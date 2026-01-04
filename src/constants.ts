@@ -295,15 +295,21 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
 ];
 
 export const STATUS_COLORS: Record<string, string> = {
-  visitor: 'bg-amber-100 text-amber-800',
-  regular: 'bg-blue-100 text-blue-800',
-  member: 'bg-green-100 text-green-800',
-  leader: 'bg-purple-100 text-purple-800',
-  inactive: 'bg-gray-100 text-gray-600'
+  visitor: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  regular: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+  member: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+  leader: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+  inactive: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
 };
 
 export const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-600',
-  medium: 'bg-amber-100 text-amber-700',
-  high: 'bg-red-100 text-red-700'
+  low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+  high: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+};
+
+export const PRIORITY_COLORS_DARK: Record<string, string> = {
+  low: 'bg-gray-700 text-gray-300',
+  medium: 'bg-amber-900/50 text-amber-300',
+  high: 'bg-red-900/50 text-red-300'
 };

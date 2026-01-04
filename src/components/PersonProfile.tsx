@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
+import { useState } from 'react';
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  Calendar,
   Tag,
   MessageSquare,
   PhoneCall,
@@ -12,7 +11,8 @@ import {
   Home,
   Heart,
   Plus,
-  Clock
+  Clock,
+  Pencil
 } from 'lucide-react';
 import { Person, Interaction, Task } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
@@ -25,6 +25,7 @@ interface PersonProfileProps {
   onAddInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   onToggleTask: (taskId: string) => void;
+  onEditPerson?: (person: Person) => void;
 }
 
 const interactionTypes = [
@@ -43,19 +44,24 @@ const statusLabels: Record<string, string> = {
   inactive: 'Inactive'
 };
 
-export function PersonProfile({ 
-  person, 
-  interactions, 
-  tasks, 
-  onBack, 
+export function PersonProfile({
+  person,
+  interactions,
+  tasks,
+  onBack,
   onAddInteraction,
   onAddTask,
-  onToggleTask 
+  onToggleTask,
+  onEditPerson
 }: PersonProfileProps) {
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState<Interaction['type']>('note');
   const [showAddTask, setShowAddTask] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', dueDate: '', priority: 'medium' as const });
+  const [newTask, setNewTask] = useState<{
+    title: string;
+    dueDate: string;
+    priority: 'low' | 'medium' | 'high';
+  }>({ title: '', dueDate: '', priority: 'medium' });
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -106,13 +112,24 @@ export function PersonProfile({
                 {person.firstName[0]}{person.lastName[0]}
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {person.firstName} {person.lastName}
-                  </h1>
-                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
-                    {statusLabels[person.status]}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {person.firstName} {person.lastName}
+                    </h1>
+                    <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
+                      {statusLabels[person.status]}
+                    </span>
+                  </div>
+                  {onEditPerson && (
+                    <button
+                      onClick={() => onEditPerson(person)}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <Pencil size={16} />
+                      Edit
+                    </button>
+                  )}
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 text-gray-600">

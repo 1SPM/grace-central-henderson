@@ -1,5 +1,4 @@
-import React from 'react';
-import { Settings as SettingsIcon, Church, Users, Bell, Database, Shield, Palette } from 'lucide-react';
+import { Church, Users, Bell, Database } from 'lucide-react';
 
 export function Settings() {
   return (
