@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -14,10 +15,10 @@ import { View } from '../types';
 interface LayoutProps {
   currentView: View;
   setView: (view: View) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const navItems: { view: View; label: string; icon: React.ReactNode }[] = [
+const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
   { view: 'people', label: 'People', icon: <Users size={20} /> },
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
