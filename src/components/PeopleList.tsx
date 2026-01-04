@@ -22,7 +22,7 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all');
 
   const filtered = people.filter((person) => {
-    const matchesSearch = 
+    const matchesSearch =
       `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
       person.email.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
@@ -42,8 +42,8 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">People</h1>
-          <p className="text-gray-500 mt-1">{people.length} total people in your congregation</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">People</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{people.length} total people in your congregation</p>
         </div>
         <button
           onClick={onAddPerson}
@@ -55,7 +55,7 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
         <div className="flex items-center gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -64,7 +64,7 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
           <div className="flex gap-2">
@@ -74,8 +74,8 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   statusFilter === status
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'text-gray-500 hover:bg-gray-100'
+                    ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {status === 'all' ? 'All' : statusLabels[status]} ({statusCounts[status]})
@@ -91,20 +91,20 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
           <button
             key={person.id}
             onClick={() => onViewPerson(person.id)}
-            className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between hover:border-indigo-200 hover:shadow-sm transition-all group text-left"
+            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-sm transition-all group text-left"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg">
                 {person.firstName[0]}{person.lastName[0]}
               </div>
               <div>
-                <p className="font-semibold text-gray-900">{person.firstName} {person.lastName}</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{person.firstName} {person.lastName}</p>
                 <p className="text-sm text-gray-400">{person.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {person.tags.slice(0, 2).map((tag) => (
-                <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
+                <span key={tag} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md">
                   {tag}
                 </span>
               ))}
