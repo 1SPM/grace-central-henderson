@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CheckSquare, Clock, Filter, Plus, User, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { CheckSquare, Clock, Plus, User, AlertTriangle } from 'lucide-react';
 import { Task, Person } from '../types';
 import { PRIORITY_COLORS } from '../constants';
 
@@ -17,12 +17,19 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
   const [filter, setFilter] = useState<FilterType>('pending');
   const [categoryFilter, setCategoryFilter] = useState<CategoryType>('all');
   const [showAdd, setShowAdd] = useState(false);
-  const [newTask, setNewTask] = useState({
+  const [newTask, setNewTask] = useState<{
+    title: string;
+    description: string;
+    dueDate: string;
+    priority: 'low' | 'medium' | 'high';
+    category: 'follow-up' | 'care' | 'admin' | 'outreach';
+    personId: string;
+  }>({
     title: '',
     description: '',
     dueDate: '',
-    priority: 'medium' as const,
-    category: 'follow-up' as const,
+    priority: 'medium',
+    category: 'follow-up',
     personId: ''
   });
 

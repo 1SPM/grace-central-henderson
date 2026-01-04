@@ -1,15 +1,13 @@
-import React from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CheckSquare, 
-  Calendar, 
-  UsersRound, 
+import {
+  LayoutDashboard,
+  Users,
+  CheckSquare,
+  Calendar,
+  Users2,
   Heart,
   DollarSign,
   Settings,
-  Church,
-  LogOut
+  Church
 } from 'lucide-react';
 import { View } from '../types';
 
@@ -24,7 +22,7 @@ const navItems: { view: View; label: string; icon: React.ReactNode }[] = [
   { view: 'people', label: 'People', icon: <Users size={20} /> },
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
-  { view: 'groups', label: 'Groups', icon: <UsersRound size={20} /> },
+  { view: 'groups', label: 'Groups', icon: <Users2 size={20} /> },
   { view: 'prayer', label: 'Prayer', icon: <Heart size={20} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={20} /> },
 ];

@@ -1,5 +1,5 @@
-import React from 'react';
 import { DollarSign, TrendingUp, Repeat, CreditCard, Banknote, Building } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Giving as GivingType, Person } from '../types';
 
 interface GivingProps {
@@ -15,7 +15,7 @@ const fundColors: Record<string, string> = {
   other: 'bg-gray-100 text-gray-700'
 };
 
-const methodIcons: Record<string, React.ReactNode> = {
+const methodIcons: Record<string, ReactNode> = {
   cash: <Banknote size={14} />,
   check: <Building size={14} />,
   card: <CreditCard size={14} />,

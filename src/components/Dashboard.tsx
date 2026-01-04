@@ -1,15 +1,13 @@
-import React from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  AlertCircle, 
-  TrendingUp,
+import {
+  Users,
+  UserPlus,
+  AlertCircle,
   ChevronRight,
   CheckCircle2,
   Clock
 } from 'lucide-react';
 import { Person, Task } from '../types';
-import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
+import { PRIORITY_COLORS } from '../constants';
 
 interface DashboardProps {
   people: Person[];
@@ -22,7 +20,6 @@ export function Dashboard({ people, tasks, onViewPerson, onViewTasks }: Dashboar
   const visitors = people.filter(p => p.status === 'visitor');
   const inactive = people.filter(p => p.status === 'inactive');
   const pendingTasks = tasks.filter(t => !t.completed);
-  const overdueTasks = pendingTasks.filter(t => new Date(t.dueDate) < new Date());
   
   const stats = [
     { 

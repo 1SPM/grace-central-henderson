@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { PeopleList } from './components/PeopleList';
@@ -34,7 +34,7 @@ function App() {
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   
   // State with sample data
-  const [people, setPeople] = useState<Person[]>(SAMPLE_PEOPLE);
+  const [people] = useState<Person[]>(SAMPLE_PEOPLE);
   const [tasks, setTasks] = useState<Task[]>(SAMPLE_TASKS);
   const [interactions, setInteractions] = useState<Interaction[]>(SAMPLE_INTERACTIONS);
   const [groups] = useState<SmallGroup[]>(SAMPLE_GROUPS);

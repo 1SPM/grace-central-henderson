@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, UserPlus, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Search, UserPlus, ChevronRight } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 

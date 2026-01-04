@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
+import { useState } from 'react';
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  Calendar,
   Tag,
   MessageSquare,
   PhoneCall,
@@ -55,7 +54,11 @@ export function PersonProfile({
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState<Interaction['type']>('note');
   const [showAddTask, setShowAddTask] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', dueDate: '', priority: 'medium' as const });
+  const [newTask, setNewTask] = useState<{
+    title: string;
+    dueDate: string;
+    priority: 'low' | 'medium' | 'high';
+  }>({ title: '', dueDate: '', priority: 'medium' });
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;

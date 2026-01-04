@@ -1,5 +1,4 @@
-import React from 'react';
-import { UsersRound, MapPin, Clock, User } from 'lucide-react';
+import { Users2, MapPin, Clock, User } from 'lucide-react';
 import { SmallGroup, Person } from '../types';
 
 interface GroupsProps {
@@ -32,7 +31,7 @@ export function Groups({ groups, people }: GroupsProps) {
                   )}
                 </div>
                 <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <UsersRound className="text-purple-600" size={20} />
+                  <Users2 className="text-purple-600" size={20} />
                 </div>
               </div>
 
@@ -83,7 +82,7 @@ export function Groups({ groups, people }: GroupsProps) {
 
       {activeGroups.length === 0 && (
         <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
-          <UsersRound className="mx-auto text-gray-300 mb-3" size={48} />
+          <Users2 className="mx-auto text-gray-300 mb-3" size={48} />
           <p className="text-gray-400">No small groups yet</p>
         </div>
       )}

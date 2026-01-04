@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Heart, Check, Lock, Unlock, Sparkles } from 'lucide-react';
 import { PrayerRequest, Person } from '../types';
 

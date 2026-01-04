@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { CalendarEvent } from '../types';
 
