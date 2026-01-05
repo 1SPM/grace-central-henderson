@@ -62,7 +62,7 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-50 dark:bg-dark-900">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -73,19 +73,19 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 flex flex-col transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Church className="text-white" size={22} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">GRACE</h1>
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-wider hidden sm:block">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-dark-100">GRACE</h1>
+              <p className="text-[10px] text-gray-400 dark:text-dark-500 tracking-wider hidden sm:block">
                 GROWTH · RELATIONSHIPS · ATTENDANCE · COMMUNITY · ENGAGEMENT
               </p>
             </div>
@@ -94,14 +94,14 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
         {/* Search button */}
         {onOpenSearch && (
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-100 dark:border-dark-700">
             <button
               onClick={onOpenSearch}
-              className="w-full flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-dark-800 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
             >
               <Search size={18} />
               <span className="flex-1 text-left">Search...</span>
-              <kbd className="hidden sm:inline-flex text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded">
+              <kbd className="hidden sm:inline-flex text-xs bg-gray-200 dark:bg-dark-700 px-1.5 py-0.5 rounded">
                 ⌘K
               </kbd>
             </button>
@@ -116,8 +116,8 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
               onClick={() => handleNavClick(item.view)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 currentView === item.view
-                  ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
+                  : 'text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100'
               }`}
             >
               {item.icon}
@@ -127,17 +127,17 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-1">
+        <div className="p-4 border-t border-gray-100 dark:border-dark-700 space-y-1">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all"
           >
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
           </button>
           <button
             onClick={() => handleNavClick('settings')}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all"
           >
             <Settings size={20} />
             Settings
@@ -148,30 +148,30 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <header className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
           >
-            <Menu size={24} className="text-gray-600 dark:text-gray-300" />
+            <Menu size={24} className="text-gray-600 dark:text-dark-300" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Church className="text-white" size={18} />
             </div>
-            <span className="font-bold text-gray-900 dark:text-white">GRACE</span>
+            <span className="font-bold text-gray-900 dark:text-dark-100">GRACE</span>
           </div>
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
             >
-              <Search size={24} className="text-gray-600 dark:text-gray-300" />
+              <Search size={24} className="text-gray-600 dark:text-dark-300" />
             </button>
           )}
         </header>
 
-        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-dark-900">
           {children}
         </main>
       </div>
