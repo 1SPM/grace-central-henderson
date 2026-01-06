@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { PeopleList } from './components/PeopleList';
@@ -17,6 +17,7 @@ import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { VisitorPipeline } from './components/VisitorPipeline';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { AttendanceCheckIn } from './components/AttendanceCheckIn';
+import { VolunteerScheduling } from './components/VolunteerScheduling';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
@@ -198,6 +199,65 @@ function App() {
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
 
+  // RSVP state (demo data)
+  const [rsvps, setRsvps] = useState<{ eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[]>([]);
+
+  // Volunteer assignments state (demo data)
+  const [volunteerAssignments, setVolunteerAssignments] = useState<{
+    id: string;
+    eventId: string;
+    roleId: string;
+    personId: string;
+    status: 'confirmed' | 'pending' | 'declined';
+  }[]>([]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      // Cmd/Ctrl + K is handled in Layout for search
+
+      switch (e.key.toLowerCase()) {
+        case 'n':
+          // N = New Person
+          e.preventDefault();
+          setShowPersonForm(true);
+          setEditingPerson(undefined);
+          break;
+        case 't':
+          // T = New Task
+          e.preventDefault();
+          setShowQuickTask(true);
+          break;
+        case 'p':
+          // P = New Prayer
+          e.preventDefault();
+          setShowQuickPrayer(true);
+          break;
+        case '/':
+          // / = Search
+          e.preventDefault();
+          setShowSearch(true);
+          break;
+        case 'escape':
+          // ESC = Close modals
+          setShowPersonForm(false);
+          setShowQuickTask(false);
+          setShowQuickPrayer(false);
+          setShowSearch(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleViewPerson = (id: string) => {
     setSelectedPersonId(id);
     setView('person');
@@ -250,6 +310,42 @@ function App() {
       checkedInAt: new Date().toISOString(),
     };
     setAttendanceRecords((prev) => [...prev, newRecord]);
+  };
+
+  const handleRSVP = (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0) => {
+    setRsvps((prev) => {
+      // Check if this person already has an RSVP for this event
+      const existingIndex = prev.findIndex((r) => r.eventId === eventId && r.personId === personId);
+      if (existingIndex >= 0) {
+        // Update existing RSVP
+        const updated = [...prev];
+        updated[existingIndex] = { eventId, personId, status, guestCount };
+        return updated;
+      }
+      // Add new RSVP
+      return [...prev, { eventId, personId, status, guestCount }];
+    });
+  };
+
+  const handleAssignVolunteer = (eventId: string, roleId: string, personId: string) => {
+    const newAssignment = {
+      id: `vol-${Date.now()}`,
+      eventId,
+      roleId,
+      personId,
+      status: 'pending' as const,
+    };
+    setVolunteerAssignments((prev) => [...prev, newAssignment]);
+  };
+
+  const handleUpdateVolunteerStatus = (assignmentId: string, status: 'confirmed' | 'pending' | 'declined') => {
+    setVolunteerAssignments((prev) =>
+      prev.map((a) => (a.id === assignmentId ? { ...a, status } : a))
+    );
+  };
+
+  const handleRemoveVolunteer = (assignmentId: string) => {
+    setVolunteerAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
   };
 
   const handleAddPrayer = async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
@@ -405,7 +501,26 @@ function App() {
         );
 
       case 'calendar':
-        return <Calendar events={events} />;
+        return (
+          <Calendar
+            events={events}
+            people={people}
+            rsvps={rsvps}
+            onRSVP={handleRSVP}
+          />
+        );
+
+      case 'volunteers':
+        return (
+          <VolunteerScheduling
+            people={people}
+            events={events}
+            assignments={volunteerAssignments}
+            onAssign={handleAssignVolunteer}
+            onUpdateStatus={handleUpdateVolunteerStatus}
+            onRemove={handleRemoveVolunteer}
+          />
+        );
 
       case 'groups':
         return <Groups groups={groups} people={people} />;

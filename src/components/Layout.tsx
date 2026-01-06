@@ -15,7 +15,8 @@ import {
   Menu,
   Search,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  ClipboardList
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -34,6 +35,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={20} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
+  { view: 'volunteers', label: 'Volunteers', icon: <ClipboardList size={20} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={20} /> },
   { view: 'prayer', label: 'Prayer', icon: <Heart size={20} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={20} /> },

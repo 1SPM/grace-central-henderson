@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Heart, Check, Lock, Unlock, Sparkles } from 'lucide-react';
+import { Heart, Check, Lock, Unlock, Sparkles, Download } from 'lucide-react';
 import { PrayerRequest, Person } from '../types';
+import { exportPrayersToCSV } from '../utils/exportCsv';
 
 interface PrayerProps {
   prayers: PrayerRequest[];
@@ -30,6 +31,13 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Prayer Requests</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">Lift up your community in prayer</p>
         </div>
+        <button
+          onClick={() => exportPrayersToCSV(prayers, people)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+        >
+          <Download size={18} />
+          Export
+        </button>
       </div>
 
       {/* Filters */}

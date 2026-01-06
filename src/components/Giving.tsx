@@ -1,6 +1,7 @@
-import { DollarSign, TrendingUp, Repeat, CreditCard, Banknote, Building } from 'lucide-react';
+import { DollarSign, TrendingUp, Repeat, CreditCard, Banknote, Building, Download } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Giving as GivingType, Person } from '../types';
+import { exportGivingToCSV } from '../utils/exportCsv';
 
 interface GivingProps {
   giving: GivingType[];
@@ -34,9 +35,18 @@ export function Giving({ giving, people }: GivingProps) {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Giving</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">Track generosity and stewardship</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Giving</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">Track generosity and stewardship</p>
+        </div>
+        <button
+          onClick={() => exportGivingToCSV(giving, people)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+        >
+          <Download size={18} />
+          Export
+        </button>
       </div>
 
       {/* Stats */}
