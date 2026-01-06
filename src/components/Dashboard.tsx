@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
+import { DashboardCharts } from './DashboardCharts';
+import { BirthdayWidget } from './BirthdayWidget';
 
 interface DashboardProps {
   people: Person[];
@@ -201,6 +203,17 @@ export function Dashboard({ people, tasks, onViewPerson, onViewTasks }: Dashboar
           </div>
         </div>
       )}
+
+      {/* Charts Section */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">Analytics</h2>
+        <DashboardCharts people={people} />
+      </div>
+
+      {/* Birthday Widget */}
+      <div className="mt-8">
+        <BirthdayWidget people={people} onViewPerson={onViewPerson} />
+      </div>
     </div>
   );
 }

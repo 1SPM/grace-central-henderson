@@ -11,6 +11,10 @@ import { Prayer } from './components/Prayer';
 import { Giving } from './components/Giving';
 import { Settings } from './components/Settings';
 import { GlobalSearch } from './components/GlobalSearch';
+import { QuickActions } from './components/QuickActions';
+import { QuickTaskForm } from './components/QuickTaskForm';
+import { QuickPrayerForm } from './components/QuickPrayerForm';
+import { VisitorPipeline } from './components/VisitorPipeline';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction } from './types';
 
@@ -120,6 +124,7 @@ function App() {
     addTask,
     toggleTask,
     addInteraction,
+    addPrayer,
     markPrayerAnswered,
   } = useSupabaseData();
 
@@ -185,6 +190,8 @@ function App() {
   const [showPersonForm, setShowPersonForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState<LegacyPerson | undefined>(undefined);
   const [showSearch, setShowSearch] = useState(false);
+  const [showQuickTask, setShowQuickTask] = useState(false);
+  const [showQuickPrayer, setShowQuickPrayer] = useState(false);
 
   const handleViewPerson = (id: string) => {
     setSelectedPersonId(id);
@@ -226,6 +233,15 @@ function App() {
 
   const handleMarkPrayerAnswered = async (id: string, testimony?: string) => {
     await markPrayerAnswered(id, testimony);
+  };
+
+  const handleAddPrayer = async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
+    await addPrayer({
+      church_id: 'demo-church',
+      person_id: prayer.personId,
+      content: prayer.content,
+      is_private: prayer.isPrivate,
+    });
   };
 
   // Person CRUD handlers
@@ -314,6 +330,14 @@ function App() {
             tasks={tasks}
             onViewPerson={handleViewPerson}
             onViewTasks={() => setView('tasks')}
+          />
+        );
+
+      case 'pipeline':
+        return (
+          <VisitorPipeline
+            people={people}
+            onViewPerson={handleViewPerson}
           />
         );
 
@@ -426,6 +450,31 @@ function App() {
           onSelectTask={() => setView('tasks')}
           onSelectPrayer={() => setView('prayer')}
           onClose={() => setShowSearch(false)}
+        />
+      )}
+
+      {/* Quick Actions FAB */}
+      <QuickActions
+        onAddPerson={handleAddPerson}
+        onAddTask={() => setShowQuickTask(true)}
+        onAddPrayer={() => setShowQuickPrayer(true)}
+      />
+
+      {/* Quick Task Form Modal */}
+      {showQuickTask && (
+        <QuickTaskForm
+          people={people}
+          onSave={handleAddTask}
+          onClose={() => setShowQuickTask(false)}
+        />
+      )}
+
+      {/* Quick Prayer Form Modal */}
+      {showQuickPrayer && (
+        <QuickPrayerForm
+          people={people}
+          onSave={handleAddPrayer}
+          onClose={() => setShowQuickPrayer(false)}
         />
       )}
     </>

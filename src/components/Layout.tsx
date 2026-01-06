@@ -13,7 +13,8 @@ import {
   Moon,
   Sun,
   Menu,
-  Search
+  Search,
+  TrendingUp
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -27,6 +28,7 @@ interface LayoutProps {
 
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+  { view: 'pipeline', label: 'Pipeline', icon: <TrendingUp size={20} /> },
   { view: 'people', label: 'People', icon: <Users size={20} /> },
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
