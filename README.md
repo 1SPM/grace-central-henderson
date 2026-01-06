@@ -54,12 +54,26 @@
 - At-a-glance view of visitors, tasks, and members needing attention
 - Priority follow-ups with overdue detection
 - Inactive member alerts
+- **Analytics charts** with member distribution and conversion metrics
+- **Upcoming birthdays** widget (next 30 days)
+
+### ➕ Quick Actions
+- Floating action button for fast data entry
+- Quickly add people, tasks, or prayer requests from anywhere
+- Streamlined forms for on-the-go updates
+
+### 📈 Visitor Pipeline
+- **Kanban-style board** showing member journey
+- Visual stages: Visitor → Regular → Member → Leader
+- Track conversion progress at a glance
+- Click-through to individual profiles
 
 ### 👥 People Management
 - Complete member profiles with contact info and notes
 - Status tracking: Visitor → Regular → Member → Leader
 - Tag system for organization
 - Interaction logging (calls, emails, visits, prayers)
+- Birthday tracking with automatic reminders
 
 ### ✅ Follow-Up Tasks
 - Priority-based task management
@@ -123,21 +137,27 @@ npm run dev
 grace-crm/
 ├── src/
 │   ├── components/
-│   │   ├── Layout.tsx       # Sidebar navigation
-│   │   ├── Dashboard.tsx    # Main dashboard
-│   │   ├── PeopleList.tsx   # Congregation list
-│   │   ├── PersonProfile.tsx # Individual profile
-│   │   ├── Tasks.tsx        # Follow-up management
-│   │   ├── Calendar.tsx     # Events calendar
-│   │   ├── Groups.tsx       # Small groups
-│   │   ├── Prayer.tsx       # Prayer requests
-│   │   ├── Giving.tsx       # Giving dashboard
-│   │   └── Settings.tsx     # Configuration
-│   ├── types.ts             # TypeScript interfaces
-│   ├── constants.ts         # Sample data
-│   ├── App.tsx              # Main application
-│   ├── main.tsx             # Entry point
-│   └── index.css            # Tailwind imports
+│   │   ├── Layout.tsx         # Sidebar navigation
+│   │   ├── Dashboard.tsx      # Main dashboard
+│   │   ├── DashboardCharts.tsx # Analytics charts
+│   │   ├── BirthdayWidget.tsx # Upcoming birthdays
+│   │   ├── VisitorPipeline.tsx # Kanban pipeline view
+│   │   ├── QuickActions.tsx   # Floating action button
+│   │   ├── QuickTaskForm.tsx  # Quick task modal
+│   │   ├── QuickPrayerForm.tsx # Quick prayer modal
+│   │   ├── PeopleList.tsx     # Congregation list
+│   │   ├── PersonProfile.tsx  # Individual profile
+│   │   ├── Tasks.tsx          # Follow-up management
+│   │   ├── Calendar.tsx       # Events calendar
+│   │   ├── Groups.tsx         # Small groups
+│   │   ├── Prayer.tsx         # Prayer requests
+│   │   ├── Giving.tsx         # Giving dashboard
+│   │   └── Settings.tsx       # Configuration
+│   ├── types.ts               # TypeScript interfaces
+│   ├── constants.ts           # Sample data
+│   ├── App.tsx                # Main application
+│   ├── main.tsx               # Entry point
+│   └── index.css              # Tailwind imports
 ├── index.html
 ├── package.json
 ├── tailwind.config.js
@@ -149,28 +169,47 @@ grace-crm/
 
 ## Roadmap
 
-### Phase 1: Core CRM (Current)
+### Phase 1: Core CRM ✅
 - [x] People management
 - [x] Task/follow-up system
 - [x] Prayer requests
 - [x] Small groups
 - [x] Giving overview
+- [x] Dark mode support
 
-### Phase 2: Backend Integration
-- [ ] Supabase database
-- [ ] Clerk authentication
+### Phase 2: Enhanced UI ✅
+- [x] Quick Actions floating button
+- [x] Visitor Pipeline (kanban view)
+- [x] Dashboard analytics charts
+- [x] Birthday/anniversary widget
+- [x] Global search
+
+### Phase 3: Backend Integration (Current)
+- [x] Supabase database connection
+- [ ] User authentication (Clerk)
+- [ ] Multi-church support
 - [ ] Stripe payments
 
-### Phase 3: Automation
+### Phase 4: Automation
 - [ ] Automated visitor follow-up emails
 - [ ] Attendance tracking integration
 - [ ] Task reminder notifications
+- [ ] SMS messaging
+- [ ] Birthday auto-reminders
 
-### Phase 4: Community Layer
-- [ ] Member-facing app
-- [ ] Prayer wall
+### Phase 5: Community Layer
+- [ ] Member-facing app / portal
+- [ ] Prayer wall (public sharing)
 - [ ] Event RSVPs
 - [ ] Small group communication
+- [ ] Volunteer scheduling
+
+### Phase 6: Advanced Features
+- [ ] Reporting & export (CSV/PDF)
+- [ ] Attendance check-in system
+- [ ] Giving trends & charts
+- [ ] Mobile PWA support
+- [ ] Offline mode
 
 ---
 
