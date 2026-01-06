@@ -16,8 +16,9 @@ import { QuickTaskForm } from './components/QuickTaskForm';
 import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { VisitorPipeline } from './components/VisitorPipeline';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { AttendanceCheckIn } from './components/AttendanceCheckIn';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction } from './types';
+import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
 // Adapter functions to convert between database types and legacy component types
 function toPersonLegacy(p: {
@@ -194,6 +195,9 @@ function App() {
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showQuickPrayer, setShowQuickPrayer] = useState(false);
 
+  // Attendance state (demo data)
+  const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
+
   const handleViewPerson = (id: string) => {
     setSelectedPersonId(id);
     setView('person');
@@ -234,6 +238,18 @@ function App() {
 
   const handleMarkPrayerAnswered = async (id: string, testimony?: string) => {
     await markPrayerAnswered(id, testimony);
+  };
+
+  const handleCheckIn = (personId: string, eventType: Attendance['eventType'], eventName?: string) => {
+    const newRecord: Attendance = {
+      id: `attendance-${Date.now()}`,
+      personId,
+      eventType,
+      eventName,
+      date: new Date().toISOString().split('T')[0],
+      checkedInAt: new Date().toISOString(),
+    };
+    setAttendanceRecords((prev) => [...prev, newRecord]);
   };
 
   const handleAddPrayer = async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
@@ -376,6 +392,15 @@ function App() {
             people={people}
             onToggleTask={handleToggleTask}
             onAddTask={handleAddTask}
+          />
+        );
+
+      case 'attendance':
+        return (
+          <AttendanceCheckIn
+            people={people}
+            attendance={attendanceRecords}
+            onCheckIn={handleCheckIn}
           />
         );
 
