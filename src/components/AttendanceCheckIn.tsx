@@ -344,6 +344,80 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
           )}
         </div>
       </div>
+
+      {/* Weekly Attendance Chart */}
+      <div className="mt-6 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-xl flex items-center justify-center">
+            <BarChart3 className="text-purple-600 dark:text-purple-400" size={20} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 dark:text-dark-100">Weekly Overview</h2>
+            <p className="text-sm text-gray-500 dark:text-dark-400">Attendance for the past 7 days</p>
+          </div>
+        </div>
+
+        <WeeklyChart attendance={attendance} selectedEventType={selectedEventType} />
+      </div>
+    </div>
+  );
+}
+
+// Weekly Chart Component
+function WeeklyChart({ attendance, selectedEventType }: { attendance: Attendance[]; selectedEventType: EventType }) {
+  const days = useMemo(() => {
+    const result = [];
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const count = attendance.filter(
+        (a) => a.date === dateStr && a.eventType === selectedEventType
+      ).length;
+
+      result.push({
+        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        count,
+        isToday: i === 0,
+      });
+    }
+
+    return result;
+  }, [attendance, selectedEventType]);
+
+  const maxCount = Math.max(...days.map((d) => d.count), 1);
+
+  return (
+    <div className="flex items-end justify-between gap-2 h-48">
+      {days.map((day, index) => (
+        <div key={index} className="flex-1 flex flex-col items-center gap-2">
+          <div className="w-full flex flex-col items-center justify-end h-32">
+            <span className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-1">
+              {day.count}
+            </span>
+            <div
+              className={`w-full rounded-t-lg transition-all ${
+                day.isToday
+                  ? 'bg-gradient-to-t from-indigo-500 to-purple-500'
+                  : 'bg-gray-200 dark:bg-dark-700'
+              }`}
+              style={{
+                height: `${Math.max((day.count / maxCount) * 100, 8)}%`,
+                minHeight: '8px',
+              }}
+            />
+          </div>
+          <div className="text-center">
+            <p className={`text-xs font-medium ${day.isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-dark-300'}`}>
+              {day.day}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-dark-500">{day.date}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
