@@ -14,7 +14,8 @@ import {
   Sun,
   Menu,
   Search,
-  TrendingUp
+  TrendingUp,
+  UserCheck
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -31,6 +32,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'pipeline', label: 'Pipeline', icon: <TrendingUp size={20} /> },
   { view: 'people', label: 'People', icon: <Users size={20} /> },
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
+  { view: 'attendance', label: 'Attendance', icon: <UserCheck size={20} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={20} /> },
   { view: 'prayer', label: 'Prayer', icon: <Heart size={20} /> },

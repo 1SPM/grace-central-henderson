@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { CheckSquare, Clock, Plus, User, AlertTriangle } from 'lucide-react';
+import { CheckSquare, Clock, Plus, User, AlertTriangle, Download } from 'lucide-react';
 import { Task, Person } from '../types';
 import { PRIORITY_COLORS } from '../constants';
+import { exportTasksToCSV } from '../utils/exportCsv';
 
 interface TasksProps {
   tasks: Task[];
@@ -89,13 +90,22 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Follow-Ups</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">Track and manage your care tasks</p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
-        >
-          <Plus size={18} />
-          Add Task
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => exportTasksToCSV(tasks, people)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+          >
+            <Download size={18} />
+            Export
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <Plus size={18} />
+            Add Task
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
