@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, UserPlus, ChevronRight } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Download } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
+import { exportPeopleToCSV } from '../utils/exportCsv';
 
 interface PeopleListProps {
   people: Person[];
@@ -45,13 +46,22 @@ export function PeopleList({ people, onViewPerson, onAddPerson }: PeopleListProp
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">People</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">{people.length} total people in your congregation</p>
         </div>
-        <button
-          onClick={onAddPerson}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
-        >
-          <UserPlus size={18} />
-          Add Person
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => exportPeopleToCSV(people)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+          >
+            <Download size={18} />
+            Export
+          </button>
+          <button
+            onClick={onAddPerson}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <UserPlus size={18} />
+            Add Person
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

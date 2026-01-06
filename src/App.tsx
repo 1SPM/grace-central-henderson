@@ -15,6 +15,7 @@ import { QuickActions } from './components/QuickActions';
 import { QuickTaskForm } from './components/QuickTaskForm';
 import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { VisitorPipeline } from './components/VisitorPipeline';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction } from './types';
 
@@ -477,6 +478,9 @@ function App() {
           onClose={() => setShowQuickPrayer(false)}
         />
       )}
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </>
   );
 }
