@@ -19,7 +19,10 @@ import {
   ClipboardList,
   PanelLeftClose,
   PanelLeft,
-  ChevronRight
+  ChevronRight,
+  Tag,
+  FileText,
+  Cake
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -38,10 +41,13 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={20} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
+  { view: 'birthdays', label: 'Birthdays', icon: <Cake size={20} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <ClipboardList size={20} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={20} /> },
   { view: 'prayer', label: 'Prayer', icon: <Heart size={20} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={20} /> },
+  { view: 'tags', label: 'Tags', icon: <Tag size={20} /> },
+  { view: 'reports', label: 'Reports', icon: <FileText size={20} /> },
 ];
 
 // View labels for breadcrumbs
@@ -53,10 +59,13 @@ const viewLabels: Record<View, string> = {
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
   calendar: 'Calendar',
+  birthdays: 'Birthdays',
   volunteers: 'Volunteers',
   groups: 'Groups',
   prayer: 'Prayer',
   giving: 'Giving',
+  tags: 'Tags',
+  reports: 'Reports',
   settings: 'Settings',
 };
 

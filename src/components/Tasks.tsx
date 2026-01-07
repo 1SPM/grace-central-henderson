@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { CheckSquare, Clock, Plus, User, AlertTriangle, Download } from 'lucide-react';
-import { Task, Person } from '../types';
+import { CheckSquare, Clock, Plus, User, AlertTriangle, Download, Repeat, RefreshCw } from 'lucide-react';
+import { Task, Person, RecurrenceType } from '../types';
 import { PRIORITY_COLORS } from '../constants';
 import { exportTasksToCSV } from '../utils/exportCsv';
+import { useToast } from './Toast';
 
 interface TasksProps {
   tasks: Task[];
@@ -11,10 +12,45 @@ interface TasksProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
 }
 
+const recurrenceLabels: Record<RecurrenceType, string> = {
+  none: 'No Repeat',
+  daily: 'Daily',
+  weekly: 'Weekly',
+  biweekly: 'Every 2 Weeks',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+};
+
+// Calculate next due date based on recurrence
+function getNextDueDate(currentDueDate: string, recurrence: RecurrenceType): string {
+  const date = new Date(currentDueDate);
+  switch (recurrence) {
+    case 'daily':
+      date.setDate(date.getDate() + 1);
+      break;
+    case 'weekly':
+      date.setDate(date.getDate() + 7);
+      break;
+    case 'biweekly':
+      date.setDate(date.getDate() + 14);
+      break;
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    case 'quarterly':
+      date.setMonth(date.getMonth() + 3);
+      break;
+    default:
+      break;
+  }
+  return date.toISOString().split('T')[0];
+}
+
 type FilterType = 'all' | 'pending' | 'completed' | 'overdue';
 type CategoryType = 'all' | 'follow-up' | 'care' | 'admin' | 'outreach';
 
 export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
+  const toast = useToast();
   const [filter, setFilter] = useState<FilterType>('pending');
   const [categoryFilter, setCategoryFilter] = useState<CategoryType>('all');
   const [showAdd, setShowAdd] = useState(false);
@@ -25,13 +61,15 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
     priority: 'low' | 'medium' | 'high';
     category: 'follow-up' | 'care' | 'admin' | 'outreach';
     personId: string;
+    recurrence: RecurrenceType;
   }>({
     title: '',
     description: '',
     dueDate: '',
     priority: 'medium',
     category: 'follow-up',
-    personId: ''
+    personId: '',
+    recurrence: 'none'
   });
 
   const now = new Date();
@@ -63,17 +101,44 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
     onAddTask({
       ...newTask,
       completed: false,
-      personId: newTask.personId || undefined
+      personId: newTask.personId || undefined,
+      recurrence: newTask.recurrence === 'none' ? undefined : newTask.recurrence
     });
+    if (newTask.recurrence !== 'none') {
+      toast.success(`Created recurring task: ${recurrenceLabels[newTask.recurrence]}`);
+    }
     setNewTask({
       title: '',
       description: '',
       dueDate: '',
       priority: 'medium',
       category: 'follow-up',
-      personId: ''
+      personId: '',
+      recurrence: 'none'
     });
     setShowAdd(false);
+  };
+
+  // Handle completing a recurring task - create the next instance
+  const handleToggleRecurringTask = (task: Task) => {
+    onToggleTask(task.id);
+
+    // If completing a recurring task, create the next instance
+    if (!task.completed && task.recurrence && task.recurrence !== 'none') {
+      const nextDueDate = getNextDueDate(task.dueDate, task.recurrence);
+      onAddTask({
+        title: task.title,
+        description: task.description,
+        dueDate: nextDueDate,
+        completed: false,
+        priority: task.priority,
+        category: task.category,
+        personId: task.personId,
+        recurrence: task.recurrence,
+        originalTaskId: task.originalTaskId || task.id,
+      });
+      toast.success(`Next "${task.title}" scheduled for ${new Date(nextDueDate).toLocaleDateString()}`);
+    }
   };
 
   const counts = {
@@ -204,6 +269,21 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-400 mb-2">
+                  <Repeat size={14} />
+                  Recurrence
+                </label>
+                <select
+                  value={newTask.recurrence}
+                  onChange={(e) => setNewTask({ ...newTask, recurrence: e.target.value as RecurrenceType })}
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {(Object.keys(recurrenceLabels) as RecurrenceType[]).map((key) => (
+                    <option key={key} value={key}>{recurrenceLabels[key]}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button
@@ -245,7 +325,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                 <input
                   type="checkbox"
                   checked={task.completed}
-                  onChange={() => onToggleTask(task.id)}
+                  onChange={() => handleToggleRecurringTask(task)}
                   className="mt-1 w-5 h-5 rounded border-gray-300 dark:border-dark-600 text-indigo-600 focus:ring-indigo-500"
                 />
                 <div className="flex-1">
@@ -279,6 +359,12 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                     <span className="text-xs bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-dark-300 px-2 py-0.5 rounded">
                       {task.category}
                     </span>
+                    {task.recurrence && task.recurrence !== 'none' && (
+                      <span className="flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded">
+                        <RefreshCw size={10} />
+                        {recurrenceLabels[task.recurrence]}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

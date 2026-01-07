@@ -5,6 +5,7 @@ import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/exportCsv';
 import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
+import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
 
 interface PeopleListProps {
@@ -59,6 +60,29 @@ export function PeopleList({
   const [tagFilter, setTagFilter] = useState<string>('');
   const [hasEmailFilter, setHasEmailFilter] = useState<boolean | null>(null);
   const [hasPhoneFilter, setHasPhoneFilter] = useState<boolean | null>(null);
+
+  // Current filters object for saving
+  const currentFilters = {
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    tag: tagFilter || undefined,
+    hasEmail: hasEmailFilter ?? undefined,
+    hasPhone: hasPhoneFilter ?? undefined,
+    search: search || undefined,
+  };
+
+  // Apply a saved filter
+  const handleApplyFilter = (filters: SavedFilter['filters']) => {
+    if (filters.status) {
+      setStatusFilter(filters.status);
+    } else {
+      setStatusFilter('all');
+    }
+    setTagFilter(filters.tag || '');
+    setHasEmailFilter(filters.hasEmail ?? null);
+    setHasPhoneFilter(filters.hasPhone ?? null);
+    setSearch(filters.search || '');
+    toast.success(`Filter applied`);
+  };
 
   // Get all unique tags
   const allTags = Array.from(new Set(people.flatMap(p => p.tags))).sort();
@@ -372,6 +396,10 @@ export function PeopleList({
               <span className="w-2 h-2 bg-indigo-600 rounded-full" />
             )}
           </button>
+          <SavedFilters
+            currentFilters={currentFilters}
+            onApplyFilter={handleApplyFilter}
+          />
           <div className="flex flex-wrap gap-2">
             {(['all', 'visitor', 'regular', 'member', 'leader', 'inactive'] as const).map((status) => (
               <button

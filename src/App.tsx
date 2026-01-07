@@ -18,6 +18,10 @@ import { VisitorPipeline } from './components/VisitorPipeline';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { AttendanceCheckIn } from './components/AttendanceCheckIn';
 import { VolunteerScheduling } from './components/VolunteerScheduling';
+import { TagsManager } from './components/TagsManager';
+import { PrintableReports } from './components/PrintableReports';
+import { BirthdayCalendar } from './components/BirthdayCalendar';
+import { QuickNote } from './components/QuickNote';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
@@ -195,6 +199,7 @@ function App() {
   const [showSearch, setShowSearch] = useState(false);
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showQuickPrayer, setShowQuickPrayer] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
 
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
@@ -239,6 +244,11 @@ function App() {
           e.preventDefault();
           setShowQuickPrayer(true);
           break;
+        case 'm':
+          // M = New Note (Memo)
+          e.preventDefault();
+          setShowQuickNote(true);
+          break;
         case '/':
           // / = Search
           e.preventDefault();
@@ -249,6 +259,7 @@ function App() {
           setShowPersonForm(false);
           setShowQuickTask(false);
           setShowQuickPrayer(false);
+          setShowQuickNote(false);
           setShowSearch(false);
           break;
       }
@@ -582,6 +593,34 @@ function App() {
       case 'giving':
         return <Giving giving={giving} people={people} />;
 
+      case 'tags':
+        return (
+          <TagsManager
+            people={people}
+            onUpdatePersonTags={async (personId: string, tags: string[]) => {
+              await updatePerson(personId, { tags });
+            }}
+          />
+        );
+
+      case 'reports':
+        return (
+          <PrintableReports
+            people={people}
+            tasks={tasks}
+            prayers={prayers}
+            giving={giving}
+          />
+        );
+
+      case 'birthdays':
+        return (
+          <BirthdayCalendar
+            people={people}
+            onViewPerson={handleViewPerson}
+          />
+        );
+
       case 'settings':
         return <Settings />;
 
@@ -644,6 +683,7 @@ function App() {
         onAddPerson={handleAddPerson}
         onAddTask={() => setShowQuickTask(true)}
         onAddPrayer={() => setShowQuickPrayer(true)}
+        onAddNote={() => setShowQuickNote(true)}
       />
 
       {/* Quick Task Form Modal */}
@@ -661,6 +701,15 @@ function App() {
           people={people}
           onSave={handleAddPrayer}
           onClose={() => setShowQuickPrayer(false)}
+        />
+      )}
+
+      {/* Quick Note Modal */}
+      {showQuickNote && (
+        <QuickNote
+          people={people}
+          onSave={handleAddInteraction}
+          onClose={() => setShowQuickNote(false)}
         />
       )}
 

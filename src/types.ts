@@ -30,6 +30,8 @@ export interface Interaction {
   createdBy: string;
 }
 
+export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly';
+
 export interface Task {
   id: string;
   personId?: string;
@@ -41,6 +43,8 @@ export interface Task {
   assignedTo?: string;
   category: 'follow-up' | 'care' | 'admin' | 'outreach';
   createdAt: string;
+  recurrence?: RecurrenceType;
+  originalTaskId?: string; // For tracking recurring task instances
 }
 
 export interface SmallGroup {
@@ -98,4 +102,4 @@ export interface CalendarEvent {
   attendees?: string[];
 }
 
-export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers';
+export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays';
