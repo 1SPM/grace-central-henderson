@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Plus, UserPlus, CheckSquare, Heart, X } from 'lucide-react';
+import { Plus, UserPlus, CheckSquare, Heart, X, MessageSquare } from 'lucide-react';
 
 interface QuickActionsProps {
   onAddPerson: () => void;
   onAddTask: () => void;
   onAddPrayer: () => void;
+  onAddNote?: () => void;
 }
 
-export function QuickActions({ onAddPerson, onAddTask, onAddPrayer }: QuickActionsProps) {
+export function QuickActions({ onAddPerson, onAddTask, onAddPrayer, onAddNote }: QuickActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
@@ -29,6 +30,12 @@ export function QuickActions({ onAddPerson, onAddTask, onAddPrayer }: QuickActio
       onClick: onAddPrayer,
       color: 'bg-rose-500 hover:bg-rose-600 text-white'
     },
+    ...(onAddNote ? [{
+      label: 'Quick Note',
+      icon: <MessageSquare size={20} />,
+      onClick: onAddNote,
+      color: 'bg-teal-500 hover:bg-teal-600 text-white'
+    }] : []),
   ];
 
   const handleAction = (action: () => void) => {

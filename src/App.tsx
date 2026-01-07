@@ -18,6 +18,10 @@ import { VisitorPipeline } from './components/VisitorPipeline';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { AttendanceCheckIn } from './components/AttendanceCheckIn';
 import { VolunteerScheduling } from './components/VolunteerScheduling';
+import { TagsManager } from './components/TagsManager';
+import { PrintableReports } from './components/PrintableReports';
+import { BirthdayCalendar } from './components/BirthdayCalendar';
+import { QuickNote } from './components/QuickNote';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
@@ -195,6 +199,7 @@ function App() {
   const [showSearch, setShowSearch] = useState(false);
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showQuickPrayer, setShowQuickPrayer] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
 
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
@@ -239,6 +244,11 @@ function App() {
           e.preventDefault();
           setShowQuickPrayer(true);
           break;
+        case 'm':
+          // M = New Note (Memo)
+          e.preventDefault();
+          setShowQuickNote(true);
+          break;
         case '/':
           // / = Search
           e.preventDefault();
@@ -249,6 +259,7 @@ function App() {
           setShowPersonForm(false);
           setShowQuickTask(false);
           setShowQuickPrayer(false);
+          setShowQuickNote(false);
           setShowSearch(false);
           break;
       }
@@ -415,6 +426,48 @@ function App() {
     setEditingPerson(undefined);
   };
 
+  // Bulk action handlers
+  const handleBulkUpdateStatus = async (ids: string[], status: LegacyPerson['status']) => {
+    for (const id of ids) {
+      await updatePerson(id, { status });
+    }
+  };
+
+  const handleBulkAddTag = async (ids: string[], tag: string) => {
+    for (const id of ids) {
+      const person = dbPeople.find(p => p.id === id);
+      if (person && !person.tags.includes(tag)) {
+        await updatePerson(id, { tags: [...person.tags, tag] });
+      }
+    }
+  };
+
+  const handleImportCSV = async (importedPeople: Partial<LegacyPerson>[]) => {
+    for (const person of importedPeople) {
+      if (person.firstName && person.lastName) {
+        await addPerson({
+          church_id: 'demo-church',
+          first_name: person.firstName,
+          last_name: person.lastName,
+          email: person.email || null,
+          phone: person.phone || null,
+          status: person.status || 'visitor',
+          photo_url: null,
+          address: null,
+          city: null,
+          state: null,
+          zip: null,
+          birth_date: null,
+          join_date: null,
+          first_visit: null,
+          notes: null,
+          tags: person.tags || [],
+          family_id: null,
+        });
+      }
+    }
+  };
+
   // Search handlers
   const handleSearchSelectPerson = (id: string) => {
     handleViewPerson(id);
@@ -460,6 +513,9 @@ function App() {
             people={people}
             onViewPerson={handleViewPerson}
             onAddPerson={handleAddPerson}
+            onBulkUpdateStatus={handleBulkUpdateStatus}
+            onBulkAddTag={handleBulkAddTag}
+            onImportCSV={handleImportCSV}
           />
         );
 
@@ -537,6 +593,34 @@ function App() {
       case 'giving':
         return <Giving giving={giving} people={people} />;
 
+      case 'tags':
+        return (
+          <TagsManager
+            people={people}
+            onUpdatePersonTags={async (personId: string, tags: string[]) => {
+              await updatePerson(personId, { tags });
+            }}
+          />
+        );
+
+      case 'reports':
+        return (
+          <PrintableReports
+            people={people}
+            tasks={tasks}
+            prayers={prayers}
+            giving={giving}
+          />
+        );
+
+      case 'birthdays':
+        return (
+          <BirthdayCalendar
+            people={people}
+            onViewPerson={handleViewPerson}
+          />
+        );
+
       case 'settings':
         return <Settings />;
 
@@ -599,6 +683,7 @@ function App() {
         onAddPerson={handleAddPerson}
         onAddTask={() => setShowQuickTask(true)}
         onAddPrayer={() => setShowQuickPrayer(true)}
+        onAddNote={() => setShowQuickNote(true)}
       />
 
       {/* Quick Task Form Modal */}
@@ -616,6 +701,15 @@ function App() {
           people={people}
           onSave={handleAddPrayer}
           onClose={() => setShowQuickPrayer(false)}
+        />
+      )}
+
+      {/* Quick Note Modal */}
+      {showQuickNote && (
+        <QuickNote
+          people={people}
+          onSave={handleAddInteraction}
+          onClose={() => setShowQuickNote(false)}
         />
       )}
 
