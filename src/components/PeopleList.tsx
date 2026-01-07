@@ -3,6 +3,9 @@ import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCo
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/exportCsv';
+import { ViewToggle } from './ViewToggle';
+import { ProfileCompletenessBadge } from './ProfileCompleteness';
+import { useToast } from './Toast';
 
 interface PeopleListProps {
   people: Person[];
@@ -29,6 +32,7 @@ export function PeopleList({
   onBulkAddTag,
   onImportCSV
 }: PeopleListProps) {
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -40,6 +44,16 @@ export function PeopleList({
   const [showImportModal, setShowImportModal] = useState(false);
   const [importData, setImportData] = useState('');
   const [importError, setImportError] = useState('');
+  const [viewMode, setViewMode] = useState<'card' | 'table'>(() => {
+    const saved = localStorage.getItem('peopleViewMode');
+    return (saved as 'card' | 'table') || 'card';
+  });
+
+  // Save view mode preference
+  const handleViewModeChange = (mode: 'card' | 'table') => {
+    setViewMode(mode);
+    localStorage.setItem('peopleViewMode', mode);
+  };
 
   // Advanced filters
   const [tagFilter, setTagFilter] = useState<string>('');
@@ -96,6 +110,7 @@ export function PeopleList({
   const handleBulkStatusUpdate = () => {
     if (onBulkUpdateStatus && selectedIds.size > 0) {
       onBulkUpdateStatus(Array.from(selectedIds), newStatus);
+      toast.success(`Updated ${selectedIds.size} people to ${statusLabels[newStatus]}`);
       clearSelection();
     }
   };
@@ -103,6 +118,7 @@ export function PeopleList({
   const handleBulkAddTag = () => {
     if (onBulkAddTag && selectedIds.size > 0 && newTag.trim()) {
       onBulkAddTag(Array.from(selectedIds), newTag.trim());
+      toast.success(`Added tag "${newTag}" to ${selectedIds.size} people`);
       setNewTag('');
       clearSelection();
     }
@@ -111,6 +127,7 @@ export function PeopleList({
   const handleExportSelected = () => {
     const selectedPeople = people.filter(p => selectedIds.has(p.id));
     exportPeopleToCSV(selectedPeople);
+    toast.success(`Exported ${selectedPeople.length} people to CSV`);
   };
 
   const handleImportCSV = () => {
@@ -180,6 +197,7 @@ export function PeopleList({
 
       if (onImportCSV) {
         onImportCSV(imported);
+        toast.success(`Imported ${imported.length} people successfully`);
         setShowImportModal(false);
         setImportData('');
       }
@@ -204,6 +222,7 @@ export function PeopleList({
           <p className="text-gray-500 dark:text-dark-400 mt-1">{people.length} total people in your congregation</p>
         </div>
         <div className="flex items-center gap-3">
+          <ViewToggle view={viewMode} onViewChange={handleViewModeChange} />
           {onImportCSV && (
             <button
               onClick={() => setShowImportModal(true)}
@@ -214,7 +233,10 @@ export function PeopleList({
             </button>
           )}
           <button
-            onClick={() => exportPeopleToCSV(people)}
+            onClick={() => {
+              exportPeopleToCSV(people);
+              toast.success(`Exported ${people.length} people to CSV`);
+            }}
             className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
           >
             <Download size={18} />
@@ -421,77 +443,161 @@ export function PeopleList({
         )}
       </div>
 
-      {/* People Grid */}
-      <div className="grid grid-cols-1 gap-3">
-        {/* Select All Header */}
-        {filtered.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
-          <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 dark:text-dark-400">
-            <button
-              onClick={selectAll}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                selectedIds.size === filtered.length && filtered.length > 0
-                  ? 'bg-indigo-600 border-indigo-600 text-white'
-                  : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
-              }`}
-            >
-              {selectedIds.size === filtered.length && filtered.length > 0 && <Check size={14} />}
-            </button>
-            <span>
-              {selectedIds.size === filtered.length && filtered.length > 0
-                ? 'Deselect all'
-                : `Select all ${filtered.length} people`}
-            </span>
-          </div>
-        )}
+      {/* People List */}
+      {viewMode === 'card' ? (
+        <div className="grid grid-cols-1 gap-3">
+          {/* Select All Header */}
+          {filtered.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
+            <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 dark:text-dark-400">
+              <button
+                onClick={selectAll}
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                  selectedIds.size === filtered.length && filtered.length > 0
+                    ? 'bg-indigo-600 border-indigo-600 text-white'
+                    : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
+                }`}
+              >
+                {selectedIds.size === filtered.length && filtered.length > 0 && <Check size={14} />}
+              </button>
+              <span>
+                {selectedIds.size === filtered.length && filtered.length > 0
+                  ? 'Deselect all'
+                  : `Select all ${filtered.length} people`}
+              </span>
+            </div>
+          )}
 
-        {filtered.map((person) => (
-          <div
-            key={person.id}
-            className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-sm transition-all group"
-          >
-            <div className="flex items-center gap-4">
-              {(onBulkUpdateStatus || onBulkAddTag) && (
+          {filtered.map((person) => (
+            <div
+              key={person.id}
+              className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                {(onBulkUpdateStatus || onBulkAddTag) && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleSelect(person.id); }}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      selectedIds.has(person.id)
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
+                    }`}
+                  >
+                    {selectedIds.has(person.id) && <Check size={14} />}
+                  </button>
+                )}
                 <button
-                  onClick={(e) => { e.stopPropagation(); toggleSelect(person.id); }}
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                    selectedIds.has(person.id)
-                      ? 'bg-indigo-600 border-indigo-600 text-white'
-                      : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
-                  }`}
+                  onClick={() => onViewPerson(person.id)}
+                  className="flex items-center gap-4 text-left"
                 >
-                  {selectedIds.has(person.id) && <Check size={14} />}
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg">
+                    {person.firstName[0]}{person.lastName[0]}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
+                    <p className="text-sm text-gray-400 dark:text-dark-400">{person.email || 'No email'}</p>
+                  </div>
                 </button>
-              )}
+              </div>
               <button
                 onClick={() => onViewPerson(person.id)}
-                className="flex items-center gap-4 text-left"
+                className="flex items-center gap-3"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg">
-                  {person.firstName[0]}{person.lastName[0]}
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
-                  <p className="text-sm text-gray-400 dark:text-dark-400">{person.email || 'No email'}</p>
-                </div>
+                <ProfileCompletenessBadge person={person} />
+                {person.tags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="hidden sm:inline text-xs bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 px-2 py-1 rounded-md">
+                    {tag}
+                  </span>
+                ))}
+                <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
+                  {statusLabels[person.status]}
+                </span>
+                <ChevronRight size={18} className="text-gray-300 dark:text-dark-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
               </button>
             </div>
-            <button
-              onClick={() => onViewPerson(person.id)}
-              className="flex items-center gap-3"
-            >
-              {person.tags.slice(0, 2).map((tag) => (
-                <span key={tag} className="hidden sm:inline text-xs bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 px-2 py-1 rounded-md">
-                  {tag}
-                </span>
+          ))}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700">
+              <tr>
+                {(onBulkUpdateStatus || onBulkAddTag) && (
+                  <th className="px-4 py-3 text-left">
+                    <button
+                      onClick={selectAll}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                        selectedIds.size === filtered.length && filtered.length > 0
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
+                      }`}
+                    >
+                      {selectedIds.size === filtered.length && filtered.length > 0 && <Check size={14} />}
+                    </button>
+                  </th>
+                )}
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider hidden md:table-cell">Email</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider hidden lg:table-cell">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider hidden sm:table-cell">Profile</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-dark-700">
+              {filtered.map((person) => (
+                <tr
+                  key={person.id}
+                  className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors cursor-pointer"
+                  onClick={() => onViewPerson(person.id)}
+                >
+                  {(onBulkUpdateStatus || onBulkAddTag) && (
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => toggleSelect(person.id)}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          selectedIds.has(person.id)
+                            ? 'bg-indigo-600 border-indigo-600 text-white'
+                            : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
+                        }`}
+                      >
+                        {selectedIds.has(person.id) && <Check size={14} />}
+                      </button>
+                    </td>
+                  )}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                        {person.firstName[0]}{person.lastName[0]}
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-dark-100">
+                        {person.firstName} {person.lastName}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-dark-400 hidden md:table-cell">
+                    {person.email || '-'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-dark-400 hidden lg:table-cell">
+                    {person.phone || '-'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
+                      {statusLabels[person.status]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    <ProfileCompletenessBadge person={person} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <ChevronRight size={16} className="text-gray-300 dark:text-dark-500" />
+                  </td>
+                </tr>
               ))}
-              <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
-                {statusLabels[person.status]}
-              </span>
-              <ChevronRight size={18} className="text-gray-300 dark:text-dark-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
-            </button>
-          </div>
-        ))}
-      </div>
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <div className="text-center py-12">

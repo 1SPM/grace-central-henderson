@@ -16,7 +16,10 @@ import {
   Search,
   TrendingUp,
   UserCheck,
-  ClipboardList
+  ClipboardList,
+  PanelLeftClose,
+  PanelLeft,
+  ChevronRight
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -41,9 +44,34 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'giving', label: 'Giving', icon: <DollarSign size={20} /> },
 ];
 
+// View labels for breadcrumbs
+const viewLabels: Record<View, string> = {
+  dashboard: 'Dashboard',
+  pipeline: 'Pipeline',
+  people: 'People',
+  person: 'Profile',
+  tasks: 'Follow-Ups',
+  attendance: 'Attendance',
+  calendar: 'Calendar',
+  volunteers: 'Volunteers',
+  groups: 'Groups',
+  prayer: 'Prayer',
+  giving: 'Giving',
+  settings: 'Settings',
+};
+
 export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
+
+  // Save collapsed state
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   // Keyboard shortcut for search
   useEffect(() => {
@@ -51,6 +79,11 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         onOpenSearch?.();
+      }
+      // Toggle sidebar with Cmd/Ctrl + B
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault();
+        setSidebarCollapsed((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -67,6 +100,19 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
     setSidebarOpen(false);
   };
 
+  // Breadcrumb paths
+  const getBreadcrumbs = () => {
+    if (currentView === 'person') {
+      return [
+        { label: 'People', view: 'people' as View },
+        { label: 'Profile', view: currentView },
+      ];
+    }
+    return [{ label: viewLabels[currentView], view: currentView }];
+  };
+
+  const breadcrumbs = getBreadcrumbs();
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-dark-900">
       {/* Mobile overlay */}
@@ -79,20 +125,20 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 flex flex-col transform transition-all duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        } ${sidebarCollapsed ? 'lg:w-[72px]' : 'w-64'}`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-gray-100 dark:border-dark-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <div className={`p-4 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:px-3' : 'p-6'}`}>
+          <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-3'}`}>
+            <div className={`bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 ${sidebarCollapsed ? 'w-10 h-10' : 'w-10 h-10'}`}>
               <Church className="text-white" size={22} />
             </div>
-            <div>
+            <div className={sidebarCollapsed ? 'lg:hidden' : ''}>
               <h1 className="text-xl font-bold text-gray-900 dark:text-dark-100">GRACE</h1>
               <p className="text-[10px] text-gray-400 dark:text-dark-500 tracking-wider hidden sm:block">
-                GROWTH · RELATIONSHIPS · ATTENDANCE · COMMUNITY · ENGAGEMENT
+                CHURCH CRM
               </p>
             </div>
           </div>
@@ -100,14 +146,17 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
         {/* Search button */}
         {onOpenSearch && (
-          <div className="p-4 border-b border-gray-100 dark:border-dark-700">
+          <div className={`p-4 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
             <button
               onClick={onOpenSearch}
-              className="w-full flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-dark-800 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
+              className={`w-full flex items-center gap-3 bg-gray-50 dark:bg-dark-800 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors ${
+                sidebarCollapsed ? 'lg:justify-center lg:p-2.5 lg:px-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+              }`}
+              title={sidebarCollapsed ? 'Search (⌘K)' : undefined}
             >
               <Search size={18} />
-              <span className="flex-1 text-left">Search...</span>
-              <kbd className="hidden sm:inline-flex text-xs bg-gray-200 dark:bg-dark-700 px-1.5 py-0.5 rounded">
+              <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Search...</span>
+              <kbd className={`text-xs bg-gray-200 dark:bg-dark-700 px-1.5 py-0.5 rounded ${sidebarCollapsed ? 'lg:hidden' : 'hidden sm:inline-flex'}`}>
                 ⌘K
               </kbd>
             </button>
@@ -115,62 +164,126 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 p-4 space-y-1 overflow-y-auto ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
           {navItems.map((item) => (
             <button
               key={item.view}
               onClick={() => handleNavClick(item.view)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium transition-all group relative ${
+                sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+              } ${
                 currentView === item.view
                   ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
                   : 'text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100'
               }`}
+              title={sidebarCollapsed ? item.label : undefined}
             >
               {item.icon}
-              {item.label}
+              <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
+
+              {/* Tooltip for collapsed state */}
+              {sidebarCollapsed && (
+                <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
+                  {item.label}
+                </span>
+              )}
             </button>
           ))}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-dark-700 space-y-1">
+        <div className={`p-4 border-t border-gray-100 dark:border-dark-700 space-y-1 ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
+          {/* Collapse toggle - desktop only */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={`hidden lg:flex w-full items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all ${
+              sidebarCollapsed ? 'justify-center px-2.5 py-2.5' : 'px-4 py-2.5'
+            }`}
+            title={sidebarCollapsed ? 'Expand sidebar (⌘B)' : 'Collapse sidebar (⌘B)'}
+          >
+            {sidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+            <span className={sidebarCollapsed ? 'hidden' : ''}>Collapse</span>
+          </button>
+
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all"
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all group relative ${
+              sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+            }`}
+            title={sidebarCollapsed ? (theme === 'light' ? 'Dark Mode' : 'Light Mode') : undefined}
           >
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            {sidebarCollapsed && (
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
+                {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+              </span>
+            )}
           </button>
+
           <button
             onClick={() => handleNavClick('settings')}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all"
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all group relative ${
+              sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+            }`}
+            title={sidebarCollapsed ? 'Settings' : undefined}
           >
             <Settings size={20} />
-            Settings
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Settings</span>
+            {sidebarCollapsed && (
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
+                Settings
+              </span>
+            )}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700">
+        {/* Header with breadcrumbs */}
+        <header className="flex items-center justify-between p-4 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700">
+          {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg mr-2"
           >
             <Menu size={24} className="text-gray-600 dark:text-dark-300" />
           </button>
-          <div className="flex items-center gap-2">
+
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-1 text-sm flex-1">
+            {breadcrumbs.map((crumb, index) => (
+              <div key={crumb.view} className="flex items-center">
+                {index > 0 && (
+                  <ChevronRight size={14} className="mx-1 text-gray-400 dark:text-dark-500" />
+                )}
+                <button
+                  onClick={() => setView(crumb.view)}
+                  className={`px-2 py-1 rounded-md transition-colors ${
+                    index === breadcrumbs.length - 1
+                      ? 'font-medium text-gray-900 dark:text-dark-100'
+                      : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800'
+                  }`}
+                >
+                  {crumb.label}
+                </button>
+              </div>
+            ))}
+          </nav>
+
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Church className="text-white" size={18} />
             </div>
-            <span className="font-bold text-gray-900 dark:text-dark-100">GRACE</span>
           </div>
+
+          {/* Mobile search */}
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg ml-2"
             >
               <Search size={24} className="text-gray-600 dark:text-dark-300" />
             </button>
