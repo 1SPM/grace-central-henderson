@@ -415,6 +415,48 @@ function App() {
     setEditingPerson(undefined);
   };
 
+  // Bulk action handlers
+  const handleBulkUpdateStatus = async (ids: string[], status: LegacyPerson['status']) => {
+    for (const id of ids) {
+      await updatePerson(id, { status });
+    }
+  };
+
+  const handleBulkAddTag = async (ids: string[], tag: string) => {
+    for (const id of ids) {
+      const person = dbPeople.find(p => p.id === id);
+      if (person && !person.tags.includes(tag)) {
+        await updatePerson(id, { tags: [...person.tags, tag] });
+      }
+    }
+  };
+
+  const handleImportCSV = async (importedPeople: Partial<LegacyPerson>[]) => {
+    for (const person of importedPeople) {
+      if (person.firstName && person.lastName) {
+        await addPerson({
+          church_id: 'demo-church',
+          first_name: person.firstName,
+          last_name: person.lastName,
+          email: person.email || null,
+          phone: person.phone || null,
+          status: person.status || 'visitor',
+          photo_url: null,
+          address: null,
+          city: null,
+          state: null,
+          zip: null,
+          birth_date: null,
+          join_date: null,
+          first_visit: null,
+          notes: null,
+          tags: person.tags || [],
+          family_id: null,
+        });
+      }
+    }
+  };
+
   // Search handlers
   const handleSearchSelectPerson = (id: string) => {
     handleViewPerson(id);
@@ -460,6 +502,9 @@ function App() {
             people={people}
             onViewPerson={handleViewPerson}
             onAddPerson={handleAddPerson}
+            onBulkUpdateStatus={handleBulkUpdateStatus}
+            onBulkAddTag={handleBulkAddTag}
+            onImportCSV={handleImportCSV}
           />
         );
 
