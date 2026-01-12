@@ -150,7 +150,7 @@ function PasswordInput({
 }
 
 export function Settings() {
-  const { status, configure, saveConfigToDatabase } = useIntegrations();
+  const { status, saveIntegrations } = useIntegrations();
 
   // Modal states
   const [showEmailConfig, setShowEmailConfig] = useState(false);
@@ -179,26 +179,35 @@ export function Settings() {
 
   const handleSaveEmailConfig = async () => {
     setSaving(true);
-    configure(emailConfig);
-    await saveConfigToDatabase(emailConfig);
+    const success = await saveIntegrations(emailConfig);
     setSaving(false);
-    setShowEmailConfig(false);
+    if (success) {
+      setShowEmailConfig(false);
+      // Clear form for security
+      setEmailConfig({ resendApiKey: '', emailFromAddress: '', emailFromName: '' });
+    }
   };
 
   const handleSaveSmsConfig = async () => {
     setSaving(true);
-    configure(smsConfig);
-    await saveConfigToDatabase(smsConfig);
+    const success = await saveIntegrations(smsConfig);
     setSaving(false);
-    setShowSmsConfig(false);
+    if (success) {
+      setShowSmsConfig(false);
+      // Clear form for security
+      setSmsConfig({ twilioAccountSid: '', twilioAuthToken: '', twilioPhoneNumber: '' });
+    }
   };
 
   const handleSavePaymentConfig = async () => {
     setSaving(true);
-    configure(paymentConfig);
-    await saveConfigToDatabase(paymentConfig);
+    const success = await saveIntegrations(paymentConfig);
     setSaving(false);
-    setShowPaymentConfig(false);
+    if (success) {
+      setShowPaymentConfig(false);
+      // Clear form for security
+      setPaymentConfig({ stripePublishableKey: '' });
+    }
   };
 
   return (

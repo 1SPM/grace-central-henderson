@@ -18,5 +18,4 @@ export {
 } from './IntegrationsContext';
 export type {
   IntegrationStatus,
-  IntegrationConfig,
 } from './IntegrationsContext';
