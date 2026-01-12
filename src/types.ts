@@ -28,6 +28,9 @@ export interface Interaction {
   content: string;
   createdAt: string;
   createdBy: string;
+  // For distinguishing logged vs actually sent
+  sentVia?: 'resend' | 'twilio'; // If set, message was actually sent
+  messageId?: string; // External message ID from provider
 }
 
 export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly';
