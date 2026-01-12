@@ -12,10 +12,15 @@ import {
   Heart,
   Plus,
   Clock,
-  Pencil
+  Pencil,
+  Smartphone,
+  Loader2,
+  Check,
+  X,
 } from 'lucide-react';
 import { Person, Interaction, Task } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
+import { useIntegrations } from '../contexts/IntegrationsContext';
 
 interface PersonProfileProps {
   person: Person;
@@ -32,6 +37,7 @@ const interactionTypes = [
   { type: 'note', icon: <MessageSquare size={16} />, label: 'Note' },
   { type: 'call', icon: <PhoneCall size={16} />, label: 'Call' },
   { type: 'email', icon: <Send size={16} />, label: 'Email' },
+  { type: 'text', icon: <Smartphone size={16} />, label: 'Text' },
   { type: 'visit', icon: <Home size={16} />, label: 'Visit' },
   { type: 'prayer', icon: <Heart size={16} />, label: 'Prayer' },
 ] as const;
@@ -54,6 +60,8 @@ export function PersonProfile({
   onToggleTask,
   onEditPerson
 }: PersonProfileProps) {
+  const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
+
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState<Interaction['type']>('note');
   const [showAddTask, setShowAddTask] = useState(false);
@@ -62,6 +70,90 @@ export function PersonProfile({
     dueDate: string;
     priority: 'low' | 'medium' | 'high';
   }>({ title: '', dueDate: '', priority: 'medium' });
+
+  // Communication states
+  const [isSending, setIsSending] = useState(false);
+  const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showSmsModal, setShowSmsModal] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [smsMessage, setSmsMessage] = useState('');
+
+  const handleSendEmail = async () => {
+    if (!person.email || !emailBody.trim()) return;
+
+    setIsSending(true);
+    setSendResult(null);
+
+    try {
+      const result = await sendEmail({
+        to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
+        subject: emailSubject || `Message from Grace CRM`,
+        html: `<div style="font-family: Arial, sans-serif;"><p>Hi ${person.firstName},</p><p>${emailBody.replace(/\n/g, '<br/>')}</p></div>`,
+        text: emailBody,
+      });
+
+      if (result.success) {
+        // Log the interaction
+        onAddInteraction({
+          personId: person.id,
+          type: 'email',
+          content: `Subject: ${emailSubject}\n\n${emailBody}`,
+          createdBy: 'You'
+        });
+        setSendResult({ success: true, message: 'Email sent successfully!' });
+        setEmailSubject('');
+        setEmailBody('');
+        setTimeout(() => {
+          setShowEmailModal(false);
+          setSendResult(null);
+        }, 2000);
+      } else {
+        setSendResult({ success: false, message: result.error || 'Failed to send email' });
+      }
+    } catch (error) {
+      setSendResult({ success: false, message: 'An error occurred while sending the email' });
+    }
+
+    setIsSending(false);
+  };
+
+  const handleSendSms = async () => {
+    if (!person.phone || !smsMessage.trim()) return;
+
+    setIsSending(true);
+    setSendResult(null);
+
+    try {
+      const result = await sendSMS({
+        to: person.phone,
+        message: smsMessage,
+      });
+
+      if (result.success) {
+        // Log the interaction
+        onAddInteraction({
+          personId: person.id,
+          type: 'text',
+          content: smsMessage,
+          createdBy: 'You'
+        });
+        setSendResult({ success: true, message: 'Text message sent successfully!' });
+        setSmsMessage('');
+        setTimeout(() => {
+          setShowSmsModal(false);
+          setSendResult(null);
+        }, 2000);
+      } else {
+        setSendResult({ success: false, message: result.error || 'Failed to send text message' });
+      }
+    } catch (error) {
+      setSendResult({ success: false, message: 'An error occurred while sending the text' });
+    }
+
+    setIsSending(false);
+  };
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -131,14 +223,57 @@ export function PersonProfile({
                     </button>
                   )}
                 </div>
+                {/* Quick Communication Actions */}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {person.email && (
+                    <button
+                      onClick={() => setShowEmailModal(true)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                        integrationStatus.email
+                          ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20'
+                          : 'bg-gray-100 dark:bg-dark-800 text-gray-400 dark:text-dark-500 cursor-not-allowed'
+                      }`}
+                      disabled={!integrationStatus.email}
+                      title={integrationStatus.email ? 'Send Email' : 'Configure email in Settings'}
+                    >
+                      <Mail size={16} />
+                      Send Email
+                    </button>
+                  )}
+                  {person.phone && (
+                    <button
+                      onClick={() => setShowSmsModal(true)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                        integrationStatus.sms
+                          ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20'
+                          : 'bg-gray-100 dark:bg-dark-800 text-gray-400 dark:text-dark-500 cursor-not-allowed'
+                      }`}
+                      disabled={!integrationStatus.sms}
+                      title={integrationStatus.sms ? 'Send Text' : 'Configure SMS in Settings'}
+                    >
+                      <Smartphone size={16} />
+                      Send Text
+                    </button>
+                  )}
+                  {person.phone && (
+                    <a
+                      href={`tel:${person.phone}`}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                    >
+                      <Phone size={16} />
+                      Call
+                    </a>
+                  )}
+                </div>
+
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">
                     <Mail size={16} className="text-gray-400 dark:text-dark-500" />
-                    {person.email}
+                    {person.email || <span className="text-gray-400">No email</span>}
                   </div>
                   <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">
                     <Phone size={16} className="text-gray-400 dark:text-dark-500" />
-                    {person.phone}
+                    {person.phone || <span className="text-gray-400">No phone</span>}
                   </div>
                   {person.joinDate && (
                     <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">
@@ -333,6 +468,200 @@ export function PersonProfile({
           </div>
         </div>
       </div>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+            <div className="p-6 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
+                  Send Email to {person.firstName}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowEmailModal(false);
+                    setSendResult(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  To
+                </label>
+                <input
+                  type="email"
+                  value={person.email}
+                  disabled
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-800 text-gray-500 dark:text-dark-400 rounded-xl text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Enter subject..."
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  Message
+                </label>
+                <textarea
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  placeholder="Write your message..."
+                  rows={5}
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                />
+              </div>
+              {sendResult && (
+                <div
+                  className={`p-3 rounded-xl flex items-center gap-2 ${
+                    sendResult.success
+                      ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400'
+                      : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                  }`}
+                >
+                  {sendResult.success ? <Check size={16} /> : <X size={16} />}
+                  {sendResult.message}
+                </div>
+              )}
+            </div>
+            <div className="p-6 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowEmailModal(false);
+                  setSendResult(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendEmail}
+                disabled={isSending || !emailBody.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSending ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Send Email
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SMS Modal */}
+      {showSmsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+            <div className="p-6 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
+                  Send Text to {person.firstName}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowSmsModal(false);
+                    setSendResult(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  To
+                </label>
+                <input
+                  type="tel"
+                  value={person.phone}
+                  disabled
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-800 text-gray-500 dark:text-dark-400 rounded-xl text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  Message
+                </label>
+                <textarea
+                  value={smsMessage}
+                  onChange={(e) => setSmsMessage(e.target.value)}
+                  placeholder="Write your message..."
+                  rows={4}
+                  maxLength={160}
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                />
+                <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
+                  {smsMessage.length}/160 characters
+                </p>
+              </div>
+              {sendResult && (
+                <div
+                  className={`p-3 rounded-xl flex items-center gap-2 ${
+                    sendResult.success
+                      ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400'
+                      : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                  }`}
+                >
+                  {sendResult.success ? <Check size={16} /> : <X size={16} />}
+                  {sendResult.message}
+                </div>
+              )}
+            </div>
+            <div className="p-6 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowSmsModal(false);
+                  setSendResult(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendSms}
+                disabled={isSending || !smsMessage.trim()}
+                className="px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSending ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Smartphone size={16} />
+                    Send Text
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
