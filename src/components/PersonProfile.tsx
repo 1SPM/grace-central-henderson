@@ -95,12 +95,14 @@ export function PersonProfile({
       });
 
       if (result.success) {
-        // Log the interaction
+        // Log the interaction - mark as actually sent
         onAddInteraction({
           personId: person.id,
           type: 'email',
           content: `Subject: ${emailSubject}\n\n${emailBody}`,
-          createdBy: 'You'
+          createdBy: 'You',
+          sentVia: 'resend',
+          messageId: result.messageId,
         });
         setSendResult({ success: true, message: 'Email sent successfully!' });
         setEmailSubject('');
@@ -132,12 +134,14 @@ export function PersonProfile({
       });
 
       if (result.success) {
-        // Log the interaction
+        // Log the interaction - mark as actually sent
         onAddInteraction({
           personId: person.id,
           type: 'text',
           content: smsMessage,
-          createdBy: 'You'
+          createdBy: 'You',
+          sentVia: 'twilio',
+          messageId: result.messageId,
         });
         setSendResult({ success: true, message: 'Text message sent successfully!' });
         setSmsMessage('');
@@ -355,12 +359,37 @@ export function PersonProfile({
                   .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                   .map((interaction) => {
                     const typeConfig = interactionTypes.find(t => t.type === interaction.type);
+                    const wasSent = !!interaction.sentVia;
+                    const isEmailOrText = interaction.type === 'email' || interaction.type === 'text';
+
                     return (
-                      <div key={interaction.id} className="flex gap-4 pb-4 border-b border-gray-100 dark:border-dark-700 last:border-0">
-                        <div className="w-8 h-8 bg-gray-100 dark:bg-dark-700 rounded-lg flex items-center justify-center text-gray-500 dark:text-dark-400">
+                      <div
+                        key={interaction.id}
+                        className={`flex gap-4 pb-4 border-b border-gray-100 dark:border-dark-700 last:border-0 ${
+                          wasSent ? 'bg-green-50/50 dark:bg-green-500/5 -mx-2 px-2 py-2 rounded-lg' : ''
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          wasSent
+                            ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'
+                            : 'bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-dark-400'
+                        }`}>
                           {typeConfig?.icon}
                         </div>
                         <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {wasSent && (
+                              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-500/20 px-2 py-0.5 rounded-full">
+                                <Check size={10} />
+                                Sent via {interaction.sentVia === 'resend' ? 'Email' : 'SMS'}
+                              </span>
+                            )}
+                            {isEmailOrText && !wasSent && (
+                              <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-dark-400 bg-gray-100 dark:bg-dark-700 px-2 py-0.5 rounded-full">
+                                Logged
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-700 dark:text-dark-200">{interaction.content}</p>
                           <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
                             {interaction.createdBy} · {new Date(interaction.createdAt).toLocaleDateString()}
