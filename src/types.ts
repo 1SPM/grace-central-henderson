@@ -105,4 +105,107 @@ export interface CalendarEvent {
   attendees?: string[];
 }
 
-export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays';
+export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements';
+
+// ============================================
+// COLLECTION & DONATION MANAGEMENT TYPES
+// ============================================
+
+export type PledgeFrequency = 'one-time' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
+export type PledgeStatus = 'active' | 'completed' | 'cancelled';
+export type BatchStatus = 'open' | 'closed' | 'reconciled';
+export type RecurringStatus = 'active' | 'paused' | 'cancelled';
+
+export interface Campaign {
+  id: string;
+  name: string;
+  description?: string;
+  goalAmount?: number;
+  startDate: string;
+  endDate?: string;
+  fund: string;
+  isActive: boolean;
+  currentAmount?: number; // Calculated from donations
+}
+
+export interface Pledge {
+  id: string;
+  personId?: string;
+  campaignId?: string;
+  amount: number;
+  frequency: PledgeFrequency;
+  startDate: string;
+  endDate?: string;
+  fund: string;
+  status: PledgeStatus;
+  notes?: string;
+  // Calculated fields
+  totalPledged?: number;
+  totalGiven?: number;
+  percentComplete?: number;
+}
+
+export interface DonationBatch {
+  id: string;
+  batchDate: string;
+  batchName?: string;
+  status: BatchStatus;
+  totalCash: number;
+  totalChecks: number;
+  totalAmount: number;
+  checkCount: number;
+  notes?: string;
+  createdBy?: string;
+  closedBy?: string;
+  closedAt?: string;
+  items?: BatchItem[];
+}
+
+export interface BatchItem {
+  id: string;
+  batchId: string;
+  personId?: string;
+  amount: number;
+  method: 'cash' | 'check';
+  fund: string;
+  checkNumber?: string;
+  memo?: string;
+}
+
+export interface RecurringGiving {
+  id: string;
+  personId?: string;
+  amount: number;
+  frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually';
+  fund: string;
+  nextDate: string;
+  stripeSubscriptionId?: string;
+  paymentMethodLast4?: string;
+  paymentMethodBrand?: string;
+  status: RecurringStatus;
+}
+
+export interface GivingStatement {
+  id: string;
+  personId?: string;
+  year: number;
+  totalAmount: number;
+  byFund: Record<string, number>;
+  generatedAt: string;
+  sentAt?: string;
+  sentMethod?: 'email' | 'print';
+  pdfUrl?: string;
+}
+
+export interface GivingAnalytics {
+  totalGiving: number;
+  monthlyAverage: number;
+  yearOverYearChange: number;
+  recurringTotal: number;
+  recurringCount: number;
+  topFunds: { fund: string; amount: number; percentage: number }[];
+  monthlyTrend: { month: string; amount: number }[];
+  donorRetention: number;
+  averageGiftSize: number;
+  newDonorCount: number;
+}

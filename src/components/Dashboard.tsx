@@ -6,19 +6,22 @@ import {
   CheckCircle2,
   Clock
 } from 'lucide-react';
-import { Person, Task } from '../types';
+import { Person, Task, Giving } from '../types';
 import { PRIORITY_COLORS } from '../constants';
 import { DashboardCharts } from './DashboardCharts';
 import { BirthdayWidget } from './BirthdayWidget';
+import { GivingWidget } from './GivingWidget';
 
 interface DashboardProps {
   people: Person[];
   tasks: Task[];
+  giving?: Giving[];
   onViewPerson: (id: string) => void;
   onViewTasks: () => void;
+  onViewGiving?: () => void;
 }
 
-export function Dashboard({ people, tasks, onViewPerson, onViewTasks }: DashboardProps) {
+export function Dashboard({ people, tasks, giving = [], onViewPerson, onViewTasks, onViewGiving }: DashboardProps) {
   const visitors = people.filter(p => p.status === 'visitor');
   const inactive = people.filter(p => p.status === 'inactive');
   const pendingTasks = tasks.filter(t => !t.completed);
@@ -174,6 +177,13 @@ export function Dashboard({ people, tasks, onViewPerson, onViewTasks }: Dashboar
           )}
         </div>
       </div>
+
+      {/* Giving Widget */}
+      {onViewGiving && (
+        <div className="mt-6">
+          <GivingWidget giving={giving} onViewGiving={onViewGiving} />
+        </div>
+      )}
 
       {/* Inactive Members Alert */}
       {inactive.length > 0 && (

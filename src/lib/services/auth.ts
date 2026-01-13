@@ -5,7 +5,7 @@
  * Handles user sessions, roles, and permissions.
  */
 
-import { secureFetch } from '../utils/security';
+import { secureFetch } from '../../utils/security';
 
 export interface User {
   id: string;

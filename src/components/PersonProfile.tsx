@@ -18,19 +18,22 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { Person, Interaction, Task } from '../types';
+import { Person, Interaction, Task, Giving } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
+import { PersonGivingHistory } from './PersonGivingHistory';
 
 interface PersonProfileProps {
   person: Person;
   interactions: Interaction[];
   tasks: Task[];
+  giving?: Giving[];
   onBack: () => void;
   onAddInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   onToggleTask: (taskId: string) => void;
   onEditPerson?: (person: Person) => void;
+  onViewAllGiving?: () => void;
 }
 
 const interactionTypes = [
@@ -54,11 +57,13 @@ export function PersonProfile({
   person,
   interactions,
   tasks,
+  giving = [],
   onBack,
   onAddInteraction,
   onAddTask,
   onToggleTask,
-  onEditPerson
+  onEditPerson,
+  onViewAllGiving,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
 
@@ -405,6 +410,14 @@ export function PersonProfile({
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Giving History */}
+          <PersonGivingHistory
+            personId={person.id}
+            giving={giving}
+            onViewAll={onViewAllGiving}
+            compact
+          />
+
           {/* Tasks */}
           <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-center justify-between mb-4">
