@@ -28,8 +28,11 @@ import { PrintableReports } from './components/PrintableReports';
 import { BirthdayCalendar } from './components/BirthdayCalendar';
 import { QuickNote } from './components/QuickNote';
 import { QuickDonationForm } from './components/QuickDonationForm';
+import { CharityBaskets } from './components/CharityBaskets';
+import { MemberDonationStats } from './components/MemberDonationStats';
+import { DonationTracker } from './components/DonationTracker';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement } from './types';
+import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement, CharityBasket, BasketItem } from './types';
 
 // Adapter functions to convert between database types and legacy component types
 function toPersonLegacy(p: {
@@ -245,6 +248,35 @@ function App() {
 
   const [givingStatements, setGivingStatements] = useState<GivingStatement[]>([]);
 
+  // Charity Baskets state (demo data)
+  const [charityBaskets, setCharityBaskets] = useState<CharityBasket[]>([
+    {
+      id: 'basket-1',
+      name: 'Johnson Family Holiday Basket',
+      type: 'holiday',
+      description: 'Christmas basket for the Johnson family',
+      recipientName: 'Johnson Family',
+      status: 'collecting',
+      targetDate: '2025-12-20',
+      createdAt: new Date().toISOString(),
+      createdBy: 'Admin',
+      items: [
+        {
+          id: 'item-1',
+          basketId: 'basket-1',
+          name: 'Canned vegetables (assorted)',
+          category: 'food',
+          quantity: 6,
+          unit: 'cans',
+          estimatedValue: 12,
+          donorName: 'Smith Family',
+          donatedAt: new Date().toISOString(),
+        },
+      ],
+      totalValue: 12,
+    },
+  ]);
+
   // Campaign handlers
   const handleCreateCampaign = (campaign: Omit<Campaign, 'id'>) => {
     const newCampaign: Campaign = {
@@ -393,6 +425,71 @@ function App() {
         s.id === statementId
           ? { ...s, sentAt: new Date().toISOString(), sentMethod: method }
           : s
+      )
+    );
+  };
+
+  // Charity Basket handlers
+  const handleCreateBasket = (basket: Omit<CharityBasket, 'id' | 'createdAt' | 'items' | 'totalValue'>) => {
+    const newBasket: CharityBasket = {
+      ...basket,
+      id: `basket-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      items: [],
+      totalValue: 0,
+    };
+    setCharityBaskets((prev) => [...prev, newBasket]);
+  };
+
+  const handleUpdateBasket = (id: string, updates: Partial<CharityBasket>) => {
+    setCharityBaskets((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
+    );
+  };
+
+  const handleDeleteBasket = (id: string) => {
+    setCharityBaskets((prev) => prev.filter((b) => b.id !== id));
+  };
+
+  const handleAddBasketItem = (basketId: string, item: Omit<BasketItem, 'id' | 'basketId' | 'donatedAt'>) => {
+    const newItem: BasketItem = {
+      ...item,
+      id: `item-${Date.now()}`,
+      basketId,
+      donatedAt: new Date().toISOString(),
+    };
+
+    setCharityBaskets((prev) =>
+      prev.map((b) => {
+        if (b.id === basketId) {
+          const items = [...b.items, newItem];
+          const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0) * i.quantity, 0);
+          return { ...b, items, totalValue };
+        }
+        return b;
+      })
+    );
+  };
+
+  const handleRemoveBasketItem = (basketId: string, itemId: string) => {
+    setCharityBaskets((prev) =>
+      prev.map((b) => {
+        if (b.id === basketId) {
+          const items = b.items.filter((i) => i.id !== itemId);
+          const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0) * i.quantity, 0);
+          return { ...b, items, totalValue };
+        }
+        return b;
+      })
+    );
+  };
+
+  const handleDistributeBasket = (basketId: string) => {
+    setCharityBaskets((prev) =>
+      prev.map((b) =>
+        b.id === basketId
+          ? { ...b, status: 'distributed' as const, distributedDate: new Date().toISOString() }
+          : b
       )
     );
   };
@@ -867,6 +964,42 @@ function App() {
             statements={givingStatements}
             onGenerateStatement={handleGenerateStatement}
             onSendStatement={handleSendStatement}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'charity-baskets':
+        return (
+          <CharityBaskets
+            baskets={charityBaskets}
+            people={people}
+            onCreateBasket={handleCreateBasket}
+            onUpdateBasket={handleUpdateBasket}
+            onDeleteBasket={handleDeleteBasket}
+            onAddItem={handleAddBasketItem}
+            onRemoveItem={handleRemoveBasketItem}
+            onDistributeBasket={handleDistributeBasket}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'donation-tracker':
+        return (
+          <DonationTracker
+            giving={giving}
+            people={people}
+            onBack={() => setView('giving')}
+            onViewMemberStats={() => setView('member-stats')}
+            onViewPerson={handleViewPerson}
+          />
+        );
+
+      case 'member-stats':
+        return (
+          <MemberDonationStats
+            people={people}
+            giving={giving}
+            onViewPerson={handleViewPerson}
             onBack={() => setView('giving')}
           />
         );
