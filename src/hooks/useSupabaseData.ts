@@ -8,6 +8,8 @@ import type {
   PrayerRequest,
   CalendarEvent,
   Giving,
+  GivingFund,
+  GivingMethod,
   GroupMembership,
   PersonInsert,
   TaskInsert,
@@ -474,6 +476,51 @@ export function useSupabaseData() {
     return newPrayer;
   }, [isDemo]);
 
+  // Add giving record
+  const addGiving = useCallback(async (givingData: {
+    church_id: string;
+    person_id: string | null;
+    amount: number;
+    fund: string;
+    date: string;
+    method: string;
+    is_recurring?: boolean;
+    note?: string | null;
+  }) => {
+    if (isDemo) {
+      const newGiving: Giving = {
+        id: `giving-${Date.now()}`,
+        church_id: givingData.church_id,
+        person_id: givingData.person_id,
+        amount: givingData.amount,
+        fund: givingData.fund as GivingFund,
+        date: givingData.date,
+        method: givingData.method as GivingMethod,
+        is_recurring: givingData.is_recurring ?? false,
+        stripe_payment_id: null,
+        note: givingData.note ?? null,
+        created_at: new Date().toISOString(),
+      };
+      setGiving(prev => [newGiving, ...prev]);
+      return newGiving;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { data, error } = await supabase
+      .from('giving')
+      .insert(givingData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    const newGiving = data as Giving;
+    setGiving(prev => [newGiving, ...prev]);
+    return newGiving;
+  }, [isDemo]);
+
   return {
     // State
     isLoading,
@@ -503,5 +550,8 @@ export function useSupabaseData() {
     // Prayer actions
     markPrayerAnswered,
     addPrayer,
+
+    // Giving actions
+    addGiving,
   };
 }

@@ -27,6 +27,7 @@ import { TagsManager } from './components/TagsManager';
 import { PrintableReports } from './components/PrintableReports';
 import { BirthdayCalendar } from './components/BirthdayCalendar';
 import { QuickNote } from './components/QuickNote';
+import { QuickDonationForm } from './components/QuickDonationForm';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement } from './types';
 
@@ -138,6 +139,7 @@ function App() {
     addInteraction,
     addPrayer,
     markPrayerAnswered,
+    addGiving,
   } = useSupabaseData();
 
   // Convert to legacy types for existing components
@@ -205,6 +207,8 @@ function App() {
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showQuickPrayer, setShowQuickPrayer] = useState(false);
   const [showQuickNote, setShowQuickNote] = useState(false);
+  const [showQuickDonation, setShowQuickDonation] = useState(false);
+  const [quickDonationPersonId, setQuickDonationPersonId] = useState<string | undefined>(undefined);
 
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
@@ -426,6 +430,11 @@ function App() {
           e.preventDefault();
           setShowQuickNote(true);
           break;
+        case 'd':
+          // D = New Donation
+          e.preventDefault();
+          handleOpenQuickDonation();
+          break;
         case '/':
           // / = Search
           e.preventDefault();
@@ -437,6 +446,7 @@ function App() {
           setShowQuickTask(false);
           setShowQuickPrayer(false);
           setShowQuickNote(false);
+          setShowQuickDonation(false);
           setShowSearch(false);
           break;
       }
@@ -543,6 +553,32 @@ function App() {
       content: prayer.content,
       is_private: prayer.isPrivate,
     });
+  };
+
+  const handleAddGiving = async (donation: {
+    personId: string;
+    amount: number;
+    fund: string;
+    method: string;
+    date: string;
+    isRecurring: boolean;
+    note?: string;
+  }) => {
+    await addGiving({
+      church_id: 'demo-church',
+      person_id: donation.personId || null,
+      amount: donation.amount,
+      fund: donation.fund,
+      method: donation.method,
+      date: donation.date,
+      is_recurring: donation.isRecurring,
+      note: donation.note || null,
+    });
+  };
+
+  const handleOpenQuickDonation = (personId?: string) => {
+    setQuickDonationPersonId(personId);
+    setShowQuickDonation(true);
   };
 
   // Person CRUD handlers
@@ -671,8 +707,10 @@ function App() {
           <Dashboard
             people={people}
             tasks={tasks}
+            giving={giving}
             onViewPerson={handleViewPerson}
             onViewTasks={() => setView('tasks')}
+            onViewGiving={() => setView('giving')}
           />
         );
 
@@ -706,11 +744,13 @@ function App() {
             person={selectedPerson}
             interactions={interactions}
             tasks={tasks}
+            giving={giving}
             onBack={handleBackToPeople}
             onAddInteraction={handleAddInteraction}
             onAddTask={handleAddTask}
             onToggleTask={handleToggleTask}
             onEditPerson={handleEditPerson}
+            onViewAllGiving={() => setView('giving')}
           />
         );
 
@@ -922,6 +962,7 @@ function App() {
         onAddTask={() => setShowQuickTask(true)}
         onAddPrayer={() => setShowQuickPrayer(true)}
         onAddNote={() => setShowQuickNote(true)}
+        onAddDonation={() => handleOpenQuickDonation()}
       />
 
       {/* Quick Task Form Modal */}
@@ -948,6 +989,19 @@ function App() {
           people={people}
           onSave={handleAddInteraction}
           onClose={() => setShowQuickNote(false)}
+        />
+      )}
+
+      {/* Quick Donation Modal */}
+      {showQuickDonation && (
+        <QuickDonationForm
+          people={people}
+          defaultPersonId={quickDonationPersonId}
+          onSave={handleAddGiving}
+          onClose={() => {
+            setShowQuickDonation(false);
+            setQuickDonationPersonId(undefined);
+          }}
         />
       )}
 
