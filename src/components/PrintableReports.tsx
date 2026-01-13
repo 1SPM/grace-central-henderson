@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Printer, FileText, Users, Calendar, DollarSign, Heart } from 'lucide-react';
 import { Person, Task, PrayerRequest, Giving } from '../types';
+import { sanitizeHtml } from '../utils/security';
 
 interface PrintableReportsProps {
   people: Person[];
@@ -30,11 +31,15 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // Sanitize the HTML content to prevent XSS attacks
+    const sanitizedContent = sanitizeHtml(printContent.innerHTML);
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>GRACE CRM Report</title>
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline';">
           <style>
             body {
               font-family: system-ui, -apple-system, sans-serif;
@@ -59,7 +64,7 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
           </style>
         </head>
         <body>
-          ${printContent.innerHTML}
+          ${sanitizedContent}
         </body>
       </html>
     `);

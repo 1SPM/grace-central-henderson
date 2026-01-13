@@ -5,6 +5,8 @@
  * Handles user sessions, roles, and permissions.
  */
 
+import { secureFetch } from '../utils/security';
+
 export interface User {
   id: string;
   clerkId: string;
@@ -243,7 +245,7 @@ class AuthService {
     try {
       // This would typically call your Supabase backend
       // to create or update the user record
-      const response = await fetch('/api/auth/sync-user', {
+      const response = await secureFetch('/api/auth/sync-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +276,7 @@ class AuthService {
   // Invite a new user to the organization
   async inviteUser(params: InviteUserParams): Promise<InviteResult> {
     try {
-      const response = await fetch('/api/auth/invite', {
+      const response = await secureFetch('/api/auth/invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +311,7 @@ class AuthService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`/api/auth/users/${userId}/role`, {
+      const response = await secureFetch(`/api/auth/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -340,7 +342,7 @@ class AuthService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`/api/auth/users/${userId}`, {
+      const response = await secureFetch(`/api/auth/users/${userId}`, {
         method: 'DELETE',
       });
 
@@ -368,7 +370,7 @@ class AuthService {
     error?: string;
   }> {
     try {
-      const response = await fetch('/api/auth/users');
+      const response = await secureFetch('/api/auth/users');
 
       if (!response.ok) {
         const result = await response.json();

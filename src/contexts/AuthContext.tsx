@@ -36,6 +36,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Get Clerk publishable key from environment
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+// Check if demo mode is explicitly enabled (security: fail closed)
+const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+const isProduction = import.meta.env.PROD;
+
 // Hook to use auth context
 export function useAuthContext() {
   const context = useContext(AuthContext);
@@ -211,8 +215,15 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
 // Main Auth Provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // If Clerk is not configured, provide a demo auth context
+  // If Clerk is not configured, check if demo mode is allowed
   if (!clerkPubKey) {
+    // SECURITY: In production, require explicit demo mode opt-in
+    // This prevents accidental admin access if Clerk fails to initialize
+    if (isProduction && !isDemoModeEnabled) {
+      return (
+        <AuthProviderSecurityBlock>{children}</AuthProviderSecurityBlock>
+      );
+    }
     return (
       <AuthProviderDemo>{children}</AuthProviderDemo>
     );
@@ -225,8 +236,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Security block when auth is not configured in production
+function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) {
+  const value: AuthContextType = {
+    isLoaded: true,
+    isSignedIn: false,
+    user: null,
+    permissions: null,
+    signOut: async () => {},
+    hasPermission: () => false,
+    hasAnyPermission: () => false,
+    inviteUser: async () => ({ success: false, error: 'Authentication not configured' }),
+    updateUserRole: async () => ({ success: false, error: 'Authentication not configured' }),
+    removeUser: async () => ({ success: false, error: 'Authentication not configured' }),
+    getOrganizationUsers: async () => ({ success: false, error: 'Authentication not configured' }),
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
 // Demo auth provider for when Clerk is not configured
+// SECURITY: Only enabled in development or when explicitly opted-in
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
+  // Log security warning
+  if (typeof console !== 'undefined') {
+    console.warn(
+      '[SECURITY WARNING] Running in demo mode with automatic admin access. ' +
+      'This should NEVER be used in production without explicit opt-in via VITE_ENABLE_DEMO_MODE=true'
+    );
+  }
+
   const demoUser: User = {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',

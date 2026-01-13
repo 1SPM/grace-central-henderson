@@ -3,10 +3,14 @@
  *
  * Each church stores their own API credentials in the database,
  * making it easy to onboard new churches without code changes.
+ *
+ * SECURITY NOTE: Secret keys (Stripe, Twilio, Resend) should ideally be
+ * handled by a backend server. This frontend storage is for development/demo only.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { maskSensitiveData } from '../utils/security';
 
 export interface IntegrationCredentials {
   // Email (Resend)
@@ -21,7 +25,12 @@ export interface IntegrationCredentials {
 
   // Payments (Stripe)
   stripePublishableKey?: string;
-  stripeSecretKey?: string; // Note: In production, handle secret keys on backend only
+  /**
+   * @deprecated SECURITY WARNING: Secret keys should NEVER be stored in the frontend.
+   * This field exists for development/demo purposes only.
+   * In production, implement a backend API to handle Stripe operations.
+   */
+  stripeSecretKey?: string;
 
   // Auth (Clerk) - Usually set at app level, not per-church
   clerkPublishableKey?: string;
@@ -128,6 +137,19 @@ export function useChurchSettings(churchId: string = 'demo-church') {
 
   // Save just integration credentials
   const saveIntegrations = useCallback(async (integrations: Partial<IntegrationCredentials>): Promise<boolean> => {
+    // Security warning for secret keys
+    if (integrations.stripeSecretKey || integrations.twilioAuthToken || integrations.resendApiKey) {
+      console.warn(
+        '[SECURITY WARNING] Storing API secrets in the database is not recommended for production. ' +
+        'Consider implementing a backend API to handle sensitive operations. ' +
+        'Credentials being stored (masked): ',
+        {
+          stripeSecretKey: integrations.stripeSecretKey ? maskSensitiveData(integrations.stripeSecretKey) : undefined,
+          twilioAuthToken: integrations.twilioAuthToken ? maskSensitiveData(integrations.twilioAuthToken) : undefined,
+          resendApiKey: integrations.resendApiKey ? maskSensitiveData(integrations.resendApiKey) : undefined,
+        }
+      );
+    }
     return saveSettings({
       integrations: { ...settings.integrations, ...integrations }
     });
