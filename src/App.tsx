@@ -8,7 +8,12 @@ import { Tasks } from './components/Tasks';
 import { Calendar } from './components/Calendar';
 import { Groups } from './components/Groups';
 import { Prayer } from './components/Prayer';
-import { Giving } from './components/Giving';
+// Giving component replaced by GivingDashboard
+import { GivingDashboard } from './components/GivingDashboard';
+import { OnlineGivingForm } from './components/OnlineGivingForm';
+import { BatchEntry } from './components/BatchEntry';
+import { PledgeManager } from './components/PledgeManager';
+import { GivingStatements } from './components/GivingStatements';
 import { Settings } from './components/Settings';
 import { GlobalSearch } from './components/GlobalSearch';
 import { QuickActions } from './components/QuickActions';
@@ -23,7 +28,7 @@ import { PrintableReports } from './components/PrintableReports';
 import { BirthdayCalendar } from './components/BirthdayCalendar';
 import { QuickNote } from './components/QuickNote';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
+import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement } from './types';
 
 // Adapter functions to convert between database types and legacy component types
 function toPersonLegacy(p: {
@@ -215,6 +220,178 @@ function App() {
     personId: string;
     status: 'confirmed' | 'pending' | 'declined';
   }[]>([]);
+
+  // Collection & Donation Management state (demo data)
+  const [campaigns, setCampaigns] = useState<Campaign[]>([
+    {
+      id: 'campaign-1',
+      name: 'Building Fund 2025',
+      description: 'New sanctuary construction project',
+      goalAmount: 500000,
+      startDate: '2025-01-01',
+      endDate: '2025-12-31',
+      fund: 'building',
+      isActive: true,
+    },
+  ]);
+
+  const [pledges, setPledges] = useState<Pledge[]>([]);
+
+  const [donationBatches, setDonationBatches] = useState<DonationBatch[]>([]);
+
+  const [givingStatements, setGivingStatements] = useState<GivingStatement[]>([]);
+
+  // Campaign handlers
+  const handleCreateCampaign = (campaign: Omit<Campaign, 'id'>) => {
+    const newCampaign: Campaign = {
+      ...campaign,
+      id: `campaign-${Date.now()}`,
+    };
+    setCampaigns((prev) => [...prev, newCampaign]);
+  };
+
+  const handleUpdateCampaign = (id: string, updates: Partial<Campaign>) => {
+    setCampaigns((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+    );
+  };
+
+  // Pledge handlers
+  const handleCreatePledge = (pledge: Omit<Pledge, 'id'>) => {
+    const newPledge: Pledge = {
+      ...pledge,
+      id: `pledge-${Date.now()}`,
+      totalPledged: pledge.amount,
+      totalGiven: 0,
+      percentComplete: 0,
+    };
+    setPledges((prev) => [...prev, newPledge]);
+  };
+
+  const handleUpdatePledge = (id: string, updates: Partial<Pledge>) => {
+    setPledges((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+    );
+  };
+
+  const handleDeletePledge = (id: string) => {
+    setPledges((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  // Batch handlers
+  const handleCreateBatch = (batch: Omit<DonationBatch, 'id'>) => {
+    const newBatch: DonationBatch = {
+      ...batch,
+      id: `batch-${Date.now()}`,
+      items: [],
+    };
+    setDonationBatches((prev) => [...prev, newBatch]);
+  };
+
+  const handleAddBatchItem = (item: Omit<BatchItem, 'id'>) => {
+    const newItem: BatchItem = {
+      ...item,
+      id: `item-${Date.now()}`,
+    };
+
+    setDonationBatches((prev) =>
+      prev.map((b) => {
+        if (b.id === item.batchId) {
+          const items = [...(b.items || []), newItem];
+          const totalCash = items
+            .filter((i) => i.method === 'cash')
+            .reduce((sum, i) => sum + i.amount, 0);
+          const totalChecks = items
+            .filter((i) => i.method === 'check')
+            .reduce((sum, i) => sum + i.amount, 0);
+          const checkCount = items.filter((i) => i.method === 'check').length;
+
+          return {
+            ...b,
+            items,
+            totalCash,
+            totalChecks,
+            totalAmount: totalCash + totalChecks,
+            checkCount,
+          };
+        }
+        return b;
+      })
+    );
+  };
+
+  const handleRemoveBatchItem = (itemId: string) => {
+    setDonationBatches((prev) =>
+      prev.map((b) => {
+        const items = (b.items || []).filter((i) => i.id !== itemId);
+        const totalCash = items
+          .filter((i) => i.method === 'cash')
+          .reduce((sum, i) => sum + i.amount, 0);
+        const totalChecks = items
+          .filter((i) => i.method === 'check')
+          .reduce((sum, i) => sum + i.amount, 0);
+        const checkCount = items.filter((i) => i.method === 'check').length;
+
+        return {
+          ...b,
+          items,
+          totalCash,
+          totalChecks,
+          totalAmount: totalCash + totalChecks,
+          checkCount,
+        };
+      })
+    );
+  };
+
+  const handleCloseBatch = (batchId: string) => {
+    setDonationBatches((prev) =>
+      prev.map((b) =>
+        b.id === batchId
+          ? { ...b, status: 'closed' as const, closedAt: new Date().toISOString() }
+          : b
+      )
+    );
+  };
+
+  // Statement handlers
+  const handleGenerateStatement = (personId: string, year: number) => {
+    const personGiving = giving.filter(
+      (g) => g.personId === personId && new Date(g.date).getFullYear() === year
+    );
+    const total = personGiving.reduce((sum, g) => sum + g.amount, 0);
+    const byFund: Record<string, number> = {};
+    personGiving.forEach((g) => {
+      byFund[g.fund] = (byFund[g.fund] || 0) + g.amount;
+    });
+
+    const newStatement: GivingStatement = {
+      id: `stmt-${Date.now()}`,
+      personId,
+      year,
+      totalAmount: total,
+      byFund,
+      generatedAt: new Date().toISOString(),
+    };
+
+    setGivingStatements((prev) => {
+      // Replace existing statement for same person/year
+      const filtered = prev.filter(
+        (s) => !(s.personId === personId && s.year === year)
+      );
+      return [...filtered, newStatement];
+    });
+  };
+
+  const handleSendStatement = (statementId: string, method: 'email' | 'print') => {
+    setGivingStatements((prev) =>
+      prev.map((s) =>
+        s.id === statementId
+          ? { ...s, sentAt: new Date().toISOString(), sentMethod: method }
+          : s
+      )
+    );
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -591,7 +768,68 @@ function App() {
         );
 
       case 'giving':
-        return <Giving giving={giving} people={people} />;
+        return (
+          <GivingDashboard
+            giving={giving}
+            people={people}
+            campaigns={campaigns}
+            pledges={pledges}
+            onNavigate={(subView) => setView(subView)}
+          />
+        );
+
+      case 'online-giving':
+        return (
+          <OnlineGivingForm
+            churchName="Grace Church"
+            onBack={() => setView('giving')}
+            onSuccess={(donation) => {
+              console.log('Donation received:', donation);
+              setView('giving');
+            }}
+          />
+        );
+
+      case 'batch-entry':
+        return (
+          <BatchEntry
+            people={people}
+            batches={donationBatches}
+            onCreateBatch={handleCreateBatch}
+            onAddItem={handleAddBatchItem}
+            onRemoveItem={handleRemoveBatchItem}
+            onCloseBatch={handleCloseBatch}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'pledges':
+      case 'campaigns':
+        return (
+          <PledgeManager
+            people={people}
+            campaigns={campaigns}
+            pledges={pledges}
+            onCreateCampaign={handleCreateCampaign}
+            onUpdateCampaign={handleUpdateCampaign}
+            onCreatePledge={handleCreatePledge}
+            onUpdatePledge={handleUpdatePledge}
+            onDeletePledge={handleDeletePledge}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'statements':
+        return (
+          <GivingStatements
+            giving={giving}
+            people={people}
+            statements={givingStatements}
+            onGenerateStatement={handleGenerateStatement}
+            onSendStatement={handleSendStatement}
+            onBack={() => setView('giving')}
+          />
+        );
 
       case 'tags':
         return (
