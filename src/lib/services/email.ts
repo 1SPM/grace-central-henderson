@@ -274,8 +274,25 @@ class EmailService {
   // Convenience methods for common emails
   async sendWelcomeEmail(
     to: EmailRecipient,
-    data: { firstName: string; churchName: string }
+    data: { firstName: string; churchName: string },
+    aiGeneratedMessage?: string
   ): Promise<EmailResult> {
+    // If AI message provided, use custom HTML instead of template
+    if (aiGeneratedMessage) {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #4F46E5;">Welcome to ${this.escapeHtml(data.churchName)}!</h1>
+          <p>${this.escapeHtml(aiGeneratedMessage).replace(/\n/g, '<br>')}</p>
+          <p>Blessings,<br/>The ${this.escapeHtml(data.churchName)} Team</p>
+        </div>
+      `;
+      return this.send({
+        to,
+        subject: `Welcome to ${data.churchName}!`,
+        html,
+      });
+    }
+
     return this.send({
       to,
       subject: '',
