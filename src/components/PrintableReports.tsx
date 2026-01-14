@@ -168,15 +168,16 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
     const givingByFund = new Map<string, number>();
 
     giving.forEach((g) => {
-      const person = people.find((p) => p.id === g.personId);
+      const personKey = g.personId || 'anonymous';
+      const person = g.personId ? people.find((p) => p.id === g.personId) : null;
       const name = person ? `${person.firstName} ${person.lastName}` : 'Anonymous';
 
-      if (givingByPerson.has(g.personId)) {
-        const entry = givingByPerson.get(g.personId)!;
+      if (givingByPerson.has(personKey)) {
+        const entry = givingByPerson.get(personKey)!;
         entry.total += g.amount;
         entry.count++;
       } else {
-        givingByPerson.set(g.personId, { name, total: g.amount, count: 1 });
+        givingByPerson.set(personKey, { name, total: g.amount, count: 1 });
       }
 
       givingByFund.set(g.fund, (givingByFund.get(g.fund) || 0) + g.amount);
