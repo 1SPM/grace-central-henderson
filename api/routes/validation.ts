@@ -6,7 +6,7 @@
 export const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // Phone validation regex (E.164 format or common formats)
-export const PHONE_REGEX = /^[\d\s\-\(\)\+\.]{7,20}$/;
+export const PHONE_REGEX = /^[\d\s\-().+]{7,20}$/;
 
 // Validation limits
 export const LIMITS = {

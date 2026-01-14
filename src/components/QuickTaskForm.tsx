@@ -12,7 +12,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
   const [title, setTitle] = useState('');
   const [personId, setPersonId] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
-  const [dueDate, setDueDate] = useState(
+  const [dueDate, setDueDate] = useState(() =>
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
 
