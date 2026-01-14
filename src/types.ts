@@ -105,7 +105,7 @@ export interface CalendarEvent {
   attendees?: string[];
 }
 
-export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements';
+export type View = 'dashboard' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats';
 
 // ============================================
 // COLLECTION & DONATION MANAGEMENT TYPES
@@ -208,4 +208,97 @@ export interface GivingAnalytics {
   donorRetention: number;
   averageGiftSize: number;
   newDonorCount: number;
+}
+
+// ============================================
+// CHARITY BASKETS & DONATION TRACKING TYPES
+// ============================================
+
+export type BasketType = 'food' | 'holiday' | 'emergency' | 'school' | 'baby' | 'household' | 'other';
+export type BasketStatus = 'collecting' | 'ready' | 'distributed' | 'cancelled';
+export type ItemCategory = 'food' | 'clothing' | 'hygiene' | 'household' | 'school' | 'baby' | 'gift' | 'other';
+
+export interface CharityBasket {
+  id: string;
+  name: string;
+  type: BasketType;
+  description?: string;
+  recipientId?: string; // Person who will receive the basket
+  recipientName?: string; // For anonymous/external recipients
+  status: BasketStatus;
+  targetDate?: string; // When basket should be ready
+  distributedDate?: string;
+  distributedBy?: string;
+  notes?: string;
+  createdAt: string;
+  createdBy?: string;
+  items: BasketItem[];
+  totalValue: number;
+}
+
+export interface BasketItem {
+  id: string;
+  basketId: string;
+  name: string;
+  category: ItemCategory;
+  quantity: number;
+  unit?: string; // e.g., 'cans', 'boxes', 'items'
+  estimatedValue?: number;
+  donorId?: string; // Person who donated this item
+  donorName?: string; // For anonymous donors
+  donatedAt: string;
+  notes?: string;
+}
+
+export interface BasketDonation {
+  id: string;
+  basketId?: string; // Optional - can be general inventory
+  donorId?: string;
+  donorName?: string;
+  type: 'item' | 'cash';
+  items?: BasketItem[];
+  cashAmount?: number;
+  date: string;
+  notes?: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: ItemCategory;
+  quantity: number;
+  unit?: string;
+  minQuantity?: number; // Alert when below this
+  location?: string;
+  lastUpdated: string;
+}
+
+export interface DonationStats {
+  personId: string;
+  totalLifetime: number;
+  totalThisYear: number;
+  totalLastYear: number;
+  averageGift: number;
+  largestGift: number;
+  giftCount: number;
+  firstGiftDate?: string;
+  lastGiftDate?: string;
+  preferredMethod?: string;
+  preferredFund?: string;
+  yearOverYearChange: number;
+  monthlyGiving: { month: string; amount: number }[];
+  fundBreakdown: { fund: string; amount: number; percentage: number }[];
+  givingStreak: number; // Consecutive months with giving
+  basketContributions: number; // Number of basket item donations
+}
+
+export interface DonationTrackerFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  personId?: string;
+  fund?: string;
+  method?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  isRecurring?: boolean;
 }

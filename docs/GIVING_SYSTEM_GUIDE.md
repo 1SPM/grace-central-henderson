@@ -13,8 +13,11 @@ A complete guide to managing church donations, pledges, campaigns, and financial
 5. [Managing Campaigns & Pledges](#managing-campaigns--pledges)
 6. [Generating Tax Statements](#generating-tax-statements)
 7. [Understanding Analytics](#understanding-analytics)
-8. [Best Practices](#best-practices)
-9. [Troubleshooting](#troubleshooting)
+8. [Charity Baskets](#charity-baskets)
+9. [Donation Tracker](#donation-tracker)
+10. [Member Donation Statistics](#member-donation-statistics)
+11. [Best Practices](#best-practices)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -328,6 +331,312 @@ Click **"Export"** to download:
 
 ---
 
+## Charity Baskets
+
+Charity Baskets help your church organize and distribute care packages to those in need. Track donations of physical items, manage inventory, and coordinate distribution.
+
+### Accessing Charity Baskets
+
+1. Go to **Giving** → Click **Charity Baskets** in the Additional Tools row
+2. You'll see the basket management dashboard with filters and basket list
+
+### Basket Types
+
+| Type | Purpose | Examples |
+|------|---------|----------|
+| **Food** | Food pantry assistance | Canned goods, non-perishables |
+| **Holiday** | Seasonal care packages | Thanksgiving meals, Christmas gifts |
+| **Emergency** | Urgent need assistance | Disaster relief, crisis support |
+| **School** | Back-to-school supplies | Backpacks, notebooks, supplies |
+| **Baby** | New parent support | Diapers, formula, clothing |
+| **Household** | Home essentials | Cleaning supplies, bedding |
+| **Other** | Miscellaneous baskets | Custom care packages |
+
+### Creating a New Basket
+
+1. Click **"New Basket"** (green button, top right)
+2. Fill in the basket details:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Basket Name** | Yes | Descriptive name (e.g., "Holiday Food Drive - Smith Family") |
+| **Basket Type** | Yes | Select from dropdown |
+| **Target Date** | No | When the basket should be ready |
+| **Recipient Name** | No | Who will receive the basket |
+| **Description** | No | Additional details or special needs |
+
+3. Click **Create Basket**
+
+### Basket Workflow
+
+Each basket progresses through four statuses:
+
+```
+Collecting → Ready → Distributed → (or Cancelled)
+```
+
+| Status | Meaning | Actions Available |
+|--------|---------|-------------------|
+| **Collecting** | Actively accepting donations | Add items, edit basket |
+| **Ready** | Complete and ready to deliver | Mark as distributed |
+| **Distributed** | Delivered to recipient | View only |
+| **Cancelled** | No longer needed | View only |
+
+### Adding Items to a Basket
+
+1. Click on a basket to expand it (or click the **+** button)
+2. Click **"Add Item"**
+3. Fill in item details:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Item Name** | Yes | What was donated (e.g., "Canned Vegetables") |
+| **Category** | Yes | Food, Clothing, Hygiene, Household, School, Baby, Gift, Other |
+| **Quantity** | Yes | Number of items |
+| **Unit** | No | Measurement (cans, boxes, items, pairs) |
+| **Donor Name** | No | Who donated this item |
+| **Estimated Value** | No | Dollar value for tracking |
+| **Notes** | No | Additional details |
+
+4. Click **Add Item**
+
+### Tracking Item Donations
+
+Each basket displays:
+- **Total Items** - Count of all items in the basket
+- **Total Value** - Sum of estimated item values
+- **Donors** - List of people who contributed
+
+### Item Categories
+
+| Category | Examples |
+|----------|----------|
+| **Food** | Canned goods, pasta, rice, cereal |
+| **Clothing** | Shirts, pants, jackets, shoes |
+| **Hygiene** | Soap, shampoo, toothpaste, deodorant |
+| **Household** | Towels, sheets, cleaning supplies |
+| **School** | Notebooks, pencils, backpacks |
+| **Baby** | Diapers, formula, bottles, onesies |
+| **Gift** | Toys, games, gift cards |
+| **Other** | Miscellaneous items |
+
+### Distributing a Basket
+
+When a basket is ready for delivery:
+
+1. Ensure basket status is **"Ready"**
+2. Click the **truck icon** (Distribute button)
+3. The basket moves to **"Distributed"** status
+4. Distribution date and time are recorded automatically
+
+### Filtering Baskets
+
+Use the filter options at the top:
+- **By Type** - Show only specific basket types
+- **By Status** - Show only collecting, ready, distributed, or all
+
+### Best Practices for Charity Baskets
+
+- **Name baskets descriptively** - Include recipient name and purpose
+- **Set target dates** - Helps with planning and prioritization
+- **Track donors** - Enables thank-you notes and recognition
+- **Estimate values** - Useful for reporting and tax purposes
+- **Add notes** - Record special dietary needs or preferences
+
+---
+
+## Donation Tracker
+
+The Donation Tracker provides a powerful search and filter interface for all monetary donations, helping you analyze giving patterns and find specific transactions.
+
+### Accessing the Donation Tracker
+
+1. Go to **Giving** → Click **Donation Tracker** in the Additional Tools row
+2. You'll see the search interface with filters and transaction list
+
+### Quick Date Filters
+
+Use the preset date buttons for quick filtering:
+
+| Button | Range | Use Case |
+|--------|-------|----------|
+| **7D** | Last 7 days | Recent activity review |
+| **30D** | Last 30 days | Monthly summary |
+| **90D** | Last 90 days | Quarterly review |
+| **1Y** | Last year | Annual trends |
+| **All** | All time | Complete history |
+
+### Search Functionality
+
+The search bar searches across:
+- Donor names (first and last)
+- Fund names
+- Payment methods
+- Transaction notes
+
+Type any keyword and results filter instantly.
+
+### Advanced Filters
+
+Click the **filter icon** to access advanced filtering:
+
+| Filter | Options | Description |
+|--------|---------|-------------|
+| **Date Range** | Custom start/end dates | Specific time period |
+| **Fund** | Tithe, Offering, Missions, etc. | By designation |
+| **Method** | Cash, Check, Card, Online | By payment type |
+| **Min Amount** | Dollar value | Minimum donation |
+| **Max Amount** | Dollar value | Maximum donation |
+| **Recurring Only** | Toggle | Show only recurring gifts |
+
+### Transaction List
+
+Each donation shows:
+- **Donor Name** - Who gave (or "Anonymous")
+- **Amount** - Dollar value
+- **Fund** - Where it was designated
+- **Method** - How it was paid
+- **Date** - When it was given
+- **Recurring Icon** - If it's a recurring donation
+
+### Daily Trend Chart
+
+The chart at the top shows:
+- **Bar height** = Total donations per day
+- **X-axis** = Dates in selected range
+- **Hover** = See exact amount for each day
+
+Use this to identify:
+- Peak giving days (usually Sundays)
+- Seasonal patterns
+- Special event giving spikes
+
+### Summary Statistics
+
+The tracker displays:
+- **Total Donations** - Sum of filtered transactions
+- **Transaction Count** - Number of donations
+- **Average Gift** - Mean donation amount
+- **Unique Donors** - Number of distinct givers
+
+### Exporting Filtered Results
+
+After applying filters:
+1. Click **"Export"** button
+2. Download CSV with filtered transactions
+3. Includes all visible fields
+
+### Use Cases
+
+| Scenario | How to Filter |
+|----------|--------------|
+| Find all checks over $500 | Method: Check, Min Amount: 500 |
+| December giving for year-end | Date: Dec 1 - Dec 31 |
+| All missions fund donations | Fund: Missions |
+| First-time donors this month | 30D filter, sort by date |
+| Recurring donor analysis | Toggle: Recurring Only |
+
+---
+
+## Member Donation Statistics
+
+Member Donation Statistics provides per-member analytics, helping you understand individual giving patterns and identify opportunities for stewardship.
+
+### Accessing Member Stats
+
+1. Go to **Giving** → Click **Member Stats** in the Additional Tools row
+2. You'll see a searchable, sortable list of all donors
+
+### Understanding the Member List
+
+Each member row displays:
+
+| Column | Description |
+|--------|-------------|
+| **Name** | Member's full name |
+| **Lifetime Total** | All-time giving |
+| **This Year** | Current year donations |
+| **Last Year** | Previous year total |
+| **YoY Change** | Year-over-year trend (↑ or ↓ %) |
+| **Giving Streak** | Consecutive months with gifts |
+| **Primary Fund** | Their most common designation |
+
+### Sorting Options
+
+Click column headers to sort by:
+- **Lifetime** - Find top all-time donors
+- **This Year** - Current year leaders
+- **YoY Change** - Biggest growth or decline
+- **Streak** - Most consistent givers
+
+### Member Detail View
+
+Click any member row to see their full profile:
+
+#### Giving Summary Card
+- **Lifetime Total** with gift count
+- **This Year** vs **Last Year** comparison
+- **Year-over-Year Change** percentage
+- **Average Gift** size
+- **Largest Gift** ever
+- **Giving Streak** (consecutive months)
+
+#### Monthly Giving Chart
+- Bar chart of last 12 months
+- Shows giving patterns and consistency
+- Identify seasonal trends
+
+#### Fund Breakdown
+- Pie chart of fund distribution
+- Dollar amounts and percentages
+- Shows primary giving interests
+
+#### Additional Information
+- **First Gift Date** - When they started giving
+- **Last Gift Date** - Most recent donation
+- **Preferred Method** - How they usually give
+- **Preferred Fund** - Where they usually designate
+
+### Key Metrics Explained
+
+| Metric | What It Means | Why It Matters |
+|--------|---------------|----------------|
+| **Giving Streak** | Months in a row with at least one gift | Indicates commitment and consistency |
+| **YoY Change** | Percentage change from last year | Shows engagement trajectory |
+| **Avg Gift** | Mean donation amount | Helps set ask amounts |
+| **Preferred Fund** | Most frequently chosen designation | Reveals ministry interests |
+
+### Use Cases for Member Stats
+
+#### Stewardship Follow-up
+- Filter by **negative YoY change** to identify donors who may be struggling or disengaging
+- Reach out with pastoral care, not asking for money
+
+#### Major Donor Cultivation
+- Sort by **Lifetime Total** to identify top givers
+- Review their fund preferences for personalized asks
+
+#### New Donor Welcome
+- Filter by **First Gift Date** in recent months
+- Send personal thank-you and connection opportunities
+
+#### Consistency Recognition
+- Sort by **Giving Streak** to find most faithful givers
+- Consider recognizing long streaks privately
+
+#### Year-End Planning
+- Compare **This Year** vs **Last Year** trends
+- Identify growth areas and concerns for budget planning
+
+### Privacy Considerations
+
+- Member giving data is confidential
+- Only authorized staff should access these reports
+- Never share individual giving details publicly
+- Use aggregated data for board reports
+
+---
+
 ## Best Practices
 
 ### Weekly Workflow
@@ -344,6 +653,18 @@ Click **"Export"** to download:
 - Follow up on behind-schedule pledges
 - Send thank-you notes to first-time donors
 - Check campaign progress
+- Review member stats for declining YoY donors
+- Update charity basket inventory
+- Use donation tracker to verify all entries
+
+### Charity Basket Workflow
+
+| Phase | Tasks |
+|-------|-------|
+| **Planning** | Create basket, set target date, identify recipient needs |
+| **Collection** | Share donation requests, add items as received, track donors |
+| **Assembly** | Review items, mark basket as Ready when complete |
+| **Distribution** | Deliver basket, click Distribute to record completion |
 
 ### Year-End Tasks
 
@@ -351,6 +672,7 @@ Click **"Export"** to download:
 2. **Review**: Check for any missing or duplicate entries
 3. **Distribute**: Email or mail statements to all donors
 4. **Archive**: Export full year data for records
+5. **Baskets**: Review distributed baskets, close any open baskets from prior year
 
 ### Data Quality Tips
 
@@ -391,6 +713,31 @@ Click **"Export"** to download:
 - Check that the download completed
 - The file is CSV format, not Excel native
 
+**Q: Can't add items to a charity basket**
+- Make sure the basket status is "Collecting"
+- Baskets in "Ready" or "Distributed" status cannot accept new items
+- Create a new basket if needed
+
+**Q: Charity basket shows $0 total value**
+- Estimated values are optional for each item
+- Add values when entering items to see totals
+- You can edit items to add missing values
+
+**Q: Member stats show wrong year-over-year change**
+- YoY compares current calendar year to previous
+- Make sure donation dates are recorded correctly
+- Allow a few moments for calculations to update
+
+**Q: Donation tracker not showing all donations**
+- Check your date range filter
+- Clear the search box if you've been searching
+- Reset advanced filters by clicking "Clear Filters"
+
+**Q: Giving streak seems incorrect**
+- Streak counts consecutive months with at least one gift
+- A zero-giving month breaks the streak
+- Streak restarts from the next donation
+
 ### Getting Help
 
 - Check this guide first
@@ -415,13 +762,19 @@ Click **"Export"** to download:
 | Term | Definition |
 |------|------------|
 | **Batch** | A group of donations entered together |
+| **Basket** | A care package of physical items for those in need |
+| **Basket Item** | An individual donated item within a charity basket |
 | **Campaign** | A fundraising initiative with a goal |
+| **Distribution** | The act of delivering a charity basket to a recipient |
 | **Fund** | A category for designating donations |
+| **Giving Streak** | Consecutive months with at least one donation |
+| **In-Kind Donation** | Non-monetary gifts like food, clothing, or supplies |
 | **Pledge** | A donor's commitment to give |
 | **Recurring** | Automatic repeated donations |
 | **Statement** | Tax receipt for donor records |
 | **Tithe** | Traditional 10% giving |
+| **YoY Change** | Year-over-year percentage change in giving |
 
 ---
 
-*Last updated: January 2025*
+*Last updated: January 2026*

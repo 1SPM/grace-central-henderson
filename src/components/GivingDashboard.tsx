@@ -18,6 +18,9 @@ import {
   Building,
   Heart,
   ChevronRight,
+  ShoppingBasket,
+  Search,
+  UserCheck,
 } from 'lucide-react';
 import type { Giving, Person, Campaign, Pledge, GivingAnalytics } from '../types';
 import { exportGivingToCSV } from '../utils/exportCsv';
@@ -27,7 +30,7 @@ interface GivingDashboardProps {
   people: Person[];
   campaigns?: Campaign[];
   pledges?: Pledge[];
-  onNavigate: (view: 'online-giving' | 'batch-entry' | 'pledges' | 'statements') => void;
+  onNavigate: (view: 'online-giving' | 'batch-entry' | 'pledges' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats') => void;
 }
 
 const fundColors: Record<string, { bg: string; text: string; chart: string }> = {
@@ -244,6 +247,37 @@ export function GivingDashboard({
           <FileText className="mb-2 text-amber-500" size={24} />
           <p className="font-semibold text-gray-900 dark:text-dark-100">Statements</p>
           <p className="text-sm text-gray-500 dark:text-dark-400">Tax receipts</p>
+          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+        </button>
+      </div>
+
+      {/* Additional Tools Row */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <button
+          onClick={() => onNavigate('charity-baskets')}
+          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+        >
+          <ShoppingBasket className="mb-2 text-orange-500" size={24} />
+          <p className="font-semibold text-gray-900 dark:text-dark-100">Charity Baskets</p>
+          <p className="text-sm text-gray-500 dark:text-dark-400">Care packages</p>
+          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+        </button>
+        <button
+          onClick={() => onNavigate('donation-tracker')}
+          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+        >
+          <Search className="mb-2 text-indigo-500" size={24} />
+          <p className="font-semibold text-gray-900 dark:text-dark-100">Donation Tracker</p>
+          <p className="text-sm text-gray-500 dark:text-dark-400">Search & filter</p>
+          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+        </button>
+        <button
+          onClick={() => onNavigate('member-stats')}
+          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+        >
+          <UserCheck className="mb-2 text-teal-500" size={24} />
+          <p className="font-semibold text-gray-900 dark:text-dark-100">Member Stats</p>
+          <p className="text-sm text-gray-500 dark:text-dark-400">Per-member analytics</p>
           <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
         </button>
       </div>
