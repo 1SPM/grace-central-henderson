@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.59.3",
+    "@google/genai": "^1.36.0",
     "@stripe/stripe-js": "^8.6.1",
     "@supabase/supabase-js": "^2.89.0",
     "date-fns": "^2.30.0",
