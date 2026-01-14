@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
@@ -84,10 +84,14 @@ export function PeopleList({
     toast.success(`Filter applied`);
   };
 
-  // Get all unique tags
-  const allTags = Array.from(new Set(people.flatMap(p => p.tags))).sort();
+  // Memoize all unique tags
+  const allTags = useMemo(() =>
+    Array.from(new Set(people.flatMap(p => p.tags))).sort(),
+    [people]
+  );
 
-  const filtered = people.filter((person) => {
+  // Memoize filtered people list
+  const filtered = useMemo(() => people.filter((person) => {
     const matchesSearch =
       `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
       person.email.toLowerCase().includes(search.toLowerCase());
@@ -96,16 +100,23 @@ export function PeopleList({
     const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
     const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
     return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
-  });
+  }), [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter]);
 
-  const statusCounts = {
-    all: people.length,
-    visitor: people.filter(p => p.status === 'visitor').length,
-    regular: people.filter(p => p.status === 'regular').length,
-    member: people.filter(p => p.status === 'member').length,
-    leader: people.filter(p => p.status === 'leader').length,
-    inactive: people.filter(p => p.status === 'inactive').length,
-  };
+  // Memoize status counts (single pass through people array)
+  const statusCounts = useMemo(() => {
+    const counts = {
+      all: people.length,
+      visitor: 0,
+      regular: 0,
+      member: 0,
+      leader: 0,
+      inactive: 0,
+    };
+    people.forEach(p => {
+      counts[p.status]++;
+    });
+    return counts;
+  }, [people]);
 
   const toggleSelect = (id: string) => {
     const newSelected = new Set(selectedIds);

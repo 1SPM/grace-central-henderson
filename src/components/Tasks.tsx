@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckSquare, Clock, Plus, User, AlertTriangle, Download, Repeat, RefreshCw } from 'lucide-react';
 import { Task, Person, RecurrenceType } from '../types';
 import { PRIORITY_COLORS } from '../constants';
@@ -72,29 +72,32 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
     recurrence: 'none'
   });
 
-  const now = new Date();
-  const filteredTasks = tasks.filter((task) => {
-    const isOverdue = !task.completed && new Date(task.dueDate) < now;
+  // Memoize filtered and sorted tasks
+  const sortedTasks = useMemo(() => {
+    const now = new Date();
+    const filteredTasks = tasks.filter((task) => {
+      const isOverdue = !task.completed && new Date(task.dueDate) < now;
 
-    let matchesFilter = true;
-    if (filter === 'pending') matchesFilter = !task.completed;
-    if (filter === 'completed') matchesFilter = task.completed;
-    if (filter === 'overdue') matchesFilter = isOverdue;
+      let matchesFilter = true;
+      if (filter === 'pending') matchesFilter = !task.completed;
+      if (filter === 'completed') matchesFilter = task.completed;
+      if (filter === 'overdue') matchesFilter = isOverdue;
 
-    let matchesCategory = true;
-    if (categoryFilter !== 'all') matchesCategory = task.category === categoryFilter;
+      let matchesCategory = true;
+      if (categoryFilter !== 'all') matchesCategory = task.category === categoryFilter;
 
-    return matchesFilter && matchesCategory;
-  });
+      return matchesFilter && matchesCategory;
+    });
 
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
-    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    }
-    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-  });
+    return [...filteredTasks].sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+  }, [tasks, filter, categoryFilter]);
 
   const handleAddTask = () => {
     if (!newTask.title.trim() || !newTask.dueDate) return;
@@ -141,12 +144,25 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
     }
   };
 
-  const counts = {
-    all: tasks.length,
-    pending: tasks.filter(t => !t.completed).length,
-    completed: tasks.filter(t => t.completed).length,
-    overdue: tasks.filter(t => !t.completed && new Date(t.dueDate) < now).length
-  };
+  // Memoize counts (single pass)
+  const counts = useMemo(() => {
+    const now = new Date();
+    const result = { all: tasks.length, pending: 0, completed: 0, overdue: 0 };
+    tasks.forEach(t => {
+      if (t.completed) {
+        result.completed++;
+      } else {
+        result.pending++;
+        if (new Date(t.dueDate) < now) {
+          result.overdue++;
+        }
+      }
+    });
+    return result;
+  }, [tasks]);
+
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   return (
     <div className="p-8">
@@ -307,8 +323,8 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
       {/* Task List */}
       <div className="space-y-3">
         {sortedTasks.map((task) => {
-          const person = people.find(p => p.id === task.personId);
-          const isOverdue = !task.completed && new Date(task.dueDate) < now;
+          const person = task.personId ? personMap.get(task.personId) : undefined;
+          const isOverdue = !task.completed && new Date(task.dueDate) < new Date();
 
           return (
             <div

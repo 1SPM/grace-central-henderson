@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
@@ -73,22 +73,22 @@ function App() {
     addGiving,
   } = useSupabaseData();
 
-  // Convert to legacy types for existing components
-  const people = dbPeople.map(p => {
+  // Convert to legacy types for existing components (memoized)
+  const people = useMemo(() => dbPeople.map(p => {
     const person = toPersonLegacy(p);
     // Add small groups (with null safety)
     person.smallGroups = dbGroups
       .filter(g => g.members?.includes(p.id) ?? false)
       .map(g => g.id);
     return person;
-  });
+  }), [dbPeople, dbGroups]);
 
-  const tasks = dbTasks.map(toTaskLegacy);
-  const interactions = dbInteractions.map(toInteractionLegacy);
-  const groups = dbGroups.map(toGroupLegacy);
-  const prayers = dbPrayers.map(toPrayerLegacy);
-  const events = dbEvents.map(toEventLegacy);
-  const giving = dbGiving.map(toGivingLegacy);
+  const tasks = useMemo(() => dbTasks.map(toTaskLegacy), [dbTasks]);
+  const interactions = useMemo(() => dbInteractions.map(toInteractionLegacy), [dbInteractions]);
+  const groups = useMemo(() => dbGroups.map(toGroupLegacy), [dbGroups]);
+  const prayers = useMemo(() => dbPrayers.map(toPrayerLegacy), [dbPrayers]);
+  const events = useMemo(() => dbEvents.map(toEventLegacy), [dbEvents]);
+  const giving = useMemo(() => dbGiving.map(toGivingLegacy), [dbGiving]);
 
   // Custom hooks for state management
   const modals = useModals();
@@ -163,15 +163,15 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [modals]);
 
-  const handleViewPerson = (id: string) => {
+  const handleViewPerson = useCallback((id: string) => {
     setSelectedPersonId(id);
     setView('person');
-  };
+  }, []);
 
-  const handleBackToPeople = () => {
+  const handleBackToPeople = useCallback(() => {
     setSelectedPersonId(null);
     setView('people');
-  };
+  }, []);
 
   const handleAddInteraction = async (interaction: Omit<LegacyInteraction, 'id' | 'createdAt'>) => {
     await addInteraction({
@@ -431,11 +431,13 @@ function App() {
   };
 
   // Search handlers
-  const handleSearchSelectPerson = (id: string) => {
+  const handleSearchSelectPerson = useCallback((id: string) => {
     handleViewPerson(id);
-  };
+  }, [handleViewPerson]);
 
-  const selectedPerson = people.find(p => p.id === selectedPersonId);
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
+  const selectedPerson = selectedPersonId ? personMap.get(selectedPersonId) : undefined;
 
   // Loading state
   if (isLoading) {
