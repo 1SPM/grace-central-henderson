@@ -22,6 +22,7 @@ import { Person, Interaction, Task, Giving } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { PersonGivingHistory } from './PersonGivingHistory';
+import { escapeHtml } from '../utils/security';
 
 interface PersonProfileProps {
   person: Person;
@@ -95,7 +96,7 @@ export function PersonProfile({
       const result = await sendEmail({
         to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
         subject: emailSubject || `Message from Grace CRM`,
-        html: `<div style="font-family: Arial, sans-serif;"><p>Hi ${person.firstName},</p><p>${emailBody.replace(/\n/g, '<br/>')}</p></div>`,
+        html: `<div style="font-family: Arial, sans-serif;"><p>Hi ${escapeHtml(person.firstName)},</p><p>${escapeHtml(emailBody).replace(/\n/g, '<br/>')}</p></div>`,
         text: emailBody,
       });
 

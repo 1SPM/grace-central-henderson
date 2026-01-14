@@ -44,6 +44,7 @@ import {
   toEventLegacy,
   toGivingLegacy,
 } from './utils/typeConverters';
+import { isValidEmail, sanitizePhone, sanitizeInput } from './utils/security';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
 function App() {
@@ -75,9 +76,9 @@ function App() {
   // Convert to legacy types for existing components
   const people = dbPeople.map(p => {
     const person = toPersonLegacy(p);
-    // Add small groups
+    // Add small groups (with null safety)
     person.smallGroups = dbGroups
-      .filter(g => g.members.includes(p.id))
+      .filter(g => g.members?.includes(p.id) ?? false)
       .map(g => g.id);
     return person;
   });
@@ -339,30 +340,74 @@ function App() {
 
   // Bulk action handlers
   const handleBulkUpdateStatus = async (ids: string[], status: LegacyPerson['status']) => {
+    let successCount = 0;
+    let errorCount = 0;
     for (const id of ids) {
-      await updatePerson(id, { status });
+      try {
+        await updatePerson(id, { status });
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to update status for person ${id}:`, error);
+        errorCount++;
+      }
+    }
+    if (errorCount > 0) {
+      console.warn(`Bulk update: ${successCount} succeeded, ${errorCount} failed`);
     }
   };
 
   const handleBulkAddTag = async (ids: string[], tag: string) => {
+    let successCount = 0;
+    let errorCount = 0;
     for (const id of ids) {
-      const person = dbPeople.find(p => p.id === id);
-      if (person && !person.tags.includes(tag)) {
-        await updatePerson(id, { tags: [...person.tags, tag] });
+      try {
+        const person = dbPeople.find(p => p.id === id);
+        if (person && !person.tags.includes(tag)) {
+          await updatePerson(id, { tags: [...person.tags, tag] });
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`Failed to add tag for person ${id}:`, error);
+        errorCount++;
       }
+    }
+    if (errorCount > 0) {
+      console.warn(`Bulk add tag: ${successCount} succeeded, ${errorCount} failed`);
     }
   };
 
   const handleImportCSV = async (importedPeople: Partial<LegacyPerson>[]) => {
+    let importedCount = 0;
+    let skippedCount = 0;
+
     for (const person of importedPeople) {
-      if (person.firstName && person.lastName) {
+      // Validate required fields
+      const firstName = sanitizeInput(person.firstName || '', { maxLength: 100 });
+      const lastName = sanitizeInput(person.lastName || '', { maxLength: 100 });
+
+      if (!firstName || !lastName) {
+        skippedCount++;
+        continue;
+      }
+
+      // Validate and sanitize optional fields
+      const email = person.email && isValidEmail(person.email) ? person.email : null;
+      const phone = person.phone ? sanitizePhone(person.phone) : null;
+
+      // Validate status
+      const validStatuses = ['visitor', 'regular', 'member', 'leader', 'inactive'];
+      const status = validStatuses.includes(person.status || '')
+        ? person.status as LegacyPerson['status']
+        : 'visitor';
+
+      try {
         await addPerson({
           church_id: churchId,
-          first_name: person.firstName,
-          last_name: person.lastName,
-          email: person.email || null,
-          phone: person.phone || null,
-          status: person.status || 'visitor',
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          phone,
+          status,
           photo_url: null,
           address: null,
           city: null,
@@ -375,8 +420,14 @@ function App() {
           tags: person.tags || [],
           family_id: null,
         });
+        importedCount++;
+      } catch (error) {
+        console.error(`Failed to import ${firstName} ${lastName}:`, error);
+        skippedCount++;
       }
     }
+
+    console.log(`CSV import complete: ${importedCount} imported, ${skippedCount} skipped`);
   };
 
   // Search handlers

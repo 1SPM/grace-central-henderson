@@ -180,13 +180,27 @@ class EmailService {
     return this.isEnabled;
   }
 
+  // HTML entities for XSS prevention in templates
+  private escapeHtml(str: string): string {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+    };
+    return str.replace(/[&<>"']/g, (char) => entities[char] || char);
+  }
+
   private replaceTemplateVariables(
     template: string,
     data: Record<string, string>
   ): string {
     let result = template;
     for (const [key, value] of Object.entries(data)) {
-      result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      // Escape HTML in template values to prevent XSS
+      const safeValue = this.escapeHtml(value);
+      result = result.replace(new RegExp(`{{${key}}}`, 'g'), safeValue);
     }
     return result;
   }
