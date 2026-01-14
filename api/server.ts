@@ -25,6 +25,79 @@ import cors from 'cors';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
+// ============================================
+// INPUT VALIDATION UTILITIES
+// ============================================
+
+// Email validation regex (RFC 5322 simplified)
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+// Phone validation regex (E.164 format or common formats)
+const PHONE_REGEX = /^[\d\s\-\(\)\+\.]{7,20}$/;
+
+// Validation limits
+const LIMITS = {
+  EMAIL_MAX: 254,
+  NAME_MAX: 100,
+  SUBJECT_MAX: 200,
+  MESSAGE_MAX: 5000,
+  SMS_MAX: 1600,
+  PHONE_MAX: 20,
+  NOTE_MAX: 2000,
+};
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+  return typeof email === 'string' &&
+         email.length <= LIMITS.EMAIL_MAX &&
+         EMAIL_REGEX.test(email);
+}
+
+// Validate phone number format
+function isValidPhone(phone: string): boolean {
+  return typeof phone === 'string' &&
+         phone.length <= LIMITS.PHONE_MAX &&
+         PHONE_REGEX.test(phone);
+}
+
+// Sanitize string input (remove potential XSS/injection)
+function sanitizeString(input: unknown, maxLength: number = 1000): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/[<>]/g, '') // Remove HTML tags
+    .trim();
+}
+
+// Sanitize HTML content (allow safe tags for emails)
+function sanitizeHtml(input: unknown, maxLength: number = 50000): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .trim();
+}
+
+// Validate array of emails
+function validateEmailArray(emails: unknown): string[] | null {
+  if (!Array.isArray(emails)) return null;
+  const validated: string[] = [];
+  for (const email of emails) {
+    if (typeof email === 'string' && isValidEmail(email)) {
+      validated.push(email);
+    } else if (typeof email === 'object' && email !== null) {
+      // Handle { email: string, name?: string } format
+      const emailObj = email as { email?: string; name?: string };
+      if (emailObj.email && isValidEmail(emailObj.email)) {
+        validated.push(emailObj.name ? `${sanitizeString(emailObj.name, LIMITS.NAME_MAX)} <${emailObj.email}>` : emailObj.email);
+      }
+    }
+  }
+  return validated.length > 0 ? validated : null;
+}
+
 // Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -531,10 +604,35 @@ app.post('/api/email/send', asyncHandler(async (req: Request, res: Response) => 
 
   const { to, subject, html, text, from, replyTo, cc, bcc } = req.body;
 
+  // Validate required fields
   if (!to || !subject) {
     res.status(400).json({ error: 'Recipient (to) and subject are required' });
     return;
   }
+
+  // Validate and sanitize recipients
+  const toArray = Array.isArray(to) ? to : [to];
+  const validatedTo = validateEmailArray(toArray);
+  if (!validatedTo) {
+    res.status(400).json({ error: 'Invalid email address format' });
+    return;
+  }
+
+  // Validate subject length
+  const sanitizedSubject = sanitizeString(subject, LIMITS.SUBJECT_MAX);
+  if (!sanitizedSubject) {
+    res.status(400).json({ error: 'Subject is required' });
+    return;
+  }
+
+  // Sanitize HTML content
+  const sanitizedHtml = html ? sanitizeHtml(html, LIMITS.MESSAGE_MAX * 10) : undefined;
+  const sanitizedText = text ? sanitizeString(text, LIMITS.MESSAGE_MAX) : undefined;
+
+  // Validate optional fields
+  const validatedCc = cc ? validateEmailArray(Array.isArray(cc) ? cc : [cc]) : undefined;
+  const validatedBcc = bcc ? validateEmailArray(Array.isArray(bcc) ? bcc : [bcc]) : undefined;
+  const validatedReplyTo = replyTo && isValidEmail(replyTo) ? replyTo : undefined;
 
   try {
     const response = await fetch(`${RESEND_BASE_URL}/emails`, {
@@ -545,13 +643,13 @@ app.post('/api/email/send', asyncHandler(async (req: Request, res: Response) => 
       },
       body: JSON.stringify({
         from: from || `Grace CRM <noreply@${process.env.EMAIL_DOMAIN || 'grace-crm.com'}>`,
-        to: Array.isArray(to) ? to : [to],
-        subject,
-        html,
-        text,
-        reply_to: replyTo,
-        cc,
-        bcc,
+        to: validatedTo,
+        subject: sanitizedSubject,
+        html: sanitizedHtml,
+        text: sanitizedText,
+        reply_to: validatedReplyTo,
+        cc: validatedCc,
+        bcc: validatedBcc,
       }),
     });
 
@@ -592,6 +690,20 @@ app.post('/api/email/send-bulk', asyncHandler(async (req: Request, res: Response
   const results: Array<{ success: boolean; messageId?: string; error?: string }> = [];
 
   for (const email of emails) {
+    // Validate each email in the batch
+    const toArray = Array.isArray(email.to) ? email.to : [email.to];
+    const validatedTo = validateEmailArray(toArray);
+    if (!validatedTo) {
+      results.push({ success: false, error: 'Invalid email address' });
+      continue;
+    }
+
+    const sanitizedSubject = sanitizeString(email.subject, LIMITS.SUBJECT_MAX);
+    if (!sanitizedSubject) {
+      results.push({ success: false, error: 'Missing subject' });
+      continue;
+    }
+
     try {
       const response = await fetch(`${RESEND_BASE_URL}/emails`, {
         method: 'POST',
@@ -601,10 +713,10 @@ app.post('/api/email/send-bulk', asyncHandler(async (req: Request, res: Response
         },
         body: JSON.stringify({
           from: email.from || `Grace CRM <noreply@${process.env.EMAIL_DOMAIN || 'grace-crm.com'}>`,
-          to: Array.isArray(email.to) ? email.to : [email.to],
-          subject: email.subject,
-          html: email.html,
-          text: email.text,
+          to: validatedTo,
+          subject: sanitizedSubject,
+          html: email.html ? sanitizeHtml(email.html, LIMITS.MESSAGE_MAX * 10) : undefined,
+          text: email.text ? sanitizeString(email.text, LIMITS.MESSAGE_MAX) : undefined,
         }),
       });
 
@@ -668,14 +780,22 @@ app.post('/api/sms/send', asyncHandler(async (req: Request, res: Response) => {
 
   const { to, message } = req.body;
 
+  // Validate required fields
   if (!to || !message) {
     res.status(400).json({ error: 'Recipient (to) and message are required' });
     return;
   }
 
-  // Limit message length
-  if (message.length > 1600) {
-    res.status(400).json({ error: 'Message too long (max 1600 characters)' });
+  // Validate phone number format
+  if (!isValidPhone(to)) {
+    res.status(400).json({ error: 'Invalid phone number format' });
+    return;
+  }
+
+  // Sanitize and limit message length
+  const sanitizedMessage = sanitizeString(message, LIMITS.SMS_MAX);
+  if (!sanitizedMessage) {
+    res.status(400).json({ error: 'Message is required' });
     return;
   }
 
@@ -684,7 +804,7 @@ app.post('/api/sms/send', asyncHandler(async (req: Request, res: Response) => {
     const formData = new URLSearchParams();
     formData.append('To', formattedTo);
     formData.append('From', TWILIO_FROM_NUMBER);
-    formData.append('Body', message);
+    formData.append('Body', sanitizedMessage);
 
     const response = await fetch(
       `${TWILIO_BASE_URL}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
@@ -735,8 +855,20 @@ app.post('/api/sms/send-bulk', asyncHandler(async (req: Request, res: Response) 
   const results: Array<{ success: boolean; messageId?: string; error?: string }> = [];
 
   for (const msg of messages) {
+    // Validate each message in the batch
     if (!msg.to || !msg.message) {
       results.push({ success: false, error: 'Missing to or message' });
+      continue;
+    }
+
+    if (!isValidPhone(msg.to)) {
+      results.push({ success: false, error: 'Invalid phone number' });
+      continue;
+    }
+
+    const sanitizedMessage = sanitizeString(msg.message, LIMITS.SMS_MAX);
+    if (!sanitizedMessage) {
+      results.push({ success: false, error: 'Invalid message' });
       continue;
     }
 
@@ -745,7 +877,7 @@ app.post('/api/sms/send-bulk', asyncHandler(async (req: Request, res: Response) 
       const formData = new URLSearchParams();
       formData.append('To', formattedTo);
       formData.append('From', TWILIO_FROM_NUMBER);
-      formData.append('Body', msg.message.slice(0, 1600));
+      formData.append('Body', sanitizedMessage);
 
       const response = await fetch(
         `${TWILIO_BASE_URL}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,

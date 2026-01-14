@@ -9,7 +9,6 @@ import { Tasks } from './components/Tasks';
 import { Calendar } from './components/Calendar';
 import { Groups } from './components/Groups';
 import { Prayer } from './components/Prayer';
-// Giving component replaced by GivingDashboard
 import { GivingDashboard } from './components/GivingDashboard';
 import { OnlineGivingForm } from './components/OnlineGivingForm';
 import { BatchEntry } from './components/BatchEntry';
@@ -33,93 +32,16 @@ import { CharityBaskets } from './components/CharityBaskets';
 import { MemberDonationStats } from './components/MemberDonationStats';
 import { DonationTracker } from './components/DonationTracker';
 import { useSupabaseData } from './hooks/useSupabaseData';
+import {
+  toPersonLegacy,
+  toTaskLegacy,
+  toInteractionLegacy,
+  toGroupLegacy,
+  toPrayerLegacy,
+  toEventLegacy,
+  toGivingLegacy,
+} from './utils/typeConverters';
 import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement, CharityBasket, BasketItem } from './types';
-
-// Adapter functions to convert between database types and legacy component types
-function toPersonLegacy(p: {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string | null;
-  status: string;
-  photo_url: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zip: string | null;
-  birth_date: string | null;
-  join_date: string | null;
-  first_visit: string | null;
-  notes: string | null;
-  tags: string[];
-  family_id: string | null;
-}): LegacyPerson {
-  return {
-    id: p.id,
-    firstName: p.first_name,
-    lastName: p.last_name,
-    email: p.email || '',
-    phone: p.phone || '',
-    status: p.status as LegacyPerson['status'],
-    photo: p.photo_url || undefined,
-    address: p.address || undefined,
-    city: p.city || undefined,
-    state: p.state || undefined,
-    zip: p.zip || undefined,
-    birthDate: p.birth_date || undefined,
-    joinDate: p.join_date || undefined,
-    firstVisit: p.first_visit || undefined,
-    notes: p.notes || undefined,
-    tags: p.tags,
-    smallGroups: [], // Will be populated separately
-    familyId: p.family_id || undefined,
-  };
-}
-
-function toTaskLegacy(t: {
-  id: string;
-  person_id: string | null;
-  title: string;
-  description: string | null;
-  due_date: string;
-  completed: boolean;
-  priority: string;
-  category: string;
-  assigned_to: string | null;
-  created_at: string;
-}): LegacyTask {
-  return {
-    id: t.id,
-    personId: t.person_id || undefined,
-    title: t.title,
-    description: t.description || undefined,
-    dueDate: t.due_date,
-    completed: t.completed,
-    priority: t.priority as LegacyTask['priority'],
-    category: t.category as LegacyTask['category'],
-    assignedTo: t.assigned_to || undefined,
-    createdAt: t.created_at,
-  };
-}
-
-function toInteractionLegacy(i: {
-  id: string;
-  person_id: string;
-  type: string;
-  content: string;
-  created_by_name: string | null;
-  created_at: string;
-}): LegacyInteraction {
-  return {
-    id: i.id,
-    personId: i.person_id,
-    type: i.type as LegacyInteraction['type'],
-    content: i.content,
-    createdBy: i.created_by_name || 'Unknown',
-    createdAt: i.created_at,
-  };
-}
 
 function App() {
   const { churchId } = useAuthContext();
@@ -159,51 +81,10 @@ function App() {
 
   const tasks = dbTasks.map(toTaskLegacy);
   const interactions = dbInteractions.map(toInteractionLegacy);
-
-  const groups = dbGroups.map(g => ({
-    id: g.id,
-    name: g.name,
-    description: g.description || undefined,
-    leaderId: g.leader_id || '',
-    meetingDay: g.meeting_day || undefined,
-    meetingTime: g.meeting_time || undefined,
-    location: g.location || undefined,
-    members: g.members,
-    isActive: g.is_active,
-  }));
-
-  const prayers = dbPrayers.map(p => ({
-    id: p.id,
-    personId: p.person_id,
-    content: p.content,
-    isPrivate: p.is_private,
-    isAnswered: p.is_answered,
-    testimony: p.testimony || undefined,
-    createdAt: p.created_at,
-    updatedAt: p.updated_at,
-  }));
-
-  const events = dbEvents.map(e => ({
-    id: e.id,
-    title: e.title,
-    description: e.description || undefined,
-    startDate: e.start_date,
-    endDate: e.end_date || undefined,
-    allDay: e.all_day,
-    location: e.location || undefined,
-    category: e.category as 'service' | 'meeting' | 'event' | 'small-group' | 'other',
-  }));
-
-  const giving = dbGiving.map(g => ({
-    id: g.id,
-    personId: g.person_id || '',
-    amount: g.amount,
-    fund: g.fund as 'tithe' | 'offering' | 'missions' | 'building' | 'other',
-    date: g.date,
-    method: g.method as 'cash' | 'check' | 'card' | 'online',
-    isRecurring: g.is_recurring,
-    note: g.note || undefined,
-  }));
+  const groups = dbGroups.map(toGroupLegacy);
+  const prayers = dbPrayers.map(toPrayerLegacy);
+  const events = dbEvents.map(toEventLegacy);
+  const giving = dbGiving.map(toGivingLegacy);
 
   // Modal states
   const [showPersonForm, setShowPersonForm] = useState(false);
