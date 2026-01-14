@@ -5,6 +5,7 @@
  * - Stripe payment processing
  * - Resend email sending
  * - Twilio SMS messaging
+ * - AI Agent orchestration
  *
  * This server should be run separately from the frontend.
  *
@@ -29,6 +30,7 @@ import { createClient } from '@supabase/supabase-js';
 import { initPaymentRoutes } from './routes/payments';
 import emailRoutes from './routes/email';
 import smsRoutes from './routes/sms';
+import agentRoutes from './routes/agents';
 import { initWebhookRoutes } from './routes/webhooks';
 
 // Initialize Express
@@ -70,6 +72,7 @@ app.use(express.json());
 app.use('/api/payments', initPaymentRoutes(stripe));
 app.use('/api/email', emailRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/agents', agentRoutes);
 app.use('/webhooks', initWebhookRoutes(stripe, supabase));
 
 // ============================================
@@ -84,6 +87,7 @@ app.get('/health', (_req: Request, res: Response) => {
     resend: !!process.env.RESEND_API_KEY,
     twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER),
     supabase: !!process.env.SUPABASE_URL,
+    agents: true, // AI agents are always available
   });
 });
 
