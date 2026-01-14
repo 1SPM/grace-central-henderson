@@ -83,40 +83,16 @@ export const SMS_TEMPLATES: Record<string, SMSTemplate> = {
 };
 
 class SMSService {
-  private accountSid: string | null = null;
-  private authToken: string | null = null;
-  private fromNumber: string | null = null;
-  private baseUrl: string = 'https://api.twilio.com/2010-04-01';
+  private apiBaseUrl: string = '/api/sms'; // Backend API proxy
+  private isEnabled: boolean = false;
 
-  configure(config: {
-    accountSid: string;
-    authToken: string;
-    fromNumber: string;
-  }) {
-    this.accountSid = config.accountSid;
-    this.authToken = config.authToken;
-    this.fromNumber = config.fromNumber;
+  configure(config: { apiBaseUrl?: string }) {
+    if (config.apiBaseUrl) this.apiBaseUrl = config.apiBaseUrl;
+    this.isEnabled = true;
   }
 
   isConfigured(): boolean {
-    return !!(this.accountSid && this.authToken && this.fromNumber);
-  }
-
-  private formatPhoneNumber(phone: string): string {
-    // Remove all non-digits
-    const digits = phone.replace(/\D/g, '');
-
-    // Add US country code if not present
-    if (digits.length === 10) {
-      return `+1${digits}`;
-    }
-    if (digits.length === 11 && digits.startsWith('1')) {
-      return `+${digits}`;
-    }
-    if (!phone.startsWith('+')) {
-      return `+${digits}`;
-    }
-    return phone;
+    return this.isEnabled;
   }
 
   private replaceTemplateVariables(
@@ -131,13 +107,6 @@ class SMSService {
   }
 
   async send(params: SendSMSParams): Promise<SMSResult> {
-    if (!this.accountSid || !this.authToken || !this.fromNumber) {
-      return {
-        success: false,
-        error: 'SMS service not configured. Please set your Twilio credentials.',
-      };
-    }
-
     try {
       let message = params.message;
 
@@ -157,37 +126,27 @@ class SMSService {
       const results: SMSResult[] = [];
 
       for (const to of recipients) {
-        const formattedTo = this.formatPhoneNumber(to);
-
-        const formData = new URLSearchParams();
-        formData.append('To', formattedTo);
-        formData.append('From', this.fromNumber);
-        formData.append('Body', message);
-
-        const response = await fetch(
-          `${this.baseUrl}/Accounts/${this.accountSid}/Messages.json`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization:
-                'Basic ' + btoa(`${this.accountSid}:${this.authToken}`),
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: formData.toString(),
-          }
-        );
+        // Send via backend API proxy (no credentials exposed in frontend)
+        const response = await fetch(`${this.apiBaseUrl}/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ to, message }),
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
           results.push({
             success: false,
-            error: data.message || 'Failed to send SMS',
+            error: data.error || 'Failed to send SMS',
           });
         } else {
           results.push({
             success: true,
-            messageId: data.sid,
+            messageId: data.messageId,
             status: data.status,
           });
         }
@@ -313,54 +272,79 @@ class SMSService {
     });
   }
 
-  // Bulk send with rate limiting
+  // Bulk send with rate limiting (via backend)
   async sendBulk(
-    messages: SendSMSParams[],
+    smsMessages: SendSMSParams[],
     delayMs: number = 200
   ): Promise<SMSResult[]> {
-    const results: SMSResult[] = [];
-    for (const sms of messages) {
-      const result = await this.send(sms);
-      results.push(result);
-      // Rate limiting delay
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    try {
+      // Prepare messages with templates applied
+      const preparedMessages = smsMessages.map((params) => {
+        let message = params.message;
+
+        if (params.template && SMS_TEMPLATES[params.template]) {
+          const template = SMS_TEMPLATES[params.template];
+          message = this.replaceTemplateVariables(
+            template.content,
+            params.templateData || {}
+          );
+        } else if (params.templateData) {
+          message = this.replaceTemplateVariables(message, params.templateData);
+        }
+
+        // For bulk, we only support single recipient per message
+        const to = Array.isArray(params.to) ? params.to[0] : params.to;
+        return { to, message };
+      });
+
+      // Send via backend bulk endpoint
+      const response = await fetch(`${this.apiBaseUrl}/send-bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ messages: preparedMessages, delayMs }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return smsMessages.map(() => ({
+          success: false,
+          error: data.error || 'Failed to send messages',
+        }));
+      }
+
+      return data.results || smsMessages.map(() => ({ success: true }));
+    } catch (error) {
+      return smsMessages.map(() => ({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      }));
     }
-    return results;
   }
 
-  // Check message status
+  // Check message status (via backend)
   async getMessageStatus(messageId: string): Promise<SMSResult> {
-    if (!this.accountSid || !this.authToken) {
-      return {
-        success: false,
-        error: 'SMS service not configured',
-      };
-    }
-
     try {
-      const response = await fetch(
-        `${this.baseUrl}/Accounts/${this.accountSid}/Messages/${messageId}.json`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization:
-              'Basic ' + btoa(`${this.accountSid}:${this.authToken}`),
-          },
-        }
-      );
+      const response = await fetch(`${this.apiBaseUrl}/status/${messageId}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || 'Failed to get message status',
+          error: data.error || 'Failed to get message status',
         };
       }
 
       return {
         success: true,
-        messageId: data.sid,
+        messageId: data.messageId,
         status: data.status,
       };
     } catch (error) {
