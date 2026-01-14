@@ -9,7 +9,6 @@ import {
   Heart,
   DollarSign,
   Settings,
-  Church,
   Moon,
   Sun,
   Menu,
@@ -22,7 +21,8 @@ import {
   ChevronRight,
   Tag,
   FileText,
-  Cake
+  Cake,
+  X,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -35,19 +35,19 @@ interface LayoutProps {
 }
 
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
-  { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-  { view: 'pipeline', label: 'Pipeline', icon: <TrendingUp size={20} /> },
-  { view: 'people', label: 'People', icon: <Users size={20} /> },
-  { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={20} /> },
-  { view: 'attendance', label: 'Attendance', icon: <UserCheck size={20} /> },
-  { view: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
-  { view: 'birthdays', label: 'Birthdays', icon: <Cake size={20} /> },
-  { view: 'volunteers', label: 'Volunteers', icon: <ClipboardList size={20} /> },
-  { view: 'groups', label: 'Groups', icon: <Users2 size={20} /> },
-  { view: 'prayer', label: 'Prayer', icon: <Heart size={20} /> },
-  { view: 'giving', label: 'Giving', icon: <DollarSign size={20} /> },
-  { view: 'tags', label: 'Tags', icon: <Tag size={20} /> },
-  { view: 'reports', label: 'Reports', icon: <FileText size={20} /> },
+  { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { view: 'pipeline', label: 'Pipeline', icon: <TrendingUp size={18} /> },
+  { view: 'people', label: 'People', icon: <Users size={18} /> },
+  { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={18} /> },
+  { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
+  { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
+  { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
+  { view: 'volunteers', label: 'Volunteers', icon: <ClipboardList size={18} /> },
+  { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
+  { view: 'prayer', label: 'Prayer', icon: <Heart size={18} /> },
+  { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+  { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
+  { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
 
 // View labels for breadcrumbs
@@ -125,6 +125,14 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
         { label: 'Profile', view: currentView },
       ];
     }
+    // Sub-pages under Giving
+    const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
+    if (givingSubViews.includes(currentView)) {
+      return [
+        { label: 'Giving', view: 'giving' as View },
+        { label: viewLabels[currentView], view: currentView },
+      ];
+    }
     return [{ label: viewLabels[currentView], view: currentView }];
   };
 
@@ -135,45 +143,50 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 flex flex-col transform transition-all duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-dark-850 flex flex-col transform transition-all duration-200 ease-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${sidebarCollapsed ? 'lg:w-[72px]' : 'w-64'}`}
+        } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
+        style={{ boxShadow: '1px 0 0 0 rgba(0,0,0,0.05)' }}
       >
         {/* Logo */}
-        <div className={`p-4 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:px-3' : 'p-6'}`}>
-          <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-3'}`}>
-            <div className={`bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 ${sidebarCollapsed ? 'w-10 h-10' : 'w-10 h-10'}`}>
-              <Church className="text-white" size={22} />
+        <div className={`flex items-center h-14 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
+          <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">G</span>
             </div>
-            <div className={sidebarCollapsed ? 'lg:hidden' : ''}>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-dark-100">GRACE</h1>
-              <p className="text-[10px] text-gray-400 dark:text-dark-500 tracking-wider hidden sm:block">
-                CHURCH CRM
-              </p>
-            </div>
+            <span className={`font-semibold text-gray-900 dark:text-dark-100 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              Grace
+            </span>
           </div>
+          {/* Mobile close button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
         </div>
 
-        {/* Search button */}
+        {/* Search */}
         {onOpenSearch && (
-          <div className={`p-4 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
+          <div className={`px-3 py-2 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
             <button
               onClick={onOpenSearch}
-              className={`w-full flex items-center gap-3 bg-gray-50 dark:bg-dark-800 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors ${
-                sidebarCollapsed ? 'lg:justify-center lg:p-2.5 lg:px-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${
+                sidebarCollapsed ? 'lg:justify-center' : ''
               }`}
               title={sidebarCollapsed ? 'Search (⌘K)' : undefined}
             >
-              <Search size={18} />
-              <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Search...</span>
-              <kbd className={`text-xs bg-gray-200 dark:bg-dark-700 px-1.5 py-0.5 rounded ${sidebarCollapsed ? 'lg:hidden' : 'hidden sm:inline-flex'}`}>
+              <Search size={16} />
+              <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Search</span>
+              <kbd className={`text-[10px] font-medium text-gray-400 dark:text-dark-500 bg-gray-100 dark:bg-dark-700 px-1.5 py-0.5 rounded ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                 ⌘K
               </kbd>
             </button>
@@ -181,74 +194,82 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
         )}
 
         {/* Navigation */}
-        <nav className={`flex-1 p-4 space-y-1 overflow-y-auto ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
-          {navItems.map((item) => (
-            <button
-              key={item.view}
-              onClick={() => handleNavClick(item.view)}
-              className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium transition-all group relative ${
-                sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
-              } ${
-                currentView === item.view
-                  ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
-                  : 'text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100'
-              }`}
-              title={sidebarCollapsed ? item.label : undefined}
-            >
-              {item.icon}
-              <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
+        <nav className={`flex-1 px-3 py-2 space-y-0.5 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+          {navItems.map((item) => {
+            const isActive = currentView === item.view ||
+              (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
+              (item.view === 'people' && currentView === 'person');
 
-              {/* Tooltip for collapsed state */}
-              {sidebarCollapsed && (
-                <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
-                  {item.label}
+            return (
+              <button
+                key={item.view}
+                onClick={() => handleNavClick(item.view)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors group relative ${
+                  sidebarCollapsed ? 'lg:justify-center' : ''
+                } ${
+                  isActive
+                    ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium'
+                    : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-200'
+                }`}
+                title={sidebarCollapsed ? item.label : undefined}
+              >
+                <span className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-dark-500 group-hover:text-gray-600 dark:group-hover:text-dark-400'}>
+                  {item.icon}
                 </span>
-              )}
-            </button>
-          ))}
+                <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
+
+                {/* Tooltip for collapsed state */}
+                {sidebarCollapsed && (
+                  <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Footer */}
-        <div className={`p-4 border-t border-gray-100 dark:border-dark-700 space-y-1 ${sidebarCollapsed ? 'lg:p-2' : ''}`}>
+        <div className={`px-3 py-2 border-t border-gray-100 dark:border-dark-700 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
           {/* Collapse toggle - desktop only */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`hidden lg:flex w-full items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all ${
-              sidebarCollapsed ? 'justify-center px-2.5 py-2.5' : 'px-4 py-2.5'
+            className={`hidden lg:flex w-full items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${
+              sidebarCollapsed ? 'justify-center' : ''
             }`}
-            title={sidebarCollapsed ? 'Expand sidebar (⌘B)' : 'Collapse sidebar (⌘B)'}
+            title={sidebarCollapsed ? 'Expand (⌘B)' : 'Collapse (⌘B)'}
           >
-            {sidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+            {sidebarCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
             <span className={sidebarCollapsed ? 'hidden' : ''}>Collapse</span>
           </button>
 
           <button
             onClick={toggleTheme}
-            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all group relative ${
-              sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+              sidebarCollapsed ? 'lg:justify-center' : ''
             }`}
-            title={sidebarCollapsed ? (theme === 'light' ? 'Dark Mode' : 'Light Mode') : undefined}
+            title={sidebarCollapsed ? (theme === 'light' ? 'Dark mode' : 'Light mode') : undefined}
           >
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
             {sidebarCollapsed && (
-              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
-                {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                {theme === 'light' ? 'Dark mode' : 'Light mode'}
               </span>
             )}
           </button>
 
           <button
             onClick={() => handleNavClick('settings')}
-            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-100 transition-all group relative ${
-              sidebarCollapsed ? 'lg:justify-center lg:px-2.5 lg:py-2.5 px-4 py-2.5' : 'px-4 py-2.5'
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+              sidebarCollapsed ? 'lg:justify-center' : ''
             }`}
             title={sidebarCollapsed ? 'Settings' : undefined}
           >
-            <Settings size={20} />
+            <Settings size={18} />
             <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Settings</span>
             {sidebarCollapsed && (
-              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded whitespace-nowrap z-50">
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
                 Settings
               </span>
             )}
@@ -258,14 +279,14 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header with breadcrumbs */}
-        <header className="flex items-center justify-between p-4 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700">
+        {/* Header */}
+        <header className="flex items-center h-14 px-4 bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700">
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg mr-2"
+            className="lg:hidden p-2 -ml-2 mr-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
           >
-            <Menu size={24} className="text-gray-600 dark:text-dark-300" />
+            <Menu size={20} className="text-gray-600 dark:text-dark-400" />
           </button>
 
           {/* Breadcrumbs */}
@@ -273,14 +294,14 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
             {breadcrumbs.map((crumb, index) => (
               <div key={crumb.view} className="flex items-center">
                 {index > 0 && (
-                  <ChevronRight size={14} className="mx-1 text-gray-400 dark:text-dark-500" />
+                  <ChevronRight size={14} className="mx-1 text-gray-300 dark:text-dark-600" />
                 )}
                 <button
                   onClick={() => setView(crumb.view)}
-                  className={`px-2 py-1 rounded-md transition-colors ${
+                  className={`px-1.5 py-0.5 rounded transition-colors ${
                     index === breadcrumbs.length - 1
                       ? 'font-medium text-gray-900 dark:text-dark-100'
-                      : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800'
+                      : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
                   }`}
                 >
                   {crumb.label}
@@ -289,20 +310,13 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
             ))}
           </nav>
 
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Church className="text-white" size={18} />
-            </div>
-          </div>
-
           {/* Mobile search */}
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg ml-2"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
             >
-              <Search size={24} className="text-gray-600 dark:text-dark-300" />
+              <Search size={20} className="text-gray-500 dark:text-dark-400" />
             </button>
           )}
         </header>
