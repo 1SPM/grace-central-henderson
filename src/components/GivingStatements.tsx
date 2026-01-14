@@ -18,6 +18,216 @@ import {
 } from 'lucide-react';
 import type { Giving, Person, GivingStatement } from '../types';
 
+// Helper function moved outside component
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount);
+};
+
+// StatementPreview component moved outside parent to avoid recreating on each render
+interface StatementPreviewProps {
+  person: Person;
+  personGiving: {
+    total: number;
+    byFund: Record<string, number>;
+    transactions: Giving[];
+  };
+  selectedYear: number;
+  churchName: string;
+  churchAddress: string;
+  churchPhone: string;
+  churchEmail: string;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+function StatementPreview({
+  person,
+  personGiving,
+  selectedYear,
+  churchName,
+  churchAddress,
+  churchPhone,
+  churchEmail,
+  onClose,
+  onDownload,
+}: StatementPreviewProps) {
+  if (!personGiving) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Preview Header */}
+        <div className="sticky top-0 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900 dark:text-dark-100">
+            Statement Preview
+          </h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onDownload}
+              className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 flex items-center gap-1"
+            >
+              <Download size={14} />
+              Download PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-dark-200"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Statement Content */}
+        <div className="p-8" id="statement-preview">
+          {/* Church Header */}
+          <div className="text-center mb-8 pb-6 border-b border-gray-200 dark:border-dark-700">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+              {churchName}
+            </h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">{churchAddress}</p>
+            <p className="text-gray-500 dark:text-dark-400">
+              {churchPhone} • {churchEmail}
+            </p>
+          </div>
+
+          {/* Statement Title */}
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100">
+              Contribution Statement
+            </h2>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              For the Year {selectedYear}
+            </p>
+          </div>
+
+          {/* Donor Info */}
+          <div className="mb-8 p-4 bg-gray-50 dark:bg-dark-800 rounded-xl">
+            <p className="font-semibold text-gray-900 dark:text-dark-100">
+              {person.firstName} {person.lastName}
+            </p>
+            {person.address && (
+              <p className="text-gray-600 dark:text-dark-400 text-sm">{person.address}</p>
+            )}
+            {person.city && person.state && person.zip && (
+              <p className="text-gray-600 dark:text-dark-400 text-sm">
+                {person.city}, {person.state} {person.zip}
+              </p>
+            )}
+            <p className="text-gray-600 dark:text-dark-400 text-sm mt-1">{person.email}</p>
+          </div>
+
+          {/* Summary */}
+          <div className="mb-8">
+            <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4">
+              Contribution Summary
+            </h3>
+            <div className="border border-gray-200 dark:border-dark-700 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-dark-800">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Fund
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
+                  {Object.entries(personGiving.byFund).map(([fund, amount]) => (
+                    <tr key={fund}>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-dark-100 capitalize">
+                        {fund}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-dark-100">
+                        {formatCurrency(amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-gray-50 dark:bg-dark-800">
+                  <tr>
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-dark-100">
+                      Total Contributions
+                    </td>
+                    <td className="px-4 py-3 text-sm text-right font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(personGiving.total)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {/* Transaction Detail */}
+          <div className="mb-8">
+            <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4">
+              Contribution Detail
+            </h3>
+            <div className="border border-gray-200 dark:border-dark-700 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-dark-800">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Fund
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Method
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
+                  {personGiving.transactions
+                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .map((t) => (
+                      <tr key={t.id}>
+                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-dark-400">
+                          {new Date(t.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 dark:text-dark-100 capitalize">
+                          {t.fund}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-dark-400 capitalize">
+                          {t.method}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-right font-medium text-gray-900 dark:text-dark-100">
+                          {formatCurrency(t.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-sm text-gray-500 dark:text-dark-400 border-t border-gray-200 dark:border-dark-700 pt-6">
+            <p>
+              No goods or services were provided in exchange for these contributions.
+            </p>
+            <p className="mt-2">
+              {churchName} is a 501(c)(3) non-profit organization.
+            </p>
+            <p className="mt-2 text-xs">
+              Statement generated on {new Date().toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface GivingStatementsProps {
   giving: Giving[];
   people: Person[];
@@ -127,193 +337,6 @@ export function GivingStatements({
     selectedPeople.forEach((personId) => {
       onGenerateStatement(personId, selectedYear);
     });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  // Preview component
-  const StatementPreview = ({ person }: { person: Person }) => {
-    const personGiving = givingByPerson[person.id];
-    if (!personGiving) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          {/* Preview Header */}
-          <div className="sticky top-0 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-dark-100">
-              Statement Preview
-            </h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  onGenerateStatement(person.id, selectedYear);
-                  setPreviewPerson(null);
-                }}
-                className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 flex items-center gap-1"
-              >
-                <Download size={14} />
-                Download PDF
-              </button>
-              <button
-                onClick={() => setPreviewPerson(null)}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-dark-200"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Statement Content */}
-          <div className="p-8" id="statement-preview">
-            {/* Church Header */}
-            <div className="text-center mb-8 pb-6 border-b border-gray-200 dark:border-dark-700">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">
-                {churchName}
-              </h1>
-              <p className="text-gray-500 dark:text-dark-400 mt-1">{churchAddress}</p>
-              <p className="text-gray-500 dark:text-dark-400">
-                {churchPhone} • {churchEmail}
-              </p>
-            </div>
-
-            {/* Statement Title */}
-            <div className="text-center mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100">
-                Contribution Statement
-              </h2>
-              <p className="text-gray-500 dark:text-dark-400 mt-1">
-                For the Year {selectedYear}
-              </p>
-            </div>
-
-            {/* Donor Info */}
-            <div className="mb-8 p-4 bg-gray-50 dark:bg-dark-800 rounded-xl">
-              <p className="font-semibold text-gray-900 dark:text-dark-100">
-                {person.firstName} {person.lastName}
-              </p>
-              {person.address && (
-                <p className="text-gray-600 dark:text-dark-400 text-sm">{person.address}</p>
-              )}
-              {person.city && person.state && person.zip && (
-                <p className="text-gray-600 dark:text-dark-400 text-sm">
-                  {person.city}, {person.state} {person.zip}
-                </p>
-              )}
-              <p className="text-gray-600 dark:text-dark-400 text-sm mt-1">{person.email}</p>
-            </div>
-
-            {/* Summary */}
-            <div className="mb-8">
-              <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4">
-                Contribution Summary
-              </h3>
-              <div className="border border-gray-200 dark:border-dark-700 rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-dark-800">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Fund
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
-                    {Object.entries(personGiving.byFund).map(([fund, amount]) => (
-                      <tr key={fund}>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-dark-100 capitalize">
-                          {fund}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-dark-100">
-                          {formatCurrency(amount)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-50 dark:bg-dark-800">
-                    <tr>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-dark-100">
-                        Total Contributions
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right font-bold text-green-600 dark:text-green-400">
-                        {formatCurrency(personGiving.total)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            {/* Transaction Detail */}
-            <div className="mb-8">
-              <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4">
-                Contribution Detail
-              </h3>
-              <div className="border border-gray-200 dark:border-dark-700 rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-dark-800">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Fund
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Method
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-400 uppercase">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
-                    {personGiving.transactions
-                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                      .map((t) => (
-                        <tr key={t.id}>
-                          <td className="px-4 py-2 text-sm text-gray-600 dark:text-dark-400">
-                            {new Date(t.date).toLocaleDateString()}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-900 dark:text-dark-100 capitalize">
-                            {t.fund}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-600 dark:text-dark-400 capitalize">
-                            {t.method}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-right font-medium text-gray-900 dark:text-dark-100">
-                            {formatCurrency(t.amount)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center text-sm text-gray-500 dark:text-dark-400 border-t border-gray-200 dark:border-dark-700 pt-6">
-              <p>
-                No goods or services were provided in exchange for these contributions.
-              </p>
-              <p className="mt-2">
-                {churchName} is a 501(c)(3) non-profit organization.
-              </p>
-              <p className="mt-2 text-xs">
-                Statement generated on {new Date().toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -572,7 +595,22 @@ export function GivingStatements({
       </div>
 
       {/* Preview Modal */}
-      {previewPerson && <StatementPreview person={previewPerson} />}
+      {previewPerson && givingByPerson[previewPerson.id] && (
+        <StatementPreview
+          person={previewPerson}
+          personGiving={givingByPerson[previewPerson.id]}
+          selectedYear={selectedYear}
+          churchName={churchName}
+          churchAddress={churchAddress}
+          churchPhone={churchPhone}
+          churchEmail={churchEmail}
+          onClose={() => setPreviewPerson(null)}
+          onDownload={() => {
+            onGenerateStatement(previewPerson.id, selectedYear);
+            setPreviewPerson(null);
+          }}
+        />
+      )}
 
       {/* Bulk Send Modal */}
       {showBulkSend && (

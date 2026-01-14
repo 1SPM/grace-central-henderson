@@ -153,7 +153,7 @@ export function MemberDonationStats({
 
   // Filter and sort members
   const filteredMembers = useMemo(() => {
-    let filtered = memberStats.filter((m) => {
+    const filtered = memberStats.filter((m) => {
       if (!m.stats) return false; // Only show members with giving history
       const fullName = `${m.person.firstName} ${m.person.lastName}`.toLowerCase();
       return fullName.includes(search.toLowerCase());

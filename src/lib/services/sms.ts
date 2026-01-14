@@ -78,7 +78,7 @@ export const SMS_TEMPLATES: Record<string, SMSTemplate> = {
     id: 'giving-thanks',
     name: 'Giving Thanks',
     content:
-      'Thank you {{firstName}} for your generous gift of \${{amount}} to {{churchName}}! Your support means so much.',
+      'Thank you {{firstName}} for your generous gift of ${{amount}} to {{churchName}}! Your support means so much.',
   },
 };
 
