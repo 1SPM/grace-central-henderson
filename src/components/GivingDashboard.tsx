@@ -9,15 +9,13 @@ import {
   FileText,
   Package,
   Target,
-  ArrowUpRight,
+  ArrowRight,
   Calendar,
   BarChart3,
-  PieChart,
   CreditCard,
   Banknote,
   Building,
   Heart,
-  ChevronRight,
   ShoppingBasket,
   Search,
   UserCheck,
@@ -33,14 +31,14 @@ interface GivingDashboardProps {
   onNavigate: (view: 'online-giving' | 'batch-entry' | 'pledges' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats') => void;
 }
 
-const fundColors: Record<string, { bg: string; text: string; chart: string }> = {
-  tithe: { bg: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-700 dark:text-green-400', chart: '#22c55e' },
-  offering: { bg: 'bg-blue-100 dark:bg-blue-500/15', text: 'text-blue-700 dark:text-blue-400', chart: '#3b82f6' },
-  missions: { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400', chart: '#a855f7' },
-  building: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-400', chart: '#f59e0b' },
-  benevolence: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400', chart: '#ec4899' },
-  youth: { bg: 'bg-cyan-100 dark:bg-cyan-500/15', text: 'text-cyan-700 dark:text-cyan-400', chart: '#06b6d4' },
-  other: { bg: 'bg-gray-100 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', chart: '#6b7280' },
+const fundColors: Record<string, { bg: string; text: string; bar: string }> = {
+  tithe: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', bar: 'bg-emerald-500' },
+  offering: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-400', bar: 'bg-blue-500' },
+  missions: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-700 dark:text-purple-400', bar: 'bg-purple-500' },
+  building: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', bar: 'bg-amber-500' },
+  benevolence: { bg: 'bg-pink-50 dark:bg-pink-500/10', text: 'text-pink-700 dark:text-pink-400', bar: 'bg-pink-500' },
+  youth: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-400', bar: 'bg-cyan-500' },
+  other: { bg: 'bg-gray-50 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', bar: 'bg-gray-400' },
 };
 
 const methodIcons: Record<string, React.ReactNode> = {
@@ -175,195 +173,177 @@ export function GivingDashboard({
   const recentTransactions = useMemo(() => {
     return [...giving]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10);
+      .slice(0, 8);
   }, [giving]);
 
   // Active campaigns
   const activeCampaigns = campaigns.filter(c => c.isActive).slice(0, 3);
 
   return (
-    <div className="p-8">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Giving Dashboard</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">Track generosity and stewardship</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-100">Giving</h1>
+          <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">Track donations and stewardship</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Period Selector */}
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-            className="px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 font-medium"
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300"
           >
-            <option value="week">Last 7 Days</option>
-            <option value="month">Last 30 Days</option>
-            <option value="quarter">Last Quarter</option>
-            <option value="year">Last Year</option>
+            <option value="week">Last 7 days</option>
+            <option value="month">Last 30 days</option>
+            <option value="quarter">Last quarter</option>
+            <option value="year">Last year</option>
           </select>
           <button
             onClick={() => exportGivingToCSV(giving, people)}
-            className="px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors flex items-center gap-2"
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-dark-600 text-gray-600 dark:text-dark-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors flex items-center gap-1.5"
           >
-            <Download size={18} />
+            <Download size={16} />
             Export
           </button>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      {/* Quick Actions - Clean grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <button
           onClick={() => onNavigate('online-giving')}
-          className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl text-white text-left hover:from-green-600 hover:to-emerald-700 transition-all group"
+          className="group p-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-white text-left transition-colors"
         >
-          <Heart className="mb-2" size={24} />
-          <p className="font-semibold">Online Giving</p>
-          <p className="text-sm opacity-80">Accept donations</p>
-          <ArrowUpRight className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <Heart className="mb-3" size={20} />
+          <p className="font-medium text-sm">Online Giving</p>
+          <p className="text-xs text-indigo-200 mt-0.5">Accept donations</p>
         </button>
         <button
           onClick={() => onNavigate('batch-entry')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
-          <Package className="mb-2 text-blue-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Batch Entry</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Cash & checks</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <Package className="mb-3 text-gray-400" size={20} />
+          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Batch Entry</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">Cash & checks</p>
         </button>
         <button
           onClick={() => onNavigate('pledges')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
-          <Target className="mb-2 text-purple-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Pledges</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">{pledges.filter(p => p.status === 'active').length} active</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <Target className="mb-3 text-gray-400" size={20} />
+          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Pledges</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">{pledges.filter(p => p.status === 'active').length} active</p>
         </button>
         <button
           onClick={() => onNavigate('statements')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
-          <FileText className="mb-2 text-amber-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Statements</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Tax receipts</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <FileText className="mb-3 text-gray-400" size={20} />
+          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Statements</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">Tax receipts</p>
         </button>
       </div>
 
-      {/* Additional Tools Row */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      {/* Secondary Actions */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => onNavigate('charity-baskets')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
-          <ShoppingBasket className="mb-2 text-orange-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Charity Baskets</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Care packages</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <ShoppingBasket size={14} className="text-orange-500" />
+          <span className="text-gray-700 dark:text-dark-300">Charity Baskets</span>
         </button>
         <button
           onClick={() => onNavigate('donation-tracker')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
-          <Search className="mb-2 text-indigo-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Donation Tracker</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Search & filter</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <Search size={14} className="text-indigo-500" />
+          <span className="text-gray-700 dark:text-dark-300">Donation Tracker</span>
         </button>
         <button
           onClick={() => onNavigate('member-stats')}
-          className="p-4 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl text-left hover:border-gray-300 dark:hover:border-dark-600 transition-all group relative"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
-          <UserCheck className="mb-2 text-teal-500" size={24} />
-          <p className="font-semibold text-gray-900 dark:text-dark-100">Member Stats</p>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Per-member analytics</p>
-          <ChevronRight className="absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" size={18} />
+          <UserCheck size={14} className="text-teal-500" />
+          <span className="text-gray-700 dark:text-dark-300">Member Stats</span>
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
-          <DollarSign className="mb-4 opacity-80" size={24} />
-          <p className="text-3xl font-bold">${analytics.totalGiving.toLocaleString()}</p>
-          <p className="text-sm opacity-80 mt-1">Total This Period</p>
+      {/* Stats Grid - Clean cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
+              <DollarSign className="text-emerald-600 dark:text-emerald-400" size={16} />
+            </div>
+          </div>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
+            ${analytics.totalGiving.toLocaleString()}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Total this period</p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
-              <BarChart3 className="text-blue-600 dark:text-blue-400" size={20} />
+        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
+              <BarChart3 className="text-blue-600 dark:text-blue-400" size={16} />
             </div>
-            <div className={`flex items-center gap-1 text-sm font-medium ${
+            <span className={`text-xs font-medium flex items-center gap-0.5 ${
               analytics.yearOverYearChange >= 0
-                ? 'text-green-600 dark:text-green-400'
+                ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-red-600 dark:text-red-400'
             }`}>
-              {analytics.yearOverYearChange >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              {analytics.yearOverYearChange >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
               {Math.abs(analytics.yearOverYearChange).toFixed(1)}%
-            </div>
+            </span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
             ${analytics.monthlyAverage.toLocaleString()}
           </p>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">Monthly Average</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Monthly average</p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center mb-4">
-            <Repeat className="text-purple-600 dark:text-purple-400" size={20} />
+        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center mb-3">
+            <Repeat className="text-purple-600 dark:text-purple-400" size={16} />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
             ${analytics.recurringTotal.toLocaleString()}
           </p>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-            {analytics.recurringCount} Recurring Gifts
-          </p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{analytics.recurringCount} recurring</p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/10 rounded-xl flex items-center justify-center mb-4">
-            <Users className="text-amber-600 dark:text-amber-400" size={20} />
+        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+          <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-lg flex items-center justify-center mb-3">
+            <Users className="text-amber-600 dark:text-amber-400" size={16} />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
             {analytics.newDonorCount}
           </p>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-            New Donors • {analytics.donorRetention.toFixed(0)}% Retention
-          </p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">New donors · {analytics.donorRetention.toFixed(0)}% retention</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fund Breakdown */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
-              <PieChart size={20} className="text-gray-400" />
-              By Fund
-            </h2>
-          </div>
-          <div className="space-y-4">
-            {analytics.topFunds.map(({ fund, amount, percentage }) => {
+        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">By Fund</h2>
+          <div className="space-y-3">
+            {analytics.topFunds.slice(0, 5).map(({ fund, amount, percentage }) => {
               const colors = fundColors[fund] || fundColors.other;
               return (
                 <div key={fund}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-sm px-3 py-1 rounded-full ${colors.bg} ${colors.text}`}>
-                      {fund.charAt(0).toUpperCase() + fund.slice(1)}
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-dark-100">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm text-gray-700 dark:text-dark-300 capitalize">{fund}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">
                       ${amount.toLocaleString()}
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundColor: colors.chart,
-                      }}
+                      className={`h-full rounded-full ${colors.bar}`}
+                      style={{ width: `${percentage}%` }}
                     />
                   </div>
                 </div>
@@ -373,60 +353,56 @@ export function GivingDashboard({
         </div>
 
         {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
-              Recent Transactions
-            </h2>
-            <span className="text-sm text-gray-500 dark:text-dark-400">
-              {giving.length} total
-            </span>
+        <div className="lg:col-span-2 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Recent Transactions</h2>
+            <button
+              onClick={() => onNavigate('donation-tracker')}
+              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+            >
+              View all
+              <ArrowRight size={12} />
+            </button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {recentTransactions.map((gift) => {
               const person = people.find((p) => p.id === gift.personId);
               const colors = fundColors[gift.fund] || fundColors.other;
               return (
                 <div
                   key={gift.id}
-                  className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-700 last:border-0"
+                  className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0"
                 >
                   <div className="flex items-center gap-3">
                     {person ? (
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center text-xs font-medium text-gray-600 dark:text-dark-300">
                         {person.firstName[0]}{person.lastName[0]}
                       </div>
                     ) : (
-                      <div className="w-10 h-10 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center">
-                        <DollarSign className="text-gray-400" size={18} />
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center">
+                        <DollarSign className="text-gray-400" size={14} />
                       </div>
                     )}
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-dark-100">
+                      <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
                         {person ? `${person.firstName} ${person.lastName}` : 'Anonymous'}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-dark-400">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-dark-500">
                         {methodIcons[gift.method]}
-                        <span className="capitalize">{gift.method}</span>
-                        <span>•</span>
                         <span>{new Date(gift.date).toLocaleDateString()}</span>
                         {gift.isRecurring && (
-                          <>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 text-purple-500 dark:text-purple-400">
-                              <Repeat size={10} />
-                              recurring
-                            </span>
-                          </>
+                          <span className="text-purple-500 dark:text-purple-400 flex items-center gap-0.5">
+                            <Repeat size={10} />
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900 dark:text-dark-100">
+                    <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
                       ${gift.amount.toLocaleString()}
                     </p>
-                    <span className={`text-xs px-2 py-0.5 rounded ${colors.bg} ${colors.text}`}>
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${colors.bg} ${colors.text}`}>
                       {gift.fund}
                     </span>
                   </div>
@@ -439,21 +415,18 @@ export function GivingDashboard({
 
       {/* Active Campaigns */}
       {activeCampaigns.length > 0 && (
-        <div className="mt-6 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
-              <Target size={20} className="text-purple-500" />
-              Active Campaigns
-            </h2>
+        <div className="mt-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Active Campaigns</h2>
             <button
               onClick={() => onNavigate('pledges')}
-              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium flex items-center gap-1"
+              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
             >
-              View All
-              <ChevronRight size={16} />
+              View all
+              <ArrowRight size={12} />
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {activeCampaigns.map((campaign) => {
               const campaignPledges = pledges.filter((p) => p.campaignId === campaign.id);
               const totalGiven = campaignPledges.reduce((sum, p) => sum + (p.totalGiven || 0), 0);
@@ -464,32 +437,32 @@ export function GivingDashboard({
               return (
                 <div
                   key={campaign.id}
-                  className="p-4 bg-gray-50 dark:bg-dark-800 rounded-xl"
+                  className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg"
                 >
-                  <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-2">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2">
                     {campaign.name}
                   </h3>
                   {campaign.goalAmount && (
                     <>
-                      <div className="flex items-center justify-between text-sm mb-2">
+                      <div className="flex items-center justify-between text-xs mb-2">
                         <span className="text-gray-500 dark:text-dark-400">
                           ${totalGiven.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}
                         </span>
-                        <span className="font-medium text-purple-600 dark:text-purple-400">
+                        <span className="font-medium text-indigo-600 dark:text-indigo-400">
                           {percentage.toFixed(0)}%
                         </span>
                       </div>
-                      <div className="h-2 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                          className="h-full bg-indigo-500 rounded-full"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
                     </>
                   )}
-                  <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-dark-400">
+                  <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-dark-400">
                     <span className="flex items-center gap-1">
-                      <Calendar size={12} />
+                      <Calendar size={10} />
                       {campaign.endDate
                         ? `Ends ${new Date(campaign.endDate).toLocaleDateString()}`
                         : 'Ongoing'}
@@ -503,25 +476,29 @@ export function GivingDashboard({
         </div>
       )}
 
-      {/* Monthly Trend Chart (simplified) */}
-      {analytics.monthlyTrend.length > 0 && (
-        <div className="mt-6 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-6 flex items-center gap-2">
-            <BarChart3 size={20} className="text-blue-500" />
-            Monthly Trend
-          </h2>
-          <div className="flex items-end justify-between gap-2 h-40">
+      {/* Monthly Trend */}
+      {analytics.monthlyTrend.length > 1 && (
+        <div className="mt-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">Monthly Trend</h2>
+          <div className="flex items-end justify-between gap-1 h-32">
             {analytics.monthlyTrend.map(({ month, amount }) => {
               const maxAmount = Math.max(...analytics.monthlyTrend.map((t) => t.amount));
               const height = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
 
               return (
-                <div key={month} className="flex-1 flex flex-col items-center gap-2">
-                  <div
-                    className="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-lg transition-all duration-500"
-                    style={{ height: `${height}%`, minHeight: '4px' }}
-                  />
-                  <span className="text-xs text-gray-500 dark:text-dark-400">{month}</span>
+                <div key={month} className="flex-1 flex flex-col items-center gap-1.5 group">
+                  <div className="w-full relative">
+                    <div
+                      className="w-full bg-indigo-500 hover:bg-indigo-600 rounded transition-all cursor-default"
+                      style={{ height: `${Math.max(height, 4)}px` }}
+                    />
+                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block">
+                      <div className="bg-gray-900 dark:bg-dark-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                        ${amount.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-gray-400 dark:text-dark-500">{month}</span>
                 </div>
               );
             })}
