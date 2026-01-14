@@ -23,6 +23,7 @@ import {
   FileText,
   Cake,
   X,
+  Bot,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -46,6 +47,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
   { view: 'prayer', label: 'Prayer', icon: <Heart size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+  { view: 'agents', label: 'AI Agents', icon: <Bot size={18} /> },
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
@@ -72,6 +74,7 @@ const viewLabels: Record<View, string> = {
   'charity-baskets': 'Charity Baskets',
   'donation-tracker': 'Donation Tracker',
   'member-stats': 'Member Stats',
+  agents: 'AI Agents',
   tags: 'Tags',
   reports: 'Reports',
   settings: 'Settings',

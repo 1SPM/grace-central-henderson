@@ -31,10 +31,12 @@ import { QuickDonationForm } from './components/QuickDonationForm';
 import { CharityBaskets } from './components/CharityBaskets';
 import { MemberDonationStats } from './components/MemberDonationStats';
 import { DonationTracker } from './components/DonationTracker';
+import { AgentDashboard } from './components/AgentDashboard';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
 import { useModals } from './hooks/useModals';
+import { useAgents } from './hooks/useAgents';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -94,6 +96,55 @@ function App() {
   const modals = useModals();
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
+
+  // Agent task creation callback
+  const handleAgentCreateTask = useCallback(async (task: {
+    personId: string;
+    title: string;
+    description?: string;
+    dueDate: string;
+    priority: 'low' | 'medium' | 'high';
+    category: 'follow-up' | 'care' | 'admin' | 'outreach';
+    assignedTo?: string;
+  }) => {
+    await addTask({
+      church_id: churchId,
+      person_id: task.personId,
+      title: task.title,
+      description: task.description || null,
+      due_date: task.dueDate,
+      completed: false,
+      priority: task.priority,
+      category: task.category,
+      assigned_to: task.assignedTo || null,
+    });
+  }, [addTask, churchId]);
+
+  // AI Agents hook
+  const agents = useAgents({
+    churchId,
+    churchName: 'Grace Church', // TODO: Get from settings
+    people: people.map(p => ({
+      id: p.id,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      email: p.email,
+      phone: p.phone,
+      birthDate: p.birthDate,
+      joinDate: p.joinDate,
+      status: p.status,
+    })),
+    giving: giving.map(g => ({
+      id: g.id,
+      personId: g.personId,
+      amount: g.amount,
+      fund: g.fund,
+      date: g.date,
+      method: g.method,
+      isRecurring: g.isRecurring,
+    })),
+    onCreateTask: handleAgentCreateTask,
+  });
 
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
@@ -684,6 +735,23 @@ function App() {
             people={people}
             onViewPerson={handleViewPerson}
           />
+        );
+
+      case 'agents':
+        return (
+          <div className="p-6 max-w-7xl mx-auto">
+            <AgentDashboard
+              lifeEventConfig={agents.lifeEventConfig}
+              donationConfig={agents.donationConfig}
+              newMemberConfig={agents.newMemberConfig}
+              upcomingLifeEvents={agents.upcomingLifeEvents}
+              recentLogs={agents.logs}
+              stats={agents.stats}
+              onToggleAgent={agents.toggleAgent}
+              onUpdateConfig={agents.updateConfig}
+              onRunAgent={agents.runAgent}
+            />
+          </div>
         );
 
       case 'settings':
