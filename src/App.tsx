@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { PeopleList } from './components/PeopleList';
@@ -121,6 +122,7 @@ function toInteractionLegacy(i: {
 }
 
 function App() {
+  const { churchId } = useAuthContext();
   const [view, setView] = useState<View>('dashboard');
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
 
@@ -565,7 +567,7 @@ function App() {
 
   const handleAddInteraction = async (interaction: Omit<LegacyInteraction, 'id' | 'createdAt'>) => {
     await addInteraction({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: interaction.personId,
       type: interaction.type,
       content: interaction.content,
@@ -575,7 +577,7 @@ function App() {
 
   const handleAddTask = async (task: Omit<LegacyTask, 'id' | 'createdAt'>) => {
     await addTask({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: task.personId || null,
       title: task.title,
       description: task.description || null,
@@ -645,7 +647,7 @@ function App() {
 
   const handleAddPrayer = async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
     await addPrayer({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: prayer.personId,
       content: prayer.content,
       is_private: prayer.isPrivate,
@@ -662,7 +664,7 @@ function App() {
     note?: string;
   }) => {
     await addGiving({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: donation.personId || null,
       amount: donation.amount,
       fund: donation.fund,
@@ -713,7 +715,7 @@ function App() {
     } else {
       // Adding new person
       await addPerson({
-        church_id: 'demo-church',
+        church_id: churchId,
         first_name: personData.firstName,
         last_name: personData.lastName,
         email: personData.email || null,
@@ -756,7 +758,7 @@ function App() {
     for (const person of importedPeople) {
       if (person.firstName && person.lastName) {
         await addPerson({
-          church_id: 'demo-church',
+          church_id: churchId,
           first_name: person.firstName,
           last_name: person.lastName,
           email: person.email || null,

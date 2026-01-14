@@ -17,10 +17,14 @@ import {
 } from '../lib/services/auth';
 import { supabase } from '../lib/supabase';
 
+// Default church ID for demo/fallback mode
+const DEFAULT_CHURCH_ID = 'demo-church';
+
 interface AuthContextType {
   isLoaded: boolean;
   isSignedIn: boolean;
   user: User | null;
+  churchId: string;
   permissions: UserPermissions | null;
   signOut: () => Promise<void>;
   hasPermission: (permission: keyof UserPermissions) => boolean;
@@ -200,6 +204,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     isLoaded: clerkLoaded && !isLoading,
     isSignedIn: clerkSignedIn || false,
     user,
+    churchId: user?.churchId || DEFAULT_CHURCH_ID,
     permissions: user ? ROLE_PERMISSIONS[user.role] : null,
     signOut,
     hasPermission,
@@ -242,6 +247,7 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
     isLoaded: true,
     isSignedIn: false,
     user: null,
+    churchId: DEFAULT_CHURCH_ID,
     permissions: null,
     signOut: async () => {},
     hasPermission: () => false,
@@ -273,7 +279,7 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     firstName: 'Demo',
     lastName: 'Admin',
     role: 'admin',
-    churchId: 'demo-church',
+    churchId: DEFAULT_CHURCH_ID,
     createdAt: new Date().toISOString(),
   };
 
@@ -281,6 +287,7 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     isLoaded: true,
     isSignedIn: true, // Auto sign-in for demo mode
     user: demoUser,
+    churchId: DEFAULT_CHURCH_ID,
     permissions: ROLE_PERMISSIONS.admin,
     signOut: async () => {
       // Demo mode - no actual sign out
