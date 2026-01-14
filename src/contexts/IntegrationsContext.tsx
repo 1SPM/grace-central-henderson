@@ -18,6 +18,7 @@ import {
   PaymentResult,
 } from '../lib/services';
 import { useChurchSettings, IntegrationCredentials } from '../hooks/useChurchSettings';
+import { useAuthContext } from './AuthContext';
 
 export interface IntegrationStatus {
   email: boolean;
@@ -82,7 +83,8 @@ export function useIntegrations() {
 }
 
 export function IntegrationsProvider({ children }: { children: React.ReactNode }) {
-  const { settings, isLoading, saveIntegrations: saveToDb, clearIntegration: clearFromDb } = useChurchSettings();
+  const { churchId } = useAuthContext();
+  const { settings, isLoading, saveIntegrations: saveToDb, clearIntegration: clearFromDb } = useChurchSettings(churchId);
   const [status, setStatus] = useState<IntegrationStatus>({
     email: false,
     sms: false,
@@ -92,35 +94,19 @@ export function IntegrationsProvider({ children }: { children: React.ReactNode }
   // Configure services when settings change
   useEffect(() => {
     const { integrations } = settings;
-
-    // First check environment variables (app-level config)
-    const envResendKey = import.meta.env.VITE_RESEND_API_KEY;
-    const envTwilioSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
     const envStripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
-    // Configure Email - prefer database, fallback to env
-    const resendKey = integrations.resendApiKey || envResendKey;
-    if (resendKey) {
-      emailService.configure({
-        apiKey: resendKey,
-        fromEmail: integrations.emailFromAddress || import.meta.env.VITE_EMAIL_FROM_ADDRESS || 'noreply@grace-crm.com',
-        fromName: integrations.emailFromName || import.meta.env.VITE_EMAIL_FROM_NAME || 'Grace CRM',
-      });
-    }
+    // Configure Email - uses backend API proxy (no API key needed in frontend)
+    // Just configure the from address and name
+    emailService.configure({
+      fromEmail: integrations.emailFromAddress || import.meta.env.VITE_EMAIL_FROM_ADDRESS || 'noreply@grace-crm.com',
+      fromName: integrations.emailFromName || import.meta.env.VITE_EMAIL_FROM_NAME || 'Grace CRM',
+    });
 
-    // Configure SMS - prefer database, fallback to env
-    const twilioSid = integrations.twilioAccountSid || envTwilioSid;
-    const twilioToken = integrations.twilioAuthToken || import.meta.env.VITE_TWILIO_AUTH_TOKEN;
-    const twilioPhone = integrations.twilioPhoneNumber || import.meta.env.VITE_TWILIO_PHONE_NUMBER;
-    if (twilioSid && twilioToken && twilioPhone) {
-      smsService.configure({
-        accountSid: twilioSid,
-        authToken: twilioToken,
-        fromNumber: twilioPhone,
-      });
-    }
+    // Configure SMS - uses backend API proxy (no credentials needed in frontend)
+    smsService.configure({});
 
-    // Configure Payments - prefer database, fallback to env
+    // Configure Payments - only publishable key needed in frontend
     const stripeKey = integrations.stripePublishableKey || envStripeKey;
     if (stripeKey) {
       paymentService.configure({

@@ -441,12 +441,16 @@ export function DonationTracker({
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <button
-                          onClick={() => onViewPerson?.(donation.personId)}
-                          className="text-sm font-medium text-gray-900 dark:text-dark-100 hover:text-indigo-600 dark:hover:text-indigo-400"
-                        >
-                          {getPersonName(donation.personId)}
-                        </button>
+                        {donation.personId ? (
+                          <button
+                            onClick={() => onViewPerson?.(donation.personId!)}
+                            className="text-sm font-medium text-gray-900 dark:text-dark-100 hover:text-indigo-600 dark:hover:text-indigo-400"
+                          >
+                            {getPersonName(donation.personId)}
+                          </button>
+                        ) : (
+                          <span className="text-sm text-gray-500 dark:text-gray-400 italic">Anonymous</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-semibold text-gray-900 dark:text-dark-100">

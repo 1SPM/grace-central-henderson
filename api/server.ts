@@ -1,12 +1,20 @@
 /**
- * Grace CRM - Payment API Server
+ * Grace CRM - Backend API Server
  *
- * Handles secure Stripe payment processing.
+ * Handles secure processing for:
+ * - Stripe payment processing
+ * - Resend email sending
+ * - Twilio SMS messaging
+ *
  * This server should be run separately from the frontend.
  *
  * Environment variables required:
  * - STRIPE_SECRET_KEY: Your Stripe secret key
  * - STRIPE_WEBHOOK_SECRET: Webhook signing secret
+ * - RESEND_API_KEY: Your Resend API key
+ * - TWILIO_ACCOUNT_SID: Your Twilio Account SID
+ * - TWILIO_AUTH_TOKEN: Your Twilio Auth Token
+ * - TWILIO_FROM_NUMBER: Your Twilio phone number
  * - SUPABASE_URL: Supabase project URL
  * - SUPABASE_SERVICE_KEY: Supabase service role key
  * - PORT: Server port (default 3001)
@@ -16,6 +24,79 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+
+// ============================================
+// INPUT VALIDATION UTILITIES
+// ============================================
+
+// Email validation regex (RFC 5322 simplified)
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+// Phone validation regex (E.164 format or common formats)
+const PHONE_REGEX = /^[\d\s\-\(\)\+\.]{7,20}$/;
+
+// Validation limits
+const LIMITS = {
+  EMAIL_MAX: 254,
+  NAME_MAX: 100,
+  SUBJECT_MAX: 200,
+  MESSAGE_MAX: 5000,
+  SMS_MAX: 1600,
+  PHONE_MAX: 20,
+  NOTE_MAX: 2000,
+};
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+  return typeof email === 'string' &&
+         email.length <= LIMITS.EMAIL_MAX &&
+         EMAIL_REGEX.test(email);
+}
+
+// Validate phone number format
+function isValidPhone(phone: string): boolean {
+  return typeof phone === 'string' &&
+         phone.length <= LIMITS.PHONE_MAX &&
+         PHONE_REGEX.test(phone);
+}
+
+// Sanitize string input (remove potential XSS/injection)
+function sanitizeString(input: unknown, maxLength: number = 1000): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/[<>]/g, '') // Remove HTML tags
+    .trim();
+}
+
+// Sanitize HTML content (allow safe tags for emails)
+function sanitizeHtml(input: unknown, maxLength: number = 50000): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .trim();
+}
+
+// Validate array of emails
+function validateEmailArray(emails: unknown): string[] | null {
+  if (!Array.isArray(emails)) return null;
+  const validated: string[] = [];
+  for (const email of emails) {
+    if (typeof email === 'string' && isValidEmail(email)) {
+      validated.push(email);
+    } else if (typeof email === 'object' && email !== null) {
+      // Handle { email: string, name?: string } format
+      const emailObj = email as { email?: string; name?: string };
+      if (emailObj.email && isValidEmail(emailObj.email)) {
+        validated.push(emailObj.name ? `${sanitizeString(emailObj.name, LIMITS.NAME_MAX)} <${emailObj.email}>` : emailObj.email);
+      }
+    }
+  }
+  return validated.length > 0 ? validated : null;
+}
 
 // Initialize Express
 const app = express();
@@ -508,6 +589,370 @@ app.post('/webhooks/stripe', asyncHandler(async (req: Request, res: Response) =>
 }));
 
 // ============================================
+// EMAIL ROUTES (Resend)
+// ============================================
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_BASE_URL = 'https://api.resend.com';
+
+// Send email
+app.post('/api/email/send', asyncHandler(async (req: Request, res: Response) => {
+  if (!RESEND_API_KEY) {
+    res.status(503).json({ error: 'Email service not configured' });
+    return;
+  }
+
+  const { to, subject, html, text, from, replyTo, cc, bcc } = req.body;
+
+  // Validate required fields
+  if (!to || !subject) {
+    res.status(400).json({ error: 'Recipient (to) and subject are required' });
+    return;
+  }
+
+  // Validate and sanitize recipients
+  const toArray = Array.isArray(to) ? to : [to];
+  const validatedTo = validateEmailArray(toArray);
+  if (!validatedTo) {
+    res.status(400).json({ error: 'Invalid email address format' });
+    return;
+  }
+
+  // Validate subject length
+  const sanitizedSubject = sanitizeString(subject, LIMITS.SUBJECT_MAX);
+  if (!sanitizedSubject) {
+    res.status(400).json({ error: 'Subject is required' });
+    return;
+  }
+
+  // Sanitize HTML content
+  const sanitizedHtml = html ? sanitizeHtml(html, LIMITS.MESSAGE_MAX * 10) : undefined;
+  const sanitizedText = text ? sanitizeString(text, LIMITS.MESSAGE_MAX) : undefined;
+
+  // Validate optional fields
+  const validatedCc = cc ? validateEmailArray(Array.isArray(cc) ? cc : [cc]) : undefined;
+  const validatedBcc = bcc ? validateEmailArray(Array.isArray(bcc) ? bcc : [bcc]) : undefined;
+  const validatedReplyTo = replyTo && isValidEmail(replyTo) ? replyTo : undefined;
+
+  try {
+    const response = await fetch(`${RESEND_BASE_URL}/emails`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: from || `Grace CRM <noreply@${process.env.EMAIL_DOMAIN || 'grace-crm.com'}>`,
+        to: validatedTo,
+        subject: sanitizedSubject,
+        html: sanitizedHtml,
+        text: sanitizedText,
+        reply_to: validatedReplyTo,
+        cc: validatedCc,
+        bcc: validatedBcc,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      res.status(response.status).json({ error: data.message || 'Failed to send email' });
+      return;
+    }
+
+    res.json({ success: true, messageId: data.id });
+  } catch (error) {
+    console.error('Email send error:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+}));
+
+// Send bulk emails with rate limiting
+app.post('/api/email/send-bulk', asyncHandler(async (req: Request, res: Response) => {
+  if (!RESEND_API_KEY) {
+    res.status(503).json({ error: 'Email service not configured' });
+    return;
+  }
+
+  const { emails, delayMs = 100 } = req.body;
+
+  if (!Array.isArray(emails) || emails.length === 0) {
+    res.status(400).json({ error: 'Emails array is required' });
+    return;
+  }
+
+  // Limit bulk emails to prevent abuse
+  if (emails.length > 100) {
+    res.status(400).json({ error: 'Maximum 100 emails per batch' });
+    return;
+  }
+
+  const results: Array<{ success: boolean; messageId?: string; error?: string }> = [];
+
+  for (const email of emails) {
+    // Validate each email in the batch
+    const toArray = Array.isArray(email.to) ? email.to : [email.to];
+    const validatedTo = validateEmailArray(toArray);
+    if (!validatedTo) {
+      results.push({ success: false, error: 'Invalid email address' });
+      continue;
+    }
+
+    const sanitizedSubject = sanitizeString(email.subject, LIMITS.SUBJECT_MAX);
+    if (!sanitizedSubject) {
+      results.push({ success: false, error: 'Missing subject' });
+      continue;
+    }
+
+    try {
+      const response = await fetch(`${RESEND_BASE_URL}/emails`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: email.from || `Grace CRM <noreply@${process.env.EMAIL_DOMAIN || 'grace-crm.com'}>`,
+          to: validatedTo,
+          subject: sanitizedSubject,
+          html: email.html ? sanitizeHtml(email.html, LIMITS.MESSAGE_MAX * 10) : undefined,
+          text: email.text ? sanitizeString(email.text, LIMITS.MESSAGE_MAX) : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        results.push({ success: true, messageId: data.id });
+      } else {
+        results.push({ success: false, error: data.message || 'Failed to send' });
+      }
+    } catch (error) {
+      results.push({ success: false, error: 'Request failed' });
+    }
+
+    // Rate limiting delay
+    if (delayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, Math.min(delayMs, 1000)));
+    }
+  }
+
+  const successful = results.filter(r => r.success).length;
+  res.json({
+    success: successful === emails.length,
+    total: emails.length,
+    successful,
+    failed: emails.length - successful,
+    results,
+  });
+}));
+
+// ============================================
+// SMS ROUTES (Twilio)
+// ============================================
+
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER;
+const TWILIO_BASE_URL = 'https://api.twilio.com/2010-04-01';
+
+// Format phone number to E.164 format
+function formatPhoneNumber(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+  if (digits.length === 11 && digits.startsWith('1')) {
+    return `+${digits}`;
+  }
+  if (!phone.startsWith('+')) {
+    return `+${digits}`;
+  }
+  return phone;
+}
+
+// Send SMS
+app.post('/api/sms/send', asyncHandler(async (req: Request, res: Response) => {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
+    res.status(503).json({ error: 'SMS service not configured' });
+    return;
+  }
+
+  const { to, message } = req.body;
+
+  // Validate required fields
+  if (!to || !message) {
+    res.status(400).json({ error: 'Recipient (to) and message are required' });
+    return;
+  }
+
+  // Validate phone number format
+  if (!isValidPhone(to)) {
+    res.status(400).json({ error: 'Invalid phone number format' });
+    return;
+  }
+
+  // Sanitize and limit message length
+  const sanitizedMessage = sanitizeString(message, LIMITS.SMS_MAX);
+  if (!sanitizedMessage) {
+    res.status(400).json({ error: 'Message is required' });
+    return;
+  }
+
+  try {
+    const formattedTo = formatPhoneNumber(to);
+    const formData = new URLSearchParams();
+    formData.append('To', formattedTo);
+    formData.append('From', TWILIO_FROM_NUMBER);
+    formData.append('Body', sanitizedMessage);
+
+    const response = await fetch(
+      `${TWILIO_BASE_URL}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      res.status(response.status).json({ error: data.message || 'Failed to send SMS' });
+      return;
+    }
+
+    res.json({ success: true, messageId: data.sid, status: data.status });
+  } catch (error) {
+    console.error('SMS send error:', error);
+    res.status(500).json({ error: 'Failed to send SMS' });
+  }
+}));
+
+// Send bulk SMS with rate limiting
+app.post('/api/sms/send-bulk', asyncHandler(async (req: Request, res: Response) => {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
+    res.status(503).json({ error: 'SMS service not configured' });
+    return;
+  }
+
+  const { messages, delayMs = 200 } = req.body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({ error: 'Messages array is required' });
+    return;
+  }
+
+  // Limit bulk SMS to prevent abuse
+  if (messages.length > 50) {
+    res.status(400).json({ error: 'Maximum 50 messages per batch' });
+    return;
+  }
+
+  const results: Array<{ success: boolean; messageId?: string; error?: string }> = [];
+
+  for (const msg of messages) {
+    // Validate each message in the batch
+    if (!msg.to || !msg.message) {
+      results.push({ success: false, error: 'Missing to or message' });
+      continue;
+    }
+
+    if (!isValidPhone(msg.to)) {
+      results.push({ success: false, error: 'Invalid phone number' });
+      continue;
+    }
+
+    const sanitizedMessage = sanitizeString(msg.message, LIMITS.SMS_MAX);
+    if (!sanitizedMessage) {
+      results.push({ success: false, error: 'Invalid message' });
+      continue;
+    }
+
+    try {
+      const formattedTo = formatPhoneNumber(msg.to);
+      const formData = new URLSearchParams();
+      formData.append('To', formattedTo);
+      formData.append('From', TWILIO_FROM_NUMBER);
+      formData.append('Body', sanitizedMessage);
+
+      const response = await fetch(
+        `${TWILIO_BASE_URL}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString(),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        results.push({ success: true, messageId: data.sid });
+      } else {
+        results.push({ success: false, error: data.message || 'Failed to send' });
+      }
+    } catch (error) {
+      results.push({ success: false, error: 'Request failed' });
+    }
+
+    // Rate limiting delay
+    if (delayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, Math.min(delayMs, 1000)));
+    }
+  }
+
+  const successful = results.filter(r => r.success).length;
+  res.json({
+    success: successful === messages.length,
+    total: messages.length,
+    successful,
+    failed: messages.length - successful,
+    results,
+  });
+}));
+
+// Get SMS status
+app.get('/api/sms/status/:messageId', asyncHandler(async (req: Request, res: Response) => {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
+    res.status(503).json({ error: 'SMS service not configured' });
+    return;
+  }
+
+  const { messageId } = req.params;
+
+  try {
+    const response = await fetch(
+      `${TWILIO_BASE_URL}/Accounts/${TWILIO_ACCOUNT_SID}/Messages/${messageId}.json`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      res.status(response.status).json({ error: data.message || 'Failed to get status' });
+      return;
+    }
+
+    res.json({ success: true, messageId: data.sid, status: data.status });
+  } catch (error) {
+    console.error('SMS status error:', error);
+    res.status(500).json({ error: 'Failed to get message status' });
+  }
+}));
+
+// ============================================
 // HEALTH CHECK
 // ============================================
 
@@ -516,6 +961,8 @@ app.get('/health', (_req: Request, res: Response) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     stripe: !!process.env.STRIPE_SECRET_KEY,
+    resend: !!RESEND_API_KEY,
+    twilio: !!(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_FROM_NUMBER),
     supabase: !!process.env.SUPABASE_URL,
   });
 });

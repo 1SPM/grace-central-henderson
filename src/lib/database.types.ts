@@ -5,10 +5,10 @@ export type MemberStatus = 'visitor' | 'regular' | 'member' | 'leader' | 'inacti
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskCategory = 'follow-up' | 'care' | 'admin' | 'outreach';
 export type InteractionType = 'note' | 'call' | 'email' | 'visit' | 'text' | 'prayer';
-export type EventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'other';
+export type EventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
 export type AttendanceType = 'sunday' | 'wednesday' | 'small-group' | 'special';
-export type GivingFund = 'tithe' | 'offering' | 'missions' | 'building' | 'other';
-export type GivingMethod = 'cash' | 'check' | 'card' | 'online';
+export type GivingFund = 'tithe' | 'offering' | 'missions' | 'building' | 'benevolence' | 'other';
+export type GivingMethod = 'cash' | 'check' | 'card' | 'online' | 'bank';
 export type UserRole = 'admin' | 'staff' | 'volunteer';
 
 // Row types (what you get from the database)

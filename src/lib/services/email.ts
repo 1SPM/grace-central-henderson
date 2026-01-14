@@ -164,19 +164,20 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
 };
 
 class EmailService {
-  private apiKey: string | null = null;
   private fromEmail: string = 'noreply@grace-crm.com';
   private fromName: string = 'Grace CRM';
-  private baseUrl: string = 'https://api.resend.com';
+  private apiBaseUrl: string = '/api/email'; // Backend API proxy
+  private isEnabled: boolean = false;
 
-  configure(config: { apiKey: string; fromEmail?: string; fromName?: string }) {
-    this.apiKey = config.apiKey;
+  configure(config: { fromEmail?: string; fromName?: string; apiBaseUrl?: string }) {
     if (config.fromEmail) this.fromEmail = config.fromEmail;
     if (config.fromName) this.fromName = config.fromName;
+    if (config.apiBaseUrl) this.apiBaseUrl = config.apiBaseUrl;
+    this.isEnabled = true;
   }
 
   isConfigured(): boolean {
-    return !!this.apiKey;
+    return this.isEnabled;
   }
 
   private replaceTemplateVariables(
@@ -191,13 +192,6 @@ class EmailService {
   }
 
   async send(params: SendEmailParams): Promise<EmailResult> {
-    if (!this.apiKey) {
-      return {
-        success: false,
-        error: 'Email service not configured. Please set your Resend API key.',
-      };
-    }
-
     try {
       let html = params.html;
       let subject = params.subject;
@@ -223,19 +217,20 @@ class EmailService {
         r.name ? `${r.name} <${r.email}>` : r.email
       );
 
-      const response = await fetch(`${this.baseUrl}/emails`, {
+      // Send via backend API proxy (no API key exposed in frontend)
+      const response = await fetch(`${this.apiBaseUrl}/send`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
           from: `${this.fromName} <${this.fromEmail}>`,
           to: toEmails,
           subject,
           html,
           text: params.text,
-          reply_to: params.replyTo,
+          replyTo: params.replyTo,
           cc: params.cc?.map((r) => (r.name ? `${r.name} <${r.email}>` : r.email)),
           bcc: params.bcc?.map((r) => (r.name ? `${r.name} <${r.email}>` : r.email)),
         }),
@@ -246,13 +241,13 @@ class EmailService {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || 'Failed to send email',
+          error: data.error || 'Failed to send email',
         };
       }
 
       return {
         success: true,
-        messageId: data.id,
+        messageId: data.messageId,
       };
     } catch (error) {
       return {
@@ -367,19 +362,72 @@ class EmailService {
     });
   }
 
-  // Bulk send with rate limiting
+  // Bulk send with rate limiting (via backend)
   async sendBulk(
     emails: SendEmailParams[],
     delayMs: number = 100
   ): Promise<EmailResult[]> {
-    const results: EmailResult[] = [];
-    for (const email of emails) {
-      const result = await this.send(email);
-      results.push(result);
-      // Rate limiting delay
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    try {
+      // Prepare emails with templates applied
+      const preparedEmails = emails.map((params) => {
+        let html = params.html;
+        let subject = params.subject;
+
+        if (params.template && EMAIL_TEMPLATES[params.template]) {
+          const template = EMAIL_TEMPLATES[params.template];
+          html = this.replaceTemplateVariables(
+            template.htmlContent,
+            params.templateData || {}
+          );
+          subject = this.replaceTemplateVariables(
+            template.subject,
+            params.templateData || {}
+          );
+        } else if (params.templateData && html) {
+          html = this.replaceTemplateVariables(html, params.templateData);
+          subject = this.replaceTemplateVariables(subject, params.templateData);
+        }
+
+        const recipients = Array.isArray(params.to) ? params.to : [params.to];
+        const toEmails = recipients.map((r) =>
+          r.name ? `${r.name} <${r.email}>` : r.email
+        );
+
+        return {
+          from: `${this.fromName} <${this.fromEmail}>`,
+          to: toEmails,
+          subject,
+          html,
+          text: params.text,
+        };
+      });
+
+      // Send via backend bulk endpoint
+      const response = await fetch(`${this.apiBaseUrl}/send-bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ emails: preparedEmails, delayMs }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return emails.map(() => ({
+          success: false,
+          error: data.error || 'Failed to send emails',
+        }));
+      }
+
+      return data.results || emails.map(() => ({ success: true }));
+    } catch (error) {
+      return emails.map(() => ({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      }));
     }
-    return results;
   }
 }
 

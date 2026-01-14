@@ -84,11 +84,11 @@ export interface Attendance {
 
 export interface Giving {
   id: string;
-  personId: string;
+  personId?: string;
   amount: number;
-  fund: 'tithe' | 'offering' | 'missions' | 'building' | 'other';
+  fund: 'tithe' | 'offering' | 'missions' | 'building' | 'benevolence' | 'other';
   date: string;
-  method: 'cash' | 'check' | 'card' | 'online';
+  method: 'cash' | 'check' | 'card' | 'online' | 'bank';
   isRecurring: boolean;
   note?: string;
 }
@@ -101,7 +101,7 @@ export interface CalendarEvent {
   endDate?: string;
   allDay: boolean;
   location?: string;
-  category: 'service' | 'meeting' | 'event' | 'small-group' | 'other';
+  category: 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
   attendees?: string[];
 }
 

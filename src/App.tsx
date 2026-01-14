@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { PeopleList } from './components/PeopleList';
@@ -8,7 +9,6 @@ import { Tasks } from './components/Tasks';
 import { Calendar } from './components/Calendar';
 import { Groups } from './components/Groups';
 import { Prayer } from './components/Prayer';
-// Giving component replaced by GivingDashboard
 import { GivingDashboard } from './components/GivingDashboard';
 import { OnlineGivingForm } from './components/OnlineGivingForm';
 import { BatchEntry } from './components/BatchEntry';
@@ -32,95 +32,22 @@ import { CharityBaskets } from './components/CharityBaskets';
 import { MemberDonationStats } from './components/MemberDonationStats';
 import { DonationTracker } from './components/DonationTracker';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance, Campaign, Pledge, DonationBatch, BatchItem, GivingStatement, CharityBasket, BasketItem } from './types';
-
-// Adapter functions to convert between database types and legacy component types
-function toPersonLegacy(p: {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string | null;
-  status: string;
-  photo_url: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zip: string | null;
-  birth_date: string | null;
-  join_date: string | null;
-  first_visit: string | null;
-  notes: string | null;
-  tags: string[];
-  family_id: string | null;
-}): LegacyPerson {
-  return {
-    id: p.id,
-    firstName: p.first_name,
-    lastName: p.last_name,
-    email: p.email || '',
-    phone: p.phone || '',
-    status: p.status as LegacyPerson['status'],
-    photo: p.photo_url || undefined,
-    address: p.address || undefined,
-    city: p.city || undefined,
-    state: p.state || undefined,
-    zip: p.zip || undefined,
-    birthDate: p.birth_date || undefined,
-    joinDate: p.join_date || undefined,
-    firstVisit: p.first_visit || undefined,
-    notes: p.notes || undefined,
-    tags: p.tags,
-    smallGroups: [], // Will be populated separately
-    familyId: p.family_id || undefined,
-  };
-}
-
-function toTaskLegacy(t: {
-  id: string;
-  person_id: string | null;
-  title: string;
-  description: string | null;
-  due_date: string;
-  completed: boolean;
-  priority: string;
-  category: string;
-  assigned_to: string | null;
-  created_at: string;
-}): LegacyTask {
-  return {
-    id: t.id,
-    personId: t.person_id || undefined,
-    title: t.title,
-    description: t.description || undefined,
-    dueDate: t.due_date,
-    completed: t.completed,
-    priority: t.priority as LegacyTask['priority'],
-    category: t.category as LegacyTask['category'],
-    assignedTo: t.assigned_to || undefined,
-    createdAt: t.created_at,
-  };
-}
-
-function toInteractionLegacy(i: {
-  id: string;
-  person_id: string;
-  type: string;
-  content: string;
-  created_by_name: string | null;
-  created_at: string;
-}): LegacyInteraction {
-  return {
-    id: i.id,
-    personId: i.person_id,
-    type: i.type as LegacyInteraction['type'],
-    content: i.content,
-    createdBy: i.created_by_name || 'Unknown',
-    createdAt: i.created_at,
-  };
-}
+import { useCollectionManagement } from './hooks/useCollectionManagement';
+import { useCharityBaskets } from './hooks/useCharityBaskets';
+import { useModals } from './hooks/useModals';
+import {
+  toPersonLegacy,
+  toTaskLegacy,
+  toInteractionLegacy,
+  toGroupLegacy,
+  toPrayerLegacy,
+  toEventLegacy,
+  toGivingLegacy,
+} from './utils/typeConverters';
+import type { View, Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance } from './types';
 
 function App() {
+  const { churchId } = useAuthContext();
   const [view, setView] = useState<View>('dashboard');
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
 
@@ -157,61 +84,15 @@ function App() {
 
   const tasks = dbTasks.map(toTaskLegacy);
   const interactions = dbInteractions.map(toInteractionLegacy);
+  const groups = dbGroups.map(toGroupLegacy);
+  const prayers = dbPrayers.map(toPrayerLegacy);
+  const events = dbEvents.map(toEventLegacy);
+  const giving = dbGiving.map(toGivingLegacy);
 
-  const groups = dbGroups.map(g => ({
-    id: g.id,
-    name: g.name,
-    description: g.description || undefined,
-    leaderId: g.leader_id || '',
-    meetingDay: g.meeting_day || undefined,
-    meetingTime: g.meeting_time || undefined,
-    location: g.location || undefined,
-    members: g.members,
-    isActive: g.is_active,
-  }));
-
-  const prayers = dbPrayers.map(p => ({
-    id: p.id,
-    personId: p.person_id,
-    content: p.content,
-    isPrivate: p.is_private,
-    isAnswered: p.is_answered,
-    testimony: p.testimony || undefined,
-    createdAt: p.created_at,
-    updatedAt: p.updated_at,
-  }));
-
-  const events = dbEvents.map(e => ({
-    id: e.id,
-    title: e.title,
-    description: e.description || undefined,
-    startDate: e.start_date,
-    endDate: e.end_date || undefined,
-    allDay: e.all_day,
-    location: e.location || undefined,
-    category: e.category as 'service' | 'meeting' | 'event' | 'small-group' | 'other',
-  }));
-
-  const giving = dbGiving.map(g => ({
-    id: g.id,
-    personId: g.person_id || '',
-    amount: g.amount,
-    fund: g.fund as 'tithe' | 'offering' | 'missions' | 'building' | 'other',
-    date: g.date,
-    method: g.method as 'cash' | 'check' | 'card' | 'online',
-    isRecurring: g.is_recurring,
-    note: g.note || undefined,
-  }));
-
-  // Modal states
-  const [showPersonForm, setShowPersonForm] = useState(false);
-  const [editingPerson, setEditingPerson] = useState<LegacyPerson | undefined>(undefined);
-  const [showSearch, setShowSearch] = useState(false);
-  const [showQuickTask, setShowQuickTask] = useState(false);
-  const [showQuickPrayer, setShowQuickPrayer] = useState(false);
-  const [showQuickNote, setShowQuickNote] = useState(false);
-  const [showQuickDonation, setShowQuickDonation] = useState(false);
-  const [quickDonationPersonId, setQuickDonationPersonId] = useState<string | undefined>(undefined);
+  // Custom hooks for state management
+  const modals = useModals();
+  const collectionMgmt = useCollectionManagement(giving);
+  const charityBasketMgmt = useCharityBaskets();
 
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
@@ -228,272 +109,6 @@ function App() {
     status: 'confirmed' | 'pending' | 'declined';
   }[]>([]);
 
-  // Collection & Donation Management state (demo data)
-  const [campaigns, setCampaigns] = useState<Campaign[]>([
-    {
-      id: 'campaign-1',
-      name: 'Building Fund 2025',
-      description: 'New sanctuary construction project',
-      goalAmount: 500000,
-      startDate: '2025-01-01',
-      endDate: '2025-12-31',
-      fund: 'building',
-      isActive: true,
-    },
-  ]);
-
-  const [pledges, setPledges] = useState<Pledge[]>([]);
-
-  const [donationBatches, setDonationBatches] = useState<DonationBatch[]>([]);
-
-  const [givingStatements, setGivingStatements] = useState<GivingStatement[]>([]);
-
-  // Charity Baskets state (demo data)
-  const [charityBaskets, setCharityBaskets] = useState<CharityBasket[]>([
-    {
-      id: 'basket-1',
-      name: 'Johnson Family Holiday Basket',
-      type: 'holiday',
-      description: 'Christmas basket for the Johnson family',
-      recipientName: 'Johnson Family',
-      status: 'collecting',
-      targetDate: '2025-12-20',
-      createdAt: new Date().toISOString(),
-      createdBy: 'Admin',
-      items: [
-        {
-          id: 'item-1',
-          basketId: 'basket-1',
-          name: 'Canned vegetables (assorted)',
-          category: 'food',
-          quantity: 6,
-          unit: 'cans',
-          estimatedValue: 12,
-          donorName: 'Smith Family',
-          donatedAt: new Date().toISOString(),
-        },
-      ],
-      totalValue: 12,
-    },
-  ]);
-
-  // Campaign handlers
-  const handleCreateCampaign = (campaign: Omit<Campaign, 'id'>) => {
-    const newCampaign: Campaign = {
-      ...campaign,
-      id: `campaign-${Date.now()}`,
-    };
-    setCampaigns((prev) => [...prev, newCampaign]);
-  };
-
-  const handleUpdateCampaign = (id: string, updates: Partial<Campaign>) => {
-    setCampaigns((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
-    );
-  };
-
-  // Pledge handlers
-  const handleCreatePledge = (pledge: Omit<Pledge, 'id'>) => {
-    const newPledge: Pledge = {
-      ...pledge,
-      id: `pledge-${Date.now()}`,
-      totalPledged: pledge.amount,
-      totalGiven: 0,
-      percentComplete: 0,
-    };
-    setPledges((prev) => [...prev, newPledge]);
-  };
-
-  const handleUpdatePledge = (id: string, updates: Partial<Pledge>) => {
-    setPledges((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-    );
-  };
-
-  const handleDeletePledge = (id: string) => {
-    setPledges((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  // Batch handlers
-  const handleCreateBatch = (batch: Omit<DonationBatch, 'id'>) => {
-    const newBatch: DonationBatch = {
-      ...batch,
-      id: `batch-${Date.now()}`,
-      items: [],
-    };
-    setDonationBatches((prev) => [...prev, newBatch]);
-  };
-
-  const handleAddBatchItem = (item: Omit<BatchItem, 'id'>) => {
-    const newItem: BatchItem = {
-      ...item,
-      id: `item-${Date.now()}`,
-    };
-
-    setDonationBatches((prev) =>
-      prev.map((b) => {
-        if (b.id === item.batchId) {
-          const items = [...(b.items || []), newItem];
-          const totalCash = items
-            .filter((i) => i.method === 'cash')
-            .reduce((sum, i) => sum + i.amount, 0);
-          const totalChecks = items
-            .filter((i) => i.method === 'check')
-            .reduce((sum, i) => sum + i.amount, 0);
-          const checkCount = items.filter((i) => i.method === 'check').length;
-
-          return {
-            ...b,
-            items,
-            totalCash,
-            totalChecks,
-            totalAmount: totalCash + totalChecks,
-            checkCount,
-          };
-        }
-        return b;
-      })
-    );
-  };
-
-  const handleRemoveBatchItem = (itemId: string) => {
-    setDonationBatches((prev) =>
-      prev.map((b) => {
-        const items = (b.items || []).filter((i) => i.id !== itemId);
-        const totalCash = items
-          .filter((i) => i.method === 'cash')
-          .reduce((sum, i) => sum + i.amount, 0);
-        const totalChecks = items
-          .filter((i) => i.method === 'check')
-          .reduce((sum, i) => sum + i.amount, 0);
-        const checkCount = items.filter((i) => i.method === 'check').length;
-
-        return {
-          ...b,
-          items,
-          totalCash,
-          totalChecks,
-          totalAmount: totalCash + totalChecks,
-          checkCount,
-        };
-      })
-    );
-  };
-
-  const handleCloseBatch = (batchId: string) => {
-    setDonationBatches((prev) =>
-      prev.map((b) =>
-        b.id === batchId
-          ? { ...b, status: 'closed' as const, closedAt: new Date().toISOString() }
-          : b
-      )
-    );
-  };
-
-  // Statement handlers
-  const handleGenerateStatement = (personId: string, year: number) => {
-    const personGiving = giving.filter(
-      (g) => g.personId === personId && new Date(g.date).getFullYear() === year
-    );
-    const total = personGiving.reduce((sum, g) => sum + g.amount, 0);
-    const byFund: Record<string, number> = {};
-    personGiving.forEach((g) => {
-      byFund[g.fund] = (byFund[g.fund] || 0) + g.amount;
-    });
-
-    const newStatement: GivingStatement = {
-      id: `stmt-${Date.now()}`,
-      personId,
-      year,
-      totalAmount: total,
-      byFund,
-      generatedAt: new Date().toISOString(),
-    };
-
-    setGivingStatements((prev) => {
-      // Replace existing statement for same person/year
-      const filtered = prev.filter(
-        (s) => !(s.personId === personId && s.year === year)
-      );
-      return [...filtered, newStatement];
-    });
-  };
-
-  const handleSendStatement = (statementId: string, method: 'email' | 'print') => {
-    setGivingStatements((prev) =>
-      prev.map((s) =>
-        s.id === statementId
-          ? { ...s, sentAt: new Date().toISOString(), sentMethod: method }
-          : s
-      )
-    );
-  };
-
-  // Charity Basket handlers
-  const handleCreateBasket = (basket: Omit<CharityBasket, 'id' | 'createdAt' | 'items' | 'totalValue'>) => {
-    const newBasket: CharityBasket = {
-      ...basket,
-      id: `basket-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      items: [],
-      totalValue: 0,
-    };
-    setCharityBaskets((prev) => [...prev, newBasket]);
-  };
-
-  const handleUpdateBasket = (id: string, updates: Partial<CharityBasket>) => {
-    setCharityBaskets((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
-    );
-  };
-
-  const handleDeleteBasket = (id: string) => {
-    setCharityBaskets((prev) => prev.filter((b) => b.id !== id));
-  };
-
-  const handleAddBasketItem = (basketId: string, item: Omit<BasketItem, 'id' | 'basketId' | 'donatedAt'>) => {
-    const newItem: BasketItem = {
-      ...item,
-      id: `item-${Date.now()}`,
-      basketId,
-      donatedAt: new Date().toISOString(),
-    };
-
-    setCharityBaskets((prev) =>
-      prev.map((b) => {
-        if (b.id === basketId) {
-          const items = [...b.items, newItem];
-          const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0) * i.quantity, 0);
-          return { ...b, items, totalValue };
-        }
-        return b;
-      })
-    );
-  };
-
-  const handleRemoveBasketItem = (basketId: string, itemId: string) => {
-    setCharityBaskets((prev) =>
-      prev.map((b) => {
-        if (b.id === basketId) {
-          const items = b.items.filter((i) => i.id !== itemId);
-          const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0) * i.quantity, 0);
-          return { ...b, items, totalValue };
-        }
-        return b;
-      })
-    );
-  };
-
-  const handleDistributeBasket = (basketId: string) => {
-    setCharityBaskets((prev) =>
-      prev.map((b) =>
-        b.id === basketId
-          ? { ...b, status: 'distributed' as const, distributedDate: new Date().toISOString() }
-          : b
-      )
-    );
-  };
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -509,49 +124,43 @@ function App() {
         case 'n':
           // N = New Person
           e.preventDefault();
-          setShowPersonForm(true);
-          setEditingPerson(undefined);
+          modals.openPersonForm();
           break;
         case 't':
           // T = New Task
           e.preventDefault();
-          setShowQuickTask(true);
+          modals.openQuickTask();
           break;
         case 'p':
           // P = New Prayer
           e.preventDefault();
-          setShowQuickPrayer(true);
+          modals.openQuickPrayer();
           break;
         case 'm':
           // M = New Note (Memo)
           e.preventDefault();
-          setShowQuickNote(true);
+          modals.openQuickNote();
           break;
         case 'd':
           // D = New Donation
           e.preventDefault();
-          handleOpenQuickDonation();
+          modals.openQuickDonation();
           break;
         case '/':
           // / = Search
           e.preventDefault();
-          setShowSearch(true);
+          modals.openSearch();
           break;
         case 'escape':
           // ESC = Close modals
-          setShowPersonForm(false);
-          setShowQuickTask(false);
-          setShowQuickPrayer(false);
-          setShowQuickNote(false);
-          setShowQuickDonation(false);
-          setShowSearch(false);
+          modals.closeAll();
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [modals]);
 
   const handleViewPerson = (id: string) => {
     setSelectedPersonId(id);
@@ -565,7 +174,7 @@ function App() {
 
   const handleAddInteraction = async (interaction: Omit<LegacyInteraction, 'id' | 'createdAt'>) => {
     await addInteraction({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: interaction.personId,
       type: interaction.type,
       content: interaction.content,
@@ -575,7 +184,7 @@ function App() {
 
   const handleAddTask = async (task: Omit<LegacyTask, 'id' | 'createdAt'>) => {
     await addTask({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: task.personId || null,
       title: task.title,
       description: task.description || null,
@@ -645,7 +254,7 @@ function App() {
 
   const handleAddPrayer = async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
     await addPrayer({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: prayer.personId,
       content: prayer.content,
       is_private: prayer.isPrivate,
@@ -653,7 +262,7 @@ function App() {
   };
 
   const handleAddGiving = async (donation: {
-    personId: string;
+    personId?: string;
     amount: number;
     fund: string;
     method: string;
@@ -662,7 +271,7 @@ function App() {
     note?: string;
   }) => {
     await addGiving({
-      church_id: 'demo-church',
+      church_id: churchId,
       person_id: donation.personId || null,
       amount: donation.amount,
       fund: donation.fund,
@@ -673,20 +282,13 @@ function App() {
     });
   };
 
-  const handleOpenQuickDonation = (personId?: string) => {
-    setQuickDonationPersonId(personId);
-    setShowQuickDonation(true);
-  };
-
   // Person CRUD handlers
   const handleAddPerson = () => {
-    setEditingPerson(undefined);
-    setShowPersonForm(true);
+    modals.openPersonForm();
   };
 
   const handleEditPerson = (person: LegacyPerson) => {
-    setEditingPerson(person);
-    setShowPersonForm(true);
+    modals.openPersonForm(person);
   };
 
   const handleSavePerson = async (personData: Omit<LegacyPerson, 'id'> | LegacyPerson) => {
@@ -713,7 +315,7 @@ function App() {
     } else {
       // Adding new person
       await addPerson({
-        church_id: 'demo-church',
+        church_id: churchId,
         first_name: personData.firstName,
         last_name: personData.lastName,
         email: personData.email || null,
@@ -732,8 +334,7 @@ function App() {
         family_id: personData.familyId || null,
       });
     }
-    setShowPersonForm(false);
-    setEditingPerson(undefined);
+    modals.closePersonForm();
   };
 
   // Bulk action handlers
@@ -756,7 +357,7 @@ function App() {
     for (const person of importedPeople) {
       if (person.firstName && person.lastName) {
         await addPerson({
-          church_id: 'demo-church',
+          church_id: churchId,
           first_name: person.firstName,
           last_name: person.lastName,
           email: person.email || null,
@@ -909,8 +510,8 @@ function App() {
           <GivingDashboard
             giving={giving}
             people={people}
-            campaigns={campaigns}
-            pledges={pledges}
+            campaigns={collectionMgmt.campaigns}
+            pledges={collectionMgmt.pledges}
             onNavigate={(subView) => setView(subView)}
           />
         );
@@ -931,11 +532,11 @@ function App() {
         return (
           <BatchEntry
             people={people}
-            batches={donationBatches}
-            onCreateBatch={handleCreateBatch}
-            onAddItem={handleAddBatchItem}
-            onRemoveItem={handleRemoveBatchItem}
-            onCloseBatch={handleCloseBatch}
+            batches={collectionMgmt.donationBatches}
+            onCreateBatch={collectionMgmt.createBatch}
+            onAddItem={collectionMgmt.addBatchItem}
+            onRemoveItem={collectionMgmt.removeBatchItem}
+            onCloseBatch={collectionMgmt.closeBatch}
             onBack={() => setView('giving')}
           />
         );
@@ -945,13 +546,13 @@ function App() {
         return (
           <PledgeManager
             people={people}
-            campaigns={campaigns}
-            pledges={pledges}
-            onCreateCampaign={handleCreateCampaign}
-            onUpdateCampaign={handleUpdateCampaign}
-            onCreatePledge={handleCreatePledge}
-            onUpdatePledge={handleUpdatePledge}
-            onDeletePledge={handleDeletePledge}
+            campaigns={collectionMgmt.campaigns}
+            pledges={collectionMgmt.pledges}
+            onCreateCampaign={collectionMgmt.createCampaign}
+            onUpdateCampaign={collectionMgmt.updateCampaign}
+            onCreatePledge={collectionMgmt.createPledge}
+            onUpdatePledge={collectionMgmt.updatePledge}
+            onDeletePledge={collectionMgmt.deletePledge}
             onBack={() => setView('giving')}
           />
         );
@@ -961,9 +562,9 @@ function App() {
           <GivingStatements
             giving={giving}
             people={people}
-            statements={givingStatements}
-            onGenerateStatement={handleGenerateStatement}
-            onSendStatement={handleSendStatement}
+            statements={collectionMgmt.givingStatements}
+            onGenerateStatement={collectionMgmt.generateStatement}
+            onSendStatement={collectionMgmt.sendStatement}
             onBack={() => setView('giving')}
           />
         );
@@ -971,14 +572,14 @@ function App() {
       case 'charity-baskets':
         return (
           <CharityBaskets
-            baskets={charityBaskets}
+            baskets={charityBasketMgmt.baskets}
             people={people}
-            onCreateBasket={handleCreateBasket}
-            onUpdateBasket={handleUpdateBasket}
-            onDeleteBasket={handleDeleteBasket}
-            onAddItem={handleAddBasketItem}
-            onRemoveItem={handleRemoveBasketItem}
-            onDistributeBasket={handleDistributeBasket}
+            onCreateBasket={charityBasketMgmt.createBasket}
+            onUpdateBasket={charityBasketMgmt.updateBasket}
+            onDeleteBasket={charityBasketMgmt.deleteBasket}
+            onAddItem={charityBasketMgmt.addItem}
+            onRemoveItem={charityBasketMgmt.removeItem}
+            onDistributeBasket={charityBasketMgmt.distributeBasket}
             onBack={() => setView('giving')}
           />
         );
@@ -1045,7 +646,7 @@ function App() {
       <Layout
         currentView={view}
         setView={setView}
-        onOpenSearch={() => setShowSearch(true)}
+        onOpenSearch={modals.openSearch}
       >
         {/* Demo Mode Banner */}
         {isDemo && (
@@ -1065,19 +666,16 @@ function App() {
       </Layout>
 
       {/* Person Form Modal */}
-      {showPersonForm && (
+      {modals.showPersonForm && (
         <PersonForm
-          person={editingPerson}
+          person={modals.editingPerson}
           onSave={handleSavePerson}
-          onClose={() => {
-            setShowPersonForm(false);
-            setEditingPerson(undefined);
-          }}
+          onClose={modals.closePersonForm}
         />
       )}
 
       {/* Global Search Modal */}
-      {showSearch && (
+      {modals.showSearch && (
         <GlobalSearch
           people={people}
           tasks={tasks}
@@ -1085,56 +683,53 @@ function App() {
           onSelectPerson={handleSearchSelectPerson}
           onSelectTask={() => setView('tasks')}
           onSelectPrayer={() => setView('prayer')}
-          onClose={() => setShowSearch(false)}
+          onClose={modals.closeSearch}
         />
       )}
 
       {/* Quick Actions FAB */}
       <QuickActions
         onAddPerson={handleAddPerson}
-        onAddTask={() => setShowQuickTask(true)}
-        onAddPrayer={() => setShowQuickPrayer(true)}
-        onAddNote={() => setShowQuickNote(true)}
-        onAddDonation={() => handleOpenQuickDonation()}
+        onAddTask={modals.openQuickTask}
+        onAddPrayer={modals.openQuickPrayer}
+        onAddNote={modals.openQuickNote}
+        onAddDonation={modals.openQuickDonation}
       />
 
       {/* Quick Task Form Modal */}
-      {showQuickTask && (
+      {modals.showQuickTask && (
         <QuickTaskForm
           people={people}
           onSave={handleAddTask}
-          onClose={() => setShowQuickTask(false)}
+          onClose={modals.closeQuickTask}
         />
       )}
 
       {/* Quick Prayer Form Modal */}
-      {showQuickPrayer && (
+      {modals.showQuickPrayer && (
         <QuickPrayerForm
           people={people}
           onSave={handleAddPrayer}
-          onClose={() => setShowQuickPrayer(false)}
+          onClose={modals.closeQuickPrayer}
         />
       )}
 
       {/* Quick Note Modal */}
-      {showQuickNote && (
+      {modals.showQuickNote && (
         <QuickNote
           people={people}
           onSave={handleAddInteraction}
-          onClose={() => setShowQuickNote(false)}
+          onClose={modals.closeQuickNote}
         />
       )}
 
       {/* Quick Donation Modal */}
-      {showQuickDonation && (
+      {modals.showQuickDonation && (
         <QuickDonationForm
           people={people}
-          defaultPersonId={quickDonationPersonId}
+          defaultPersonId={modals.quickDonationPersonId}
           onSave={handleAddGiving}
-          onClose={() => {
-            setShowQuickDonation(false);
-            setQuickDonationPersonId(undefined);
-          }}
+          onClose={modals.closeQuickDonation}
         />
       )}
 
