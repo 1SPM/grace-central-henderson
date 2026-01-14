@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Users2, MapPin, Clock, User } from 'lucide-react';
 import { SmallGroup, Person } from '../types';
 
@@ -7,7 +8,11 @@ interface GroupsProps {
 }
 
 export function Groups({ groups, people }: GroupsProps) {
-  const activeGroups = groups.filter(g => g.isActive);
+  // Memoize active groups filter
+  const activeGroups = useMemo(() => groups.filter(g => g.isActive), [groups]);
+
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   return (
     <div className="p-8">
@@ -18,8 +23,8 @@ export function Groups({ groups, people }: GroupsProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {activeGroups.map((group) => {
-          const leader = people.find(p => p.id === group.leaderId);
-          const members = group.members.map(id => people.find(p => p.id === id)).filter(Boolean) as Person[];
+          const leader = group.leaderId ? personMap.get(group.leaderId) : undefined;
+          const members = group.members.map(id => personMap.get(id)).filter(Boolean) as Person[];
 
           return (
             <div key={group.id} className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">

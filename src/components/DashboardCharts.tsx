@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { TrendingUp, Users, BarChart3 } from 'lucide-react';
 import type { Person, MemberStatus } from '../types';
 
@@ -21,28 +22,31 @@ const statusLabels: Record<MemberStatus, string> = {
   inactive: 'Inactive',
 };
 
+const activeStatuses: MemberStatus[] = ['visitor', 'regular', 'member', 'leader'];
+
 export function DashboardCharts({ people }: DashboardChartsProps) {
-  // Calculate counts by status
-  const statusCounts: Record<MemberStatus, number> = {
-    visitor: 0,
-    regular: 0,
-    member: 0,
-    leader: 0,
-    inactive: 0,
-  };
+  // Memoize all metrics calculation in single pass
+  const { statusCounts, maxCount, totalActive, conversionRate } = useMemo(() => {
+    const counts: Record<MemberStatus, number> = {
+      visitor: 0,
+      regular: 0,
+      member: 0,
+      leader: 0,
+      inactive: 0,
+    };
 
-  people.forEach((person) => {
-    statusCounts[person.status]++;
-  });
+    people.forEach((person) => {
+      counts[person.status]++;
+    });
 
-  const maxCount = Math.max(...Object.values(statusCounts), 1);
-  const activeStatuses: MemberStatus[] = ['visitor', 'regular', 'member', 'leader'];
+    const max = Math.max(...Object.values(counts), 1);
+    const active = activeStatuses.reduce((sum, status) => sum + counts[status], 0);
+    const rate = active > 0
+      ? Math.round(((counts.member + counts.leader) / active) * 100)
+      : 0;
 
-  // Calculate growth metrics (simulated for demo)
-  const totalActive = activeStatuses.reduce((sum, status) => sum + statusCounts[status], 0);
-  const conversionRate = totalActive > 0
-    ? Math.round(((statusCounts.member + statusCounts.leader) / totalActive) * 100)
-    : 0;
+    return { statusCounts: counts, maxCount: max, totalActive: active, conversionRate: rate };
+  }, [people]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

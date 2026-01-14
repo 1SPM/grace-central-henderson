@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Users,
   UserPlus,
@@ -23,9 +24,24 @@ interface DashboardProps {
 }
 
 export function Dashboard({ people, tasks, giving = [], onViewPerson, onViewTasks, onViewGiving }: DashboardProps) {
-  const visitors = people.filter(p => p.status === 'visitor');
-  const inactive = people.filter(p => p.status === 'inactive');
-  const pendingTasks = tasks.filter(t => !t.completed);
+  // Memoize filtered arrays to prevent recalculation on every render
+  const { visitors, inactive, pendingTasks } = useMemo(() => ({
+    visitors: people.filter(p => p.status === 'visitor'),
+    inactive: people.filter(p => p.status === 'inactive'),
+    pendingTasks: tasks.filter(t => !t.completed),
+  }), [people, tasks]);
+
+  // Memoize sorted pending tasks
+  const sortedPendingTasks = useMemo(() =>
+    [...pendingTasks].sort((a, b) => {
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    }).slice(0, 5),
+    [pendingTasks]
+  );
+
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   const stats = [
     {
@@ -139,14 +155,8 @@ export function Dashboard({ people, tasks, giving = [], onViewPerson, onViewTask
             </div>
           ) : (
             <div className="space-y-2">
-              {pendingTasks
-                .sort((a, b) => {
-                  const priorityOrder = { high: 0, medium: 1, low: 2 };
-                  return priorityOrder[a.priority] - priorityOrder[b.priority];
-                })
-                .slice(0, 5)
-                .map((task) => {
-                  const person = people.find(p => p.id === task.personId);
+              {sortedPendingTasks.map((task) => {
+                  const person = task.personId ? personMap.get(task.personId) : undefined;
                   const isOverdue = new Date(task.dueDate) < new Date();
 
                   return (
