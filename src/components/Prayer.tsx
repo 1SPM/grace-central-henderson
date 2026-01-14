@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Heart, Check, Lock, Unlock, Sparkles, Download } from 'lucide-react';
 import { PrayerRequest, Person } from '../types';
 import { exportPrayersToCSV } from '../utils/exportCsv';
@@ -13,11 +13,15 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'answered'>('active');
   const [testimonyInput, setTestimonyInput] = useState<Record<string, string>>({});
 
-  const filtered = prayers.filter((p) => {
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
+
+  // Memoize filtered prayers
+  const filtered = useMemo(() => prayers.filter((p) => {
     if (filter === 'active') return !p.isAnswered;
     if (filter === 'answered') return p.isAnswered;
     return true;
-  });
+  }), [prayers, filter]);
 
   const handleMarkAnswered = (id: string) => {
     onMarkAnswered(id, testimonyInput[id] || undefined);
@@ -60,7 +64,7 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
       {/* Prayer List */}
       <div className="space-y-4">
         {filtered.map((prayer) => {
-          const person = people.find(p => p.id === prayer.personId);
+          const person = prayer.personId ? personMap.get(prayer.personId) : undefined;
 
           return (
             <div

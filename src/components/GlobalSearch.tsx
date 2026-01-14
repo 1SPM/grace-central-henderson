@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, X, User, CheckSquare, Heart } from 'lucide-react';
 import { Person, Task, PrayerRequest } from '../types';
 
@@ -33,6 +33,9 @@ export function GlobalSearch({
   const [results, setResults] = useState<SearchResult[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Memoize person lookup map for O(1) access
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -65,13 +68,13 @@ export function GlobalSearch({
       }
     });
 
-    // Search tasks
+    // Search tasks (using personMap for O(1) lookup)
     tasks.forEach((task) => {
       if (
         task.title.toLowerCase().includes(q) ||
         task.description?.toLowerCase().includes(q)
       ) {
-        const person = people.find(p => p.id === task.personId);
+        const person = task.personId ? personMap.get(task.personId) : undefined;
         searchResults.push({
           type: 'task',
           id: task.id,
@@ -82,10 +85,10 @@ export function GlobalSearch({
       }
     });
 
-    // Search prayers
+    // Search prayers (using personMap for O(1) lookup)
     prayers.forEach((prayer) => {
       if (prayer.content.toLowerCase().includes(q)) {
-        const person = people.find(p => p.id === prayer.personId);
+        const person = prayer.personId ? personMap.get(prayer.personId) : undefined;
         searchResults.push({
           type: 'prayer',
           id: prayer.id,
@@ -97,7 +100,7 @@ export function GlobalSearch({
     });
 
     setResults(searchResults.slice(0, 10));
-  }, [query, people, tasks, prayers]);
+  }, [query, people, tasks, prayers, personMap]);
 
   const handleSelect = (result: SearchResult) => {
     switch (result.type) {

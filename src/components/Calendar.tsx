@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus } from 'lucide-react';
 import { CalendarEvent, Person } from '../types';
 
@@ -31,35 +31,54 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
   const [rsvpStatus, setRsvpStatus] = useState<RSVP['status']>('yes');
   const [rsvpGuests, setRsvpGuests] = useState(0);
 
-  const sortedEvents = [...events].sort(
-    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-  );
+  // Memoize sorted and grouped events
+  const groupedEvents = useMemo(() => {
+    const sorted = [...events].sort(
+      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
 
-  const groupedEvents: Record<string, CalendarEvent[]> = {};
-  sortedEvents.forEach((event) => {
-    const date = new Date(event.startDate).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
+    const grouped: Record<string, CalendarEvent[]> = {};
+    sorted.forEach((event) => {
+      const date = new Date(event.startDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+      });
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(event);
     });
-    if (!groupedEvents[date]) groupedEvents[date] = [];
-    groupedEvents[date].push(event);
-  });
+    return grouped;
+  }, [events]);
 
-  const getEventRSVPs = (eventId: string) => {
-    return rsvps.filter((r) => r.eventId === eventId);
-  };
+  // Memoize RSVP lookup by event ID
+  const rsvpsByEvent = useMemo(() => {
+    const map = new Map<string, RSVP[]>();
+    rsvps.forEach(r => {
+      const existing = map.get(r.eventId) || [];
+      existing.push(r);
+      map.set(r.eventId, existing);
+    });
+    return map;
+  }, [rsvps]);
 
-  const getRSVPCounts = (eventId: string) => {
-    const eventRsvps = getEventRSVPs(eventId);
-    const yes = eventRsvps.filter((r) => r.status === 'yes');
-    const no = eventRsvps.filter((r) => r.status === 'no');
-    const maybe = eventRsvps.filter((r) => r.status === 'maybe');
-    const totalAttending = yes.reduce((sum, r) => sum + 1 + r.guestCount, 0);
-    return { yes: yes.length, no: no.length, maybe: maybe.length, totalAttending };
-  };
+  // Get RSVP counts for an event (O(1) lookup)
+  const getRSVPCounts = useCallback((eventId: string) => {
+    const eventRsvps = rsvpsByEvent.get(eventId) || [];
+    let yesCount = 0, noCount = 0, maybeCount = 0, totalAttending = 0;
+    eventRsvps.forEach(r => {
+      if (r.status === 'yes') {
+        yesCount++;
+        totalAttending += 1 + r.guestCount;
+      } else if (r.status === 'no') {
+        noCount++;
+      } else {
+        maybeCount++;
+      }
+    });
+    return { yes: yesCount, no: noCount, maybe: maybeCount, totalAttending };
+  }, [rsvpsByEvent]);
 
-  const handleRSVP = () => {
+  const handleRSVP = useCallback(() => {
     if (!selectedEvent || !rsvpPersonId) return;
     onRSVP(selectedEvent.id, rsvpPersonId, rsvpStatus, rsvpGuests);
     setShowRSVPModal(false);
@@ -67,12 +86,12 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
     setRsvpPersonId('');
     setRsvpStatus('yes');
     setRsvpGuests(0);
-  };
+  }, [selectedEvent, rsvpPersonId, rsvpStatus, rsvpGuests, onRSVP]);
 
-  const openRSVPModal = (event: CalendarEvent) => {
+  const openRSVPModal = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
     setShowRSVPModal(true);
-  };
+  }, []);
 
   return (
     <div className="p-8">
