@@ -27,6 +27,8 @@ const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ defa
 const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
+const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
+const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -319,6 +321,12 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
+
+      case 'child-checkin':
+        return <ChildCheckIn people={people} onBack={() => setView('attendance')} />;
+
+      case 'forms':
+        return <FormBuilder onBack={() => setView('settings')} />;
 
       default:
         return null;

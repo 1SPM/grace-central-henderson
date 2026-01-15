@@ -26,6 +26,8 @@ import {
   Bot,
   QrCode,
   Contact,
+  Baby,
+  FormInput,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -43,6 +45,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'people', label: 'People', icon: <Users size={18} /> },
   { view: 'tasks', label: 'Follow-Ups', icon: <CheckSquare size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
+  { view: 'child-checkin', label: 'Child Check-In', icon: <Baby size={18} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
   { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <ClipboardList size={18} /> },
@@ -54,6 +57,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
   { view: 'directory', label: 'Directory', icon: <Contact size={18} /> },
   { view: 'connect-card', label: 'Connect Card', icon: <QrCode size={18} /> },
+  { view: 'forms', label: 'Forms', icon: <FormInput size={18} /> },
 ];
 
 // View labels for breadcrumbs
@@ -84,6 +88,8 @@ const viewLabels: Record<View, string> = {
   settings: 'Settings',
   'connect-card': 'Connect Card',
   directory: 'Directory',
+  'child-checkin': 'Child Check-In',
+  forms: 'Forms',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
