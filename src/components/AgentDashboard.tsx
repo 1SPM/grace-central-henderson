@@ -26,6 +26,9 @@ import {
   Calendar,
   Gift,
   Users,
+  Sparkles,
+  HelpCircle,
+  Info,
 } from 'lucide-react';
 import type {
   AgentConfig,
@@ -62,6 +65,28 @@ interface AgentCardProps {
   onToggle: (enabled: boolean) => void;
   onRun: () => void;
   onConfigure: () => void;
+  hasAI?: boolean;
+}
+
+// Tooltip component for help text
+function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative inline-flex">
+      <div
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      >
+        {children}
+      </div>
+      {show && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded-lg whitespace-nowrap z-50 shadow-lg">
+          {text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AgentCard({
@@ -73,6 +98,7 @@ function AgentCard({
   onToggle,
   onRun,
   onConfigure,
+  hasAI,
 }: AgentCardProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -88,18 +114,28 @@ function AgentCard({
       : 100;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-md">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+            <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
               {icon}
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                {config.name}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {config.name}
+                </h3>
+                {hasAI && (
+                  <Tooltip text="AI-powered personalization enabled">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full">
+                      <Sparkles className="w-3 h-3" />
+                      AI
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
               <span
                 className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${statusColor}`}
               >
@@ -275,6 +311,27 @@ export function AgentDashboard({
         </div>
       </div>
 
+      {/* Getting Started Banner */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 p-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-medium text-gray-900 dark:text-white">How AI Agents Work</h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Agents run automatically based on triggers like new members, donations, or upcoming birthdays.
+              Click the <Settings className="w-3.5 h-3.5 inline" /> gear icon to configure each agent,
+              or <Play className="w-3.5 h-3.5 inline" /> to run manually. Enable
+              <span className="inline-flex items-center gap-0.5 mx-1 px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full">
+                <Sparkles className="w-3 h-3" /> AI
+              </span>
+              in settings for personalized messages powered by Gemini.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="flex gap-4">
@@ -306,6 +363,7 @@ export function AgentDashboard({
             onToggle={(enabled) => onToggleAgent('life-event-agent', enabled)}
             onRun={() => onRunAgent('life-event-agent')}
             onConfigure={() => setConfigModal('life-event-agent')}
+            hasAI={lifeEventConfig.settings.useAIMessages}
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
@@ -354,6 +412,7 @@ export function AgentDashboard({
             onToggle={(enabled) => onToggleAgent('donation-processing-agent', enabled)}
             onRun={() => onRunAgent('donation-processing-agent')}
             onConfigure={() => setConfigModal('donation-processing-agent')}
+            hasAI={donationConfig.settings.useAIMessages}
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
@@ -402,6 +461,7 @@ export function AgentDashboard({
             onToggle={(enabled) => onToggleAgent('new-member-agent', enabled)}
             onRun={() => onRunAgent('new-member-agent')}
             onConfigure={() => setConfigModal('new-member-agent')}
+            hasAI={newMemberConfig.settings.useAIMessages}
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
@@ -610,6 +670,34 @@ function AgentConfigModal({
         <div className="p-4 space-y-4">
           {agentId === 'life-event-agent' && (
             <>
+              {/* AI Section */}
+              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <label className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      Use AI Messages
+                    </span>
+                    <Tooltip text="AI generates unique, personalized greetings for each person">
+                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                    </Tooltip>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.useAIMessages as boolean}
+                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
+                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                </label>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  Gemini AI creates heartfelt, personalized messages instead of templates
+                </p>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Event Types</p>
+              </div>
+
               <label className="flex items-center justify-between">
                 <span className="text-sm text-gray-700 dark:text-gray-300">
                   Enable Birthdays
@@ -634,6 +722,11 @@ function AgentConfigModal({
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
               </label>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Delivery Methods</p>
+              </div>
+
               <label className="flex items-center justify-between">
                 <span className="text-sm text-gray-700 dark:text-gray-300">
                   Send Email
@@ -672,10 +765,43 @@ function AgentConfigModal({
 
           {agentId === 'donation-processing-agent' && (
             <>
+              {/* AI Section */}
+              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <label className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      Use AI Messages
+                    </span>
+                    <Tooltip text="AI creates personalized thank-you messages for each donor">
+                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                    </Tooltip>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.useAIMessages as boolean}
+                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
+                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                </label>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  Gemini AI writes heartfelt, personalized thank-you notes for donations
+                </p>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Receipt Settings</p>
+              </div>
+
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Auto-send Receipts
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Auto-send Receipts
+                  </span>
+                  <Tooltip text="Automatically send tax receipts after each donation">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.autoSendReceipts as boolean}
@@ -684,9 +810,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Receipt Method
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Receipt Method
+                  </span>
+                  <Tooltip text="How to deliver donation receipts to givers">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <select
                   value={settings.receiptMethod as string}
                   onChange={(e) => updateSetting('receiptMethod', e.target.value)}
@@ -697,10 +828,20 @@ function AgentConfigModal({
                   <option value="both">Both</option>
                 </select>
               </label>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Tracking & Alerts</p>
+              </div>
+
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Track First-Time Givers
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Track First-Time Givers
+                  </span>
+                  <Tooltip text="Identify and flag new donors for special follow-up">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.trackFirstTimeGivers as boolean}
@@ -709,9 +850,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Alert on Large Gifts
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Alert on Large Gifts
+                  </span>
+                  <Tooltip text="Notify staff when donations exceed the threshold">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.alertOnLargeGifts as boolean}
@@ -720,9 +866,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Large Gift Threshold ($)
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Large Gift Threshold ($)
+                  </span>
+                  <Tooltip text="Donations above this amount trigger alerts">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="number"
                   value={settings.largeGiftThreshold as number}
@@ -737,10 +888,43 @@ function AgentConfigModal({
 
           {agentId === 'new-member-agent' && (
             <>
+              {/* AI Section */}
+              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <label className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      Use AI Messages
+                    </span>
+                    <Tooltip text="AI creates unique welcome messages tailored to each new member">
+                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                    </Tooltip>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.useAIMessages as boolean}
+                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
+                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                </label>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  Gemini AI writes warm, personalized welcome messages for new members
+                </p>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Onboarding Settings</p>
+              </div>
+
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Enable Welcome Sequence
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Enable Welcome Sequence
+                  </span>
+                  <Tooltip text="Send a series of welcome emails over the first few weeks">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.enableWelcomeSequence as boolean}
@@ -749,9 +933,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Enable Drip Campaign
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Enable Drip Campaign
+                  </span>
+                  <Tooltip text="Automated follow-up messages at scheduled intervals">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.enableDripCampaign as boolean}
@@ -760,9 +949,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Assign Follow-up Task
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Assign Follow-up Task
+                  </span>
+                  <Tooltip text="Create a task for staff to personally reach out">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="checkbox"
                   checked={settings.assignFollowUpTask as boolean}
@@ -771,9 +965,14 @@ function AgentConfigModal({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Pastor Name
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Pastor Name
+                  </span>
+                  <Tooltip text="Name to sign on welcome messages">
+                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </div>
                 <input
                   type="text"
                   value={settings.pastorName as string}
