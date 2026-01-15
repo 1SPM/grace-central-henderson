@@ -19,7 +19,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  TrendingDown,
 } from 'lucide-react';
 import type {
   AgentConfig,
@@ -327,6 +326,53 @@ export function AgentDashboard({
                 />
               </div>
             </div>
+
+            {/* Lapsed Giver Detection */}
+            <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-3">
+              <OptionRow
+                label="Detect lapsed givers"
+                enabled={donationConfig.settings.detectLapsedGivers ?? false}
+                onChange={(v) => updateSettings('donation-processing-agent', 'detectLapsedGivers', v)}
+              />
+              {donationConfig.settings.detectLapsedGivers && (
+                <>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Days without giving
+                    </span>
+                    <input
+                      type="number"
+                      value={donationConfig.settings.lapsedGiverDays ?? 30}
+                      onChange={(e) =>
+                        updateSettings(
+                          'donation-processing-agent',
+                          'lapsedGiverDays',
+                          parseInt(e.target.value) || 30
+                        )
+                      }
+                      className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Min. past donations
+                    </span>
+                    <input
+                      type="number"
+                      value={donationConfig.settings.lapsedGiverMinDonations ?? 3}
+                      onChange={(e) =>
+                        updateSettings(
+                          'donation-processing-agent',
+                          'lapsedGiverMinDonations',
+                          parseInt(e.target.value) || 3
+                        )
+                      }
+                      className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </AutomationCard>
 
@@ -368,14 +414,14 @@ export function AgentDashboard({
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Coming Soon</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <ComingSoonCard
-            icon={<TrendingDown className="w-4 h-4" />}
-            title="Lapsed Giver Alerts"
-            description="Get notified when regular donors stop giving"
-          />
-          <ComingSoonCard
             icon={<Zap className="w-4 h-4" />}
             title="Custom Workflows"
             description="Build your own multi-step automations"
+          />
+          <ComingSoonCard
+            icon={<Clock className="w-4 h-4" />}
+            title="Scheduled Reports"
+            description="Auto-email weekly giving & attendance summaries"
           />
         </div>
       </div>
