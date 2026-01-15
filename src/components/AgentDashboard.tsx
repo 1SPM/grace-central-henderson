@@ -1,34 +1,25 @@
 /**
  * Agent Dashboard Component
  *
- * Displays agent status, configuration, and activity logs.
- * Allows users to enable/disable agents and view upcoming actions.
+ * Simple automation management inspired by Breeze, Planning Center, and Churchteams.
+ * Uses "When → Then" pattern for clarity.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState } from 'react';
 import {
-  Bot,
   Cake,
   DollarSign,
   UserPlus,
-  Play,
-  Pause,
-  Settings,
+  Mail,
+  MessageSquare,
+  Zap,
+  ChevronRight,
+  Sparkles,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Mail,
-  MessageSquare,
-  Bell,
-  Calendar,
-  Gift,
-  Users,
-  Sparkles,
-  HelpCircle,
-  Info,
+  TrendingDown,
 } from 'lucide-react';
 import type {
   AgentConfig,
@@ -56,195 +47,151 @@ interface AgentDashboardProps {
   onRunAgent: (agentId: string) => void;
 }
 
-interface AgentCardProps {
-  config: AgentConfig;
-  icon: React.ReactNode;
-  stats: AgentStats;
-  description: string;
-  children?: React.ReactNode;
-  onToggle: (enabled: boolean) => void;
-  onRun: () => void;
-  onConfigure: () => void;
-  hasAI?: boolean;
+// Simple toggle switch component
+function Toggle({
+  enabled,
+  onChange,
+  label,
+}: {
+  enabled: boolean;
+  onChange: (enabled: boolean) => void;
+  label?: string;
+}) {
+  return (
+    <button
+      onClick={() => onChange(!enabled)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        enabled ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
+      }`}
+      aria-label={label}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+          enabled ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  );
 }
 
-// Tooltip component for help text
-function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
-  const [show, setShow] = useState(false);
+// Automation rule card - simple "When X → Then Y" pattern
+function AutomationCard({
+  icon,
+  iconBg,
+  title,
+  trigger,
+  action,
+  enabled,
+  onToggle,
+  hasAI,
+  onToggleAI,
+  aiEnabled,
+  children,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  trigger: string;
+  action: string;
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  hasAI?: boolean;
+  onToggleAI?: (enabled: boolean) => void;
+  aiEnabled?: boolean;
+  children?: React.ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div className="relative inline-flex">
-      <div
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-      >
-        {children}
-      </div>
-      {show && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded-lg whitespace-nowrap z-50 shadow-lg">
-          {text}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg border transition-all ${
+        enabled
+          ? 'border-indigo-200 dark:border-indigo-800 shadow-sm'
+          : 'border-gray-200 dark:border-gray-700 opacity-75'
+      }`}
+    >
+      <div className="p-4">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${iconBg}`}>{icon}</div>
+            <div>
+              <h3 className="font-medium text-gray-900 dark:text-white">{title}</h3>
+              {enabled && aiEnabled && (
+                <span className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400">
+                  <Sparkles className="w-3 h-3" /> AI personalization on
+                </span>
+              )}
+            </div>
+          </div>
+          <Toggle enabled={enabled} onChange={onToggle} label={`Toggle ${title}`} />
         </div>
-      )}
+
+        {/* When → Then description */}
+        <div className="flex items-start gap-2 text-sm">
+          <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs font-medium shrink-0">
+            When
+          </span>
+          <span className="text-gray-700 dark:text-gray-300">{trigger}</span>
+        </div>
+        <div className="flex items-start gap-2 text-sm mt-2">
+          <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-xs font-medium shrink-0">
+            Then
+          </span>
+          <span className="text-gray-700 dark:text-gray-300">{action}</span>
+        </div>
+
+        {/* AI toggle if available */}
+        {hasAI && enabled && (
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <Sparkles className="w-4 h-4 text-purple-500" />
+                Use AI for personalized messages
+              </span>
+              <Toggle
+                enabled={aiEnabled || false}
+                onChange={onToggleAI || (() => {})}
+                label="Toggle AI messages"
+              />
+            </label>
+          </div>
+        )}
+
+        {/* Expandable options */}
+        {children && enabled && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="mt-3 flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700"
+          >
+            <ChevronRight
+              className={`w-4 h-4 transition-transform ${expanded ? 'rotate-90' : ''}`}
+            />
+            {expanded ? 'Hide options' : 'More options'}
+          </button>
+        )}
+
+        {expanded && children && <div className="mt-3 space-y-3">{children}</div>}
+      </div>
     </div>
   );
 }
 
-function AgentCard({
-  config,
-  icon,
-  stats,
-  description,
-  children,
-  onToggle,
-  onRun,
-  onConfigure,
-  hasAI,
-}: AgentCardProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  const statusColor = config.enabled
-    ? config.status === 'active'
-      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
-
-  const successRate =
-    stats.totalActions > 0
-      ? Math.round((stats.successfulActions / stats.totalActions) * 100)
-      : 100;
-
+// Simple option toggle row
+function OptionRow({
+  label,
+  enabled,
+  onChange,
+}: {
+  label: string;
+  enabled: boolean;
+  onChange: (enabled: boolean) => void;
+}) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-md">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
-              {icon}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {config.name}
-                </h3>
-                {hasAI && (
-                  <Tooltip text="AI-powered personalization enabled">
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full">
-                      <Sparkles className="w-3 h-3" />
-                      AI
-                    </span>
-                  </Tooltip>
-                )}
-              </div>
-              <span
-                className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${statusColor}`}
-              >
-                {config.enabled ? config.status : 'Disabled'}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onConfigure}
-              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              title="Configure"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onToggle(!config.enabled)}
-              className={`p-1.5 rounded-lg transition-colors ${
-                config.enabled
-                  ? 'text-green-600 bg-green-100 dark:bg-green-900/30 hover:bg-green-200'
-                  : 'text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-              }`}
-              title={config.enabled ? 'Disable' : 'Enable'}
-            >
-              {config.enabled ? (
-                <Pause className="w-4 h-4" />
-              ) : (
-                <Play className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {description}
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 divide-x divide-gray-200 dark:divide-gray-700 bg-gray-50 dark:bg-gray-900/50">
-        <div className="p-3 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Actions</p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
-            {stats.totalActions}
-          </p>
-        </div>
-        <div className="p-3 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Success</p>
-          <p
-            className={`text-lg font-semibold ${
-              successRate >= 90
-                ? 'text-green-600'
-                : successRate >= 70
-                  ? 'text-yellow-600'
-                  : 'text-red-600'
-            }`}
-          >
-            {successRate}%
-          </p>
-        </div>
-        <div className="p-3 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Last Run</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {stats.lastRunAt
-              ? new Date(stats.lastRunAt).toLocaleDateString()
-              : 'Never'}
-          </p>
-        </div>
-      </div>
-
-      {/* Expandable content */}
-      {children && (
-        <>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="w-full px-4 py-2 flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700"
-          >
-            {expanded ? (
-              <>
-                <ChevronUp className="w-4 h-4" /> Hide Details
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-4 h-4" /> Show Details
-              </>
-            )}
-          </button>
-          {expanded && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              {children}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Run Button */}
-      {config.enabled && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={onRun}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-          >
-            <Play className="w-4 h-4" />
-            Run Now
-          </button>
-        </div>
-      )}
-    </div>
+    <label className="flex items-center justify-between py-2 cursor-pointer">
+      <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+      <Toggle enabled={enabled} onChange={onChange} />
+    </label>
   );
 }
 
@@ -257,748 +204,289 @@ export function AgentDashboard({
   stats,
   onToggleAgent,
   onUpdateConfig,
-  onRunAgent,
 }: AgentDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'upcoming'>('overview');
-  const [configModal, setConfigModal] = useState<string | null>(null);
+  const totalActions = Object.values(stats).reduce((sum, s) => sum + s.totalActions, 0);
 
-  // Filter logs by level
-  const errorLogs = useMemo(
-    () => recentLogs.filter((log) => log.level === 'error'),
-    [recentLogs]
-  );
-
-  const handleConfigSave = useCallback(
-    (agentId: string, settings: Record<string, unknown>) => {
-      onUpdateConfig(agentId, { settings });
-      setConfigModal(null);
-    },
-    [onUpdateConfig]
-  );
+  const updateSettings = (agentId: string, key: string, value: unknown) => {
+    const config =
+      agentId === 'life-event-agent'
+        ? lifeEventConfig
+        : agentId === 'donation-processing-agent'
+          ? donationConfig
+          : newMemberConfig;
+    onUpdateConfig(agentId, { settings: { ...config.settings, [key]: value } });
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-            <Bot className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              AI Agents
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Automate engagement, finance, and pastoral care
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Automations</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Set it and forget it. Automations run in the background.
+          </p>
         </div>
-
-        {/* Quick stats */}
-        <div className="flex items-center gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-indigo-600">
-              {Object.values(stats).reduce((sum, s) => sum + s.totalActions, 0)}
-            </p>
-            <p className="text-xs text-gray-500">Total Actions</p>
+        {totalActions > 0 && (
+          <div className="text-right">
+            <p className="text-2xl font-bold text-indigo-600">{totalActions}</p>
+            <p className="text-xs text-gray-500">messages sent</p>
           </div>
-          {errorLogs.length > 0 && (
-            <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-sm font-medium">{errorLogs.length} errors</span>
+        )}
+      </div>
+
+      {/* Automations Grid */}
+      <div className="space-y-4">
+        {/* Birthdays & Anniversaries */}
+        <AutomationCard
+          icon={<Cake className="w-5 h-5 text-pink-600" />}
+          iconBg="bg-pink-100 dark:bg-pink-900/30"
+          title="Birthday & Anniversary Greetings"
+          trigger="Someone has a birthday or membership anniversary"
+          action="Send them a personalized greeting via email or SMS"
+          enabled={lifeEventConfig.enabled}
+          onToggle={(enabled) => onToggleAgent('life-event-agent', enabled)}
+          hasAI
+          aiEnabled={lifeEventConfig.settings.useAIMessages}
+          onToggleAI={(enabled) => updateSettings('life-event-agent', 'useAIMessages', enabled)}
+        >
+          <div className="border-t border-gray-100 dark:border-gray-700 pt-3 space-y-1">
+            <OptionRow
+              label="Birthdays"
+              enabled={lifeEventConfig.settings.enableBirthdays}
+              onChange={(v) => updateSettings('life-event-agent', 'enableBirthdays', v)}
+            />
+            <OptionRow
+              label="Membership anniversaries"
+              enabled={lifeEventConfig.settings.enableMembershipAnniversaries}
+              onChange={(v) =>
+                updateSettings('life-event-agent', 'enableMembershipAnniversaries', v)
+              }
+            />
+            <OptionRow
+              label="Send via email"
+              enabled={lifeEventConfig.settings.sendEmail}
+              onChange={(v) => updateSettings('life-event-agent', 'sendEmail', v)}
+            />
+            <OptionRow
+              label="Send via SMS"
+              enabled={lifeEventConfig.settings.sendSMS}
+              onChange={(v) => updateSettings('life-event-agent', 'sendSMS', v)}
+            />
+          </div>
+        </AutomationCard>
+
+        {/* Donation Thank You */}
+        <AutomationCard
+          icon={<DollarSign className="w-5 h-5 text-green-600" />}
+          iconBg="bg-green-100 dark:bg-green-900/30"
+          title="Donation Receipts & Thank You"
+          trigger="Someone makes a donation"
+          action="Send a receipt and personalized thank-you message"
+          enabled={donationConfig.enabled}
+          onToggle={(enabled) => onToggleAgent('donation-processing-agent', enabled)}
+          hasAI
+          aiEnabled={donationConfig.settings.useAIMessages}
+          onToggleAI={(enabled) =>
+            updateSettings('donation-processing-agent', 'useAIMessages', enabled)
+          }
+        >
+          <div className="border-t border-gray-100 dark:border-gray-700 pt-3 space-y-1">
+            <OptionRow
+              label="Auto-send receipts"
+              enabled={donationConfig.settings.autoSendReceipts}
+              onChange={(v) => updateSettings('donation-processing-agent', 'autoSendReceipts', v)}
+            />
+            <OptionRow
+              label="Track first-time givers"
+              enabled={donationConfig.settings.trackFirstTimeGivers}
+              onChange={(v) =>
+                updateSettings('donation-processing-agent', 'trackFirstTimeGivers', v)
+              }
+            />
+            <OptionRow
+              label="Alert on large gifts"
+              enabled={donationConfig.settings.alertOnLargeGifts}
+              onChange={(v) => updateSettings('donation-processing-agent', 'alertOnLargeGifts', v)}
+            />
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Large gift threshold</span>
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500">$</span>
+                <input
+                  type="number"
+                  value={donationConfig.settings.largeGiftThreshold}
+                  onChange={(e) =>
+                    updateSettings(
+                      'donation-processing-agent',
+                      'largeGiftThreshold',
+                      parseInt(e.target.value) || 0
+                    )
+                  }
+                  className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+                />
+              </div>
             </div>
-          )}
+          </div>
+        </AutomationCard>
+
+        {/* New Member Welcome */}
+        <AutomationCard
+          icon={<UserPlus className="w-5 h-5 text-indigo-600" />}
+          iconBg="bg-indigo-100 dark:bg-indigo-900/30"
+          title="New Member Welcome"
+          trigger="Someone joins as a new member"
+          action="Send a welcome message and start follow-up sequence"
+          enabled={newMemberConfig.enabled}
+          onToggle={(enabled) => onToggleAgent('new-member-agent', enabled)}
+          hasAI
+          aiEnabled={newMemberConfig.settings.useAIMessages}
+          onToggleAI={(enabled) => updateSettings('new-member-agent', 'useAIMessages', enabled)}
+        >
+          <div className="border-t border-gray-100 dark:border-gray-700 pt-3 space-y-1">
+            <OptionRow
+              label="Welcome email sequence"
+              enabled={newMemberConfig.settings.enableWelcomeSequence}
+              onChange={(v) => updateSettings('new-member-agent', 'enableWelcomeSequence', v)}
+            />
+            <OptionRow
+              label="Follow-up drip campaign"
+              enabled={newMemberConfig.settings.enableDripCampaign}
+              onChange={(v) => updateSettings('new-member-agent', 'enableDripCampaign', v)}
+            />
+            <OptionRow
+              label="Create follow-up task for staff"
+              enabled={newMemberConfig.settings.assignFollowUpTask}
+              onChange={(v) => updateSettings('new-member-agent', 'assignFollowUpTask', v)}
+            />
+          </div>
+        </AutomationCard>
+      </div>
+
+      {/* Coming Soon - Missing Features from Competitors */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Coming Soon</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <ComingSoonCard
+            icon={<TrendingDown className="w-4 h-4" />}
+            title="Lapsed Giver Alerts"
+            description="Get notified when regular donors stop giving"
+          />
+          <ComingSoonCard
+            icon={<Zap className="w-4 h-4" />}
+            title="Custom Workflows"
+            description="Build your own multi-step automations"
+          />
         </div>
       </div>
 
-      {/* Getting Started Banner */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 p-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-gray-900 dark:text-white">How AI Agents Work</h3>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Agents run automatically based on triggers like new members, donations, or upcoming birthdays.
-              Click the <Settings className="w-3.5 h-3.5 inline" /> gear icon to configure each agent,
-              or <Play className="w-3.5 h-3.5 inline" /> to run manually. Enable
-              <span className="inline-flex items-center gap-0.5 mx-1 px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full">
-                <Sparkles className="w-3 h-3" /> AI
-              </span>
-              in settings for personalized messages powered by Gemini.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex gap-4">
-          {(['overview', 'upcoming', 'logs'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Life Event Agent */}
-          <AgentCard
-            config={lifeEventConfig}
-            icon={<Cake className="w-5 h-5" />}
-            stats={stats.lifeEvent}
-            description="Sends birthday and anniversary greetings automatically"
-            onToggle={(enabled) => onToggleAgent('life-event-agent', enabled)}
-            onRun={() => onRunAgent('life-event-agent')}
-            onConfigure={() => setConfigModal('life-event-agent')}
-            hasAI={lifeEventConfig.settings.useAIMessages}
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Birthdays</span>
-                <span
-                  className={
-                    lifeEventConfig.settings.enableBirthdays
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {lifeEventConfig.settings.enableBirthdays ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Membership Anniversaries
-                </span>
-                <span
-                  className={
-                    lifeEventConfig.settings.enableMembershipAnniversaries
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {lifeEventConfig.settings.enableMembershipAnniversaries
-                    ? 'Enabled'
-                    : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <Mail className="w-4 h-4" />
-                <span>Email: {lifeEventConfig.settings.sendEmail ? 'On' : 'Off'}</span>
-                <MessageSquare className="w-4 h-4 ml-2" />
-                <span>SMS: {lifeEventConfig.settings.sendSMS ? 'On' : 'Off'}</span>
-              </div>
-            </div>
-          </AgentCard>
-
-          {/* Donation Processing Agent */}
-          <AgentCard
-            config={donationConfig}
-            icon={<DollarSign className="w-5 h-5" />}
-            stats={stats.donation}
-            description="Processes donations with receipts and thank-you messages"
-            onToggle={(enabled) => onToggleAgent('donation-processing-agent', enabled)}
-            onRun={() => onRunAgent('donation-processing-agent')}
-            onConfigure={() => setConfigModal('donation-processing-agent')}
-            hasAI={donationConfig.settings.useAIMessages}
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Auto Receipts</span>
-                <span
-                  className={
-                    donationConfig.settings.autoSendReceipts
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {donationConfig.settings.autoSendReceipts ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  First-Time Giver Tracking
-                </span>
-                <span
-                  className={
-                    donationConfig.settings.trackFirstTimeGivers
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {donationConfig.settings.trackFirstTimeGivers ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Large Gift Alert
-                </span>
-                <span className="text-gray-900 dark:text-white">
-                  ${donationConfig.settings.largeGiftThreshold}+
-                </span>
-              </div>
-            </div>
-          </AgentCard>
-
-          {/* New Member Agent */}
-          <AgentCard
-            config={newMemberConfig}
-            icon={<UserPlus className="w-5 h-5" />}
-            stats={stats.newMember}
-            description="Onboards new members with welcome sequences"
-            onToggle={(enabled) => onToggleAgent('new-member-agent', enabled)}
-            onRun={() => onRunAgent('new-member-agent')}
-            onConfigure={() => setConfigModal('new-member-agent')}
-            hasAI={newMemberConfig.settings.useAIMessages}
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Welcome Sequence
-                </span>
-                <span
-                  className={
-                    newMemberConfig.settings.enableWelcomeSequence
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {newMemberConfig.settings.enableWelcomeSequence ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Drip Campaign</span>
-                <span
-                  className={
-                    newMemberConfig.settings.enableDripCampaign
-                      ? 'text-green-600'
-                      : 'text-gray-400'
-                  }
-                >
-                  {newMemberConfig.settings.enableDripCampaign ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Drip Days: {newMemberConfig.settings.dripCampaignDays.join(', ')}
-              </div>
-            </div>
-          </AgentCard>
-        </div>
-      )}
-
-      {activeTab === 'upcoming' && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-600" />
-              Upcoming Life Events (Next 7 Days)
-            </h2>
-          </div>
-
-          {upcomingLifeEvents.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No upcoming life events in the next 7 days</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {upcomingLifeEvents.map((event, idx) => (
-                <div
-                  key={`${event.personId}-${event.type}-${idx}`}
-                  className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        event.type === 'birthday'
-                          ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
-                          : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                      }`}
-                    >
-                      {event.type === 'birthday' ? (
-                        <Cake className="w-5 h-5" />
-                      ) : (
-                        <Users className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {event.personName}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {event.type === 'birthday'
-                          ? `Birthday${event.yearsCount ? ` - Turning ${event.yearsCount}` : ''}`
-                          : `${event.yearsCount} Year Membership Anniversary`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {new Date(event.date).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      {event.email && <Mail className="w-3 h-3" />}
-                      {event.phone && <MessageSquare className="w-3 h-3" />}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'logs' && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-indigo-600" />
-              Recent Activity
-            </h2>
-          </div>
-
-          {recentLogs.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No recent activity logs</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
-              {recentLogs.slice(0, 50).map((log) => (
-                <div
-                  key={log.id}
-                  className="p-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
+      {/* Upcoming Events Preview */}
+      {upcomingLifeEvents.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Upcoming This Week
+          </h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+            {upcomingLifeEvents.slice(0, 5).map((event, idx) => (
+              <div
+                key={`${event.personId}-${idx}`}
+                className="p-3 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
                   <div
-                    className={`mt-0.5 ${
-                      log.level === 'error'
-                        ? 'text-red-500'
-                        : log.level === 'warning'
-                          ? 'text-yellow-500'
-                          : 'text-green-500'
+                    className={`p-1.5 rounded ${
+                      event.type === 'birthday'
+                        ? 'bg-pink-100 text-pink-600'
+                        : 'bg-purple-100 text-purple-600'
                     }`}
                   >
-                    {log.level === 'error' ? (
-                      <XCircle className="w-4 h-4" />
-                    ) : log.level === 'warning' ? (
-                      <AlertCircle className="w-4 h-4" />
-                    ) : (
-                      <CheckCircle className="w-4 h-4" />
-                    )}
+                    <Cake className="w-4 h-4" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 dark:text-white">
-                      {log.message}
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      {event.personName}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(log.timestamp).toLocaleString()} • {log.agentId}
+                    <p className="text-xs text-gray-500">
+                      {event.type === 'birthday' ? 'Birthday' : 'Anniversary'}
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  {event.email && <Mail className="w-3 h-3" />}
+                  {event.phone && <MessageSquare className="w-3 h-3" />}
+                  <span>
+                    {new Date(event.date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Configuration Modal */}
-      {configModal && (
-        <AgentConfigModal
-          agentId={configModal}
-          config={
-            configModal === 'life-event-agent'
-              ? lifeEventConfig
-              : configModal === 'donation-processing-agent'
-                ? donationConfig
-                : newMemberConfig
-          }
-          onSave={(settings) => handleConfigSave(configModal, settings)}
-          onClose={() => setConfigModal(null)}
-        />
+      {/* Recent Activity */}
+      {recentLogs.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Recent Activity
+          </h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+            {recentLogs.slice(0, 5).map((log) => (
+              <div key={log.id} className="p-3 flex items-start gap-3">
+                <div
+                  className={`mt-0.5 ${
+                    log.level === 'error'
+                      ? 'text-red-500'
+                      : log.level === 'warning'
+                        ? 'text-yellow-500'
+                        : 'text-green-500'
+                  }`}
+                >
+                  {log.level === 'error' ? (
+                    <XCircle className="w-4 h-4" />
+                  ) : log.level === 'warning' ? (
+                    <AlertCircle className="w-4 h-4" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 dark:text-white">{log.message}</p>
+                  <p className="text-xs text-gray-500">
+                    <Clock className="w-3 h-3 inline mr-1" />
+                    {new Date(log.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-// Configuration Modal Component
-function AgentConfigModal({
-  agentId,
-  config,
-  onSave,
-  onClose,
+// Coming soon feature placeholder
+function ComingSoonCard({
+  icon,
+  title,
+  description,
 }: {
-  agentId: string;
-  config: AgentConfig;
-  onSave: (settings: Record<string, unknown>) => void;
-  onClose: () => void;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
 }) {
-  const [settings, setSettings] = useState(config.settings);
-
-  const updateSetting = (key: string, value: unknown) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Configure {config.name}
-          </h2>
-        </div>
-
-        <div className="p-4 space-y-4">
-          {agentId === 'life-event-agent' && (
-            <>
-              {/* AI Section */}
-              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                <label className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      Use AI Messages
-                    </span>
-                    <Tooltip text="AI generates unique, personalized greetings for each person">
-                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                    </Tooltip>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.useAIMessages as boolean}
-                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                  />
-                </label>
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  Gemini AI creates heartfelt, personalized messages instead of templates
-                </p>
-              </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Event Types</p>
-              </div>
-
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Enable Birthdays
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.enableBirthdays as boolean}
-                  onChange={(e) => updateSetting('enableBirthdays', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Enable Membership Anniversaries
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.enableMembershipAnniversaries as boolean}
-                  onChange={(e) =>
-                    updateSetting('enableMembershipAnniversaries', e.target.checked)
-                  }
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Delivery Methods</p>
-              </div>
-
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Send Email
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.sendEmail as boolean}
-                  onChange={(e) => updateSetting('sendEmail', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Send SMS
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.sendSMS as boolean}
-                  onChange={(e) => updateSetting('sendSMS', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Auto-send (vs. notify staff)
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.autoSend as boolean}
-                  onChange={(e) => updateSetting('autoSend', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-            </>
-          )}
-
-          {agentId === 'donation-processing-agent' && (
-            <>
-              {/* AI Section */}
-              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                <label className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      Use AI Messages
-                    </span>
-                    <Tooltip text="AI creates personalized thank-you messages for each donor">
-                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                    </Tooltip>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.useAIMessages as boolean}
-                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                  />
-                </label>
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  Gemini AI writes heartfelt, personalized thank-you notes for donations
-                </p>
-              </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Receipt Settings</p>
-              </div>
-
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Auto-send Receipts
-                  </span>
-                  <Tooltip text="Automatically send tax receipts after each donation">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.autoSendReceipts as boolean}
-                  onChange={(e) => updateSetting('autoSendReceipts', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Receipt Method
-                  </span>
-                  <Tooltip text="How to deliver donation receipts to givers">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <select
-                  value={settings.receiptMethod as string}
-                  onChange={(e) => updateSetting('receiptMethod', e.target.value)}
-                  className="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                >
-                  <option value="email">Email Only</option>
-                  <option value="sms">SMS Only</option>
-                  <option value="both">Both</option>
-                </select>
-              </label>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Tracking & Alerts</p>
-              </div>
-
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Track First-Time Givers
-                  </span>
-                  <Tooltip text="Identify and flag new donors for special follow-up">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.trackFirstTimeGivers as boolean}
-                  onChange={(e) => updateSetting('trackFirstTimeGivers', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Alert on Large Gifts
-                  </span>
-                  <Tooltip text="Notify staff when donations exceed the threshold">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.alertOnLargeGifts as boolean}
-                  onChange={(e) => updateSetting('alertOnLargeGifts', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Large Gift Threshold ($)
-                  </span>
-                  <Tooltip text="Donations above this amount trigger alerts">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="number"
-                  value={settings.largeGiftThreshold as number}
-                  onChange={(e) =>
-                    updateSetting('largeGiftThreshold', parseInt(e.target.value) || 0)
-                  }
-                  className="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </label>
-            </>
-          )}
-
-          {agentId === 'new-member-agent' && (
-            <>
-              {/* AI Section */}
-              <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                <label className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      Use AI Messages
-                    </span>
-                    <Tooltip text="AI creates unique welcome messages tailored to each new member">
-                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                    </Tooltip>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.useAIMessages as boolean}
-                    onChange={(e) => updateSetting('useAIMessages', e.target.checked)}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                  />
-                </label>
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  Gemini AI writes warm, personalized welcome messages for new members
-                </p>
-              </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Onboarding Settings</p>
-              </div>
-
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Enable Welcome Sequence
-                  </span>
-                  <Tooltip text="Send a series of welcome emails over the first few weeks">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.enableWelcomeSequence as boolean}
-                  onChange={(e) => updateSetting('enableWelcomeSequence', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Enable Drip Campaign
-                  </span>
-                  <Tooltip text="Automated follow-up messages at scheduled intervals">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.enableDripCampaign as boolean}
-                  onChange={(e) => updateSetting('enableDripCampaign', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Assign Follow-up Task
-                  </span>
-                  <Tooltip text="Create a task for staff to personally reach out">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.assignFollowUpTask as boolean}
-                  onChange={(e) => updateSetting('assignFollowUpTask', e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Pastor Name
-                  </span>
-                  <Tooltip text="Name to sign on welcome messages">
-                    <HelpCircle className="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                  </Tooltip>
-                </div>
-                <input
-                  type="text"
-                  value={settings.pastorName as string}
-                  onChange={(e) => updateSetting('pastorName', e.target.value)}
-                  className="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </label>
-            </>
-          )}
-        </div>
-
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave(settings)}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Save Changes
-          </button>
-        </div>
+    <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+      <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+        {icon}
+        <span className="font-medium text-sm">{title}</span>
       </div>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{description}</p>
     </div>
   );
 }
