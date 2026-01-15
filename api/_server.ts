@@ -27,12 +27,12 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 // Import route modules
-import { initPaymentRoutes } from './routes/payments';
-import emailRoutes from './routes/email';
-import smsRoutes from './routes/sms';
-import agentRoutes from './routes/agents';
-import aiRoutes from './routes/ai';
-import { initWebhookRoutes } from './routes/webhooks';
+import { initPaymentRoutes } from './_routes/payments';
+import emailRoutes from './_routes/email';
+import smsRoutes from './_routes/sms';
+import agentRoutes from './_routes/agents';
+import aiRoutes from './_routes/ai';
+import { initWebhookRoutes } from './_routes/webhooks';
 
 // Initialize Express
 const app = express();
