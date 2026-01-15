@@ -1,32 +1,43 @@
+import { lazy, Suspense } from 'react';
 import { Dashboard } from './Dashboard';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
-import { Calendar } from './Calendar';
-import { Groups } from './Groups';
-import { Prayer } from './Prayer';
-import { GivingDashboard } from './GivingDashboard';
-import { OnlineGivingForm } from './OnlineGivingForm';
-import { BatchEntry } from './BatchEntry';
-import { PledgeManager } from './PledgeManager';
-import { GivingStatements } from './GivingStatements';
-import { Settings } from './Settings';
-import { VisitorPipeline } from './VisitorPipeline';
-import { AttendanceCheckIn } from './AttendanceCheckIn';
-import { VolunteerScheduling } from './VolunteerScheduling';
-import { TagsManager } from './TagsManager';
-import { PrintableReports } from './PrintableReports';
-import { BirthdayCalendar } from './BirthdayCalendar';
-import { CharityBaskets } from './CharityBaskets';
-import { MemberDonationStats } from './MemberDonationStats';
-import { DonationTracker } from './DonationTracker';
-import { AgentDashboard } from './AgentDashboard';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance } from '../types';
+
+// Lazy load less frequently used views for code splitting
+const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
+const Groups = lazy(() => import('./Groups').then(m => ({ default: m.Groups })));
+const Prayer = lazy(() => import('./Prayer').then(m => ({ default: m.Prayer })));
+const GivingDashboard = lazy(() => import('./GivingDashboard').then(m => ({ default: m.GivingDashboard })));
+const OnlineGivingForm = lazy(() => import('./OnlineGivingForm').then(m => ({ default: m.OnlineGivingForm })));
+const BatchEntry = lazy(() => import('./BatchEntry').then(m => ({ default: m.BatchEntry })));
+const PledgeManager = lazy(() => import('./PledgeManager').then(m => ({ default: m.PledgeManager })));
+const GivingStatements = lazy(() => import('./GivingStatements').then(m => ({ default: m.GivingStatements })));
+const Settings = lazy(() => import('./Settings').then(m => ({ default: m.Settings })));
+const VisitorPipeline = lazy(() => import('./VisitorPipeline').then(m => ({ default: m.VisitorPipeline })));
+const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
+const VolunteerScheduling = lazy(() => import('./VolunteerScheduling').then(m => ({ default: m.VolunteerScheduling })));
+const TagsManager = lazy(() => import('./TagsManager').then(m => ({ default: m.TagsManager })));
+const PrintableReports = lazy(() => import('./PrintableReports').then(m => ({ default: m.PrintableReports })));
+const BirthdayCalendar = lazy(() => import('./BirthdayCalendar').then(m => ({ default: m.BirthdayCalendar })));
+const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ default: m.CharityBaskets })));
+const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
+const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
+const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
+
+// Loading fallback component
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
 
 interface ViewRendererProps {
   view: View;
   setView: (view: View) => void;
-  // Data
   people: Person[];
   tasks: Task[];
   interactions: Interaction[];
@@ -37,9 +48,7 @@ interface ViewRendererProps {
   attendanceRecords: Attendance[];
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   volunteerAssignments: { id: string; eventId: string; roleId: string; personId: string; status: 'confirmed' | 'pending' | 'declined' }[];
-  // Selected person
   selectedPerson?: Person;
-  // Handlers
   handlers: {
     viewPerson: (id: string) => void;
     backToPeople: () => void;
@@ -59,7 +68,6 @@ interface ViewRendererProps {
     removeVolunteer: (assignmentId: string) => void;
     updatePersonTags: (personId: string, tags: string[]) => Promise<void>;
   };
-  // Collection management - passed directly from useCollectionManagement hook
   collectionMgmt: {
     campaigns: any[];
     pledges: any[];
@@ -77,7 +85,6 @@ interface ViewRendererProps {
     generateStatement: (personId: string, year: number) => void;
     sendStatement: (statementId: string, method: 'email' | 'print') => void;
   };
-  // Charity baskets - passed directly from useCharityBaskets hook
   charityBasketMgmt: {
     baskets: any[];
     createBasket: (basket: any) => void;
@@ -87,7 +94,6 @@ interface ViewRendererProps {
     removeItem: (basketId: string, itemId: string) => void;
     distributeBasket: (basketId: string) => void;
   };
-  // Agents - passed directly from useAgents hook
   agents: {
     lifeEventConfig: any;
     donationConfig: any;
@@ -101,25 +107,12 @@ interface ViewRendererProps {
   };
 }
 
-export function ViewRenderer({
-  view,
-  setView,
-  people,
-  tasks,
-  interactions,
-  groups,
-  prayers,
-  events,
-  giving,
-  attendanceRecords,
-  rsvps,
-  volunteerAssignments,
-  selectedPerson,
-  handlers,
-  collectionMgmt,
-  charityBasketMgmt,
-  agents,
-}: ViewRendererProps) {
+export function ViewRenderer(props: ViewRendererProps) {
+  const { view, setView, people, tasks, interactions, giving, groups, prayers, events,
+    attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
+    collectionMgmt, charityBasketMgmt, agents } = props;
+
+  // Core views (not lazy loaded for instant response)
   switch (view) {
     case 'dashboard':
       return (
@@ -132,9 +125,6 @@ export function ViewRenderer({
           onViewGiving={() => setView('giving')}
         />
       );
-
-    case 'pipeline':
-      return <VisitorPipeline people={people} onViewPerson={handlers.viewPerson} />;
 
     case 'people':
       return (
@@ -170,151 +160,159 @@ export function ViewRenderer({
 
     case 'tasks':
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
+  }
 
-    case 'attendance':
-      return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
+  // Lazy-loaded views wrapped in Suspense
+  return (
+    <Suspense fallback={<ViewLoader />}>
+      {renderLazyView()}
+    </Suspense>
+  );
 
-    case 'calendar':
-      return <Calendar events={events} people={people} rsvps={rsvps} onRSVP={handlers.rsvp} />;
+  function renderLazyView() {
+    switch (view) {
+      case 'pipeline':
+        return <VisitorPipeline people={people} onViewPerson={handlers.viewPerson} />;
 
-    case 'volunteers':
-      return (
-        <VolunteerScheduling
-          people={people}
-          events={events}
-          assignments={volunteerAssignments}
-          onAssign={handlers.assignVolunteer}
-          onUpdateStatus={handlers.updateVolunteerStatus}
-          onRemove={handlers.removeVolunteer}
-        />
-      );
+      case 'attendance':
+        return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
 
-    case 'groups':
-      return <Groups groups={groups} people={people} />;
+      case 'calendar':
+        return <Calendar events={events} people={people} rsvps={rsvps} onRSVP={handlers.rsvp} />;
 
-    case 'prayer':
-      return <Prayer prayers={prayers} people={people} onMarkAnswered={handlers.markPrayerAnswered} />;
-
-    case 'giving':
-      return (
-        <GivingDashboard
-          giving={giving}
-          people={people}
-          campaigns={collectionMgmt.campaigns}
-          pledges={collectionMgmt.pledges}
-          onNavigate={(subView) => setView(subView)}
-        />
-      );
-
-    case 'online-giving':
-      return (
-        <OnlineGivingForm
-          churchName="Grace Church"
-          onBack={() => setView('giving')}
-          onSuccess={() => setView('giving')}
-        />
-      );
-
-    case 'batch-entry':
-      return (
-        <BatchEntry
-          people={people}
-          batches={collectionMgmt.donationBatches}
-          onCreateBatch={collectionMgmt.createBatch}
-          onAddItem={collectionMgmt.addBatchItem}
-          onRemoveItem={collectionMgmt.removeBatchItem}
-          onCloseBatch={collectionMgmt.closeBatch}
-          onBack={() => setView('giving')}
-        />
-      );
-
-    case 'pledges':
-    case 'campaigns':
-      return (
-        <PledgeManager
-          people={people}
-          campaigns={collectionMgmt.campaigns}
-          pledges={collectionMgmt.pledges}
-          onCreateCampaign={collectionMgmt.createCampaign}
-          onUpdateCampaign={collectionMgmt.updateCampaign}
-          onCreatePledge={collectionMgmt.createPledge}
-          onUpdatePledge={collectionMgmt.updatePledge}
-          onDeletePledge={collectionMgmt.deletePledge}
-          onBack={() => setView('giving')}
-        />
-      );
-
-    case 'statements':
-      return (
-        <GivingStatements
-          giving={giving}
-          people={people}
-          statements={collectionMgmt.givingStatements}
-          onGenerateStatement={collectionMgmt.generateStatement}
-          onSendStatement={collectionMgmt.sendStatement}
-          onBack={() => setView('giving')}
-        />
-      );
-
-    case 'charity-baskets':
-      return (
-        <CharityBaskets
-          baskets={charityBasketMgmt.baskets}
-          people={people}
-          onCreateBasket={charityBasketMgmt.createBasket}
-          onUpdateBasket={charityBasketMgmt.updateBasket}
-          onDeleteBasket={charityBasketMgmt.deleteBasket}
-          onAddItem={charityBasketMgmt.addItem}
-          onRemoveItem={charityBasketMgmt.removeItem}
-          onDistributeBasket={charityBasketMgmt.distributeBasket}
-          onBack={() => setView('giving')}
-        />
-      );
-
-    case 'donation-tracker':
-      return (
-        <DonationTracker
-          giving={giving}
-          people={people}
-          onBack={() => setView('giving')}
-          onViewMemberStats={() => setView('member-stats')}
-          onViewPerson={handlers.viewPerson}
-        />
-      );
-
-    case 'member-stats':
-      return <MemberDonationStats people={people} giving={giving} onViewPerson={handlers.viewPerson} onBack={() => setView('giving')} />;
-
-    case 'tags':
-      return <TagsManager people={people} onUpdatePersonTags={handlers.updatePersonTags} />;
-
-    case 'reports':
-      return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
-
-    case 'birthdays':
-      return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
-
-    case 'agents':
-      return (
-        <div className="p-6 max-w-7xl mx-auto">
-          <AgentDashboard
-            lifeEventConfig={agents.lifeEventConfig}
-            donationConfig={agents.donationConfig}
-            newMemberConfig={agents.newMemberConfig}
-            upcomingLifeEvents={agents.upcomingLifeEvents}
-            recentLogs={agents.logs}
-            stats={agents.stats}
-            onToggleAgent={agents.toggleAgent}
-            onUpdateConfig={agents.updateConfig}
-            onRunAgent={agents.runAgent}
+      case 'volunteers':
+        return (
+          <VolunteerScheduling
+            people={people}
+            events={events}
+            assignments={volunteerAssignments}
+            onAssign={handlers.assignVolunteer}
+            onUpdateStatus={handlers.updateVolunteerStatus}
+            onRemove={handlers.removeVolunteer}
           />
-        </div>
-      );
+        );
 
-    case 'settings':
-      return <Settings />;
+      case 'groups':
+        return <Groups groups={groups} people={people} />;
 
-    default:
-      return null;
+      case 'prayer':
+        return <Prayer prayers={prayers} people={people} onMarkAnswered={handlers.markPrayerAnswered} />;
+
+      case 'giving':
+        return (
+          <GivingDashboard
+            giving={giving}
+            people={people}
+            campaigns={collectionMgmt.campaigns}
+            pledges={collectionMgmt.pledges}
+            onNavigate={(subView) => setView(subView)}
+          />
+        );
+
+      case 'online-giving':
+        return <OnlineGivingForm churchName="Grace Church" onBack={() => setView('giving')} onSuccess={() => setView('giving')} />;
+
+      case 'batch-entry':
+        return (
+          <BatchEntry
+            people={people}
+            batches={collectionMgmt.donationBatches}
+            onCreateBatch={collectionMgmt.createBatch}
+            onAddItem={collectionMgmt.addBatchItem}
+            onRemoveItem={collectionMgmt.removeBatchItem}
+            onCloseBatch={collectionMgmt.closeBatch}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'pledges':
+      case 'campaigns':
+        return (
+          <PledgeManager
+            people={people}
+            campaigns={collectionMgmt.campaigns}
+            pledges={collectionMgmt.pledges}
+            onCreateCampaign={collectionMgmt.createCampaign}
+            onUpdateCampaign={collectionMgmt.updateCampaign}
+            onCreatePledge={collectionMgmt.createPledge}
+            onUpdatePledge={collectionMgmt.updatePledge}
+            onDeletePledge={collectionMgmt.deletePledge}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'statements':
+        return (
+          <GivingStatements
+            giving={giving}
+            people={people}
+            statements={collectionMgmt.givingStatements}
+            onGenerateStatement={collectionMgmt.generateStatement}
+            onSendStatement={collectionMgmt.sendStatement}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'charity-baskets':
+        return (
+          <CharityBaskets
+            baskets={charityBasketMgmt.baskets}
+            people={people}
+            onCreateBasket={charityBasketMgmt.createBasket}
+            onUpdateBasket={charityBasketMgmt.updateBasket}
+            onDeleteBasket={charityBasketMgmt.deleteBasket}
+            onAddItem={charityBasketMgmt.addItem}
+            onRemoveItem={charityBasketMgmt.removeItem}
+            onDistributeBasket={charityBasketMgmt.distributeBasket}
+            onBack={() => setView('giving')}
+          />
+        );
+
+      case 'donation-tracker':
+        return (
+          <DonationTracker
+            giving={giving}
+            people={people}
+            onBack={() => setView('giving')}
+            onViewMemberStats={() => setView('member-stats')}
+            onViewPerson={handlers.viewPerson}
+          />
+        );
+
+      case 'member-stats':
+        return <MemberDonationStats people={people} giving={giving} onViewPerson={handlers.viewPerson} onBack={() => setView('giving')} />;
+
+      case 'tags':
+        return <TagsManager people={people} onUpdatePersonTags={handlers.updatePersonTags} />;
+
+      case 'reports':
+        return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
+
+      case 'birthdays':
+        return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
+
+      case 'agents':
+        return (
+          <div className="p-6 max-w-7xl mx-auto">
+            <AgentDashboard
+              lifeEventConfig={agents.lifeEventConfig}
+              donationConfig={agents.donationConfig}
+              newMemberConfig={agents.newMemberConfig}
+              upcomingLifeEvents={agents.upcomingLifeEvents}
+              recentLogs={agents.logs}
+              stats={agents.stats}
+              onToggleAgent={agents.toggleAgent}
+              onUpdateConfig={agents.updateConfig}
+              onRunAgent={agents.runAgent}
+            />
+          </div>
+        );
+
+      case 'settings':
+        return <Settings />;
+
+      default:
+        return null;
+    }
   }
 }
