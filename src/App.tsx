@@ -190,6 +190,7 @@ function App() {
         <ViewRenderer
           view={view}
           setView={setView}
+          churchId={churchId}
           people={people}
           tasks={tasks}
           interactions={interactions}

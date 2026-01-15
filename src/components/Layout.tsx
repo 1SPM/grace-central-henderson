@@ -24,6 +24,8 @@ import {
   Cake,
   X,
   Bot,
+  QrCode,
+  Contact,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -50,6 +52,8 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'agents', label: 'AI Agents', icon: <Bot size={18} /> },
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
+  { view: 'directory', label: 'Directory', icon: <Contact size={18} /> },
+  { view: 'connect-card', label: 'Connect Card', icon: <QrCode size={18} /> },
 ];
 
 // View labels for breadcrumbs
@@ -78,6 +82,8 @@ const viewLabels: Record<View, string> = {
   tags: 'Tags',
   reports: 'Reports',
   settings: 'Settings',
+  'connect-card': 'Connect Card',
+  directory: 'Directory',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
