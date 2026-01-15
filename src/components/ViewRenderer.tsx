@@ -25,6 +25,10 @@ const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ defaul
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
 const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
+const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
+const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
+const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
+const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -38,6 +42,7 @@ function ViewLoader() {
 interface ViewRendererProps {
   view: View;
   setView: (view: View) => void;
+  churchId: string;
   people: Person[];
   tasks: Task[];
   interactions: Interaction[];
@@ -108,7 +113,7 @@ interface ViewRendererProps {
 }
 
 export function ViewRenderer(props: ViewRendererProps) {
-  const { view, setView, people, tasks, interactions, giving, groups, prayers, events,
+  const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
     collectionMgmt, charityBasketMgmt, agents } = props;
 
@@ -310,6 +315,18 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'settings':
         return <Settings />;
+
+      case 'connect-card':
+        return <ConnectCard churchId={churchId} churchName="Grace Church" />;
+
+      case 'directory':
+        return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
+
+      case 'child-checkin':
+        return <ChildCheckIn people={people} onBack={() => setView('attendance')} />;
+
+      case 'forms':
+        return <FormBuilder onBack={() => setView('settings')} />;
 
       default:
         return null;
