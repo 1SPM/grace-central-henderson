@@ -27,11 +27,12 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 // Import route modules
-import { initPaymentRoutes } from './routes/payments';
-import emailRoutes from './routes/email';
-import smsRoutes from './routes/sms';
-import agentRoutes from './routes/agents';
-import { initWebhookRoutes } from './routes/webhooks';
+import { initPaymentRoutes } from './_routes/payments';
+import emailRoutes from './_routes/email';
+import smsRoutes from './_routes/sms';
+import agentRoutes from './_routes/agents';
+import aiRoutes from './_routes/ai';
+import { initWebhookRoutes } from './_routes/webhooks';
 
 // Initialize Express
 const app = express();
@@ -73,6 +74,7 @@ app.use('/api/payments', initPaymentRoutes(stripe));
 app.use('/api/email', emailRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/agents', agentRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/webhooks', initWebhookRoutes(stripe, supabase));
 
 // ============================================
@@ -87,6 +89,7 @@ app.get('/health', (_req: Request, res: Response) => {
     resend: !!process.env.RESEND_API_KEY,
     twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER),
     supabase: !!process.env.SUPABASE_URL,
+    gemini: !!process.env.GEMINI_API_KEY,
     agents: true, // AI agents are always available
   });
 });
