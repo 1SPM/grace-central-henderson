@@ -194,7 +194,7 @@ export class NewMemberAgent extends BaseAgent {
    * Send welcome message to new member
    */
   private async sendWelcomeMessage(event: NewMemberEvent): Promise<boolean> {
-    const { churchName } = this.config.settings;
+    const { churchName, useAIMessages } = this.config.settings;
     
     const firstName = event.personName.split(' ')[0];
     let success = true;
