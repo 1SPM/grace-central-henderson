@@ -71,6 +71,7 @@ export interface LifeEventConfig extends AgentConfig {
     daysInAdvance: number; // For reminders to staff
     autoSend: boolean; // Auto-send greetings or just notify staff
     churchName: string;
+    useAIMessages?: boolean; // Use AI to generate personalized messages
   };
 }
 
@@ -96,6 +97,7 @@ export interface DonationProcessingConfig extends AgentConfig {
     largeGiftThreshold: number;
     churchName: string;
     taxId: string;
+    useAIMessages?: boolean; // Use AI to generate personalized thank-you messages
   };
 }
 
@@ -125,6 +127,7 @@ export interface NewMemberConfig extends AgentConfig {
     sendWelcomePacket: boolean;
     churchName: string;
     pastorName: string;
+    useAIMessages?: boolean; // Use AI to generate personalized welcome messages
   };
 }
 

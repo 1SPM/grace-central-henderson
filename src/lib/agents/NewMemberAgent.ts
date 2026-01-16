@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { emailService } from '../services/email';
 import { smsService } from '../services/sms';
+import { generateWelcomeMessage } from '../services/ai';
 
 interface PersonData {
   id: string;
@@ -194,8 +195,26 @@ export class NewMemberAgent extends BaseAgent {
    */
   private async sendWelcomeMessage(event: NewMemberEvent): Promise<boolean> {
     const { churchName } = this.config.settings;
+    
     const firstName = event.personName.split(' ')[0];
     let success = true;
+
+    // Generate AI message if enabled
+    let aiGeneratedMessage: string | undefined;
+    if (useAIMessages) {
+      try {
+        this.log(`Generating AI welcome message for ${firstName}`);
+        const aiResult = await generateWelcomeMessage(firstName, churchName);
+        if (aiResult.success && aiResult.text) {
+          aiGeneratedMessage = aiResult.text;
+          this.log(`AI message generated successfully`, { model: aiResult.model });
+        } else {
+          this.warn(`AI message generation failed, using template: ${aiResult.error}`);
+        }
+      } catch (err) {
+        this.warn(`AI service error, using template: ${err}`);
+      }
+    }
 
     // Send welcome email
     if (event.email) {
@@ -203,19 +222,25 @@ export class NewMemberAgent extends BaseAgent {
         if (!this.context.dryRun) {
           const result = await emailService.sendWelcomeEmail(
             { email: event.email, name: event.personName },
-            { firstName, churchName }
+            { firstName, churchName },
+            aiGeneratedMessage // Pass AI message if available
           );
           if (!result.success) {
             this.error(`Failed to send welcome email: ${result.error}`);
             success = false;
           } else {
-            this.log(`Sent welcome email to ${event.personName}`, { messageId: result.messageId });
+            this.log(`Sent welcome email to ${event.personName}`, {
+              messageId: result.messageId,
+              usedAI: !!aiGeneratedMessage
+            });
           }
         } else {
-          this.log(`[DRY RUN] Would send welcome email to ${event.personName}`);
+          this.log(`[DRY RUN] Would send welcome email to ${event.personName}`, {
+            usedAI: !!aiGeneratedMessage
+          });
         }
         this.recordAction('email', success, {
-          template: 'WELCOME_VISITOR',
+          template: aiGeneratedMessage ? 'AI_GENERATED' : 'WELCOME_VISITOR',
           templateData: { firstName, churchName },
           targetPersonId: event.personId,
         });

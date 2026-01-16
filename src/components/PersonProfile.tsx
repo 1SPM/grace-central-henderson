@@ -120,7 +120,7 @@ export function PersonProfile({
       } else {
         setSendResult({ success: false, message: result.error || 'Failed to send email' });
       }
-    } catch (error) {
+    } catch {
       setSendResult({ success: false, message: 'An error occurred while sending the email' });
     }
 
@@ -158,7 +158,7 @@ export function PersonProfile({
       } else {
         setSendResult({ success: false, message: result.error || 'Failed to send text message' });
       }
-    } catch (error) {
+    } catch {
       setSendResult({ success: false, message: 'An error occurred while sending the text' });
     }
 

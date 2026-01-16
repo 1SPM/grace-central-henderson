@@ -85,7 +85,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
     if (sourceInfo) {
       sourceInfo.people.forEach((person) => {
         // Remove source tag and add target if not already present
-        let newTags = person.tags.filter((t) => t !== mergeSource);
+        const newTags = person.tags.filter((t) => t !== mergeSource);
         if (!newTags.includes(mergeTarget)) {
           newTags.push(mergeTarget);
         }
