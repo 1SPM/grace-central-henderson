@@ -29,6 +29,7 @@ const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.C
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
+const MemberPortal = lazy(() => import('./member/MemberPortal').then(m => ({ default: m.MemberPortal })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -327,6 +328,25 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'forms':
         return <FormBuilder onBack={() => setView('settings')} />;
+
+      case 'member-portal':
+      case 'member-directory':
+      case 'member-giving':
+      case 'member-events':
+      case 'member-checkin':
+        return (
+          <MemberPortal
+            people={people}
+            events={events}
+            giving={giving}
+            attendance={attendanceRecords}
+            rsvps={rsvps}
+            churchName="Grace Church"
+            onBack={() => setView('dashboard')}
+            onRSVP={handlers.rsvp}
+            onCheckIn={handlers.checkIn}
+          />
+        );
 
       default:
         return null;
