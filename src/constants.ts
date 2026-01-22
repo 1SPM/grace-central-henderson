@@ -93,7 +93,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     id: '6',
     firstName: 'David',
     lastName: 'Williams',
-    email: 'david.w@email.com',
+    email: 'cdeichmiller11@gmail.com', // TEST: Birthday greeting (today!)
     phone: '(555) 678-9012',
     status: 'member',
     joinDate: '2021-09-20',
@@ -190,7 +190,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     id: '13',
     firstName: 'Jennifer',
     lastName: 'Adams',
-    email: 'jen.adams@email.com',
+    email: 'camd1993@gmail.com', // TEST: Welcome/follow-up emails for recent visitor
     phone: '(555) 345-6780',
     status: 'visitor',
     firstVisit: getDateString(-3), // Visited 3 days ago
