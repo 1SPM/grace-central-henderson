@@ -91,8 +91,8 @@ export const SAMPLE_PEOPLE: Person[] = [
   },
   {
     id: '6',
-    firstName: 'David',
-    lastName: 'Williams',
+    firstName: 'Cam',
+    lastName: 'Deich',
     email: 'cdeichmiller11@gmail.com', // TEST: Birthday greeting (today!)
     phone: '(555) 678-9012',
     status: 'member',
@@ -100,7 +100,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: getBirthDateForUpcoming(0), // Birthday TODAY!
     tags: ['worship-team', 'musician'],
     smallGroups: ['2'],
-    notes: 'Plays guitar on worship team.'
+    notes: 'Test user for AI email features.'
   },
   {
     id: '7',
@@ -188,8 +188,8 @@ export const SAMPLE_PEOPLE: Person[] = [
   // Recent visitors (for New Member Agent testing)
   {
     id: '13',
-    firstName: 'Jennifer',
-    lastName: 'Adams',
+    firstName: 'Cam',
+    lastName: '1993',
     email: 'camd1993@gmail.com', // TEST: Welcome/follow-up emails for recent visitor
     phone: '(555) 345-6780',
     status: 'visitor',
@@ -197,7 +197,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1990-02-14',
     tags: ['first-time', 'young-family'],
     smallGroups: [],
-    notes: 'Found us on Google. Looking for a church home.'
+    notes: 'Test user for AI email features.'
   },
   {
     id: '14',
