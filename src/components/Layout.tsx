@@ -161,29 +161,28 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-dark-900">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100/50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Glass effect */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-dark-850 flex flex-col transform transition-all duration-200 ease-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl flex flex-col transform transition-all duration-200 ease-out border-r border-gray-200/50 dark:border-white/5 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
-        style={{ boxShadow: '1px 0 0 0 rgba(0,0,0,0.05)' }}
       >
         {/* Logo */}
-        <div className={`flex items-center h-14 border-b border-gray-100 dark:border-dark-700 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
+        <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">G</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-violet-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+              <span className="text-white font-semibold text-sm">G</span>
             </div>
-            <span className={`font-semibold text-gray-900 dark:text-dark-100 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+            <span className={`font-semibold text-gray-900 dark:text-gray-100 tracking-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               Grace
             </span>
           </div>
@@ -226,23 +225,23 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
               <button
                 key={item.view}
                 onClick={() => handleNavClick(item.view)}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors group relative ${
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
                   sidebarCollapsed ? 'lg:justify-center' : ''
                 } ${
                   isActive
-                    ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium'
-                    : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-dark-200'
+                    ? 'bg-violet-50/80 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-medium shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
                 title={sidebarCollapsed ? item.label : undefined}
               >
-                <span className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-dark-500 group-hover:text-gray-600 dark:group-hover:text-dark-400'}>
+                <span className={isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
                   {item.icon}
                 </span>
                 <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
 
                 {/* Tooltip for collapsed state */}
                 {sidebarCollapsed && (
-                  <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                  <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
                     {item.label}
                   </span>
                 )}
@@ -252,7 +251,7 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
         </nav>
 
         {/* Footer */}
-        <div className={`px-3 py-2 border-t border-gray-100 dark:border-dark-700 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+        <div className={`px-3 py-2 border-t border-gray-200/50 dark:border-white/5 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
           {/* Collapse toggle - desktop only */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -301,8 +300,8 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center h-14 px-4 bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700">
+        {/* Header - Glass effect */}
+        <header className="flex items-center h-14 px-4 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5">
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -343,7 +342,7 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
           )}
         </header>
 
-        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-dark-900">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>
