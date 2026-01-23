@@ -465,8 +465,8 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                 </div>
               </div>
               {printBadge.allergies && (
-                <div className="mt-4 bg-amber-500/30 border border-amber-300 rounded-lg p-2 text-center">
-                  <p className="text-xs font-semibold">⚠️ ALLERGY: {printBadge.allergies}</p>
+                <div className="mt-4 bg-amber-500/20 border border-amber-400/50 rounded-lg p-2 text-center">
+                  <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Allergy Alert: {printBadge.allergies}</p>
                 </div>
               )}
             </div>

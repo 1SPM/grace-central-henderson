@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Search, MessageSquare, Loader2 } from 'lucide-react';
+import { X, Search, MessageSquare, Loader2, FileText, Phone, Mail, Home, MessageCircle, Heart } from 'lucide-react';
 import { Person, Interaction } from '../types';
 
 interface QuickNoteProps {
@@ -56,13 +56,13 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
     }
   };
 
-  const noteTypes: { value: Interaction['type']; label: string; emoji: string }[] = [
-    { value: 'note', label: 'Note', emoji: '📝' },
-    { value: 'call', label: 'Call', emoji: '📞' },
-    { value: 'email', label: 'Email', emoji: '✉️' },
-    { value: 'visit', label: 'Visit', emoji: '🏠' },
-    { value: 'text', label: 'Text', emoji: '💬' },
-    { value: 'prayer', label: 'Prayer', emoji: '🙏' },
+  const noteTypes: { value: Interaction['type']; label: string; icon: React.ReactNode }[] = [
+    { value: 'note', label: 'Note', icon: <FileText size={14} /> },
+    { value: 'call', label: 'Call', icon: <Phone size={14} /> },
+    { value: 'email', label: 'Email', icon: <Mail size={14} /> },
+    { value: 'visit', label: 'Visit', icon: <Home size={14} /> },
+    { value: 'text', label: 'Text', icon: <MessageCircle size={14} /> },
+    { value: 'prayer', label: 'Prayer', icon: <Heart size={14} /> },
   ];
 
   return (
@@ -170,13 +170,13 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
                   <button
                     key={type.value}
                     onClick={() => setNoteType(type.value)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                       noteType === type.value
-                        ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
-                        : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-gray-200 dark:hover:bg-dark-600'
+                        ? 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                        : 'bg-gray-100/80 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-white/10'
                     }`}
                   >
-                    <span className="mr-1.5">{type.emoji}</span>
+                    {type.icon}
                     {type.label}
                   </button>
                 ))}

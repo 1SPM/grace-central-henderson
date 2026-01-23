@@ -77,12 +77,12 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
     name: 'Birthday Greeting',
     subject: 'Happy Birthday, {{firstName}}!',
     htmlContent: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; text-align: center;">
-        <h1 style="color: #4F46E5;">Happy Birthday! 🎂</h1>
-        <p>Dear {{firstName}},</p>
-        <p>Wishing you a wonderful birthday filled with joy and blessings!</p>
-        <p>May this next year bring you closer to all your dreams.</p>
-        <p>With love,<br/>Your {{churchName}} Family</p>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
+        <h1 style="color: #7c3aed; font-weight: 600; font-size: 28px; margin-bottom: 24px;">Happy Birthday</h1>
+        <p style="color: #374151; font-size: 16px; line-height: 1.6;">Dear {{firstName}},</p>
+        <p style="color: #374151; font-size: 16px; line-height: 1.6;">Wishing you a wonderful birthday filled with joy and blessings.</p>
+        <p style="color: #374151; font-size: 16px; line-height: 1.6;">May this next year bring you closer to all your dreams.</p>
+        <p style="color: #6b7280; font-size: 14px; margin-top: 32px;">With love,<br/><strong style="color: #374151;">Your {{churchName}} Family</strong></p>
       </div>
     `,
   },
