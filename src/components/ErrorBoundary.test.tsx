@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 
@@ -67,12 +67,9 @@ describe('ErrorBoundary', () => {
   });
 
   it('clears error state when Try Again is clicked', () => {
-    // Using a key to force remount after recovery
-    let shouldThrow = true;
-
-    const { rerender } = render(
+    render(
       <ErrorBoundary key="test">
-        <ThrowError shouldThrow={shouldThrow} />
+        <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
