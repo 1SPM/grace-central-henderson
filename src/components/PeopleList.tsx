@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/exportCsv';
@@ -48,6 +48,13 @@ export function PeopleList({
   const [viewMode, setViewMode] = useState<'card' | 'table'>(() => {
     const saved = localStorage.getItem('peopleViewMode');
     return (saved as 'card' | 'table') || 'card';
+  });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(() => {
+    const saved = localStorage.getItem('peoplePageSize');
+    return saved ? parseInt(saved) : 25;
   });
 
   // Save view mode preference
@@ -102,6 +109,27 @@ export function PeopleList({
     return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
   }), [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedPeople = useMemo(() =>
+    filtered.slice(startIndex, endIndex),
+    [filtered, startIndex, endIndex]
+  );
+
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter]);
+
+  // Save page size preference
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    localStorage.setItem('peoplePageSize', size.toString());
+  };
+
   // Memoize status counts (single pass through people array)
   const statusCounts = useMemo(() => {
     const counts = {
@@ -129,12 +157,20 @@ export function PeopleList({
   };
 
   const selectAll = () => {
-    if (selectedIds.size === filtered.length) {
-      setSelectedIds(new Set());
+    const pageIds = paginatedPeople.map(p => p.id);
+    const allPageSelected = pageIds.every(id => selectedIds.has(id));
+    if (allPageSelected) {
+      // Deselect current page
+      const newSelected = new Set(selectedIds);
+      pageIds.forEach(id => newSelected.delete(id));
+      setSelectedIds(newSelected);
     } else {
-      setSelectedIds(new Set(filtered.map(p => p.id)));
+      // Select current page
+      setSelectedIds(new Set([...selectedIds, ...pageIds]));
     }
   };
+
+  const isAllPageSelected = paginatedPeople.length > 0 && paginatedPeople.every(p => selectedIds.has(p.id));
 
   const clearSelection = () => {
     setSelectedIds(new Set());
@@ -486,27 +522,28 @@ export function PeopleList({
       {viewMode === 'card' ? (
         <div className="grid grid-cols-1 gap-3">
           {/* Select All Header */}
-          {filtered.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
+          {paginatedPeople.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
             <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 dark:text-dark-400">
               <button
                 onClick={selectAll}
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                  selectedIds.size === filtered.length && filtered.length > 0
+                  isAllPageSelected
                     ? 'bg-indigo-600 border-indigo-600 text-white'
                     : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
                 }`}
               >
-                {selectedIds.size === filtered.length && filtered.length > 0 && <Check size={14} />}
+                {isAllPageSelected && <Check size={14} />}
               </button>
               <span>
-                {selectedIds.size === filtered.length && filtered.length > 0
-                  ? 'Deselect all'
-                  : `Select all ${filtered.length} people`}
+                {isAllPageSelected
+                  ? `Deselect page (${paginatedPeople.length})`
+                  : `Select page (${paginatedPeople.length})`}
+                {selectedIds.size > 0 && ` • ${selectedIds.size} total selected`}
               </span>
             </div>
           )}
 
-          {filtered.map((person) => (
+          {paginatedPeople.map((person) => (
             <div
               key={person.id}
               className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-sm transition-all group"
@@ -566,12 +603,12 @@ export function PeopleList({
                     <button
                       onClick={selectAll}
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                        selectedIds.size === filtered.length && filtered.length > 0
+                        isAllPageSelected
                           ? 'bg-indigo-600 border-indigo-600 text-white'
                           : 'border-gray-300 dark:border-dark-600 hover:border-indigo-400'
                       }`}
                     >
-                      {selectedIds.size === filtered.length && filtered.length > 0 && <Check size={14} />}
+                      {isAllPageSelected && <Check size={14} />}
                     </button>
                   </th>
                 )}
@@ -584,7 +621,7 @@ export function PeopleList({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-700">
-              {filtered.map((person) => (
+              {paginatedPeople.map((person) => (
                 <tr
                   key={person.id}
                   className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors cursor-pointer"
@@ -635,6 +672,87 @@ export function PeopleList({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {filtered.length > 0 && (
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-dark-400">
+            <span>
+              Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <span>Per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
+                className="px-2 py-1 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              First
+            </button>
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-9 h-9 text-sm font-medium rounded-lg transition-colors ${
+                      currentPage === pageNum
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-700 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={18} />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Last
+            </button>
+          </div>
         </div>
       )}
 

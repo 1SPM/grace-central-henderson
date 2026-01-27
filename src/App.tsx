@@ -10,6 +10,7 @@ import { QuickNote } from './components/QuickNote';
 import { QuickDonationForm } from './components/QuickDonationForm';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { ViewRenderer } from './components/ViewRenderer';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -175,7 +176,7 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch}>
         {isDemo && (
           <div className="bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20 px-4 py-2">
@@ -187,26 +188,28 @@ function App() {
             </div>
           </div>
         )}
-        <ViewRenderer
-          view={view}
-          setView={setView}
-          churchId={churchId}
-          people={people}
-          tasks={tasks}
-          interactions={interactions}
-          groups={groups}
-          prayers={prayers}
-          events={events}
-          giving={giving}
-          attendanceRecords={attendanceRecords}
-          rsvps={rsvps}
-          volunteerAssignments={volunteerAssignments}
-          selectedPerson={selectedPerson}
-          handlers={handlers}
-          collectionMgmt={collectionMgmt}
-          charityBasketMgmt={charityBasketMgmt}
-          agents={agents}
-        />
+        <ErrorBoundary>
+          <ViewRenderer
+            view={view}
+            setView={setView}
+            churchId={churchId}
+            people={people}
+            tasks={tasks}
+            interactions={interactions}
+            groups={groups}
+            prayers={prayers}
+            events={events}
+            giving={giving}
+            attendanceRecords={attendanceRecords}
+            rsvps={rsvps}
+            volunteerAssignments={volunteerAssignments}
+            selectedPerson={selectedPerson}
+            handlers={handlers}
+            collectionMgmt={collectionMgmt}
+            charityBasketMgmt={charityBasketMgmt}
+            agents={agents}
+          />
+        </ErrorBoundary>
       </Layout>
 
       {modals.showPersonForm && (
@@ -246,7 +249,7 @@ function App() {
       )}
 
       <PWAInstallPrompt />
-    </>
+    </ErrorBoundary>
   );
 }
 
