@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Dashboard } from './Dashboard';
+import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -134,6 +135,16 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewPeople={() => setView('people')}
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
+        />
+      );
+
+    case 'feed':
+      return (
+        <ActionFeed
+          people={people}
+          tasks={tasks}
+          onToggleTask={handlers.toggleTask}
+          onSelectPerson={handlers.viewPerson}
         />
       );
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
   LayoutDashboard,
+  ListTodo,
   Users,
   Calendar,
   Users2,
@@ -29,6 +30,7 @@ interface LayoutProps {
 
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
   { view: 'people', label: 'People', icon: <Users size={18} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
@@ -39,6 +41,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
 // View labels for breadcrumbs
 const viewLabels: Record<View, string> = {
   dashboard: 'Dashboard',
+  feed: 'Actions',
   pipeline: 'Pipeline',
   people: 'People',
   person: 'Profile',
