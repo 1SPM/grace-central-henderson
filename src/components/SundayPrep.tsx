@@ -18,6 +18,8 @@ import {
   Target,
   Megaphone,
   RefreshCw,
+  ChevronUp,
+  ChevronDown,
   FileText,
   Loader2,
 } from 'lucide-react';
@@ -227,7 +229,7 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
   // Section drag handlers for reordering
   const handleSectionDragStart = (e: React.DragEvent, sectionId: string) => {
     setDraggingSectionId(sectionId);
-    e.dataTransfer.setData('text/plain', sectionId);
+    e.dataTransfer.setData('application/json', JSON.stringify({ sectionId }));
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -239,23 +241,47 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
 
   const handleSectionDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    if (!draggingSectionId) return;
+    // Get section ID from dataTransfer (more reliable than state)
+    let sectionId: string | null = null;
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (data) {
+        const parsed = JSON.parse(data);
+        sectionId = parsed.sectionId;
+      }
+    } catch {
+      sectionId = draggingSectionId;
+    }
 
-    const dragIndex = sections.findIndex(s => s.id === draggingSectionId);
-    if (dragIndex === -1 || dragIndex === dropIndex) {
+    if (!sectionId) {
       setDraggingSectionId(null);
       setDragOverIndex(null);
       return;
     }
 
-    // Reorder sections
+    const dragIndex = sections.findIndex(s => s.id === sectionId);
+    if (dragIndex === -1) {
+      setDraggingSectionId(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Don't move if dropping in same position or position right after current
+    if (dragIndex === dropIndex || dragIndex === dropIndex - 1) {
+      setDraggingSectionId(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Create new sections array with reordered items
     const newSections = [...sections];
     const [draggedSection] = newSections.splice(dragIndex, 1);
 
-    // Adjust drop index if we removed an item before it
-    const adjustedIndex = dropIndex > dragIndex ? dropIndex - 1 : dropIndex;
-    newSections.splice(adjustedIndex, 0, draggedSection);
+    // Adjust drop index since we removed an item
+    const insertIndex = dropIndex > dragIndex ? dropIndex - 1 : dropIndex;
+    newSections.splice(insertIndex, 0, draggedSection);
 
     setSections(newSections);
     setDraggingSectionId(null);
@@ -297,6 +323,18 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
 
   const deleteSection = (id: string) => {
     setSections(sections.filter(s => s.id !== id));
+  };
+
+  const moveSection = (id: string, direction: 'up' | 'down') => {
+    const index = sections.findIndex(s => s.id === id);
+    if (index === -1) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === sections.length - 1) return;
+
+    const newSections = [...sections];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [newSections[index], newSections[newIndex]] = [newSections[newIndex], newSections[index]];
+    setSections(newSections);
   };
 
   const expandWithAI = async (sectionId: string) => {
@@ -670,6 +708,22 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                             />
                           </div>
                           <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => moveSection(section.id, 'up')}
+                              disabled={index === 0}
+                              className="p-1.5 hover:bg-white/50 dark:hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-30"
+                              title="Move up"
+                            >
+                              <ChevronUp size={14} className="text-gray-500 dark:text-dark-400" />
+                            </button>
+                            <button
+                              onClick={() => moveSection(section.id, 'down')}
+                              disabled={index === sections.length - 1}
+                              className="p-1.5 hover:bg-white/50 dark:hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-30"
+                              title="Move down"
+                            >
+                              <ChevronDown size={14} className="text-gray-500 dark:text-dark-400" />
+                            </button>
                             <button
                               onClick={() => expandWithAI(section.id)}
                               disabled={expandingSection === section.id}
