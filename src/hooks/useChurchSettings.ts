@@ -36,7 +36,16 @@ export interface IntegrationCredentials {
   clerkPublishableKey?: string;
 }
 
+export interface ChurchProfile {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+}
+
 export interface ChurchSettings {
+  profile: ChurchProfile;
   integrations: IntegrationCredentials;
   notifications: {
     newVisitorAlerts: boolean;
@@ -51,6 +60,13 @@ export interface ChurchSettings {
 }
 
 const DEFAULT_SETTINGS: ChurchSettings = {
+  profile: {
+    name: 'Grace Community Church',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
+  },
   integrations: {},
   notifications: {
     newVisitorAlerts: true,
@@ -135,6 +151,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     }
   }, [churchId, settings]);
 
+  // Save just church profile
+  const saveProfile = useCallback(async (profile: Partial<ChurchProfile>): Promise<boolean> => {
+    return saveSettings({
+      profile: { ...settings.profile, ...profile }
+    });
+  }, [saveSettings, settings.profile]);
+
   // Save just integration credentials
   const saveIntegrations = useCallback(async (integrations: Partial<IntegrationCredentials>): Promise<boolean> => {
     // Security warning for secret keys
@@ -192,6 +215,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     isLoading,
     error,
     saveSettings,
+    saveProfile,
     saveIntegrations,
     clearIntegration,
     reloadSettings: loadSettings,

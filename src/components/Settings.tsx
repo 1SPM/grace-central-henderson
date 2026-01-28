@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Church,
   Users,
@@ -13,8 +13,10 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Save,
 } from 'lucide-react';
 import { useIntegrations } from '../contexts/IntegrationsContext';
+import { useChurchSettings } from '../hooks/useChurchSettings';
 
 interface IntegrationCardProps {
   title: string;
@@ -151,6 +153,26 @@ function PasswordInput({
 
 export function Settings() {
   const { status, saveIntegrations } = useIntegrations();
+  const { settings: churchSettings, saveProfile, isLoading: settingsLoading } = useChurchSettings();
+
+  // Church profile state
+  const [churchProfile, setChurchProfile] = useState({
+    name: '',
+    address: '',
+    phone: '',
+  });
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  // Load church profile from settings
+  useEffect(() => {
+    if (churchSettings?.profile) {
+      setChurchProfile({
+        name: churchSettings.profile.name || '',
+        address: churchSettings.profile.address || '',
+        phone: churchSettings.profile.phone || '',
+      });
+    }
+  }, [churchSettings]);
 
   // Modal states
   const [showEmailConfig, setShowEmailConfig] = useState(false);
@@ -207,6 +229,16 @@ export function Settings() {
       setShowPaymentConfig(false);
       // Clear form for security
       setPaymentConfig({ stripePublishableKey: '' });
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    const success = await saveProfile(churchProfile);
+    setSaving(false);
+    if (success) {
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2000);
     }
   };
 
@@ -278,22 +310,61 @@ export function Settings() {
             </div>
           </div>
           <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Church Name"
-              defaultValue="Grace Community Church"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Address"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Phone"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Church Name
+              </label>
+              <input
+                type="text"
+                placeholder="Your Church Name"
+                value={churchProfile.name}
+                onChange={(e) => setChurchProfile({ ...churchProfile, name: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Address
+              </label>
+              <input
+                type="text"
+                placeholder="123 Main St, City, State"
+                value={churchProfile.address}
+                onChange={(e) => setChurchProfile({ ...churchProfile, address: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Phone
+              </label>
+              <input
+                type="text"
+                placeholder="(555) 123-4567"
+                value={churchProfile.phone}
+                onChange={(e) => setChurchProfile({ ...churchProfile, phone: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving || settingsLoading}
+              className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {profileSaved ? (
+                <>
+                  <Check size={16} />
+                  Saved!
+                </>
+              ) : saving ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Profile
+                </>
+              )}
+            </button>
           </div>
         </div>
 

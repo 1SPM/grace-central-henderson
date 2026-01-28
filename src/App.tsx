@@ -17,6 +17,7 @@ import { useCharityBaskets } from './hooks/useCharityBaskets';
 import { useModals } from './hooks/useModals';
 import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
+import { useChurchSettings } from './hooks/useChurchSettings';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -71,6 +72,7 @@ function App() {
   const modals = useModals();
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
+  const { settings: churchSettings } = useChurchSettings(churchId);
 
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
@@ -116,7 +118,7 @@ function App() {
   // AI Agents hook
   const agents = useAgents({
     churchId,
-    churchName: 'Grace Church',
+    churchName: churchSettings?.profile?.name || 'Grace Church',
     people: people.map(p => ({
       id: p.id,
       firstName: p.firstName,
