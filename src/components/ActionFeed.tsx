@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   CheckCircle2,
   Circle,
@@ -46,6 +46,7 @@ interface ComposeModal {
   type: 'email' | 'sms';
   person: Person;
   purpose: string;
+  feedItem: FeedItem;
 }
 
 export function ActionFeed({
@@ -56,6 +57,16 @@ export function ActionFeed({
 }: ActionFeedProps) {
   const [filter, setFilter] = useState<FeedFilter>('all');
   const [showCompleted] = useState(false);
+  const [dismissedItems, setDismissedItems] = useState<Set<string>>(() => {
+    // Load from localStorage
+    const saved = localStorage.getItem('grace-crm-dismissed-actions');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  // Save dismissed items to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('grace-crm-dismissed-actions', JSON.stringify([...dismissedItems]));
+  }, [dismissedItems]);
 
   // Compose modal state
   const [composeModal, setComposeModal] = useState<ComposeModal | null>(null);
@@ -183,8 +194,9 @@ export function ActionFeed({
       return 0;
     });
 
-    return items;
-  }, [people, tasks, filter, showCompleted]);
+    // Filter out dismissed items (non-task items that user marked done)
+    return items.filter(item => !dismissedItems.has(item.id));
+  }, [people, tasks, filter, showCompleted, dismissedItems]);
 
   const getItemIcon = (item: FeedItem) => {
     switch (item.type) {
@@ -220,8 +232,8 @@ export function ActionFeed({
     return null;
   };
 
-  const openCompose = (type: 'email' | 'sms', person: Person, purpose: string) => {
-    setComposeModal({ type, person, purpose });
+  const openCompose = (type: 'email' | 'sms', person: Person, purpose: string, feedItem: FeedItem) => {
+    setComposeModal({ type, person, purpose, feedItem });
     setEmailSubject('');
     setEmailBody('');
     setSmsMessage('');
@@ -289,13 +301,19 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
     // Simulate send (in real app, this would call the actual send API)
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setSendResult({ success: true, message: `${composeModal.type === 'email' ? 'Email' : 'Text'} sent successfully!` });
+    setSendResult({ success: true, message: `${composeModal.type === 'email' ? 'Email' : 'Text'} sent!` });
     setIsSending(false);
+  };
 
-    // Close after delay
-    setTimeout(() => {
-      closeCompose();
-    }, 1500);
+  const handleMarkDone = (item: FeedItem) => {
+    if (item.task) {
+      // For tasks, toggle completion via the callback
+      onToggleTask(item.task.id);
+    } else {
+      // For non-task items (birthdays, visitors), add to dismissed set
+      setDismissedItems(prev => new Set([...prev, item.id]));
+    }
+    closeCompose();
   };
 
   const counts = useMemo(() => ({
@@ -382,7 +400,8 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                           <button
                             onClick={() => openCompose('email', item.person!,
                               item.type === 'birthday' ? 'birthday greeting' :
-                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up'
+                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
+                              item
                             )}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                           >
@@ -403,7 +422,8 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                           <button
                             onClick={() => openCompose('sms', item.person!,
                               item.type === 'birthday' ? 'birthday greeting' :
-                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up'
+                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
+                              item
                             )}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
                           >
@@ -414,10 +434,18 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                       </>
                     )}
 
-                    {item.type === 'task' && (
+                    {item.type === 'task' ? (
                       <button
                         onClick={() => item.task && onToggleTask(item.task.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors ml-auto"
+                      >
+                        <CheckCircle2 size={12} />
+                        Done
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleMarkDone(item)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors"
                       >
                         <CheckCircle2 size={12} />
                         Done
@@ -561,33 +589,53 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
             {/* Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">
-              <button
-                onClick={closeCompose}
-                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSend}
-                disabled={isSending || (composeModal.type === 'email' ? !emailBody.trim() : !smsMessage.trim())}
-                className={`px-4 py-2 text-white rounded-xl text-sm font-medium flex items-center gap-2 disabled:opacity-50 transition-colors ${
-                  composeModal.type === 'email'
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-purple-600 hover:bg-purple-700'
-                }`}
-              >
-                {isSending ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send size={16} />
-                    Send {composeModal.type === 'email' ? 'Email' : 'Text'}
-                  </>
-                )}
-              </button>
+              {sendResult?.success ? (
+                <>
+                  <button
+                    onClick={closeCompose}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl transition-colors"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => handleMarkDone(composeModal.feedItem)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
+                  >
+                    <CheckCircle2 size={16} />
+                    Mark Done
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={closeCompose}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    disabled={isSending || (composeModal.type === 'email' ? !emailBody.trim() : !smsMessage.trim())}
+                    className={`px-4 py-2 text-white rounded-xl text-sm font-medium flex items-center gap-2 disabled:opacity-50 transition-colors ${
+                      composeModal.type === 'email'
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-purple-600 hover:bg-purple-700'
+                    }`}
+                  >
+                    {isSending ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={16} />
+                        Send {composeModal.type === 'email' ? 'Email' : 'Text'}
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
