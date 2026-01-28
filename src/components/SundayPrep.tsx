@@ -6,7 +6,6 @@ import {
   Gift,
   Heart,
   Users,
-  GripVertical,
   Plus,
   Trash2,
   Download,
@@ -181,8 +180,6 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
 
   const [newsItems, setNewsItems] = useState<NewsItem[]>(defaultNewsItems);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
-  const [draggingSectionId, setDraggingSectionId] = useState<string | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [expandingSection, setExpandingSection] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -224,73 +221,6 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
       setNewsItems([...defaultNewsItems].sort(() => Math.random() - 0.5));
       setIsLoadingNews(false);
     }, 1000);
-  };
-
-  // Section drag handlers for reordering
-  const handleSectionDragStart = (e: React.DragEvent, sectionId: string) => {
-    setDraggingSectionId(sectionId);
-    e.dataTransfer.setData('application/json', JSON.stringify({ sectionId }));
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleSectionDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverIndex(index);
-  };
-
-  const handleSectionDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Get section ID from dataTransfer (more reliable than state)
-    let sectionId: string | null = null;
-    try {
-      const data = e.dataTransfer.getData('application/json');
-      if (data) {
-        const parsed = JSON.parse(data);
-        sectionId = parsed.sectionId;
-      }
-    } catch {
-      sectionId = draggingSectionId;
-    }
-
-    if (!sectionId) {
-      setDraggingSectionId(null);
-      setDragOverIndex(null);
-      return;
-    }
-
-    const dragIndex = sections.findIndex(s => s.id === sectionId);
-    if (dragIndex === -1) {
-      setDraggingSectionId(null);
-      setDragOverIndex(null);
-      return;
-    }
-
-    // Don't move if dropping in same position or position right after current
-    if (dragIndex === dropIndex || dragIndex === dropIndex - 1) {
-      setDraggingSectionId(null);
-      setDragOverIndex(null);
-      return;
-    }
-
-    // Create new sections array with reordered items
-    const newSections = [...sections];
-    const [draggedSection] = newSections.splice(dragIndex, 1);
-
-    // Adjust drop index since we removed an item
-    const insertIndex = dropIndex > dragIndex ? dropIndex - 1 : dropIndex;
-    newSections.splice(insertIndex, 0, draggedSection);
-
-    setSections(newSections);
-    setDraggingSectionId(null);
-    setDragOverIndex(null);
-  };
-
-  const handleSectionDragEnd = () => {
-    setDraggingSectionId(null);
-    setDragOverIndex(null);
   };
 
   // Add item from sidebar to sermon builder
@@ -660,11 +590,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
             </div>
 
             {/* Sermon Sections */}
-            <div
-              className={`space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed transition-colors ${
-                draggingSectionId ? 'border-violet-400 dark:border-violet-500 bg-violet-50 dark:bg-violet-500/5' : 'border-gray-200 dark:border-dark-700'
-              }`}
-            >
+            <div className="space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed border-gray-200 dark:border-dark-700">
               {sections.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500 pointer-events-none">
                   <FileText size={48} className="mb-4 opacity-50" />
@@ -677,28 +603,13 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                   const Icon = config.icon;
 
                   return (
-                    <div key={section.id}>
-                      {/* Drop zone before this section */}
-                      <div
-                        onDragOver={(e) => handleSectionDragOver(e, index)}
-                        onDrop={(e) => handleSectionDrop(e, index)}
-                        className={`h-2 -my-1 rounded transition-all ${
-                          dragOverIndex === index && draggingSectionId !== section.id ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
-                        }`}
-                      />
-
-                      <div
-                        draggable
-                        onDragStart={(e) => handleSectionDragStart(e, section.id)}
-                        onDragEnd={handleSectionDragEnd}
-                        className={`bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all ${
-                          draggingSectionId === section.id ? 'opacity-50' : ''
-                        }`}
-                      >
-                        {/* Section Header */}
-                        <div className={`${config.bgLight} ${config.bgDark} border-b ${config.borderLight} ${config.borderDark} px-4 py-2 flex items-center justify-between`}>
-                          <div className="flex items-center gap-2">
-                            <GripVertical size={14} className="text-gray-400 dark:text-dark-500 cursor-grab" />
+                    <div
+                      key={section.id}
+                      className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
+                    >
+                      {/* Section Header */}
+                      <div className={`${config.bgLight} ${config.bgDark} border-b ${config.borderLight} ${config.borderDark} px-4 py-2 flex items-center justify-between`}>
+                        <div className="flex items-center gap-2">
                             <Icon size={16} className={config.iconColor} />
                             <input
                               type="text"
@@ -745,28 +656,16 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                           </div>
                         </div>
 
-                        {/* Section Content */}
-                        <div className="p-4">
-                          <textarea
-                            value={section.content}
-                            onChange={(e) => updateSection(section.id, { content: e.target.value })}
-                            placeholder={`Enter ${config.label.toLowerCase()} content...`}
-                            rows={4}
-                            className="w-full bg-transparent text-gray-700 dark:text-dark-200 placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none resize-none text-sm leading-relaxed"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Drop zone after last section */}
-                      {index === sections.length - 1 && (
-                        <div
-                          onDragOver={(e) => handleSectionDragOver(e, index + 1)}
-                          onDrop={(e) => handleSectionDrop(e, index + 1)}
-                          className={`h-2 mt-2 rounded transition-all ${
-                            dragOverIndex === index + 1 ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
-                          }`}
+                      {/* Section Content */}
+                      <div className="p-4">
+                        <textarea
+                          value={section.content}
+                          onChange={(e) => updateSection(section.id, { content: e.target.value })}
+                          placeholder={`Enter ${config.label.toLowerCase()} content...`}
+                          rows={4}
+                          className="w-full bg-transparent text-gray-700 dark:text-dark-200 placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none resize-none text-sm leading-relaxed"
                         />
-                      )}
+                      </div>
                     </div>
                   );
                 })
