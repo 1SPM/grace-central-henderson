@@ -32,6 +32,7 @@ const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ defa
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortal = lazy(() => import('./member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 
 // Loading fallback component
@@ -357,7 +358,7 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'member-events':
       case 'member-checkin':
         return (
-          <MemberPortal
+          <MemberPortalPreview
             people={people}
             events={events}
             giving={giving}
