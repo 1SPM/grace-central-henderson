@@ -36,7 +36,6 @@ function App() {
   // Use Supabase data hook
   const {
     isLoading,
-    isDemo,
     people: dbPeople,
     tasks: dbTasks,
     interactions: dbInteractions,
