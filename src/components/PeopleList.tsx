@@ -630,7 +630,18 @@ export function PeopleList({
                   onClick={() => onViewPerson(person.id)}
                   className="flex items-center gap-4 text-left"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg">
+                  {person.photo ? (
+                    <img
+                      src={person.photo}
+                      alt={`${person.firstName} ${person.lastName}`}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${person.photo ? 'hidden' : ''}`}>
                     {person.firstName[0]}{person.lastName[0]}
                   </div>
                   <div>
@@ -708,7 +719,18 @@ export function PeopleList({
                   )}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                      {person.photo ? (
+                        <img
+                          src={person.photo}
+                          alt={`${person.firstName} ${person.lastName}`}
+                          className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm ${person.photo ? 'hidden' : ''}`}>
                         {person.firstName[0]}{person.lastName[0]}
                       </div>
                       <span className="font-medium text-gray-900 dark:text-dark-100">

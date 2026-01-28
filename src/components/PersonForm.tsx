@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Camera } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 
 interface PersonFormProps {
@@ -72,6 +72,41 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Profile Photo */}
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {formData.photo ? (
+                <img
+                  src={formData.photo}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div className={`w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${formData.photo ? 'hidden' : ''}`}>
+                {formData.firstName?.[0] || '?'}{formData.lastName?.[0] || ''}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+                <Camera size={12} className="text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                Photo URL
+              </label>
+              <input
+                type="url"
+                value={formData.photo || ''}
+                onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
+                placeholder="https://example.com/photo.jpg"
+                className="w-full px-4 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">

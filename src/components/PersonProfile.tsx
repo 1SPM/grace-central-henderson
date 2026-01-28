@@ -211,8 +211,21 @@ export function PersonProfile({
           {/* Profile Card */}
           <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-start gap-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
-                {person.firstName[0]}{person.lastName[0]}
+              <div className="relative">
+                {person.photo ? (
+                  <img
+                    src={person.photo}
+                    alt={`${person.firstName} ${person.lastName}`}
+                    className="w-20 h-20 rounded-2xl object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-20 h-20 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl ${person.photo ? 'hidden' : ''}`}>
+                  {person.firstName[0]}{person.lastName[0]}
+                </div>
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
