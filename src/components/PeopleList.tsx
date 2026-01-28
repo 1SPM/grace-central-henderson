@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft, ArrowUpDown } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/exportCsv';
@@ -7,6 +7,8 @@ import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
+
+type SortOption = 'name-asc' | 'name-desc' | 'status' | 'newest' | 'oldest';
 
 interface PeopleListProps {
   people: Person[];
@@ -49,6 +51,18 @@ export function PeopleList({
     const saved = localStorage.getItem('peopleViewMode');
     return (saved as 'card' | 'table') || 'card';
   });
+
+  // Sort state
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    const saved = localStorage.getItem('peopleSortBy');
+    return (saved as SortOption) || 'name-asc';
+  });
+
+  // Save sort preference
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+    localStorage.setItem('peopleSortBy', sort);
+  };
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,17 +111,47 @@ export function PeopleList({
     [people]
   );
 
-  // Memoize filtered people list
-  const filtered = useMemo(() => people.filter((person) => {
-    const matchesSearch =
-      `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      person.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
-    const matchesTag = !tagFilter || person.tags.includes(tagFilter);
-    const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
-    const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
-    return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
-  }), [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter]);
+  // Memoize filtered and sorted people list
+  const filtered = useMemo(() => {
+    const statusOrder: Record<MemberStatus, number> = {
+      leader: 0,
+      member: 1,
+      regular: 2,
+      visitor: 3,
+      inactive: 4,
+    };
+
+    const result = people.filter((person) => {
+      const matchesSearch =
+        `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+        person.email.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
+      const matchesTag = !tagFilter || person.tags.includes(tagFilter);
+      const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
+      const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
+      return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
+    });
+
+    // Sort the results
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+        case 'name-desc':
+          return `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`);
+        case 'status':
+          return statusOrder[a.status] - statusOrder[b.status];
+        case 'newest':
+          return new Date(b.joinDate || 0).getTime() - new Date(a.joinDate || 0).getTime();
+        case 'oldest':
+          return new Date(a.joinDate || 0).getTime() - new Date(b.joinDate || 0).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter, sortBy]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filtered.length / pageSize);
@@ -285,14 +329,35 @@ export function PeopleList({
 
   const hasActiveAdvancedFilters = tagFilter || hasEmailFilter !== null || hasPhoneFilter !== null;
 
+  const sortLabels: Record<SortOption, string> = {
+    'name-asc': 'Name (A-Z)',
+    'name-desc': 'Name (Z-A)',
+    'status': 'Status',
+    'newest': 'Newest First',
+    'oldest': 'Oldest First',
+  };
+
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">People</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">{people.length} total people in your congregation</p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as SortOption)}
+              className="appearance-none pl-9 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {Object.entries(sortLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
           <ViewToggle view={viewMode} onViewChange={handleViewModeChange} />
           {onImportCSV && (
             <button
