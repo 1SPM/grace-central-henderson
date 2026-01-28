@@ -275,6 +275,13 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
               </span>
             )}
           </button>
+
+          {/* Version indicator */}
+          <div className={`mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+            <p className="px-2.5 text-[10px] text-gray-400 dark:text-dark-500">
+              v1.0 Beta
+            </p>
+          </div>
         </div>
       </aside>
 
