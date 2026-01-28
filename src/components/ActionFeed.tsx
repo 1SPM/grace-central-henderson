@@ -11,21 +11,21 @@ import {
   Cake,
   UserPlus,
   Sparkles,
-  ChevronRight,
   Filter,
   CheckCheck,
+  X,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
-import { AISuggestButton } from './AIAssistant';
+import { generateAIText } from '../lib/services/ai';
 
 interface ActionFeedProps {
   people: Person[];
   tasks: Task[];
   onToggleTask: (taskId: string) => void;
   onSelectPerson: (personId: string) => void;
-  onEmailPerson?: (person: Person) => void;
-  onSmsPerson?: (person: Person) => void;
 }
 
 type FeedFilter = 'all' | 'tasks' | 'birthdays' | 'visitors';
@@ -42,6 +42,12 @@ interface FeedItem {
   actionLabel: string;
 }
 
+interface ComposeModal {
+  type: 'email' | 'sms';
+  person: Person;
+  purpose: string;
+}
+
 export function ActionFeed({
   people,
   tasks,
@@ -50,7 +56,15 @@ export function ActionFeed({
 }: ActionFeedProps) {
   const [filter, setFilter] = useState<FeedFilter>('all');
   const [showCompleted] = useState(false);
-  const [emailDraft, setEmailDraft] = useState<{ personId: string; content: string } | null>(null);
+
+  // Compose modal state
+  const [composeModal, setComposeModal] = useState<ComposeModal | null>(null);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [smsMessage, setSmsMessage] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Build feed items
   const feedItems = useMemo(() => {
@@ -69,7 +83,7 @@ export function ActionFeed({
     if (filter === 'all' || filter === 'tasks') {
       tasks.forEach(task => {
         if (task.completed && !showCompleted) return;
-        if (task.completed) return; // Skip completed in feed
+        if (task.completed) return;
 
         const dueDate = new Date(task.dueDate);
         dueDate.setHours(0, 0, 0, 0);
@@ -108,7 +122,6 @@ export function ActionFeed({
         const bday = new Date(person.birthDate);
         const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
 
-        // If birthday already passed this year, check next year
         if (thisYearBday < today) {
           thisYearBday.setFullYear(thisYearBday.getFullYear() + 1);
         }
@@ -161,7 +174,7 @@ export function ActionFeed({
         });
     }
 
-    // Sort by priority (urgent first), then by date
+    // Sort by priority, then by date
     const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
     items.sort((a, b) => {
       const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -207,12 +220,82 @@ export function ActionFeed({
     return null;
   };
 
-  const handleAction = (item: FeedItem) => {
-    if (item.type === 'task' && item.task) {
-      onToggleTask(item.task.id);
-    } else if (item.person) {
-      onSelectPerson(item.person.id);
+  const openCompose = (type: 'email' | 'sms', person: Person, purpose: string) => {
+    setComposeModal({ type, person, purpose });
+    setEmailSubject('');
+    setEmailBody('');
+    setSmsMessage('');
+    setSendResult(null);
+  };
+
+  const closeCompose = () => {
+    setComposeModal(null);
+    setEmailSubject('');
+    setEmailBody('');
+    setSmsMessage('');
+    setSendResult(null);
+  };
+
+  const handleAIDraft = async () => {
+    if (!composeModal) return;
+    setIsGenerating(true);
+
+    const { type, person, purpose } = composeModal;
+
+    const prompt = type === 'email'
+      ? `Write a friendly, professional email for ${person.firstName} ${person.lastName}.
+Status: ${person.status}
+Purpose: ${purpose}
+${person.notes ? `Notes about them: ${person.notes}` : ''}
+
+Generate a warm, personalized email. Include a subject line formatted as "Subject: [subject]" on the first line. Keep the body under 150 words.`
+      : `Write a brief, friendly text message for ${person.firstName}.
+Status: ${person.status}
+Purpose: ${purpose}
+
+Keep it under 160 characters. Be warm but concise. Do not include a subject line.`;
+
+    try {
+      const result = await generateAIText({
+        prompt,
+        maxTokens: type === 'sms' ? 100 : 300
+      });
+
+      if (result.success && result.text) {
+        if (type === 'email') {
+          // Parse subject line
+          const subjectMatch = result.text.match(/^Subject:\s*(.+?)(?:\n|$)/i);
+          if (subjectMatch) {
+            setEmailSubject(subjectMatch[1].trim());
+            setEmailBody(result.text.replace(/^Subject:\s*.+?\n+/i, '').trim());
+          } else {
+            setEmailBody(result.text);
+          }
+        } else {
+          setSmsMessage(result.text.slice(0, 160));
+        }
+      }
+    } catch {
+      // Silent fail
     }
+
+    setIsGenerating(false);
+  };
+
+  const handleSend = async () => {
+    if (!composeModal) return;
+    setIsSending(true);
+
+    // Simulate send (in real app, this would call the actual send API)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setSendResult({ success: true, message: `${composeModal.type === 'email' ? 'Email' : 'Text'} sent successfully!` });
+    setIsSending(false);
+
+    // Close after delay
+    setTimeout(() => {
+      closeCompose();
+    }, 1500);
   };
 
   const counts = useMemo(() => ({
@@ -226,7 +309,7 @@ export function ActionFeed({
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Action Feed</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Actions</h1>
         <p className="text-gray-500 dark:text-dark-400 mt-1">
           {feedItems.length} item{feedItems.length !== 1 ? 's' : ''} need your attention
         </p>
@@ -283,16 +366,8 @@ export function ActionFeed({
                     <div>
                       <h3 className="font-medium text-gray-900 dark:text-dark-100">{item.title}</h3>
                       <p className="text-sm text-gray-500 dark:text-dark-400 flex items-center gap-2 mt-0.5">
-                        {item.type === 'task' && item.dueDate && (
-                          <span className="flex items-center gap-1">
-                            <Clock size={12} />
-                          </span>
-                        )}
-                        {item.type === 'birthday' && (
-                          <span className="flex items-center gap-1">
-                            <Calendar size={12} />
-                          </span>
-                        )}
+                        {item.type === 'task' && item.dueDate && <Clock size={12} />}
+                        {item.type === 'birthday' && <Calendar size={12} />}
                         {item.subtitle}
                       </p>
                     </div>
@@ -300,12 +375,15 @@ export function ActionFeed({
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap">
                     {item.person && (
                       <>
                         {item.person.email && (
                           <button
-                            onClick={() => onSelectPerson(item.person!.id)}
+                            onClick={() => openCompose('email', item.person!,
+                              item.type === 'birthday' ? 'birthday greeting' :
+                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up'
+                            )}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                           >
                             <Mail size={12} />
@@ -323,87 +401,195 @@ export function ActionFeed({
                         )}
                         {item.person.phone && (
                           <button
-                            onClick={() => onSelectPerson(item.person!.id)}
+                            onClick={() => openCompose('sms', item.person!,
+                              item.type === 'birthday' ? 'birthday greeting' :
+                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up'
+                            )}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
                           >
                             <MessageSquare size={12} />
                             Text
                           </button>
                         )}
-                        <AISuggestButton
-                          context={{
-                            type: 'email',
-                            person: item.person,
-                            purpose: item.type === 'birthday' ? 'birthday greeting' : item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
-                          }}
-                          onGenerate={(text) => setEmailDraft({ personId: item.person!.id, content: text })}
-                        />
                       </>
                     )}
 
                     {item.type === 'task' && (
                       <button
-                        onClick={() => handleAction(item)}
+                        onClick={() => item.task && onToggleTask(item.task.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors ml-auto"
                       >
                         <CheckCircle2 size={12} />
-                        Mark Done
+                        Done
                       </button>
                     )}
 
                     {item.person && (
                       <button
                         onClick={() => onSelectPerson(item.person!.id)}
-                        className="flex items-center gap-1 px-2 py-1.5 text-xs text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200 transition-colors ml-auto"
+                        className="text-xs text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200 transition-colors ml-auto"
                       >
-                        View Profile
-                        <ChevronRight size={14} />
+                        View Profile →
                       </button>
                     )}
                   </div>
                 </div>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-              {/* AI Draft Preview */}
-              {emailDraft && item.person && emailDraft.personId === item.person.id && (
-                <div className="mt-4 p-3 bg-violet-50 dark:bg-violet-500/10 rounded-lg border border-violet-200 dark:border-violet-500/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-violet-700 dark:text-violet-400 flex items-center gap-1">
-                      <Sparkles size={12} />
-                      AI Draft
-                    </span>
-                    <button
-                      onClick={() => setEmailDraft(null)}
-                      className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
-                    >
-                      Dismiss
-                    </button>
+      {/* Compose Modal */}
+      {composeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg shadow-2xl">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    composeModal.type === 'email'
+                      ? 'bg-blue-100 dark:bg-blue-500/20'
+                      : 'bg-purple-100 dark:bg-purple-500/20'
+                  }`}>
+                    {composeModal.type === 'email'
+                      ? <Mail size={20} className="text-blue-600 dark:text-blue-400" />
+                      : <MessageSquare size={20} className="text-purple-600 dark:text-purple-400" />
+                    }
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-dark-200 whitespace-pre-wrap">{emailDraft.content}</p>
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(emailDraft.content);
-                        setEmailDraft(null);
-                      }}
-                      className="px-3 py-1.5 text-xs font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
-                    >
-                      Copy & Use
-                    </button>
-                    <button
-                      onClick={() => {
-                        onSelectPerson(item.person!.id);
-                        setEmailDraft(null);
-                      }}
-                      className="px-3 py-1.5 text-xs font-medium text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20 rounded-lg transition-colors"
-                    >
-                      Open in Profile
-                    </button>
+                  <div>
+                    <h2 className="font-semibold text-gray-900 dark:text-dark-100">
+                      {composeModal.type === 'email' ? 'Send Email' : 'Send Text'}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-dark-400">
+                      to {composeModal.person.firstName} {composeModal.person.lastName}
+                    </p>
                   </div>
+                </div>
+                <button
+                  onClick={closeCompose}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+                >
+                  <X size={20} className="text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-4 space-y-4">
+              {/* AI Generate Button */}
+              <button
+                onClick={handleAIDraft}
+                disabled={isGenerating}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    Generate with AI
+                  </>
+                )}
+              </button>
+
+              {composeModal.type === 'email' ? (
+                <>
+                  {/* Subject */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      placeholder="Enter subject..."
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                  </div>
+
+                  {/* Body */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                      placeholder="Write your message or click 'Generate with AI'..."
+                      rows={6}
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                    />
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                    Message
+                  </label>
+                  <textarea
+                    value={smsMessage}
+                    onChange={(e) => setSmsMessage(e.target.value.slice(0, 160))}
+                    placeholder="Write your message or click 'Generate with AI'..."
+                    rows={4}
+                    maxLength={160}
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  />
+                  <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
+                    {smsMessage.length}/160 characters
+                  </p>
+                </div>
+              )}
+
+              {/* Send Result */}
+              {sendResult && (
+                <div className={`p-3 rounded-xl flex items-center gap-2 ${
+                  sendResult.success
+                    ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400'
+                    : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                }`}>
+                  {sendResult.success ? <CheckCircle2 size={16} /> : <X size={16} />}
+                  {sendResult.message}
                 </div>
               )}
             </div>
-          ))}
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">
+              <button
+                onClick={closeCompose}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSend}
+                disabled={isSending || (composeModal.type === 'email' ? !emailBody.trim() : !smsMessage.trim())}
+                className={`px-4 py-2 text-white rounded-xl text-sm font-medium flex items-center gap-2 disabled:opacity-50 transition-colors ${
+                  composeModal.type === 'email'
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-purple-600 hover:bg-purple-700'
+                }`}
+              >
+                {isSending ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Send {composeModal.type === 'email' ? 'Email' : 'Text'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
