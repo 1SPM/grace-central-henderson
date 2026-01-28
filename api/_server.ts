@@ -34,6 +34,9 @@ import agentRoutes from './_routes/agents';
 import aiRoutes from './_routes/ai';
 import { initWebhookRoutes } from './_routes/webhooks';
 
+// Import middleware
+import { requireAuth, optionalAuth, getAuthStatus, AuthenticatedRequest } from './_middleware/auth';
+
 // Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,12 +72,16 @@ app.use(express.json());
 // ROUTES
 // ============================================
 
-// Mount route modules
-app.use('/api/payments', initPaymentRoutes(stripe));
-app.use('/api/email', emailRoutes);
-app.use('/api/sms', smsRoutes);
-app.use('/api/agents', agentRoutes);
-app.use('/api/ai', aiRoutes);
+// Protected routes - require authentication
+app.use('/api/payments', requireAuth, initPaymentRoutes(stripe));
+app.use('/api/email', requireAuth, emailRoutes);
+app.use('/api/sms', requireAuth, smsRoutes);
+app.use('/api/agents', requireAuth, agentRoutes);
+
+// AI routes - optional auth (rate limited separately)
+app.use('/api/ai', optionalAuth, aiRoutes);
+
+// Webhooks - no auth (verified by signature)
 app.use('/webhooks', initWebhookRoutes(stripe, supabase));
 
 // ============================================
@@ -82,6 +89,7 @@ app.use('/webhooks', initWebhookRoutes(stripe, supabase));
 // ============================================
 
 app.get('/health', (_req: Request, res: Response) => {
+  const authStatus = getAuthStatus();
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -90,7 +98,8 @@ app.get('/health', (_req: Request, res: Response) => {
     twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER),
     supabase: !!process.env.SUPABASE_URL,
     gemini: !!process.env.GEMINI_API_KEY,
-    agents: true, // AI agents are always available
+    agents: true,
+    auth: authStatus,
   });
 });
 
