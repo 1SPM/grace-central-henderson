@@ -224,26 +224,43 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     }, 1000);
   };
 
-  const handleDragStart = (item: DragItem) => {
+  const handleDragStart = (e: React.DragEvent, item: DragItem) => {
     setDraggedItem(item);
+    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     setDragOverIndex(index);
   };
 
   const handleDrop = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (!draggedItem) return;
+
+    // Try to get item from dataTransfer if draggedItem is not set
+    let item = draggedItem;
+    if (!item) {
+      try {
+        const data = e.dataTransfer.getData('text/plain');
+        if (data) {
+          item = JSON.parse(data) as DragItem;
+        }
+      } catch {
+        return;
+      }
+    }
+
+    if (!item) return;
 
     const newSection: SermonSection = {
       id: `section-${Date.now()}`,
-      type: draggedItem.type === 'news' ? 'point' : 'announcement',
-      title: draggedItem.title,
-      content: draggedItem.content,
-      sourceType: draggedItem.type,
-      sourceId: draggedItem.id,
+      type: item.type === 'news' ? 'point' : 'announcement',
+      title: item.title,
+      content: item.content,
+      sourceType: item.type,
+      sourceId: item.id,
     };
 
     const newSections = [...sections];
@@ -353,7 +370,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
     return (
       <div
         draggable
-        onDragStart={() => handleDragStart(item)}
+        onDragStart={(e) => handleDragStart(e, item)}
         onDragEnd={handleDragEnd}
         className={`p-3 ${styles.bg} rounded-lg cursor-grab active:cursor-grabbing border ${styles.border} hover:shadow-md transition-all group`}
       >
@@ -603,13 +620,20 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
 
             {/* Sermon Sections */}
             <div
-              className="space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed border-gray-200 dark:border-dark-700"
+              className={`space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed transition-colors ${
+                draggedItem ? 'border-violet-400 dark:border-violet-500 bg-violet-50 dark:bg-violet-500/5' : 'border-gray-200 dark:border-dark-700'
+              }`}
               onDragOver={(e) => {
                 e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
                 if (sections.length === 0) setDragOverIndex(0);
               }}
               onDrop={(e) => {
-                if (sections.length === 0) handleDrop(e, 0);
+                e.preventDefault();
+                // If dropping on empty area or at the end
+                if (sections.length === 0 || dragOverIndex === null) {
+                  handleDrop(e, sections.length);
+                }
               }}
             >
               {sections.length === 0 ? (
@@ -636,7 +660,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
 
                       <div
                         draggable
-                        onDragStart={() => setDraggedItem({ type: 'news', id: section.id, title: section.title, content: section.content })}
+                        onDragStart={(e) => handleDragStart(e, { type: 'news', id: section.id, title: section.title, content: section.content })}
                         onDragEnd={handleDragEnd}
                         className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
                       >
