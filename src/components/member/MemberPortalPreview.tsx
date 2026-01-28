@@ -102,22 +102,14 @@ export function MemberPortalPreview({
           <div className="flex items-center gap-2 bg-white dark:bg-dark-800 rounded-xl p-1 border border-gray-200 dark:border-dark-600">
             <button
               onClick={() => setViewMode('phone')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
-                viewMode === 'phone'
-                  ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
-                  : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700'
-              }`}
+              className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400"
             >
               <Smartphone size={16} />
               Phone
             </button>
             <button
               onClick={() => setViewMode('full')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
-                viewMode === 'full'
-                  ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
-                  : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700'
-              }`}
+              className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-700"
             >
               <Monitor size={16} />
               Full Screen
