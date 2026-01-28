@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Dashboard } from './Dashboard';
+import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -30,6 +31,7 @@ const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ defa
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortal = lazy(() => import('./member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -134,6 +136,16 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewPeople={() => setView('people')}
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
+        />
+      );
+
+    case 'feed':
+      return (
+        <ActionFeed
+          people={people}
+          tasks={tasks}
+          onToggleTask={handlers.toggleTask}
+          onSelectPerson={handlers.viewPerson}
         />
       );
 
@@ -351,6 +363,13 @@ export function ViewRenderer(props: ViewRendererProps) {
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
           />
+        );
+
+      case 'sunday-prep':
+        return (
+          <div className="p-6 max-w-6xl mx-auto">
+            <SundayPrep people={people} prayers={prayers} onViewPerson={handlers.viewPerson} />
+          </div>
         );
 
       default:
