@@ -11,11 +11,14 @@ import {
   Cake,
   UserPlus,
   Sparkles,
-  Filter,
   CheckCheck,
   X,
   Send,
   Loader2,
+  Zap,
+  ListTodo,
+  Gift,
+  Users,
 } from 'lucide-react';
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
@@ -198,21 +201,6 @@ export function ActionFeed({
     return items.filter(item => !dismissedItems.has(item.id));
   }, [people, tasks, filter, showCompleted, dismissedItems]);
 
-  const getItemIcon = (item: FeedItem) => {
-    switch (item.type) {
-      case 'task':
-        return item.task?.completed ? (
-          <CheckCircle2 size={20} className="text-green-500" />
-        ) : (
-          <Circle size={20} className="text-gray-400" />
-        );
-      case 'birthday':
-        return <Cake size={20} className="text-pink-500" />;
-      case 'visitor':
-        return <UserPlus size={20} className="text-blue-500" />;
-    }
-  };
-
   const getPriorityBadge = (priority: FeedItem['priority']) => {
     if (priority === 'urgent') {
       return (
@@ -323,148 +311,229 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
     visitors: feedItems.filter(i => i.type === 'visitor').length,
   }), [feedItems]);
 
+  const filterConfig = {
+    all: { icon: Zap, color: 'violet' },
+    tasks: { icon: ListTodo, color: 'blue' },
+    birthdays: { icon: Gift, color: 'pink' },
+    visitors: { icon: Users, color: 'amber' },
+  };
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Actions</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">
-          {feedItems.length} item{feedItems.length !== 1 ? 's' : ''} need your attention
-        </p>
+    <div className="space-y-6">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-xl h-32">
+        <img
+          src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop"
+          alt="Actions"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/90 via-purple-800/80 to-violet-900/70" />
+        <div className="relative h-full p-5 flex items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+              <Zap className="text-white/90" size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white">Action Center</h2>
+              <p className="text-white/60 text-sm">
+                {feedItems.length} item{feedItems.length !== 1 ? 's' : ''} need your attention
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-        <Filter size={16} className="text-gray-400 flex-shrink-0" />
-        {(['all', 'tasks', 'birthdays', 'visitors'] as FeedFilter[]).map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
-              filter === f
-                ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400'
-                : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800'
-            }`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-            <span className="ml-1.5 text-xs opacity-60">({counts[f]})</span>
-          </button>
-        ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {(['all', 'tasks', 'birthdays', 'visitors'] as FeedFilter[]).map(f => {
+          const config = filterConfig[f];
+          const Icon = config.icon;
+          const isActive = filter === f;
+          const count = counts[f];
+
+          const colorClasses = {
+            violet: {
+              bg: isActive ? 'bg-violet-100 dark:bg-violet-500/20' : 'bg-white dark:bg-dark-800',
+              border: isActive ? 'border-violet-300 dark:border-violet-500/30' : 'border-gray-200 dark:border-dark-700',
+              icon: 'text-violet-500',
+              text: isActive ? 'text-violet-700 dark:text-violet-400' : 'text-gray-900 dark:text-dark-100',
+            },
+            blue: {
+              bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-white dark:bg-dark-800',
+              border: isActive ? 'border-blue-300 dark:border-blue-500/30' : 'border-gray-200 dark:border-dark-700',
+              icon: 'text-blue-500',
+              text: isActive ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-dark-100',
+            },
+            pink: {
+              bg: isActive ? 'bg-pink-100 dark:bg-pink-500/20' : 'bg-white dark:bg-dark-800',
+              border: isActive ? 'border-pink-300 dark:border-pink-500/30' : 'border-gray-200 dark:border-dark-700',
+              icon: 'text-pink-500',
+              text: isActive ? 'text-pink-700 dark:text-pink-400' : 'text-gray-900 dark:text-dark-100',
+            },
+            amber: {
+              bg: isActive ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-white dark:bg-dark-800',
+              border: isActive ? 'border-amber-300 dark:border-amber-500/30' : 'border-gray-200 dark:border-dark-700',
+              icon: 'text-amber-500',
+              text: isActive ? 'text-amber-700 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100',
+            },
+          };
+
+          const colors = colorClasses[config.color as keyof typeof colorClasses];
+
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`${colors.bg} ${colors.border} border rounded-xl p-4 text-left transition-all hover:shadow-md`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <Icon size={20} className={colors.icon} />
+                <span className={`text-2xl font-bold ${colors.text}`}>{count}</span>
+              </div>
+              <p className={`text-sm font-medium ${colors.text}`}>
+                {f === 'all' ? 'All Actions' : f.charAt(0).toUpperCase() + f.slice(1)}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {/* Feed Items */}
       {feedItems.length === 0 ? (
-        <div className="text-center py-12">
-          <CheckCheck size={48} className="mx-auto text-green-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100">All caught up!</h3>
+        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-12 text-center">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCheck size={32} className="text-green-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">All caught up!</h3>
           <p className="text-gray-500 dark:text-dark-400 mt-1">No pending actions right now.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {feedItems.map(item => (
-            <div
-              key={item.id}
-              className={`bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 transition-all hover:shadow-md ${
-                item.priority === 'urgent' ? 'border-l-4 border-l-red-500' : ''
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                {/* Icon / Checkbox */}
-                <button
-                  onClick={() => item.type === 'task' && item.task && onToggleTask(item.task.id)}
-                  className={`mt-0.5 ${item.type === 'task' ? 'hover:scale-110 transition-transform' : ''}`}
-                  disabled={item.type !== 'task'}
+        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="divide-y divide-gray-100 dark:divide-dark-700">
+            {feedItems.map(item => {
+              const typeConfig = {
+                task: { bg: 'bg-blue-500', iconBg: 'bg-blue-100 dark:bg-blue-500/20', iconColor: 'text-blue-500' },
+                birthday: { bg: 'bg-pink-500', iconBg: 'bg-pink-100 dark:bg-pink-500/20', iconColor: 'text-pink-500' },
+                visitor: { bg: 'bg-amber-500', iconBg: 'bg-amber-100 dark:bg-amber-500/20', iconColor: 'text-amber-500' },
+              };
+              const config = typeConfig[item.type];
+
+              return (
+                <div
+                  key={item.id}
+                  className={`p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors ${
+                    item.priority === 'urgent' ? 'bg-red-50/50 dark:bg-red-500/5' : ''
+                  }`}
                 >
-                  {getItemIcon(item)}
-                </button>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-dark-100">{item.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-dark-400 flex items-center gap-2 mt-0.5">
-                        {item.type === 'task' && item.dueDate && <Clock size={12} />}
-                        {item.type === 'birthday' && <Calendar size={12} />}
-                        {item.subtitle}
-                      </p>
-                    </div>
-                    {getPriorityBadge(item.priority)}
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    {item.person && (
-                      <>
-                        {item.person.email && (
+                  <div className="flex items-start gap-4">
+                    {/* Type indicator + Icon */}
+                    <div className="relative">
+                      <div className={`w-10 h-10 ${config.iconBg} rounded-xl flex items-center justify-center`}>
+                        {item.type === 'task' ? (
                           <button
-                            onClick={() => openCompose('email', item.person!,
-                              item.type === 'birthday' ? 'birthday greeting' :
-                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
-                              item
-                            )}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                            onClick={() => item.task && onToggleTask(item.task.id)}
+                            className="hover:scale-110 transition-transform"
                           >
-                            <Mail size={12} />
-                            Email
+                            {item.task?.completed ? (
+                              <CheckCircle2 size={20} className="text-green-500" />
+                            ) : (
+                              <Circle size={20} className={config.iconColor} />
+                            )}
                           </button>
+                        ) : item.type === 'birthday' ? (
+                          <Cake size={20} className={config.iconColor} />
+                        ) : (
+                          <UserPlus size={20} className={config.iconColor} />
                         )}
-                        {item.person.phone && (
-                          <a
-                            href={`tel:${item.person.phone}`}
+                      </div>
+                      {item.priority === 'urgent' && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                          <AlertTriangle size={10} className="text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-medium text-gray-900 dark:text-dark-100">{item.title}</h3>
+                          <p className="text-sm text-gray-500 dark:text-dark-400 flex items-center gap-1.5 mt-0.5">
+                            {item.type === 'task' && item.dueDate && <Clock size={12} />}
+                            {item.type === 'birthday' && <Calendar size={12} />}
+                            {item.subtitle}
+                          </p>
+                        </div>
+                        {getPriorityBadge(item.priority)}
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="flex items-center gap-2 mt-3 flex-wrap">
+                        {item.person && (
+                          <>
+                            {item.person.email && (
+                              <button
+                                onClick={() => openCompose('email', item.person!,
+                                  item.type === 'birthday' ? 'birthday greeting' :
+                                  item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
+                                  item
+                                )}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                              >
+                                <Mail size={12} />
+                                Email
+                              </button>
+                            )}
+                            {item.person.phone && (
+                              <a
+                                href={`tel:${item.person.phone}`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors"
+                              >
+                                <Phone size={12} />
+                                Call
+                              </a>
+                            )}
+                            {item.person.phone && (
+                              <button
+                                onClick={() => openCompose('sms', item.person!,
+                                  item.type === 'birthday' ? 'birthday greeting' :
+                                  item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
+                                  item
+                                )}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
+                              >
+                                <MessageSquare size={12} />
+                                Text
+                              </button>
+                            )}
+                          </>
+                        )}
+
+                        <div className="flex items-center gap-2 ml-auto">
+                          <button
+                            onClick={() => item.type === 'task' && item.task ? onToggleTask(item.task.id) : handleMarkDone(item)}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors"
                           >
-                            <Phone size={12} />
-                            Call
-                          </a>
-                        )}
-                        {item.person.phone && (
-                          <button
-                            onClick={() => openCompose('sms', item.person!,
-                              item.type === 'birthday' ? 'birthday greeting' :
-                              item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
-                              item
-                            )}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
-                          >
-                            <MessageSquare size={12} />
-                            Text
+                            <CheckCircle2 size={12} />
+                            Done
                           </button>
-                        )}
-                      </>
-                    )}
 
-                    {item.type === 'task' ? (
-                      <button
-                        onClick={() => item.task && onToggleTask(item.task.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors ml-auto"
-                      >
-                        <CheckCircle2 size={12} />
-                        Done
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleMarkDone(item)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors"
-                      >
-                        <CheckCircle2 size={12} />
-                        Done
-                      </button>
-                    )}
-
-                    {item.person && (
-                      <button
-                        onClick={() => onSelectPerson(item.person!.id)}
-                        className="text-xs text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200 transition-colors ml-auto"
-                      >
-                        View Profile →
-                      </button>
-                    )}
+                          {item.person && (
+                            <button
+                              onClick={() => onSelectPerson(item.person!.id)}
+                              className="text-xs text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                            >
+                              View →
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
         </div>
       )}
 
