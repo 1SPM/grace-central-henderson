@@ -55,6 +55,9 @@ function App() {
     addPrayer,
     markPrayerAnswered,
     addGiving,
+    createGroup,
+    addGroupMember,
+    removeGroupMember,
   } = useSupabaseData();
 
   // Convert to legacy types for existing components (memoized)
@@ -89,6 +92,9 @@ function App() {
     addPrayer,
     markPrayerAnswered,
     addGiving,
+    createGroup,
+    addGroupMember,
+    removeGroupMember,
     setView,
     setSelectedPersonId,
     openPersonForm: modals.openPersonForm,

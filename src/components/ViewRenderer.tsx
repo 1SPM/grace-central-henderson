@@ -76,6 +76,9 @@ interface ViewRendererProps {
     updateVolunteerStatus: (assignmentId: string, status: 'confirmed' | 'pending' | 'declined') => void;
     removeVolunteer: (assignmentId: string) => void;
     updatePersonTags: (personId: string, tags: string[]) => Promise<void>;
+    createGroup: (group: Omit<SmallGroup, 'id'>) => Promise<void>;
+    addGroupMember: (groupId: string, personId: string) => Promise<void>;
+    removeGroupMember: (groupId: string, personId: string) => Promise<void>;
   };
   collectionMgmt: {
     campaigns: any[];
@@ -221,7 +224,15 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'groups':
-        return <Groups groups={groups} people={people} />;
+        return (
+          <Groups
+            groups={groups}
+            people={people}
+            onCreateGroup={handlers.createGroup}
+            onAddMember={handlers.addGroupMember}
+            onRemoveMember={handlers.removeGroupMember}
+          />
+        );
 
       case 'prayer':
         return <Prayer prayers={prayers} people={people} onMarkAnswered={handlers.markPrayerAnswered} />;

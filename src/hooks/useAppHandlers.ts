@@ -13,6 +13,9 @@ interface UseAppHandlersProps {
   addPrayer: (data: any) => Promise<any>;
   markPrayerAnswered: (id: string, testimony?: string) => Promise<any>;
   addGiving: (data: any) => Promise<any>;
+  createGroup?: (data: any) => Promise<any>;
+  addGroupMember?: (groupId: string, personId: string) => Promise<any>;
+  removeGroupMember?: (groupId: string, personId: string) => Promise<any>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
@@ -30,6 +33,9 @@ export function useAppHandlers({
   addPrayer,
   markPrayerAnswered,
   addGiving,
+  createGroup,
+  addGroupMember,
+  removeGroupMember,
   setView,
   setSelectedPersonId,
   openPersonForm,
@@ -283,6 +289,38 @@ export function useAppHandlers({
     await updatePerson(personId, { tags });
   }, [updatePerson]);
 
+  // Group handlers
+  const handleCreateGroup = useCallback(async (groupData: {
+    name: string;
+    description?: string;
+    leaderId?: string;
+    members?: string[];
+    meetingDay?: string;
+    meetingTime?: string;
+    location?: string;
+  }) => {
+    if (!createGroup) return;
+    await createGroup({
+      church_id: churchId,
+      name: groupData.name,
+      description: groupData.description,
+      leader_id: groupData.leaderId,
+      meeting_day: groupData.meetingDay,
+      meeting_time: groupData.meetingTime,
+      location: groupData.location,
+    });
+  }, [createGroup, churchId]);
+
+  const handleAddGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!addGroupMember) return;
+    await addGroupMember(groupId, personId);
+  }, [addGroupMember]);
+
+  const handleRemoveGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!removeGroupMember) return;
+    await removeGroupMember(groupId, personId);
+  }, [removeGroupMember]);
+
   return {
     // State
     attendanceRecords,
@@ -310,6 +348,9 @@ export function useAppHandlers({
       bulkAddTag: handleBulkAddTag,
       importCSV: handleImportCSV,
       updatePersonTags: handleUpdatePersonTags,
+      createGroup: handleCreateGroup,
+      addGroupMember: handleAddGroupMember,
+      removeGroupMember: handleRemoveGroupMember,
     },
   };
 }

@@ -522,6 +522,146 @@ export function useSupabaseData() {
     return newGiving;
   }, [isDemo]);
 
+  // Create a new group
+  const createGroup = useCallback(async (groupData: {
+    church_id: string;
+    name: string;
+    description?: string;
+    leader_id?: string;
+    meeting_day?: string;
+    meeting_time?: string;
+    location?: string;
+  }) => {
+    if (isDemo) {
+      const newGroup: SmallGroupWithMembers = {
+        id: `group-${Date.now()}`,
+        church_id: groupData.church_id,
+        name: groupData.name,
+        description: groupData.description || null,
+        leader_id: groupData.leader_id || null,
+        meeting_day: groupData.meeting_day || null,
+        meeting_time: groupData.meeting_time || null,
+        location: groupData.location || null,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        members: groupData.leader_id ? [groupData.leader_id] : [],
+      };
+      setGroups(prev => [...prev, newGroup]);
+
+      // If there's a leader, add them as a member too
+      if (groupData.leader_id) {
+        // In demo mode, members array is already set above
+      }
+      return newGroup;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { data, error } = await supabase
+      .from('small_groups')
+      .insert({
+        church_id: groupData.church_id,
+        name: groupData.name,
+        description: groupData.description || null,
+        leader_id: groupData.leader_id || null,
+        meeting_day: groupData.meeting_day || null,
+        meeting_time: groupData.meeting_time || null,
+        location: groupData.location || null,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const newGroup: SmallGroupWithMembers = {
+      ...(data as SmallGroup),
+      members: [],
+    };
+
+    // If there's a leader, add them as a member
+    if (groupData.leader_id) {
+      await supabase
+        .from('group_memberships')
+        .insert({
+          group_id: newGroup.id,
+          person_id: groupData.leader_id,
+        });
+      newGroup.members = [groupData.leader_id];
+    }
+
+    setGroups(prev => [...prev, newGroup]);
+    return newGroup;
+  }, [isDemo]);
+
+  // Add member to group
+  const addGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (isDemo) {
+      setGroups(prev => prev.map(g => {
+        if (g.id === groupId && !g.members.includes(personId)) {
+          return { ...g, members: [...g.members, personId] };
+        }
+        return g;
+      }));
+      return;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { error } = await supabase
+      .from('group_memberships')
+      .insert({
+        group_id: groupId,
+        person_id: personId,
+      });
+
+    if (error) throw error;
+
+    setGroups(prev => prev.map(g => {
+      if (g.id === groupId && !g.members.includes(personId)) {
+        return { ...g, members: [...g.members, personId] };
+      }
+      return g;
+    }));
+  }, [isDemo]);
+
+  // Remove member from group
+  const removeGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (isDemo) {
+      setGroups(prev => prev.map(g => {
+        if (g.id === groupId) {
+          return { ...g, members: g.members.filter(m => m !== personId) };
+        }
+        return g;
+      }));
+      return;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { error } = await supabase
+      .from('group_memberships')
+      .delete()
+      .eq('group_id', groupId)
+      .eq('person_id', personId);
+
+    if (error) throw error;
+
+    setGroups(prev => prev.map(g => {
+      if (g.id === groupId) {
+        return { ...g, members: g.members.filter(m => m !== personId) };
+      }
+      return g;
+    }));
+  }, [isDemo]);
+
   return {
     // State
     isLoading,
@@ -554,5 +694,10 @@ export function useSupabaseData() {
 
     // Giving actions
     addGiving,
+
+    // Group actions
+    createGroup,
+    addGroupMember,
+    removeGroupMember,
   };
 }
