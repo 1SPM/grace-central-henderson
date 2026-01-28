@@ -31,6 +31,7 @@ const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ defa
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortal = lazy(() => import('./member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -362,6 +363,13 @@ export function ViewRenderer(props: ViewRendererProps) {
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
           />
+        );
+
+      case 'sunday-prep':
+        return (
+          <div className="p-6 max-w-6xl mx-auto">
+            <SundayPrep people={people} prayers={prayers} onViewPerson={handlers.viewPerson} />
+          </div>
         );
 
       default:

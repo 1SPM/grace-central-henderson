@@ -16,6 +16,7 @@ import {
   PanelLeft,
   ChevronRight,
   FileText,
+  Church,
   X,
 } from 'lucide-react';
 import { View } from '../types';
@@ -31,6 +32,7 @@ interface LayoutProps {
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
   { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
+  { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
   { view: 'people', label: 'People', icon: <Users size={18} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
   { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
@@ -74,6 +76,7 @@ const viewLabels: Record<View, string> = {
   'member-giving': 'Member Giving',
   'member-events': 'Member Events',
   'member-checkin': 'Member Check-In',
+  'sunday-prep': 'Sunday Prep',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
