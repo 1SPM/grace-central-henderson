@@ -23,6 +23,7 @@ import {
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
 import { generateAIText } from '../lib/services/ai';
+import { useChurchSettings } from '../hooks/useChurchSettings';
 
 interface ActionFeedProps {
   people: Person[];
@@ -58,6 +59,9 @@ export function ActionFeed({
   onToggleTask,
   onSelectPerson,
 }: ActionFeedProps) {
+  const { settings: churchSettings } = useChurchSettings();
+  const churchName = churchSettings?.profile?.name || 'Our Church';
+
   const [filter, setFilter] = useState<FeedFilter>('all');
   const [showCompleted] = useState(false);
   const [dismissedItems, setDismissedItems] = useState<Set<string>>(() => {
@@ -243,17 +247,20 @@ export function ActionFeed({
     const { type, person, purpose } = composeModal;
 
     const prompt = type === 'email'
-      ? `Write a friendly, professional email for ${person.firstName} ${person.lastName}.
+      ? `Write a friendly, professional email for ${person.firstName} ${person.lastName} from ${churchName}.
 Status: ${person.status}
 Purpose: ${purpose}
 ${person.notes ? `Notes about them: ${person.notes}` : ''}
 
-Generate a warm, personalized email. Include a subject line formatted as "Subject: [subject]" on the first line. Keep the body under 150 words.`
-      : `Write a brief, friendly text message for ${person.firstName}.
+Generate a warm, personalized email. Include a subject line formatted as "Subject: [subject]" on the first line.
+Keep the body under 150 words.
+End with a warm closing like "Blessings," or "With warmth," followed by the church name "${churchName}" as the signature.
+Make it feel personal and caring, like it's from the pastoral team.`
+      : `Write a brief, friendly text message for ${person.firstName} from ${churchName}.
 Status: ${person.status}
 Purpose: ${purpose}
 
-Keep it under 160 characters. Be warm but concise. Do not include a subject line.`;
+Keep it under 160 characters. Be warm but concise. Do not include a subject line. Sign off with just the church name.`;
 
     try {
       const result = await generateAIText({
