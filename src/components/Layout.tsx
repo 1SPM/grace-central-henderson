@@ -18,6 +18,7 @@ import {
   FileText,
   Church,
   X,
+  Globe,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -256,6 +257,25 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
             {sidebarCollapsed && (
               <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
                 {theme === 'light' ? 'Dark mode' : 'Light mode'}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => handleNavClick('member-portal')}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+              sidebarCollapsed ? 'lg:justify-center' : ''
+            }`}
+            title={sidebarCollapsed ? 'Member Portal (Preview)' : undefined}
+          >
+            <Globe size={18} />
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Member Portal</span>
+            <span className={`text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-medium ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              Preview
+            </span>
+            {sidebarCollapsed && (
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                Member Portal
               </span>
             )}
           </button>

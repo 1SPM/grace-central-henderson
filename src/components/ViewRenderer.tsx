@@ -4,6 +4,7 @@ import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
+import { useChurchSettings } from '../hooks/useChurchSettings';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance } from '../types';
 
 // Lazy load less frequently used views for code splitting
@@ -120,6 +121,9 @@ export function ViewRenderer(props: ViewRendererProps) {
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
     collectionMgmt, charityBasketMgmt, agents } = props;
 
+  const { settings } = useChurchSettings(churchId);
+  const churchName = settings?.profile?.name || 'Grace Church';
+
   // Core views (not lazy loaded for instant response)
   switch (view) {
     case 'dashboard':
@@ -234,7 +238,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'online-giving':
-        return <OnlineGivingForm churchName="Grace Church" onBack={() => setView('giving')} onSuccess={() => setView('giving')} />;
+        return <OnlineGivingForm churchName={churchName} onBack={() => setView('giving')} onSuccess={() => setView('giving')} />;
 
       case 'batch-entry':
         return (
@@ -336,7 +340,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <Settings />;
 
       case 'connect-card':
-        return <ConnectCard churchId={churchId} churchName="Grace Church" />;
+        return <ConnectCard churchId={churchId} churchName={churchName} />;
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
@@ -359,7 +363,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             giving={giving}
             attendance={attendanceRecords}
             rsvps={rsvps}
-            churchName="Grace Church"
+            churchName={churchName}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
