@@ -343,20 +343,6 @@ export function Dashboard({ people, tasks, giving = [], interactions = [], praye
         />
       </div>
 
-      {/* Task Progress Overview */}
-      {tasks.length > 0 && (
-        <div className="mb-6 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Task Completion</span>
-            </div>
-            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{completedTasks}/{tasks.length} done</span>
-          </div>
-          <ProgressBar value={completedTasks} max={tasks.length} color="emerald" size="lg" />
-        </div>
-      )}
-
       {/* Main Content + Sidebar Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Main Content Area */}
