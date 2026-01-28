@@ -16,6 +16,8 @@ import {
   ListTodo,
   LayoutGrid,
   List,
+  Zap,
+  BookOpen,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest } from '../types';
 import { DashboardCharts } from './DashboardCharts';
@@ -41,12 +43,13 @@ interface DashboardProps {
   onViewPeople?: () => void;
   onViewVisitors?: () => void;
   onViewInactive?: () => void;
+  onViewActions?: () => void;
 }
 
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, giving = [], interactions = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive }: DashboardProps) {
+export function Dashboard({ people, tasks, giving = [], interactions = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -254,6 +257,48 @@ export function Dashboard({ people, tasks, giving = [], interactions = [], praye
         </>
       ) : (
         <>
+      {/* Quick Action CTAs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Actions CTA */}
+        <button
+          onClick={onViewActions}
+          className="group relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02]"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <Zap className="text-white" size={24} />
+              </div>
+              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-1">Action Center</h3>
+            <p className="text-white/70 text-sm">
+              {pendingTasks.length + visitors.length} items need attention
+            </p>
+          </div>
+        </button>
+
+        {/* Sermon Builder CTA */}
+        <button
+          onClick={() => setActiveTab('sunday-prep')}
+          className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02]"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <BookOpen className="text-white" size={24} />
+              </div>
+              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-1">Sermon Builder</h3>
+            <p className="text-white/70 text-sm">
+              Prepare for Sunday with AI assistance
+            </p>
+          </div>
+        </button>
+      </div>
 
       {/* Stats Grid with Sparklines */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

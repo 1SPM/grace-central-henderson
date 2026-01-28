@@ -136,6 +136,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewPeople={() => setView('people')}
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
+          onViewActions={() => setView('feed')}
         />
       );
 
