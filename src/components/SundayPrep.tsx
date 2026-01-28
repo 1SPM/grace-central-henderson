@@ -1,22 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Church,
-  CheckCircle2,
-  Circle,
-  Mic,
   Newspaper,
   Sparkles,
   Gift,
   Heart,
   Users,
-  Calendar,
-  RefreshCw,
-  ChevronRight,
-  Lightbulb,
+  GripVertical,
+  Plus,
+  Trash2,
+  Download,
+  Printer,
   BookOpen,
   MessageSquare,
+  Lightbulb,
+  Quote,
+  Target,
+  Megaphone,
+  RefreshCw,
+  FileText,
+  Loader2,
 } from 'lucide-react';
 import { Person, PrayerRequest } from '../types';
+import { generateAIText } from '../lib/services/ai';
 
 interface SundayPrepProps {
   people: Person[];
@@ -24,104 +30,168 @@ interface SundayPrepProps {
   onViewPerson?: (id: string) => void;
 }
 
-interface PrepTask {
+interface SermonSection {
   id: string;
-  label: string;
-  completed: boolean;
-  category: 'before' | 'during' | 'after';
+  type: 'opening' | 'scripture' | 'point' | 'illustration' | 'application' | 'announcement' | 'closing';
+  title: string;
+  content: string;
+  sourceType?: 'news' | 'birthday' | 'visitor' | 'prayer' | 'manual';
+  sourceId?: string;
 }
 
-interface NewsTheme {
+interface NewsItem {
+  id: string;
   headline: string;
   connection: string;
   category: string;
 }
 
-const defaultTasks: PrepTask[] = [
-  { id: '1', label: 'Review prayer requests from this week', completed: false, category: 'before' },
-  { id: '2', label: 'Check for birthdays & anniversaries to announce', completed: false, category: 'before' },
-  { id: '3', label: 'Prepare welcome message for visitors', completed: false, category: 'before' },
-  { id: '4', label: 'Review sermon notes and key points', completed: false, category: 'before' },
-  { id: '5', label: 'Welcome first-time visitors by name', completed: false, category: 'during' },
-  { id: '6', label: 'Acknowledge answered prayers', completed: false, category: 'during' },
-  { id: '7', label: 'Make announcements', completed: false, category: 'during' },
-  { id: '8', label: 'Follow up with visitors', completed: false, category: 'after' },
-];
+interface DragItem {
+  type: 'news' | 'birthday' | 'visitor' | 'prayer';
+  id: string;
+  title: string;
+  content: string;
+}
 
-// Simulated trending themes - in production this could come from an API
-const trendingThemes: NewsTheme[] = [
-  {
-    headline: 'Mental Health Awareness Rising',
-    connection: 'Connect to messages of hope, community support, and "casting your anxieties" (1 Peter 5:7)',
-    category: 'Health & Wellness',
+const sectionTypeConfig = {
+  opening: {
+    label: 'Opening',
+    icon: Megaphone,
+    bgLight: 'bg-amber-50',
+    bgDark: 'dark:bg-amber-500/10',
+    borderLight: 'border-amber-100',
+    borderDark: 'dark:border-amber-500/20',
+    textLight: 'text-amber-700',
+    textDark: 'dark:text-amber-400',
+    iconColor: 'text-amber-600 dark:text-amber-400',
   },
+  scripture: {
+    label: 'Scripture',
+    icon: BookOpen,
+    bgLight: 'bg-blue-50',
+    bgDark: 'dark:bg-blue-500/10',
+    borderLight: 'border-blue-100',
+    borderDark: 'dark:border-blue-500/20',
+    textLight: 'text-blue-700',
+    textDark: 'dark:text-blue-400',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+  },
+  point: {
+    label: 'Main Point',
+    icon: Target,
+    bgLight: 'bg-violet-50',
+    bgDark: 'dark:bg-violet-500/10',
+    borderLight: 'border-violet-100',
+    borderDark: 'dark:border-violet-500/20',
+    textLight: 'text-violet-700',
+    textDark: 'dark:text-violet-400',
+    iconColor: 'text-violet-600 dark:text-violet-400',
+  },
+  illustration: {
+    label: 'Illustration',
+    icon: Lightbulb,
+    bgLight: 'bg-cyan-50',
+    bgDark: 'dark:bg-cyan-500/10',
+    borderLight: 'border-cyan-100',
+    borderDark: 'dark:border-cyan-500/20',
+    textLight: 'text-cyan-700',
+    textDark: 'dark:text-cyan-400',
+    iconColor: 'text-cyan-600 dark:text-cyan-400',
+  },
+  application: {
+    label: 'Application',
+    icon: MessageSquare,
+    bgLight: 'bg-green-50',
+    bgDark: 'dark:bg-green-500/10',
+    borderLight: 'border-green-100',
+    borderDark: 'dark:border-green-500/20',
+    textLight: 'text-green-700',
+    textDark: 'dark:text-green-400',
+    iconColor: 'text-green-600 dark:text-green-400',
+  },
+  announcement: {
+    label: 'Announcement',
+    icon: Users,
+    bgLight: 'bg-pink-50',
+    bgDark: 'dark:bg-pink-500/10',
+    borderLight: 'border-pink-100',
+    borderDark: 'dark:border-pink-500/20',
+    textLight: 'text-pink-700',
+    textDark: 'dark:text-pink-400',
+    iconColor: 'text-pink-600 dark:text-pink-400',
+  },
+  closing: {
+    label: 'Closing',
+    icon: Quote,
+    bgLight: 'bg-slate-50',
+    bgDark: 'dark:bg-slate-500/10',
+    borderLight: 'border-slate-100',
+    borderDark: 'dark:border-slate-500/20',
+    textLight: 'text-slate-700',
+    textDark: 'dark:text-slate-400',
+    iconColor: 'text-slate-600 dark:text-slate-400',
+  },
+};
+
+// Simulated trending news - in production this would come from a news API
+const defaultNewsItems: NewsItem[] = [
   {
-    headline: 'Community Coming Together After Challenges',
-    connection: 'Tie to the power of fellowship, Acts 2:42-47, and bearing one another\'s burdens',
+    id: 'news-1',
+    headline: 'Community Rallies Together After Local Tragedy',
+    connection: 'Connect to bearing one another\'s burdens (Galatians 6:2) and the power of community in grief',
     category: 'Community',
   },
   {
-    headline: 'Finding Purpose in Uncertain Times',
-    connection: 'Link to Jeremiah 29:11, Romans 8:28, and trusting God\'s plan',
-    category: 'Faith & Purpose',
+    id: 'news-2',
+    headline: 'Mental Health Awareness Month Highlights Growing Needs',
+    connection: 'Link to casting anxieties on God (1 Peter 5:7) and finding peace that surpasses understanding',
+    category: 'Health',
+  },
+  {
+    id: 'news-3',
+    headline: 'Economic Uncertainty Causes Widespread Anxiety',
+    connection: 'Tie to Matthew 6:25-34 - do not worry about tomorrow, God provides',
+    category: 'Economy',
+  },
+  {
+    id: 'news-4',
+    headline: 'Acts of Kindness Going Viral on Social Media',
+    connection: 'Encourage congregation with examples of light in darkness (Matthew 5:14-16)',
+    category: 'Inspiration',
   },
 ];
 
-export function SundayPrep({ people, prayers, onViewPerson }: SundayPrepProps) {
-  const [tasks, setTasks] = useState<PrepTask[]>(() => {
-    const saved = localStorage.getItem('sundayPrepTasks');
+export function SundayPrep({ people, prayers }: SundayPrepProps) {
+  const [sermonTitle, setSermonTitle] = useState(() =>
+    localStorage.getItem('sermon-title') || ''
+  );
+  const [sections, setSections] = useState<SermonSection[]>(() => {
+    const saved = localStorage.getItem('sermon-sections');
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch {
-        return defaultTasks;
+        return [];
       }
     }
-    return defaultTasks;
+    return [];
   });
 
-  const [sermonTheme, setSermonTheme] = useState(() => {
-    return localStorage.getItem('sermonTheme') || '';
-  });
-
-  const [talkingPoints, setTalkingPoints] = useState(() => {
-    return localStorage.getItem('sermonTalkingPoints') || '';
-  });
-
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(defaultNewsItems);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
-  const [newsThemes, setNewsThemes] = useState<NewsTheme[]>(trendingThemes);
+  const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [expandingSection, setExpandingSection] = useState<string | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem('sundayPrepTasks', JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem('sermon-title', sermonTitle);
+  }, [sermonTitle]);
 
   useEffect(() => {
-    localStorage.setItem('sermonTheme', sermonTheme);
-  }, [sermonTheme]);
-
-  useEffect(() => {
-    localStorage.setItem('sermonTalkingPoints', talkingPoints);
-  }, [talkingPoints]);
-
-  const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-  };
-
-  const resetTasks = () => {
-    setTasks(defaultTasks);
-    setSermonTheme('');
-    setTalkingPoints('');
-  };
-
-  const refreshNews = () => {
-    setIsLoadingNews(true);
-    // Simulate API call - in production this would fetch real news
-    setTimeout(() => {
-      setNewsThemes([...trendingThemes].sort(() => Math.random() - 0.5));
-      setIsLoadingNews(false);
-    }, 1000);
-  };
+    localStorage.setItem('sermon-sections', JSON.stringify(sections));
+  }, [sections]);
 
   // Get upcoming birthdays (next 7 days)
   const upcomingBirthdays = people.filter(p => {
@@ -133,7 +203,7 @@ export function SundayPrep({ people, prayers, onViewPerson }: SundayPrepProps) {
     return diffDays >= 0 && diffDays <= 7;
   });
 
-  // Get recent visitors (last 30 days)
+  // Get recent visitors
   const recentVisitors = people.filter(p => {
     if (p.status !== 'visitor') return false;
     if (!p.firstVisit) return false;
@@ -143,330 +213,521 @@ export function SundayPrep({ people, prayers, onViewPerson }: SundayPrepProps) {
     return visitDate >= thirtyDaysAgo;
   });
 
-  // Get active prayer requests (not answered)
+  // Get active prayer requests
   const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 5);
 
-  const beforeTasks = tasks.filter(t => t.category === 'before');
-  const duringTasks = tasks.filter(t => t.category === 'during');
-  const completedCount = tasks.filter(t => t.completed).length;
-  const progress = Math.round((completedCount / tasks.length) * 100);
+  const refreshNews = () => {
+    setIsLoadingNews(true);
+    setTimeout(() => {
+      setNewsItems([...defaultNewsItems].sort(() => Math.random() - 0.5));
+      setIsLoadingNews(false);
+    }, 1000);
+  };
+
+  const handleDragStart = (item: DragItem) => {
+    setDraggedItem(item);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (!draggedItem) return;
+
+    const newSection: SermonSection = {
+      id: `section-${Date.now()}`,
+      type: draggedItem.type === 'news' ? 'point' : 'announcement',
+      title: draggedItem.title,
+      content: draggedItem.content,
+      sourceType: draggedItem.type,
+      sourceId: draggedItem.id,
+    };
+
+    const newSections = [...sections];
+    newSections.splice(index, 0, newSection);
+    setSections(newSections);
+    setDraggedItem(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverIndex(null);
+  };
+
+  const addSection = (type: SermonSection['type']) => {
+    const newSection: SermonSection = {
+      id: `section-${Date.now()}`,
+      type,
+      title: sectionTypeConfig[type].label,
+      content: '',
+      sourceType: 'manual',
+    };
+    setSections([...sections, newSection]);
+  };
+
+  const updateSection = (id: string, updates: Partial<SermonSection>) => {
+    setSections(sections.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const deleteSection = (id: string) => {
+    setSections(sections.filter(s => s.id !== id));
+  };
+
+  const expandWithAI = async (sectionId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    setExpandingSection(sectionId);
+
+    const prompt = `Expand this ${section.type} section for a church sermon.
+Title: ${section.title}
+Current content: ${section.content || 'None yet'}
+
+Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and include relevant scripture if appropriate. Keep it under 200 words.`;
+
+    try {
+      const result = await generateAIText({ prompt, maxTokens: 400 });
+      if (result.success && result.text) {
+        updateSection(sectionId, {
+          content: section.content ? `${section.content}\n\n${result.text}` : result.text
+        });
+      }
+    } catch {
+      // Silent fail
+    }
+
+    setExpandingSection(null);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const generatePDF = () => {
+    // For now, use print dialog which allows Save as PDF
+    handlePrint();
+  };
+
+  const clearSermon = () => {
+    if (confirm('Clear all sermon content? This cannot be undone.')) {
+      setSermonTitle('');
+      setSections([]);
+    }
+  };
+
+  // Color style mappings for draggable items
+  const dragItemStyles = {
+    cyan: {
+      bg: 'bg-cyan-50 dark:bg-cyan-500/10',
+      border: 'border-cyan-100 dark:border-cyan-500/20',
+      icon: 'text-cyan-500',
+      text: 'text-cyan-700 dark:text-cyan-400',
+    },
+    pink: {
+      bg: 'bg-pink-50 dark:bg-pink-500/10',
+      border: 'border-pink-100 dark:border-pink-500/20',
+      icon: 'text-pink-500',
+      text: 'text-pink-700 dark:text-pink-400',
+    },
+    amber: {
+      bg: 'bg-amber-50 dark:bg-amber-500/10',
+      border: 'border-amber-100 dark:border-amber-500/20',
+      icon: 'text-amber-500',
+      text: 'text-amber-700 dark:text-amber-400',
+    },
+    purple: {
+      bg: 'bg-purple-50 dark:bg-purple-500/10',
+      border: 'border-purple-100 dark:border-purple-500/20',
+      icon: 'text-purple-500',
+      text: 'text-purple-700 dark:text-purple-400',
+    },
+  };
+
+  // Draggable item component
+  const DraggableItem = ({ item, icon: Icon, color }: { item: DragItem; icon: React.ElementType; color: keyof typeof dragItemStyles }) => {
+    const styles = dragItemStyles[color];
+    return (
+      <div
+        draggable
+        onDragStart={() => handleDragStart(item)}
+        onDragEnd={handleDragEnd}
+        className={`p-3 ${styles.bg} rounded-lg cursor-grab active:cursor-grabbing border ${styles.border} hover:shadow-md transition-all group`}
+      >
+        <div className="flex items-start gap-2">
+          <Icon size={16} className={`${styles.icon} mt-0.5 flex-shrink-0`} />
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-medium ${styles.text} line-clamp-2`}>
+              {item.title}
+            </p>
+            {item.content && (
+              <p className="text-xs text-gray-500 dark:text-dark-400 mt-1 line-clamp-2">
+                {item.content}
+              </p>
+            )}
+          </div>
+          <GripVertical size={14} className="text-gray-300 dark:text-dark-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header with Photo */}
-      <div className="relative overflow-hidden rounded-xl h-40">
-        <img
-          src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1200&h=400&fit=crop"
-          alt="Church service preparation"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/50" />
-        <div className="relative h-full p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-              <Church className="text-white/90" size={24} />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-white">Sunday Prep</h2>
-              <p className="text-white/60 text-sm">Get ready for service</p>
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-2xl font-semibold text-white">{progress}%</p>
-              <p className="text-xs text-white/50">ready</p>
-            </div>
-            <button
-              onClick={resetTasks}
-              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
-              title="Reset for new week"
-            >
-              <RefreshCw size={18} className="text-white/80" />
-            </button>
-          </div>
-        </div>
-        {/* Progress bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-          <div
-            className="h-full bg-white/80 transition-all duration-500"
-            style={{ width: `${progress}%` }}
+    <>
+      {/* Print-only styles */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-content, .print-content * {
+            visibility: visible;
+          }
+          .print-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 40px;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="relative overflow-hidden rounded-xl h-32 no-print">
+          <img
+            src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1200&h=400&fit=crop"
+            alt="Church service preparation"
+            className="absolute inset-0 w-full h-full object-cover"
           />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column - Checklist & Sermon */}
-        <div className="space-y-6">
-          {/* Pre-Service Checklist */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-800/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={18} />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-dark-100">Before Service</h3>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">Complete these first</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 space-y-2">
-              {beforeTasks.map((task) => (
-                <button
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left ${
-                    task.completed
-                      ? 'bg-emerald-50 dark:bg-emerald-900/20'
-                      : 'bg-gray-50 dark:bg-dark-750 hover:bg-gray-100 dark:hover:bg-dark-700'
-                  }`}
-                >
-                  {task.completed ? (
-                    <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                  ) : (
-                    <Circle size={18} className="text-gray-300 dark:text-dark-500 flex-shrink-0" />
-                  )}
-                  <span className={`text-sm ${task.completed ? 'text-emerald-700 dark:text-emerald-400 line-through' : 'text-gray-700 dark:text-dark-200'}`}>
-                    {task.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* During Service */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <Mic className="text-indigo-600 dark:text-indigo-400" size={18} />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-dark-100">During Service</h3>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">Don't forget these</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 space-y-2">
-              {duringTasks.map((task) => (
-                <button
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left ${
-                    task.completed
-                      ? 'bg-indigo-50 dark:bg-indigo-900/20'
-                      : 'bg-gray-50 dark:bg-dark-750 hover:bg-gray-100 dark:hover:bg-dark-700'
-                  }`}
-                >
-                  {task.completed ? (
-                    <CheckCircle2 size={18} className="text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-                  ) : (
-                    <Circle size={18} className="text-gray-300 dark:text-dark-500 flex-shrink-0" />
-                  )}
-                  <span className={`text-sm ${task.completed ? 'text-indigo-700 dark:text-indigo-400 line-through' : 'text-gray-700 dark:text-dark-200'}`}>
-                    {task.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sermon Notes */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <BookOpen className="text-blue-600 dark:text-blue-400" size={18} />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-dark-100">Sermon Highlights</h3>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">Key points to remember</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                  Today's Theme
-                </label>
-                <input
-                  type="text"
-                  value={sermonTheme}
-                  onChange={(e) => setSermonTheme(e.target.value)}
-                  placeholder="e.g., Finding Peace in the Storm"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-750 text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/70" />
+          <div className="relative h-full p-5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                <Church className="text-white/90" size={24} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                  Talking Points
-                </label>
-                <textarea
-                  value={talkingPoints}
-                  onChange={(e) => setTalkingPoints(e.target.value)}
-                  placeholder="• Main scripture reference&#10;• Key message&#10;• Call to action&#10;• Closing thought"
-                  rows={5}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-750 text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
+                <h2 className="text-xl font-semibold text-white">Sermon Builder</h2>
+                <p className="text-white/60 text-sm">Drag content to build your message</p>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={generatePDF}
+                className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10 text-white text-sm"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">Export PDF</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10 text-white text-sm"
+              >
+                <Printer size={16} />
+                <span className="hidden sm:inline">Print</span>
+              </button>
+              <button
+                onClick={clearSermon}
+                className="p-2 bg-white/10 hover:bg-red-500/20 rounded-lg transition-colors border border-white/10 text-white/70 hover:text-red-400"
+                title="Clear all"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Right Column - Context & Connections */}
-        <div className="space-y-6">
-          {/* What to Address */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-rose-50 dark:bg-rose-900/20 border-b border-rose-100 dark:border-rose-800/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <MessageSquare className="text-rose-600 dark:text-rose-400" size={18} />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-dark-100">What to Address</h3>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">Personalize your message</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel - Content Sources */}
+          <div className="lg:col-span-1 space-y-4 no-print">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+              Drag to Add
+            </h3>
+
+            {/* News & Trending */}
+            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="bg-cyan-50 dark:bg-cyan-900/20 border-b border-cyan-100 dark:border-cyan-800/30 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Newspaper size={16} className="text-cyan-600 dark:text-cyan-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Trending Topics</span>
+                  </div>
+                  <button
+                    onClick={refreshNews}
+                    disabled={isLoadingNews}
+                    className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
+                  >
+                    <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
+                  </button>
                 </div>
               </div>
+              <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
+                {newsItems.map(news => (
+                  <DraggableItem
+                    key={news.id}
+                    item={{
+                      type: 'news',
+                      id: news.id,
+                      title: news.headline,
+                      content: news.connection,
+                    }}
+                    icon={Lightbulb}
+                    color="cyan"
+                  />
+                ))}
+              </div>
             </div>
-            <div className="p-4 space-y-4">
-              {/* Birthdays */}
-              {upcomingBirthdays.length > 0 && (
-                <div className="p-3 bg-pink-50 dark:bg-pink-500/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
+
+            {/* Birthdays */}
+            {upcomingBirthdays.length > 0 && (
+              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+                <div className="bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-800/30 p-3">
+                  <div className="flex items-center gap-2">
                     <Gift size={16} className="text-pink-500" />
-                    <span className="text-sm font-medium text-pink-700 dark:text-pink-400">Birthdays This Week</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {upcomingBirthdays.slice(0, 5).map((person) => (
-                      <button
-                        key={person.id}
-                        onClick={() => onViewPerson?.(person.id)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors"
-                      >
-                        {person.firstName} {person.lastName}
-                        <ChevronRight size={12} />
-                      </button>
-                    ))}
+                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Birthdays This Week</span>
                   </div>
                 </div>
-              )}
+                <div className="p-3 space-y-2">
+                  {upcomingBirthdays.slice(0, 5).map(person => (
+                    <DraggableItem
+                      key={person.id}
+                      item={{
+                        type: 'birthday',
+                        id: person.id,
+                        title: `🎂 ${person.firstName} ${person.lastName}'s Birthday`,
+                        content: `Celebrate ${person.firstName}'s special day with the congregation`,
+                      }}
+                      icon={Gift}
+                      color="pink"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* Visitors to Welcome */}
-              {recentVisitors.length > 0 && (
-                <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
+            {/* Visitors */}
+            {recentVisitors.length > 0 && (
+              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-3">
+                  <div className="flex items-center gap-2">
                     <Users size={16} className="text-amber-500" />
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Welcome These Visitors</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {recentVisitors.slice(0, 5).map((person) => (
-                      <button
-                        key={person.id}
-                        onClick={() => onViewPerson?.(person.id)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors"
-                      >
-                        {person.firstName} {person.lastName}
-                        <ChevronRight size={12} />
-                      </button>
-                    ))}
+                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Welcome Visitors</span>
                   </div>
                 </div>
-              )}
+                <div className="p-3 space-y-2">
+                  {recentVisitors.slice(0, 5).map(person => (
+                    <DraggableItem
+                      key={person.id}
+                      item={{
+                        type: 'visitor',
+                        id: person.id,
+                        title: `Welcome ${person.firstName} ${person.lastName}`,
+                        content: 'Extend a warm welcome to our visitor',
+                      }}
+                      icon={Users}
+                      color="amber"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* Prayer Requests */}
-              {activePrayers.length > 0 && (
-                <div className="p-3 bg-purple-50 dark:bg-purple-500/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
+            {/* Prayer Requests */}
+            {activePrayers.length > 0 && (
+              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800/30 p-3">
+                  <div className="flex items-center gap-2">
                     <Heart size={16} className="text-purple-500" />
-                    <span className="text-sm font-medium text-purple-700 dark:text-purple-400">Pray For</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Prayer Requests</span>
                   </div>
-                  <div className="space-y-2">
-                    {activePrayers.map((prayer) => {
-                      const person = people.find(p => p.id === prayer.personId);
-                      return (
-                        <div key={prayer.id} className="text-sm text-gray-600 dark:text-dark-400">
-                          <span className="font-medium text-gray-900 dark:text-dark-200">
-                            {person ? `${person.firstName} ${person.lastName}` : 'Anonymous'}:
-                          </span>{' '}
-                          {prayer.content.length > 60 ? prayer.content.substring(0, 60) + '...' : prayer.content}
+                </div>
+                <div className="p-3 space-y-2">
+                  {activePrayers.map(prayer => {
+                    const person = people.find(p => p.id === prayer.personId);
+                    return (
+                      <DraggableItem
+                        key={prayer.id}
+                        item={{
+                          type: 'prayer',
+                          id: prayer.id,
+                          title: `Pray for ${person ? `${person.firstName} ${person.lastName}` : 'Anonymous'}`,
+                          content: prayer.content.length > 100 ? prayer.content.substring(0, 100) + '...' : prayer.content,
+                        }}
+                        icon={Heart}
+                        color="purple"
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - Sermon Builder Canvas */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Sermon Title */}
+            <div className="no-print">
+              <input
+                type="text"
+                value={sermonTitle}
+                onChange={(e) => setSermonTitle(e.target.value)}
+                placeholder="Enter Sermon Title..."
+                className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Section Type Buttons */}
+            <div className="flex flex-wrap gap-2 no-print">
+              {Object.entries(sectionTypeConfig).map(([type, config]) => {
+                const Icon = config.icon;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => addSection(type as SermonSection['type'])}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${config.bgLight} ${config.bgDark} ${config.textLight} ${config.textDark} rounded-lg hover:opacity-80 transition-colors border ${config.borderLight} ${config.borderDark}`}
+                  >
+                    <Plus size={12} />
+                    <Icon size={12} />
+                    {config.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sermon Sections */}
+            <div
+              className="space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed border-gray-200 dark:border-dark-700"
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (sections.length === 0) setDragOverIndex(0);
+              }}
+              onDrop={(e) => {
+                if (sections.length === 0) handleDrop(e, 0);
+              }}
+            >
+              {sections.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500">
+                  <FileText size={48} className="mb-4 opacity-50" />
+                  <p className="text-lg font-medium">Start building your sermon</p>
+                  <p className="text-sm mt-1">Drag items from the left or click buttons above</p>
+                </div>
+              ) : (
+                sections.map((section, index) => {
+                  const config = sectionTypeConfig[section.type];
+                  const Icon = config.icon;
+
+                  return (
+                    <div key={section.id}>
+                      {/* Drop zone before this section */}
+                      <div
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className={`h-2 -my-1 rounded transition-all ${
+                          dragOverIndex === index ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
+                        }`}
+                      />
+
+                      <div
+                        draggable
+                        onDragStart={() => setDraggedItem({ type: 'news', id: section.id, title: section.title, content: section.content })}
+                        onDragEnd={handleDragEnd}
+                        className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
+                      >
+                        {/* Section Header */}
+                        <div className={`${config.bgLight} ${config.bgDark} border-b ${config.borderLight} ${config.borderDark} px-4 py-2 flex items-center justify-between`}>
+                          <div className="flex items-center gap-2">
+                            <GripVertical size={14} className="text-gray-400 dark:text-dark-500 cursor-grab" />
+                            <Icon size={16} className={config.iconColor} />
+                            <input
+                              type="text"
+                              value={section.title}
+                              onChange={(e) => updateSection(section.id, { title: e.target.value })}
+                              className={`bg-transparent font-medium text-sm ${config.textLight} ${config.textDark} focus:outline-none`}
+                            />
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => expandWithAI(section.id)}
+                              disabled={expandingSection === section.id}
+                              className="p-1.5 hover:bg-white/50 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                              title="Expand with AI"
+                            >
+                              {expandingSection === section.id ? (
+                                <Loader2 size={14} className="text-violet-500 animate-spin" />
+                              ) : (
+                                <Sparkles size={14} className="text-violet-500" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => deleteSection(section.id)}
+                              className="p-1.5 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={14} className="text-red-500" />
+                            </button>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {upcomingBirthdays.length === 0 && recentVisitors.length === 0 && activePrayers.length === 0 && (
-                <div className="text-center py-6 text-gray-400 dark:text-dark-500">
-                  <Calendar size={24} className="mx-auto mb-2" />
-                  <p className="text-sm">No specific items to address this week</p>
-                </div>
-              )}
-            </div>
-          </div>
+                        {/* Section Content */}
+                        <div className="p-4">
+                          <textarea
+                            value={section.content}
+                            onChange={(e) => updateSection(section.id, { content: e.target.value })}
+                            placeholder={`Enter ${config.label.toLowerCase()} content...`}
+                            rows={4}
+                            className="w-full bg-transparent text-gray-700 dark:text-dark-200 placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none resize-none text-sm leading-relaxed"
+                          />
+                        </div>
+                      </div>
 
-          {/* News & Themes Connection */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-cyan-50 dark:bg-cyan-900/20 border-b border-cyan-100 dark:border-cyan-800/30 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                    <Newspaper className="text-cyan-600 dark:text-cyan-400" size={18} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-dark-100">Connect the Theme</h3>
-                    <p className="text-xs text-gray-500 dark:text-dark-400">Relevant world topics</p>
-                  </div>
-                </div>
-                <button
-                  onClick={refreshNews}
-                  disabled={isLoadingNews}
-                  className="p-2 bg-white dark:bg-dark-700 hover:bg-gray-50 dark:hover:bg-dark-600 rounded-lg transition-colors disabled:opacity-50 border border-gray-200 dark:border-dark-600"
-                >
-                  <RefreshCw size={14} className={`text-gray-500 dark:text-dark-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-            </div>
-            <div className="p-4 space-y-3">
-              {newsThemes.map((theme, index) => (
-                <div key={index} className="p-3 bg-gray-50 dark:bg-dark-750 rounded-lg border border-gray-100 dark:border-dark-600">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Lightbulb size={14} className="text-cyan-600 dark:text-cyan-400" />
+                      {/* Drop zone after last section */}
+                      {index === sections.length - 1 && (
+                        <div
+                          onDragOver={(e) => handleDragOver(e, index + 1)}
+                          onDrop={(e) => handleDrop(e, index + 1)}
+                          className={`h-2 mt-2 rounded transition-all ${
+                            dragOverIndex === index + 1 ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
+                          }`}
+                        />
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <span className="inline-block px-2 py-0.5 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 text-[10px] font-medium rounded-full mb-1">
-                        {theme.category}
-                      </span>
-                      <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">{theme.headline}</h4>
-                      <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{theme.connection}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
-          </div>
-
-          {/* AI Sermon Helper */}
-          <div className="bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                <Sparkles className="text-slate-600 dark:text-slate-400" size={18} />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-dark-100">AI Sermon Helper</h3>
-                <p className="text-xs text-gray-500 dark:text-dark-400">Get AI-powered suggestions</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-dark-400 mb-3">
-              Need help crafting your message? Use the AI Assistant to generate sermon illustrations and scripture connections.
-            </p>
-            <button className="w-full py-2.5 bg-slate-800 dark:bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors">
-              Open AI Assistant
-            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Print Preview Content (hidden until print) */}
+      <div ref={printRef} className="print-content hidden print:block">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-2">{sermonTitle || 'Untitled Sermon'}</h1>
+          <p className="text-center text-gray-500 mb-8">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+
+          {sections.map((section, index) => {
+            const config = sectionTypeConfig[section.type];
+            return (
+              <div key={section.id} className="mb-6">
+                <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <span className="text-gray-400">{index + 1}.</span>
+                  {section.title}
+                  <span className="text-xs font-normal text-gray-400 uppercase">({config.label})</span>
+                </h2>
+                <div className="pl-6 text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {section.content || '(No content)'}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 }
