@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MemberLayout } from './MemberLayout';
+import { MemberHomePage } from './MemberHomePage';
 import { MemberDirectoryPage } from './MemberDirectoryPage';
 import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
@@ -31,10 +32,19 @@ export function MemberPortal({
   onRSVP,
   onCheckIn
 }: MemberPortalProps) {
-  const [activeTab, setActiveTab] = useState<MemberPortalTab>('directory');
+  const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'home':
+        return (
+          <MemberHomePage
+            churchName={churchName}
+            events={events}
+            onNavigate={setActiveTab}
+          />
+        );
+
       case 'directory':
         return <MemberDirectoryPage people={people} />;
 
@@ -69,7 +79,13 @@ export function MemberPortal({
         );
 
       default:
-        return <MemberDirectoryPage people={people} />;
+        return (
+          <MemberHomePage
+            churchName={churchName}
+            events={events}
+            onNavigate={setActiveTab}
+          />
+        );
     }
   };
 
