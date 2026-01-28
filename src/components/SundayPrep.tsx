@@ -625,19 +625,20 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
               }`}
               onDragOver={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 e.dataTransfer.dropEffect = 'move';
-                if (sections.length === 0) setDragOverIndex(0);
               }}
               onDrop={(e) => {
                 e.preventDefault();
-                // If dropping on empty area or at the end
-                if (sections.length === 0 || dragOverIndex === null) {
-                  handleDrop(e, sections.length);
-                }
+                e.stopPropagation();
+                handleDrop(e, sections.length);
+              }}
+              onDragEnter={(e) => {
+                e.preventDefault();
               }}
             >
               {sections.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500">
+                <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500 pointer-events-none">
                   <FileText size={48} className="mb-4 opacity-50" />
                   <p className="text-lg font-medium">Start building your sermon</p>
                   <p className="text-sm mt-1">Drag items from the left or click buttons above</p>
