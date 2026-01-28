@@ -30,10 +30,10 @@ export function MemberPortalPreview({
   const [copied, setCopied] = useState(false);
 
   // Generate a shareable URL for the portal
-  // In production, this would be a real URL like: https://yourchurch.com/portal
+  // Uses /portal route which renders standalone member portal without admin UI
   const portalUrl = useMemo(() => {
     const baseUrl = window.location.origin;
-    return `${baseUrl}/member-portal`;
+    return `${baseUrl}/portal`;
   }, []);
 
   // Generate QR code using a public API (qrserver.com)
@@ -129,7 +129,7 @@ export function MemberPortalPreview({
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-50" />
 
                   {/* Screen Content */}
-                  <div className="h-full overflow-hidden">
+                  <div className="h-full overflow-y-auto overflow-x-hidden">
                     <MemberPortal
                       people={people}
                       events={events}

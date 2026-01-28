@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -11,6 +11,9 @@ import { QuickDonationForm } from './components/QuickDonationForm';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Lazy load MemberPortal for standalone access
+const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -165,14 +168,44 @@ function App() {
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
   const selectedPerson = selectedPersonId ? personMap.get(selectedPersonId) : undefined;
 
+  // Check if we're accessing the standalone member portal
+  const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading GRACE CRM...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {isPortalRoute ? 'Loading Member Portal...' : 'Loading GRACE CRM...'}
+          </p>
         </div>
       </div>
+    );
+  }
+
+  // Standalone Member Portal (no admin sidebar/layout)
+  if (isPortalRoute) {
+    const churchName = churchSettings?.profile?.name || 'Grace Church';
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        }>
+          <MemberPortal
+            people={people}
+            events={events}
+            giving={giving}
+            attendance={attendanceRecords}
+            rsvps={rsvps}
+            churchName={churchName}
+            onRSVP={handlers.rsvp}
+            onCheckIn={handlers.checkIn}
+          />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
