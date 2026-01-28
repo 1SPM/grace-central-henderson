@@ -275,6 +275,19 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     setDragOverIndex(null);
   };
 
+  // Add item from sidebar to sermon builder
+  const addItemAsSection = (item: DragItem) => {
+    const newSection: SermonSection = {
+      id: `section-${Date.now()}`,
+      type: item.type === 'news' ? 'illustration' : 'announcement',
+      title: item.title,
+      content: item.content,
+      sourceType: item.type,
+      sourceId: item.id,
+    };
+    setSections([...sections, newSection]);
+  };
+
   const addSection = (type: SermonSection['type']) => {
     const newSection: SermonSection = {
       id: `section-${Date.now()}`,
@@ -364,15 +377,13 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
     },
   };
 
-  // Draggable item component
-  const DraggableItem = ({ item, icon: Icon, color }: { item: DragItem; icon: React.ElementType; color: keyof typeof dragItemStyles }) => {
+  // Clickable item component for sidebar
+  const ClickableItem = ({ item, icon: Icon, color }: { item: DragItem; icon: React.ElementType; color: keyof typeof dragItemStyles }) => {
     const styles = dragItemStyles[color];
     return (
-      <div
-        draggable
-        onDragStart={(e) => handleDragStart(e, item)}
-        onDragEnd={handleDragEnd}
-        className={`p-3 ${styles.bg} rounded-lg cursor-grab active:cursor-grabbing border ${styles.border} hover:shadow-md transition-all group`}
+      <button
+        onClick={() => addItemAsSection(item)}
+        className={`w-full text-left p-3 ${styles.bg} rounded-lg cursor-pointer border ${styles.border} hover:shadow-md hover:scale-[1.02] transition-all group`}
       >
         <div className="flex items-start gap-2">
           <Icon size={16} className={`${styles.icon} mt-0.5 flex-shrink-0`} />
@@ -386,9 +397,9 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
               </p>
             )}
           </div>
-          <GripVertical size={14} className="text-gray-300 dark:text-dark-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Plus size={14} className="text-gray-400 dark:text-dark-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-      </div>
+      </button>
     );
   };
 
@@ -432,7 +443,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">Sermon Builder</h2>
-                <p className="text-white/60 text-sm">Drag content to build your message</p>
+                <p className="text-white/60 text-sm">Click content to build your message</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -465,7 +476,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
           {/* Left Panel - Content Sources */}
           <div className="lg:col-span-1 space-y-4 no-print">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
-              Drag to Add
+              Click to Add
             </h3>
 
             {/* News & Trending */}
@@ -487,7 +498,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
               </div>
               <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
                 {newsItems.map(news => (
-                  <DraggableItem
+                  <ClickableItem
                     key={news.id}
                     item={{
                       type: 'news',
@@ -513,7 +524,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                 </div>
                 <div className="p-3 space-y-2">
                   {upcomingBirthdays.slice(0, 5).map(person => (
-                    <DraggableItem
+                    <ClickableItem
                       key={person.id}
                       item={{
                         type: 'birthday',
@@ -540,7 +551,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                 </div>
                 <div className="p-3 space-y-2">
                   {recentVisitors.slice(0, 5).map(person => (
-                    <DraggableItem
+                    <ClickableItem
                       key={person.id}
                       item={{
                         type: 'visitor',
@@ -569,7 +580,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                   {activePrayers.map(prayer => {
                     const person = people.find(p => p.id === prayer.personId);
                     return (
-                      <DraggableItem
+                      <ClickableItem
                         key={prayer.id}
                         item={{
                           type: 'prayer',
@@ -641,7 +652,7 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                 <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500 pointer-events-none">
                   <FileText size={48} className="mb-4 opacity-50" />
                   <p className="text-lg font-medium">Start building your sermon</p>
-                  <p className="text-sm mt-1">Drag items from the left or click buttons above</p>
+                  <p className="text-sm mt-1">Click items from the left or use the buttons above</p>
                 </div>
               ) : (
                 sections.map((section, index) => {
