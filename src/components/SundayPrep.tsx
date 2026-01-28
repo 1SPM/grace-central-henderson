@@ -179,7 +179,7 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
 
   const [newsItems, setNewsItems] = useState<NewsItem[]>(defaultNewsItems);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
+  const [draggingSectionId, setDraggingSectionId] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [expandingSection, setExpandingSection] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -224,54 +224,46 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     }, 1000);
   };
 
-  const handleDragStart = (e: React.DragEvent, item: DragItem) => {
-    setDraggedItem(item);
-    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+  // Section drag handlers for reordering
+  const handleSectionDragStart = (e: React.DragEvent, sectionId: string) => {
+    setDraggingSectionId(sectionId);
+    e.dataTransfer.setData('text/plain', sectionId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleSectionDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverIndex(index);
   };
 
-  const handleDrop = (e: React.DragEvent, index: number) => {
+  const handleSectionDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
 
-    // Try to get item from dataTransfer if draggedItem is not set
-    let item = draggedItem;
-    if (!item) {
-      try {
-        const data = e.dataTransfer.getData('text/plain');
-        if (data) {
-          item = JSON.parse(data) as DragItem;
-        }
-      } catch {
-        return;
-      }
+    if (!draggingSectionId) return;
+
+    const dragIndex = sections.findIndex(s => s.id === draggingSectionId);
+    if (dragIndex === -1 || dragIndex === dropIndex) {
+      setDraggingSectionId(null);
+      setDragOverIndex(null);
+      return;
     }
 
-    if (!item) return;
-
-    const newSection: SermonSection = {
-      id: `section-${Date.now()}`,
-      type: item.type === 'news' ? 'point' : 'announcement',
-      title: item.title,
-      content: item.content,
-      sourceType: item.type,
-      sourceId: item.id,
-    };
-
+    // Reorder sections
     const newSections = [...sections];
-    newSections.splice(index, 0, newSection);
+    const [draggedSection] = newSections.splice(dragIndex, 1);
+
+    // Adjust drop index if we removed an item before it
+    const adjustedIndex = dropIndex > dragIndex ? dropIndex - 1 : dropIndex;
+    newSections.splice(adjustedIndex, 0, draggedSection);
+
     setSections(newSections);
-    setDraggedItem(null);
+    setDraggingSectionId(null);
     setDragOverIndex(null);
   };
 
-  const handleDragEnd = () => {
-    setDraggedItem(null);
+  const handleSectionDragEnd = () => {
+    setDraggingSectionId(null);
     setDragOverIndex(null);
   };
 
@@ -632,21 +624,8 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
             {/* Sermon Sections */}
             <div
               className={`space-y-3 min-h-[400px] p-4 bg-gray-50 dark:bg-dark-850 rounded-xl border-2 border-dashed transition-colors ${
-                draggedItem ? 'border-violet-400 dark:border-violet-500 bg-violet-50 dark:bg-violet-500/5' : 'border-gray-200 dark:border-dark-700'
+                draggingSectionId ? 'border-violet-400 dark:border-violet-500 bg-violet-50 dark:bg-violet-500/5' : 'border-gray-200 dark:border-dark-700'
               }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = 'move';
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleDrop(e, sections.length);
-              }}
-              onDragEnter={(e) => {
-                e.preventDefault();
-              }}
             >
               {sections.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 dark:text-dark-500 pointer-events-none">
@@ -663,18 +642,20 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                     <div key={section.id}>
                       {/* Drop zone before this section */}
                       <div
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDrop={(e) => handleDrop(e, index)}
+                        onDragOver={(e) => handleSectionDragOver(e, index)}
+                        onDrop={(e) => handleSectionDrop(e, index)}
                         className={`h-2 -my-1 rounded transition-all ${
-                          dragOverIndex === index ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
+                          dragOverIndex === index && draggingSectionId !== section.id ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
                         }`}
                       />
 
                       <div
                         draggable
-                        onDragStart={(e) => handleDragStart(e, { type: 'news', id: section.id, title: section.title, content: section.content })}
-                        onDragEnd={handleDragEnd}
-                        className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
+                        onDragStart={(e) => handleSectionDragStart(e, section.id)}
+                        onDragEnd={handleSectionDragEnd}
+                        className={`bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all ${
+                          draggingSectionId === section.id ? 'opacity-50' : ''
+                        }`}
                       >
                         {/* Section Header */}
                         <div className={`${config.bgLight} ${config.bgDark} border-b ${config.borderLight} ${config.borderDark} px-4 py-2 flex items-center justify-between`}>
@@ -725,8 +706,8 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                       {/* Drop zone after last section */}
                       {index === sections.length - 1 && (
                         <div
-                          onDragOver={(e) => handleDragOver(e, index + 1)}
-                          onDrop={(e) => handleDrop(e, index + 1)}
+                          onDragOver={(e) => handleSectionDragOver(e, index + 1)}
+                          onDrop={(e) => handleSectionDrop(e, index + 1)}
                           className={`h-2 mt-2 rounded transition-all ${
                             dragOverIndex === index + 1 ? 'bg-violet-300 dark:bg-violet-500/50 h-8' : ''
                           }`}
