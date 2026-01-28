@@ -23,6 +23,7 @@ import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { PersonGivingHistory } from './PersonGivingHistory';
 import { escapeHtml } from '../utils/security';
+import { AISuggestButton } from './AIAssistant';
 
 interface PersonProfileProps {
   person: Person;
@@ -557,9 +558,24 @@ export function PersonProfile({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
-                  Message
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300">
+                    Message
+                  </label>
+                  <AISuggestButton
+                    context={{ type: 'email', person, purpose: emailSubject || 'check-in' }}
+                    onGenerate={(text) => {
+                      // Parse subject from AI response if present
+                      const subjectMatch = text.match(/^Subject:\s*(.+?)(?:\n|$)/i);
+                      if (subjectMatch) {
+                        setEmailSubject(subjectMatch[1].trim());
+                        setEmailBody(text.replace(/^Subject:\s*.+?\n+/i, '').trim());
+                      } else {
+                        setEmailBody(text);
+                      }
+                    }}
+                  />
+                </div>
                 <textarea
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
@@ -646,9 +662,15 @@ export function PersonProfile({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
-                  Message
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300">
+                    Message
+                  </label>
+                  <AISuggestButton
+                    context={{ type: 'sms', person, purpose: 'check-in' }}
+                    onGenerate={(text) => setSmsMessage(text.slice(0, 160))}
+                  />
+                </div>
                 <textarea
                   value={smsMessage}
                   onChange={(e) => setSmsMessage(e.target.value)}
