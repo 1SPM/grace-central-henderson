@@ -37,6 +37,53 @@ const categoryColors: Record<string, string> = {
   other: 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300 border-gray-200 dark:border-dark-600'
 };
 
+// Helper to get date suggestions
+function getDateSuggestions(): { label: string; date: string }[] {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Find this Sunday (or next Sunday if today is Sunday)
+  const thisSunday = new Date(today);
+  const daysUntilSunday = (7 - today.getDay()) % 7;
+  thisSunday.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
+
+  // Next Sunday after that
+  const nextSunday = new Date(thisSunday);
+  nextSunday.setDate(thisSunday.getDate() + 7);
+
+  // This Wednesday
+  const thisWednesday = new Date(today);
+  const daysUntilWednesday = (3 - today.getDay() + 7) % 7;
+  thisWednesday.setDate(today.getDate() + (daysUntilWednesday === 0 ? 7 : daysUntilWednesday));
+
+  // Next Saturday
+  const thisSaturday = new Date(today);
+  const daysUntilSaturday = (6 - today.getDay() + 7) % 7;
+  thisSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
+  return [
+    { label: 'Today', date: formatDate(today) },
+    { label: 'Tomorrow', date: formatDate(tomorrow) },
+    { label: 'This Sunday', date: formatDate(thisSunday) },
+    { label: 'This Wednesday', date: formatDate(thisWednesday) },
+    { label: 'This Saturday', date: formatDate(thisSaturday) },
+    { label: 'Next Sunday', date: formatDate(nextSunday) },
+  ];
+}
+
+// Common church event times
+const timeSuggestions = [
+  { label: '7:00 AM', time: '07:00' },
+  { label: '9:00 AM', time: '09:00' },
+  { label: '10:00 AM', time: '10:00' },
+  { label: '11:00 AM', time: '11:00' },
+  { label: '6:00 PM', time: '18:00' },
+  { label: '7:00 PM', time: '19:00' },
+];
+
 export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent }: CalendarProps) {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showRSVPModal, setShowRSVPModal] = useState(false);
@@ -587,6 +634,25 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                     onChange={(e) => setEventForm(prev => ({ ...prev, startDate: e.target.value }))}
                     className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
+                  {/* Date suggestions */}
+                  {!editingEvent && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {getDateSuggestions().map(({ label, date }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => setEventForm(prev => ({ ...prev, startDate: date }))}
+                          className={`px-2 py-1 text-xs rounded transition-colors ${
+                            eventForm.startDate === date
+                              ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
+                              : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {!eventForm.allDay && (
                   <div>
@@ -599,6 +665,25 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                       onChange={(e) => setEventForm(prev => ({ ...prev, startTime: e.target.value }))}
                       className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     />
+                    {/* Time suggestions */}
+                    {!editingEvent && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {timeSuggestions.map(({ label, time }) => (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => setEventForm(prev => ({ ...prev, startTime: time }))}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${
+                              eventForm.startTime === time
+                                ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
+                                : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
