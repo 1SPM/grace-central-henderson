@@ -14,9 +14,12 @@ import {
   Eye,
   EyeOff,
   Save,
+  Plus,
+  Trash2,
+  Clock,
 } from 'lucide-react';
 import { useIntegrations } from '../contexts/IntegrationsContext';
-import { useChurchSettings } from '../hooks/useChurchSettings';
+import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 
 interface IntegrationCardProps {
   title: string;
@@ -159,7 +162,13 @@ export function Settings() {
   const [churchProfile, setChurchProfile] = useState({
     name: '',
     address: '',
+    city: '',
+    state: '',
+    zip: '',
     phone: '',
+    email: '',
+    website: '',
+    serviceTimes: [] as ServiceTime[],
   });
   const [profileSaved, setProfileSaved] = useState(false);
 
@@ -169,7 +178,13 @@ export function Settings() {
       setChurchProfile({
         name: churchSettings.profile.name || '',
         address: churchSettings.profile.address || '',
+        city: churchSettings.profile.city || '',
+        state: churchSettings.profile.state || '',
+        zip: churchSettings.profile.zip || '',
         phone: churchSettings.profile.phone || '',
+        email: churchSettings.profile.email || '',
+        website: churchSettings.profile.website || '',
+        serviceTimes: churchSettings.profile.serviceTimes || [],
       });
     }
   }, [churchSettings]);
@@ -298,7 +313,8 @@ export function Settings() {
       </div>
 
       {/* Church Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Church Profile */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center">
@@ -324,25 +340,89 @@ export function Settings() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
-                Address
+                Street Address
               </label>
               <input
                 type="text"
-                placeholder="123 Main St, City, State"
+                placeholder="123 Main Street"
                 value={churchProfile.address}
                 onChange={(e) => setChurchProfile({ ...churchProfile, address: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-1">
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  City
+                </label>
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={churchProfile.city}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, city: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  State
+                </label>
+                <input
+                  type="text"
+                  placeholder="CA"
+                  value={churchProfile.state}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, state: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  ZIP
+                </label>
+                <input
+                  type="text"
+                  placeholder="90210"
+                  value={churchProfile.zip}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, zip: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  placeholder="(555) 123-4567"
+                  value={churchProfile.phone}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, phone: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="info@church.org"
+                  value={churchProfile.email}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, email: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
-                Phone
+                Website
               </label>
               <input
-                type="text"
-                placeholder="(555) 123-4567"
-                value={churchProfile.phone}
-                onChange={(e) => setChurchProfile({ ...churchProfile, phone: e.target.value })}
+                type="url"
+                placeholder="https://yourchurch.org"
+                value={churchProfile.website}
+                onChange={(e) => setChurchProfile({ ...churchProfile, website: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -362,6 +442,107 @@ export function Settings() {
                 <>
                   <Save size={16} />
                   Save Profile
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Service Times */}
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                <Clock className="text-emerald-600 dark:text-emerald-400" size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-dark-100">Service Times</h2>
+                <p className="text-sm text-gray-500 dark:text-dark-400">Shown on member portal</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setChurchProfile({
+                  ...churchProfile,
+                  serviceTimes: [...churchProfile.serviceTimes, { day: 'Sunday', time: '10:00 AM', name: 'Worship Service' }]
+                });
+              }}
+              className="w-8 h-8 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+            >
+              <Plus size={18} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {churchProfile.serviceTimes.length === 0 ? (
+              <p className="text-gray-400 dark:text-dark-500 text-sm text-center py-6">
+                No service times configured. Click + to add one.
+              </p>
+            ) : (
+              churchProfile.serviceTimes.map((service, index) => (
+                <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-dark-800 rounded-xl">
+                  <select
+                    value={service.day}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], day: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    className="px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={service.time}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], time: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    placeholder="10:00 AM"
+                    className="w-24 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <input
+                    type="text"
+                    value={service.name}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], name: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    placeholder="Service name"
+                    className="flex-1 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <button
+                    onClick={() => {
+                      const newTimes = churchProfile.serviceTimes.filter((_, i) => i !== index);
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))
+            )}
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving || settingsLoading}
+              className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {profileSaved ? (
+                <>
+                  <Check size={16} />
+                  Saved!
+                </>
+              ) : saving ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Service Times
                 </>
               )}
             </button>
