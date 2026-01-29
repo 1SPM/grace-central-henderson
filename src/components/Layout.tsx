@@ -28,6 +28,7 @@ interface LayoutProps {
   setView: (view: View) => void;
   children: ReactNode;
   onOpenSearch?: () => void;
+  isDemo?: boolean;
 }
 
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
@@ -80,7 +81,7 @@ const viewLabels: Record<View, string> = {
   'sunday-prep': 'Sunday Prep',
 };
 
-export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
+export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -296,11 +297,22 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
             )}
           </button>
 
-          {/* Version indicator */}
+          {/* Version & Connection Status */}
           <div className={`mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-            <p className="px-2.5 text-[10px] text-gray-400 dark:text-dark-500">
-              v1.0 Beta
-            </p>
+            <div className="px-2.5 space-y-1.5">
+              {/* Connection Status */}
+              <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium ${
+                isDemo
+                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
+                {isDemo ? 'Demo Mode' : 'Connected to Supabase'}
+              </div>
+              <p className="text-[10px] text-gray-400 dark:text-dark-500">
+                v1.0 Beta
+              </p>
+            </div>
           </div>
         </div>
       </aside>

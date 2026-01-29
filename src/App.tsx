@@ -40,6 +40,7 @@ function App() {
   // Use Supabase data hook
   const {
     isLoading,
+    isDemo,
     people: dbPeople,
     tasks: dbTasks,
     interactions: dbInteractions,
@@ -224,7 +225,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch}>
+      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
         <ErrorBoundary>
           <ViewRenderer
             view={view}
