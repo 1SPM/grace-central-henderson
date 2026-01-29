@@ -207,6 +207,7 @@ function App() {
             attendance={attendanceRecords}
             rsvps={rsvps}
             churchName={churchName}
+            churchProfile={churchSettings?.profile}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
           />

@@ -17,8 +17,9 @@ import {
   Loader2,
   Check,
   X,
+  Users,
 } from 'lucide-react';
-import { Person, Interaction, Task, Giving } from '../types';
+import { Person, Interaction, Task, Giving, SmallGroup } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { PersonGivingHistory } from './PersonGivingHistory';
@@ -30,12 +31,15 @@ interface PersonProfileProps {
   interactions: Interaction[];
   tasks: Task[];
   giving?: Giving[];
+  groups?: SmallGroup[];
   onBack: () => void;
   onAddInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   onToggleTask: (taskId: string) => void;
   onEditPerson?: (person: Person) => void;
   onViewAllGiving?: () => void;
+  onAddToGroup?: (groupId: string, personId: string) => void;
+  onRemoveFromGroup?: (groupId: string, personId: string) => void;
 }
 
 const interactionTypes = [
@@ -60,12 +64,15 @@ export function PersonProfile({
   interactions,
   tasks,
   giving = [],
+  groups = [],
   onBack,
   onAddInteraction,
   onAddTask,
   onToggleTask,
   onEditPerson,
   onViewAllGiving,
+  onAddToGroup,
+  onRemoveFromGroup,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
 
@@ -86,6 +93,13 @@ export function PersonProfile({
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [smsMessage, setSmsMessage] = useState('');
+
+  // Groups state
+  const [showGroupSelector, setShowGroupSelector] = useState(false);
+
+  // Compute person's groups
+  const personGroups = groups.filter(g => g.members?.includes(person.id));
+  const availableGroups = groups.filter(g => !g.members?.includes(person.id));
 
   const handleSendEmail = async () => {
     if (!person.email || !emailBody.trim()) return;
@@ -520,6 +534,92 @@ export function PersonProfile({
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          {/* Groups */}
+          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Groups</h2>
+              {onAddToGroup && availableGroups.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowGroupSelector(!showGroupSelector)}
+                    className="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                  >
+                    <Plus size={18} />
+                  </button>
+                  {showGroupSelector && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowGroupSelector(false)} />
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-20 py-2 max-h-64 overflow-y-auto">
+                        <p className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider border-b border-gray-100 dark:border-dark-700">
+                          Add to Group
+                        </p>
+                        {availableGroups.map((group) => (
+                          <button
+                            key={group.id}
+                            onClick={() => {
+                              onAddToGroup(group.id, person.id);
+                              setShowGroupSelector(false);
+                            }}
+                            className="w-full px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-700 flex items-center gap-3"
+                          >
+                            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                              <Users size={14} className="text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                                {group.name}
+                              </p>
+                              {group.members && (
+                                <p className="text-xs text-gray-500 dark:text-dark-400">
+                                  {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {personGroups.length === 0 ? (
+              <p className="text-gray-400 dark:text-dark-400 text-sm py-4 text-center">Not in any groups</p>
+            ) : (
+              <div className="space-y-2">
+                {personGroups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="p-3 rounded-xl border border-gray-100 dark:border-dark-700 flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <Users size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                        {group.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-dark-400">
+                        {group.members?.length || 0} member{(group.members?.length || 0) !== 1 ? 's' : ''}
+                        {group.meetingDay && ` · ${group.meetingDay}`}
+                      </p>
+                    </div>
+                    {onRemoveFromGroup && (
+                      <button
+                        onClick={() => onRemoveFromGroup(group.id, person.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Remove from group"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>

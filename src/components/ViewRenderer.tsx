@@ -180,12 +180,15 @@ export function ViewRenderer(props: ViewRendererProps) {
           interactions={interactions}
           tasks={tasks}
           giving={giving}
+          groups={groups}
           onBack={handlers.backToPeople}
           onAddInteraction={handlers.addInteraction}
           onAddTask={handlers.addTask}
           onToggleTask={handlers.toggleTask}
           onEditPerson={handlers.editPerson}
           onViewAllGiving={() => setView('giving')}
+          onAddToGroup={handlers.addGroupMember}
+          onRemoveFromGroup={handlers.removeGroupMember}
         />
       );
 
@@ -375,6 +378,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             attendance={attendanceRecords}
             rsvps={rsvps}
             churchName={churchName}
+            churchProfile={settings?.profile}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}

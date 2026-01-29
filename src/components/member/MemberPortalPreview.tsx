@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { MemberPortal } from './MemberPortal';
 import type { Person, CalendarEvent, Giving, Attendance } from '../../types';
+import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
 interface MemberPortalPreviewProps {
   people: Person[];
@@ -10,6 +11,7 @@ interface MemberPortalPreviewProps {
   attendance: Attendance[];
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   churchName: string;
+  churchProfile?: ChurchProfile;
   onBack: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -22,6 +24,7 @@ export function MemberPortalPreview({
   attendance,
   rsvps,
   churchName,
+  churchProfile,
   onBack,
   onRSVP,
   onCheckIn
@@ -67,6 +70,7 @@ export function MemberPortalPreview({
           attendance={attendance}
           rsvps={rsvps}
           churchName={churchName}
+          churchProfile={churchProfile}
           onBack={onBack}
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
@@ -137,6 +141,7 @@ export function MemberPortalPreview({
                       attendance={attendance}
                       rsvps={rsvps}
                       churchName={churchName}
+                      churchProfile={churchProfile}
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
                     />

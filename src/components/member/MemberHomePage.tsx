@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
-import { Users, DollarSign, Calendar, QrCode, Clock, MapPin, Phone, Mail, Globe, ChevronRight, Heart } from 'lucide-react';
+import { Users, DollarSign, Calendar, QrCode, Clock, MapPin, Phone, Mail, Globe, ChevronRight } from 'lucide-react';
 import type { CalendarEvent, MemberPortalTab } from '../../types';
+import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
 interface MemberHomePageProps {
   churchName: string;
+  churchProfile?: ChurchProfile;
   events: CalendarEvent[];
   onNavigate: (tab: MemberPortalTab) => void;
 }
 
-export function MemberHomePage({ churchName, events, onNavigate }: MemberHomePageProps) {
+export function MemberHomePage({ churchName, churchProfile, events, onNavigate }: MemberHomePageProps) {
   // Get upcoming events (next 3)
   const upcomingEvents = useMemo(() => {
     const now = new Date();
@@ -168,31 +170,26 @@ export function MemberHomePage({ churchName, events, onNavigate }: MemberHomePag
       )}
 
       {/* Service Times */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-3 px-1">
-          Service Times
-        </h2>
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center">
-              <Clock size={18} className="text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Sunday Worship</h3>
-              <p className="text-xs text-gray-500 dark:text-dark-400">9:00 AM & 11:00 AM</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <Heart size={18} className="text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Wednesday Bible Study</h3>
-              <p className="text-xs text-gray-500 dark:text-dark-400">7:00 PM</p>
-            </div>
+      {(churchProfile?.serviceTimes?.length ?? 0) > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-3 px-1">
+            Service Times
+          </h2>
+          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+            {churchProfile?.serviceTimes.map((service, idx) => (
+              <div key={idx} className="p-4 flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center">
+                  <Clock size={18} className="text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">{service.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">{service.day} · {service.time}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Contact Info */}
       <div>
@@ -200,22 +197,35 @@ export function MemberHomePage({ churchName, events, onNavigate }: MemberHomePag
           Contact Us
         </h2>
         <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 p-4 space-y-3">
-          <a href="tel:+15551234567" className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Phone size={16} className="text-gray-400" />
-            (555) 123-4567
-          </a>
-          <a href="mailto:info@gracechurch.com" className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Mail size={16} className="text-gray-400" />
-            info@gracechurch.com
-          </a>
-          <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300">
-            <MapPin size={16} className="text-gray-400 flex-shrink-0" />
-            123 Faith Street, Graceville, GA 30301
-          </div>
-          <a href="https://gracechurch.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Globe size={16} className="text-gray-400" />
-            www.gracechurch.com
-          </a>
+          {churchProfile?.phone && (
+            <a href={`tel:${churchProfile.phone}`} className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <Phone size={16} className="text-gray-400" />
+              {churchProfile.phone}
+            </a>
+          )}
+          {churchProfile?.email && (
+            <a href={`mailto:${churchProfile.email}`} className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <Mail size={16} className="text-gray-400" />
+              {churchProfile.email}
+            </a>
+          )}
+          {(churchProfile?.address || churchProfile?.city) && (
+            <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300">
+              <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+              {[churchProfile.address, churchProfile.city, churchProfile.state, churchProfile.zip].filter(Boolean).join(', ')}
+            </div>
+          )}
+          {churchProfile?.website && (
+            <a href={churchProfile.website.startsWith('http') ? churchProfile.website : `https://${churchProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <Globe size={16} className="text-gray-400" />
+              {churchProfile.website.replace(/^https?:\/\//, '')}
+            </a>
+          )}
+          {!churchProfile?.phone && !churchProfile?.email && !churchProfile?.address && !churchProfile?.website && (
+            <p className="text-sm text-gray-400 dark:text-dark-500 text-center py-2">
+              Contact info not configured yet
+            </p>
+          )}
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
 import { MemberCheckInPage } from './MemberCheckInPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
+import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
 interface MemberPortalProps {
   people: Person[];
@@ -15,6 +16,7 @@ interface MemberPortalProps {
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   currentMember?: Person | null;
   churchName?: string;
+  churchProfile?: ChurchProfile;
   onBack?: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -28,6 +30,7 @@ export function MemberPortal({
   rsvps,
   currentMember,
   churchName = 'Grace Church',
+  churchProfile,
   onBack,
   onRSVP,
   onCheckIn
@@ -40,6 +43,7 @@ export function MemberPortal({
         return (
           <MemberHomePage
             churchName={churchName}
+            churchProfile={churchProfile}
             events={events}
             onNavigate={setActiveTab}
           />
@@ -82,6 +86,7 @@ export function MemberPortal({
         return (
           <MemberHomePage
             churchName={churchName}
+            churchProfile={churchProfile}
             events={events}
             onNavigate={setActiveTab}
           />

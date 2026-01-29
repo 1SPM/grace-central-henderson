@@ -36,12 +36,22 @@ export interface IntegrationCredentials {
   clerkPublishableKey?: string;
 }
 
+export interface ServiceTime {
+  day: string;
+  time: string;
+  name: string;
+}
+
 export interface ChurchProfile {
   name: string;
   address: string;
+  city: string;
+  state: string;
+  zip: string;
   phone: string;
   email: string;
   website: string;
+  serviceTimes: ServiceTime[];
 }
 
 export interface ChurchSettings {
@@ -63,9 +73,17 @@ const DEFAULT_SETTINGS: ChurchSettings = {
   profile: {
     name: 'Grace Community Church',
     address: '',
+    city: '',
+    state: '',
+    zip: '',
     phone: '',
     email: '',
     website: '',
+    serviceTimes: [
+      { day: 'Sunday', time: '9:00 AM', name: 'Sunday Worship' },
+      { day: 'Sunday', time: '11:00 AM', name: 'Sunday Worship' },
+      { day: 'Wednesday', time: '7:00 PM', name: 'Bible Study' },
+    ],
   },
   integrations: {},
   notifications: {
