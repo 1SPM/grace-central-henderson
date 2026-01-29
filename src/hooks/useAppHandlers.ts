@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
 import type { Person, Task, Interaction, Attendance, View } from '../types';
 
+type EventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
+
 interface UseAppHandlersProps {
   churchId: string;
   dbPeople: any[];
@@ -16,6 +18,9 @@ interface UseAppHandlersProps {
   createGroup?: (data: any) => Promise<any>;
   addGroupMember?: (groupId: string, personId: string) => Promise<any>;
   removeGroupMember?: (groupId: string, personId: string) => Promise<any>;
+  addEvent?: (data: any) => Promise<any>;
+  updateEvent?: (id: string, data: any) => Promise<any>;
+  deleteEvent?: (id: string) => Promise<any>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
@@ -36,6 +41,9 @@ export function useAppHandlers({
   createGroup,
   addGroupMember,
   removeGroupMember,
+  addEvent,
+  updateEvent,
+  deleteEvent,
   setView,
   setSelectedPersonId,
   openPersonForm,
@@ -321,6 +329,55 @@ export function useAppHandlers({
     await removeGroupMember(groupId, personId);
   }, [removeGroupMember]);
 
+  // Event handlers
+  const handleAddEvent = useCallback(async (eventData: {
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate?: string;
+    allDay: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => {
+    if (!addEvent) return;
+    await addEvent({
+      church_id: churchId,
+      title: eventData.title,
+      description: eventData.description,
+      start_date: eventData.startDate,
+      end_date: eventData.endDate,
+      all_day: eventData.allDay,
+      location: eventData.location,
+      category: eventData.category,
+    });
+  }, [addEvent, churchId]);
+
+  const handleUpdateEvent = useCallback(async (eventId: string, updates: {
+    title?: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    allDay?: boolean;
+    location?: string;
+    category?: EventCategory;
+  }) => {
+    if (!updateEvent) return;
+    await updateEvent(eventId, {
+      title: updates.title,
+      description: updates.description,
+      start_date: updates.startDate,
+      end_date: updates.endDate,
+      all_day: updates.allDay,
+      location: updates.location,
+      category: updates.category,
+    });
+  }, [updateEvent]);
+
+  const handleDeleteEvent = useCallback(async (eventId: string) => {
+    if (!deleteEvent) return;
+    await deleteEvent(eventId);
+  }, [deleteEvent]);
+
   return {
     // State
     attendanceRecords,
@@ -351,6 +408,9 @@ export function useAppHandlers({
       createGroup: handleCreateGroup,
       addGroupMember: handleAddGroupMember,
       removeGroupMember: handleRemoveGroupMember,
+      addEvent: handleAddEvent,
+      updateEvent: handleUpdateEvent,
+      deleteEvent: handleDeleteEvent,
     },
   };
 }

@@ -58,6 +58,9 @@ function App() {
     createGroup,
     addGroupMember,
     removeGroupMember,
+    addEvent,
+    updateEvent,
+    deleteEvent,
   } = useSupabaseData();
 
   // Convert to legacy types for existing components (memoized)
@@ -95,6 +98,9 @@ function App() {
     createGroup,
     addGroupMember,
     removeGroupMember,
+    addEvent,
+    updateEvent,
+    deleteEvent,
     setView,
     setSelectedPersonId,
     openPersonForm: modals.openPersonForm,

@@ -79,6 +79,17 @@ interface ViewRendererProps {
     createGroup: (group: Omit<SmallGroup, 'id'>) => Promise<void>;
     addGroupMember: (groupId: string, personId: string) => Promise<void>;
     removeGroupMember: (groupId: string, personId: string) => Promise<void>;
+    addEvent?: (event: {
+      title: string;
+      description?: string;
+      startDate: string;
+      endDate?: string;
+      allDay: boolean;
+      location?: string;
+      category: CalendarEvent['category'];
+    }) => Promise<void>;
+    updateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => Promise<void>;
+    deleteEvent?: (eventId: string) => Promise<void>;
   };
   collectionMgmt: {
     campaigns: any[];
@@ -212,7 +223,17 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
 
       case 'calendar':
-        return <Calendar events={events} people={people} rsvps={rsvps} onRSVP={handlers.rsvp} />;
+        return (
+          <Calendar
+            events={events}
+            people={people}
+            rsvps={rsvps}
+            onRSVP={handlers.rsvp}
+            onAddEvent={handlers.addEvent}
+            onUpdateEvent={handlers.updateEvent}
+            onDeleteEvent={handlers.deleteEvent}
+          />
+        );
 
       case 'volunteers':
         return (

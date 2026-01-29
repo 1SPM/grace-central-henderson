@@ -662,6 +662,122 @@ export function useSupabaseData() {
     }));
   }, [isDemo]);
 
+  // Add event
+  const addEvent = useCallback(async (eventData: {
+    church_id: string;
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date?: string;
+    all_day: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => {
+    if (isDemo) {
+      const newEvent: CalendarEvent = {
+        id: `event-${Date.now()}`,
+        church_id: eventData.church_id,
+        title: eventData.title,
+        description: eventData.description || null,
+        start_date: eventData.start_date,
+        end_date: eventData.end_date || null,
+        all_day: eventData.all_day,
+        location: eventData.location || null,
+        category: eventData.category,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setEvents(prev => [...prev, newEvent].sort((a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      ));
+      return newEvent;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .insert({
+        church_id: eventData.church_id,
+        title: eventData.title,
+        description: eventData.description || null,
+        start_date: eventData.start_date,
+        end_date: eventData.end_date || null,
+        all_day: eventData.all_day,
+        location: eventData.location || null,
+        category: eventData.category,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    setEvents(prev => [...prev, data as CalendarEvent].sort((a, b) =>
+      new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    ));
+    return data as CalendarEvent;
+  }, [isDemo]);
+
+  // Update event
+  const updateEvent = useCallback(async (eventId: string, updates: Partial<{
+    title: string;
+    description: string | null;
+    start_date: string;
+    end_date: string | null;
+    all_day: boolean;
+    location: string | null;
+    category: EventCategory;
+  }>) => {
+    if (isDemo) {
+      setEvents(prev => prev.map(e =>
+        e.id === eventId ? { ...e, ...updates, updated_at: new Date().toISOString() } : e
+      ).sort((a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      ));
+      return;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { error } = await supabase
+      .from('calendar_events')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', eventId);
+
+    if (error) throw error;
+
+    setEvents(prev => prev.map(e =>
+      e.id === eventId ? { ...e, ...updates, updated_at: new Date().toISOString() } : e
+    ).sort((a, b) =>
+      new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    ));
+  }, [isDemo]);
+
+  // Delete event
+  const deleteEvent = useCallback(async (eventId: string) => {
+    if (isDemo) {
+      setEvents(prev => prev.filter(e => e.id !== eventId));
+      return;
+    }
+
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
+    const { error } = await supabase
+      .from('calendar_events')
+      .delete()
+      .eq('id', eventId);
+
+    if (error) throw error;
+
+    setEvents(prev => prev.filter(e => e.id !== eventId));
+  }, [isDemo]);
+
   return {
     // State
     isLoading,
@@ -699,5 +815,10 @@ export function useSupabaseData() {
     createGroup,
     addGroupMember,
     removeGroupMember,
+
+    // Event actions
+    addEvent,
+    updateEvent,
+    deleteEvent,
   };
 }
