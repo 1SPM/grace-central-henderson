@@ -145,6 +145,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         <Dashboard
           people={people}
           tasks={tasks}
+          events={events}
           giving={giving}
           interactions={interactions}
           prayers={prayers}
@@ -155,6 +156,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
           onViewActions={() => setView('feed')}
+          onViewCalendar={() => setView('calendar')}
         />
       );
 
