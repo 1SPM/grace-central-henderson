@@ -459,6 +459,40 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
             </div>
 
             <div className="p-4 space-y-4">
+              {/* Quick Templates */}
+              {!editingEvent && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
+                    Quick Add
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { title: 'Sunday Service', category: 'service' as EventCategory, time: '10:00', location: 'Main Sanctuary' },
+                      { title: 'Wednesday Bible Study', category: 'meeting' as EventCategory, time: '19:00', location: 'Fellowship Hall' },
+                      { title: 'Youth Group', category: 'small-group' as EventCategory, time: '18:00', location: 'Youth Room' },
+                      { title: 'Prayer Meeting', category: 'meeting' as EventCategory, time: '07:00', location: 'Chapel' },
+                      { title: 'Leadership Meeting', category: 'meeting' as EventCategory, time: '18:30', location: 'Conference Room' },
+                      { title: 'Potluck Dinner', category: 'event' as EventCategory, time: '17:00', location: 'Fellowship Hall' },
+                    ].map((template) => (
+                      <button
+                        key={template.title}
+                        type="button"
+                        onClick={() => setEventForm(prev => ({
+                          ...prev,
+                          title: template.title,
+                          category: template.category,
+                          startTime: template.time,
+                          location: template.location,
+                        }))}
+                        className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
+                      >
+                        {template.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
                   Event Title *
@@ -470,6 +504,21 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                   placeholder="Enter event title"
                   className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
+                {/* Title suggestions */}
+                {!eventForm.title && !editingEvent && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {['Worship Service', 'Bible Study', 'Small Group', 'Team Meeting', 'Special Event', 'Outreach'].map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => setEventForm(prev => ({ ...prev, title: suggestion }))}
+                        className="px-2 py-1 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 rounded hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -479,8 +528,8 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                 <textarea
                   value={eventForm.description}
                   onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter event description"
-                  rows={3}
+                  placeholder="Enter event description (optional)"
+                  rows={2}
                   className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
                 />
               </div>
@@ -489,18 +538,29 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
                   Category
                 </label>
-                <select
-                  value={eventForm.category}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, category: e.target.value as EventCategory }))}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
-                >
-                  <option value="service">Service</option>
-                  <option value="meeting">Meeting</option>
-                  <option value="event">Event</option>
-                  <option value="small-group">Small Group</option>
-                  <option value="holiday">Holiday</option>
-                  <option value="other">Other</option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'service', label: 'Service', activeClass: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-500/30' },
+                    { value: 'meeting', label: 'Meeting', activeClass: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/30' },
+                    { value: 'event', label: 'Event', activeClass: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-500/30' },
+                    { value: 'small-group', label: 'Small Group', activeClass: 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-300 dark:border-purple-500/30' },
+                    { value: 'holiday', label: 'Holiday', activeClass: 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-300 dark:border-red-500/30' },
+                    { value: 'other', label: 'Other', activeClass: 'bg-gray-200 dark:bg-dark-600 text-gray-700 dark:text-dark-300 border-gray-300 dark:border-dark-500' },
+                  ].map(({ value, label, activeClass }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setEventForm(prev => ({ ...prev, category: value as EventCategory }))}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                        eventForm.category === value
+                          ? activeClass
+                          : 'bg-gray-50 dark:bg-dark-800 text-gray-600 dark:text-dark-400 border-gray-200 dark:border-dark-600 hover:bg-gray-100 dark:hover:bg-dark-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
