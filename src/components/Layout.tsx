@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
   LayoutDashboard,
@@ -19,9 +19,98 @@ import {
   Church,
   X,
   Globe,
+  ChevronLeft,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
+
+// Mini Calendar Component for sidebar
+function MiniCalendar({ collapsed }: { collapsed: boolean }) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = useMemo(() => new Date(), []);
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const startingDay = firstDayOfMonth.getDay();
+  const totalDays = lastDayOfMonth.getDate();
+
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+
+  const monthName = currentDate.toLocaleString('default', { month: 'short' });
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  // Generate calendar grid
+  const calendarDays = [];
+  for (let i = 0; i < startingDay; i++) {
+    calendarDays.push(null);
+  }
+  for (let day = 1; day <= totalDays; day++) {
+    calendarDays.push(day);
+  }
+
+  const isToday = (day: number) =>
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear();
+
+  if (collapsed) return null;
+
+  return (
+    <div className="px-3 py-2 border-b border-gray-200/50 dark:border-white/5">
+      <div className="bg-gray-50/50 dark:bg-dark-800/50 rounded-xl p-2">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-1.5">
+          <button
+            onClick={prevMonth}
+            className="p-1 hover:bg-gray-200/50 dark:hover:bg-dark-700 rounded transition-colors"
+          >
+            <ChevronLeft size={14} className="text-gray-500 dark:text-dark-400" />
+          </button>
+          <span className="text-xs font-medium text-gray-700 dark:text-dark-300">
+            {monthName} {year}
+          </span>
+          <button
+            onClick={nextMonth}
+            className="p-1 hover:bg-gray-200/50 dark:hover:bg-dark-700 rounded transition-colors"
+          >
+            <ChevronRight size={14} className="text-gray-500 dark:text-dark-400" />
+          </button>
+        </div>
+
+        {/* Day headers */}
+        <div className="grid grid-cols-7 gap-0.5 mb-0.5">
+          {days.map((day, i) => (
+            <div key={i} className="text-center text-[9px] font-medium text-gray-400 dark:text-dark-500 py-0.5">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-0.5">
+          {calendarDays.map((day, i) => (
+            <div
+              key={i}
+              className={`text-center text-[10px] py-0.5 rounded ${
+                day === null
+                  ? ''
+                  : isToday(day)
+                  ? 'bg-violet-600 text-white font-medium'
+                  : 'text-gray-600 dark:text-dark-400'
+              }`}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface LayoutProps {
   currentView: View;
@@ -36,7 +125,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
   { view: 'people', label: 'People', icon: <Users size={18} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-  { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
+  { view: 'calendar', label: 'Events Calendar', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
@@ -50,7 +139,7 @@ const viewLabels: Record<View, string> = {
   person: 'Profile',
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
-  calendar: 'Calendar',
+  calendar: 'Events Calendar',
   birthdays: 'Birthdays',
   volunteers: 'Volunteers',
   groups: 'Groups',
@@ -194,6 +283,9 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
             </button>
           </div>
         )}
+
+        {/* Mini Calendar */}
+        <MiniCalendar collapsed={sidebarCollapsed} />
 
         {/* Navigation */}
         <nav className={`flex-1 px-3 py-2 space-y-0.5 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
