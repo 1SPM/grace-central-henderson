@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone, Heart } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone, Heart, Download, ExternalLink } from 'lucide-react';
 import { CalendarEvent, Person } from '../types';
+import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookUrl } from '../utils/calendarExport';
 
 interface RSVP {
   eventId: string;
@@ -16,6 +17,7 @@ interface CalendarProps {
   events: CalendarEvent[];
   people: Person[];
   rsvps: RSVP[];
+  churchName?: string;
   onRSVP: (eventId: string, personId: string, status: RSVP['status'], guestCount?: number) => void;
   onAddEvent?: (event: {
     title: string;
@@ -111,7 +113,7 @@ const timeSuggestions = [
   { label: '7:00 PM', time: '19:00' },
 ];
 
-export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
+export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [showBirthdays, setShowBirthdays] = useState(true);
@@ -124,6 +126,7 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
   const [rsvpGuests, setRsvpGuests] = useState(0);
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [eventForm, setEventForm] = useState({
     title: '',
     description: '',
@@ -447,15 +450,94 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
             {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
           </p>
         </div>
-        {onAddEvent && (
-          <button
-            onClick={openCreateEventModal}
-            className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 flex items-center gap-2"
-          >
-            <Plus size={18} />
-            Create Event
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 flex items-center gap-2"
+            >
+              <Download size={18} />
+              Export
+            </button>
+            {showExportMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowExportMenu(false)}
+                />
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-850 rounded-xl shadow-lg border border-gray-200 dark:border-dark-700 z-50 overflow-hidden">
+                  <div className="p-2">
+                    <p className="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-dark-500 uppercase">
+                      Export Calendar
+                    </p>
+                    <button
+                      onClick={() => {
+                        downloadICalFile(events, churchName);
+                        setShowExportMenu(false);
+                      }}
+                      disabled={events.length === 0}
+                      className="w-full px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 rounded-lg flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <Download size={16} className="text-gray-400" />
+                      Download .ics file
+                    </button>
+                    <p className="px-3 py-1.5 text-xs text-gray-400 dark:text-dark-500 mt-2">
+                      Import into Google Calendar or Outlook
+                    </p>
+                  </div>
+                  {upcomingEvents.length > 0 && (
+                    <div className="border-t border-gray-100 dark:border-dark-700 p-2">
+                      <p className="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-dark-500 uppercase">
+                        Add Single Event
+                      </p>
+                      <div className="max-h-48 overflow-y-auto">
+                        {upcomingEvents.slice(0, 5).map((event) => (
+                          <div key={event.id} className="px-3 py-2">
+                            <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                              {event.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <a
+                                href={generateGoogleCalendarUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                onClick={() => setShowExportMenu(false)}
+                              >
+                                <ExternalLink size={10} />
+                                Google
+                              </a>
+                              <a
+                                href={generateOutlookUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                onClick={() => setShowExportMenu(false)}
+                              >
+                                <ExternalLink size={10} />
+                                Outlook
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          {onAddEvent && (
+            <button
+              onClick={openCreateEventModal}
+              className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 flex items-center gap-2"
+            >
+              <Plus size={18} />
+              Create Event
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Show/Hide Toggles + Category Filters */}

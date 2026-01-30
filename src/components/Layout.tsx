@@ -87,6 +87,8 @@ const viewLabels: Record<View, string> = {
   skills: 'Skills & Talents',
   'email-templates': 'Email Templates',
   'event-registration': 'Event Registration',
+  'reminders': 'Automated Reminders',
+  'planning-center-import': 'Planning Center Import',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

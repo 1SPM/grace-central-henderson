@@ -37,6 +37,8 @@ const Families = lazy(() => import('./Families').then(m => ({ default: m.Familie
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
+const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => ({ default: m.AutomatedReminders })));
+const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -237,6 +239,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             events={events}
             people={people}
             rsvps={rsvps}
+            churchName={churchName}
             onRSVP={handlers.rsvp}
             onAddEvent={handlers.addEvent}
             onUpdateEvent={handlers.updateEvent}
@@ -400,7 +403,17 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'settings':
-        return <Settings />;
+        return (
+          <Settings
+            people={people}
+            tasks={tasks}
+            events={events}
+            giving={giving}
+            groups={groups}
+            prayers={prayers}
+            onNavigate={(subView) => setView(subView)}
+          />
+        );
 
       case 'connect-card':
         return <ConnectCard churchId={churchId} churchName={churchName} />;
@@ -454,6 +467,29 @@ export function ViewRenderer(props: ViewRendererProps) {
             onDeleteEvent={handlers.deleteEvent}
             onViewPerson={handlers.viewPerson}
             onBack={() => setView('calendar')}
+          />
+        );
+
+      case 'reminders':
+        return (
+          <AutomatedReminders
+            people={people}
+            tasks={tasks}
+            events={events}
+            prayers={prayers}
+            emailConfigured={false}
+            smsConfigured={false}
+            onBack={() => setView('settings')}
+          />
+        );
+
+      case 'planning-center-import':
+        return (
+          <PlanningCenterImport
+            existingPeople={people}
+            existingGroups={groups}
+            onImportPeople={handlers.importCSV}
+            onBack={() => setView('people')}
           />
         );
 
