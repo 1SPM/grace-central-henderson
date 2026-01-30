@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone } from 'lucide-react';
 import { CalendarEvent, Person } from '../types';
 
 interface RSVP {
@@ -10,6 +10,7 @@ interface RSVP {
 }
 
 type EventCategory = CalendarEvent['category'];
+type FilterType = 'all' | 'events' | 'birthdays' | EventCategory;
 
 interface CalendarProps {
   events: CalendarEvent[];
@@ -27,6 +28,15 @@ interface CalendarProps {
   }) => void;
   onUpdateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => void;
   onDeleteEvent?: (eventId: string) => void;
+  onViewPerson?: (personId: string) => void;
+}
+
+// Birthday item type
+interface BirthdayItem {
+  id: string;
+  person: Person;
+  date: string;
+  age: number;
 }
 
 const categoryColors: Record<string, { bg: string; text: string; border: string; dot: string }> = {
@@ -35,6 +45,7 @@ const categoryColors: Record<string, { bg: string; text: string; border: string;
   event: { bg: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-700 dark:text-green-400', border: 'border-green-200 dark:border-green-500/20', dot: 'bg-green-500' },
   'small-group': { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-500/20', dot: 'bg-purple-500' },
   holiday: { bg: 'bg-rose-100 dark:bg-rose-500/15', text: 'text-rose-700 dark:text-rose-400', border: 'border-rose-200 dark:border-rose-500/20', dot: 'bg-rose-500' },
+  birthday: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400', border: 'border-pink-200 dark:border-pink-500/20', dot: 'bg-pink-500' },
   other: { bg: 'bg-gray-100 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', border: 'border-gray-200 dark:border-dark-600', dot: 'bg-gray-500' }
 };
 
@@ -44,6 +55,7 @@ const categoryLabels: Record<string, string> = {
   event: 'Events',
   'small-group': 'Small Groups',
   holiday: 'Holidays',
+  birthday: 'Birthdays',
   other: 'Other'
 };
 
@@ -89,9 +101,11 @@ const timeSuggestions = [
   { label: '7:00 PM', time: '19:00' },
 ];
 
-export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent }: CalendarProps) {
+export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [showBirthdays, setShowBirthdays] = useState(true);
+  const [showEvents, setShowEvents] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showRSVPModal, setShowRSVPModal] = useState(false);
   const [rsvpPersonId, setRsvpPersonId] = useState('');
@@ -133,17 +147,51 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
     calendarDays.push(day);
   }
 
+  // Calculate birthdays for current year
+  const birthdays = useMemo(() => {
+    const birthdayItems: BirthdayItem[] = [];
+    people.forEach(person => {
+      if (person.birthDate) {
+        const birthDate = new Date(person.birthDate);
+        const thisYearBirthday = new Date(year, birthDate.getMonth(), birthDate.getDate());
+        const age = year - birthDate.getFullYear();
+        birthdayItems.push({
+          id: `birthday-${person.id}`,
+          person,
+          date: thisYearBirthday.toISOString().split('T')[0],
+          age
+        });
+      }
+    });
+    return birthdayItems;
+  }, [people, year]);
+
   // Filter events by category
   const filteredEvents = useMemo(() => {
-    if (!selectedCategory) return events;
-    return events.filter(e => e.category === selectedCategory);
-  }, [events, selectedCategory]);
+    if (!showEvents) return [];
+    if (filterType === 'all' || filterType === 'events') return events;
+    if (filterType === 'birthdays') return [];
+    return events.filter(e => e.category === filterType);
+  }, [events, filterType, showEvents]);
+
+  // Filter birthdays
+  const filteredBirthdays = useMemo(() => {
+    if (!showBirthdays) return [];
+    if (filterType === 'events') return [];
+    return birthdays;
+  }, [birthdays, filterType, showBirthdays]);
 
   // Get events for a specific day
   const getEventsForDay = useCallback((day: number) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return filteredEvents.filter(e => e.startDate.startsWith(dateStr));
   }, [year, month, filteredEvents]);
+
+  // Get birthdays for a specific day
+  const getBirthdaysForDay = useCallback((day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return filteredBirthdays.filter(b => b.date === dateStr);
+  }, [year, month, filteredBirthdays]);
 
   // Get upcoming events (next 30 days)
   const upcomingEvents = useMemo(() => {
@@ -159,6 +207,21 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
       })
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   }, [filteredEvents]);
+
+  // Get upcoming birthdays (next 30 days)
+  const upcomingBirthdays = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    return filteredBirthdays
+      .filter(b => {
+        const birthdayDate = new Date(b.date);
+        return birthdayDate >= now && birthdayDate <= thirtyDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredBirthdays]);
 
   // RSVP lookup
   const rsvpsByEvent = useMemo(() => {
@@ -189,7 +252,7 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
 
   // Category counts
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
+    const counts: Record<string, number> = { birthday: birthdays.length };
     events.forEach(e => {
       counts[e.category] = (counts[e.category] || 0) + 1;
     });
@@ -319,8 +382,10 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Events Calendar</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">{events.length} total events</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Calendar / Events</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">
+            {events.length} events · {birthdays.length} birthdays this year
+          </p>
         </div>
         {onAddEvent && (
           <button
@@ -333,43 +398,74 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
         )}
       </div>
 
-      {/* Category Filters */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-dark-400 mr-2">
+      {/* Show/Hide Toggles + Category Filters */}
+      <div className="mb-6 space-y-3">
+        {/* Main toggles */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-dark-400">
             <Filter size={16} />
-            <span>Filter:</span>
+            <span>Show:</span>
           </div>
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              selectedCategory === null
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
-            }`}
-          >
-            All ({events.length})
-          </button>
-          {Object.entries(categoryLabels).map(([key, label]) => {
-            const count = categoryCounts[key] || 0;
-            if (count === 0) return null;
-            const colors = categoryColors[key];
-            return (
-              <button
-                key={key}
-                onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  selectedCategory === key
-                    ? `${colors.bg} ${colors.text} ${colors.border} border`
-                    : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-                {label} ({count})
-              </button>
-            );
-          })}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showEvents}
+              onChange={(e) => setShowEvents(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300">
+              Events ({events.length})
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showBirthdays}
+              onChange={(e) => setShowBirthdays(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-pink-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300 flex items-center gap-1.5">
+              <Cake size={14} className="text-pink-500" />
+              Birthdays ({birthdays.length})
+            </span>
+          </label>
         </div>
+
+        {/* Category Filters */}
+        {showEvents && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-gray-400 dark:text-dark-500 mr-1">Event type:</span>
+            <button
+              onClick={() => setFilterType('all')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                filterType === 'all'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                  : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+              }`}
+            >
+              All
+            </button>
+            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday').map(([key, label]) => {
+              const count = categoryCounts[key] || 0;
+              if (count === 0) return null;
+              const colors = categoryColors[key];
+              return (
+                <button
+                  key={key}
+                  onClick={() => setFilterType(filterType === key ? 'all' : key as FilterType)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                    filterType === key
+                      ? `${colors.bg} ${colors.text} ${colors.border} border`
+                      : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
+                  {label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -418,7 +514,11 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
             <div className="grid grid-cols-7">
               {calendarDays.map((day, i) => {
                 const dayEvents = day !== null ? getEventsForDay(day) : [];
+                const dayBirthdays = day !== null ? getBirthdaysForDay(day) : [];
                 const isTodayDay = day !== null && isToday(day);
+                const totalItems = dayEvents.length + dayBirthdays.length;
+                const maxVisible = 3;
+                let shown = 0;
                 return (
                   <div
                     key={i}
@@ -436,7 +536,24 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                           {day}
                         </div>
                         <div className="space-y-1">
-                          {dayEvents.slice(0, 3).map((event) => {
+                          {/* Show birthdays first */}
+                          {dayBirthdays.slice(0, maxVisible).map((birthday) => {
+                            shown++;
+                            const colors = categoryColors.birthday;
+                            return (
+                              <button
+                                key={birthday.id}
+                                onClick={() => onViewPerson?.(birthday.person.id)}
+                                className={`w-full text-left px-1.5 py-0.5 text-[10px] font-medium rounded truncate ${colors.bg} ${colors.text} flex items-center gap-1`}
+                              >
+                                <Cake size={8} />
+                                {birthday.person.firstName}
+                              </button>
+                            );
+                          })}
+                          {/* Show events */}
+                          {dayEvents.slice(0, maxVisible - shown).map((event) => {
+                            shown++;
                             const colors = categoryColors[event.category] || categoryColors.other;
                             return (
                               <button
@@ -448,9 +565,9 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                               </button>
                             );
                           })}
-                          {dayEvents.length > 3 && (
+                          {totalItems > maxVisible && (
                             <p className="text-[10px] text-gray-500 dark:text-dark-400 pl-1">
-                              +{dayEvents.length - 3} more
+                              +{totalItems - maxVisible} more
                             </p>
                           )}
                         </div>
@@ -463,14 +580,81 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
           </div>
         </div>
 
-        {/* Upcoming Events Sidebar */}
-        <div className="xl:col-span-1">
+        {/* Upcoming Sidebar */}
+        <div className="xl:col-span-1 space-y-4">
+          {/* Upcoming Birthdays */}
+          {showBirthdays && upcomingBirthdays.length > 0 && (
+            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-pink-50 dark:bg-pink-500/10">
+                <div className="flex items-center gap-2">
+                  <Cake className="text-pink-500" size={18} />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-dark-100">Upcoming Birthdays</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
+                  </div>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[300px] overflow-y-auto">
+                {upcomingBirthdays.map((birthday) => {
+                  const birthdayDate = new Date(birthday.date);
+                  return (
+                    <div
+                      key={birthday.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors cursor-pointer"
+                      onClick={() => onViewPerson?.(birthday.person.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-pink-100 dark:bg-pink-500/20 rounded-full flex items-center justify-center text-pink-600 dark:text-pink-400 font-medium text-sm">
+                          {birthday.person.firstName[0]}{birthday.person.lastName[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                            {birthday.person.firstName} {birthday.person.lastName}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
+                            {birthdayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            <span className="mx-1">·</span>
+                            Turning {birthday.age}
+                          </p>
+                          <div className="flex items-center gap-3 mt-2">
+                            {birthday.person.email && (
+                              <a
+                                href={`mailto:${birthday.person.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Mail size={10} />
+                                Email
+                              </a>
+                            )}
+                            {birthday.person.phone && (
+                              <a
+                                href={`tel:${birthday.person.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Phone size={10} />
+                                Call
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Events */}
+          {showEvents && (
           <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h3 className="font-semibold text-gray-900 dark:text-dark-100">Upcoming Events</h3>
               <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
             </div>
-            <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[400px] overflow-y-auto">
               {upcomingEvents.length === 0 ? (
                 <div className="p-8 text-center">
                   <CalendarIcon className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={32} />
@@ -549,6 +733,7 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
 

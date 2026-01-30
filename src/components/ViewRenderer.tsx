@@ -234,6 +234,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             onAddEvent={handlers.addEvent}
             onUpdateEvent={handlers.updateEvent}
             onDeleteEvent={handlers.deleteEvent}
+            onViewPerson={handlers.viewPerson}
           />
         );
 
