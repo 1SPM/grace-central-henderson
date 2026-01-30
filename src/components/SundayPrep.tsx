@@ -291,11 +291,6 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
   };
 
   const generateFullSermon = async () => {
-    if (!sermonTitle.trim()) {
-      alert('Please enter a sermon title first');
-      return;
-    }
-
     setIsGeneratingFullSermon(true);
 
     // Gather context from the congregation
@@ -309,7 +304,11 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
       ? `Prayer needs: ${activePrayers.map(p => p.content.substring(0, 50)).join('; ')}`
       : '';
 
-    const prompt = `Generate a complete church sermon outline for the topic: "${sermonTitle}"
+    const topicInstruction = sermonTitle.trim()
+      ? `Generate a complete church sermon outline for the topic: "${sermonTitle}"`
+      : `Generate a complete church sermon outline. Choose an uplifting, relevant topic for this Sunday's service - something that will resonate with the congregation and provide hope and guidance.`;
+
+    const prompt = `${topicInstruction}
 
 Context about the congregation:
 ${birthdayContext}
@@ -319,6 +318,9 @@ ${prayerContext}
 Create a warm, engaging sermon with the following sections. For each section, write 2-3 paragraphs of actual sermon content (not just bullet points). Total should be around 800-1000 words.
 
 Format your response EXACTLY like this, with these exact headers:
+
+[TITLE]
+(${sermonTitle.trim() ? 'Use: ' + sermonTitle : 'Create a compelling sermon title'})
 
 [OPENING]
 (Write an engaging opening that draws people in, maybe referencing current events or relatable experiences)
@@ -347,6 +349,12 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
 
       if (result.success && result.text) {
         const text = result.text;
+
+        // Extract title if AI generated one
+        const titleMatch = text.match(/\[TITLE\]\s*([\s\S]*?)(?=\[|$)/i);
+        if (titleMatch && titleMatch[1]?.trim() && !sermonTitle.trim()) {
+          setSermonTitle(titleMatch[1].trim());
+        }
 
         // Parse the sections from the response
         const newSections: SermonSection[] = [];
@@ -687,7 +695,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
               />
               <button
                 onClick={generateFullSermon}
-                disabled={isGeneratingFullSermon || !sermonTitle.trim()}
+                disabled={isGeneratingFullSermon}
                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isGeneratingFullSermon ? (
@@ -704,7 +712,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
               </button>
               {!sermonTitle.trim() && (
                 <p className="text-xs text-center text-gray-400 dark:text-dark-500">
-                  Enter a sermon title above to enable AI generation
+                  Or leave blank and AI will choose a topic for you
                 </p>
               )}
             </div>
