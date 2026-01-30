@@ -10,6 +10,9 @@ interface ModalState {
   showQuickNote: boolean;
   showQuickDonation: boolean;
   quickDonationPersonId: string | undefined;
+  showEmailSidebar: boolean;
+  emailRecipients: string[];
+  emailGroupId: string | undefined;
 }
 
 const INITIAL_STATE: ModalState = {
@@ -21,6 +24,9 @@ const INITIAL_STATE: ModalState = {
   showQuickNote: false,
   showQuickDonation: false,
   quickDonationPersonId: undefined,
+  showEmailSidebar: false,
+  emailRecipients: [],
+  emailGroupId: undefined,
 };
 
 export function useModals() {
@@ -82,6 +88,24 @@ export function useModals() {
     }));
   }, []);
 
+  const openEmailSidebar = useCallback((recipients?: string[], groupId?: string) => {
+    setState((prev) => ({
+      ...prev,
+      showEmailSidebar: true,
+      emailRecipients: recipients || [],
+      emailGroupId: groupId,
+    }));
+  }, []);
+
+  const closeEmailSidebar = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      showEmailSidebar: false,
+      emailRecipients: [],
+      emailGroupId: undefined,
+    }));
+  }, []);
+
   const closeAll = useCallback(() => {
     setState(INITIAL_STATE);
   }, []);
@@ -96,6 +120,9 @@ export function useModals() {
     showQuickNote: state.showQuickNote,
     showQuickDonation: state.showQuickDonation,
     quickDonationPersonId: state.quickDonationPersonId,
+    showEmailSidebar: state.showEmailSidebar,
+    emailRecipients: state.emailRecipients,
+    emailGroupId: state.emailGroupId,
     // Actions
     openPersonForm,
     closePersonForm,
@@ -109,6 +136,8 @@ export function useModals() {
     closeQuickNote,
     openQuickDonation,
     closeQuickDonation,
+    openEmailSidebar,
+    closeEmailSidebar,
     closeAll,
   };
 }

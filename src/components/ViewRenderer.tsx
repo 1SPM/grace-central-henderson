@@ -61,6 +61,7 @@ interface ViewRendererProps {
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   volunteerAssignments: { id: string; eventId: string; roleId: string; personId: string; status: 'confirmed' | 'pending' | 'declined' }[];
   selectedPerson?: Person;
+  onOpenEmailSidebar?: (recipients?: string[], groupId?: string) => void;
   handlers: {
     viewPerson: (id: string) => void;
     backToPeople: () => void;
@@ -137,7 +138,7 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
-    collectionMgmt, charityBasketMgmt, agents } = props;
+    collectionMgmt, charityBasketMgmt, agents, onOpenEmailSidebar } = props;
 
   const { settings } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
@@ -206,6 +207,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewAllGiving={() => setView('giving')}
           onAddToGroup={handlers.addGroupMember}
           onRemoveFromGroup={handlers.removeGroupMember}
+          onSendEmail={onOpenEmailSidebar ? () => onOpenEmailSidebar([selectedPerson.id]) : undefined}
         />
       );
 
@@ -262,6 +264,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             onCreateGroup={handlers.createGroup}
             onAddMember={handlers.addGroupMember}
             onRemoveMember={handlers.removeGroupMember}
+            onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
           />
         );
 

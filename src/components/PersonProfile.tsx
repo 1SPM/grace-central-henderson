@@ -40,6 +40,7 @@ interface PersonProfileProps {
   onViewAllGiving?: () => void;
   onAddToGroup?: (groupId: string, personId: string) => void;
   onRemoveFromGroup?: (groupId: string, personId: string) => void;
+  onSendEmail?: () => void;
 }
 
 const interactionTypes = [
@@ -73,6 +74,7 @@ export function PersonProfile({
   onViewAllGiving,
   onAddToGroup,
   onRemoveFromGroup,
+  onSendEmail,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
 
@@ -263,19 +265,24 @@ export function PersonProfile({
                 </div>
                 {/* Quick Communication Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {person.email && (
+                  {person.email && onSendEmail && (
                     <button
-                      onClick={() => setShowEmailModal(true)}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                        integrationStatus.email
-                          ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20'
-                          : 'bg-gray-100 dark:bg-dark-800 text-gray-400 dark:text-dark-500 cursor-not-allowed'
-                      }`}
-                      disabled={!integrationStatus.email}
-                      title={integrationStatus.email ? 'Send Email' : 'Configure email in Settings'}
+                      onClick={onSendEmail}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20"
+                      title="Compose email with templates"
                     >
                       <Mail size={16} />
-                      Send Email
+                      Compose Email
+                    </button>
+                  )}
+                  {person.email && integrationStatus.email && (
+                    <button
+                      onClick={() => setShowEmailModal(true)}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20"
+                      title="Quick send email"
+                    >
+                      <Send size={16} />
+                      Quick Send
                     </button>
                   )}
                   {person.phone && (

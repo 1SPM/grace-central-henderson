@@ -9,6 +9,7 @@ import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { QuickNote } from './components/QuickNote';
 import { QuickDonationForm } from './components/QuickDonationForm';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { EmailSidebar } from './components/EmailSidebar';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -169,6 +170,7 @@ function App() {
         case 'p': e.preventDefault(); modals.openQuickPrayer(); break;
         case 'm': e.preventDefault(); modals.openQuickNote(); break;
         case 'd': e.preventDefault(); modals.openQuickDonation(); break;
+        case 'e': e.preventDefault(); modals.openEmailSidebar(); break;
         case '/': e.preventDefault(); modals.openSearch(); break;
         case 'escape': modals.closeAll(); break;
       }
@@ -246,6 +248,7 @@ function App() {
             collectionMgmt={collectionMgmt}
             charityBasketMgmt={charityBasketMgmt}
             agents={agents}
+            onOpenEmailSidebar={modals.openEmailSidebar}
           />
         </ErrorBoundary>
       </Layout>
@@ -285,6 +288,15 @@ function App() {
           onClose={modals.closeQuickDonation}
         />
       )}
+
+      <EmailSidebar
+        isOpen={modals.showEmailSidebar}
+        onClose={modals.closeEmailSidebar}
+        people={people}
+        groups={groups}
+        preselectedRecipients={modals.emailRecipients}
+        preselectedGroup={modals.emailGroupId}
+      />
 
       <PWAInstallPrompt />
     </ErrorBoundary>

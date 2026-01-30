@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Users2, MapPin, Clock, User, Plus, ChevronDown, ChevronUp, UserPlus, UserMinus, Edit2, X, Check, Search } from 'lucide-react';
+import { Users2, MapPin, Clock, User, Plus, ChevronDown, ChevronUp, UserPlus, UserMinus, Edit2, X, Check, Search, Mail } from 'lucide-react';
 import { SmallGroup, Person } from '../types';
 
 interface GroupsProps {
@@ -8,9 +8,10 @@ interface GroupsProps {
   onCreateGroup?: (group: Omit<SmallGroup, 'id'>) => void;
   onAddMember?: (groupId: string, personId: string) => void;
   onRemoveMember?: (groupId: string, personId: string) => void;
+  onEmailGroup?: (groupId: string) => void;
 }
 
-export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMember }: GroupsProps) {
+export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMember, onEmailGroup }: GroupsProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
@@ -187,6 +188,15 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {onEmailGroup && members.length > 0 && (
+                      <button
+                        onClick={() => onEmailGroup(group.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
+                      >
+                        <Mail size={16} />
+                        Email
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setAddingMemberTo(isAddingMember ? null : group.id);
