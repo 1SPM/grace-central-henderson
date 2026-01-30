@@ -54,7 +54,7 @@ INSERT INTO people (id, church_id, first_name, last_name, email, phone, status, 
 
   -- First-time givers
   ('00000000-0000-0000-0000-000000000020', '11111111-1111-1111-1111-111111111111', 'Christopher', 'Hall', 'chris.hall@email.com', '(555) 012-3457', 'regular', '1991-03-25', NULL, '2024-11-10', ARRAY['young-professional'], NULL, 'Attending for 2 months. Made first donation last week!'),
-  ('00000000-0000-0000-0000-000000000021', '11111111-1111-1111-1111-111111111111', 'Lauren', 'White', 'lauren.w@email.com', '(555) 123-4561', 'member', '1989-08-14', '2023-03-12', NULL, ARRAY['choir', 'worship-team'], NULL, 'Beautiful soprano voice. Joined choir immediately.'),
+  ('00000000-0000-0000-0000-000000000021', '11111111-1111-1111-1111-111111111111', 'Lauren', 'White', 'lauren.w@email.com', '(555) 123-4561', 'member', '1989-08-14', '2023-02-12', NULL, ARRAY['choir', 'worship-team'], NULL, 'Beautiful soprano voice. Joined choir immediately.'),
 
   -- Inactive members for re-engagement
   ('00000000-0000-0000-0000-000000000022', '11111111-1111-1111-1111-111111111111', 'Andrew', 'Clark', 'andrew.c@email.com', '(555) 234-5671', 'inactive', '1985-01-25', '2021-04-15', NULL, ARRAY[]::text[], NULL, 'Stopped attending after job change. Moved across town.'),
@@ -70,13 +70,13 @@ INSERT INTO people (id, church_id, first_name, last_name, email, phone, status, 
   ('00000000-0000-0000-0000-000000000028', '11111111-1111-1111-1111-111111111111', 'Ethan', 'Thompson', NULL, NULL, 'member', '2020-03-22', '2025-01-05', NULL, ARRAY['child', 'kids-ministry'], 'fam-thompson', 'Lisa & Marks son, age 5. In preschool class.'),
 
   -- Additional diverse members
-  ('00000000-0000-0000-0000-000000000029', '11111111-1111-1111-1111-111111111111', 'Grace', 'Williams', 'grace.w@email.com', '(555) 111-2222', 'member', '1978-05-15', '2019-03-10', NULL, ARRAY['womens-ministry', 'hospitality'], NULL, 'Hosts monthly womens brunch. Very welcoming.'),
-  ('00000000-0000-0000-0000-000000000030', '11111111-1111-1111-1111-111111111111', 'David', 'Park', 'david.park@email.com', '(555) 222-3333', 'member', '1985-09-20', '2020-07-15', NULL, ARRAY['tech-team', 'media'], NULL, 'Runs livestream. Software engineer.'),
+  ('00000000-0000-0000-0000-000000000029', '11111111-1111-1111-1111-111111111111', 'Grace', 'Williams', 'grace.w@email.com', '(555) 111-2222', 'member', '1978-05-15', '2019-02-05', NULL, ARRAY['womens-ministry', 'hospitality'], NULL, 'Hosts monthly womens brunch. Very welcoming.'),
+  ('00000000-0000-0000-0000-000000000030', '11111111-1111-1111-1111-111111111111', 'David', 'Park', 'david.park@email.com', '(555) 222-3333', 'member', '1985-09-20', '2020-02-14', NULL, ARRAY['tech-team', 'media'], NULL, 'Runs livestream. Software engineer.'),
   ('00000000-0000-0000-0000-000000000031', '11111111-1111-1111-1111-111111111111', 'Jennifer', 'Scott', 'jen.scott@email.com', '(555) 333-4444', 'regular', '1995-12-08', NULL, '2024-11-17', ARRAY['young-adult'], NULL, 'Moved to town recently. Looking for community.'),
   ('00000000-0000-0000-0000-000000000032', '11111111-1111-1111-1111-111111111111', 'William', 'Harris', 'will.harris@email.com', '(555) 444-5555', 'member', '1960-02-28', '2010-06-20', NULL, ARRAY['elder', 'teaching'], NULL, 'Retired professor. Leads adult Sunday school.'),
   ('00000000-0000-0000-0000-000000000033', '11111111-1111-1111-1111-111111111111', 'Susan', 'Harris', 'susan.harris@email.com', '(555) 444-5556', 'member', '1962-08-14', '2010-06-20', NULL, ARRAY['womens-ministry'], 'fam-harris', 'Williams wife. Active in prayer ministry.'),
   ('00000000-0000-0000-0000-000000000034', '11111111-1111-1111-1111-111111111111', 'Jason', 'Reed', 'jason.reed@email.com', '(555) 555-6666', 'visitor', '1998-04-05', NULL, '2025-01-19', ARRAY['first-time', 'young-adult'], NULL, 'College friend of Ashley. Came together last week.'),
-  ('00000000-0000-0000-0000-000000000035', '11111111-1111-1111-1111-111111111111', 'Elizabeth', 'Adams', 'liz.adams@email.com', '(555) 666-7777', 'member', '1972-11-22', '2016-04-10', NULL, ARRAY['choir', 'hospitality'], NULL, 'Alto section leader. Coordinates potlucks.')
+  ('00000000-0000-0000-0000-000000000035', '11111111-1111-1111-1111-111111111111', 'Elizabeth', 'Adams', 'liz.adams@email.com', '(555) 666-7777', 'member', '1972-11-22', '2016-02-20', NULL, ARRAY['choir', 'hospitality'], NULL, 'Alto section leader. Coordinates potlucks.')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
@@ -185,16 +185,56 @@ ON CONFLICT (id) DO NOTHING;
 -- CALENDAR EVENTS
 -- ============================================
 INSERT INTO calendar_events (id, church_id, title, description, start_date, end_date, all_day, location, category) VALUES
-  ('44444444-4444-4444-4444-444444444401', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service', '2025-01-26 10:00:00', '2025-01-26 11:30:00', false, 'Main Sanctuary', 'service'),
-  ('44444444-4444-4444-4444-444444444402', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study', '2025-01-28 19:00:00', '2025-01-28 20:30:00', false, 'Room 201', 'small-group'),
-  ('44444444-4444-4444-4444-444444444403', '11111111-1111-1111-1111-111111111111', 'Women of Grace', 'Weekly womens study', '2025-01-29 09:30:00', '2025-01-29 11:00:00', false, 'Fellowship Hall', 'small-group'),
-  ('44444444-4444-4444-4444-444444444404', '11111111-1111-1111-1111-111111111111', 'Young Adults', 'Weekly young adults gathering', '2025-01-30 19:30:00', '2025-01-30 21:00:00', false, 'Coffee House', 'small-group'),
-  ('44444444-4444-4444-4444-444444444405', '11111111-1111-1111-1111-111111111111', 'Elder Meeting', 'Monthly elders meeting', '2025-01-27 18:00:00', '2025-01-27 19:30:00', false, 'Conference Room', 'meeting'),
-  ('44444444-4444-4444-4444-444444444406', '11111111-1111-1111-1111-111111111111', 'Newcomers Lunch', 'Welcome lunch for new visitors', '2025-01-26 12:00:00', '2025-01-26 13:30:00', false, 'Fellowship Hall', 'event'),
-  ('44444444-4444-4444-4444-444444444407', '11111111-1111-1111-1111-111111111111', 'Prayer Night', 'Monthly prayer gathering', '2025-02-05 19:00:00', '2025-02-05 20:30:00', false, 'Chapel', 'service'),
-  ('44444444-4444-4444-4444-444444444408', '11111111-1111-1111-1111-111111111111', 'Membership Class', 'New members orientation', '2025-02-08 09:00:00', '2025-02-08 12:00:00', false, 'Room 105', 'event'),
-  ('44444444-4444-4444-4444-444444444409', '11111111-1111-1111-1111-111111111111', 'Marriage Matters', 'Monthly couples gathering', '2025-02-01 18:00:00', '2025-02-01 20:00:00', false, 'Family Life Center', 'small-group'),
-  ('44444444-4444-4444-4444-444444444410', '11111111-1111-1111-1111-111111111111', 'Senior Saints', 'Weekly seniors fellowship', '2025-01-30 10:00:00', '2025-01-30 11:30:00', false, 'Room 105', 'small-group')
+  -- Week of Jan 25-31, 2026
+  ('44444444-4444-4444-4444-444444444401', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service with communion', '2026-01-25 10:00:00', '2026-01-25 11:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444402', '11111111-1111-1111-1111-111111111111', 'Newcomers Lunch', 'Welcome lunch for new visitors', '2026-01-25 12:00:00', '2026-01-25 13:30:00', false, 'Fellowship Hall', 'event'),
+  ('44444444-4444-4444-4444-444444444403', '11111111-1111-1111-1111-111111111111', 'Elder Meeting', 'Monthly elders meeting', '2026-01-26 18:00:00', '2026-01-26 19:30:00', false, 'Conference Room', 'meeting'),
+  ('44444444-4444-4444-4444-444444444404', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study - Book of James', '2026-01-27 19:00:00', '2026-01-27 20:30:00', false, 'Room 201', 'small-group'),
+  ('44444444-4444-4444-4444-444444444405', '11111111-1111-1111-1111-111111111111', 'Women of Grace', 'Weekly womens study - Prayer Warriors', '2026-01-28 09:30:00', '2026-01-28 11:00:00', false, 'Fellowship Hall', 'small-group'),
+  ('44444444-4444-4444-4444-444444444406', '11111111-1111-1111-1111-111111111111', 'Youth Group', 'Wednesday night youth gathering', '2026-01-28 18:30:00', '2026-01-28 20:00:00', false, 'Youth Center', 'small-group'),
+  ('44444444-4444-4444-4444-444444444407', '11111111-1111-1111-1111-111111111111', 'Senior Saints', 'Weekly seniors fellowship and lunch', '2026-01-29 10:00:00', '2026-01-29 12:00:00', false, 'Room 105', 'small-group'),
+  ('44444444-4444-4444-4444-444444444408', '11111111-1111-1111-1111-111111111111', 'Young Adults', 'Weekly young adults gathering', '2026-01-30 19:30:00', '2026-01-30 21:00:00', false, 'Coffee House', 'small-group'),
+  ('44444444-4444-4444-4444-444444444409', '11111111-1111-1111-1111-111111111111', 'Worship Team Practice', 'Sunday service preparation', '2026-01-31 09:00:00', '2026-01-31 11:00:00', false, 'Main Sanctuary', 'meeting'),
+
+  -- Week of Feb 1-7, 2026
+  ('44444444-4444-4444-4444-444444444410', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service', '2026-02-01 10:00:00', '2026-02-01 11:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444411', '11111111-1111-1111-1111-111111111111', 'Super Bowl Fellowship', 'Watch party with food and fellowship', '2026-02-01 17:00:00', '2026-02-01 22:00:00', false, 'Family Life Center', 'event'),
+  ('44444444-4444-4444-4444-444444444412', '11111111-1111-1111-1111-111111111111', 'Deacon Meeting', 'Monthly deacons meeting', '2026-02-02 18:30:00', '2026-02-02 20:00:00', false, 'Conference Room', 'meeting'),
+  ('44444444-4444-4444-4444-444444444413', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study - Book of James', '2026-02-03 19:00:00', '2026-02-03 20:30:00', false, 'Room 201', 'small-group'),
+  ('44444444-4444-4444-4444-444444444414', '11111111-1111-1111-1111-111111111111', 'Women of Grace', 'Weekly womens study - Prayer Warriors', '2026-02-04 09:30:00', '2026-02-04 11:00:00', false, 'Fellowship Hall', 'small-group'),
+  ('44444444-4444-4444-4444-444444444415', '11111111-1111-1111-1111-111111111111', 'Youth Group', 'Wednesday night youth gathering', '2026-02-04 18:30:00', '2026-02-04 20:00:00', false, 'Youth Center', 'small-group'),
+  ('44444444-4444-4444-4444-444444444416', '11111111-1111-1111-1111-111111111111', 'Prayer Night', 'Monthly corporate prayer gathering', '2026-02-05 19:00:00', '2026-02-05 20:30:00', false, 'Chapel', 'service'),
+  ('44444444-4444-4444-4444-444444444417', '11111111-1111-1111-1111-111111111111', 'Senior Saints', 'Weekly seniors fellowship', '2026-02-05 10:00:00', '2026-02-05 12:00:00', false, 'Room 105', 'small-group'),
+  ('44444444-4444-4444-4444-444444444418', '11111111-1111-1111-1111-111111111111', 'Young Adults', 'Weekly young adults gathering', '2026-02-06 19:30:00', '2026-02-06 21:00:00', false, 'Coffee House', 'small-group'),
+  ('44444444-4444-4444-4444-444444444419', '11111111-1111-1111-1111-111111111111', 'Marriage Matters', 'Monthly couples workshop', '2026-02-07 18:00:00', '2026-02-07 20:00:00', false, 'Family Life Center', 'small-group'),
+
+  -- Week of Feb 8-14, 2026
+  ('44444444-4444-4444-4444-444444444420', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service', '2026-02-08 10:00:00', '2026-02-08 11:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444421', '11111111-1111-1111-1111-111111111111', 'Membership Class', 'New members orientation - Session 1', '2026-02-08 13:00:00', '2026-02-08 15:00:00', false, 'Room 105', 'event'),
+  ('44444444-4444-4444-4444-444444444422', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study - Book of James', '2026-02-10 19:00:00', '2026-02-10 20:30:00', false, 'Room 201', 'small-group'),
+  ('44444444-4444-4444-4444-444444444423', '11111111-1111-1111-1111-111111111111', 'Women of Grace', 'Weekly womens study - Prayer Warriors', '2026-02-11 09:30:00', '2026-02-11 11:00:00', false, 'Fellowship Hall', 'small-group'),
+  ('44444444-4444-4444-4444-444444444424', '11111111-1111-1111-1111-111111111111', 'Youth Group', 'Wednesday night youth gathering', '2026-02-11 18:30:00', '2026-02-11 20:00:00', false, 'Youth Center', 'small-group'),
+  ('44444444-4444-4444-4444-444444444425', '11111111-1111-1111-1111-111111111111', 'Senior Saints', 'Weekly seniors fellowship', '2026-02-12 10:00:00', '2026-02-12 12:00:00', false, 'Room 105', 'small-group'),
+  ('44444444-4444-4444-4444-444444444426', '11111111-1111-1111-1111-111111111111', 'Young Adults', 'Weekly young adults gathering', '2026-02-13 19:30:00', '2026-02-13 21:00:00', false, 'Coffee House', 'small-group'),
+  ('44444444-4444-4444-4444-444444444427', '11111111-1111-1111-1111-111111111111', 'Valentines Dinner', 'Couples date night dinner', '2026-02-14 18:00:00', '2026-02-14 21:00:00', false, 'Fellowship Hall', 'event'),
+
+  -- Week of Feb 15-21, 2026
+  ('44444444-4444-4444-4444-444444444428', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service', '2026-02-15 10:00:00', '2026-02-15 11:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444429', '11111111-1111-1111-1111-111111111111', 'Membership Class', 'New members orientation - Session 2', '2026-02-15 13:00:00', '2026-02-15 15:00:00', false, 'Room 105', 'event'),
+  ('44444444-4444-4444-4444-444444444430', '11111111-1111-1111-1111-111111111111', 'Finance Committee', 'Quarterly budget review', '2026-02-16 18:00:00', '2026-02-16 19:30:00', false, 'Conference Room', 'meeting'),
+  ('44444444-4444-4444-4444-444444444431', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study - Book of James', '2026-02-17 19:00:00', '2026-02-17 20:30:00', false, 'Room 201', 'small-group'),
+  ('44444444-4444-4444-4444-444444444432', '11111111-1111-1111-1111-111111111111', 'Women of Grace', 'Weekly womens study - Prayer Warriors', '2026-02-18 09:30:00', '2026-02-18 11:00:00', false, 'Fellowship Hall', 'small-group'),
+  ('44444444-4444-4444-4444-444444444433', '11111111-1111-1111-1111-111111111111', 'Community Outreach', 'Food bank volunteer day', '2026-02-21 09:00:00', '2026-02-21 13:00:00', false, 'City Food Bank', 'event'),
+
+  -- Week of Feb 22-28, 2026
+  ('44444444-4444-4444-4444-444444444434', '11111111-1111-1111-1111-111111111111', 'Sunday Service', 'Weekly worship service', '2026-02-22 10:00:00', '2026-02-22 11:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444435', '11111111-1111-1111-1111-111111111111', 'Baptism Service', 'Quarterly baptism celebration', '2026-02-22 12:30:00', '2026-02-22 13:30:00', false, 'Main Sanctuary', 'service'),
+  ('44444444-4444-4444-4444-444444444436', '11111111-1111-1111-1111-111111111111', 'Elder Meeting', 'Monthly elders meeting', '2026-02-23 18:00:00', '2026-02-23 19:30:00', false, 'Conference Room', 'meeting'),
+  ('44444444-4444-4444-4444-444444444437', '11111111-1111-1111-1111-111111111111', 'Men of Faith', 'Weekly mens Bible study - Book of James', '2026-02-24 19:00:00', '2026-02-24 20:30:00', false, 'Room 201', 'small-group'),
+  ('44444444-4444-4444-4444-444444444438', '11111111-1111-1111-1111-111111111111', 'Ash Wednesday Service', 'Beginning of Lenten season', '2026-02-25 19:00:00', '2026-02-25 20:00:00', false, 'Chapel', 'service'),
+  ('44444444-4444-4444-4444-444444444439', '11111111-1111-1111-1111-111111111111', 'Senior Saints', 'Weekly seniors fellowship', '2026-02-26 10:00:00', '2026-02-26 12:00:00', false, 'Room 105', 'small-group'),
+  ('44444444-4444-4444-4444-444444444440', '11111111-1111-1111-1111-111111111111', 'Young Adults', 'Weekly young adults gathering', '2026-02-27 19:30:00', '2026-02-27 21:00:00', false, 'Coffee House', 'small-group'),
+  ('44444444-4444-4444-4444-444444444441', '11111111-1111-1111-1111-111111111111', 'Church Work Day', 'Spring cleaning and maintenance', '2026-02-28 08:00:00', '2026-02-28 12:00:00', false, 'Church Campus', 'event')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================

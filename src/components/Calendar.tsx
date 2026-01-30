@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone, Heart } from 'lucide-react';
 import { CalendarEvent, Person } from '../types';
 
 interface RSVP {
@@ -39,6 +39,14 @@ interface BirthdayItem {
   age: number;
 }
 
+// Anniversary item type (membership anniversary)
+interface AnniversaryItem {
+  id: string;
+  person: Person;
+  date: string;
+  years: number;
+}
+
 const categoryColors: Record<string, { bg: string; text: string; border: string; dot: string }> = {
   service: { bg: 'bg-indigo-100 dark:bg-indigo-500/15', text: 'text-indigo-700 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-500/20', dot: 'bg-indigo-500' },
   meeting: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20', dot: 'bg-amber-500' },
@@ -46,6 +54,7 @@ const categoryColors: Record<string, { bg: string; text: string; border: string;
   'small-group': { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-500/20', dot: 'bg-purple-500' },
   holiday: { bg: 'bg-rose-100 dark:bg-rose-500/15', text: 'text-rose-700 dark:text-rose-400', border: 'border-rose-200 dark:border-rose-500/20', dot: 'bg-rose-500' },
   birthday: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400', border: 'border-pink-200 dark:border-pink-500/20', dot: 'bg-pink-500' },
+  anniversary: { bg: 'bg-red-100 dark:bg-red-500/15', text: 'text-red-700 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20', dot: 'bg-red-500' },
   other: { bg: 'bg-gray-100 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', border: 'border-gray-200 dark:border-dark-600', dot: 'bg-gray-500' }
 };
 
@@ -56,6 +65,7 @@ const categoryLabels: Record<string, string> = {
   'small-group': 'Small Groups',
   holiday: 'Holidays',
   birthday: 'Birthdays',
+  anniversary: 'Anniversaries',
   other: 'Other'
 };
 
@@ -105,6 +115,7 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [showBirthdays, setShowBirthdays] = useState(true);
+  const [showAnniversaries, setShowAnniversaries] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showRSVPModal, setShowRSVPModal] = useState(false);
@@ -166,6 +177,27 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
     return birthdayItems;
   }, [people, year]);
 
+  // Calculate membership anniversaries for current year
+  const anniversaries = useMemo(() => {
+    const anniversaryItems: AnniversaryItem[] = [];
+    people.forEach(person => {
+      if (person.joinDate) {
+        const joinDate = new Date(person.joinDate);
+        const thisYearAnniversary = new Date(year, joinDate.getMonth(), joinDate.getDate());
+        const years = year - joinDate.getFullYear();
+        if (years > 0) { // Only show if at least 1 year member
+          anniversaryItems.push({
+            id: `anniversary-${person.id}`,
+            person,
+            date: thisYearAnniversary.toISOString().split('T')[0],
+            years
+          });
+        }
+      }
+    });
+    return anniversaryItems;
+  }, [people, year]);
+
   // Filter events by category
   const filteredEvents = useMemo(() => {
     if (!showEvents) return [];
@@ -181,6 +213,13 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
     return birthdays;
   }, [birthdays, filterType, showBirthdays]);
 
+  // Filter anniversaries
+  const filteredAnniversaries = useMemo(() => {
+    if (!showAnniversaries) return [];
+    if (filterType === 'events') return [];
+    return anniversaries;
+  }, [anniversaries, filterType, showAnniversaries]);
+
   // Get events for a specific day
   const getEventsForDay = useCallback((day: number) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -192,6 +231,12 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return filteredBirthdays.filter(b => b.date === dateStr);
   }, [year, month, filteredBirthdays]);
+
+  // Get anniversaries for a specific day
+  const getAnniversariesForDay = useCallback((day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return filteredAnniversaries.filter(a => a.date === dateStr);
+  }, [year, month, filteredAnniversaries]);
 
   // Get upcoming events (next 30 days)
   const upcomingEvents = useMemo(() => {
@@ -223,6 +268,21 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [filteredBirthdays]);
 
+  // Get upcoming anniversaries (next 30 days)
+  const upcomingAnniversaries = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    return filteredAnniversaries
+      .filter(a => {
+        const anniversaryDate = new Date(a.date);
+        return anniversaryDate >= now && anniversaryDate <= thirtyDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredAnniversaries]);
+
   // RSVP lookup
   const rsvpsByEvent = useMemo(() => {
     const map = new Map<string, RSVP[]>();
@@ -252,12 +312,12 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
 
   // Category counts
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { birthday: birthdays.length };
+    const counts: Record<string, number> = { birthday: birthdays.length, anniversary: anniversaries.length };
     events.forEach(e => {
       counts[e.category] = (counts[e.category] || 0) + 1;
     });
     return counts;
-  }, [events]);
+  }, [events, birthdays.length, anniversaries.length]);
 
   // Navigation
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
@@ -384,7 +444,7 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Calendar / Events</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">
-            {events.length} events · {birthdays.length} birthdays this year
+            {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
           </p>
         </div>
         {onAddEvent && (
@@ -427,6 +487,18 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
             <span className="text-sm font-medium text-gray-700 dark:text-dark-300 flex items-center gap-1.5">
               <Cake size={14} className="text-pink-500" />
               Birthdays ({birthdays.length})
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showAnniversaries}
+              onChange={(e) => setShowAnniversaries(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-red-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300 flex items-center gap-1.5">
+              <Heart size={14} className="text-red-500" />
+              Anniversaries ({anniversaries.length})
             </span>
           </label>
         </div>
@@ -515,8 +587,9 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
               {calendarDays.map((day, i) => {
                 const dayEvents = day !== null ? getEventsForDay(day) : [];
                 const dayBirthdays = day !== null ? getBirthdaysForDay(day) : [];
+                const dayAnniversaries = day !== null ? getAnniversariesForDay(day) : [];
                 const isTodayDay = day !== null && isToday(day);
-                const totalItems = dayEvents.length + dayBirthdays.length;
+                const totalItems = dayEvents.length + dayBirthdays.length + dayAnniversaries.length;
                 const maxVisible = 3;
                 let shown = 0;
                 return (
@@ -551,8 +624,23 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                               </button>
                             );
                           })}
+                          {/* Show anniversaries */}
+                          {shown < maxVisible && dayAnniversaries.slice(0, maxVisible - shown).map((anniversary) => {
+                            shown++;
+                            const colors = categoryColors.anniversary;
+                            return (
+                              <button
+                                key={anniversary.id}
+                                onClick={() => onViewPerson?.(anniversary.person.id)}
+                                className={`w-full text-left px-1.5 py-0.5 text-[10px] font-medium rounded truncate ${colors.bg} ${colors.text} flex items-center gap-1`}
+                              >
+                                <Heart size={8} />
+                                {anniversary.person.firstName}
+                              </button>
+                            );
+                          })}
                           {/* Show events */}
-                          {dayEvents.slice(0, maxVisible - shown).map((event) => {
+                          {shown < maxVisible && dayEvents.slice(0, maxVisible - shown).map((event) => {
                             shown++;
                             const colors = categoryColors[event.category] || categoryColors.other;
                             return (
@@ -630,6 +718,71 @@ export function Calendar({ events, people, rsvps, onRSVP, onAddEvent, onUpdateEv
                             {birthday.person.phone && (
                               <a
                                 href={`tel:${birthday.person.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Phone size={10} />
+                                Call
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Anniversaries */}
+          {showAnniversaries && upcomingAnniversaries.length > 0 && (
+            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-red-50 dark:bg-red-500/10">
+                <div className="flex items-center gap-2">
+                  <Heart className="text-red-500" size={18} />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-dark-100">Member Anniversaries</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
+                  </div>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[250px] overflow-y-auto">
+                {upcomingAnniversaries.map((anniversary) => {
+                  const anniversaryDate = new Date(anniversary.date);
+                  return (
+                    <div
+                      key={anniversary.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors cursor-pointer"
+                      onClick={() => onViewPerson?.(anniversary.person.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 font-medium text-sm">
+                          {anniversary.person.firstName[0]}{anniversary.person.lastName[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                            {anniversary.person.firstName} {anniversary.person.lastName}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
+                            {anniversaryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            <span className="mx-1">·</span>
+                            {anniversary.years} year{anniversary.years !== 1 ? 's' : ''} as member
+                          </p>
+                          <div className="flex items-center gap-3 mt-2">
+                            {anniversary.person.email && (
+                              <a
+                                href={`mailto:${anniversary.person.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Mail size={10} />
+                                Email
+                              </a>
+                            )}
+                            {anniversary.person.phone && (
+                              <a
+                                href={`tel:${anniversary.person.phone}`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
                               >
