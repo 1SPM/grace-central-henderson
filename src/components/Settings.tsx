@@ -265,6 +265,7 @@ export function Settings() {
 
   return (
     <div className="p-8">
+      <div className="max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Settings</h1>
         <p className="text-gray-500 dark:text-dark-400 mt-1">Manage your GRACE CRM configuration</p>
@@ -729,6 +730,7 @@ export function Settings() {
           </div>
           <Church size={48} className="opacity-20" />
         </div>
+      </div>
       </div>
 
       {/* Email Config Modal */}
