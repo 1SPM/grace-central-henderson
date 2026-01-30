@@ -105,7 +105,19 @@ export interface CalendarEvent {
   attendees?: string[];
 }
 
-export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep';
+export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families';
+
+// Family/Household type for grouping
+export interface Family {
+  id: string;
+  name: string;
+  members: Person[];
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  headOfHousehold?: string; // personId
+}
 
 // Member Portal Tab
 export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin';

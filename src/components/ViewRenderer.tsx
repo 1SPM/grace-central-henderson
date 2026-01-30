@@ -33,6 +33,7 @@ const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
+const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -63,6 +64,7 @@ interface ViewRendererProps {
     backToPeople: () => void;
     addPerson: () => void;
     editPerson: (person: Person) => void;
+    savePerson: (person: Omit<Person, 'id'> | Person) => Promise<void>;
     addInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => Promise<void>;
     addTask: (task: Omit<Task, 'id' | 'createdAt'>) => Promise<void>;
     toggleTask: (id: string) => Promise<void>;
@@ -258,6 +260,15 @@ export function ViewRenderer(props: ViewRendererProps) {
             onCreateGroup={handlers.createGroup}
             onAddMember={handlers.addGroupMember}
             onRemoveMember={handlers.removeGroupMember}
+          />
+        );
+
+      case 'families':
+        return (
+          <Families
+            people={people}
+            onSelectPerson={handlers.viewPerson}
+            onUpdatePerson={handlers.savePerson}
           />
         );
 
