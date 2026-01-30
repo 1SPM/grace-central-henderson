@@ -23,72 +23,46 @@ export interface CuratedNewsItem {
   url: string;
 }
 
-const NEWS_API_BASE = 'https://newsapi.org/v2';
-
 /**
- * Get the NewsAPI key from localStorage
- */
-export function getNewsApiKey(): string | null {
-  return localStorage.getItem('newsapi-key');
-}
-
-/**
- * Save the NewsAPI key to localStorage
- */
-export function setNewsApiKey(key: string): void {
-  localStorage.setItem('newsapi-key', key);
-}
-
-/**
- * Check if NewsAPI key is configured
+ * Check if news service is available (always true now - uses server-side API)
  */
 export function hasNewsApiKey(): boolean {
-  const key = getNewsApiKey();
-  return !!key && key.length > 10;
+  return true;
 }
 
 /**
- * Fetch top headlines from NewsAPI
+ * Legacy functions kept for compatibility - no longer needed
+ */
+export function getNewsApiKey(): string | null {
+  return 'server-side';
+}
+
+export function setNewsApiKey(_key: string): void {
+  // No-op: API key is now server-side
+}
+
+/**
+ * Fetch top headlines via server-side API proxy
  */
 export async function fetchNewsHeadlines(category?: string): Promise<NewsArticle[]> {
-  const apiKey = getNewsApiKey();
-
-  if (!apiKey) {
-    throw new Error('NewsAPI key not configured');
-  }
-
-  const params = new URLSearchParams({
-    apiKey,
-    country: 'us',
-    pageSize: '10',
-  });
-
+  const params = new URLSearchParams();
   if (category) {
     params.set('category', category);
   }
 
   try {
-    const response = await fetch(`${NEWS_API_BASE}/top-headlines?${params}`);
+    const url = `/api/news/headlines${params.toString() ? `?${params}` : ''}`;
+    const response = await fetch(url);
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch news');
+      throw new Error(error.error || 'Failed to fetch news');
     }
 
     const data = await response.json();
-
-    return data.articles
-      .filter((a: { title: string; description: string }) => a.title && a.title !== '[Removed]')
-      .map((article: { title: string; description: string; source: { name: string }; url: string; publishedAt: string }, index: number) => ({
-        id: `news-${Date.now()}-${index}`,
-        headline: article.title,
-        description: article.description || '',
-        source: article.source?.name || 'Unknown',
-        url: article.url,
-        publishedAt: article.publishedAt,
-      }));
+    return data.articles;
   } catch (error) {
-    console.error('NewsAPI error:', error);
+    console.error('News fetch error:', error);
     throw error;
   }
 }

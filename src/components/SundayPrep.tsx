@@ -21,9 +21,6 @@ import {
   ChevronDown,
   FileText,
   Loader2,
-  Key,
-  ExternalLink,
-  CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
 import { Person, PrayerRequest } from '../types';
@@ -31,7 +28,6 @@ import { generateAIText } from '../lib/services/ai';
 import {
   fetchCuratedNews,
   hasNewsApiKey,
-  setNewsApiKey,
   fallbackNewsItems,
   CuratedNewsItem,
 } from '../lib/services/news';
@@ -158,8 +154,6 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
   const [isLoadingNews, setIsLoadingNews] = useState(false);
   const [expandingSection, setExpandingSection] = useState<string | null>(null);
   const [isGeneratingFullSermon, setIsGeneratingFullSermon] = useState(false);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
   const [newsError, setNewsError] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -224,15 +218,6 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     }
 
     setIsLoadingNews(false);
-  };
-
-  const handleSaveApiKey = () => {
-    if (apiKeyInput.trim()) {
-      setNewsApiKey(apiKeyInput.trim());
-      setShowApiKeyModal(false);
-      setApiKeyInput('');
-      refreshNews();
-    }
   };
 
   // Add item from sidebar to sermon builder
@@ -561,38 +546,16 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setShowApiKeyModal(true)}
-                      className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
-                      title={hasNewsApiKey() ? 'Update API Key' : 'Configure NewsAPI'}
-                    >
-                      <Key size={14} className={hasNewsApiKey() ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-dark-500'} />
-                    </button>
-                    <button
-                      onClick={refreshNews}
-                      disabled={isLoadingNews}
-                      className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
-                      title="Refresh news"
-                    >
-                      <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* API Key prompt if not configured */}
-              {!hasNewsApiKey() && (
-                <div className="px-3 py-2 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-100 dark:border-amber-500/20">
                   <button
-                    onClick={() => setShowApiKeyModal(true)}
-                    className="w-full flex items-center justify-center gap-2 text-xs text-amber-700 dark:text-amber-400 hover:underline"
+                    onClick={refreshNews}
+                    disabled={isLoadingNews}
+                    className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
+                    title="Refresh news"
                   >
-                    <Key size={12} />
-                    Add NewsAPI key for live news with AI curation
+                    <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
-              )}
+              </div>
 
               {/* Error message */}
               {newsError && (
@@ -874,94 +837,6 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         </div>
       </div>
 
-      {/* NewsAPI Key Modal */}
-      {showApiKeyModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 no-print">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md shadow-2xl">
-            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                  <Key size={20} className="text-cyan-600 dark:text-cyan-400" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900 dark:text-dark-100">
-                    Configure NewsAPI
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
-                    Get live news with AI-powered Biblical connections
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                  NewsAPI Key
-                </label>
-                <input
-                  type="password"
-                  value={apiKeyInput}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
-                  placeholder="Enter your NewsAPI key..."
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-
-              {hasNewsApiKey() && (
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <CheckCircle2 size={16} />
-                  API key is currently configured
-                </div>
-              )}
-
-              <div className="bg-gray-50 dark:bg-dark-800 rounded-xl p-3 space-y-2">
-                <p className="text-xs font-medium text-gray-700 dark:text-dark-300">
-                  How to get a free API key:
-                </p>
-                <ol className="text-xs text-gray-500 dark:text-dark-400 space-y-1 list-decimal list-inside">
-                  <li>Visit newsapi.org and create a free account</li>
-                  <li>Copy your API key from the dashboard</li>
-                  <li>Paste it above (free tier: 100 requests/day)</li>
-                </ol>
-                <a
-                  href="https://newsapi.org/register"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:underline mt-2"
-                >
-                  <ExternalLink size={12} />
-                  Get your free API key
-                </a>
-              </div>
-
-              <p className="text-xs text-gray-400 dark:text-dark-500">
-                Your API key is stored locally and never sent to our servers.
-              </p>
-            </div>
-
-            <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowApiKeyModal(false);
-                  setApiKeyInput('');
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveApiKey}
-                disabled={!apiKeyInput.trim()}
-                className="px-4 py-2 bg-cyan-600 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <CheckCircle2 size={16} />
-                Save & Fetch News
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
