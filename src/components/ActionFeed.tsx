@@ -180,8 +180,8 @@ export function ActionFeed({
     return 'later';
   };
 
-  // Build feed items
-  const feedItems = useMemo(() => {
+  // Build all feed items (unfiltered by type)
+  const allItems = useMemo(() => {
     const items: FeedItem[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -197,91 +197,85 @@ export function ActionFeed({
     const personMap = new Map(people.map(p => [p.id, p]));
 
     // Add tasks
-    if (filter === 'all' || filter === 'tasks') {
-      tasks.forEach(task => {
-        if (task.completed && !showCompleted) return;
-        if (task.completed) return;
+    tasks.forEach(task => {
+      if (task.completed && !showCompleted) return;
+      if (task.completed) return;
 
-        const dueDate = new Date(task.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        const timeGroup = getTimeGroup(dueDate, today, tomorrow, nextWeek);
-        const person = task.personId ? personMap.get(task.personId) : undefined;
+      const dueDate = new Date(task.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      const timeGroup = getTimeGroup(dueDate, today, tomorrow, nextWeek);
+      const person = task.personId ? personMap.get(task.personId) : undefined;
 
-        let priority: FeedItem['priority'] = task.priority;
-        if (timeGroup === 'overdue') priority = 'urgent';
+      let priority: FeedItem['priority'] = task.priority;
+      if (timeGroup === 'overdue') priority = 'urgent';
 
-        items.push({
-          id: `task-${task.id}`,
-          type: 'task',
-          title: task.title,
-          subtitle: person ? `${person.firstName} ${person.lastName}` : `Due ${dueDate.toLocaleDateString()}`,
-          priority,
-          person,
-          task,
-          dueDate,
-          actionLabel: 'Complete',
-          timeGroup,
-        });
+      items.push({
+        id: `task-${task.id}`,
+        type: 'task',
+        title: task.title,
+        subtitle: person ? `${person.firstName} ${person.lastName}` : `Due ${dueDate.toLocaleDateString()}`,
+        priority,
+        person,
+        task,
+        dueDate,
+        actionLabel: 'Complete',
+        timeGroup,
       });
-    }
+    });
 
     // Add upcoming birthdays (next 7 days)
-    if (filter === 'all' || filter === 'birthdays') {
-      people.forEach(person => {
-        if (!person.birthDate) return;
+    people.forEach(person => {
+      if (!person.birthDate) return;
 
-        const bday = new Date(person.birthDate);
-        const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+      const bday = new Date(person.birthDate);
+      const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
 
-        if (thisYearBday < today) {
-          thisYearBday.setFullYear(thisYearBday.getFullYear() + 1);
-        }
+      if (thisYearBday < today) {
+        thisYearBday.setFullYear(thisYearBday.getFullYear() + 1);
+      }
 
-        if (thisYearBday >= today && thisYearBday <= nextWeek) {
-          const timeGroup = getTimeGroup(thisYearBday, today, tomorrow, nextWeek);
+      if (thisYearBday >= today && thisYearBday <= nextWeek) {
+        const timeGroup = getTimeGroup(thisYearBday, today, tomorrow, nextWeek);
 
-          items.push({
-            id: `birthday-${person.id}`,
-            type: 'birthday',
-            title: `${person.firstName} ${person.lastName}'s Birthday`,
-            subtitle: timeGroup === 'today' ? 'Today!' : timeGroup === 'tomorrow' ? 'Tomorrow' : thisYearBday.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
-            priority: timeGroup === 'today' ? 'high' : 'medium',
-            person,
-            dueDate: thisYearBday,
-            actionLabel: 'Send wishes',
-            timeGroup,
-          });
-        }
-      });
-    }
+        items.push({
+          id: `birthday-${person.id}`,
+          type: 'birthday',
+          title: `${person.firstName} ${person.lastName}'s Birthday`,
+          subtitle: timeGroup === 'today' ? 'Today!' : timeGroup === 'tomorrow' ? 'Tomorrow' : thisYearBday.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+          priority: timeGroup === 'today' ? 'high' : 'medium',
+          person,
+          dueDate: thisYearBday,
+          actionLabel: 'Send wishes',
+          timeGroup,
+        });
+      }
+    });
 
     // Add visitors needing follow-up
-    if (filter === 'all' || filter === 'visitors') {
-      people
-        .filter(p => p.status === 'visitor')
-        .forEach(person => {
-          const visitDate = person.firstVisit ? new Date(person.firstVisit) : null;
-          const daysSinceVisit = visitDate
-            ? Math.floor((today.getTime() - visitDate.getTime()) / (1000 * 60 * 60 * 24))
-            : null;
+    people
+      .filter(p => p.status === 'visitor')
+      .forEach(person => {
+        const visitDate = person.firstVisit ? new Date(person.firstVisit) : null;
+        const daysSinceVisit = visitDate
+          ? Math.floor((today.getTime() - visitDate.getTime()) / (1000 * 60 * 60 * 24))
+          : null;
 
-          // Visitors are treated as "today" priority
-          items.push({
-            id: `visitor-${person.id}`,
-            type: 'visitor',
-            title: `Follow up with ${person.firstName} ${person.lastName}`,
-            subtitle: daysSinceVisit !== null
-              ? daysSinceVisit === 0
-                ? 'Visited today'
-                : `Visited ${daysSinceVisit} day${daysSinceVisit > 1 ? 's' : ''} ago`
-              : 'New visitor',
-            priority: daysSinceVisit !== null && daysSinceVisit > 7 ? 'high' : 'medium',
-            person,
-            actionLabel: 'Reach out',
-            timeGroup: daysSinceVisit !== null && daysSinceVisit > 7 ? 'overdue' : 'today',
-          });
+        // Visitors are treated as "today" priority
+        items.push({
+          id: `visitor-${person.id}`,
+          type: 'visitor',
+          title: `Follow up with ${person.firstName} ${person.lastName}`,
+          subtitle: daysSinceVisit !== null
+            ? daysSinceVisit === 0
+              ? 'Visited today'
+              : `Visited ${daysSinceVisit} day${daysSinceVisit > 1 ? 's' : ''} ago`
+            : 'New visitor',
+          priority: daysSinceVisit !== null && daysSinceVisit > 7 ? 'high' : 'medium',
+          person,
+          actionLabel: 'Reach out',
+          timeGroup: daysSinceVisit !== null && daysSinceVisit > 7 ? 'overdue' : 'today',
         });
-    }
+      });
 
     // Sort by priority within each time group
     const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
@@ -294,7 +288,13 @@ export function ActionFeed({
 
     // Filter out dismissed and snoozed items
     return items.filter(item => !dismissedItems.has(item.id) && !snoozedIds.has(item.id));
-  }, [people, tasks, filter, showCompleted, dismissedItems, snoozedItems]);
+  }, [people, tasks, showCompleted, dismissedItems, snoozedItems]);
+
+  // Filter items by current filter tab
+  const feedItems = useMemo(() => {
+    if (filter === 'all') return allItems;
+    return allItems.filter(item => item.type === filter.slice(0, -1) as FeedItem['type']);
+  }, [allItems, filter]);
 
   // Group items by time
   const groupedItems = useMemo(() => {
@@ -467,11 +467,11 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
   };
 
   const counts = useMemo(() => ({
-    all: feedItems.length,
-    tasks: feedItems.filter(i => i.type === 'task').length,
-    birthdays: feedItems.filter(i => i.type === 'birthday').length,
-    visitors: feedItems.filter(i => i.type === 'visitor').length,
-  }), [feedItems]);
+    all: allItems.length,
+    tasks: allItems.filter(i => i.type === 'task').length,
+    birthdays: allItems.filter(i => i.type === 'birthday').length,
+    visitors: allItems.filter(i => i.type === 'visitor').length,
+  }), [allItems]);
 
   const filterConfig = {
     all: { icon: Zap, color: 'violet' },
