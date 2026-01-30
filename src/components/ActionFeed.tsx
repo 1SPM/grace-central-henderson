@@ -29,6 +29,7 @@ import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
 import { generateAIText } from '../lib/services/ai';
 import { useChurchSettings } from '../hooks/useChurchSettings';
+import { useAISettings } from '../hooks/useAISettings';
 
 interface ActionFeedProps {
   people: Person[];
@@ -89,6 +90,7 @@ export function ActionFeed({
   onSelectPerson,
 }: ActionFeedProps) {
   const { settings: churchSettings } = useChurchSettings();
+  const { settings: aiSettings } = useAISettings();
   const churchName = churchSettings?.profile?.name || 'Our Church';
 
   const [filter, setFilter] = useState<FeedFilter>('all');
@@ -914,23 +916,25 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             </div>
 
             <div className="p-4 space-y-4">
-              <button
-                onClick={handleAIDraft}
-                disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 transition-all"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Generate with AI
-                  </>
-                )}
-              </button>
+              {aiSettings.personalizedMessages && (
+                <button
+                  onClick={handleAIDraft}
+                  disabled={isGenerating}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={18} />
+                      Generate with AI
+                    </>
+                  )}
+                </button>
+              )}
 
               {composeModal.type === 'email' ? (
                 <>

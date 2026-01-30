@@ -17,7 +17,12 @@ import {
   Plus,
   Trash2,
   Clock,
+  Sparkles,
+  MapPin,
+  ToggleLeft,
+  ToggleRight,
 } from 'lucide-react';
+import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 
@@ -157,6 +162,7 @@ function PasswordInput({
 export function Settings() {
   const { status, saveIntegrations } = useIntegrations();
   const { settings: churchSettings, saveProfile, isLoading: settingsLoading } = useChurchSettings();
+  const { settings: aiSettings, toggleSetting, enableAll, disableAll } = useAISettings();
 
   // Church profile state
   const [churchProfile, setChurchProfile] = useState({
@@ -310,6 +316,79 @@ export function Settings() {
             onConfigure={() => setShowAuthConfig(true)}
           />
         </div>
+      </div>
+
+      {/* AI Features Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
+              <Sparkles className="text-violet-500" size={20} />
+              AI Features
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
+              Control which AI-powered features are enabled
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={enableAll}
+              className="px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+            >
+              Enable All
+            </button>
+            <button
+              onClick={disableAll}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-dark-800 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700"
+            >
+              Disable All
+            </button>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+          {AI_FEATURES.map((feature) => {
+            const isEnabled = aiSettings[feature.id as keyof AISettings];
+            return (
+              <div
+                key={feature.id}
+                className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors"
+              >
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-gray-900 dark:text-dark-100">
+                      {feature.name}
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 rounded-full">
+                      <MapPin size={10} />
+                      {feature.location}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
+                    {feature.description}
+                  </p>
+                </div>
+                <button
+                  onClick={() => toggleSetting(feature.id as keyof AISettings)}
+                  className={`flex-shrink-0 transition-colors ${
+                    isEnabled
+                      ? 'text-emerald-500 hover:text-emerald-600'
+                      : 'text-gray-300 dark:text-dark-600 hover:text-gray-400 dark:hover:text-dark-500'
+                  }`}
+                  aria-label={`Toggle ${feature.name}`}
+                >
+                  {isEnabled ? (
+                    <ToggleRight size={32} strokeWidth={1.5} />
+                  ) : (
+                    <ToggleLeft size={32} strokeWidth={1.5} />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-dark-500 mt-2">
+          AI features require a configured Gemini API key. Disabling features will hide their UI elements.
+        </p>
       </div>
 
       {/* Church Settings */}

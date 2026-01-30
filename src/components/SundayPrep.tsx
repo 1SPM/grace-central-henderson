@@ -31,6 +31,7 @@ import {
   fallbackNewsItems,
   CuratedNewsItem,
 } from '../lib/services/news';
+import { useAISettings } from '../hooks/useAISettings';
 
 interface SundayPrepProps {
   people: Person[];
@@ -135,6 +136,7 @@ const sectionTypeConfig = {
 };
 
 export function SundayPrep({ people, prayers }: SundayPrepProps) {
+  const { settings: aiSettings } = useAISettings();
   const [sermonTitle, setSermonTitle] = useState(() =>
     localStorage.getItem('sermon-title') || ''
   );
@@ -166,12 +168,11 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     localStorage.setItem('sermon-sections', JSON.stringify(sections));
   }, [sections]);
 
-  // Load news on mount if API key is configured
+  // Load news on mount and when AI settings change
   useEffect(() => {
-    if (hasNewsApiKey()) {
-      refreshNews();
-    }
-  }, []);
+    refreshNews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiSettings.newsCuration]);
 
   // Get upcoming birthdays (next 7 days)
   const upcomingBirthdays = people.filter(p => {
@@ -197,6 +198,12 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
   const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 5);
 
   const refreshNews = async () => {
+    // Skip AI news curation if disabled
+    if (!aiSettings.newsCuration) {
+      setNewsItems([...fallbackNewsItems].sort(() => Math.random() - 0.5));
+      return;
+    }
+
     setIsLoadingNews(true);
     setNewsError(null);
 
@@ -546,22 +553,24 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                   <div className="flex items-center gap-2">
                     <Newspaper size={16} className="text-cyan-600 dark:text-cyan-400" />
                     <span className="text-sm font-medium text-gray-900 dark:text-dark-100">
-                      {hasNewsApiKey() ? 'Live News' : 'Trending Topics'}
+                      {aiSettings.newsCuration && hasNewsApiKey() ? 'Curated News' : 'Sermon Topics'}
                     </span>
-                    {hasNewsApiKey() && (
+                    {aiSettings.newsCuration && hasNewsApiKey() && (
                       <span className="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 rounded-full font-medium">
-                        LIVE
+                        AI
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={refreshNews}
-                    disabled={isLoadingNews}
-                    className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
-                    title="Refresh news"
-                  >
-                    <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
-                  </button>
+                  {aiSettings.newsCuration && (
+                    <button
+                      onClick={refreshNews}
+                      disabled={isLoadingNews}
+                      className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
+                      title="Refresh news"
+                    >
+                      <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -693,27 +702,31 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                 placeholder="Enter Sermon Title..."
                 className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
-              <button
-                onClick={generateFullSermon}
-                disabled={isGeneratingFullSermon}
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {isGeneratingFullSermon ? (
-                  <>
-                    <Loader2 size={22} className="animate-spin" />
-                    Generating Your Sermon...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={22} />
-                    Generate Full Sermon with AI
-                  </>
-                )}
-              </button>
-              {!sermonTitle.trim() && (
-                <p className="text-xs text-center text-gray-400 dark:text-dark-500">
-                  Or leave blank and AI will choose a topic for you
-                </p>
+              {aiSettings.sermonGenerator && (
+                <>
+                  <button
+                    onClick={generateFullSermon}
+                    disabled={isGeneratingFullSermon}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {isGeneratingFullSermon ? (
+                      <>
+                        <Loader2 size={22} className="animate-spin" />
+                        Generating Your Sermon...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={22} />
+                        Generate Full Sermon with AI
+                      </>
+                    )}
+                  </button>
+                  {!sermonTitle.trim() && (
+                    <p className="text-xs text-center text-gray-400 dark:text-dark-500">
+                      Or leave blank and AI will choose a topic for you
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -781,18 +794,20 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                             >
                               <ChevronDown size={14} className="text-gray-500 dark:text-dark-400" />
                             </button>
-                            <button
-                              onClick={() => expandWithAI(section.id)}
-                              disabled={expandingSection === section.id}
-                              className="p-1.5 hover:bg-white/50 dark:hover:bg-dark-700 rounded-lg transition-colors"
-                              title="Expand with AI"
-                            >
-                              {expandingSection === section.id ? (
-                                <Loader2 size={14} className="text-violet-500 animate-spin" />
-                              ) : (
-                                <Sparkles size={14} className="text-violet-500" />
-                              )}
-                            </button>
+                            {aiSettings.sectionExpander && (
+                              <button
+                                onClick={() => expandWithAI(section.id)}
+                                disabled={expandingSection === section.id}
+                                className="p-1.5 hover:bg-white/50 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                                title="Expand with AI"
+                              >
+                                {expandingSection === section.id ? (
+                                  <Loader2 size={14} className="text-violet-500 animate-spin" />
+                                ) : (
+                                  <Sparkles size={14} className="text-violet-500" />
+                                )}
+                              </button>
+                            )}
                             <button
                               onClick={() => deleteSection(section.id)}
                               className="p-1.5 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors"
