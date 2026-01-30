@@ -2,16 +2,14 @@ import { useState } from 'react';
 import {
   Heart,
   DollarSign,
-  CreditCard,
-  Building2,
   Repeat,
   CheckCircle,
-  AlertCircle,
   ArrowLeft,
   Gift,
   Sparkles,
 } from 'lucide-react';
 import { GIVING_FUNDS, RECURRING_INTERVALS } from '../lib/services/payments';
+import { StripeCheckoutForm } from './StripeCheckoutForm';
 
 interface OnlineGivingFormProps {
   churchName?: string;
@@ -40,8 +38,6 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [coverFees, setCoverFees] = useState(false);
 
   const numericAmount = parseFloat(amount) || 0;
@@ -66,29 +62,16 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
     }
   };
 
-  const handleSubmit = async () => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // Simulate payment processing
-      // In production, this would call the payment service
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setStep('success');
-      onSuccess?.({
-        amount: totalAmount,
-        fund,
-        isRecurring,
-        frequency: isRecurring ? frequency : undefined,
-        email,
-        name: `${firstName} ${lastName}`,
-      });
-    } catch {
-      setError('Payment processing failed. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
+  const handlePaymentSuccess = (_paymentId: string) => {
+    setStep('success');
+    onSuccess?.({
+      amount: totalAmount,
+      fund,
+      isRecurring,
+      frequency: isRecurring ? frequency : undefined,
+      email,
+      name: `${firstName} ${lastName}`,
+    });
   };
 
   const renderAmountStep = () => (
@@ -352,46 +335,18 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl">
-          <AlertCircle size={20} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Payment Options */}
-      <div className="space-y-3">
-        <button
-          onClick={handleSubmit}
-          disabled={isProcessing}
-          className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:from-blue-600 hover:to-indigo-700 transition-all disabled:opacity-50"
-        >
-          {isProcessing ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard size={20} />
-              Pay with Card
-            </>
-          )}
-        </button>
-
-        <button
-          onClick={handleSubmit}
-          disabled={isProcessing}
-          className="w-full py-4 bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-dark-700 transition-all disabled:opacity-50"
-        >
-          <Building2 size={20} />
-          Pay with Bank Account (ACH)
-        </button>
-      </div>
-
-      <p className="text-center text-xs text-gray-400 dark:text-dark-500">
-        Your payment is secure and encrypted. By continuing, you agree to our terms.
-      </p>
+      {/* Stripe Checkout Form */}
+      <StripeCheckoutForm
+        amount={totalAmount}
+        fund={fund}
+        email={email}
+        name={`${firstName} ${lastName}`}
+        isRecurring={isRecurring}
+        frequency={frequency}
+        coverFees={coverFees}
+        onSuccess={handlePaymentSuccess}
+        onError={(err) => console.error('Payment error:', err)}
+      />
     </div>
   );
 
