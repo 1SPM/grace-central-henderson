@@ -181,6 +181,7 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
   const [newsItems, setNewsItems] = useState<NewsItem[]>(defaultNewsItems);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
   const [expandingSection, setExpandingSection] = useState<string | null>(null);
+  const [isGeneratingFullSermon, setIsGeneratingFullSermon] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Save to localStorage
@@ -291,6 +292,101 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
     }
 
     setExpandingSection(null);
+  };
+
+  const generateFullSermon = async () => {
+    if (!sermonTitle.trim()) {
+      alert('Please enter a sermon title first');
+      return;
+    }
+
+    setIsGeneratingFullSermon(true);
+
+    // Gather context from the congregation
+    const birthdayContext = upcomingBirthdays.length > 0
+      ? `Birthdays this week: ${upcomingBirthdays.map(p => p.firstName).join(', ')}`
+      : '';
+    const visitorContext = recentVisitors.length > 0
+      ? `New visitors to welcome: ${recentVisitors.map(p => p.firstName).join(', ')}`
+      : '';
+    const prayerContext = activePrayers.length > 0
+      ? `Prayer needs: ${activePrayers.map(p => p.content.substring(0, 50)).join('; ')}`
+      : '';
+
+    const prompt = `Generate a complete church sermon outline for the topic: "${sermonTitle}"
+
+Context about the congregation:
+${birthdayContext}
+${visitorContext}
+${prayerContext}
+
+Create a warm, engaging sermon with the following sections. For each section, write 2-3 paragraphs of actual sermon content (not just bullet points). Total should be around 800-1000 words.
+
+Format your response EXACTLY like this, with these exact headers:
+
+[OPENING]
+(Write an engaging opening that draws people in, maybe referencing current events or relatable experiences)
+
+[SCRIPTURE]
+(Include a relevant Bible passage with the reference, and explain its context)
+
+[POINT1]
+(First main teaching point with explanation and examples)
+
+[POINT2]
+(Second main teaching point with explanation and examples)
+
+[APPLICATION]
+(Practical ways the congregation can apply this message in their daily lives)
+
+[CLOSING]
+(A powerful closing with a call to action or prayer)
+
+${upcomingBirthdays.length > 0 ? '\n[ANNOUNCEMENTS]\n(Mention the birthdays and any visitors to welcome)' : ''}
+
+Make the tone warm, pastoral, and engaging. Include relevant scripture references throughout.`;
+
+    try {
+      const result = await generateAIText({ prompt, maxTokens: 2000 });
+
+      if (result.success && result.text) {
+        const text = result.text;
+
+        // Parse the sections from the response
+        const newSections: SermonSection[] = [];
+
+        const sectionPatterns = [
+          { pattern: /\[OPENING\]\s*([\s\S]*?)(?=\[|$)/i, type: 'opening' as const, title: 'Opening' },
+          { pattern: /\[SCRIPTURE\]\s*([\s\S]*?)(?=\[|$)/i, type: 'scripture' as const, title: 'Scripture Reading' },
+          { pattern: /\[POINT1\]\s*([\s\S]*?)(?=\[|$)/i, type: 'point' as const, title: 'Main Point 1' },
+          { pattern: /\[POINT2\]\s*([\s\S]*?)(?=\[|$)/i, type: 'point' as const, title: 'Main Point 2' },
+          { pattern: /\[APPLICATION\]\s*([\s\S]*?)(?=\[|$)/i, type: 'application' as const, title: 'Application' },
+          { pattern: /\[CLOSING\]\s*([\s\S]*?)(?=\[|$)/i, type: 'closing' as const, title: 'Closing' },
+          { pattern: /\[ANNOUNCEMENTS\]\s*([\s\S]*?)(?=\[|$)/i, type: 'announcement' as const, title: 'Announcements' },
+        ];
+
+        for (const { pattern, type, title } of sectionPatterns) {
+          const match = text.match(pattern);
+          if (match && match[1]?.trim()) {
+            newSections.push({
+              id: `section-${Date.now()}-${type}-${Math.random().toString(36).substr(2, 9)}`,
+              type,
+              title,
+              content: match[1].trim(),
+              sourceType: 'manual',
+            });
+          }
+        }
+
+        if (newSections.length > 0) {
+          setSections(newSections);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate sermon:', error);
+    }
+
+    setIsGeneratingFullSermon(false);
   };
 
   const handlePrint = () => {
@@ -560,8 +656,8 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
 
           {/* Right Panel - Sermon Builder Canvas */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Sermon Title */}
-            <div className="no-print">
+            {/* Sermon Title & Generate Button */}
+            <div className="no-print space-y-3">
               <input
                 type="text"
                 value={sermonTitle}
@@ -569,6 +665,28 @@ Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and in
                 placeholder="Enter Sermon Title..."
                 className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
+              <button
+                onClick={generateFullSermon}
+                disabled={isGeneratingFullSermon || !sermonTitle.trim()}
+                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isGeneratingFullSermon ? (
+                  <>
+                    <Loader2 size={22} className="animate-spin" />
+                    Generating Your Sermon...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={22} />
+                    Generate Full Sermon with AI
+                  </>
+                )}
+              </button>
+              {!sermonTitle.trim() && (
+                <p className="text-xs text-center text-gray-400 dark:text-dark-500">
+                  Enter a sermon title above to enable AI generation
+                </p>
+              )}
             </div>
 
             {/* Section Type Buttons */}
