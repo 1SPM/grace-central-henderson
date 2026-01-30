@@ -3,7 +3,37 @@
  * Export calendar events to iCal format for Google Calendar, Outlook, Apple Calendar
  */
 
-import type { CalendarEvent, RecurrenceType } from '../types';
+// Use database types which have snake_case fields
+interface CalendarEventData {
+  id: string;
+  title: string;
+  description?: string | null;
+  start_date?: string;
+  end_date?: string | null;
+  startDate?: string; // Legacy format support
+  endDate?: string; // Legacy format support
+  all_day?: boolean;
+  allDay?: boolean; // Legacy format support
+  location?: string | null;
+  category: string;
+  recurrence?: string;
+  recurrenceEndDate?: string;
+}
+
+type RecurrenceType = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly';
+
+// Helper to get the correct field value (supports both snake_case and camelCase)
+function getStartDate(event: CalendarEventData): string {
+  return event.start_date || event.startDate || '';
+}
+
+function getEndDate(event: CalendarEventData): string | undefined {
+  return event.end_date || event.endDate || undefined;
+}
+
+function isAllDay(event: CalendarEventData): boolean {
+  return event.all_day ?? event.allDay ?? false;
+}
 
 // Convert RecurrenceType to iCal RRULE
 function getRecurrenceRule(recurrence: RecurrenceType, endDate?: string): string | null {
@@ -73,22 +103,26 @@ function foldLine(line: string): string {
 }
 
 // Generate a unique ID for an event
-function generateUID(event: CalendarEvent, churchName: string): string {
+function generateUID(event: CalendarEventData, churchName: string): string {
   const sanitizedName = churchName.toLowerCase().replace(/[^a-z0-9]/g, '');
   return `${event.id}@${sanitizedName}.gracecrm`;
 }
 
 // Convert a single event to iCal VEVENT format
-function eventToVEvent(event: CalendarEvent, churchName: string): string {
+function eventToVEvent(event: CalendarEventData, churchName: string): string {
   const lines: string[] = [];
-  const startDate = new Date(event.startDate);
-  const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
+  const startDateStr = getStartDate(event);
+  const endDateStr = getEndDate(event);
+  const allDay = isAllDay(event);
+
+  const startDate = new Date(startDateStr);
+  const endDate = endDateStr ? new Date(endDateStr) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
 
   lines.push('BEGIN:VEVENT');
   lines.push(`UID:${generateUID(event, churchName)}`);
   lines.push(`DTSTAMP:${formatICalDate(new Date())}`);
 
-  if (event.allDay) {
+  if (allDay) {
     lines.push(`DTSTART;VALUE=DATE:${formatICalDate(startDate, true)}`);
     // For all-day events, end date is exclusive
     const nextDay = new Date(endDate);
@@ -110,7 +144,7 @@ function eventToVEvent(event: CalendarEvent, churchName: string): string {
   }
 
   // Add recurrence rule if applicable
-  const rrule = getRecurrenceRule(event.recurrence || 'none', event.recurrenceEndDate);
+  const rrule = getRecurrenceRule((event.recurrence || 'none') as RecurrenceType, event.recurrenceEndDate);
   if (rrule) {
     lines.push(`RRULE:${rrule}`);
   }
@@ -133,7 +167,7 @@ function eventToVEvent(event: CalendarEvent, churchName: string): string {
 
 // Generate complete iCal file content
 export function generateICalFile(
-  events: CalendarEvent[],
+  events: CalendarEventData[],
   churchName: string,
   calendarName?: string
 ): string {
@@ -160,7 +194,7 @@ export function generateICalFile(
 
 // Download iCal file
 export function downloadICalFile(
-  events: CalendarEvent[],
+  events: CalendarEventData[],
   churchName: string,
   filename?: string
 ): void {
@@ -184,15 +218,19 @@ export function generateWebcalUrl(baseUrl: string): string {
 }
 
 // Generate Google Calendar add URL for a single event
-export function generateGoogleCalendarUrl(event: CalendarEvent): string {
-  const startDate = new Date(event.startDate);
-  const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+export function generateGoogleCalendarUrl(event: CalendarEventData): string {
+  const startDateStr = getStartDate(event);
+  const endDateStr = getEndDate(event);
+  const allDay = isAllDay(event);
+
+  const startDate = new Date(startDateStr);
+  const endDate = endDateStr ? new Date(endDateStr) : new Date(startDate.getTime() + 60 * 60 * 1000);
 
   const params = new URLSearchParams();
   params.set('action', 'TEMPLATE');
   params.set('text', event.title);
 
-  if (event.allDay) {
+  if (allDay) {
     const format = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '');
     params.set('dates', `${format(startDate)}/${format(endDate)}`);
   } else {
@@ -210,7 +248,7 @@ export function generateGoogleCalendarUrl(event: CalendarEvent): string {
 
   // Add recurrence if applicable
   if (event.recurrence && event.recurrence !== 'none') {
-    const rrule = getRecurrenceRule(event.recurrence, event.recurrenceEndDate);
+    const rrule = getRecurrenceRule(event.recurrence as RecurrenceType, event.recurrenceEndDate);
     if (rrule) {
       params.set('recur', `RRULE:${rrule}`);
     }
@@ -220,9 +258,13 @@ export function generateGoogleCalendarUrl(event: CalendarEvent): string {
 }
 
 // Generate Outlook.com add URL for a single event
-export function generateOutlookUrl(event: CalendarEvent): string {
-  const startDate = new Date(event.startDate);
-  const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+export function generateOutlookUrl(event: CalendarEventData): string {
+  const startDateStr = getStartDate(event);
+  const endDateStr = getEndDate(event);
+  const allDay = isAllDay(event);
+
+  const startDate = new Date(startDateStr);
+  const endDate = endDateStr ? new Date(endDateStr) : new Date(startDate.getTime() + 60 * 60 * 1000);
 
   const params = new URLSearchParams();
   params.set('path', '/calendar/action/compose');
@@ -230,7 +272,7 @@ export function generateOutlookUrl(event: CalendarEvent): string {
   params.set('subject', event.title);
   params.set('startdt', startDate.toISOString());
   params.set('enddt', endDate.toISOString());
-  params.set('allday', event.allDay ? 'true' : 'false');
+  params.set('allday', allDay ? 'true' : 'false');
 
   if (event.description) {
     params.set('body', event.description);
