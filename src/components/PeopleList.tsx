@@ -7,6 +7,7 @@ import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
+import { CSVImportWizard } from './CSVImportWizard';
 
 type SortOption = 'name-asc' | 'name-desc' | 'status' | 'newest' | 'oldest';
 
@@ -16,7 +17,7 @@ interface PeopleListProps {
   onAddPerson: () => void;
   onBulkUpdateStatus?: (ids: string[], status: MemberStatus) => void;
   onBulkAddTag?: (ids: string[], tag: string) => void;
-  onImportCSV?: (people: Partial<Person>[]) => void;
+  onImportCSV?: (people: Partial<Person>[]) => Promise<void>;
 }
 
 const statusLabels: Record<MemberStatus, string> = {
@@ -44,9 +45,7 @@ export function PeopleList({
   const [bulkAction, setBulkAction] = useState<'status' | 'tag' | null>(null);
   const [newTag, setNewTag] = useState('');
   const [newStatus, setNewStatus] = useState<MemberStatus>('member');
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importData, setImportData] = useState('');
-  const [importError, setImportError] = useState('');
+  const [showImportWizard, setShowImportWizard] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'table'>(() => {
     const saved = localStorage.getItem('peopleViewMode');
     return (saved as 'card' | 'table') || 'card';
@@ -245,82 +244,6 @@ export function PeopleList({
     toast.success(`Exported ${selectedPeople.length} people to CSV`);
   };
 
-  const handleImportCSV = () => {
-    try {
-      setImportError('');
-      const lines = importData.trim().split('\n');
-      if (lines.length < 2) {
-        setImportError('CSV must have a header row and at least one data row');
-        return;
-      }
-
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const requiredFields = ['firstname', 'lastname'];
-      const hasRequired = requiredFields.every(f => headers.includes(f));
-
-      if (!hasRequired) {
-        setImportError('CSV must include firstName and lastName columns');
-        return;
-      }
-
-      const imported: Partial<Person>[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length !== headers.length) continue;
-
-        const person: Partial<Person> = {
-          tags: [],
-          smallGroups: []
-        };
-
-        headers.forEach((header, idx) => {
-          const value = values[idx];
-          switch (header) {
-            case 'firstname':
-              person.firstName = value;
-              break;
-            case 'lastname':
-              person.lastName = value;
-              break;
-            case 'email':
-              person.email = value;
-              break;
-            case 'phone':
-              person.phone = value;
-              break;
-            case 'status':
-              if (['visitor', 'regular', 'member', 'leader', 'inactive'].includes(value.toLowerCase())) {
-                person.status = value.toLowerCase() as MemberStatus;
-              }
-              break;
-            case 'tags':
-              person.tags = value.split(';').map(t => t.trim()).filter(Boolean);
-              break;
-          }
-        });
-
-        if (person.firstName && person.lastName) {
-          if (!person.status) person.status = 'visitor';
-          imported.push(person);
-        }
-      }
-
-      if (imported.length === 0) {
-        setImportError('No valid records found in CSV');
-        return;
-      }
-
-      if (onImportCSV) {
-        onImportCSV(imported);
-        toast.success(`Imported ${imported.length} people successfully`);
-        setShowImportModal(false);
-        setImportData('');
-      }
-    } catch {
-      setImportError('Failed to parse CSV. Please check the format.');
-    }
-  };
-
   const clearAdvancedFilters = () => {
     setTagFilter('');
     setHasEmailFilter(null);
@@ -361,7 +284,7 @@ export function PeopleList({
           <ViewToggle view={viewMode} onViewChange={handleViewModeChange} />
           {onImportCSV && (
             <button
-              onClick={() => setShowImportModal(true)}
+              onClick={() => setShowImportWizard(true)}
               className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
             >
               <Upload size={18} />
@@ -849,47 +772,12 @@ export function PeopleList({
         </div>
       )}
 
-      {/* Import CSV Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Import from CSV</h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-                Paste CSV data with columns: firstName, lastName, email, phone, status, tags
-              </p>
-            </div>
-            <div className="p-4">
-              <textarea
-                value={importData}
-                onChange={(e) => setImportData(e.target.value)}
-                placeholder={`firstName,lastName,email,phone,status,tags
-John,Doe,john@example.com,555-1234,visitor,Youth;Volunteer
-Jane,Smith,jane@example.com,555-5678,member,Women's Ministry`}
-                rows={8}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {importError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{importError}</p>
-              )}
-            </div>
-            <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex gap-3">
-              <button
-                onClick={() => { setShowImportModal(false); setImportData(''); setImportError(''); }}
-                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl text-gray-700 dark:text-dark-300 font-medium hover:bg-gray-50 dark:hover:bg-dark-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleImportCSV}
-                disabled={!importData.trim()}
-                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
-              >
-                Import
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Import CSV Wizard */}
+      {showImportWizard && onImportCSV && (
+        <CSVImportWizard
+          onImport={onImportCSV}
+          onClose={() => setShowImportWizard(false)}
+        />
       )}
     </div>
   );
