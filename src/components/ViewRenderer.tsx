@@ -34,6 +34,7 @@ const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.F
 const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
+const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -269,6 +270,14 @@ export function ViewRenderer(props: ViewRendererProps) {
             people={people}
             onSelectPerson={handlers.viewPerson}
             onUpdatePerson={handlers.savePerson}
+          />
+        );
+
+      case 'skills':
+        return (
+          <SkillsDatabase
+            people={people}
+            onViewPerson={handlers.viewPerson}
           />
         );
 
