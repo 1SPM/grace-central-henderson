@@ -36,6 +36,7 @@ const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.Sun
 const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
+const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -441,6 +442,19 @@ export function ViewRenderer(props: ViewRendererProps) {
           <div className="p-6 max-w-6xl mx-auto">
             <SundayPrep people={people} prayers={prayers} onViewPerson={handlers.viewPerson} />
           </div>
+        );
+
+      case 'event-registration':
+        return (
+          <EventRegistration
+            events={events}
+            people={people}
+            onAddEvent={handlers.addEvent}
+            onUpdateEvent={handlers.updateEvent}
+            onDeleteEvent={handlers.deleteEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('calendar')}
+          />
         );
 
       default:
