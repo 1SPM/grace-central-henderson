@@ -85,6 +85,7 @@ const viewLabels: Record<View, string> = {
   'sunday-prep': 'Sunday Prep',
   families: 'Families',
   skills: 'Skills & Talents',
+  'email-templates': 'Email Templates',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

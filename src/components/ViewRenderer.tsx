@@ -35,6 +35,7 @@ const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').th
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
+const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -408,6 +409,9 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'forms':
         return <FormBuilder onBack={() => setView('settings')} />;
+
+      case 'email-templates':
+        return <EmailTemplateBuilder onBack={() => setView('settings')} />;
 
       case 'member-portal':
       case 'member-directory':
