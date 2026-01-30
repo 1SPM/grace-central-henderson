@@ -37,7 +37,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
   { view: 'people', label: 'People', icon: <Users size={18} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-  { view: 'calendar', label: 'Events Calendar', icon: <Calendar size={18} /> },
+  { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
@@ -51,7 +51,7 @@ const viewLabels: Record<View, string> = {
   person: 'Profile',
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
-  calendar: 'Events Calendar',
+  calendar: 'Calendar / Events',
   birthdays: 'Birthdays',
   volunteers: 'Volunteers',
   groups: 'Groups',
