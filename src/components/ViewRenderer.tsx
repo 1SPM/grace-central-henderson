@@ -39,6 +39,8 @@ const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m 
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
 const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => ({ default: m.AutomatedReminders })));
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
+const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
+const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -490,6 +492,30 @@ export function ViewRenderer(props: ViewRendererProps) {
             existingGroups={groups}
             onImportPeople={handlers.importCSV}
             onBack={() => setView('people')}
+          />
+        );
+
+      case 'qr-checkin':
+        return (
+          <QRCheckIn
+            people={people}
+            events={events}
+            attendance={attendanceRecords}
+            churchName={churchName}
+            churchId={churchId}
+            onCheckIn={handlers.checkIn}
+            onBack={() => setView('attendance')}
+          />
+        );
+
+      case 'follow-up-automation':
+        return (
+          <FollowUpAutomation
+            people={people}
+            tasks={tasks}
+            interactions={interactions}
+            onAddTask={handlers.addTask}
+            onBack={() => setView('settings')}
           />
         );
 

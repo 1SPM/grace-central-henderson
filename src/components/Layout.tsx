@@ -89,6 +89,8 @@ const viewLabels: Record<View, string> = {
   'event-registration': 'Event Registration',
   'reminders': 'Automated Reminders',
   'planning-center-import': 'Planning Center Import',
+  'qr-checkin': 'QR Check-In',
+  'follow-up-automation': 'Follow-up Automation',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
