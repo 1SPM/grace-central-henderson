@@ -21,7 +21,34 @@ const categoryColors: Record<string, string> = {
   meeting: 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
   event: 'bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20',
   'small-group': 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+  holiday: 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20',
+  // New categories
+  wedding: 'bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20',
+  funeral: 'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-500/20',
+  baptism: 'bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20',
+  dedication: 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20',
+  counseling: 'bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20',
+  rehearsal: 'bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
+  outreach: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
+  class: 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/20',
   other: 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300 border-gray-200 dark:border-dark-600'
+};
+
+const categoryLabels: Record<string, string> = {
+  service: 'Service',
+  meeting: 'Meeting',
+  event: 'Event',
+  'small-group': 'Small Group',
+  holiday: 'Holiday',
+  wedding: 'Wedding',
+  funeral: 'Memorial',
+  baptism: 'Baptism',
+  dedication: 'Dedication',
+  counseling: 'Counseling',
+  rehearsal: 'Rehearsal',
+  outreach: 'Outreach',
+  class: 'Class',
+  other: 'Other'
 };
 
 export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
@@ -120,7 +147,7 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
                         )}
                       </div>
                       <span className="text-xs px-2 py-1 rounded-full bg-white/50 dark:bg-white/10">
-                        {event.category}
+                        {categoryLabels[event.category] || event.category}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 mt-3 text-sm opacity-75">
