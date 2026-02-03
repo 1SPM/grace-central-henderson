@@ -13,8 +13,10 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Accessibility,
 } from 'lucide-react';
 import { useIntegrations } from '../contexts/IntegrationsContext';
+import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
 
 interface IntegrationCardProps {
   title: string;
@@ -149,8 +151,16 @@ function PasswordInput({
   );
 }
 
+const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
+  { value: 'small', label: 'Small', preview: 'Aa' },
+  { value: 'medium', label: 'Medium', preview: 'Aa' },
+  { value: 'large', label: 'Large', preview: 'Aa' },
+  { value: 'x-large', label: 'X-Large', preview: 'Aa' },
+];
+
 export function Settings() {
   const { status, saveIntegrations } = useIntegrations();
+  const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
 
   // Modal states
   const [showEmailConfig, setShowEmailConfig] = useState(false);
@@ -262,6 +272,92 @@ export function Settings() {
             setupUrl="https://clerk.com/docs"
             onConfigure={() => setShowAuthConfig(true)}
           />
+        </div>
+      </div>
+
+      {/* Accessibility Section */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">
+          Accessibility
+        </h2>
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center">
+              <Accessibility className="text-cyan-600 dark:text-cyan-400" size={20} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-dark-100">Display Settings</h3>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Customize text size and visual preferences</p>
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
+              Font Size
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {fontSizeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setFontSize(option.value)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    accessibilitySettings.fontSize === option.value
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
+                      : 'border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600'
+                  }`}
+                >
+                  <span
+                    className={`font-semibold text-gray-900 dark:text-dark-100 ${
+                      option.value === 'small' ? 'text-sm' :
+                      option.value === 'medium' ? 'text-base' :
+                      option.value === 'large' ? 'text-lg' : 'text-xl'
+                    }`}
+                  >
+                    {option.preview}
+                  </span>
+                  <span className={`text-xs ${
+                    accessibilitySettings.fontSize === option.value
+                      ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                      : 'text-gray-500 dark:text-dark-400'
+                  }`}>
+                    {option.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 text-sm text-gray-500 dark:text-dark-400">
+              Preview: The quick brown fox jumps over the lazy dog.
+            </p>
+          </div>
+
+          {/* Other accessibility options */}
+          <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-dark-700">
+            <label className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-gray-700 dark:text-dark-300">High Contrast</span>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Increase contrast for better visibility</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={accessibilitySettings.highContrast}
+                onChange={(e) => setHighContrast(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600"
+              />
+            </label>
+            <label className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-gray-700 dark:text-dark-300">Reduce Motion</span>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Minimize animations and transitions</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={accessibilitySettings.reduceMotion}
+                onChange={(e) => setReduceMotion(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600"
+              />
+            </label>
+          </div>
         </div>
       </div>
 

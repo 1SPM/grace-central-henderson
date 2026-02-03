@@ -93,6 +93,23 @@ export interface Giving {
   note?: string;
 }
 
+// Calendar event categories
+export type EventCategory =
+  | 'service'      // Regular services
+  | 'meeting'      // Staff/committee meetings
+  | 'event'        // General church events
+  | 'small-group'  // Small group meetings
+  | 'holiday'      // Church holidays
+  | 'wedding'      // Weddings & rehearsals
+  | 'funeral'      // Funerals & memorials
+  | 'baptism'      // Baptisms
+  | 'dedication'   // Baby dedications
+  | 'counseling'   // Counseling appointments
+  | 'rehearsal'    // Music/drama rehearsals
+  | 'outreach'     // Community outreach
+  | 'class'        // Classes & training
+  | 'other';
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -101,8 +118,12 @@ export interface CalendarEvent {
   endDate?: string;
   allDay: boolean;
   location?: string;
-  category: 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
+  category: EventCategory;
   attendees?: string[];
+  // Extended fields
+  linkedEntityType?: 'wedding' | 'funeral' | 'sermon' | 'ceremony';
+  linkedEntityId?: string;
+  isPrivate?: boolean;
 }
 
 export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep';
@@ -304,4 +325,19 @@ export interface DonationTrackerFilters {
   minAmount?: number;
   maxAmount?: number;
   isRecurring?: boolean;
+}
+
+// Donation Goals
+export interface DonationGoal {
+  id: string;
+  name: string;
+  description?: string;
+  targetAmount: number;
+  currentAmount: number;
+  startDate: string;
+  endDate?: string;
+  fund?: string;
+  isPublic: boolean;
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
 }

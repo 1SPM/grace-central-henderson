@@ -18,7 +18,7 @@ interface MemberEventsPageProps {
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
 }
 
-type EventCategory = 'all' | 'service' | 'event' | 'small-group' | 'meeting';
+type FilterCategory = 'all' | 'service' | 'event' | 'small-group' | 'meeting';
 
 const categoryColors: Record<CalendarEvent['category'], { bg: string; text: string; label: string }> = {
   service: { bg: 'bg-blue-100 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', label: 'Service' },
@@ -26,11 +26,20 @@ const categoryColors: Record<CalendarEvent['category'], { bg: string; text: stri
   'small-group': { bg: 'bg-green-100 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400', label: 'Small Group' },
   meeting: { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', label: 'Meeting' },
   holiday: { bg: 'bg-red-100 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', label: 'Holiday' },
+  // New categories
+  wedding: { bg: 'bg-pink-100 dark:bg-pink-500/10', text: 'text-pink-600 dark:text-pink-400', label: 'Wedding' },
+  funeral: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400', label: 'Memorial' },
+  baptism: { bg: 'bg-sky-100 dark:bg-sky-500/10', text: 'text-sky-600 dark:text-sky-400', label: 'Baptism' },
+  dedication: { bg: 'bg-yellow-100 dark:bg-yellow-500/10', text: 'text-yellow-600 dark:text-yellow-400', label: 'Dedication' },
+  counseling: { bg: 'bg-teal-100 dark:bg-teal-500/10', text: 'text-teal-600 dark:text-teal-400', label: 'Counseling' },
+  rehearsal: { bg: 'bg-orange-100 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', label: 'Rehearsal' },
+  outreach: { bg: 'bg-emerald-100 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', label: 'Outreach' },
+  class: { bg: 'bg-cyan-100 dark:bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', label: 'Class' },
   other: { bg: 'bg-gray-100 dark:bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400', label: 'Other' },
 };
 
 export function MemberEventsPage({ events, rsvps = [], personId, onRSVP }: MemberEventsPageProps) {
-  const [filter, setFilter] = useState<EventCategory>('all');
+  const [filter, setFilter] = useState<FilterCategory>('all');
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // Get upcoming events (next 30 days)
@@ -92,7 +101,7 @@ export function MemberEventsPage({ events, rsvps = [], personId, onRSVP }: Membe
       {/* Filter */}
       <div className="mb-4 overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 pb-2">
-          {(['all', 'service', 'event', 'small-group'] as EventCategory[]).map((cat) => (
+          {(['all', 'service', 'event', 'small-group'] as FilterCategory[]).map((cat) => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}

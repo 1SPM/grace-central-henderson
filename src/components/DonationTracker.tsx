@@ -14,16 +14,65 @@ import {
   ArrowLeft,
   ChevronDown,
   BarChart3,
+  Target,
+  Calendar,
+  CheckCircle2,
+  Plus,
 } from 'lucide-react';
-import type { Giving, Person, DonationTrackerFilters } from '../types';
+import type { Giving, Person, DonationTrackerFilters, DonationGoal } from '../types';
 
 interface DonationTrackerProps {
   giving: Giving[];
   people: Person[];
+  goals?: DonationGoal[];
   onBack?: () => void;
   onViewMemberStats?: () => void;
   onViewPerson?: (personId: string) => void;
+  onAddGoal?: () => void;
 }
+
+// Sample goals for demo - in production these would come from database
+const SAMPLE_GOALS: DonationGoal[] = [
+  {
+    id: '1',
+    name: '2026 Building Fund',
+    description: 'New sanctuary construction fund',
+    targetAmount: 500000,
+    currentAmount: 325000,
+    startDate: '2025-01-01',
+    endDate: '2026-12-31',
+    fund: 'building',
+    isPublic: true,
+    status: 'active',
+    createdAt: '2025-01-01',
+  },
+  {
+    id: '2',
+    name: 'Mission Trip - Guatemala',
+    description: 'Summer mission trip to Guatemala',
+    targetAmount: 25000,
+    currentAmount: 18500,
+    startDate: '2026-01-01',
+    endDate: '2026-06-01',
+    fund: 'missions',
+    isPublic: true,
+    status: 'active',
+    createdAt: '2026-01-01',
+  },
+  {
+    id: '3',
+    name: 'Youth Camp Scholarships',
+    description: 'Help send youth to summer camp',
+    targetAmount: 8000,
+    currentAmount: 8000,
+    startDate: '2026-01-01',
+    endDate: '2026-05-01',
+    fund: 'youth',
+    isPublic: true,
+    status: 'completed',
+    createdAt: '2026-01-01',
+  },
+];
 
 const METHOD_ICONS: Record<string, React.ReactNode> = {
   cash: <Banknote size={14} />,
@@ -45,14 +94,33 @@ const FUND_COLORS: Record<string, { bg: string; text: string }> = {
 export function DonationTracker({
   giving,
   people,
+  goals = SAMPLE_GOALS,
   onBack,
   onViewMemberStats,
   onViewPerson,
+  onAddGoal,
 }: DonationTrackerProps) {
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<DonationTrackerFilters>({});
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y' | 'all' | 'custom'>('30d');
+  const [showGoals, setShowGoals] = useState(true);
+
+  // Filter and sort goals
+  const activeGoals = useMemo(() => {
+    return goals
+      .filter(g => g.status === 'active')
+      .sort((a, b) => {
+        // Sort by percentage complete descending
+        const aPercent = a.currentAmount / a.targetAmount;
+        const bPercent = b.currentAmount / b.targetAmount;
+        return bPercent - aPercent;
+      });
+  }, [goals]);
+
+  const completedGoals = useMemo(() => {
+    return goals.filter(g => g.status === 'completed');
+  }, [goals]);
 
   // Calculate date range
   const dateFilter = useMemo(() => {
@@ -222,6 +290,132 @@ export function DonationTracker({
           <p className="text-sm text-gray-500 dark:text-dark-400">Recurring</p>
         </div>
       </div>
+
+      {/* Donation Goals Section */}
+      {(activeGoals.length > 0 || completedGoals.length > 0) && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setShowGoals(!showGoals)}
+              className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-dark-100 hover:text-indigo-600 dark:hover:text-indigo-400"
+            >
+              <Target size={18} />
+              Fundraising Goals ({activeGoals.length} active)
+              <ChevronDown size={16} className={`transition-transform ${showGoals ? 'rotate-180' : ''}`} />
+            </button>
+            {onAddGoal && (
+              <button
+                onClick={onAddGoal}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg"
+              >
+                <Plus size={14} />
+                New Goal
+              </button>
+            )}
+          </div>
+
+          {showGoals && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeGoals.map((goal) => {
+                const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+                const remaining = goal.targetAmount - goal.currentAmount;
+                const daysLeft = goal.endDate
+                  ? Math.max(0, Math.ceil((new Date(goal.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                  : null;
+                const fundColor = FUND_COLORS[goal.fund || 'other'] || FUND_COLORS.other;
+
+                return (
+                  <div
+                    key={goal.id}
+                    className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-dark-100">{goal.name}</h4>
+                        {goal.description && (
+                          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">{goal.description}</p>
+                        )}
+                      </div>
+                      {goal.fund && (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${fundColor.bg} ${fundColor.text}`}>
+                          {goal.fund}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="flex items-end justify-between mb-1.5">
+                        <span className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+                          ${goal.currentAmount.toLocaleString()}
+                        </span>
+                        <span className="text-sm text-gray-500 dark:text-dark-400">
+                          of ${goal.targetAmount.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            percentage >= 100
+                              ? 'bg-green-500'
+                              : percentage >= 75
+                              ? 'bg-emerald-500'
+                              : percentage >= 50
+                              ? 'bg-blue-500'
+                              : percentage >= 25
+                              ? 'bg-amber-500'
+                              : 'bg-indigo-500'
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                        {percentage.toFixed(0)}% complete
+                      </span>
+                      <div className="flex items-center gap-3 text-gray-500 dark:text-dark-400">
+                        {remaining > 0 && (
+                          <span>${remaining.toLocaleString()} to go</span>
+                        )}
+                        {daysLeft !== null && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} />
+                            {daysLeft === 0 ? 'Ends today' : `${daysLeft}d left`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Show completed goals summary */}
+              {completedGoals.length > 0 && (
+                <div className="bg-green-50 dark:bg-green-500/10 rounded-xl border border-green-200 dark:border-green-500/20 p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="text-green-600 dark:text-green-400" size={18} />
+                    <h4 className="font-semibold text-green-800 dark:text-green-400">
+                      {completedGoals.length} Goal{completedGoals.length !== 1 ? 's' : ''} Completed
+                    </h4>
+                  </div>
+                  <p className="text-sm text-green-700 dark:text-green-400/80">
+                    Total raised: ${completedGoals.reduce((sum, g) => sum + g.currentAmount, 0).toLocaleString()}
+                  </p>
+                  <div className="mt-3 space-y-1">
+                    {completedGoals.slice(0, 3).map((goal) => (
+                      <div key={goal.id} className="flex items-center gap-2 text-xs text-green-700 dark:text-green-400/70">
+                        <CheckCircle2 size={12} />
+                        <span>{goal.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-3 gap-6 mb-6">

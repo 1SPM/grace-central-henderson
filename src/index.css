@@ -381,3 +381,57 @@ a:focus-visible,
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
+
+/* Accessibility: High Contrast Mode */
+html.high-contrast {
+  --color-primary: 99 102 241; /* More saturated indigo */
+  --hc-muted-text: #374151;
+  --hc-border: #9ca3af;
+}
+
+html.high-contrast.dark {
+  --hc-muted-text: #d1d5db;
+  --hc-border: #6b7280;
+}
+
+html.high-contrast button,
+html.high-contrast a {
+  text-decoration-thickness: 2px;
+}
+
+/* High contrast: improve muted text visibility */
+html.high-contrast p,
+html.high-contrast span,
+html.high-contrast label {
+  --tw-text-opacity: 1;
+}
+
+/* Force higher contrast on muted elements */
+html.high-contrast [class*="opacity-"] {
+  opacity: 1 !important;
+}
+
+/* Accessibility: Reduce Motion */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Respect user's system preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
