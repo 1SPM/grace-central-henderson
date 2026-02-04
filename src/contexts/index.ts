@@ -19,3 +19,11 @@ export {
 export type {
   IntegrationStatus,
 } from './IntegrationsContext';
+
+export {
+  AccessibilityProvider,
+  useAccessibility,
+} from './AccessibilityContext';
+export type {
+  FontSize,
+} from './AccessibilityContext';
