@@ -528,6 +528,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           <LifeServices
             onNavigate={setView}
             events={events}
+            people={people}
           />
         );
 
