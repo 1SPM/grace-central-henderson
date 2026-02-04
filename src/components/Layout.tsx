@@ -21,6 +21,7 @@ import {
   Globe,
   Home,
   Briefcase,
+  Heart,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -43,6 +44,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
   { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+  { view: 'estate-planning', label: 'Life Services', icon: <Heart size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
 
