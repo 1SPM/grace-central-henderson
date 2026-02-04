@@ -192,7 +192,7 @@ interface SettingsProps {
   giving?: Giving[];
   groups?: SmallGroup[];
   prayers?: PrayerRequest[];
-  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import') => void;
+  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
 }
 
 export function Settings({
@@ -839,6 +839,59 @@ export function Settings({
             )}
           </div>
         </div>
+
+        {/* Life Services Section */}
+        {onNavigate && (
+          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
+                <Heart className="text-rose-600 dark:text-rose-400" size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-dark-100">Life Services</h2>
+                <p className="text-sm text-gray-500 dark:text-dark-400">Manage weddings, funerals, and estate planning</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                onClick={() => onNavigate('wedding-services')}
+                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-dark-700 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-500/10 transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-pink-100 dark:bg-pink-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Heart className="text-pink-600 dark:text-pink-400" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Weddings</h3>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Manage ceremonies</p>
+                </div>
+              </button>
+              <button
+                onClick={() => onNavigate('funeral-services')}
+                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-dark-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-500/10 transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-stone-100 dark:bg-stone-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Users className="text-stone-600 dark:text-stone-400" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Funerals</h3>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Memorial services</p>
+                </div>
+              </button>
+              <button
+                onClick={() => onNavigate('estate-planning')}
+                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-dark-700 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Shield className="text-emerald-600 dark:text-emerald-400" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Estate Planning</h3>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Legacy giving</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
