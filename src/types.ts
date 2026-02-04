@@ -102,6 +102,8 @@ export type EventCategory =
   | 'holiday'      // Church holidays
   | 'wedding'      // Weddings & rehearsals
   | 'funeral'      // Funerals & memorials
+  | 'obituary'     // Obituary announcements
+  | 'ceremony'     // General ceremonies (ordinations, confirmations, etc.)
   | 'baptism'      // Baptisms
   | 'dedication'   // Baby dedications
   | 'counseling'   // Counseling appointments
