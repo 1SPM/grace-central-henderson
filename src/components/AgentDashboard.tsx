@@ -26,6 +26,9 @@ import {
   Calendar,
   Gift,
   Users,
+  BookOpen,
+  FileText,
+  Lightbulb,
 } from 'lucide-react';
 import type {
   AgentConfig,
@@ -34,6 +37,7 @@ import type {
   LifeEventConfig,
   DonationProcessingConfig,
   NewMemberConfig,
+  SermonProgrammingConfig,
   LifeEvent,
 } from '../lib/agents/types';
 
@@ -41,16 +45,19 @@ interface AgentDashboardProps {
   lifeEventConfig: LifeEventConfig;
   donationConfig: DonationProcessingConfig;
   newMemberConfig: NewMemberConfig;
+  sermonConfig?: SermonProgrammingConfig;
   upcomingLifeEvents: LifeEvent[];
   recentLogs: AgentLog[];
   stats: {
     lifeEvent: AgentStats;
     donation: AgentStats;
     newMember: AgentStats;
+    sermon?: AgentStats;
   };
   onToggleAgent: (agentId: string, enabled: boolean) => void;
   onUpdateConfig: (agentId: string, config: Partial<AgentConfig>) => void;
   onRunAgent: (agentId: string) => void;
+  onGenerateSermon?: (topic: string, scripture?: string) => void;
 }
 
 interface AgentCardProps {
@@ -216,13 +223,16 @@ export function AgentDashboard({
   lifeEventConfig,
   donationConfig,
   newMemberConfig,
+  sermonConfig,
   upcomingLifeEvents,
   recentLogs,
   stats,
   onToggleAgent,
   onUpdateConfig,
   onRunAgent,
+  onGenerateSermon: _onGenerateSermon,
 }: AgentDashboardProps) {
+  // Note: _onGenerateSermon will be used in sermon generation modal (future enhancement)
   const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'upcoming'>('overview');
   const [configModal, setConfigModal] = useState<string | null>(null);
 
@@ -435,6 +445,52 @@ export function AgentDashboard({
               </div>
             </div>
           </AgentCard>
+
+          {/* Sermon Programming Agent */}
+          {sermonConfig && stats.sermon && (
+            <AgentCard
+              config={sermonConfig}
+              icon={<BookOpen className="w-5 h-5" />}
+              stats={stats.sermon}
+              description="Generate sermon outlines, series plans, and illustrations"
+              onToggle={(enabled) => onToggleAgent('sermon-programming-agent', enabled)}
+              onRun={() => onRunAgent('sermon-programming-agent')}
+              onConfigure={() => setConfigModal('sermon-programming-agent')}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Sermon Outlines</span>
+                  <span
+                    className={
+                      sermonConfig.settings.enableSermonOutlines
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                    }
+                  >
+                    {sermonConfig.settings.enableSermonOutlines ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Series Planning</span>
+                  <span
+                    className={
+                      sermonConfig.settings.enableSeriesPlanning
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                    }
+                  >
+                    {sermonConfig.settings.enableSeriesPlanning ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <FileText className="w-4 h-4" />
+                  <span>Style: {sermonConfig.settings.preferredStyle}</span>
+                  <Lightbulb className="w-4 h-4 ml-2" />
+                  <span>Illustrations: {sermonConfig.settings.enableIllustrations ? 'On' : 'Off'}</span>
+                </div>
+              </div>
+            </AgentCard>
+          )}
         </div>
       )}
 
@@ -566,7 +622,9 @@ export function AgentDashboard({
               ? lifeEventConfig
               : configModal === 'donation-processing-agent'
                 ? donationConfig
-                : newMemberConfig
+                : configModal === 'sermon-programming-agent' && sermonConfig
+                  ? sermonConfig
+                  : newMemberConfig
           }
           onSave={(settings) => handleConfigSave(configModal, settings)}
           onClose={() => setConfigModal(null)}

@@ -148,6 +148,59 @@ export interface DripMessage {
   smsTemplate: string;
 }
 
+// Sermon Programming Agent Types
+export interface SermonProgrammingConfig extends AgentConfig {
+  settings: {
+    enableSermonOutlines: boolean;
+    enableSeriesPlanning: boolean;
+    enableIllustrations: boolean;
+    defaultSermonLength: number; // Minutes
+    includeScriptureReferences: boolean;
+    includeApplicationPoints: boolean;
+    includeDiscussionQuestions: boolean;
+    preferredStyle: 'expository' | 'topical' | 'narrative' | 'devotional';
+    targetAudience: 'general' | 'youth' | 'seniors' | 'new-believers';
+    churchName: string;
+    pastorName: string;
+  };
+}
+
+export interface SermonOutline {
+  id: string;
+  title: string;
+  scripture: string;
+  theme: string;
+  mainPoints: {
+    point: string;
+    subPoints: string[];
+    illustration?: string;
+    application?: string;
+  }[];
+  introduction: string;
+  conclusion: string;
+  discussionQuestions?: string[];
+  estimatedLength: number;
+  createdAt: string;
+  status: 'draft' | 'ready' | 'delivered';
+}
+
+export interface SermonSeries {
+  id: string;
+  title: string;
+  description: string;
+  theme: string;
+  numberOfWeeks: number;
+  sermons: {
+    week: number;
+    title: string;
+    scripture: string;
+    keyVerse: string;
+    mainIdea: string;
+  }[];
+  startDate?: string;
+  status: 'planning' | 'active' | 'completed';
+}
+
 // Agent execution context
 export interface AgentContext {
   churchId: string;
