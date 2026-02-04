@@ -1,8 +1,6 @@
 import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
-import type { Person, Task, Interaction, Attendance, View } from '../types';
-
-type EventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
+import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
 
 interface UseAppHandlersProps {
   churchId: string;
