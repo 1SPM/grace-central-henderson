@@ -91,6 +91,9 @@ const viewLabels: Record<View, string> = {
   'planning-center-import': 'Planning Center Import',
   'qr-checkin': 'QR Check-In',
   'follow-up-automation': 'Follow-up Automation',
+  'wedding-services': 'Wedding Services',
+  'funeral-services': 'Funeral Services',
+  'estate-planning': 'Estate Planning',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

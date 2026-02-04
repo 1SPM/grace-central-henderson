@@ -41,6 +41,9 @@ const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => (
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
+const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
+const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
+const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -515,6 +518,37 @@ export function ViewRenderer(props: ViewRendererProps) {
             tasks={tasks}
             interactions={interactions}
             onAddTask={handlers.addTask}
+            onBack={() => setView('settings')}
+          />
+        );
+
+      case 'wedding-services':
+        return (
+          <WeddingServices
+            people={people}
+            events={events}
+            onAddEvent={handlers.addEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('calendar')}
+          />
+        );
+
+      case 'funeral-services':
+        return (
+          <FuneralServices
+            people={people}
+            events={events}
+            onAddEvent={handlers.addEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('calendar')}
+          />
+        );
+
+      case 'estate-planning':
+        return (
+          <EstatePlanning
+            people={people}
+            onViewPerson={handlers.viewPerson}
             onBack={() => setView('settings')}
           />
         );
