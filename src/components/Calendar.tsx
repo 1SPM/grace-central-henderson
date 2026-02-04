@@ -619,9 +619,13 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
             >
               All
             </button>
-            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday').map(([key, label]) => {
+            {/* Always show primary categories, hide secondary ones if count is 0 */}
+            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday' && key !== 'anniversary').map(([key, label]) => {
               const count = categoryCounts[key] || 0;
-              if (count === 0) return null;
+              // Always show these primary categories
+              const primaryCategories = ['service', 'wedding', 'funeral', 'baptism', 'meeting', 'event', 'small-group'];
+              // Hide secondary categories only if they have 0 events
+              if (count === 0 && !primaryCategories.includes(key)) return null;
               const colors = categoryColors[key];
               return (
                 <button
@@ -630,11 +634,13 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
                     filterType === key
                       ? `${colors.bg} ${colors.text} ${colors.border} border`
-                      : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+                      : count === 0
+                        ? 'bg-gray-50 dark:bg-dark-850 text-gray-400 dark:text-dark-500 hover:bg-gray-100 dark:hover:bg-dark-800'
+                        : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-                  {label} ({count})
+                  <span className={`w-1.5 h-1.5 rounded-full ${count === 0 ? 'bg-gray-300 dark:bg-dark-600' : colors.dot}`} />
+                  {label} {count > 0 && `(${count})`}
                 </button>
               );
             })}
