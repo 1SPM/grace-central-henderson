@@ -41,6 +41,7 @@ const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => (
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
+const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
@@ -522,6 +523,14 @@ export function ViewRenderer(props: ViewRendererProps) {
           />
         );
 
+      case 'life-services':
+        return (
+          <LifeServices
+            onNavigate={setView}
+            events={events}
+          />
+        );
+
       case 'wedding-services':
         return (
           <WeddingServices
@@ -529,7 +538,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             events={events}
             onAddEvent={handlers.addEvent}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('calendar')}
+            onBack={() => setView('life-services')}
           />
         );
 
@@ -540,7 +549,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             events={events}
             onAddEvent={handlers.addEvent}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('calendar')}
+            onBack={() => setView('life-services')}
           />
         );
 
@@ -549,7 +558,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           <EstatePlanning
             people={people}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('settings')}
+            onBack={() => setView('life-services')}
           />
         );
 
