@@ -6,6 +6,7 @@ import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
 import { MemberCheckInPage } from './MemberCheckInPage';
 import { MemberShopPage } from './MemberShopPage';
+import { MemberLegacyPage } from './MemberLegacyPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
@@ -88,6 +89,15 @@ export function MemberPortal({
           <MemberShopPage
             churchName={churchName}
             personId={currentMember?.id}
+          />
+        );
+
+      case 'legacy':
+        return (
+          <MemberLegacyPage
+            churchName={churchName}
+            personId={currentMember?.id}
+            personName={currentMember ? `${currentMember.firstName} ${currentMember.lastName}` : undefined}
           />
         );
 

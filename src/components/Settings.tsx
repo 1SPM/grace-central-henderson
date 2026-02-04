@@ -316,6 +316,59 @@ export function Settings({
         <p className="text-gray-500 dark:text-dark-400 mt-1">Manage your GRACE CRM configuration</p>
       </div>
 
+      {/* Life Services Section - Quick Access */}
+      {onNavigate && (
+        <div className="bg-gradient-to-r from-rose-50 to-emerald-50 dark:from-rose-900/20 dark:to-emerald-900/20 rounded-2xl border border-rose-200 dark:border-rose-800 p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
+              <Heart className="text-rose-600 dark:text-rose-400" size={20} />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Life Services</h2>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Weddings, funerals, and legacy giving</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              onClick={() => onNavigate('wedding-services')}
+              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-pink-200 dark:border-pink-800 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-500/10 transition-colors text-left shadow-sm"
+            >
+              <div className="w-12 h-12 bg-pink-100 dark:bg-pink-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Heart className="text-pink-600 dark:text-pink-400" size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-dark-100">Weddings</h3>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Manage ceremonies & planning</p>
+              </div>
+            </button>
+            <button
+              onClick={() => onNavigate('funeral-services')}
+              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-500/10 transition-colors text-left shadow-sm"
+            >
+              <div className="w-12 h-12 bg-stone-100 dark:bg-stone-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Users className="text-stone-600 dark:text-stone-400" size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-dark-100">Funerals</h3>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Memorial service planning</p>
+              </div>
+            </button>
+            <button
+              onClick={() => onNavigate('estate-planning')}
+              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left shadow-sm"
+            >
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Shield className="text-emerald-600 dark:text-emerald-400" size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-dark-100">Estate Planning</h3>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Legacy giving & wills</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Integrations Section */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">
