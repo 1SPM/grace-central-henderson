@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
 import type { Person, Task, Interaction, Attendance, View } from '../types';
 
+type EventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'holiday' | 'other';
+
 interface UseAppHandlersProps {
   churchId: string;
   dbPeople: any[];
@@ -13,6 +15,12 @@ interface UseAppHandlersProps {
   addPrayer: (data: any) => Promise<any>;
   markPrayerAnswered: (id: string, testimony?: string) => Promise<any>;
   addGiving: (data: any) => Promise<any>;
+  createGroup?: (data: any) => Promise<any>;
+  addGroupMember?: (groupId: string, personId: string) => Promise<any>;
+  removeGroupMember?: (groupId: string, personId: string) => Promise<any>;
+  addEvent?: (data: any) => Promise<any>;
+  updateEvent?: (id: string, data: any) => Promise<any>;
+  deleteEvent?: (id: string) => Promise<any>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
@@ -30,6 +38,12 @@ export function useAppHandlers({
   addPrayer,
   markPrayerAnswered,
   addGiving,
+  createGroup,
+  addGroupMember,
+  removeGroupMember,
+  addEvent,
+  updateEvent,
+  deleteEvent,
   setView,
   setSelectedPersonId,
   openPersonForm,
@@ -283,6 +297,87 @@ export function useAppHandlers({
     await updatePerson(personId, { tags });
   }, [updatePerson]);
 
+  // Group handlers
+  const handleCreateGroup = useCallback(async (groupData: {
+    name: string;
+    description?: string;
+    leaderId?: string;
+    members?: string[];
+    meetingDay?: string;
+    meetingTime?: string;
+    location?: string;
+  }) => {
+    if (!createGroup) return;
+    await createGroup({
+      church_id: churchId,
+      name: groupData.name,
+      description: groupData.description,
+      leader_id: groupData.leaderId,
+      meeting_day: groupData.meetingDay,
+      meeting_time: groupData.meetingTime,
+      location: groupData.location,
+    });
+  }, [createGroup, churchId]);
+
+  const handleAddGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!addGroupMember) return;
+    await addGroupMember(groupId, personId);
+  }, [addGroupMember]);
+
+  const handleRemoveGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!removeGroupMember) return;
+    await removeGroupMember(groupId, personId);
+  }, [removeGroupMember]);
+
+  // Event handlers
+  const handleAddEvent = useCallback(async (eventData: {
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate?: string;
+    allDay: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => {
+    if (!addEvent) return;
+    await addEvent({
+      church_id: churchId,
+      title: eventData.title,
+      description: eventData.description,
+      start_date: eventData.startDate,
+      end_date: eventData.endDate,
+      all_day: eventData.allDay,
+      location: eventData.location,
+      category: eventData.category,
+    });
+  }, [addEvent, churchId]);
+
+  const handleUpdateEvent = useCallback(async (eventId: string, updates: {
+    title?: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    allDay?: boolean;
+    location?: string;
+    category?: EventCategory;
+  }) => {
+    if (!updateEvent) return;
+    await updateEvent(eventId, {
+      title: updates.title,
+      description: updates.description,
+      start_date: updates.startDate,
+      end_date: updates.endDate,
+      all_day: updates.allDay,
+      location: updates.location,
+      category: updates.category,
+    });
+  }, [updateEvent]);
+
+  const handleDeleteEvent = useCallback(async (eventId: string) => {
+    if (!deleteEvent) return;
+    await deleteEvent(eventId);
+  }, [deleteEvent]);
+
   return {
     // State
     attendanceRecords,
@@ -310,6 +405,12 @@ export function useAppHandlers({
       bulkAddTag: handleBulkAddTag,
       importCSV: handleImportCSV,
       updatePersonTags: handleUpdatePersonTags,
+      createGroup: handleCreateGroup,
+      addGroupMember: handleAddGroupMember,
+      removeGroupMember: handleRemoveGroupMember,
+      addEvent: handleAddEvent,
+      updateEvent: handleUpdateEvent,
+      deleteEvent: handleDeleteEvent,
     },
   };
 }

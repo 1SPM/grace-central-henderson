@@ -18,6 +18,9 @@ import {
   FileText,
   Church,
   X,
+  Globe,
+  Home,
+  Briefcase,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -27,6 +30,7 @@ interface LayoutProps {
   setView: (view: View) => void;
   children: ReactNode;
   onOpenSearch?: () => void;
+  isDemo?: boolean;
 }
 
 const navItems: { view: View; label: string; icon: ReactNode }[] = [
@@ -34,8 +38,10 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
   { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
   { view: 'people', label: 'People', icon: <Users size={18} /> },
+  { view: 'families', label: 'Families', icon: <Home size={18} /> },
+  { view: 'skills', label: 'Skills & Talents', icon: <Briefcase size={18} /> },
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-  { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
+  { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
@@ -49,7 +55,7 @@ const viewLabels: Record<View, string> = {
   person: 'Profile',
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
-  calendar: 'Calendar',
+  calendar: 'Calendar / Events',
   birthdays: 'Birthdays',
   volunteers: 'Volunteers',
   groups: 'Groups',
@@ -77,9 +83,17 @@ const viewLabels: Record<View, string> = {
   'member-events': 'Member Events',
   'member-checkin': 'Member Check-In',
   'sunday-prep': 'Sunday Prep',
+  families: 'Families',
+  skills: 'Skills & Talents',
+  'email-templates': 'Email Templates',
+  'event-registration': 'Event Registration',
+  'reminders': 'Automated Reminders',
+  'planning-center-import': 'Planning Center Import',
+  'qr-checkin': 'QR Check-In',
+  'follow-up-automation': 'Follow-up Automation',
 };
 
-export function Layout({ currentView, setView, children, onOpenSearch }: LayoutProps) {
+export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -261,6 +275,25 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
           </button>
 
           <button
+            onClick={() => handleNavClick('member-portal')}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+              sidebarCollapsed ? 'lg:justify-center' : ''
+            }`}
+            title={sidebarCollapsed ? 'Member Portal (Preview)' : undefined}
+          >
+            <Globe size={18} />
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Member Portal</span>
+            <span className={`text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-medium ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              Preview
+            </span>
+            {sidebarCollapsed && (
+              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                Member Portal
+              </span>
+            )}
+          </button>
+
+          <button
             onClick={() => handleNavClick('settings')}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
               sidebarCollapsed ? 'lg:justify-center' : ''
@@ -275,6 +308,24 @@ export function Layout({ currentView, setView, children, onOpenSearch }: LayoutP
               </span>
             )}
           </button>
+
+          {/* Version & Connection Status */}
+          <div className={`mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+            <div className="px-2.5 space-y-1.5">
+              {/* Connection Status */}
+              <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium ${
+                isDemo
+                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
+                {isDemo ? 'Demo Mode' : 'Connected to Supabase'}
+              </div>
+              <p className="text-[10px] text-gray-400 dark:text-dark-500">
+                v1.0 Beta
+              </p>
+            </div>
+          </div>
         </div>
       </aside>
 

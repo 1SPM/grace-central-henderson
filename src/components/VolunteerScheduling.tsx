@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import { Calendar, Plus, Check, X, ChevronLeft, ChevronRight, Clock, MapPin } from 'lucide-react';
+import { Calendar, Plus, Check, X, ChevronLeft, ChevronRight, Clock, MapPin, Star, Briefcase, AlertCircle } from 'lucide-react';
 import { Person, CalendarEvent } from '../types';
+
+// Skill types (matching SkillsDatabase)
+interface PersonSkill {
+  skillId: string;
+  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  yearsExperience?: number;
+  willingToServe: boolean;
+}
 
 interface VolunteerRole {
   id: string;
@@ -9,6 +17,7 @@ interface VolunteerRole {
   minVolunteers: number;
   maxVolunteers: number;
   color: string;
+  requiredSkills?: string[]; // Skill IDs that match this role
 }
 
 interface VolunteerAssignment {
@@ -28,16 +37,44 @@ interface VolunteerSchedulingProps {
   onRemove: (assignmentId: string) => void;
 }
 
-// Default volunteer roles
+// Default volunteer roles with skill mappings
 const defaultRoles: VolunteerRole[] = [
-  { id: 'greeter', name: 'Greeter', description: 'Welcome guests at the door', minVolunteers: 2, maxVolunteers: 4, color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' },
-  { id: 'usher', name: 'Usher', description: 'Help seat guests and collect offering', minVolunteers: 2, maxVolunteers: 4, color: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' },
-  { id: 'worship', name: 'Worship Team', description: 'Lead worship music', minVolunteers: 3, maxVolunteers: 8, color: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' },
-  { id: 'av', name: 'A/V Tech', description: 'Run sound and projection', minVolunteers: 1, maxVolunteers: 3, color: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400' },
-  { id: 'childcare', name: 'Children\'s Ministry', description: 'Lead children\'s programs', minVolunteers: 2, maxVolunteers: 6, color: 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-400' },
-  { id: 'parking', name: 'Parking Team', description: 'Direct traffic and parking', minVolunteers: 1, maxVolunteers: 3, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' },
-  { id: 'hospitality', name: 'Hospitality', description: 'Prepare refreshments', minVolunteers: 2, maxVolunteers: 4, color: 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400' },
+  { id: 'greeter', name: 'Greeter', description: 'Welcome guests at the door', minVolunteers: 2, maxVolunteers: 4, color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400', requiredSkills: ['hospitality', 'greeter', 'welcoming'] },
+  { id: 'usher', name: 'Usher', description: 'Help seat guests and collect offering', minVolunteers: 2, maxVolunteers: 4, color: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400', requiredSkills: ['hospitality', 'usher'] },
+  { id: 'worship', name: 'Worship Team', description: 'Lead worship music', minVolunteers: 3, maxVolunteers: 8, color: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400', requiredSkills: ['vocals', 'piano', 'guitar', 'drums', 'bass', 'strings', 'worship-leading'] },
+  { id: 'av', name: 'A/V Tech', description: 'Run sound and projection', minVolunteers: 1, maxVolunteers: 3, color: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400', requiredSkills: ['sound-mixing', 'lighting', 'video-production', 'live-streaming', 'projection', 'it-support'] },
+  { id: 'childcare', name: 'Children\'s Ministry', description: 'Lead children\'s programs', minVolunteers: 2, maxVolunteers: 6, color: 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-400', requiredSkills: ['childcare', 'early-childhood', 'elementary', 'youth-work', 'teaching-children'] },
+  { id: 'parking', name: 'Parking Team', description: 'Direct traffic and parking', minVolunteers: 1, maxVolunteers: 3, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400', requiredSkills: ['parking-team'] },
+  { id: 'hospitality', name: 'Hospitality', description: 'Prepare refreshments', minVolunteers: 2, maxVolunteers: 4, color: 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400', requiredSkills: ['hospitality', 'food-service', 'event-setup', 'kitchen'] },
 ];
+
+// Get person skills from localStorage (same as SkillsDatabase)
+const getPersonSkills = (personId: string): PersonSkill[] => {
+  const stored = localStorage.getItem(`skills-${personId}`);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return [];
+};
+
+// Skill level values for sorting
+const SKILL_LEVEL_VALUES: Record<string, number> = {
+  expert: 4,
+  advanced: 3,
+  intermediate: 2,
+  beginner: 1,
+};
+
+// Get skill level badge color
+const getSkillLevelColor = (level: PersonSkill['level']) => {
+  switch (level) {
+    case 'expert': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400';
+    case 'advanced': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400';
+    case 'intermediate': return 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400';
+    case 'beginner': return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
+    default: return 'bg-gray-100 text-gray-600';
+  }
+};
 
 export function VolunteerScheduling({
   people,
@@ -82,13 +119,45 @@ export function VolunteerScheduling({
     return assignments.filter((a) => a.eventId === eventId && a.roleId === roleId);
   };
 
-  const getAvailableVolunteers = (_roleId: string, eventId: string) => {
+  // Get available volunteers with skill matching
+  const getAvailableVolunteers = (roleId: string, eventId: string) => {
     const currentAssignments = assignments
       .filter((a) => a.eventId === eventId)
       .map((a) => a.personId);
-    return people.filter(
+
+    const role = defaultRoles.find(r => r.id === roleId);
+    const requiredSkills = role?.requiredSkills || [];
+
+    const availablePeople = people.filter(
       (p) => !currentAssignments.includes(p.id) && (p.status === 'member' || p.status === 'leader')
     );
+
+    // Get skill match info for each person
+    return availablePeople.map(person => {
+      const personSkills = getPersonSkills(person.id);
+      const matchingSkills = personSkills.filter(s =>
+        requiredSkills.includes(s.skillId) && s.willingToServe
+      );
+
+      const bestMatchingSkill = matchingSkills.reduce((best, current) => {
+        if (!best) return current;
+        return SKILL_LEVEL_VALUES[current.level] > SKILL_LEVEL_VALUES[best.level] ? current : best;
+      }, null as PersonSkill | null);
+
+      return {
+        person,
+        matchingSkills,
+        bestMatchingSkill,
+        matchScore: matchingSkills.reduce((sum, s) => sum + SKILL_LEVEL_VALUES[s.level], 0),
+        hasMatchingSkill: matchingSkills.length > 0,
+      };
+    }).sort((a, b) => {
+      // Sort by skill match - people with matching skills first
+      if (a.hasMatchingSkill && !b.hasMatchingSkill) return -1;
+      if (!a.hasMatchingSkill && b.hasMatchingSkill) return 1;
+      // Then by match score
+      return b.matchScore - a.matchScore;
+    });
   };
 
   const handleAssign = () => {
@@ -343,24 +412,108 @@ export function VolunteerScheduling({
                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
                   Volunteer
                 </label>
-                <select
-                  value={assignPerson}
-                  onChange={(e) => setAssignPerson(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
-                  disabled={!assignRole}
-                >
-                  <option value="">Select a volunteer</option>
-                  {assignRole &&
-                    getAvailableVolunteers(assignRole, selectedEvent.id).map((person) => (
-                      <option key={person.id} value={person.id}>
-                        {person.firstName} {person.lastName}
-                      </option>
-                    ))}
-                </select>
-                {assignRole && getAvailableVolunteers(assignRole, selectedEvent.id).length === 0 && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                    No available volunteers. All members are already assigned.
+                {!assignRole ? (
+                  <p className="text-sm text-gray-400 dark:text-dark-500 py-2">
+                    Select a role first to see available volunteers
                   </p>
+                ) : (
+                  <div className="border border-gray-200 dark:border-dark-600 rounded-xl max-h-64 overflow-y-auto">
+                    {(() => {
+                      const volunteers = getAvailableVolunteers(assignRole, selectedEvent.id);
+                      const withSkills = volunteers.filter(v => v.hasMatchingSkill);
+                      const withoutSkills = volunteers.filter(v => !v.hasMatchingSkill);
+
+                      if (volunteers.length === 0) {
+                        return (
+                          <div className="p-4 text-center">
+                            <AlertCircle className="mx-auto text-amber-500 mb-2" size={24} />
+                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                              No available volunteers
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <>
+                          {withSkills.length > 0 && (
+                            <div>
+                              <div className="px-3 py-2 bg-green-50 dark:bg-green-500/10 border-b border-gray-200 dark:border-dark-600">
+                                <div className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
+                                  <Star size={12} />
+                                  Recommended - Has matching skills
+                                </div>
+                              </div>
+                              {withSkills.map(({ person, bestMatchingSkill }) => (
+                                <button
+                                  key={person.id}
+                                  type="button"
+                                  onClick={() => setAssignPerson(person.id)}
+                                  className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 dark:hover:bg-dark-700 border-b border-gray-100 dark:border-dark-700 last:border-b-0 ${
+                                    assignPerson === person.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
+                                  }`}
+                                >
+                                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                                    {person.firstName[0]}{person.lastName[0]}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                                      {person.firstName} {person.lastName}
+                                    </p>
+                                    {bestMatchingSkill && (
+                                      <span className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full ${getSkillLevelColor(bestMatchingSkill.level)}`}>
+                                        <Briefcase size={10} />
+                                        {bestMatchingSkill.level}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {assignPerson === person.id && (
+                                    <Check size={16} className="text-indigo-600" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {withoutSkills.length > 0 && (
+                            <div>
+                              {withSkills.length > 0 && (
+                                <div className="px-3 py-2 bg-gray-50 dark:bg-dark-800 border-b border-gray-200 dark:border-dark-600">
+                                  <div className="text-xs font-medium text-gray-500 dark:text-dark-400">
+                                    Other volunteers
+                                  </div>
+                                </div>
+                              )}
+                              {withoutSkills.map(({ person }) => (
+                                <button
+                                  key={person.id}
+                                  type="button"
+                                  onClick={() => setAssignPerson(person.id)}
+                                  className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 dark:hover:bg-dark-700 border-b border-gray-100 dark:border-dark-700 last:border-b-0 ${
+                                    assignPerson === person.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
+                                  }`}
+                                >
+                                  <div className="w-8 h-8 bg-gray-300 dark:bg-dark-600 rounded-full flex items-center justify-center text-gray-600 dark:text-dark-300 text-xs font-medium flex-shrink-0">
+                                    {person.firstName[0]}{person.lastName[0]}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                                      {person.firstName} {person.lastName}
+                                    </p>
+                                    <span className="text-xs text-gray-400 dark:text-dark-500">
+                                      No matching skills recorded
+                                    </span>
+                                  </div>
+                                  {assignPerson === person.id && (
+                                    <Check size={16} className="text-indigo-600" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
               </div>
             </div>

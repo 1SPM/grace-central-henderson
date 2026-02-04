@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, Check, X, HelpCircle, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, Cake, Mail, Phone, Heart, Download, ExternalLink } from 'lucide-react';
 import { CalendarEvent, Person } from '../types';
+import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookUrl } from '../utils/calendarExport';
 
 interface RSVP {
   eventId: string;
@@ -9,75 +10,283 @@ interface RSVP {
   guestCount: number;
 }
 
+type EventCategory = CalendarEvent['category'];
+type FilterType = 'all' | 'events' | 'birthdays' | EventCategory;
+
 interface CalendarProps {
   events: CalendarEvent[];
   people: Person[];
   rsvps: RSVP[];
+  churchName?: string;
   onRSVP: (eventId: string, personId: string, status: RSVP['status'], guestCount?: number) => void;
+  onAddEvent?: (event: {
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate?: string;
+    allDay: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => void;
+  onUpdateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => void;
+  onDeleteEvent?: (eventId: string) => void;
+  onViewPerson?: (personId: string) => void;
 }
 
-const categoryColors: Record<string, string> = {
-  service: 'bg-indigo-100 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20',
-  meeting: 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
-  event: 'bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20',
-  'small-group': 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
-  holiday: 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20',
-  // New categories
-  wedding: 'bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20',
-  funeral: 'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-500/20',
-  baptism: 'bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20',
-  dedication: 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20',
-  counseling: 'bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20',
-  rehearsal: 'bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
-  outreach: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
-  class: 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/20',
-  other: 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300 border-gray-200 dark:border-dark-600'
+// Birthday item type
+interface BirthdayItem {
+  id: string;
+  person: Person;
+  date: string;
+  age: number;
+}
+
+// Anniversary item type (membership anniversary)
+interface AnniversaryItem {
+  id: string;
+  person: Person;
+  date: string;
+  years: number;
+}
+
+const categoryColors: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  service: { bg: 'bg-indigo-100 dark:bg-indigo-500/15', text: 'text-indigo-700 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-500/20', dot: 'bg-indigo-500' },
+  meeting: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20', dot: 'bg-amber-500' },
+  event: { bg: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-700 dark:text-green-400', border: 'border-green-200 dark:border-green-500/20', dot: 'bg-green-500' },
+  'small-group': { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-500/20', dot: 'bg-purple-500' },
+  holiday: { bg: 'bg-rose-100 dark:bg-rose-500/15', text: 'text-rose-700 dark:text-rose-400', border: 'border-rose-200 dark:border-rose-500/20', dot: 'bg-rose-500' },
+  birthday: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400', border: 'border-pink-200 dark:border-pink-500/20', dot: 'bg-pink-500' },
+  anniversary: { bg: 'bg-red-100 dark:bg-red-500/15', text: 'text-red-700 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20', dot: 'bg-red-500' },
+  other: { bg: 'bg-gray-100 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', border: 'border-gray-200 dark:border-dark-600', dot: 'bg-gray-500' }
 };
 
 const categoryLabels: Record<string, string> = {
-  service: 'Service',
-  meeting: 'Meeting',
-  event: 'Event',
-  'small-group': 'Small Group',
-  holiday: 'Holiday',
-  wedding: 'Wedding',
-  funeral: 'Memorial',
-  baptism: 'Baptism',
-  dedication: 'Dedication',
-  counseling: 'Counseling',
-  rehearsal: 'Rehearsal',
-  outreach: 'Outreach',
-  class: 'Class',
+  service: 'Services',
+  meeting: 'Meetings',
+  event: 'Events',
+  'small-group': 'Small Groups',
+  holiday: 'Holidays',
+  birthday: 'Birthdays',
+  anniversary: 'Anniversaries',
   other: 'Other'
 };
 
-export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
+// Helper to get date suggestions
+function getDateSuggestions(): { label: string; date: string }[] {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const thisSunday = new Date(today);
+  const daysUntilSunday = (7 - today.getDay()) % 7;
+  thisSunday.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
+
+  const nextSunday = new Date(thisSunday);
+  nextSunday.setDate(thisSunday.getDate() + 7);
+
+  const thisWednesday = new Date(today);
+  const daysUntilWednesday = (3 - today.getDay() + 7) % 7;
+  thisWednesday.setDate(today.getDate() + (daysUntilWednesday === 0 ? 7 : daysUntilWednesday));
+
+  const thisSaturday = new Date(today);
+  const daysUntilSaturday = (6 - today.getDay() + 7) % 7;
+  thisSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
+  return [
+    { label: 'Today', date: formatDate(today) },
+    { label: 'Tomorrow', date: formatDate(tomorrow) },
+    { label: 'This Sunday', date: formatDate(thisSunday) },
+    { label: 'This Wednesday', date: formatDate(thisWednesday) },
+    { label: 'This Saturday', date: formatDate(thisSaturday) },
+    { label: 'Next Sunday', date: formatDate(nextSunday) },
+  ];
+}
+
+const timeSuggestions = [
+  { label: '7:00 AM', time: '07:00' },
+  { label: '9:00 AM', time: '09:00' },
+  { label: '10:00 AM', time: '10:00' },
+  { label: '11:00 AM', time: '11:00' },
+  { label: '6:00 PM', time: '18:00' },
+  { label: '7:00 PM', time: '19:00' },
+];
+
+export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [showBirthdays, setShowBirthdays] = useState(true);
+  const [showAnniversaries, setShowAnniversaries] = useState(true);
+  const [showEvents, setShowEvents] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showRSVPModal, setShowRSVPModal] = useState(false);
   const [rsvpPersonId, setRsvpPersonId] = useState('');
   const [rsvpStatus, setRsvpStatus] = useState<RSVP['status']>('yes');
   const [rsvpGuests, setRsvpGuests] = useState(0);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    allDay: false,
+    location: '',
+    category: 'event' as EventCategory,
+  });
 
-  // Memoize sorted and grouped events
-  const groupedEvents = useMemo(() => {
-    const sorted = [...events].sort(
-      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-    );
+  const today = useMemo(() => new Date(), []);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
-    const grouped: Record<string, CalendarEvent[]> = {};
-    sorted.forEach((event) => {
-      const date = new Date(event.startDate).toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-      });
-      if (!grouped[date]) grouped[date] = [];
-      grouped[date].push(event);
+  // Calendar grid calculations
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const startingDay = firstDayOfMonth.getDay();
+  const totalDays = lastDayOfMonth.getDate();
+
+  const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Generate calendar grid
+  const calendarDays: (number | null)[] = [];
+  for (let i = 0; i < startingDay; i++) {
+    calendarDays.push(null);
+  }
+  for (let day = 1; day <= totalDays; day++) {
+    calendarDays.push(day);
+  }
+
+  // Calculate birthdays for current year
+  const birthdays = useMemo(() => {
+    const birthdayItems: BirthdayItem[] = [];
+    people.forEach(person => {
+      if (person.birthDate) {
+        const birthDate = new Date(person.birthDate);
+        const thisYearBirthday = new Date(year, birthDate.getMonth(), birthDate.getDate());
+        const age = year - birthDate.getFullYear();
+        birthdayItems.push({
+          id: `birthday-${person.id}`,
+          person,
+          date: thisYearBirthday.toISOString().split('T')[0],
+          age
+        });
+      }
     });
-    return grouped;
-  }, [events]);
+    return birthdayItems;
+  }, [people, year]);
 
-  // Memoize RSVP lookup by event ID
+  // Calculate membership anniversaries for current year
+  const anniversaries = useMemo(() => {
+    const anniversaryItems: AnniversaryItem[] = [];
+    people.forEach(person => {
+      if (person.joinDate) {
+        const joinDate = new Date(person.joinDate);
+        const thisYearAnniversary = new Date(year, joinDate.getMonth(), joinDate.getDate());
+        const years = year - joinDate.getFullYear();
+        if (years > 0) { // Only show if at least 1 year member
+          anniversaryItems.push({
+            id: `anniversary-${person.id}`,
+            person,
+            date: thisYearAnniversary.toISOString().split('T')[0],
+            years
+          });
+        }
+      }
+    });
+    return anniversaryItems;
+  }, [people, year]);
+
+  // Filter events by category
+  const filteredEvents = useMemo(() => {
+    if (!showEvents) return [];
+    if (filterType === 'all' || filterType === 'events') return events;
+    if (filterType === 'birthdays') return [];
+    return events.filter(e => e.category === filterType);
+  }, [events, filterType, showEvents]);
+
+  // Filter birthdays
+  const filteredBirthdays = useMemo(() => {
+    if (!showBirthdays) return [];
+    if (filterType === 'events') return [];
+    return birthdays;
+  }, [birthdays, filterType, showBirthdays]);
+
+  // Filter anniversaries
+  const filteredAnniversaries = useMemo(() => {
+    if (!showAnniversaries) return [];
+    if (filterType === 'events') return [];
+    return anniversaries;
+  }, [anniversaries, filterType, showAnniversaries]);
+
+  // Get events for a specific day
+  const getEventsForDay = useCallback((day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return filteredEvents.filter(e => e.startDate.startsWith(dateStr));
+  }, [year, month, filteredEvents]);
+
+  // Get birthdays for a specific day
+  const getBirthdaysForDay = useCallback((day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return filteredBirthdays.filter(b => b.date === dateStr);
+  }, [year, month, filteredBirthdays]);
+
+  // Get anniversaries for a specific day
+  const getAnniversariesForDay = useCallback((day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return filteredAnniversaries.filter(a => a.date === dateStr);
+  }, [year, month, filteredAnniversaries]);
+
+  // Get upcoming events (next 30 days)
+  const upcomingEvents = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    return filteredEvents
+      .filter(e => {
+        const eventDate = new Date(e.startDate);
+        return eventDate >= now && eventDate <= thirtyDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  }, [filteredEvents]);
+
+  // Get upcoming birthdays (next 30 days)
+  const upcomingBirthdays = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    return filteredBirthdays
+      .filter(b => {
+        const birthdayDate = new Date(b.date);
+        return birthdayDate >= now && birthdayDate <= thirtyDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredBirthdays]);
+
+  // Get upcoming anniversaries (next 30 days)
+  const upcomingAnniversaries = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    return filteredAnniversaries
+      .filter(a => {
+        const anniversaryDate = new Date(a.date);
+        return anniversaryDate >= now && anniversaryDate <= thirtyDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredAnniversaries]);
+
+  // RSVP lookup
   const rsvpsByEvent = useMemo(() => {
     const map = new Map<string, RSVP[]>();
     rsvps.forEach(r => {
@@ -88,7 +297,6 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
     return map;
   }, [rsvps]);
 
-  // Get RSVP counts for an event (O(1) lookup)
   const getRSVPCounts = useCallback((eventId: string) => {
     const eventRsvps = rsvpsByEvent.get(eventId) || [];
     let yesCount = 0, noCount = 0, maybeCount = 0, totalAttending = 0;
@@ -104,6 +312,118 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
     });
     return { yes: yesCount, no: noCount, maybe: maybeCount, totalAttending };
   }, [rsvpsByEvent]);
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { birthday: birthdays.length, anniversary: anniversaries.length };
+    events.forEach(e => {
+      counts[e.category] = (counts[e.category] || 0) + 1;
+    });
+    return counts;
+  }, [events, birthdays.length, anniversaries.length]);
+
+  // Navigation
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const goToToday = () => setCurrentDate(new Date());
+
+  const isToday = (day: number) =>
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear();
+
+  const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
+
+  // Event form handlers
+  const resetEventForm = useCallback(() => {
+    setEventForm({
+      title: '',
+      description: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+      allDay: false,
+      location: '',
+      category: 'event',
+    });
+    setEditingEvent(null);
+  }, []);
+
+  const openCreateEventModal = useCallback(() => {
+    resetEventForm();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setEventForm(prev => ({
+      ...prev,
+      startDate: tomorrow.toISOString().split('T')[0],
+      startTime: '10:00',
+    }));
+    setShowEventModal(true);
+  }, [resetEventForm]);
+
+  const openEditEventModal = useCallback((event: CalendarEvent) => {
+    const startDate = new Date(event.startDate);
+    const endDate = event.endDate ? new Date(event.endDate) : null;
+    setEventForm({
+      title: event.title,
+      description: event.description || '',
+      startDate: startDate.toISOString().split('T')[0],
+      startTime: startDate.toTimeString().slice(0, 5),
+      endDate: endDate ? endDate.toISOString().split('T')[0] : '',
+      endTime: endDate ? endDate.toTimeString().slice(0, 5) : '',
+      allDay: event.allDay,
+      location: event.location || '',
+      category: event.category,
+    });
+    setEditingEvent(event);
+    setShowEventModal(true);
+  }, []);
+
+  const handleSaveEvent = useCallback(() => {
+    if (!eventForm.title || !eventForm.startDate) return;
+
+    const startDateTime = eventForm.allDay
+      ? `${eventForm.startDate}T00:00:00`
+      : `${eventForm.startDate}T${eventForm.startTime || '00:00'}:00`;
+
+    const endDateTime = eventForm.endDate
+      ? (eventForm.allDay
+          ? `${eventForm.endDate}T23:59:59`
+          : `${eventForm.endDate}T${eventForm.endTime || '23:59'}:00`)
+      : undefined;
+
+    if (editingEvent && onUpdateEvent) {
+      onUpdateEvent(editingEvent.id, {
+        title: eventForm.title,
+        description: eventForm.description || undefined,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        allDay: eventForm.allDay,
+        location: eventForm.location || undefined,
+        category: eventForm.category,
+      });
+    } else if (onAddEvent) {
+      onAddEvent({
+        title: eventForm.title,
+        description: eventForm.description || undefined,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        allDay: eventForm.allDay,
+        location: eventForm.location || undefined,
+        category: eventForm.category,
+      });
+    }
+
+    setShowEventModal(false);
+    resetEventForm();
+  }, [eventForm, editingEvent, onAddEvent, onUpdateEvent, resetEventForm]);
+
+  const handleDeleteEvent = useCallback((eventId: string) => {
+    if (onDeleteEvent && confirm('Are you sure you want to delete this event?')) {
+      onDeleteEvent(eventId);
+    }
+  }, [onDeleteEvent]);
 
   const handleRSVP = useCallback(() => {
     if (!selectedEvent || !rsvpPersonId) return;
@@ -121,104 +441,536 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
   }, []);
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Calendar</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">Upcoming events and services</p>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Calendar / Events</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">
+            {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 flex items-center gap-2"
+            >
+              <Download size={18} />
+              Export
+            </button>
+            {showExportMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowExportMenu(false)}
+                />
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-850 rounded-xl shadow-lg border border-gray-200 dark:border-dark-700 z-50 overflow-hidden">
+                  <div className="p-2">
+                    <p className="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-dark-500 uppercase">
+                      Export Calendar
+                    </p>
+                    <button
+                      onClick={() => {
+                        downloadICalFile(events, churchName);
+                        setShowExportMenu(false);
+                      }}
+                      disabled={events.length === 0}
+                      className="w-full px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 rounded-lg flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <Download size={16} className="text-gray-400" />
+                      Download .ics file
+                    </button>
+                    <p className="px-3 py-1.5 text-xs text-gray-400 dark:text-dark-500 mt-2">
+                      Import into Google Calendar or Outlook
+                    </p>
+                  </div>
+                  {upcomingEvents.length > 0 && (
+                    <div className="border-t border-gray-100 dark:border-dark-700 p-2">
+                      <p className="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-dark-500 uppercase">
+                        Add Single Event
+                      </p>
+                      <div className="max-h-48 overflow-y-auto">
+                        {upcomingEvents.slice(0, 5).map((event) => (
+                          <div key={event.id} className="px-3 py-2">
+                            <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                              {event.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <a
+                                href={generateGoogleCalendarUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                onClick={() => setShowExportMenu(false)}
+                              >
+                                <ExternalLink size={10} />
+                                Google
+                              </a>
+                              <a
+                                href={generateOutlookUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                onClick={() => setShowExportMenu(false)}
+                              >
+                                <ExternalLink size={10} />
+                                Outlook
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          {onAddEvent && (
+            <button
+              onClick={openCreateEventModal}
+              className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 flex items-center gap-2"
+            >
+              <Plus size={18} />
+              Create Event
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {Object.entries(groupedEvents).map(([date, dateEvents]) => (
-          <div key={date}>
-            <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-400 mb-3">{date}</h2>
-            <div className="space-y-3">
-              {dateEvents.map((event) => {
-                const counts = getRSVPCounts(event.id);
+      {/* Show/Hide Toggles + Category Filters */}
+      <div className="mb-6 space-y-3">
+        {/* Main toggles */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-dark-400">
+            <Filter size={16} />
+            <span>Show:</span>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showEvents}
+              onChange={(e) => setShowEvents(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300">
+              Events ({events.length})
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showBirthdays}
+              onChange={(e) => setShowBirthdays(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-pink-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300 flex items-center gap-1.5">
+              <Cake size={14} className="text-pink-500" />
+              Birthdays ({birthdays.length})
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showAnniversaries}
+              onChange={(e) => setShowAnniversaries(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-red-600"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-300 flex items-center gap-1.5">
+              <Heart size={14} className="text-red-500" />
+              Anniversaries ({anniversaries.length})
+            </span>
+          </label>
+        </div>
+
+        {/* Category Filters */}
+        {showEvents && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-gray-400 dark:text-dark-500 mr-1">Event type:</span>
+            <button
+              onClick={() => setFilterType('all')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                filterType === 'all'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                  : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+              }`}
+            >
+              All
+            </button>
+            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday').map(([key, label]) => {
+              const count = categoryCounts[key] || 0;
+              if (count === 0) return null;
+              const colors = categoryColors[key];
+              return (
+                <button
+                  key={key}
+                  onClick={() => setFilterType(filterType === key ? 'all' : key as FilterType)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                    filterType === key
+                      ? `${colors.bg} ${colors.text} ${colors.border} border`
+                      : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
+                  {label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Calendar Grid */}
+        <div className="xl:col-span-2">
+          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prevMonth}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                >
+                  <ChevronLeft size={20} className="text-gray-600 dark:text-dark-400" />
+                </button>
+                <button
+                  onClick={nextMonth}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                >
+                  <ChevronRight size={20} className="text-gray-600 dark:text-dark-400" />
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 ml-2">
+                  {monthName}
+                </h2>
+              </div>
+              {!isCurrentMonth && (
+                <button
+                  onClick={goToToday}
+                  className="px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
+                >
+                  Today
+                </button>
+              )}
+            </div>
+
+            {/* Day Headers */}
+            <div className="grid grid-cols-7 border-b border-gray-200 dark:border-dark-700">
+              {days.map((day) => (
+                <div key={day} className="py-3 text-center text-sm font-medium text-gray-500 dark:text-dark-400">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Days */}
+            <div className="grid grid-cols-7">
+              {calendarDays.map((day, i) => {
+                const dayEvents = day !== null ? getEventsForDay(day) : [];
+                const dayBirthdays = day !== null ? getBirthdaysForDay(day) : [];
+                const dayAnniversaries = day !== null ? getAnniversariesForDay(day) : [];
+                const isTodayDay = day !== null && isToday(day);
+                const totalItems = dayEvents.length + dayBirthdays.length + dayAnniversaries.length;
+                const maxVisible = 3;
+                let shown = 0;
                 return (
                   <div
-                    key={event.id}
-                    className={`rounded-xl border p-4 ${categoryColors[event.category]}`}
+                    key={i}
+                    className={`min-h-[100px] p-2 border-b border-r border-gray-100 dark:border-dark-700 ${
+                      day === null ? 'bg-gray-50 dark:bg-dark-850' : ''
+                    } ${i % 7 === 6 ? 'border-r-0' : ''}`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{event.title}</h3>
-                        {event.description && (
-                          <p className="text-sm opacity-75 mt-1">{event.description}</p>
-                        )}
-                      </div>
-                      <span className="text-xs px-2 py-1 rounded-full bg-white/50 dark:bg-white/10">
-                        {categoryLabels[event.category] || event.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 mt-3 text-sm opacity-75">
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        {new Date(event.startDate).toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit'
-                        })}
-                        {event.endDate && (
-                          <> - {new Date(event.endDate).toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit'
-                          })}</>
-                        )}
-                      </div>
-                      {event.location && (
-                        <div className="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {event.location}
+                    {day !== null && (
+                      <>
+                        <div className={`text-sm font-medium mb-1 ${
+                          isTodayDay
+                            ? 'w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center'
+                            : 'text-gray-700 dark:text-dark-300'
+                        }`}>
+                          {day}
                         </div>
-                      )}
-                    </div>
-
-                    {/* RSVP Section */}
-                    <div className="mt-4 pt-4 border-t border-current/10">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1.5">
-                            <Users size={14} />
-                            <span className="text-sm font-medium">{counts.totalAttending} attending</span>
-                          </div>
-                          {counts.yes > 0 && (
-                            <span className="text-xs flex items-center gap-1">
-                              <Check size={12} className="text-green-600" /> {counts.yes}
-                            </span>
-                          )}
-                          {counts.maybe > 0 && (
-                            <span className="text-xs flex items-center gap-1">
-                              <HelpCircle size={12} className="text-amber-600" /> {counts.maybe}
-                            </span>
-                          )}
-                          {counts.no > 0 && (
-                            <span className="text-xs flex items-center gap-1">
-                              <X size={12} className="text-red-600" /> {counts.no}
-                            </span>
+                        <div className="space-y-1">
+                          {/* Show birthdays first */}
+                          {dayBirthdays.slice(0, maxVisible).map((birthday) => {
+                            shown++;
+                            const colors = categoryColors.birthday;
+                            return (
+                              <button
+                                key={birthday.id}
+                                onClick={() => onViewPerson?.(birthday.person.id)}
+                                className={`w-full text-left px-1.5 py-0.5 text-[10px] font-medium rounded truncate ${colors.bg} ${colors.text} flex items-center gap-1`}
+                              >
+                                <Cake size={8} />
+                                {birthday.person.firstName}
+                              </button>
+                            );
+                          })}
+                          {/* Show anniversaries */}
+                          {shown < maxVisible && dayAnniversaries.slice(0, maxVisible - shown).map((anniversary) => {
+                            shown++;
+                            const colors = categoryColors.anniversary;
+                            return (
+                              <button
+                                key={anniversary.id}
+                                onClick={() => onViewPerson?.(anniversary.person.id)}
+                                className={`w-full text-left px-1.5 py-0.5 text-[10px] font-medium rounded truncate ${colors.bg} ${colors.text} flex items-center gap-1`}
+                              >
+                                <Heart size={8} />
+                                {anniversary.person.firstName}
+                              </button>
+                            );
+                          })}
+                          {/* Show events */}
+                          {shown < maxVisible && dayEvents.slice(0, maxVisible - shown).map((event) => {
+                            shown++;
+                            const colors = categoryColors[event.category] || categoryColors.other;
+                            return (
+                              <button
+                                key={event.id}
+                                onClick={() => openEditEventModal(event)}
+                                className={`w-full text-left px-1.5 py-0.5 text-[10px] font-medium rounded truncate ${colors.bg} ${colors.text}`}
+                              >
+                                {event.title}
+                              </button>
+                            );
+                          })}
+                          {totalItems > maxVisible && (
+                            <p className="text-[10px] text-gray-500 dark:text-dark-400 pl-1">
+                              +{totalItems - maxVisible} more
+                            </p>
                           )}
                         </div>
-                        <button
-                          onClick={() => openRSVPModal(event)}
-                          className="px-3 py-1.5 bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
-                        >
-                          <Plus size={12} />
-                          Add RSVP
-                        </button>
-                      </div>
-                    </div>
+                      </>
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
-        ))}
-      </div>
-
-      {events.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
-          <CalendarIcon className="mx-auto text-gray-300 dark:text-dark-600 mb-3" size={48} />
-          <p className="text-gray-400 dark:text-dark-400">No upcoming events</p>
         </div>
-      )}
+
+        {/* Upcoming Sidebar */}
+        <div className="xl:col-span-1 space-y-4">
+          {/* Upcoming Birthdays */}
+          {showBirthdays && upcomingBirthdays.length > 0 && (
+            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-pink-50 dark:bg-pink-500/10">
+                <div className="flex items-center gap-2">
+                  <Cake className="text-pink-500" size={18} />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-dark-100">Upcoming Birthdays</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
+                  </div>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[300px] overflow-y-auto">
+                {upcomingBirthdays.map((birthday) => {
+                  const birthdayDate = new Date(birthday.date);
+                  return (
+                    <div
+                      key={birthday.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors cursor-pointer"
+                      onClick={() => onViewPerson?.(birthday.person.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-pink-100 dark:bg-pink-500/20 rounded-full flex items-center justify-center text-pink-600 dark:text-pink-400 font-medium text-sm">
+                          {birthday.person.firstName[0]}{birthday.person.lastName[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                            {birthday.person.firstName} {birthday.person.lastName}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
+                            {birthdayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            <span className="mx-1">·</span>
+                            Turning {birthday.age}
+                          </p>
+                          <div className="flex items-center gap-3 mt-2">
+                            {birthday.person.email && (
+                              <a
+                                href={`mailto:${birthday.person.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Mail size={10} />
+                                Email
+                              </a>
+                            )}
+                            {birthday.person.phone && (
+                              <a
+                                href={`tel:${birthday.person.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Phone size={10} />
+                                Call
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Anniversaries */}
+          {showAnniversaries && upcomingAnniversaries.length > 0 && (
+            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-red-50 dark:bg-red-500/10">
+                <div className="flex items-center gap-2">
+                  <Heart className="text-red-500" size={18} />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-dark-100">Member Anniversaries</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
+                  </div>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[250px] overflow-y-auto">
+                {upcomingAnniversaries.map((anniversary) => {
+                  const anniversaryDate = new Date(anniversary.date);
+                  return (
+                    <div
+                      key={anniversary.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors cursor-pointer"
+                      onClick={() => onViewPerson?.(anniversary.person.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 font-medium text-sm">
+                          {anniversary.person.firstName[0]}{anniversary.person.lastName[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                            {anniversary.person.firstName} {anniversary.person.lastName}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
+                            {anniversaryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            <span className="mx-1">·</span>
+                            {anniversary.years} year{anniversary.years !== 1 ? 's' : ''} as member
+                          </p>
+                          <div className="flex items-center gap-3 mt-2">
+                            {anniversary.person.email && (
+                              <a
+                                href={`mailto:${anniversary.person.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Mail size={10} />
+                                Email
+                              </a>
+                            )}
+                            {anniversary.person.phone && (
+                              <a
+                                href={`tel:${anniversary.person.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              >
+                                <Phone size={10} />
+                                Call
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Events */}
+          {showEvents && (
+          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+              <h3 className="font-semibold text-gray-900 dark:text-dark-100">Upcoming Events</h3>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>
+            </div>
+            <div className="divide-y divide-gray-100 dark:divide-dark-700 max-h-[400px] overflow-y-auto">
+              {upcomingEvents.length === 0 ? (
+                <div className="p-8 text-center">
+                  <CalendarIcon className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={32} />
+                  <p className="text-gray-500 dark:text-dark-400 text-sm">No upcoming events</p>
+                </div>
+              ) : (
+                upcomingEvents.map((event) => {
+                  const colors = categoryColors[event.category] || categoryColors.other;
+                  const counts = getRSVPCounts(event.id);
+                  const eventDate = new Date(event.startDate);
+                  return (
+                    <div key={event.id} className="p-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${colors.dot}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                              {event.title}
+                            </h4>
+                            <div className="flex items-center gap-1">
+                              {onUpdateEvent && (
+                                <button
+                                  onClick={() => openEditEventModal(event)}
+                                  className="p-1 hover:bg-gray-200 dark:hover:bg-dark-600 rounded"
+                                >
+                                  <Edit2 size={12} className="text-gray-400" />
+                                </button>
+                              )}
+                              {onDeleteEvent && (
+                                <button
+                                  onClick={() => handleDeleteEvent(event.id)}
+                                  className="p-1 hover:bg-red-100 dark:hover:bg-red-500/10 rounded"
+                                >
+                                  <Trash2 size={12} className="text-gray-400 hover:text-red-500" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-dark-400">
+                            <span className="flex items-center gap-1">
+                              <CalendarIcon size={10} />
+                              {eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                            {!event.allDay && (
+                              <span className="flex items-center gap-1">
+                                <Clock size={10} />
+                                {eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                          {event.location && (
+                            <p className="text-xs text-gray-400 dark:text-dark-500 mt-1 flex items-center gap-1">
+                              <MapPin size={10} />
+                              {event.location}
+                            </p>
+                          )}
+                          {counts.yes > 0 && (
+                            <div className="flex items-center gap-1 mt-2">
+                              <Users size={10} className="text-gray-400" />
+                              <span className="text-xs text-gray-500 dark:text-dark-400">
+                                {counts.totalAttending} attending
+                              </span>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => openRSVPModal(event)}
+                            className="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                          >
+                            Manage RSVPs
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+          )}
+        </div>
+      </div>
 
       {/* RSVP Modal */}
       {showRSVPModal && selectedEvent && (
@@ -226,31 +978,24 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
           <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
-                RSVP for {selectedEvent.title}
+                RSVP: {selectedEvent.title}
               </h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-                {new Date(selectedEvent.startDate).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
             </div>
 
             <div className="p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
-                  Person
+                  Select Person
                 </label>
                 <select
                   value={rsvpPersonId}
                   onChange={(e) => setRsvpPersonId(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
-                  <option value="">Select a person</option>
-                  {people.map((person) => (
-                    <option key={person.id} value={person.id}>
-                      {person.firstName} {person.lastName}
+                  <option value="">Choose a person...</option>
+                  {people.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.firstName} {p.lastName}
                     </option>
                   ))}
                 </select>
@@ -262,20 +1007,24 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
                 </label>
                 <div className="flex gap-2">
                   {[
-                    { value: 'yes', label: 'Yes', icon: Check, color: 'bg-green-100 text-green-700 border-green-300 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30' },
-                    { value: 'maybe', label: 'Maybe', icon: HelpCircle, color: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30' },
-                    { value: 'no', label: 'No', icon: X, color: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30' },
-                  ].map(({ value, label, icon: Icon, color }) => (
+                    { status: 'yes' as const, icon: <Check size={16} />, label: 'Yes' },
+                    { status: 'no' as const, icon: <X size={16} />, label: 'No' },
+                    { status: 'maybe' as const, icon: <HelpCircle size={16} />, label: 'Maybe' },
+                  ].map(({ status, icon, label }) => (
                     <button
-                      key={value}
-                      onClick={() => setRsvpStatus(value as RSVP['status'])}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${
-                        rsvpStatus === value
-                          ? color
-                          : 'bg-gray-50 dark:bg-dark-800 text-gray-500 dark:text-dark-400 border-gray-200 dark:border-dark-600'
+                      key={status}
+                      onClick={() => setRsvpStatus(status)}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium ${
+                        rsvpStatus === status
+                          ? status === 'yes'
+                            ? 'bg-emerald-500 text-white'
+                            : status === 'no'
+                            ? 'bg-red-500 text-white'
+                            : 'bg-amber-500 text-white'
+                          : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300'
                       }`}
                     >
-                      <Icon size={16} />
+                      {icon}
                       {label}
                     </button>
                   ))}
@@ -315,6 +1064,232 @@ export function Calendar({ events, people, rsvps, onRSVP }: CalendarProps) {
                 className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
               >
                 Submit RSVP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Create/Edit Modal */}
+      {showEventModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
+                {editingEvent ? 'Edit Event' : 'Create Event'}
+              </h2>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {/* Quick Templates */}
+              {!editingEvent && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
+                    Quick Add
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { title: 'Sunday Service', category: 'service' as EventCategory, time: '10:00', location: 'Main Sanctuary' },
+                      { title: 'Wednesday Bible Study', category: 'meeting' as EventCategory, time: '19:00', location: 'Fellowship Hall' },
+                      { title: 'Youth Group', category: 'small-group' as EventCategory, time: '18:00', location: 'Youth Room' },
+                      { title: 'Prayer Meeting', category: 'meeting' as EventCategory, time: '07:00', location: 'Chapel' },
+                      { title: 'Leadership Meeting', category: 'meeting' as EventCategory, time: '18:30', location: 'Conference Room' },
+                      { title: 'Potluck Dinner', category: 'event' as EventCategory, time: '17:00', location: 'Fellowship Hall' },
+                    ].map((template) => (
+                      <button
+                        key={template.title}
+                        type="button"
+                        onClick={() => setEventForm(prev => ({
+                          ...prev,
+                          title: template.title,
+                          category: template.category,
+                          startTime: template.time,
+                          location: template.location,
+                        }))}
+                        className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
+                      >
+                        {template.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  value={eventForm.title}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter event title"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
+                  Category
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'service', label: 'Service', activeClass: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-500/30' },
+                    { value: 'meeting', label: 'Meeting', activeClass: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/30' },
+                    { value: 'event', label: 'Event', activeClass: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-500/30' },
+                    { value: 'small-group', label: 'Small Group', activeClass: 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-300 dark:border-purple-500/30' },
+                    { value: 'holiday', label: 'Holiday', activeClass: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-500/30' },
+                    { value: 'other', label: 'Other', activeClass: 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-300 border-gray-300 dark:border-dark-500' },
+                  ].map(({ value, label, activeClass }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setEventForm(prev => ({ ...prev, category: value as EventCategory }))}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                        eventForm.category === value
+                          ? activeClass
+                          : 'bg-gray-50 dark:bg-dark-800 text-gray-600 dark:text-dark-400 border-gray-200 dark:border-dark-600 hover:bg-gray-100 dark:hover:bg-dark-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="allDay"
+                  checked={eventForm.allDay}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, allDay: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600"
+                />
+                <label htmlFor="allDay" className="text-sm text-gray-700 dark:text-dark-300">
+                  All day event
+                </label>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={eventForm.startDate}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, startDate: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  />
+                  {!editingEvent && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {getDateSuggestions().map(({ label, date }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => setEventForm(prev => ({ ...prev, startDate: date }))}
+                          className={`px-2 py-1 text-xs rounded transition-colors ${
+                            eventForm.startDate === date
+                              ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
+                              : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {!eventForm.allDay && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                      Start Time
+                    </label>
+                    <input
+                      type="time"
+                      value={eventForm.startTime}
+                      onChange={(e) => setEventForm(prev => ({ ...prev, startTime: e.target.value }))}
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    />
+                    {!editingEvent && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {timeSuggestions.map(({ label, time }) => (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => setEventForm(prev => ({ ...prev, startTime: time }))}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${
+                              eventForm.startTime === time
+                                ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400'
+                                : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={eventForm.endDate}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  />
+                </div>
+                {!eventForm.allDay && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                      End Time
+                    </label>
+                    <input
+                      type="time"
+                      value={eventForm.endTime}
+                      onChange={(e) => setEventForm(prev => ({ ...prev, endTime: e.target.value }))}
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={eventForm.location}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Enter location"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowEventModal(false);
+                  resetEventForm();
+                }}
+                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl text-gray-700 dark:text-dark-300 font-medium hover:bg-gray-50 dark:hover:bg-dark-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEvent}
+                disabled={!eventForm.title || !eventForm.startDate}
+                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {editingEvent ? 'Save Changes' : 'Create Event'}
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -9,14 +9,19 @@ import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { QuickNote } from './components/QuickNote';
 import { QuickDonationForm } from './components/QuickDonationForm';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { EmailSidebar } from './components/EmailSidebar';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Lazy load MemberPortal for standalone access
+const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
 import { useModals } from './hooks/useModals';
 import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
+import { useChurchSettings } from './hooks/useChurchSettings';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -36,6 +41,7 @@ function App() {
   // Use Supabase data hook
   const {
     isLoading,
+    isDemo,
     people: dbPeople,
     tasks: dbTasks,
     interactions: dbInteractions,
@@ -51,6 +57,12 @@ function App() {
     addPrayer,
     markPrayerAnswered,
     addGiving,
+    createGroup,
+    addGroupMember,
+    removeGroupMember,
+    addEvent,
+    updateEvent,
+    deleteEvent,
   } = useSupabaseData();
 
   // Convert to legacy types for existing components (memoized)
@@ -71,6 +83,7 @@ function App() {
   const modals = useModals();
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
+  const { settings: churchSettings } = useChurchSettings(churchId);
 
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
@@ -84,6 +97,12 @@ function App() {
     addPrayer,
     markPrayerAnswered,
     addGiving,
+    createGroup,
+    addGroupMember,
+    removeGroupMember,
+    addEvent,
+    updateEvent,
+    deleteEvent,
     setView,
     setSelectedPersonId,
     openPersonForm: modals.openPersonForm,
@@ -116,7 +135,7 @@ function App() {
   // AI Agents hook
   const agents = useAgents({
     churchId,
-    churchName: 'Grace Church',
+    churchName: churchSettings?.profile?.name || 'Grace Church',
     people: people.map(p => ({
       id: p.id,
       firstName: p.firstName,
@@ -151,6 +170,7 @@ function App() {
         case 'p': e.preventDefault(); modals.openQuickPrayer(); break;
         case 'm': e.preventDefault(); modals.openQuickNote(); break;
         case 'd': e.preventDefault(); modals.openQuickDonation(); break;
+        case 'e': e.preventDefault(); modals.openEmailSidebar(); break;
         case '/': e.preventDefault(); modals.openSearch(); break;
         case 'escape': modals.closeAll(); break;
       }
@@ -163,28 +183,51 @@ function App() {
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
   const selectedPerson = selectedPersonId ? personMap.get(selectedPersonId) : undefined;
 
+  // Check if we're accessing the standalone member portal
+  const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading GRACE CRM...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {isPortalRoute ? 'Loading Member Portal...' : 'Loading GRACE CRM...'}
+          </p>
         </div>
       </div>
     );
   }
 
+  // Standalone Member Portal (no admin sidebar/layout)
+  if (isPortalRoute) {
+    const churchName = churchSettings?.profile?.name || 'Grace Church';
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        }>
+          <MemberPortal
+            people={people}
+            events={events}
+            giving={giving}
+            attendance={attendanceRecords}
+            rsvps={rsvps}
+            churchName={churchName}
+            churchProfile={churchSettings?.profile}
+            onRSVP={handlers.rsvp}
+            onCheckIn={handlers.checkIn}
+          />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
-      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch}>
-        <div className="bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 px-4 py-2">
-          <div className="flex items-center justify-center gap-2 text-sm text-emerald-800 dark:text-emerald-400">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span><strong>Production Ready</strong> - Grace CRM v1.0 Beta</span>
-          </div>
-        </div>
+      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
         <ErrorBoundary>
           <ViewRenderer
             view={view}
@@ -205,6 +248,7 @@ function App() {
             collectionMgmt={collectionMgmt}
             charityBasketMgmt={charityBasketMgmt}
             agents={agents}
+            onOpenEmailSidebar={modals.openEmailSidebar}
           />
         </ErrorBoundary>
       </Layout>
@@ -244,6 +288,15 @@ function App() {
           onClose={modals.closeQuickDonation}
         />
       )}
+
+      <EmailSidebar
+        isOpen={modals.showEmailSidebar}
+        onClose={modals.closeEmailSidebar}
+        people={people}
+        groups={groups}
+        preselectedRecipients={modals.emailRecipients}
+        preselectedGroup={modals.emailGroupId}
+      />
 
       <PWAInstallPrompt />
     </ErrorBoundary>

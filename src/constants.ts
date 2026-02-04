@@ -748,42 +748,127 @@ export const SAMPLE_GIVING: Giving[] = [
   { id: '30', personId: '6', amount: 100, fund: 'offering', date: getDateString(0), method: 'cash', isRecurring: false },
 ];
 
+// Helper to get next occurrence of a day of week (0 = Sunday, 1 = Monday, etc.)
+const getNextDayOfWeek = (dayOfWeek: number, weeksAhead = 0): string => {
+  const date = new Date(today);
+  const currentDay = date.getDay();
+  const daysUntil = (dayOfWeek - currentDay + 7) % 7 || 7;
+  date.setDate(date.getDate() + daysUntil + weeksAhead * 7);
+  return date.toISOString().split('T')[0];
+};
+
 export const SAMPLE_EVENTS: CalendarEvent[] = [
+  // This Sunday
   {
     id: '1',
     title: 'Sunday Service',
-    startDate: '2025-01-05T10:00:00',
-    endDate: '2025-01-05T11:30:00',
+    startDate: `${getNextDayOfWeek(0)}T10:00:00`,
+    endDate: `${getNextDayOfWeek(0)}T11:30:00`,
     allDay: false,
     location: 'Main Sanctuary',
     category: 'service'
   },
   {
     id: '2',
+    title: 'Newcomers Lunch',
+    startDate: `${getNextDayOfWeek(0)}T12:00:00`,
+    endDate: `${getNextDayOfWeek(0)}T13:30:00`,
+    allDay: false,
+    location: 'Fellowship Hall',
+    category: 'event'
+  },
+  // This week
+  {
+    id: '3',
     title: 'Men of Faith',
-    startDate: '2025-01-07T19:00:00',
-    endDate: '2025-01-07T20:30:00',
+    startDate: `${getNextDayOfWeek(2)}T19:00:00`,
+    endDate: `${getNextDayOfWeek(2)}T20:30:00`,
     allDay: false,
     location: 'Room 201',
     category: 'small-group'
   },
   {
-    id: '3',
+    id: '4',
+    title: 'Women of Grace',
+    startDate: `${getNextDayOfWeek(3)}T09:30:00`,
+    endDate: `${getNextDayOfWeek(3)}T11:00:00`,
+    allDay: false,
+    location: 'Fellowship Hall',
+    category: 'small-group'
+  },
+  {
+    id: '5',
+    title: 'Young Adults',
+    startDate: `${getNextDayOfWeek(4)}T19:30:00`,
+    endDate: `${getNextDayOfWeek(4)}T21:00:00`,
+    allDay: false,
+    location: 'Coffee House',
+    category: 'small-group'
+  },
+  {
+    id: '6',
     title: 'Elder Meeting',
-    startDate: '2025-01-08T18:00:00',
-    endDate: '2025-01-08T19:30:00',
+    startDate: `${getNextDayOfWeek(1)}T18:00:00`,
+    endDate: `${getNextDayOfWeek(1)}T19:30:00`,
     allDay: false,
     location: 'Conference Room',
     category: 'meeting'
   },
+  // Next week
   {
-    id: '4',
-    title: 'Young Adults',
-    startDate: '2025-01-09T19:30:00',
-    endDate: '2025-01-09T21:00:00',
+    id: '7',
+    title: 'Sunday Service',
+    startDate: `${getNextDayOfWeek(0, 1)}T10:00:00`,
+    endDate: `${getNextDayOfWeek(0, 1)}T11:30:00`,
     allDay: false,
-    location: 'Coffee House',
+    location: 'Main Sanctuary',
+    category: 'service'
+  },
+  {
+    id: '8',
+    title: 'Prayer Night',
+    startDate: `${getNextDayOfWeek(3, 1)}T19:00:00`,
+    endDate: `${getNextDayOfWeek(3, 1)}T20:30:00`,
+    allDay: false,
+    location: 'Chapel',
+    category: 'service'
+  },
+  {
+    id: '9',
+    title: 'Membership Class',
+    startDate: `${getNextDayOfWeek(6, 1)}T09:00:00`,
+    endDate: `${getNextDayOfWeek(6, 1)}T12:00:00`,
+    allDay: false,
+    location: 'Room 105',
+    category: 'event'
+  },
+  // Two weeks out
+  {
+    id: '10',
+    title: 'Sunday Service',
+    startDate: `${getNextDayOfWeek(0, 2)}T10:00:00`,
+    endDate: `${getNextDayOfWeek(0, 2)}T11:30:00`,
+    allDay: false,
+    location: 'Main Sanctuary',
+    category: 'service'
+  },
+  {
+    id: '11',
+    title: 'Marriage Matters',
+    startDate: `${getNextDayOfWeek(5, 2)}T18:00:00`,
+    endDate: `${getNextDayOfWeek(5, 2)}T20:00:00`,
+    allDay: false,
+    location: 'Family Life Center',
     category: 'small-group'
+  },
+  {
+    id: '12',
+    title: 'Volunteer Appreciation',
+    startDate: `${getNextDayOfWeek(6, 2)}T17:00:00`,
+    endDate: `${getNextDayOfWeek(6, 2)}T20:00:00`,
+    allDay: false,
+    location: 'Fellowship Hall',
+    category: 'event'
   }
 ];
 

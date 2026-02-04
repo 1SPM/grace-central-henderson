@@ -151,7 +151,18 @@ function MemberCard({ person }: { person: Person }) {
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className="w-11 h-11 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+        {person.photo ? (
+          <img
+            src={person.photo}
+            alt={`${person.firstName} ${person.lastName}`}
+            className="w-11 h-11 rounded-full object-cover flex-shrink-0"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        <div className={`w-11 h-11 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 ${person.photo ? 'hidden' : ''}`}>
           {person.firstName[0]}{person.lastName[0]}
         </div>
 

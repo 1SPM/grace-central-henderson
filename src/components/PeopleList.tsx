@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft, ArrowUpDown } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/exportCsv';
@@ -7,6 +7,9 @@ import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
+import { CSVImportWizard } from './CSVImportWizard';
+
+type SortOption = 'name-asc' | 'name-desc' | 'status' | 'newest' | 'oldest';
 
 interface PeopleListProps {
   people: Person[];
@@ -14,7 +17,7 @@ interface PeopleListProps {
   onAddPerson: () => void;
   onBulkUpdateStatus?: (ids: string[], status: MemberStatus) => void;
   onBulkAddTag?: (ids: string[], tag: string) => void;
-  onImportCSV?: (people: Partial<Person>[]) => void;
+  onImportCSV?: (people: Partial<Person>[]) => Promise<void>;
 }
 
 const statusLabels: Record<MemberStatus, string> = {
@@ -42,13 +45,23 @@ export function PeopleList({
   const [bulkAction, setBulkAction] = useState<'status' | 'tag' | null>(null);
   const [newTag, setNewTag] = useState('');
   const [newStatus, setNewStatus] = useState<MemberStatus>('member');
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importData, setImportData] = useState('');
-  const [importError, setImportError] = useState('');
+  const [showImportWizard, setShowImportWizard] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'table'>(() => {
     const saved = localStorage.getItem('peopleViewMode');
     return (saved as 'card' | 'table') || 'card';
   });
+
+  // Sort state
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    const saved = localStorage.getItem('peopleSortBy');
+    return (saved as SortOption) || 'name-asc';
+  });
+
+  // Save sort preference
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+    localStorage.setItem('peopleSortBy', sort);
+  };
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,17 +110,47 @@ export function PeopleList({
     [people]
   );
 
-  // Memoize filtered people list
-  const filtered = useMemo(() => people.filter((person) => {
-    const matchesSearch =
-      `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      person.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
-    const matchesTag = !tagFilter || person.tags.includes(tagFilter);
-    const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
-    const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
-    return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
-  }), [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter]);
+  // Memoize filtered and sorted people list
+  const filtered = useMemo(() => {
+    const statusOrder: Record<MemberStatus, number> = {
+      leader: 0,
+      member: 1,
+      regular: 2,
+      visitor: 3,
+      inactive: 4,
+    };
+
+    const result = people.filter((person) => {
+      const matchesSearch =
+        `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+        person.email.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
+      const matchesTag = !tagFilter || person.tags.includes(tagFilter);
+      const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
+      const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
+      return matchesSearch && matchesStatus && matchesTag && matchesEmail && matchesPhone;
+    });
+
+    // Sort the results
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+        case 'name-desc':
+          return `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`);
+        case 'status':
+          return statusOrder[a.status] - statusOrder[b.status];
+        case 'newest':
+          return new Date(b.joinDate || 0).getTime() - new Date(a.joinDate || 0).getTime();
+        case 'oldest':
+          return new Date(a.joinDate || 0).getTime() - new Date(b.joinDate || 0).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [people, search, statusFilter, tagFilter, hasEmailFilter, hasPhoneFilter, sortBy]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filtered.length / pageSize);
@@ -201,82 +244,6 @@ export function PeopleList({
     toast.success(`Exported ${selectedPeople.length} people to CSV`);
   };
 
-  const handleImportCSV = () => {
-    try {
-      setImportError('');
-      const lines = importData.trim().split('\n');
-      if (lines.length < 2) {
-        setImportError('CSV must have a header row and at least one data row');
-        return;
-      }
-
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const requiredFields = ['firstname', 'lastname'];
-      const hasRequired = requiredFields.every(f => headers.includes(f));
-
-      if (!hasRequired) {
-        setImportError('CSV must include firstName and lastName columns');
-        return;
-      }
-
-      const imported: Partial<Person>[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length !== headers.length) continue;
-
-        const person: Partial<Person> = {
-          tags: [],
-          smallGroups: []
-        };
-
-        headers.forEach((header, idx) => {
-          const value = values[idx];
-          switch (header) {
-            case 'firstname':
-              person.firstName = value;
-              break;
-            case 'lastname':
-              person.lastName = value;
-              break;
-            case 'email':
-              person.email = value;
-              break;
-            case 'phone':
-              person.phone = value;
-              break;
-            case 'status':
-              if (['visitor', 'regular', 'member', 'leader', 'inactive'].includes(value.toLowerCase())) {
-                person.status = value.toLowerCase() as MemberStatus;
-              }
-              break;
-            case 'tags':
-              person.tags = value.split(';').map(t => t.trim()).filter(Boolean);
-              break;
-          }
-        });
-
-        if (person.firstName && person.lastName) {
-          if (!person.status) person.status = 'visitor';
-          imported.push(person);
-        }
-      }
-
-      if (imported.length === 0) {
-        setImportError('No valid records found in CSV');
-        return;
-      }
-
-      if (onImportCSV) {
-        onImportCSV(imported);
-        toast.success(`Imported ${imported.length} people successfully`);
-        setShowImportModal(false);
-        setImportData('');
-      }
-    } catch {
-      setImportError('Failed to parse CSV. Please check the format.');
-    }
-  };
-
   const clearAdvancedFilters = () => {
     setTagFilter('');
     setHasEmailFilter(null);
@@ -285,18 +252,39 @@ export function PeopleList({
 
   const hasActiveAdvancedFilters = tagFilter || hasEmailFilter !== null || hasPhoneFilter !== null;
 
+  const sortLabels: Record<SortOption, string> = {
+    'name-asc': 'Name (A-Z)',
+    'name-desc': 'Name (Z-A)',
+    'status': 'Status',
+    'newest': 'Newest First',
+    'oldest': 'Oldest First',
+  };
+
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">People</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">{people.length} total people in your congregation</p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as SortOption)}
+              className="appearance-none pl-9 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {Object.entries(sortLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <ArrowUpDown size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
           <ViewToggle view={viewMode} onViewChange={handleViewModeChange} />
           {onImportCSV && (
             <button
-              onClick={() => setShowImportModal(true)}
+              onClick={() => setShowImportWizard(true)}
               className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
             >
               <Upload size={18} />
@@ -565,7 +553,18 @@ export function PeopleList({
                   onClick={() => onViewPerson(person.id)}
                   className="flex items-center gap-4 text-left"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg">
+                  {person.photo ? (
+                    <img
+                      src={person.photo}
+                      alt={`${person.firstName} ${person.lastName}`}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${person.photo ? 'hidden' : ''}`}>
                     {person.firstName[0]}{person.lastName[0]}
                   </div>
                   <div>
@@ -643,7 +642,18 @@ export function PeopleList({
                   )}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                      {person.photo ? (
+                        <img
+                          src={person.photo}
+                          alt={`${person.firstName} ${person.lastName}`}
+                          className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm ${person.photo ? 'hidden' : ''}`}>
                         {person.firstName[0]}{person.lastName[0]}
                       </div>
                       <span className="font-medium text-gray-900 dark:text-dark-100">
@@ -762,47 +772,12 @@ export function PeopleList({
         </div>
       )}
 
-      {/* Import CSV Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Import from CSV</h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-                Paste CSV data with columns: firstName, lastName, email, phone, status, tags
-              </p>
-            </div>
-            <div className="p-4">
-              <textarea
-                value={importData}
-                onChange={(e) => setImportData(e.target.value)}
-                placeholder={`firstName,lastName,email,phone,status,tags
-John,Doe,john@example.com,555-1234,visitor,Youth;Volunteer
-Jane,Smith,jane@example.com,555-5678,member,Women's Ministry`}
-                rows={8}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {importError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{importError}</p>
-              )}
-            </div>
-            <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex gap-3">
-              <button
-                onClick={() => { setShowImportModal(false); setImportData(''); setImportError(''); }}
-                className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl text-gray-700 dark:text-dark-300 font-medium hover:bg-gray-50 dark:hover:bg-dark-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleImportCSV}
-                disabled={!importData.trim()}
-                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
-              >
-                Import
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Import CSV Wizard */}
+      {showImportWizard && onImportCSV && (
+        <CSVImportWizard
+          onImport={onImportCSV}
+          onClose={() => setShowImportWizard(false)}
+        />
       )}
     </div>
   );

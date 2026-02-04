@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Church,
   Users,
@@ -13,10 +13,37 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Save,
+  Plus,
+  Trash2,
+  Clock,
+  Sparkles,
+  MapPin,
+  ToggleLeft,
+  ToggleRight,
+  Download,
+  Calendar,
+  Heart,
+  DollarSign,
+  CheckSquare,
+  UsersIcon,
+  Upload,
   Accessibility,
 } from 'lucide-react';
+import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
+import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
+import {
+  exportPeopleToCSV,
+  exportGivingToCSV,
+  exportEventsToCSV,
+  exportTasksToCSV,
+  exportGroupsToCSV,
+  exportPrayerRequestsToCSV,
+  exportAllDataToCSV
+} from '../utils/csvExport';
+import type { Person, Task, CalendarEvent, Giving, SmallGroup, PrayerRequest } from '../types';
 
 interface IntegrationCardProps {
   title: string;
@@ -158,9 +185,60 @@ const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
   { value: 'x-large', label: 'X-Large', preview: 'Aa' },
 ];
 
-export function Settings() {
+interface SettingsProps {
+  people?: Person[];
+  tasks?: Task[];
+  events?: CalendarEvent[];
+  giving?: Giving[];
+  groups?: SmallGroup[];
+  prayers?: PrayerRequest[];
+  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import') => void;
+}
+
+export function Settings({
+  people = [],
+  tasks = [],
+  events = [],
+  giving = [],
+  groups = [],
+  prayers = [],
+  onNavigate,
+}: SettingsProps) {
   const { status, saveIntegrations } = useIntegrations();
   const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
+  const { settings: churchSettings, saveProfile, isLoading: settingsLoading } = useChurchSettings();
+  const { settings: aiSettings, toggleSetting, enableAll, disableAll } = useAISettings();
+
+  // Church profile state
+  const [churchProfile, setChurchProfile] = useState({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    phone: '',
+    email: '',
+    website: '',
+    serviceTimes: [] as ServiceTime[],
+  });
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  // Load church profile from settings
+  useEffect(() => {
+    if (churchSettings?.profile) {
+      setChurchProfile({
+        name: churchSettings.profile.name || '',
+        address: churchSettings.profile.address || '',
+        city: churchSettings.profile.city || '',
+        state: churchSettings.profile.state || '',
+        zip: churchSettings.profile.zip || '',
+        phone: churchSettings.profile.phone || '',
+        email: churchSettings.profile.email || '',
+        website: churchSettings.profile.website || '',
+        serviceTimes: churchSettings.profile.serviceTimes || [],
+      });
+    }
+  }, [churchSettings]);
 
   // Modal states
   const [showEmailConfig, setShowEmailConfig] = useState(false);
@@ -220,8 +298,19 @@ export function Settings() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    const success = await saveProfile(churchProfile);
+    setSaving(false);
+    if (success) {
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2000);
+    }
+  };
+
   return (
     <div className="p-8">
+      <div className="max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Settings</h1>
         <p className="text-gray-500 dark:text-dark-400 mt-1">Manage your GRACE CRM configuration</p>
@@ -273,6 +362,79 @@ export function Settings() {
             onConfigure={() => setShowAuthConfig(true)}
           />
         </div>
+      </div>
+
+      {/* AI Features Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
+              <Sparkles className="text-violet-500" size={20} />
+              AI Features
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
+              Control which AI-powered features are enabled
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={enableAll}
+              className="px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+            >
+              Enable All
+            </button>
+            <button
+              onClick={disableAll}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-dark-800 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700"
+            >
+              Disable All
+            </button>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+          {AI_FEATURES.map((feature) => {
+            const isEnabled = aiSettings[feature.id as keyof AISettings];
+            return (
+              <div
+                key={feature.id}
+                className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors"
+              >
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-gray-900 dark:text-dark-100">
+                      {feature.name}
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 rounded-full">
+                      <MapPin size={10} />
+                      {feature.location}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
+                    {feature.description}
+                  </p>
+                </div>
+                <button
+                  onClick={() => toggleSetting(feature.id as keyof AISettings)}
+                  className={`flex-shrink-0 transition-colors ${
+                    isEnabled
+                      ? 'text-emerald-500 hover:text-emerald-600'
+                      : 'text-gray-300 dark:text-dark-600 hover:text-gray-400 dark:hover:text-dark-500'
+                  }`}
+                  aria-label={`Toggle ${feature.name}`}
+                >
+                  {isEnabled ? (
+                    <ToggleRight size={32} strokeWidth={1.5} />
+                  ) : (
+                    <ToggleLeft size={32} strokeWidth={1.5} />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-dark-500 mt-2">
+          AI features require a configured Gemini API key. Disabling features will hide their UI elements.
+        </p>
       </div>
 
       {/* Accessibility Section */}
@@ -362,7 +524,8 @@ export function Settings() {
       </div>
 
       {/* Church Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Church Profile */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center">
@@ -374,22 +537,226 @@ export function Settings() {
             </div>
           </div>
           <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Church Name"
-              defaultValue="Grace Community Church"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Address"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Phone"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Church Name
+              </label>
+              <input
+                type="text"
+                placeholder="Your Church Name"
+                value={churchProfile.name}
+                onChange={(e) => setChurchProfile({ ...churchProfile, name: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Street Address
+              </label>
+              <input
+                type="text"
+                placeholder="123 Main Street"
+                value={churchProfile.address}
+                onChange={(e) => setChurchProfile({ ...churchProfile, address: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-1">
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  City
+                </label>
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={churchProfile.city}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, city: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  State
+                </label>
+                <input
+                  type="text"
+                  placeholder="CA"
+                  value={churchProfile.state}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, state: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  ZIP
+                </label>
+                <input
+                  type="text"
+                  placeholder="90210"
+                  value={churchProfile.zip}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, zip: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  placeholder="(555) 123-4567"
+                  value={churchProfile.phone}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, phone: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="info@church.org"
+                  value={churchProfile.email}
+                  onChange={(e) => setChurchProfile({ ...churchProfile, email: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Website
+              </label>
+              <input
+                type="url"
+                placeholder="https://yourchurch.org"
+                value={churchProfile.website}
+                onChange={(e) => setChurchProfile({ ...churchProfile, website: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving || settingsLoading}
+              className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {profileSaved ? (
+                <>
+                  <Check size={16} />
+                  Saved!
+                </>
+              ) : saving ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Profile
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Service Times */}
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                <Clock className="text-emerald-600 dark:text-emerald-400" size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-dark-100">Service Times</h2>
+                <p className="text-sm text-gray-500 dark:text-dark-400">Shown on member portal</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setChurchProfile({
+                  ...churchProfile,
+                  serviceTimes: [...churchProfile.serviceTimes, { day: 'Sunday', time: '10:00 AM', name: 'Worship Service' }]
+                });
+              }}
+              className="w-8 h-8 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+            >
+              <Plus size={18} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {churchProfile.serviceTimes.length === 0 ? (
+              <p className="text-gray-400 dark:text-dark-500 text-sm text-center py-6">
+                No service times configured. Click + to add one.
+              </p>
+            ) : (
+              churchProfile.serviceTimes.map((service, index) => (
+                <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-dark-800 rounded-xl">
+                  <select
+                    value={service.day}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], day: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    className="px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={service.time}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], time: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    placeholder="10:00 AM"
+                    className="w-24 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <input
+                    type="text"
+                    value={service.name}
+                    onChange={(e) => {
+                      const newTimes = [...churchProfile.serviceTimes];
+                      newTimes[index] = { ...newTimes[index], name: e.target.value };
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    placeholder="Service name"
+                    className="flex-1 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <button
+                    onClick={() => {
+                      const newTimes = churchProfile.serviceTimes.filter((_, i) => i !== index);
+                      setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))
+            )}
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving || settingsLoading}
+              className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {profileSaved ? (
+                <>
+                  <Check size={16} />
+                  Saved!
+                </>
+              ) : saving ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Service Times
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -456,6 +823,15 @@ export function Settings() {
                 className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600 disabled:opacity-50"
               />
             </label>
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('reminders')}
+                className="w-full mt-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-xl text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-500/20 flex items-center justify-center gap-2"
+              >
+                <Clock size={16} />
+                Manage Automated Reminders
+              </button>
+            )}
             {!status.email && !status.sms && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
                 Configure Email or SMS to enable notifications
@@ -470,17 +846,96 @@ export function Settings() {
               <Database className="text-green-600 dark:text-green-400" size={20} />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data & Backup</h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400">Export and backup options</p>
+              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data Export</h2>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Export data to CSV files</p>
             </div>
           </div>
           <div className="space-y-2">
-            <button className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800">
-              Export All Data (CSV)
+            <button
+              onClick={() => exportAllDataToCSV({ people, giving, events, tasks, groups, prayers })}
+              disabled={people.length === 0}
+              className="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              Export All Data
             </button>
-            <button className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800">
-              Import Data
-            </button>
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <button
+                onClick={() => exportPeopleToCSV(people)}
+                disabled={people.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <Users size={14} />
+                People ({people.length})
+              </button>
+              <button
+                onClick={() => exportGivingToCSV(giving, people)}
+                disabled={giving.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <DollarSign size={14} />
+                Giving ({giving.length})
+              </button>
+              <button
+                onClick={() => exportEventsToCSV(events)}
+                disabled={events.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <Calendar size={14} />
+                Events ({events.length})
+              </button>
+              <button
+                onClick={() => exportTasksToCSV(tasks, people)}
+                disabled={tasks.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <CheckSquare size={14} />
+                Tasks ({tasks.length})
+              </button>
+              <button
+                onClick={() => exportGroupsToCSV(groups, people)}
+                disabled={groups.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <UsersIcon size={14} />
+                Groups ({groups.length})
+              </button>
+              <button
+                onClick={() => exportPrayerRequestsToCSV(prayers, people)}
+                disabled={prayers.length === 0}
+                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <Heart size={14} />
+                Prayers ({prayers.length})
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Data Import */}
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
+              <Upload size={20} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data Import</h2>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Import from other systems</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('planning-center-import')}
+                className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
+              >
+                <Upload size={16} />
+                Import from Planning Center
+              </button>
+            )}
+            <p className="text-xs text-gray-400 dark:text-dark-500 text-center pt-2">
+              Import people, groups, and other data from Planning Center exports
+            </p>
           </div>
         </div>
       </div>
@@ -494,6 +949,7 @@ export function Settings() {
           </div>
           <Church size={48} className="opacity-20" />
         </div>
+      </div>
       </div>
 
       {/* Email Config Modal */}

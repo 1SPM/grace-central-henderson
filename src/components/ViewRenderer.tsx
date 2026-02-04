@@ -4,6 +4,7 @@ import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
+import { useChurchSettings } from '../hooks/useChurchSettings';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance } from '../types';
 
 // Lazy load less frequently used views for code splitting
@@ -30,8 +31,16 @@ const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.C
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
-const MemberPortal = lazy(() => import('./member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
+const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
+const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
+const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
+const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
+const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => ({ default: m.AutomatedReminders })));
+const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
+const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
+const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -57,11 +66,13 @@ interface ViewRendererProps {
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   volunteerAssignments: { id: string; eventId: string; roleId: string; personId: string; status: 'confirmed' | 'pending' | 'declined' }[];
   selectedPerson?: Person;
+  onOpenEmailSidebar?: (recipients?: string[], groupId?: string) => void;
   handlers: {
     viewPerson: (id: string) => void;
     backToPeople: () => void;
     addPerson: () => void;
     editPerson: (person: Person) => void;
+    savePerson: (person: Omit<Person, 'id'> | Person) => Promise<void>;
     addInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => Promise<void>;
     addTask: (task: Omit<Task, 'id' | 'createdAt'>) => Promise<void>;
     toggleTask: (id: string) => Promise<void>;
@@ -75,6 +86,20 @@ interface ViewRendererProps {
     updateVolunteerStatus: (assignmentId: string, status: 'confirmed' | 'pending' | 'declined') => void;
     removeVolunteer: (assignmentId: string) => void;
     updatePersonTags: (personId: string, tags: string[]) => Promise<void>;
+    createGroup: (group: Omit<SmallGroup, 'id'>) => Promise<void>;
+    addGroupMember: (groupId: string, personId: string) => Promise<void>;
+    removeGroupMember: (groupId: string, personId: string) => Promise<void>;
+    addEvent?: (event: {
+      title: string;
+      description?: string;
+      startDate: string;
+      endDate?: string;
+      allDay: boolean;
+      location?: string;
+      category: CalendarEvent['category'];
+    }) => Promise<void>;
+    updateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => Promise<void>;
+    deleteEvent?: (eventId: string) => Promise<void>;
   };
   collectionMgmt: {
     campaigns: any[];
@@ -118,7 +143,10 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
-    collectionMgmt, charityBasketMgmt, agents } = props;
+    collectionMgmt, charityBasketMgmt, agents, onOpenEmailSidebar } = props;
+
+  const { settings } = useChurchSettings(churchId);
+  const churchName = settings?.profile?.name || 'Grace Church';
 
   // Core views (not lazy loaded for instant response)
   switch (view) {
@@ -127,6 +155,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         <Dashboard
           people={people}
           tasks={tasks}
+          events={events}
           giving={giving}
           interactions={interactions}
           prayers={prayers}
@@ -136,6 +165,8 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewPeople={() => setView('people')}
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
+          onViewActions={() => setView('feed')}
+          onViewCalendar={() => setView('calendar')}
         />
       );
 
@@ -172,12 +203,16 @@ export function ViewRenderer(props: ViewRendererProps) {
           interactions={interactions}
           tasks={tasks}
           giving={giving}
+          groups={groups}
           onBack={handlers.backToPeople}
           onAddInteraction={handlers.addInteraction}
           onAddTask={handlers.addTask}
           onToggleTask={handlers.toggleTask}
           onEditPerson={handlers.editPerson}
           onViewAllGiving={() => setView('giving')}
+          onAddToGroup={handlers.addGroupMember}
+          onRemoveFromGroup={handlers.removeGroupMember}
+          onSendEmail={onOpenEmailSidebar ? () => onOpenEmailSidebar([selectedPerson.id]) : undefined}
         />
       );
 
@@ -201,7 +236,19 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
 
       case 'calendar':
-        return <Calendar events={events} people={people} rsvps={rsvps} onRSVP={handlers.rsvp} />;
+        return (
+          <Calendar
+            events={events}
+            people={people}
+            rsvps={rsvps}
+            churchName={churchName}
+            onRSVP={handlers.rsvp}
+            onAddEvent={handlers.addEvent}
+            onUpdateEvent={handlers.updateEvent}
+            onDeleteEvent={handlers.deleteEvent}
+            onViewPerson={handlers.viewPerson}
+          />
+        );
 
       case 'volunteers':
         return (
@@ -216,7 +263,33 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'groups':
-        return <Groups groups={groups} people={people} />;
+        return (
+          <Groups
+            groups={groups}
+            people={people}
+            onCreateGroup={handlers.createGroup}
+            onAddMember={handlers.addGroupMember}
+            onRemoveMember={handlers.removeGroupMember}
+            onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+          />
+        );
+
+      case 'families':
+        return (
+          <Families
+            people={people}
+            onSelectPerson={handlers.viewPerson}
+            onUpdatePerson={handlers.savePerson}
+          />
+        );
+
+      case 'skills':
+        return (
+          <SkillsDatabase
+            people={people}
+            onViewPerson={handlers.viewPerson}
+          />
+        );
 
       case 'prayer':
         return <Prayer prayers={prayers} people={people} onMarkAnswered={handlers.markPrayerAnswered} />;
@@ -233,7 +306,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'online-giving':
-        return <OnlineGivingForm churchName="Grace Church" onBack={() => setView('giving')} onSuccess={() => setView('giving')} />;
+        return <OnlineGivingForm churchName={churchName} onBack={() => setView('giving')} onSuccess={() => setView('giving')} />;
 
       case 'batch-entry':
         return (
@@ -332,10 +405,20 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       case 'settings':
-        return <Settings />;
+        return (
+          <Settings
+            people={people}
+            tasks={tasks}
+            events={events}
+            giving={giving}
+            groups={groups}
+            prayers={prayers}
+            onNavigate={(subView) => setView(subView)}
+          />
+        );
 
       case 'connect-card':
-        return <ConnectCard churchId={churchId} churchName="Grace Church" />;
+        return <ConnectCard churchId={churchId} churchName={churchName} />;
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
@@ -346,19 +429,23 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'forms':
         return <FormBuilder onBack={() => setView('settings')} />;
 
+      case 'email-templates':
+        return <EmailTemplateBuilder onBack={() => setView('settings')} />;
+
       case 'member-portal':
       case 'member-directory':
       case 'member-giving':
       case 'member-events':
       case 'member-checkin':
         return (
-          <MemberPortal
+          <MemberPortalPreview
             people={people}
             events={events}
             giving={giving}
             attendance={attendanceRecords}
             rsvps={rsvps}
-            churchName="Grace Church"
+            churchName={churchName}
+            churchProfile={settings?.profile}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
@@ -370,6 +457,66 @@ export function ViewRenderer(props: ViewRendererProps) {
           <div className="p-6 max-w-6xl mx-auto">
             <SundayPrep people={people} prayers={prayers} onViewPerson={handlers.viewPerson} />
           </div>
+        );
+
+      case 'event-registration':
+        return (
+          <EventRegistration
+            events={events}
+            people={people}
+            onAddEvent={handlers.addEvent}
+            onUpdateEvent={handlers.updateEvent}
+            onDeleteEvent={handlers.deleteEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('calendar')}
+          />
+        );
+
+      case 'reminders':
+        return (
+          <AutomatedReminders
+            people={people}
+            tasks={tasks}
+            events={events}
+            prayers={prayers}
+            emailConfigured={false}
+            smsConfigured={false}
+            onBack={() => setView('settings')}
+          />
+        );
+
+      case 'planning-center-import':
+        return (
+          <PlanningCenterImport
+            existingPeople={people}
+            existingGroups={groups}
+            onImportPeople={handlers.importCSV}
+            onBack={() => setView('people')}
+          />
+        );
+
+      case 'qr-checkin':
+        return (
+          <QRCheckIn
+            people={people}
+            events={events}
+            attendance={attendanceRecords}
+            churchName={churchName}
+            churchId={churchId}
+            onCheckIn={handlers.checkIn}
+            onBack={() => setView('attendance')}
+          />
+        );
+
+      case 'follow-up-automation':
+        return (
+          <FollowUpAutomation
+            people={people}
+            tasks={tasks}
+            interactions={interactions}
+            onAddTask={handlers.addTask}
+            onBack={() => setView('settings')}
+          />
         );
 
       default:

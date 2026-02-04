@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check } from 'lucide-react';
 import { Person, Task, PrayerRequest } from '../types';
 import { generateAIText } from '../lib/services/ai';
+import { useAISettings } from '../hooks/useAISettings';
 
 interface GlobalSearchProps {
   people: Person[];
@@ -46,6 +47,7 @@ export function GlobalSearch({
   onSelectPrayer,
   onClose
 }: GlobalSearchProps) {
+  const { settings: aiSettings } = useAISettings();
   const [mode, setMode] = useState<Mode>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -265,17 +267,19 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
             <Search size={16} />
             Search
           </button>
-          <button
-            onClick={() => setMode('ai')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-              mode === 'ai'
-                ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400'
-                : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200'
-            }`}
-          >
-            <Sparkles size={16} />
-            AI Assistant
-          </button>
+          {aiSettings.smartSearch && (
+            <button
+              onClick={() => setMode('ai')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+                mode === 'ai'
+                  ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400'
+                  : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200'
+              }`}
+            >
+              <Sparkles size={16} />
+              AI Assistant
+            </button>
+          )}
           <button
             onClick={onClose}
             className="p-3 hover:bg-gray-100 dark:hover:bg-dark-800"
@@ -329,16 +333,18 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
             {!query && (
               <div className="p-8 text-center text-gray-400 dark:text-dark-400">
                 <p className="text-sm">Search people, tasks, and prayers</p>
-                <p className="text-xs mt-2">
-                  <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded">Tab</kbd> to switch to AI
-                </p>
+                {aiSettings.smartSearch && (
+                  <p className="text-xs mt-2">
+                    <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded">Tab</kbd> to switch to AI
+                  </p>
+                )}
               </div>
             )}
           </>
         )}
 
         {/* AI Mode */}
-        {mode === 'ai' && (
+        {mode === 'ai' && aiSettings.smartSearch && (
           <>
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px]">

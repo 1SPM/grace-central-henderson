@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Person } from '../types';
 import { generateAIText } from '../lib/services/ai';
+import { useAISettings } from '../hooks/useAISettings';
 
 interface Message {
   id: string;
@@ -46,6 +47,25 @@ const quickActions = [
 ];
 
 export function AIAssistant({ people, onClose, onSelectPerson }: AIAssistantProps) {
+  const { settings: aiSettings } = useAISettings();
+
+  // Show disabled state if AI assistant is turned off
+  if (!aiSettings.aiAssistant) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <Sparkles size={32} className="text-gray-300 dark:text-dark-600 mb-3" />
+        <p className="text-gray-500 dark:text-dark-400 mb-2">AI Assistant is disabled</p>
+        <p className="text-xs text-gray-400 dark:text-dark-500">Enable it in Settings → AI Features</p>
+        <button
+          onClick={onClose}
+          className="mt-4 px-4 py-2 text-sm text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -410,7 +430,13 @@ interface AISuggestButtonProps {
 }
 
 export function AISuggestButton({ onGenerate, context, className = '' }: AISuggestButtonProps) {
+  const { settings: aiSettings } = useAISettings();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Don't render if message composer is disabled
+  if (!aiSettings.messageComposer) {
+    return null;
+  }
 
   const handleGenerate = async () => {
     setIsLoading(true);
