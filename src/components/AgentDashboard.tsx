@@ -29,6 +29,7 @@ import {
   BookOpen,
   FileText,
   Lightbulb,
+  ShoppingBasket,
 } from 'lucide-react';
 import type {
   AgentConfig,
@@ -38,6 +39,7 @@ import type {
   DonationProcessingConfig,
   NewMemberConfig,
   SermonProgrammingConfig,
+  CharityBasketConfig,
   LifeEvent,
 } from '../lib/agents/types';
 
@@ -46,6 +48,7 @@ interface AgentDashboardProps {
   donationConfig: DonationProcessingConfig;
   newMemberConfig: NewMemberConfig;
   sermonConfig?: SermonProgrammingConfig;
+  charityBasketConfig?: CharityBasketConfig;
   upcomingLifeEvents: LifeEvent[];
   recentLogs: AgentLog[];
   stats: {
@@ -53,6 +56,7 @@ interface AgentDashboardProps {
     donation: AgentStats;
     newMember: AgentStats;
     sermon?: AgentStats;
+    charityBasket?: AgentStats;
   };
   onToggleAgent: (agentId: string, enabled: boolean) => void;
   onUpdateConfig: (agentId: string, config: Partial<AgentConfig>) => void;
@@ -224,6 +228,7 @@ export function AgentDashboard({
   donationConfig,
   newMemberConfig,
   sermonConfig,
+  charityBasketConfig,
   upcomingLifeEvents,
   recentLogs,
   stats,
@@ -487,6 +492,64 @@ export function AgentDashboard({
                   <span>Style: {sermonConfig.settings.preferredStyle}</span>
                   <Lightbulb className="w-4 h-4 ml-2" />
                   <span>Illustrations: {sermonConfig.settings.enableIllustrations ? 'On' : 'Off'}</span>
+                </div>
+              </div>
+            </AgentCard>
+          )}
+
+          {/* Charity Basket Automation Agent */}
+          {charityBasketConfig && stats.charityBasket && (
+            <AgentCard
+              config={charityBasketConfig}
+              icon={<ShoppingBasket className="w-5 h-5" />}
+              stats={stats.charityBasket}
+              description="Automate weekly charity basket reminders and holiday scheduling"
+              onToggle={(enabled) => onToggleAgent('charity-basket-agent', enabled)}
+              onRun={() => onRunAgent('charity-basket-agent')}
+              onConfigure={() => setConfigModal('charity-basket-agent')}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Weekly Reminders</span>
+                  <span
+                    className={
+                      charityBasketConfig.settings.enableWeeklyReminders
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                    }
+                  >
+                    {charityBasketConfig.settings.enableWeeklyReminders ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Auto Create Baskets</span>
+                  <span
+                    className={
+                      charityBasketConfig.settings.enableAutoBasketCreation
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                    }
+                  >
+                    {charityBasketConfig.settings.enableAutoBasketCreation ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Calendar className="w-4 h-4" />
+                  <span className="capitalize">Reminder Day: {charityBasketConfig.settings.reminderDay}</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {charityBasketConfig.settings.holidaySchedule.thanksgiving && (
+                    <span className="text-xs px-2 py-0.5 bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-400 rounded">Thanksgiving</span>
+                  )}
+                  {charityBasketConfig.settings.holidaySchedule.christmas && (
+                    <span className="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 rounded">Christmas</span>
+                  )}
+                  {charityBasketConfig.settings.holidaySchedule.easter && (
+                    <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 rounded">Easter</span>
+                  )}
+                  {charityBasketConfig.settings.holidaySchedule.backToSchool && (
+                    <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 rounded">Back to School</span>
+                  )}
                 </div>
               </div>
             </AgentCard>

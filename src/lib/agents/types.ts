@@ -201,6 +201,54 @@ export interface SermonSeries {
   status: 'planning' | 'active' | 'completed';
 }
 
+// Charity Basket Automation Agent Types
+export interface CharityBasketConfig extends AgentConfig {
+  settings: {
+    enableWeeklyReminders: boolean;
+    reminderDay: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+    enableAutoBasketCreation: boolean;
+    autoBasketTypes: ('food' | 'holiday' | 'school' | 'emergency')[];
+    enableDonorThankYou: boolean;
+    notifyWhenReady: boolean;
+    notifyRecipients: string[]; // Staff IDs to notify
+    holidaySchedule: {
+      thanksgiving: boolean;
+      christmas: boolean;
+      easter: boolean;
+      backToSchool: boolean;
+    };
+    defaultItems: {
+      food: string[];
+      holiday: string[];
+      school: string[];
+    };
+    churchName: string;
+  };
+}
+
+export interface BasketEvent {
+  basketId: string;
+  basketName: string;
+  basketType: string;
+  eventType: 'created' | 'item_added' | 'ready' | 'distributed';
+  recipientName?: string;
+  itemCount?: number;
+  totalValue?: number;
+  donorName?: string;
+  timestamp: string;
+}
+
+export interface ScheduledBasket {
+  id: string;
+  name: string;
+  type: 'food' | 'holiday' | 'school' | 'emergency';
+  scheduledDate: string;
+  recurrence: 'weekly' | 'monthly' | 'yearly' | 'once';
+  autoCreate: boolean;
+  defaultItems: string[];
+  status: 'scheduled' | 'created' | 'cancelled';
+}
+
 // Agent execution context
 export interface AgentContext {
   churchId: string;
