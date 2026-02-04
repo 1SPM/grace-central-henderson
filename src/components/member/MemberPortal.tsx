@@ -5,6 +5,7 @@ import { MemberDirectoryPage } from './MemberDirectoryPage';
 import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
 import { MemberCheckInPage } from './MemberCheckInPage';
+import { MemberShopPage } from './MemberShopPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
@@ -79,6 +80,14 @@ export function MemberPortal({
             personId={currentMember?.id}
             personName={currentMember ? `${currentMember.firstName}` : undefined}
             onCheckIn={onCheckIn}
+          />
+        );
+
+      case 'shop':
+        return (
+          <MemberShopPage
+            churchName={churchName}
+            personId={currentMember?.id}
           />
         );
 

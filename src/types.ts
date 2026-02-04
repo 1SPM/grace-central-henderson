@@ -150,7 +150,7 @@ export interface Family {
 }
 
 // Member Portal Tab
-export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin';
+export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'shop';
 
 // ============================================
 // COLLECTION & DONATION MANAGEMENT TYPES
