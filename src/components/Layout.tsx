@@ -21,6 +21,7 @@ import {
   Globe,
   Home,
   Briefcase,
+  Heart,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -43,6 +44,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
   { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+  { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
 
@@ -91,6 +93,7 @@ const viewLabels: Record<View, string> = {
   'planning-center-import': 'Planning Center Import',
   'qr-checkin': 'QR Check-In',
   'follow-up-automation': 'Follow-up Automation',
+  'pastoral-care': 'Pastoral Care',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

@@ -22,6 +22,7 @@ import { useModals } from './hooks/useModals';
 import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
 import { useChurchSettings } from './hooks/useChurchSettings';
+import { usePastoralCare } from './hooks/usePastoralCare';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -83,6 +84,7 @@ function App() {
   const modals = useModals();
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
+  const pastoralCare = usePastoralCare();
   const { settings: churchSettings } = useChurchSettings(churchId);
 
   // App handlers
@@ -248,6 +250,7 @@ function App() {
             collectionMgmt={collectionMgmt}
             charityBasketMgmt={charityBasketMgmt}
             agents={agents}
+            pastoralCare={pastoralCare}
             onOpenEmailSidebar={modals.openEmailSidebar}
           />
         </ErrorBoundary>

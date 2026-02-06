@@ -133,7 +133,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
 }
 
-export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation';
+export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care';
 
 // Family/Household type for grouping
 export interface Family {
@@ -359,4 +359,92 @@ export interface DonationGoal {
   isPublic: boolean;
   status: 'active' | 'completed' | 'cancelled';
   createdAt: string;
+}
+
+// ============================================
+// PASTORAL CARE TYPES
+// ============================================
+
+export type HelpCategory =
+  | 'marriage'
+  | 'addiction'
+  | 'grief'
+  | 'faith-questions'
+  | 'crisis'
+  | 'financial'
+  | 'anxiety-depression'
+  | 'parenting'
+  | 'general';
+
+export type ConversationStatus = 'active' | 'waiting' | 'escalated' | 'resolved' | 'archived';
+export type ConversationPriority = 'low' | 'medium' | 'high' | 'crisis';
+export type MessageSender = 'user' | 'ai' | 'leader';
+
+export interface LeaderProfile {
+  id: string;
+  personId?: string;
+  displayName: string;
+  title: string;
+  bio: string;
+  photo?: string;
+  expertiseAreas: HelpCategory[];
+  isAvailable: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AIPersona {
+  id: string;
+  leaderId: string;
+  name: string;
+  systemPrompt: string;
+  tone: {
+    warmth: number;
+    formality: number;
+    directness: number;
+    faithLevel: number;
+  };
+  boundaries: string[];
+  isActive: boolean;
+}
+
+export interface HelpRequest {
+  id: string;
+  category: HelpCategory;
+  description?: string;
+  isAnonymous: boolean;
+  anonymousId?: string;
+  personId?: string;
+  assignedLeaderId?: string;
+  conversationId?: string;
+  status: 'pending' | 'active' | 'resolved' | 'cancelled';
+  priority: ConversationPriority;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface PastoralConversation {
+  id: string;
+  helpRequestId: string;
+  personaId?: string;
+  leaderId?: string;
+  status: ConversationStatus;
+  priority: ConversationPriority;
+  category: HelpCategory;
+  isAnonymous: boolean;
+  personId?: string;
+  messages: PastoralMessage[];
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+}
+
+export interface PastoralMessage {
+  id: string;
+  conversationId: string;
+  sender: MessageSender;
+  senderName: string;
+  content: string;
+  timestamp: string;
+  aiConfidence?: number;
 }
