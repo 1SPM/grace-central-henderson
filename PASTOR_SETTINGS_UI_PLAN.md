@@ -4,6 +4,26 @@ Replace the current slider-based tone configuration with a rich, form-driven pro
 
 ---
 
+## Important: Member Portal is Finalized
+
+The **Member Portal** (`src/components/member/`) is the most polished module in the app and must NOT be modified. It includes:
+- `MemberPortal.tsx` — main router with 5-tab system
+- `MemberLayout.tsx` — bottom nav + header
+- `MemberHomePage.tsx` — dashboard with quick actions, service times, contact
+- `MemberDirectoryPage.tsx` — searchable alphabetical directory
+- `MemberEventsPage.tsx` — events + RSVP with category filters
+- `MemberGivingPage.tsx` — 3-step giving form, history, recurring setup
+- `MemberCheckInPage.tsx` — QR check-in, today's events, attendance history
+- `MemberPortalPreview.tsx` — admin phone-frame preview + QR share
+
+The pastor settings redesign should **match the member portal's quality and patterns**:
+- Same Tailwind + dark mode conventions (`dark:bg-dark-800`, `dark:text-gray-400`, etc.)
+- Same mobile-first responsive approach
+- Same component structure (clean props interfaces, functional components, hooks)
+- Same UI patterns (pill badges, gradient avatars, card layouts, multi-step forms)
+
+---
+
 ## What We're Replacing
 
 **Current (LeaderManager.tsx on `review-pastoral-care` branch):**
