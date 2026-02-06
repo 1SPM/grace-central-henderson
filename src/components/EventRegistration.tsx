@@ -69,7 +69,7 @@ function generateRecurringInstances(
   const startDate = new Date(event.startDate);
   const endDate = event.recurrenceEndDate ? new Date(event.recurrenceEndDate) : toDate;
 
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
   let instanceIndex = 0;
 
   while (currentDate <= endDate && currentDate <= toDate) {

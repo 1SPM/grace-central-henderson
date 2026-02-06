@@ -82,7 +82,7 @@ function CheckoutFormInner({
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         onSuccess(paymentIntent.id);
       }
-    } catch (err) {
+    } catch {
       onError('An unexpected error occurred');
       setIsProcessing(false);
     }
@@ -354,7 +354,7 @@ export function StripeCheckoutForm({
 
         const data = await response.json();
         setClientSecret(data.clientSecret);
-      } catch (error) {
+      } catch {
         // If API call fails, fall back to demo mode
         console.warn('Stripe API not available, using demo mode');
         setUseDemo(true);

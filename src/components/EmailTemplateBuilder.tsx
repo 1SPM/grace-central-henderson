@@ -21,10 +21,30 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+interface EmailBlockContent {
+  title?: string;
+  subtitle?: string;
+  logoUrl?: string;
+  html?: string;
+  left?: string;
+  right?: string;
+  url?: string;
+  alt?: string;
+  caption?: string;
+  width?: number;
+  text?: string;
+  color?: string;
+  align?: string;
+  style?: string;
+  height?: number;
+  showUnsubscribe?: boolean;
+  showAddress?: boolean;
+}
+
 interface EmailBlock {
   id: string;
   type: 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'columns' | 'header' | 'footer';
-  content: Record<string, any>;
+  content: EmailBlockContent;
 }
 
 interface EmailTemplate {
@@ -158,7 +178,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
     setShowTemplates(false);
   };
 
-  const getDefaultContent = (type: EmailBlock['type']): Record<string, any> => {
+  const getDefaultContent = (type: EmailBlock['type']): EmailBlockContent => {
     switch (type) {
       case 'header':
         return { title: 'Your Church Name', subtitle: 'Newsletter', logoUrl: '' };
@@ -181,7 +201,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
     }
   };
 
-  const updateBlock = (blockId: string, content: Record<string, any>) => {
+  const updateBlock = (blockId: string, content: Partial<EmailBlockContent>) => {
     setTemplate(prev => ({
       ...prev,
       blocks: prev.blocks.map(b =>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Users2, MapPin, Clock, User, Plus, ChevronDown, ChevronUp, UserPlus, UserMinus, Edit2, X, Check, Search, Mail } from 'lucide-react';
 import { SmallGroup, Person } from '../types';
 
@@ -25,14 +25,14 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   // Get people not in a specific group
-  const getAvailablePeople = (groupId: string) => {
+  const getAvailablePeople = useCallback((groupId: string) => {
     const group = groups.find(g => g.id === groupId);
     if (!group) return [];
     return people.filter(p =>
       !group.members.includes(p.id) &&
       (p.status === 'member' || p.status === 'regular' || p.status === 'leader')
     );
-  };
+  }, [groups, people]);
 
   // Filter available people by search
   const filteredAvailablePeople = useMemo(() => {
@@ -43,7 +43,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
     return available.filter(p =>
       `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchLower)
     );
-  }, [addingMemberTo, memberSearch, groups, people]);
+  }, [addingMemberTo, memberSearch, getAvailablePeople]);
 
   // Stats
   const totalMembers = useMemo(() => {

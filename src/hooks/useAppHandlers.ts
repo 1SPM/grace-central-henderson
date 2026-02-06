@@ -1,24 +1,65 @@
 import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
 import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
+import type {
+  Person as DbPerson,
+  PersonInsert,
+  TaskInsert,
+  InteractionInsert,
+  PrayerRequestInsert,
+} from '../lib/database.types';
 
 interface UseAppHandlersProps {
   churchId: string;
-  dbPeople: any[];
-  addPerson: (data: any) => Promise<any>;
-  updatePerson: (id: string, data: any) => Promise<any>;
-  addTask: (data: any) => Promise<any>;
-  toggleTask: (id: string) => Promise<any>;
-  addInteraction: (data: any) => Promise<any>;
-  addPrayer: (data: any) => Promise<any>;
-  markPrayerAnswered: (id: string, testimony?: string) => Promise<any>;
-  addGiving: (data: any) => Promise<any>;
-  createGroup?: (data: any) => Promise<any>;
-  addGroupMember?: (groupId: string, personId: string) => Promise<any>;
-  removeGroupMember?: (groupId: string, personId: string) => Promise<any>;
-  addEvent?: (data: any) => Promise<any>;
-  updateEvent?: (id: string, data: any) => Promise<any>;
-  deleteEvent?: (id: string) => Promise<any>;
+  dbPeople: DbPerson[];
+  addPerson: (data: PersonInsert) => Promise<unknown>;
+  updatePerson: (id: string, data: Partial<DbPerson>) => Promise<unknown>;
+  addTask: (data: TaskInsert) => Promise<unknown>;
+  toggleTask: (id: string) => Promise<unknown>;
+  addInteraction: (data: InteractionInsert) => Promise<unknown>;
+  addPrayer: (data: PrayerRequestInsert) => Promise<unknown>;
+  markPrayerAnswered: (id: string, testimony?: string) => Promise<unknown>;
+  addGiving: (data: {
+    church_id: string;
+    person_id: string | null;
+    amount: number;
+    fund: string;
+    date: string;
+    method: string;
+    is_recurring?: boolean;
+    note?: string | null;
+  }) => Promise<unknown>;
+  createGroup?: (data: {
+    church_id: string;
+    name: string;
+    description?: string;
+    leader_id?: string;
+    meeting_day?: string;
+    meeting_time?: string;
+    location?: string;
+  }) => Promise<unknown>;
+  addGroupMember?: (groupId: string, personId: string) => Promise<unknown>;
+  removeGroupMember?: (groupId: string, personId: string) => Promise<unknown>;
+  addEvent?: (data: {
+    church_id: string;
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date?: string;
+    all_day: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => Promise<unknown>;
+  updateEvent?: (id: string, data: Partial<{
+    title: string;
+    description: string | null;
+    start_date: string;
+    end_date: string | null;
+    all_day: boolean;
+    location: string | null;
+    category: EventCategory;
+  }>) => Promise<unknown>;
+  deleteEvent?: (id: string) => Promise<unknown>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
