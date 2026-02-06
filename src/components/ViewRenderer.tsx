@@ -5,7 +5,8 @@ import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
 import { useChurchSettings } from '../hooks/useChurchSettings';
-import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance } from '../types';
+import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../types';
+import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
 // Lazy load less frequently used views for code splitting
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
@@ -41,6 +42,7 @@ const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => (
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
+const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
 
 // Loading fallback component
 function ViewLoader() {
@@ -102,48 +104,61 @@ interface ViewRendererProps {
     deleteEvent?: (eventId: string) => Promise<void>;
   };
   collectionMgmt: {
-    campaigns: any[];
-    pledges: any[];
-    donationBatches: any[];
-    givingStatements: any[];
-    createBatch: (batch: any) => void;
-    addBatchItem: (item: any) => void;
+    campaigns: Campaign[];
+    pledges: Pledge[];
+    donationBatches: DonationBatch[];
+    givingStatements: GivingStatement[];
+    createBatch: (batch: Omit<DonationBatch, 'id'>) => void;
+    addBatchItem: (item: Omit<BatchItem, 'id'>) => void;
     removeBatchItem: (itemId: string) => void;
     closeBatch: (batchId: string) => void;
-    createCampaign: (campaign: any) => void;
-    updateCampaign: (id: string, updates: any) => void;
-    createPledge: (pledge: any) => void;
-    updatePledge: (id: string, updates: any) => void;
+    createCampaign: (campaign: Omit<Campaign, 'id'>) => void;
+    updateCampaign: (id: string, updates: Partial<Campaign>) => void;
+    createPledge: (pledge: Omit<Pledge, 'id'>) => void;
+    updatePledge: (id: string, updates: Partial<Pledge>) => void;
     deletePledge: (id: string) => void;
     generateStatement: (personId: string, year: number) => void;
     sendStatement: (statementId: string, method: 'email' | 'print') => void;
   };
   charityBasketMgmt: {
-    baskets: any[];
-    createBasket: (basket: any) => void;
-    updateBasket: (id: string, updates: any) => void;
+    baskets: CharityBasket[];
+    createBasket: (basket: Omit<CharityBasket, 'id' | 'createdAt' | 'items' | 'totalValue'>) => void;
+    updateBasket: (id: string, updates: Partial<CharityBasket>) => void;
     deleteBasket: (id: string) => void;
-    addItem: (basketId: string, item: any) => void;
+    addItem: (basketId: string, item: Omit<BasketItem, 'id' | 'basketId' | 'donatedAt'>) => void;
     removeItem: (basketId: string, itemId: string) => void;
     distributeBasket: (basketId: string) => void;
   };
   agents: {
-    lifeEventConfig: any;
-    donationConfig: any;
-    newMemberConfig: any;
-    upcomingLifeEvents: any[];
-    logs: any[];
-    stats: any;
+    lifeEventConfig: LifeEventConfig;
+    donationConfig: DonationProcessingConfig;
+    newMemberConfig: NewMemberConfig;
+    upcomingLifeEvents: LifeEvent[];
+    logs: AgentLog[];
+    stats: { lifeEvent: AgentStats; donation: AgentStats; newMember: AgentStats };
     toggleAgent: (agentId: string, enabled: boolean) => void;
-    updateConfig: (agentId: string, config: any) => void;
-    runAgent: (agentId: string) => Promise<any>;
+    updateConfig: (agentId: string, config: Partial<AgentConfig>) => void;
+    runAgent: (agentId: string) => Promise<unknown>;
+  };
+  pastoralCare: {
+    leaders: LeaderProfile[];
+    helpRequests: HelpRequest[];
+    conversations: PastoralConversation[];
+    activeConversation?: PastoralConversation;
+    activeLeader?: LeaderProfile;
+    activeConversationId: string | null;
+    createHelpRequest: (request: { category: HelpCategory; description?: string; isAnonymous: boolean }) => void;
+    sendMessage: (conversationId: string, content: string) => void;
+    resolveConversation: (conversationId: string) => void;
+    escalateConversation: (conversationId: string) => void;
+    setActiveConversationId: (id: string | null) => void;
   };
 }
 
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
-    collectionMgmt, charityBasketMgmt, agents, onOpenEmailSidebar } = props;
+    collectionMgmt, charityBasketMgmt, agents, pastoralCare, onOpenEmailSidebar } = props;
 
   const { settings } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
@@ -516,6 +531,25 @@ export function ViewRenderer(props: ViewRendererProps) {
             interactions={interactions}
             onAddTask={handlers.addTask}
             onBack={() => setView('settings')}
+          />
+        );
+
+      case 'pastoral-care':
+        return (
+          <PastoralCareDashboard
+            leaders={pastoralCare.leaders}
+            helpRequests={pastoralCare.helpRequests}
+            conversations={pastoralCare.conversations}
+            activeConversation={pastoralCare.activeConversation}
+            activeLeader={pastoralCare.activeLeader}
+            activeConversationId={pastoralCare.activeConversationId}
+            onCreateHelpRequest={pastoralCare.createHelpRequest}
+            onSendMessage={pastoralCare.sendMessage}
+            onResolveConversation={pastoralCare.resolveConversation}
+            onEscalateConversation={pastoralCare.escalateConversation}
+            onSetActiveConversation={pastoralCare.setActiveConversationId}
+            onBack={() => setView('dashboard')}
+            churchName={churchName}
           />
         );
 

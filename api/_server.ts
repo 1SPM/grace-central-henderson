@@ -35,7 +35,7 @@ import aiRoutes from './_routes/ai';
 import { initWebhookRoutes } from './_routes/webhooks';
 
 // Import middleware
-import { requireAuth, optionalAuth, getAuthStatus, AuthenticatedRequest } from './_middleware/auth';
+import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
 
 // Initialize Express
 const app = express();

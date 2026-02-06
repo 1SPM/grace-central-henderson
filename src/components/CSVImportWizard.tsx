@@ -152,25 +152,6 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
   const [importResult, setImportResult] = useState<{ success: number; errors: string[] } | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const handleFile = useCallback((file: File) => {
-    setError('');
-
-    if (!file.name.endsWith('.csv') && !file.type.includes('csv')) {
-      setError('Please upload a CSV file');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      processCSVText(text);
-    };
-    reader.onerror = () => {
-      setError('Failed to read file');
-    };
-    reader.readAsText(file);
-  }, []);
-
   const processCSVText = useCallback((text: string) => {
     try {
       const lines = text.trim().split('\n').filter(line => line.trim());
@@ -197,6 +178,25 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
       setError('Failed to parse CSV file');
     }
   }, []);
+
+  const handleFile = useCallback((file: File) => {
+    setError('');
+
+    if (!file.name.endsWith('.csv') && !file.type.includes('csv')) {
+      setError('Please upload a CSV file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      processCSVText(text);
+    };
+    reader.onerror = () => {
+      setError('Failed to read file');
+    };
+    reader.readAsText(file);
+  }, [processCSVText]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -254,7 +254,7 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
           const tags = value.split(/[,;]/).map(t => t.trim()).filter(Boolean);
           person.tags = tags;
         } else {
-          (person as any)[mapping.personField] = value;
+          (person as Record<string, unknown>)[mapping.personField] = value;
         }
       });
 
@@ -316,7 +316,7 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
             const tags = value.split(/[,;]/).map(t => t.trim()).filter(Boolean);
             person.tags = tags;
           } else {
-            (person as any)[mapping.personField] = value;
+            (person as Record<string, unknown>)[mapping.personField] = value;
           }
         });
 
@@ -340,7 +340,7 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
 
       setImportResult({ success: people.length, errors });
       setStep('complete');
-    } catch (err) {
+    } catch {
       setError('Failed to import data. Please try again.');
     } finally {
       setImporting(false);

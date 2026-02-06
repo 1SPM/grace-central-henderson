@@ -49,23 +49,6 @@ const quickActions = [
 export function AIAssistant({ people, onClose, onSelectPerson }: AIAssistantProps) {
   const { settings: aiSettings } = useAISettings();
 
-  // Show disabled state if AI assistant is turned off
-  if (!aiSettings.aiAssistant) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <Sparkles size={32} className="text-gray-300 dark:text-dark-600 mb-3" />
-        <p className="text-gray-500 dark:text-dark-400 mb-2">AI Assistant is disabled</p>
-        <p className="text-xs text-gray-400 dark:text-dark-500">Enable it in Settings → AI Features</p>
-        <button
-          onClick={onClose}
-          className="mt-4 px-4 py-2 text-sm text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
-        >
-          Close
-        </button>
-      </div>
-    );
-  }
-
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -86,6 +69,23 @@ export function AIAssistant({ people, onClose, onSelectPerson }: AIAssistantProp
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Show disabled state if AI assistant is turned off
+  if (!aiSettings.aiAssistant) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <Sparkles size={32} className="text-gray-300 dark:text-dark-600 mb-3" />
+        <p className="text-gray-500 dark:text-dark-400 mb-2">AI Assistant is disabled</p>
+        <p className="text-xs text-gray-400 dark:text-dark-500">Enable it in Settings → AI Features</p>
+        <button
+          onClick={onClose}
+          className="mt-4 px-4 py-2 text-sm text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
