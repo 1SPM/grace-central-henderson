@@ -1,36 +1,27 @@
 /**
  * Hook for managing church-specific settings including integrations
  *
- * Each church stores their own API credentials in the database,
- * making it easy to onboard new churches without code changes.
- *
- * SECURITY NOTE: Secret keys (Stripe, Twilio, Resend) should ideally be
- * handled by a backend server. This frontend storage is for development/demo only.
+ * Each church stores their own non-secret configuration in the database.
+ * All secret API keys (Stripe secret, Twilio auth token, Resend API key)
+ * are stored exclusively as backend environment variables.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { maskSensitiveData } from '../utils/security';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('church-settings');
 
 export interface IntegrationCredentials {
-  // Email (Resend)
-  resendApiKey?: string;
+  // Email (Resend) - only non-secret config; API key lives in backend env vars
   emailFromAddress?: string;
   emailFromName?: string;
 
-  // SMS (Twilio)
-  twilioAccountSid?: string;
-  twilioAuthToken?: string;
+  // SMS (Twilio) - only non-secret config; credentials live in backend env vars
   twilioPhoneNumber?: string;
 
-  // Payments (Stripe)
+  // Payments (Stripe) - only publishable (public) key
   stripePublishableKey?: string;
-  /**
-   * @deprecated SECURITY WARNING: Secret keys should NEVER be stored in the frontend.
-   * This field exists for development/demo purposes only.
-   * In production, implement a backend API to handle Stripe operations.
-   */
-  stripeSecretKey?: string;
 
   // Auth (Clerk) - Usually set at app level, not per-church
   clerkPublishableKey?: string;
@@ -124,13 +115,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
         .single();
 
       if (fetchError) {
-        console.error('Error loading church settings:', fetchError);
+        log.error('Failed to load church settings', fetchError);
         setError(fetchError.message);
       } else if (data?.settings) {
         setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
       }
     } catch (err) {
-      console.error('Error loading church settings:', err);
+      log.error('Failed to load church settings', err);
       setError(err instanceof Error ? err.message : 'Failed to load settings');
     }
 
@@ -155,7 +146,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
         .eq('id', churchId);
 
       if (updateError) {
-        console.error('Error saving church settings:', updateError);
+        log.error('Failed to save church settings', updateError);
         setError(updateError.message);
         return false;
       }
@@ -163,7 +154,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
       setSettings(updatedSettings);
       return true;
     } catch (err) {
-      console.error('Error saving church settings:', err);
+      log.error('Failed to save church settings', err);
       setError(err instanceof Error ? err.message : 'Failed to save settings');
       return false;
     }
@@ -176,44 +167,27 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     });
   }, [saveSettings, settings.profile]);
 
-  // Save just integration credentials
+  // Save just integration credentials (non-secret only)
   const saveIntegrations = useCallback(async (integrations: Partial<IntegrationCredentials>): Promise<boolean> => {
-    // Security warning for secret keys
-    if (integrations.stripeSecretKey || integrations.twilioAuthToken || integrations.resendApiKey) {
-      console.warn(
-        '[SECURITY WARNING] Storing API secrets in the database is not recommended for production. ' +
-        'Consider implementing a backend API to handle sensitive operations. ' +
-        'Credentials being stored (masked): ',
-        {
-          stripeSecretKey: integrations.stripeSecretKey ? maskSensitiveData(integrations.stripeSecretKey) : undefined,
-          twilioAuthToken: integrations.twilioAuthToken ? maskSensitiveData(integrations.twilioAuthToken) : undefined,
-          resendApiKey: integrations.resendApiKey ? maskSensitiveData(integrations.resendApiKey) : undefined,
-        }
-      );
-    }
     return saveSettings({
       integrations: { ...settings.integrations, ...integrations }
     });
   }, [saveSettings, settings.integrations]);
 
-  // Clear a specific integration
+  // Clear a specific integration's frontend config
   const clearIntegration = useCallback(async (integration: 'email' | 'sms' | 'payments' | 'auth'): Promise<boolean> => {
     const clearedIntegrations = { ...settings.integrations };
 
     switch (integration) {
       case 'email':
-        delete clearedIntegrations.resendApiKey;
         delete clearedIntegrations.emailFromAddress;
         delete clearedIntegrations.emailFromName;
         break;
       case 'sms':
-        delete clearedIntegrations.twilioAccountSid;
-        delete clearedIntegrations.twilioAuthToken;
         delete clearedIntegrations.twilioPhoneNumber;
         break;
       case 'payments':
         delete clearedIntegrations.stripePublishableKey;
-        delete clearedIntegrations.stripeSecretKey;
         break;
       case 'auth':
         delete clearedIntegrations.clerkPublishableKey;

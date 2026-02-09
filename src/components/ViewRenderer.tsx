@@ -1,10 +1,15 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, ReactNode } from 'react';
+import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
+import { NotFound } from './NotFound';
+import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
+import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
+import { useRouteGuard } from '../hooks/useRouteGuard';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
@@ -44,11 +49,29 @@ const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRChe
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
 
-// Loading fallback component
-function ViewLoader() {
+/**
+ * Wraps lazy-loaded views with both Suspense (for loading) and
+ * ErrorBoundary (for render errors) so a failure in one view
+ * doesn't crash the entire app.
+ */
+function SafeView({ children, skeleton }: { children: ReactNode; skeleton?: ReactNode }) {
   return (
-    <div className="flex items-center justify-center p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <ErrorBoundary fallback={<CompactErrorFallback />}>
+      <Suspense fallback={skeleton || <ListSkeleton />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function AccessDenied({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-16 text-center">
+      <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
+        <ShieldAlert className="text-red-500" size={32} />
+      </div>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">Access Denied</h2>
+      <p className="text-gray-500 dark:text-dark-400 max-w-sm">{message}</p>
     </div>
   );
 }
@@ -162,6 +185,13 @@ export function ViewRenderer(props: ViewRendererProps) {
 
   const { settings } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
+  const { getBlockedMessage } = useRouteGuard();
+
+  // Role-based access check
+  const blockedMessage = getBlockedMessage(view);
+  if (blockedMessage) {
+    return <AccessDenied message={blockedMessage} />;
+  }
 
   // Core views (not lazy loaded for instant response)
   switch (view) {
@@ -235,11 +265,11 @@ export function ViewRenderer(props: ViewRendererProps) {
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
   }
 
-  // Lazy-loaded views wrapped in Suspense
+  // Lazy-loaded views wrapped in SafeView (Suspense + ErrorBoundary)
   return (
-    <Suspense fallback={<ViewLoader />}>
+    <SafeView>
       {renderLazyView()}
-    </Suspense>
+    </SafeView>
   );
 
   function renderLazyView() {
@@ -554,7 +584,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       default:
-        return null;
+        return <NotFound onGoHome={() => setView('dashboard')} />;
     }
   }
 }

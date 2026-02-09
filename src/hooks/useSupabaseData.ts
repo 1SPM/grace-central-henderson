@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('supabase-data');
 import type {
   Person,
   Task,
@@ -245,7 +248,7 @@ export function useSupabaseData() {
         setGiving((givingRes.data || []) as Giving[]);
         setIsDemo(false);
       } catch (err) {
-        console.error('Error loading data:', err);
+        log.error('Failed to load data from Supabase', err);
         setError(err instanceof Error ? err.message : 'Failed to load data');
         // Fall back to demo mode
         setPeople(SAMPLE_PEOPLE.map(convertLegacyPerson));

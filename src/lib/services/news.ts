@@ -3,6 +3,9 @@
  */
 
 import { generateAIText } from './ai';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('news-service');
 
 export interface NewsArticle {
   id: string;
@@ -62,7 +65,7 @@ export async function fetchNewsHeadlines(category?: string): Promise<NewsArticle
     const data = await response.json();
     return data.articles;
   } catch (error) {
-    console.error('News fetch error:', error);
+    log.error('News fetch error', error);
     throw error;
   }
 }
@@ -105,7 +108,7 @@ Be thoughtful and find genuine connections that would resonate with a congregati
       }
     }
   } catch (error) {
-    console.error('AI curation error:', error);
+    log.error('AI curation error', error);
   }
 
   // Fallback

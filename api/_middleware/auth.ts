@@ -36,7 +36,7 @@ export function requireAuth(
     req.auth = {
       userId: 'demo-user',
       sessionId: 'demo-session',
-      role: 'admin',
+      role: 'staff',
     };
     return next();
   }
@@ -90,7 +90,7 @@ export function optionalAuth(
     req.auth = {
       userId: 'demo-user',
       sessionId: 'demo-session',
-      role: 'admin',
+      role: 'staff',
     };
     return next();
   }

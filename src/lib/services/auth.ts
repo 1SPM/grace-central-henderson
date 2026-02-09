@@ -6,6 +6,9 @@
  */
 
 import { secureFetch } from '../../utils/security';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('auth-service');
 
 export interface User {
   id: string;
@@ -260,7 +263,7 @@ class AuthService {
       });
 
       if (!response.ok) {
-        console.error('Failed to sync user with database');
+        log.error('Failed to sync user with database');
         return null;
       }
 
@@ -268,7 +271,7 @@ class AuthService {
       this.currentUser = user;
       return user;
     } catch (error) {
-      console.error('Error syncing user:', error);
+      log.error('Error syncing user', error);
       return null;
     }
   }

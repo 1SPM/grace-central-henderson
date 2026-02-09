@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('sunday-prep');
 import {
   Church,
   Newspaper,
@@ -218,7 +221,7 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
       const curatedNews = await fetchCuratedNews(5);
       setNewsItems(curatedNews);
     } catch (error) {
-      console.error('Failed to fetch news:', error);
+      log.error('Failed to fetch news', error);
       setNewsError(error instanceof Error ? error.message : 'Failed to fetch news');
       // Fall back to default items
       setNewsItems(fallbackNewsItems);
@@ -394,7 +397,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         }
       }
     } catch (error) {
-      console.error('Failed to generate sermon:', error);
+      log.error('Failed to generate sermon', error);
     }
 
     setIsGeneratingFullSermon(false);

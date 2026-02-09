@@ -36,6 +36,8 @@ import { initWebhookRoutes } from './_routes/webhooks';
 
 // Import middleware
 import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
+import { csrfProtection } from './_middleware/csrf';
+import { rateLimit } from './_middleware/rateLimit';
 
 // Initialize Express
 const app = express();
@@ -72,14 +74,14 @@ app.use(express.json());
 // ROUTES
 // ============================================
 
-// Protected routes - require authentication
-app.use('/api/payments', requireAuth, initPaymentRoutes(stripe));
-app.use('/api/email', requireAuth, emailRoutes);
-app.use('/api/sms', requireAuth, smsRoutes);
-app.use('/api/agents', requireAuth, agentRoutes);
+// Protected routes - require authentication, CSRF, and rate limiting
+app.use('/api/payments', requireAuth, csrfProtection, rateLimit(30), initPaymentRoutes(stripe));
+app.use('/api/email', requireAuth, csrfProtection, rateLimit(20), emailRoutes);
+app.use('/api/sms', requireAuth, csrfProtection, rateLimit(10), smsRoutes);
+app.use('/api/agents', requireAuth, csrfProtection, rateLimit(30), agentRoutes);
 
-// AI routes - optional auth (rate limited separately)
-app.use('/api/ai', optionalAuth, aiRoutes);
+// AI routes - optional auth, tighter rate limit
+app.use('/api/ai', optionalAuth, rateLimit(15), aiRoutes);
 
 // Webhooks - no auth (verified by signature)
 app.use('/webhooks', initWebhookRoutes(stripe, supabase));
