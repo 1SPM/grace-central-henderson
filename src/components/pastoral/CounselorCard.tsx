@@ -1,5 +1,6 @@
-import { MessageCircle, Clock, CheckCircle } from 'lucide-react';
+import { MessageCircle, Clock } from 'lucide-react';
 import type { LeaderProfile, HelpCategory } from '../../types';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface CounselorCardProps {
   leader: LeaderProfile;
@@ -51,10 +52,11 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
               {leader.displayName}
             </h3>
+            {leader.isVerified && <VerifiedBadge />}
             {leader.isAvailable && (
               <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -67,8 +69,16 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
         </div>
       </div>
 
-      {/* Expertise tags */}
+      {/* Credential & expertise tags */}
       <div className="flex flex-wrap gap-1.5 mt-3">
+        {leader.credentials.slice(0, 2).map(cred => (
+          <span
+            key={cred}
+            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
+          >
+            {cred}
+          </span>
+        ))}
         {leader.expertiseAreas.map(area => (
           <span
             key={area}
@@ -77,6 +87,11 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
             {CATEGORY_LABELS[area]}
           </span>
         ))}
+        {leader.yearsOfPractice && (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400">
+            {leader.yearsOfPractice} yrs
+          </span>
+        )}
       </div>
 
       {/* Stats & action */}
@@ -88,10 +103,9 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
               {activeConversations} active
             </span>
           )}
-          <span className="flex items-center gap-1">
-            <CheckCircle size={12} />
-            Verified Leader
-          </span>
+          {leader.language && leader.language !== 'English' && (
+            <span>{leader.language}</span>
+          )}
         </div>
         <button
           onClick={() => onStartChat(leader.id)}

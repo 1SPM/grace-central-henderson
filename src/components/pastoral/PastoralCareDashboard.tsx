@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import type { LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../../types';
 import { HelpIntakeForm } from './HelpIntakeForm';
-import { CounselorCard } from './CounselorCard';
+import { LeaderProfileCard } from './LeaderProfileCard';
 import { ChatWindow } from './ChatWindow';
 
 type DashboardTab = 'overview' | 'conversations' | 'leaders' | 'new-request';
@@ -368,7 +368,7 @@ export function PastoralCareDashboard({
           {leaders.filter(l => l.isActive).map(leader => {
             const leaderConvs = conversations.filter(c => c.leaderId === leader.id && c.status === 'active').length;
             return (
-              <CounselorCard
+              <LeaderProfileCard
                 key={leader.id}
                 leader={leader}
                 onStartChat={() => {
