@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('stripe-checkout');
 import {
   Elements,
   PaymentElement,
@@ -356,7 +359,7 @@ export function StripeCheckoutForm({
         setClientSecret(data.clientSecret);
       } catch {
         // If API call fails, fall back to demo mode
-        console.warn('Stripe API not available, using demo mode');
+        log.warn('Stripe API not available, using demo mode');
         setUseDemo(true);
       } finally {
         setIsLoading(false);

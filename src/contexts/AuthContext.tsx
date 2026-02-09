@@ -145,8 +145,8 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
           setUser(mockUser);
           authService.setCurrentUser(mockUser);
         }
-      } catch (error) {
-        console.error('Error syncing user:', error);
+      } catch {
+        // User sync failed - will retry on next auth state change
       }
 
       setIsLoading(false);
@@ -263,37 +263,30 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
 
 // Demo auth provider for when Clerk is not configured
 // SECURITY: Only enabled in development or when explicitly opted-in
+// Uses 'staff' role (not admin) to limit blast radius of demo access
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
-  // Log security warning
-  if (typeof console !== 'undefined') {
-    console.warn(
-      '[SECURITY WARNING] Running in demo mode with automatic admin access. ' +
-      'This should NEVER be used in production without explicit opt-in via VITE_ENABLE_DEMO_MODE=true'
-    );
-  }
-
   const demoUser: User = {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
     email: 'demo@grace-crm.com',
     firstName: 'Demo',
-    lastName: 'Admin',
-    role: 'admin',
+    lastName: 'User',
+    role: 'staff',
     churchId: DEFAULT_CHURCH_ID,
     createdAt: new Date().toISOString(),
   };
 
   const value: AuthContextType = {
     isLoaded: true,
-    isSignedIn: true, // Auto sign-in for demo mode
+    isSignedIn: true,
     user: demoUser,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: ROLE_PERMISSIONS.admin,
+    permissions: ROLE_PERMISSIONS.staff,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => ROLE_PERMISSIONS.admin[permission],
-    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.admin[p]),
+    hasPermission: (permission) => ROLE_PERMISSIONS.staff[permission],
+    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.staff[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),

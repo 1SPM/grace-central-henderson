@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Search, MessageSquare, Loader2, FileText, Phone, Mail, Home, MessageCircle, Heart } from 'lucide-react';
 import { Person, Interaction } from '../types';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('quick-note');
 
 interface QuickNoteProps {
   people: Person[];
@@ -50,7 +53,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
       });
       onClose();
     } catch (error) {
-      console.error('Failed to save note:', error);
+      log.error('Failed to save note', error);
     } finally {
       setIsSaving(false);
     }

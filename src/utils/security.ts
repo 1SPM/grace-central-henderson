@@ -26,29 +26,83 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * Sanitizes a string for safe display in HTML context
- * Removes script tags and event handlers
+ * Sanitizes a string for safe display in HTML context.
+ * Uses an allowlist approach: only permits safe tags and attributes.
+ * Falls back to stripping dangerous patterns for broader compatibility.
  */
 export function sanitizeHtml(html: string): string {
   if (typeof html !== 'string') return '';
 
-  return html
+  // Allowlisted tags for report output
+  const ALLOWED_TAGS = new Set([
+    'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'ul', 'ol', 'li', 'br', 'strong', 'em', 'b', 'i',
+  ]);
+
+  // Allowlisted attributes
+  const ALLOWED_ATTRS = new Set([
+    'class', 'style', 'colspan', 'rowspan',
+  ]);
+
+  let result = html
     // Remove script tags and their content
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    // Remove event handlers
+    // Remove noscript tags
+    .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, '')
+    // Remove all event handlers (on*)
     .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
     .replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
-    // Remove javascript: URLs
-    .replace(/javascript:/gi, '')
-    // Remove data: URLs that could contain scripts
-    .replace(/data:\s*text\/html/gi, '')
-    // Remove vbscript: URLs
-    .replace(/vbscript:/gi, '')
-    // Remove expression() CSS
+    // Remove dangerous URI schemes
+    .replace(/javascript\s*:/gi, '')
+    .replace(/vbscript\s*:/gi, '')
+    .replace(/data\s*:\s*text\/html/gi, '')
+    // Remove expression() CSS (IE)
     .replace(/expression\s*\(/gi, '')
-    // Remove iframe, embed, object tags
-    .replace(/<(iframe|embed|object|frame|frameset)[^>]*>.*?<\/\1>/gi, '')
-    .replace(/<(iframe|embed|object|frame|frameset)[^>]*\/?>/gi, '');
+    // Remove -moz-binding CSS
+    .replace(/-moz-binding\s*:/gi, '')
+    // Remove iframe, embed, object, form, input, link, meta, base, svg, math tags
+    .replace(/<\/?(iframe|embed|object|frame|frameset|form|input|textarea|select|button|link|meta|base|svg|math)\b[^>]*>/gi, '')
+    // Remove style tags (can contain expression() or @import attacks)
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+  // Strip non-allowlisted attributes from remaining tags
+  result = result.replace(/<(\w+)(\s[^>]*)?(\/?)>/gi, (_match, tag: string, attrs: string, selfClose: string) => {
+    const tagLower = tag.toLowerCase();
+    if (!ALLOWED_TAGS.has(tagLower)) {
+      return ''; // Strip non-allowlisted tags entirely
+    }
+    if (!attrs) return `<${tag}${selfClose}>`;
+
+    // Filter attributes to only allowed ones
+    const cleanAttrs: string[] = [];
+    const attrRegex = /\s(\w[\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+)))?/g;
+    let attrMatch;
+    while ((attrMatch = attrRegex.exec(attrs)) !== null) {
+      const attrName = attrMatch[1].toLowerCase();
+      const attrValue = attrMatch[2] ?? attrMatch[3] ?? attrMatch[4] ?? '';
+      if (ALLOWED_ATTRS.has(attrName)) {
+        // Ensure style values don't contain dangerous patterns
+        if (attrName === 'style') {
+          const safeStyle = attrValue
+            .replace(/expression\s*\(/gi, '')
+            .replace(/javascript\s*:/gi, '')
+            .replace(/url\s*\(/gi, '');
+          cleanAttrs.push(` ${attrName}="${safeStyle}"`);
+        } else {
+          cleanAttrs.push(` ${attrName}="${escapeHtml(attrValue)}"`);
+        }
+      }
+    }
+    return `<${tag}${cleanAttrs.join('')}${selfClose}>`;
+  });
+
+  // Also strip closing tags for non-allowlisted elements
+  result = result.replace(/<\/(\w+)>/gi, (match, tag: string) => {
+    return ALLOWED_TAGS.has(tag.toLowerCase()) ? match : '';
+  });
+
+  return result;
 }
 
 /**

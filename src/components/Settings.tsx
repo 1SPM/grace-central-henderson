@@ -3,16 +3,11 @@ import {
   Church,
   Users,
   Bell,
-  Database,
   Mail,
   MessageSquare,
   CreditCard,
   Shield,
   Check,
-  X,
-  ExternalLink,
-  Eye,
-  EyeOff,
   Save,
   Plus,
   Trash2,
@@ -21,162 +16,15 @@ import {
   MapPin,
   ToggleLeft,
   ToggleRight,
-  Download,
-  Calendar,
-  Heart,
-  DollarSign,
-  CheckSquare,
-  UsersIcon,
-  Upload,
   Accessibility,
 } from 'lucide-react';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
 import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
-import {
-  exportPeopleToCSV,
-  exportGivingToCSV,
-  exportEventsToCSV,
-  exportTasksToCSV,
-  exportGroupsToCSV,
-  exportPrayerRequestsToCSV,
-  exportAllDataToCSV
-} from '../utils/csvExport';
+import { IntegrationCard, ConfigModal, PasswordInput } from './settings/SettingsUI';
+import { SettingsDataExport } from './settings/SettingsDataExport';
 import type { Person, Task, CalendarEvent, Giving, SmallGroup, PrayerRequest } from '../types';
-
-interface IntegrationCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  isConfigured: boolean;
-  setupUrl: string;
-  onConfigure: () => void;
-}
-
-function IntegrationCard({
-  title,
-  description,
-  icon,
-  iconBg,
-  isConfigured,
-  setupUrl,
-  onConfigure,
-}: IntegrationCardProps) {
-  return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center`}>
-            {icon}
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-dark-100">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-dark-400">{description}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {isConfigured ? (
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-1 rounded-full">
-              <Check size={14} />
-              Connected
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-dark-400 bg-gray-100 dark:bg-dark-800 px-2 py-1 rounded-full">
-              <X size={14} />
-              Not configured
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="mt-4 flex gap-2">
-        <button
-          onClick={onConfigure}
-          className="flex-1 px-4 py-2 text-sm font-medium bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
-        >
-          {isConfigured ? 'Update Settings' : 'Configure'}
-        </button>
-        <a
-          href={setupUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 bg-gray-50 dark:bg-dark-800 rounded-xl hover:bg-gray-100 dark:hover:bg-dark-700 flex items-center gap-1"
-        >
-          Docs <ExternalLink size={14} />
-        </a>
-      </div>
-    </div>
-  );
-}
-
-interface ConfigModalProps {
-  title: string;
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-function ConfigModal({ title, isOpen, onClose, children }: ConfigModalProps) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200 dark:border-dark-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{title}</h2>
-        </div>
-        <div className="p-6">{children}</div>
-        <div className="p-6 border-t border-gray-200 dark:border-dark-700 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-xl"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PasswordInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          type={show ? 'text' : 'password'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-4 py-2.5 pr-10 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-        <button
-          type="button"
-          onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
   { value: 'small', label: 'Small', preview: 'Aa' },
@@ -246,16 +94,13 @@ export function Settings({
   const [showPaymentConfig, setShowPaymentConfig] = useState(false);
   const [showAuthConfig, setShowAuthConfig] = useState(false);
 
-  // Form states
+  // Form states (only non-secret config; API keys managed via backend env vars)
   const [emailConfig, setEmailConfig] = useState({
-    resendApiKey: '',
     emailFromAddress: '',
     emailFromName: '',
   });
 
   const [smsConfig, setSmsConfig] = useState({
-    twilioAccountSid: '',
-    twilioAuthToken: '',
     twilioPhoneNumber: '',
   });
 
@@ -271,8 +116,7 @@ export function Settings({
     setSaving(false);
     if (success) {
       setShowEmailConfig(false);
-      // Clear form for security
-      setEmailConfig({ resendApiKey: '', emailFromAddress: '', emailFromName: '' });
+      setEmailConfig({ emailFromAddress: '', emailFromName: '' });
     }
   };
 
@@ -282,8 +126,7 @@ export function Settings({
     setSaving(false);
     if (success) {
       setShowSmsConfig(false);
-      // Clear form for security
-      setSmsConfig({ twilioAccountSid: '', twilioAuthToken: '', twilioPhoneNumber: '' });
+      setSmsConfig({ twilioPhoneNumber: '' });
     }
   };
 
@@ -840,104 +683,15 @@ export function Settings({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-500/10 rounded-xl flex items-center justify-center">
-              <Database className="text-green-600 dark:text-green-400" size={20} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data Export</h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400">Export data to CSV files</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <button
-              onClick={() => exportAllDataToCSV({ people, giving, events, tasks, groups, prayers })}
-              disabled={people.length === 0}
-              className="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <Download size={16} />
-              Export All Data
-            </button>
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <button
-                onClick={() => exportPeopleToCSV(people)}
-                disabled={people.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <Users size={14} />
-                People ({people.length})
-              </button>
-              <button
-                onClick={() => exportGivingToCSV(giving, people)}
-                disabled={giving.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <DollarSign size={14} />
-                Giving ({giving.length})
-              </button>
-              <button
-                onClick={() => exportEventsToCSV(events)}
-                disabled={events.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <Calendar size={14} />
-                Events ({events.length})
-              </button>
-              <button
-                onClick={() => exportTasksToCSV(tasks, people)}
-                disabled={tasks.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <CheckSquare size={14} />
-                Tasks ({tasks.length})
-              </button>
-              <button
-                onClick={() => exportGroupsToCSV(groups, people)}
-                disabled={groups.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <UsersIcon size={14} />
-                Groups ({groups.length})
-              </button>
-              <button
-                onClick={() => exportPrayerRequestsToCSV(prayers, people)}
-                disabled={prayers.length === 0}
-                className="px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-xs font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800 disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <Heart size={14} />
-                Prayers ({prayers.length})
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Import */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
-              <Upload size={20} className="text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data Import</h2>
-              <p className="text-sm text-gray-500 dark:text-dark-400">Import from other systems</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {onNavigate && (
-              <button
-                onClick={() => onNavigate('planning-center-import')}
-                className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
-              >
-                <Upload size={16} />
-                Import from Planning Center
-              </button>
-            )}
-            <p className="text-xs text-gray-400 dark:text-dark-500 text-center pt-2">
-              Import people, groups, and other data from Planning Center exports
-            </p>
-          </div>
-        </div>
+        <SettingsDataExport
+          people={people}
+          tasks={tasks}
+          events={events}
+          giving={giving}
+          groups={groups}
+          prayers={prayers}
+          onNavigate={onNavigate}
+        />
       </div>
 
       <div className="mt-8 p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl text-white">
@@ -959,12 +713,10 @@ export function Settings({
         onClose={() => setShowEmailConfig(false)}
       >
         <div className="space-y-4">
-          <PasswordInput
-            label="Resend API Key"
-            value={emailConfig.resendApiKey}
-            onChange={(v) => setEmailConfig({ ...emailConfig, resendApiKey: v })}
-            placeholder="re_..."
-          />
+          <p className="text-sm text-gray-500 dark:text-dark-400">
+            The Resend API key is configured as a backend environment variable (RESEND_API_KEY).
+            Configure the sender details below.
+          </p>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
               From Email Address
@@ -991,7 +743,7 @@ export function Settings({
           </div>
           <button
             onClick={handleSaveEmailConfig}
-            disabled={saving || !emailConfig.resendApiKey}
+            disabled={saving}
             className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Configuration'}
@@ -1006,18 +758,10 @@ export function Settings({
         onClose={() => setShowSmsConfig(false)}
       >
         <div className="space-y-4">
-          <PasswordInput
-            label="Account SID"
-            value={smsConfig.twilioAccountSid}
-            onChange={(v) => setSmsConfig({ ...smsConfig, twilioAccountSid: v })}
-            placeholder="AC..."
-          />
-          <PasswordInput
-            label="Auth Token"
-            value={smsConfig.twilioAuthToken}
-            onChange={(v) => setSmsConfig({ ...smsConfig, twilioAuthToken: v })}
-            placeholder="Your auth token"
-          />
+          <p className="text-sm text-gray-500 dark:text-dark-400">
+            Twilio Account SID and Auth Token are configured as backend environment variables
+            (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN). Configure the phone number below.
+          </p>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
               Twilio Phone Number
@@ -1032,7 +776,7 @@ export function Settings({
           </div>
           <button
             onClick={handleSaveSmsConfig}
-            disabled={saving || !smsConfig.twilioAccountSid || !smsConfig.twilioAuthToken || !smsConfig.twilioPhoneNumber}
+            disabled={saving || !smsConfig.twilioPhoneNumber}
             className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Configuration'}

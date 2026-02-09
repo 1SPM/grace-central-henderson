@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('ai-settings');
 
 export interface AIFeature {
   id: string;
@@ -90,7 +93,7 @@ export function useAISettings() {
         return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
       }
     } catch (e) {
-      console.error('Failed to load AI settings:', e);
+      log.error('Failed to load AI settings', e);
     }
     return DEFAULT_SETTINGS;
   });
@@ -100,7 +103,7 @@ export function useAISettings() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch (e) {
-      console.error('Failed to save AI settings:', e);
+      log.error('Failed to save AI settings', e);
     }
   }, [settings]);
 

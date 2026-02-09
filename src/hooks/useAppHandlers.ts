@@ -1,5 +1,8 @@
 import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('app-handlers');
 import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
 import type {
   Person as DbPerson,
@@ -277,7 +280,7 @@ export function useAppHandlers({
       try {
         await updatePerson(id, { status });
       } catch (error) {
-        console.error(`Failed to update status for person ${id}:`, error);
+        log.error(`Failed to update status for person ${id}`, error);
       }
     }
   }, [updatePerson]);
@@ -290,7 +293,7 @@ export function useAppHandlers({
           await updatePerson(id, { tags: [...person.tags, tag] });
         }
       } catch (error) {
-        console.error(`Failed to add tag for person ${id}:`, error);
+        log.error(`Failed to add tag for person ${id}`, error);
       }
     }
   }, [dbPeople, updatePerson]);
@@ -327,7 +330,7 @@ export function useAppHandlers({
           family_id: null,
         });
       } catch (error) {
-        console.error(`Failed to import ${firstName} ${lastName}:`, error);
+        log.error(`Failed to import ${firstName} ${lastName}`, error);
       }
     }
   }, [addPerson, churchId]);

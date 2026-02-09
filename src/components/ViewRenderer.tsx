@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, ReactNode } from 'react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
+import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
@@ -50,6 +51,21 @@ function ViewLoader() {
     <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
+  );
+}
+
+/**
+ * Wraps lazy-loaded views with both Suspense (for loading) and
+ * ErrorBoundary (for render errors) so a failure in one view
+ * doesn't crash the entire app.
+ */
+function SafeView({ children }: { children: ReactNode }) {
+  return (
+    <ErrorBoundary fallback={<CompactErrorFallback />}>
+      <Suspense fallback={<ViewLoader />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
@@ -235,11 +251,11 @@ export function ViewRenderer(props: ViewRendererProps) {
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
   }
 
-  // Lazy-loaded views wrapped in Suspense
+  // Lazy-loaded views wrapped in SafeView (Suspense + ErrorBoundary)
   return (
-    <Suspense fallback={<ViewLoader />}>
+    <SafeView>
       {renderLazyView()}
-    </Suspense>
+    </SafeView>
   );
 
   function renderLazyView() {

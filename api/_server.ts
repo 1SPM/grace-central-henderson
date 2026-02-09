@@ -36,6 +36,7 @@ import { initWebhookRoutes } from './_routes/webhooks';
 
 // Import middleware
 import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
+import { csrfProtection } from './_middleware/csrf';
 
 // Initialize Express
 const app = express();
@@ -72,11 +73,11 @@ app.use(express.json());
 // ROUTES
 // ============================================
 
-// Protected routes - require authentication
-app.use('/api/payments', requireAuth, initPaymentRoutes(stripe));
-app.use('/api/email', requireAuth, emailRoutes);
-app.use('/api/sms', requireAuth, smsRoutes);
-app.use('/api/agents', requireAuth, agentRoutes);
+// Protected routes - require authentication and CSRF protection
+app.use('/api/payments', requireAuth, csrfProtection, initPaymentRoutes(stripe));
+app.use('/api/email', requireAuth, csrfProtection, emailRoutes);
+app.use('/api/sms', requireAuth, csrfProtection, smsRoutes);
+app.use('/api/agents', requireAuth, csrfProtection, agentRoutes);
 
 // AI routes - optional auth (rate limited separately)
 app.use('/api/ai', optionalAuth, aiRoutes);

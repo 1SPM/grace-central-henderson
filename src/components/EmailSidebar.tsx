@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('email-sidebar');
 import {
   X,
   Mail,
@@ -235,7 +238,7 @@ export function EmailSidebar({
       setCustomEmails('');
       onClose();
     } catch (error) {
-      console.error('Failed to send email:', error);
+      log.error('Failed to send email', error);
     } finally {
       setIsSending(false);
     }

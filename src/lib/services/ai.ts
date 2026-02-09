@@ -2,6 +2,10 @@
  * AI Service - Frontend client for Gemini API integration
  */
 
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('ai-service');
+
 export interface AIGenerateOptions {
   prompt: string;
   context?: string;
@@ -51,7 +55,7 @@ export async function generateAIText(options: AIGenerateOptions): Promise<AIGene
       model: data.model,
     };
   } catch (error) {
-    console.error('AI service error:', error);
+    log.error('AI service error', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Network error',
