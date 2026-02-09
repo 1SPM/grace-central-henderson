@@ -388,8 +388,19 @@ export interface LeaderProfile {
   bio: string;
   photo?: string;
   expertiseAreas: HelpCategory[];
+  credentials: string[];
+  yearsOfPractice?: number;
+  personalityTraits: string[];
+  spiritualFocusAreas: string[];
+  language: string;
+  isVerified: boolean;
   isAvailable: boolean;
   isActive: boolean;
+  sessionType?: 'one-time' | 'recurring';
+  sessionFrequency?: string;
+  suitableFor?: string[];
+  anchors?: string;
+  socialMinistryDate?: string;
   createdAt: string;
 }
 
@@ -397,13 +408,10 @@ export interface AIPersona {
   id: string;
   leaderId: string;
   name: string;
+  language: string;
+  personalityDescription: string;
+  personalityTraits: string[];
   systemPrompt: string;
-  tone: {
-    warmth: number;
-    formality: number;
-    directness: number;
-    faithLevel: number;
-  };
   boundaries: string[];
   isActive: boolean;
 }
