@@ -5,6 +5,7 @@ import { ActionFeed } from './ActionFeed';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
+import { NotFound } from './NotFound';
 import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
@@ -583,7 +584,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         );
 
       default:
-        return null;
+        return <NotFound onGoHome={() => setView('dashboard')} />;
     }
   }
 }

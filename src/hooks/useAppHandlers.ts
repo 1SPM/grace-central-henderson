@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
 import { createLogger } from '../utils/logger';
+import { useToast } from '../components/Toast';
 
 const log = createLogger('app-handlers');
 import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
@@ -91,6 +92,8 @@ export function useAppHandlers({
   openPersonForm,
   closePersonForm,
 }: UseAppHandlersProps) {
+  const toast = useToast();
+
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
 
@@ -117,28 +120,38 @@ export function useAppHandlers({
   }, [setSelectedPersonId, setView]);
 
   const handleAddInteraction = useCallback(async (interaction: Omit<Interaction, 'id' | 'createdAt'>) => {
-    await addInteraction({
-      church_id: churchId,
-      person_id: interaction.personId,
-      type: interaction.type,
-      content: interaction.content,
-      created_by_name: interaction.createdBy,
-    });
-  }, [addInteraction, churchId]);
+    try {
+      await addInteraction({
+        church_id: churchId,
+        person_id: interaction.personId,
+        type: interaction.type,
+        content: interaction.content,
+        created_by_name: interaction.createdBy,
+      });
+    } catch (error) {
+      log.error('Failed to add interaction', error);
+      toast.error('Failed to save interaction. Please try again.');
+    }
+  }, [addInteraction, churchId, toast]);
 
   const handleAddTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt'>) => {
-    await addTask({
-      church_id: churchId,
-      person_id: task.personId || null,
-      title: task.title,
-      description: task.description || null,
-      due_date: task.dueDate,
-      completed: task.completed,
-      priority: task.priority,
-      category: task.category,
-      assigned_to: task.assignedTo || null,
-    });
-  }, [addTask, churchId]);
+    try {
+      await addTask({
+        church_id: churchId,
+        person_id: task.personId || null,
+        title: task.title,
+        description: task.description || null,
+        due_date: task.dueDate,
+        completed: task.completed,
+        priority: task.priority,
+        category: task.category,
+        assigned_to: task.assignedTo || null,
+      });
+    } catch (error) {
+      log.error('Failed to add task', error);
+      toast.error('Failed to create task. Please try again.');
+    }
+  }, [addTask, churchId, toast]);
 
   const handleToggleTask = useCallback(async (taskId: string) => {
     await toggleTask(taskId);
@@ -194,13 +207,18 @@ export function useAppHandlers({
   }, []);
 
   const handleAddPrayer = useCallback(async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
-    await addPrayer({
-      church_id: churchId,
-      person_id: prayer.personId,
-      content: prayer.content,
-      is_private: prayer.isPrivate,
-    });
-  }, [addPrayer, churchId]);
+    try {
+      await addPrayer({
+        church_id: churchId,
+        person_id: prayer.personId,
+        content: prayer.content,
+        is_private: prayer.isPrivate,
+      });
+    } catch (error) {
+      log.error('Failed to add prayer request', error);
+      toast.error('Failed to save prayer request. Please try again.');
+    }
+  }, [addPrayer, churchId, toast]);
 
   const handleAddGiving = useCallback(async (donation: {
     personId?: string;
@@ -211,17 +229,22 @@ export function useAppHandlers({
     isRecurring: boolean;
     note?: string;
   }) => {
-    await addGiving({
-      church_id: churchId,
-      person_id: donation.personId || null,
-      amount: donation.amount,
-      fund: donation.fund,
-      method: donation.method,
-      date: donation.date,
-      is_recurring: donation.isRecurring,
-      note: donation.note || null,
-    });
-  }, [addGiving, churchId]);
+    try {
+      await addGiving({
+        church_id: churchId,
+        person_id: donation.personId || null,
+        amount: donation.amount,
+        fund: donation.fund,
+        method: donation.method,
+        date: donation.date,
+        is_recurring: donation.isRecurring,
+        note: donation.note || null,
+      });
+    } catch (error) {
+      log.error('Failed to record donation', error);
+      toast.error('Failed to record donation. Please try again.');
+    }
+  }, [addGiving, churchId, toast]);
 
   const handleAddPerson = useCallback(() => {
     openPersonForm();
@@ -232,60 +255,71 @@ export function useAppHandlers({
   }, [openPersonForm]);
 
   const handleSavePerson = useCallback(async (personData: Omit<Person, 'id'> | Person) => {
-    if ('id' in personData) {
-      await updatePerson(personData.id, {
-        first_name: personData.firstName,
-        last_name: personData.lastName,
-        email: personData.email || null,
-        phone: personData.phone || null,
-        status: personData.status,
-        photo_url: personData.photo || null,
-        address: personData.address || null,
-        city: personData.city || null,
-        state: personData.state || null,
-        zip: personData.zip || null,
-        birth_date: personData.birthDate || null,
-        join_date: personData.joinDate || null,
-        first_visit: personData.firstVisit || null,
-        notes: personData.notes || null,
-        tags: personData.tags,
-        family_id: personData.familyId || null,
-      });
-    } else {
-      await addPerson({
-        church_id: churchId,
-        first_name: personData.firstName,
-        last_name: personData.lastName,
-        email: personData.email || null,
-        phone: personData.phone || null,
-        status: personData.status,
-        photo_url: personData.photo || null,
-        address: personData.address || null,
-        city: personData.city || null,
-        state: personData.state || null,
-        zip: personData.zip || null,
-        birth_date: personData.birthDate || null,
-        join_date: personData.joinDate || null,
-        first_visit: personData.firstVisit || null,
-        notes: personData.notes || null,
-        tags: personData.tags,
-        family_id: personData.familyId || null,
-      });
+    try {
+      if ('id' in personData) {
+        await updatePerson(personData.id, {
+          first_name: personData.firstName,
+          last_name: personData.lastName,
+          email: personData.email || null,
+          phone: personData.phone || null,
+          status: personData.status,
+          photo_url: personData.photo || null,
+          address: personData.address || null,
+          city: personData.city || null,
+          state: personData.state || null,
+          zip: personData.zip || null,
+          birth_date: personData.birthDate || null,
+          join_date: personData.joinDate || null,
+          first_visit: personData.firstVisit || null,
+          notes: personData.notes || null,
+          tags: personData.tags,
+          family_id: personData.familyId || null,
+        });
+      } else {
+        await addPerson({
+          church_id: churchId,
+          first_name: personData.firstName,
+          last_name: personData.lastName,
+          email: personData.email || null,
+          phone: personData.phone || null,
+          status: personData.status,
+          photo_url: personData.photo || null,
+          address: personData.address || null,
+          city: personData.city || null,
+          state: personData.state || null,
+          zip: personData.zip || null,
+          birth_date: personData.birthDate || null,
+          join_date: personData.joinDate || null,
+          first_visit: personData.firstVisit || null,
+          notes: personData.notes || null,
+          tags: personData.tags,
+          family_id: personData.familyId || null,
+        });
+      }
+      closePersonForm();
+    } catch (error) {
+      log.error('Failed to save person', error);
+      toast.error('Failed to save person. Please try again.');
     }
-    closePersonForm();
-  }, [addPerson, updatePerson, churchId, closePersonForm]);
+  }, [addPerson, updatePerson, churchId, closePersonForm, toast]);
 
   const handleBulkUpdateStatus = useCallback(async (ids: string[], status: Person['status']) => {
+    let failures = 0;
     for (const id of ids) {
       try {
         await updatePerson(id, { status });
       } catch (error) {
         log.error(`Failed to update status for person ${id}`, error);
+        failures++;
       }
     }
-  }, [updatePerson]);
+    if (failures > 0) {
+      toast.error(`Failed to update ${failures} of ${ids.length} people.`);
+    }
+  }, [updatePerson, toast]);
 
   const handleBulkAddTag = useCallback(async (ids: string[], tag: string) => {
+    let failures = 0;
     for (const id of ids) {
       try {
         const person = dbPeople.find(p => p.id === id);
@@ -294,9 +328,13 @@ export function useAppHandlers({
         }
       } catch (error) {
         log.error(`Failed to add tag for person ${id}`, error);
+        failures++;
       }
     }
-  }, [dbPeople, updatePerson]);
+    if (failures > 0) {
+      toast.error(`Failed to tag ${failures} of ${ids.length} people.`);
+    }
+  }, [dbPeople, updatePerson, toast]);
 
   const handleImportCSV = useCallback(async (importedPeople: Partial<Person>[]) => {
     for (const person of importedPeople) {
@@ -382,17 +420,22 @@ export function useAppHandlers({
     category: EventCategory;
   }) => {
     if (!addEvent) return;
-    await addEvent({
-      church_id: churchId,
-      title: eventData.title,
-      description: eventData.description,
-      start_date: eventData.startDate,
-      end_date: eventData.endDate,
-      all_day: eventData.allDay,
-      location: eventData.location,
-      category: eventData.category,
-    });
-  }, [addEvent, churchId]);
+    try {
+      await addEvent({
+        church_id: churchId,
+        title: eventData.title,
+        description: eventData.description,
+        start_date: eventData.startDate,
+        end_date: eventData.endDate,
+        all_day: eventData.allDay,
+        location: eventData.location,
+        category: eventData.category,
+      });
+    } catch (error) {
+      log.error('Failed to create event', error);
+      toast.error('Failed to create event. Please try again.');
+    }
+  }, [addEvent, churchId, toast]);
 
   const handleUpdateEvent = useCallback(async (eventId: string, updates: {
     title?: string;

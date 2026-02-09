@@ -25,10 +25,10 @@ export type { EventFormState };
 
 export function EventFormModal({ eventForm, editingEvent, onFormChange, onSave, onClose }: EventFormModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="event-form-title" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
         <div className="p-4 border-b border-gray-200 dark:border-dark-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
+          <h2 id="event-form-title" className="text-lg font-semibold text-gray-900 dark:text-dark-100">
             {editingEvent ? 'Edit Event' : 'Create Event'}
           </h2>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Camera } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
+import { sanitizeInput, sanitizePhone, isValidEmail } from '../utils/security';
 
 interface PersonFormProps {
   person?: Person;
@@ -39,10 +40,34 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
 
   const isEditing = !!person;
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstName.trim() || !formData.lastName.trim()) return;
-    onSave(formData);
+    const errors: Record<string, string> = {};
+
+    const firstName = sanitizeInput(formData.firstName, { maxLength: 100 });
+    const lastName = sanitizeInput(formData.lastName, { maxLength: 100 });
+
+    if (!firstName) errors.firstName = 'First name is required';
+    if (!lastName) errors.lastName = 'Last name is required';
+    if (formData.email && !isValidEmail(formData.email)) errors.email = 'Invalid email address';
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
+    const sanitized = {
+      ...formData,
+      firstName,
+      lastName,
+      email: formData.email?.trim() || '',
+      phone: formData.phone ? sanitizePhone(formData.phone) : '',
+      notes: formData.notes ? sanitizeInput(formData.notes, { maxLength: 2000, allowNewlines: true }) : '',
+    };
+    onSave(sanitized);
   };
 
   const handleAddTag = () => {
@@ -57,14 +82,15 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="person-form-title" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100">
+          <h2 id="person-form-title" className="text-xl font-semibold text-gray-900 dark:text-dark-100">
             {isEditing ? 'Edit Person' : 'Add New Person'}
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close form"
             className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
           >
             <X size={20} className="text-gray-500 dark:text-dark-400" />
@@ -116,9 +142,12 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                aria-invalid={!!validationErrors.firstName}
+                aria-describedby={validationErrors.firstName ? 'firstName-error' : undefined}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.firstName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
                 required
               />
+              {validationErrors.firstName && <p id="firstName-error" className="text-xs text-red-500 mt-1">{validationErrors.firstName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
@@ -128,9 +157,12 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                aria-invalid={!!validationErrors.lastName}
+                aria-describedby={validationErrors.lastName ? 'lastName-error' : undefined}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.lastName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
                 required
               />
+              {validationErrors.lastName && <p id="lastName-error" className="text-xs text-red-500 mt-1">{validationErrors.lastName}</p>}
             </div>
           </div>
 
@@ -142,8 +174,11 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              aria-invalid={!!validationErrors.email}
+              aria-describedby={validationErrors.email ? 'email-error' : undefined}
+              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.email ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
             />
+            {validationErrors.email && <p id="email-error" className="text-xs text-red-500 mt-1">{validationErrors.email}</p>}
           </div>
 
           <div>
