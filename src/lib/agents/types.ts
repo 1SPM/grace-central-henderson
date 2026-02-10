@@ -95,10 +95,28 @@ export interface DonationProcessingConfig extends AgentConfig {
     trackFirstTimeGivers: boolean;
     alertOnLargeGifts: boolean;
     largeGiftThreshold: number;
+    // Lapsed giver detection
+    detectLapsedGivers: boolean;
+    lapsedGiverDays: number; // Days without giving to consider "lapsed"
+    lapsedGiverMinDonations: number; // Minimum past donations to be considered "regular"
+    lapsedGiverAlertEmail?: string; // Email to send alerts to (defaults to admin)
     churchName: string;
     taxId: string;
     useAIMessages?: boolean; // Use AI to generate personalized thank-you messages
   };
+}
+
+// Lapsed giver event for alerts
+export interface LapsedGiverEvent {
+  personId: string;
+  personName: string;
+  email?: string;
+  phone?: string;
+  lastDonationDate: string;
+  daysSinceLastDonation: number;
+  totalDonations: number;
+  totalAmount: number;
+  averageGift: number;
 }
 
 export interface DonationEvent {
