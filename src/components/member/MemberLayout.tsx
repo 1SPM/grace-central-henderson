@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Users, DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart } from 'lucide-react';
+import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart } from 'lucide-react';
 import type { MemberPortalTab } from '../../types';
 
 interface MemberLayoutProps {

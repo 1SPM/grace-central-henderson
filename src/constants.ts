@@ -1225,6 +1225,9 @@ export const SAMPLE_DONATION_CONFIG: DonationProcessingConfig = {
     trackFirstTimeGivers: true,
     alertOnLargeGifts: true,
     largeGiftThreshold: 1000,
+    detectLapsedGivers: true,
+    lapsedGiverDays: 90,
+    lapsedGiverMinDonations: 3,
     churchName: 'Grace Community Church',
     taxId: '12-3456789',
     useAIMessages: true

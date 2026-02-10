@@ -19,8 +19,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  ChevronDown,
-  ChevronUp,
   Bell,
   Calendar,
   Gift,
@@ -212,6 +210,81 @@ function OptionRow({
   );
 }
 
+// Agent card component for overview tab
+function AgentCard({
+  config,
+  icon,
+  stats: agentStats,
+  description,
+  onToggle,
+  onRun,
+  onConfigure,
+  children,
+}: {
+  config: AgentConfig;
+  icon: React.ReactNode;
+  stats: AgentStats;
+  description: string;
+  onToggle: (enabled: boolean) => void;
+  onRun: () => void;
+  onConfigure: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg border transition-all ${
+        config.enabled
+          ? 'border-indigo-200 dark:border-indigo-800 shadow-sm'
+          : 'border-gray-200 dark:border-gray-700 opacity-75'
+      }`}
+    >
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">{icon}</div>
+            <div>
+              <h3 className="font-medium text-gray-900 dark:text-white">{config.name}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+            </div>
+          </div>
+          <Toggle enabled={config.enabled} onChange={onToggle} label={`Toggle ${config.name}`} />
+        </div>
+
+        {/* Stats */}
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+          <span>{agentStats.totalActions} actions</span>
+          <span className="text-green-600">{agentStats.successfulActions} success</span>
+          {agentStats.failedActions > 0 && (
+            <span className="text-red-500">{agentStats.failedActions} failed</span>
+          )}
+        </div>
+
+        {/* Details */}
+        {config.enabled && children}
+
+        {/* Actions */}
+        {config.enabled && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <button
+              onClick={onRun}
+              className="px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+            >
+              Run Now
+            </button>
+            <button
+              onClick={onConfigure}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              Configure
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function AgentDashboard({
   lifeEventConfig,
   donationConfig,
@@ -243,17 +316,6 @@ export function AgentDashboard({
     },
     [onUpdateConfig]
   );
-
-  // Inline settings update helper (from simple automation view)
-  const updateSettings = (agentId: string, key: string, value: unknown) => {
-    const config =
-      agentId === 'life-event-agent'
-        ? lifeEventConfig
-        : agentId === 'donation-processing-agent'
-          ? donationConfig
-          : newMemberConfig;
-    onUpdateConfig(agentId, { settings: { ...config.settings, [key]: value } });
-  };
 
   const totalActions = Object.values(stats).reduce((sum, s) => sum + s.totalActions, 0);
 
@@ -320,7 +382,7 @@ export function AgentDashboard({
             icon={<Cake className="w-5 h-5" />}
             stats={stats.lifeEvent}
             description="Sends birthday and anniversary greetings automatically"
-            onToggle={(enabled) => onToggleAgent('life-event-agent', enabled)}
+            onToggle={(enabled: boolean) => onToggleAgent('life-event-agent', enabled)}
             onRun={() => onRunAgent('life-event-agent')}
             onConfigure={() => setConfigModal('life-event-agent')}
           >
@@ -368,7 +430,7 @@ export function AgentDashboard({
             icon={<DollarSign className="w-5 h-5" />}
             stats={stats.donation}
             description="Processes donations with receipts and thank-you messages"
-            onToggle={(enabled) => onToggleAgent('donation-processing-agent', enabled)}
+            onToggle={(enabled: boolean) => onToggleAgent('donation-processing-agent', enabled)}
             onRun={() => onRunAgent('donation-processing-agent')}
             onConfigure={() => setConfigModal('donation-processing-agent')}
           >
@@ -416,7 +478,7 @@ export function AgentDashboard({
             icon={<UserPlus className="w-5 h-5" />}
             stats={stats.newMember}
             description="Onboards new members with welcome sequences"
-            onToggle={(enabled) => onToggleAgent('new-member-agent', enabled)}
+            onToggle={(enabled: boolean) => onToggleAgent('new-member-agent', enabled)}
             onRun={() => onRunAgent('new-member-agent')}
             onConfigure={() => setConfigModal('new-member-agent')}
           >
@@ -460,7 +522,7 @@ export function AgentDashboard({
               icon={<BookOpen className="w-5 h-5" />}
               stats={stats.sermon}
               description="Generate sermon outlines, series plans, and illustrations"
-              onToggle={(enabled) => onToggleAgent('sermon-programming-agent', enabled)}
+              onToggle={(enabled: boolean) => onToggleAgent('sermon-programming-agent', enabled)}
               onRun={() => onRunAgent('sermon-programming-agent')}
               onConfigure={() => setConfigModal('sermon-programming-agent')}
             >
@@ -506,7 +568,7 @@ export function AgentDashboard({
               icon={<ShoppingBasket className="w-5 h-5" />}
               stats={stats.charityBasket}
               description="Automate weekly charity basket reminders and holiday scheduling"
-              onToggle={(enabled) => onToggleAgent('charity-basket-agent', enabled)}
+              onToggle={(enabled: boolean) => onToggleAgent('charity-basket-agent', enabled)}
               onRun={() => onRunAgent('charity-basket-agent')}
               onConfigure={() => setConfigModal('charity-basket-agent')}
             >

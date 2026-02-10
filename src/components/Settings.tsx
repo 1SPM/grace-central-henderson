@@ -17,6 +17,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Accessibility,
+  Heart,
 } from 'lucide-react';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';

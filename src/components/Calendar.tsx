@@ -40,49 +40,6 @@ interface CalendarProps {
   onViewPerson?: (personId: string) => void;
 }
 
-// Helper to get date suggestions
-function getDateSuggestions(): { label: string; date: string }[] {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const thisSunday = new Date(today);
-  const daysUntilSunday = (7 - today.getDay()) % 7;
-  thisSunday.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
-
-  const nextSunday = new Date(thisSunday);
-  nextSunday.setDate(thisSunday.getDate() + 7);
-
-  const thisWednesday = new Date(today);
-  const daysUntilWednesday = (3 - today.getDay() + 7) % 7;
-  thisWednesday.setDate(today.getDate() + (daysUntilWednesday === 0 ? 7 : daysUntilWednesday));
-
-  const thisSaturday = new Date(today);
-  const daysUntilSaturday = (6 - today.getDay() + 7) % 7;
-  thisSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
-
-  const formatDate = (d: Date) => d.toISOString().split('T')[0];
-
-  return [
-    { label: 'Today', date: formatDate(today) },
-    { label: 'Tomorrow', date: formatDate(tomorrow) },
-    { label: 'This Sunday', date: formatDate(thisSunday) },
-    { label: 'This Wednesday', date: formatDate(thisWednesday) },
-    { label: 'This Saturday', date: formatDate(thisSaturday) },
-    { label: 'Next Sunday', date: formatDate(nextSunday) },
-  ];
-}
-
-const timeSuggestions = [
-  { label: '7:00 AM', time: '07:00' },
-  { label: '9:00 AM', time: '09:00' },
-  { label: '10:00 AM', time: '10:00' },
-  { label: '11:00 AM', time: '11:00' },
-  { label: '6:00 PM', time: '18:00' },
-  { label: '7:00 PM', time: '19:00' },
-];
-
-
 export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterType, setFilterType] = useState<FilterType>('all');
