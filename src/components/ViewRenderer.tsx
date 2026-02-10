@@ -48,6 +48,11 @@ const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m 
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
+const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
+const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
+const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
+const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
+
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -589,6 +594,46 @@ export function ViewRenderer(props: ViewRendererProps) {
             onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
             onBack={() => setView('dashboard')}
             churchName={churchName}
+          />
+        );
+
+      case 'life-services':
+        return (
+          <LifeServices
+            onNavigate={setView}
+            events={events}
+            people={people}
+          />
+        );
+
+      case 'wedding-services':
+        return (
+          <WeddingServices
+            people={people}
+            events={events}
+            onAddEvent={handlers.addEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('life-services')}
+          />
+        );
+
+      case 'funeral-services':
+        return (
+          <FuneralServices
+            people={people}
+            events={events}
+            onAddEvent={handlers.addEvent}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('life-services')}
+          />
+        );
+
+      case 'estate-planning':
+        return (
+          <EstatePlanning
+            people={people}
+            onViewPerson={handlers.viewPerson}
+            onBack={() => setView('life-services')}
           />
         );
 

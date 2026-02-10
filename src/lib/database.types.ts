@@ -13,6 +13,8 @@ export type EventCategory =
   | 'holiday'
   | 'wedding'
   | 'funeral'
+  | 'obituary'
+  | 'ceremony'
   | 'baptism'
   | 'dedication'
   | 'counseling'

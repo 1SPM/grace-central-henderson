@@ -9,6 +9,7 @@ import { BaseAgent } from './BaseAgent';
 import type {
   DonationProcessingConfig,
   DonationEvent,
+  LapsedGiverEvent,
   AgentResult,
   AgentContext,
 } from './types';
@@ -34,24 +35,36 @@ interface PersonData {
   phone?: string;
 }
 
+// Historical giving summary per person for lapsed detection
+interface GivingHistory {
+  personId: string;
+  totalDonations: number;
+  totalAmount: number;
+  lastDonationDate: string;
+  firstDonationDate: string;
+}
+
 export class DonationProcessingAgent extends BaseAgent {
   protected config: DonationProcessingConfig;
   private donations: GivingData[];
   private people: Map<string, PersonData>;
   private existingDonorIds: Set<string>;
+  private givingHistory: Map<string, GivingHistory>;
 
   constructor(
     config: DonationProcessingConfig,
     context: AgentContext,
     donations: GivingData[],
     people: PersonData[],
-    existingDonorIds: string[] = []
+    existingDonorIds: string[] = [],
+    givingHistory: GivingHistory[] = []
   ) {
     super(config, context);
     this.config = config;
     this.donations = donations;
     this.people = new Map(people.map((p) => [p.id, p]));
     this.existingDonorIds = new Set(existingDonorIds);
+    this.givingHistory = new Map(givingHistory.map((h) => [h.personId, h]));
   }
 
   /**
@@ -296,6 +309,169 @@ export class DonationProcessingAgent extends BaseAgent {
   }
 
   /**
+   * Detect and alert on lapsed givers
+   * A lapsed giver is someone who:
+   * 1. Has given at least X times in the past (configurable)
+   * 2. Hasn't given in Y days (configurable)
+   */
+  async detectLapsedGivers(): Promise<LapsedGiverEvent[]> {
+    if (!this.config.settings.detectLapsedGivers) {
+      return [];
+    }
+
+    const { lapsedGiverDays, lapsedGiverMinDonations } = this.config.settings;
+    const today = this.context.currentDate;
+    const lapsedGivers: LapsedGiverEvent[] = [];
+
+    for (const [personId, history] of this.givingHistory) {
+      // Check if they've given enough times to be considered "regular"
+      if (history.totalDonations < lapsedGiverMinDonations) {
+        continue;
+      }
+
+      // Calculate days since last donation
+      const lastDonation = new Date(history.lastDonationDate);
+      const daysSinceLastDonation = Math.floor(
+        (today.getTime() - lastDonation.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      // Check if they've lapsed
+      if (daysSinceLastDonation >= lapsedGiverDays) {
+        const person = this.people.get(personId);
+        if (!person) continue;
+
+        const lapsedEvent: LapsedGiverEvent = {
+          personId,
+          personName: `${person.firstName} ${person.lastName}`,
+          email: person.email,
+          phone: person.phone,
+          lastDonationDate: history.lastDonationDate,
+          daysSinceLastDonation,
+          totalDonations: history.totalDonations,
+          totalAmount: history.totalAmount,
+          averageGift: history.totalAmount / history.totalDonations,
+        };
+
+        lapsedGivers.push(lapsedEvent);
+      }
+    }
+
+    return lapsedGivers;
+  }
+
+  /**
+   * Send lapsed giver alert email to admin/finance team
+   */
+  async sendLapsedGiverAlerts(lapsedGivers: LapsedGiverEvent[]): Promise<boolean> {
+    if (lapsedGivers.length === 0) return true;
+
+    const { lapsedGiverAlertEmail, churchName, lapsedGiverDays } = this.config.settings;
+    const alertEmail = lapsedGiverAlertEmail || this.context.churchId; // Fallback to church contact
+
+    if (!alertEmail) {
+      this.log('No alert email configured for lapsed giver notifications');
+      return false;
+    }
+
+    // Build the alert email
+    const lapsedGiversHtml = lapsedGivers
+      .sort((a, b) => b.totalAmount - a.totalAmount) // Sort by total giving (highest first)
+      .map(
+        (g) => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${g.personName}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${g.daysSinceLastDonation} days</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${g.totalDonations}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">$${g.totalAmount.toFixed(2)}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">$${g.averageGift.toFixed(2)}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${g.email || 'N/A'}</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    const totalLostGiving = lapsedGivers.reduce((sum, g) => sum + g.averageGift, 0);
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+        <h1 style="color: #DC2626;">⚠️ Lapsed Giver Alert</h1>
+        <p>The following regular givers haven't donated in ${lapsedGiverDays}+ days:</p>
+
+        <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <strong style="color: #DC2626;">${lapsedGivers.length} lapsed givers detected</strong><br/>
+          <span style="color: #7F1D1D;">Potential monthly giving at risk: $${totalLostGiving.toFixed(2)}</span>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+          <thead>
+            <tr style="background: #F3F4F6;">
+              <th style="padding: 8px; text-align: left;">Name</th>
+              <th style="padding: 8px; text-align: left;">Days Since Gift</th>
+              <th style="padding: 8px; text-align: left;">Total Gifts</th>
+              <th style="padding: 8px; text-align: left;">Lifetime Giving</th>
+              <th style="padding: 8px; text-align: left;">Avg Gift</th>
+              <th style="padding: 8px; text-align: left;">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lapsedGiversHtml}
+          </tbody>
+        </table>
+
+        <p style="margin-top: 24px; color: #6B7280; font-size: 14px;">
+          Consider reaching out personally to check in on these members. A simple call or email can make a big difference.
+        </p>
+
+        <p style="margin-top: 16px; color: #9CA3AF; font-size: 12px;">
+          This alert was generated by Grace CRM for ${churchName}.
+        </p>
+      </div>
+    `;
+
+    this.log(`Sending lapsed giver alert for ${lapsedGivers.length} givers`, {
+      totalAtRisk: totalLostGiving,
+    });
+
+    if (!this.context.dryRun) {
+      try {
+        const result = await emailService.send({
+          to: { email: alertEmail, name: 'Finance Team' },
+          subject: `⚠️ ${lapsedGivers.length} Lapsed Givers Detected - ${churchName}`,
+          html,
+        });
+
+        if (!result.success) {
+          this.error(`Failed to send lapsed giver alert: ${result.error}`);
+          return false;
+        }
+
+        this.log('Lapsed giver alert sent successfully');
+
+        // Record each lapsed giver as a notification
+        for (const giver of lapsedGivers) {
+          this.recordAction('notification', true, {
+            metadata: {
+              type: 'lapsed_giver',
+              personName: giver.personName,
+              daysSinceLastDonation: giver.daysSinceLastDonation,
+              totalAmount: giver.totalAmount,
+            },
+            targetPersonId: giver.personId,
+          });
+        }
+
+        return true;
+      } catch (err) {
+        this.error(`Error sending lapsed giver alert: ${err}`);
+        return false;
+      }
+    } else {
+      this.log(`[DRY RUN] Would send lapsed giver alert for ${lapsedGivers.length} givers`);
+      return true;
+    }
+  }
+
+  /**
    * Format fund name for display
    */
   private formatFundName(fund: string): string {
@@ -323,6 +499,7 @@ export class DonationProcessingAgent extends BaseAgent {
       autoSendReceipts: this.config.settings.autoSendReceipts,
       trackFirstTimeGivers: this.config.settings.trackFirstTimeGivers,
       alertOnLargeGifts: this.config.settings.alertOnLargeGifts,
+      detectLapsedGivers: this.config.settings.detectLapsedGivers,
     });
 
     // Process each donation
@@ -330,8 +507,36 @@ export class DonationProcessingAgent extends BaseAgent {
       await this.processDonation(donation);
     }
 
+    // Check for lapsed givers
+    if (this.config.settings.detectLapsedGivers) {
+      const lapsedGivers = await this.detectLapsedGivers();
+      if (lapsedGivers.length > 0) {
+        this.log(`Detected ${lapsedGivers.length} lapsed givers`);
+        await this.sendLapsedGiverAlerts(lapsedGivers);
+      }
+    }
+
     this.log(`Donation Processing Agent completed. Processed ${this.donations.length} donations.`);
     return this.getResults();
+  }
+
+  /**
+   * Run lapsed giver check separately (for scheduled weekly runs)
+   */
+  async checkLapsedGivers(): Promise<{ lapsedGivers: LapsedGiverEvent[]; alertSent: boolean }> {
+    if (!this.isActive()) {
+      this.log('Agent is not active, skipping lapsed giver check');
+      return { lapsedGivers: [], alertSent: false };
+    }
+
+    const lapsedGivers = await this.detectLapsedGivers();
+    let alertSent = false;
+
+    if (lapsedGivers.length > 0) {
+      alertSent = await this.sendLapsedGiverAlerts(lapsedGivers);
+    }
+
+    return { lapsedGivers, alertSent };
   }
 
   /**
@@ -393,12 +598,14 @@ export class DonationProcessingAgent extends BaseAgent {
  */
 export function createDefaultDonationConfig(
   churchName: string,
-  taxId: string = ''
+  taxId: string = '',
+  alertEmail?: string
 ): DonationProcessingConfig {
   return {
     id: 'donation-processing-agent',
     name: 'Donation Processing',
-    description: 'Automatically sends receipts, tracks first-time givers, and alerts on large gifts',
+    description:
+      'Automatically sends receipts, tracks first-time givers, alerts on large gifts, and detects lapsed givers',
     category: 'finance',
     status: 'active',
     enabled: true,
@@ -410,6 +617,11 @@ export function createDefaultDonationConfig(
       trackFirstTimeGivers: true,
       alertOnLargeGifts: true,
       largeGiftThreshold: 1000,
+      // Lapsed giver detection defaults
+      detectLapsedGivers: true,
+      lapsedGiverDays: 30, // Alert after 30 days of no giving
+      lapsedGiverMinDonations: 3, // Must have given at least 3 times to be "regular"
+      lapsedGiverAlertEmail: alertEmail,
       churchName,
       taxId,
     },

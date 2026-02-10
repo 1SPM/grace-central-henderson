@@ -95,10 +95,28 @@ export interface DonationProcessingConfig extends AgentConfig {
     trackFirstTimeGivers: boolean;
     alertOnLargeGifts: boolean;
     largeGiftThreshold: number;
+    // Lapsed giver detection
+    detectLapsedGivers: boolean;
+    lapsedGiverDays: number; // Days without giving to consider "lapsed"
+    lapsedGiverMinDonations: number; // Minimum past donations to be considered "regular"
+    lapsedGiverAlertEmail?: string; // Email to send alerts to (defaults to admin)
     churchName: string;
     taxId: string;
     useAIMessages?: boolean; // Use AI to generate personalized thank-you messages
   };
+}
+
+// Lapsed giver event for alerts
+export interface LapsedGiverEvent {
+  personId: string;
+  personName: string;
+  email?: string;
+  phone?: string;
+  lastDonationDate: string;
+  daysSinceLastDonation: number;
+  totalDonations: number;
+  totalAmount: number;
+  averageGift: number;
 }
 
 export interface DonationEvent {
@@ -146,6 +164,107 @@ export interface DripMessage {
   subject: string;
   emailTemplate: string;
   smsTemplate: string;
+}
+
+// Sermon Programming Agent Types
+export interface SermonProgrammingConfig extends AgentConfig {
+  settings: {
+    enableSermonOutlines: boolean;
+    enableSeriesPlanning: boolean;
+    enableIllustrations: boolean;
+    defaultSermonLength: number; // Minutes
+    includeScriptureReferences: boolean;
+    includeApplicationPoints: boolean;
+    includeDiscussionQuestions: boolean;
+    preferredStyle: 'expository' | 'topical' | 'narrative' | 'devotional';
+    targetAudience: 'general' | 'youth' | 'seniors' | 'new-believers';
+    churchName: string;
+    pastorName: string;
+  };
+}
+
+export interface SermonOutline {
+  id: string;
+  title: string;
+  scripture: string;
+  theme: string;
+  mainPoints: {
+    point: string;
+    subPoints: string[];
+    illustration?: string;
+    application?: string;
+  }[];
+  introduction: string;
+  conclusion: string;
+  discussionQuestions?: string[];
+  estimatedLength: number;
+  createdAt: string;
+  status: 'draft' | 'ready' | 'delivered';
+}
+
+export interface SermonSeries {
+  id: string;
+  title: string;
+  description: string;
+  theme: string;
+  numberOfWeeks: number;
+  sermons: {
+    week: number;
+    title: string;
+    scripture: string;
+    keyVerse: string;
+    mainIdea: string;
+  }[];
+  startDate?: string;
+  status: 'planning' | 'active' | 'completed';
+}
+
+// Charity Basket Automation Agent Types
+export interface CharityBasketConfig extends AgentConfig {
+  settings: {
+    enableWeeklyReminders: boolean;
+    reminderDay: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+    enableAutoBasketCreation: boolean;
+    autoBasketTypes: ('food' | 'holiday' | 'school' | 'emergency')[];
+    enableDonorThankYou: boolean;
+    notifyWhenReady: boolean;
+    notifyRecipients: string[]; // Staff IDs to notify
+    holidaySchedule: {
+      thanksgiving: boolean;
+      christmas: boolean;
+      easter: boolean;
+      backToSchool: boolean;
+    };
+    defaultItems: {
+      food: string[];
+      holiday: string[];
+      school: string[];
+    };
+    churchName: string;
+  };
+}
+
+export interface BasketEvent {
+  basketId: string;
+  basketName: string;
+  basketType: string;
+  eventType: 'created' | 'item_added' | 'ready' | 'distributed';
+  recipientName?: string;
+  itemCount?: number;
+  totalValue?: number;
+  donorName?: string;
+  timestamp: string;
+}
+
+export interface ScheduledBasket {
+  id: string;
+  name: string;
+  type: 'food' | 'holiday' | 'school' | 'emergency';
+  scheduledDate: string;
+  recurrence: 'weekly' | 'monthly' | 'yearly' | 'once';
+  autoCreate: boolean;
+  defaultItems: string[];
+  status: 'scheduled' | 'created' | 'cancelled';
 }
 
 // Agent execution context

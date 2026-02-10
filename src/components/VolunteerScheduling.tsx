@@ -1,6 +1,22 @@
 import { useState } from 'react';
-import { Calendar, Plus, Check, X, ChevronLeft, ChevronRight, Clock, MapPin, Star, Briefcase, AlertCircle } from 'lucide-react';
+import {
+  Calendar,
+  Plus,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Star,
+  Briefcase,
+  AlertCircle,
+  Bell,
+  Send,
+  Loader2,
+} from 'lucide-react';
 import { Person, CalendarEvent } from '../types';
+import { sendSingleReminder, type ReminderResult } from '../lib/services/volunteerReminders';
 
 // Skill types (matching SkillsDatabase)
 interface PersonSkill {
@@ -32,6 +48,7 @@ interface VolunteerSchedulingProps {
   people: Person[];
   events: CalendarEvent[];
   assignments: VolunteerAssignment[];
+  churchName?: string;
   onAssign: (eventId: string, roleId: string, personId: string) => void;
   onUpdateStatus: (assignmentId: string, status: VolunteerAssignment['status']) => void;
   onRemove: (assignmentId: string) => void;
@@ -80,6 +97,7 @@ export function VolunteerScheduling({
   people,
   events,
   assignments,
+  churchName = 'Our Church',
   onAssign,
   onUpdateStatus: _onUpdateStatus,
   onRemove,
@@ -90,6 +108,37 @@ export function VolunteerScheduling({
   const [assignRole, setAssignRole] = useState<string>('');
   const [assignPerson, setAssignPerson] = useState<string>('');
   const [weekOffset, setWeekOffset] = useState(0);
+
+  // Reminder state
+  const [sendingReminders, setSendingReminders] = useState<string | null>(null); // eventId being sent
+  const [reminderResults, setReminderResults] = useState<ReminderResult[] | null>(null);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+
+  // Send reminders for all volunteers in an event
+  const handleSendEventReminders = async (event: CalendarEvent) => {
+    setSendingReminders(event.id);
+    setReminderResults(null);
+
+    const eventAssignments = assignments.filter((a) => a.eventId === event.id && a.status !== 'declined');
+
+    const results: ReminderResult[] = [];
+    for (const assignment of eventAssignments) {
+      const person = people.find((p) => p.id === assignment.personId);
+      if (!person) continue;
+
+      const result = await sendSingleReminder(
+        assignment,
+        { id: event.id, title: event.title, startDate: event.startDate, location: event.location },
+        { id: person.id, firstName: person.firstName, lastName: person.lastName, email: person.email, phone: person.phone },
+        { sendEmail: true, sendSMS: false, churchName }
+      );
+      results.push(result);
+    }
+
+    setReminderResults(results);
+    setShowReminderModal(true);
+    setSendingReminders(null);
+  };
 
   // Get start of current week
   const getWeekStart = (offset: number) => {
@@ -269,21 +318,43 @@ export function VolunteerScheduling({
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
-                        {totalAssigned}/{totalNeeded} volunteers
-                      </p>
-                      <div className="w-24 h-2 bg-gray-200 dark:bg-dark-700 rounded-full mt-1 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            fillPercentage >= 100
-                              ? 'bg-green-500'
-                              : fillPercentage >= 50
-                              ? 'bg-amber-500'
-                              : 'bg-red-500'
-                          }`}
-                          style={{ width: `${fillPercentage}%` }}
-                        />
+                    <div className="flex items-center gap-3">
+                      {/* Send Reminders Button */}
+                      {totalAssigned > 0 && (
+                        <button
+                          onClick={() => handleSendEventReminders(event)}
+                          disabled={sendingReminders === event.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+                        >
+                          {sendingReminders === event.id ? (
+                            <>
+                              <Loader2 size={14} className="animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Bell size={14} />
+                              Send Reminders
+                            </>
+                          )}
+                        </button>
+                      )}
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
+                          {totalAssigned}/{totalNeeded} volunteers
+                        </p>
+                        <div className="w-24 h-2 bg-gray-200 dark:bg-dark-700 rounded-full mt-1 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              fillPercentage >= 100
+                                ? 'bg-green-500'
+                                : fillPercentage >= 50
+                                ? 'bg-amber-500'
+                                : 'bg-red-500'
+                            }`}
+                            style={{ width: `${fillPercentage}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -535,6 +606,72 @@ export function VolunteerScheduling({
                 className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
               >
                 Assign
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reminder Results Modal */}
+      {showReminderModal && reminderResults && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-lg">
+                  <Send size={20} className="text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
+                    Reminders Sent
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                    {reminderResults.filter((r) => r.emailSent || r.smsSent).length} of{' '}
+                    {reminderResults.length} sent successfully
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 max-h-64 overflow-y-auto">
+              <div className="space-y-2">
+                {reminderResults.map((result) => (
+                  <div
+                    key={result.assignmentId}
+                    className={`flex items-center justify-between p-2 rounded-lg ${
+                      result.emailSent || result.smsSent
+                        ? 'bg-green-50 dark:bg-green-500/10'
+                        : 'bg-red-50 dark:bg-red-500/10'
+                    }`}
+                  >
+                    <span className="text-sm text-gray-700 dark:text-dark-300">
+                      {result.personName}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {result.emailSent && (
+                        <span className="text-xs text-green-600 dark:text-green-400">Email</span>
+                      )}
+                      {result.smsSent && (
+                        <span className="text-xs text-green-600 dark:text-green-400">SMS</span>
+                      )}
+                      {!result.emailSent && !result.smsSent && (
+                        <span className="text-xs text-red-600 dark:text-red-400">Failed</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-200 dark:border-dark-700">
+              <button
+                onClick={() => {
+                  setShowReminderModal(false);
+                  setReminderResults(null);
+                }}
+                className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700"
+              >
+                Done
               </button>
             </div>
           </div>
