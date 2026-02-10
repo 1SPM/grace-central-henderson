@@ -40,6 +40,49 @@ interface CalendarProps {
   onViewPerson?: (personId: string) => void;
 }
 
+// Helper to get date suggestions
+function getDateSuggestions(): { label: string; date: string }[] {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const thisSunday = new Date(today);
+  const daysUntilSunday = (7 - today.getDay()) % 7;
+  thisSunday.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
+
+  const nextSunday = new Date(thisSunday);
+  nextSunday.setDate(thisSunday.getDate() + 7);
+
+  const thisWednesday = new Date(today);
+  const daysUntilWednesday = (3 - today.getDay() + 7) % 7;
+  thisWednesday.setDate(today.getDate() + (daysUntilWednesday === 0 ? 7 : daysUntilWednesday));
+
+  const thisSaturday = new Date(today);
+  const daysUntilSaturday = (6 - today.getDay() + 7) % 7;
+  thisSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
+  return [
+    { label: 'Today', date: formatDate(today) },
+    { label: 'Tomorrow', date: formatDate(tomorrow) },
+    { label: 'This Sunday', date: formatDate(thisSunday) },
+    { label: 'This Wednesday', date: formatDate(thisWednesday) },
+    { label: 'This Saturday', date: formatDate(thisSaturday) },
+    { label: 'Next Sunday', date: formatDate(nextSunday) },
+  ];
+}
+
+const timeSuggestions = [
+  { label: '7:00 AM', time: '07:00' },
+  { label: '9:00 AM', time: '09:00' },
+  { label: '10:00 AM', time: '10:00' },
+  { label: '11:00 AM', time: '11:00' },
+  { label: '6:00 PM', time: '18:00' },
+  { label: '7:00 PM', time: '19:00' },
+];
+
+
 export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -386,20 +429,28 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
             >
               All
             </button>
-            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday').map(([key, label]) => {
+            {/* Always show primary categories, hide secondary ones if count is 0 */}
+            {Object.entries(categoryLabels).filter(([key]) => key !== 'birthday' && key !== 'anniversary').map(([key, label]) => {
               const count = categoryCounts[key] || 0;
-              if (count === 0) return null;
+              // Always show these primary categories
+              const primaryCategories = ['service', 'wedding', 'funeral', 'baptism', 'meeting', 'event', 'small-group'];
+              // Hide secondary categories only if they have 0 events
+              if (count === 0 && !primaryCategories.includes(key)) return null;
               const colors = categoryColors[key];
               return (
                 <button
                   key={key}
                   onClick={() => setFilterType(filterType === key ? 'all' : key as FilterType)}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                    filterType === key ? `${colors.bg} ${colors.text} ${colors.border} border` : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
+                    filterType === key
+                      ? `${colors.bg} ${colors.text} ${colors.border} border`
+                      : count === 0
+                        ? 'bg-gray-50 dark:bg-dark-850 text-gray-400 dark:text-dark-500 hover:bg-gray-100 dark:hover:bg-dark-800'
+                        : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-                  {label} ({count})
+                  <span className={`w-1.5 h-1.5 rounded-full ${count === 0 ? 'bg-gray-300 dark:bg-dark-600' : colors.dot}`} />
+                  {label} {count > 0 && `(${count})`}
                 </button>
               );
             })}

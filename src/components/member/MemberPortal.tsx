@@ -6,6 +6,8 @@ import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
 import { MemberCheckInPage } from './MemberCheckInPage';
 import { PastorSignupPage } from './PastorSignupPage';
+import { MemberShopPage } from './MemberShopPage';
+import { MemberLegacyPage } from './MemberLegacyPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
@@ -100,6 +102,23 @@ export function MemberPortal({
             churchName={churchName}
             onSubmit={onPastorSignup}
             onBack={() => setActiveTab('home')}
+          />
+        );
+
+      case 'shop':
+        return (
+          <MemberShopPage
+            churchName={churchName}
+            personId={currentMember?.id}
+          />
+        );
+
+      case 'legacy':
+        return (
+          <MemberLegacyPage
+            churchName={churchName}
+            personId={currentMember?.id}
+            personName={currentMember ? `${currentMember.firstName} ${currentMember.lastName}` : undefined}
           />
         );
 

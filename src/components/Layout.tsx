@@ -45,6 +45,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
   { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
+  { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
 
@@ -94,6 +95,10 @@ const viewLabels: Record<View, string> = {
   'qr-checkin': 'QR Check-In',
   'follow-up-automation': 'Follow-up Automation',
   'pastoral-care': 'Pastoral Care',
+  'life-services': 'Life Services',
+  'wedding-services': 'Weddings',
+  'funeral-services': 'Funerals',
+  'estate-planning': 'Legacy Giving',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
@@ -149,6 +154,14 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
     if (givingSubViews.includes(currentView)) {
       return [
         { label: 'Giving', view: 'giving' as View },
+        { label: viewLabels[currentView], view: currentView },
+      ];
+    }
+    // Sub-pages under Life Services
+    const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
+    if (lifeServicesSubViews.includes(currentView)) {
+      return [
+        { label: 'Life Services', view: 'life-services' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
     }
@@ -216,7 +229,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           {navItems.map((item) => {
             const isActive = currentView === item.view ||
               (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
-              (item.view === 'people' && currentView === 'person');
+              (item.view === 'people' && currentView === 'person') ||
+              (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
 
             return (
               <button
