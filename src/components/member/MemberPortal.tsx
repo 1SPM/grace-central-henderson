@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MemberLayout } from './MemberLayout';
 import { MemberHomePage } from './MemberHomePage';
 import { MemberDirectoryPage } from './MemberDirectoryPage';
 import { MemberGivingPage } from './MemberGivingPage';
 import { MemberEventsPage } from './MemberEventsPage';
 import { MemberCheckInPage } from './MemberCheckInPage';
+import { PastorSignupPage } from './PastorSignupPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
+import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
 interface MemberPortalProps {
   people: Person[];
@@ -20,6 +22,7 @@ interface MemberPortalProps {
   onBack?: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
+  onPastorSignup?: (data: LeaderFormData) => void;
 }
 
 export function MemberPortal({
@@ -33,9 +36,18 @@ export function MemberPortal({
   churchProfile,
   onBack,
   onRSVP,
-  onCheckIn
+  onCheckIn,
+  onPastorSignup
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
+
+  // Handle deep link from ?portal=pastor-signup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('portal') === 'pastor-signup') {
+      setActiveTab('pastor-signup');
+    }
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -79,6 +91,15 @@ export function MemberPortal({
             personId={currentMember?.id}
             personName={currentMember ? `${currentMember.firstName}` : undefined}
             onCheckIn={onCheckIn}
+          />
+        );
+
+      case 'pastor-signup':
+        return (
+          <PastorSignupPage
+            churchName={churchName}
+            onSubmit={onPastorSignup}
+            onBack={() => setActiveTab('home')}
           />
         );
 

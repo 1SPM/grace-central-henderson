@@ -170,7 +170,7 @@ function getPriority(category: HelpCategory): ConversationPriority {
 }
 
 export function usePastoralCare() {
-  const [leaders] = useState<LeaderProfile[]>(INITIAL_LEADERS);
+  const [leaders, setLeaders] = useState<LeaderProfile[]>(INITIAL_LEADERS);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [conversations, setConversations] = useState<PastoralConversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -302,6 +302,79 @@ export function usePastoralCare() {
     ));
   }, []);
 
+  const addLeader = useCallback((data: {
+    displayName: string;
+    title: string;
+    bio: string;
+    photo?: string;
+    expertiseAreas: HelpCategory[];
+    credentials: string[];
+    yearsOfPractice?: number;
+    personalityTraits: string[];
+    spiritualFocusAreas: string[];
+    language: string;
+    sessionType: 'one-time' | 'recurring';
+    sessionFrequency: string;
+    suitableFor: string[];
+    anchors: string;
+  }) => {
+    const newLeader: LeaderProfile = {
+      id: `leader-${Date.now()}`,
+      displayName: data.displayName,
+      title: data.title,
+      bio: data.bio,
+      photo: data.photo,
+      expertiseAreas: data.expertiseAreas,
+      credentials: data.credentials,
+      yearsOfPractice: data.yearsOfPractice,
+      personalityTraits: data.personalityTraits,
+      spiritualFocusAreas: data.spiritualFocusAreas,
+      language: data.language,
+      isVerified: false,
+      isAvailable: true,
+      isActive: true,
+      sessionType: data.sessionType,
+      sessionFrequency: data.sessionFrequency,
+      suitableFor: data.suitableFor,
+      anchors: data.anchors,
+      createdAt: new Date().toISOString(),
+    };
+    setLeaders(prev => [...prev, newLeader]);
+  }, []);
+
+  const updateLeader = useCallback((leaderId: string, data: {
+    displayName: string;
+    title: string;
+    bio: string;
+    photo?: string;
+    expertiseAreas: HelpCategory[];
+    credentials: string[];
+    yearsOfPractice?: number;
+    personalityTraits: string[];
+    spiritualFocusAreas: string[];
+    language: string;
+    sessionType: 'one-time' | 'recurring';
+    sessionFrequency: string;
+    suitableFor: string[];
+    anchors: string;
+  }) => {
+    setLeaders(prev => prev.map(l =>
+      l.id === leaderId
+        ? { ...l, ...data }
+        : l
+    ));
+  }, []);
+
+  const deleteLeader = useCallback((leaderId: string) => {
+    setLeaders(prev => prev.filter(l => l.id !== leaderId));
+  }, []);
+
+  const toggleLeaderAvailability = useCallback((leaderId: string) => {
+    setLeaders(prev => prev.map(l =>
+      l.id === leaderId ? { ...l, isAvailable: !l.isAvailable } : l
+    ));
+  }, []);
+
   const activeConversation = conversations.find(c => c.id === activeConversationId);
   const activeLeader = activeConversation?.leaderId
     ? leaders.find(l => l.id === activeConversation.leaderId)
@@ -319,5 +392,9 @@ export function usePastoralCare() {
     sendMessage,
     resolveConversation,
     escalateConversation,
+    addLeader,
+    updateLeader,
+    deleteLeader,
+    toggleLeaderAvailability,
   };
 }

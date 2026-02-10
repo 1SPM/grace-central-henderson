@@ -175,6 +175,10 @@ interface ViewRendererProps {
     resolveConversation: (conversationId: string) => void;
     escalateConversation: (conversationId: string) => void;
     setActiveConversationId: (id: string | null) => void;
+    addLeader: (data: { displayName: string; title: string; bio: string; photo?: string; expertiseAreas: HelpCategory[]; credentials: string[]; yearsOfPractice?: number; personalityTraits: string[]; spiritualFocusAreas: string[]; language: string; sessionType: 'one-time' | 'recurring'; sessionFrequency: string; suitableFor: string[]; anchors: string }) => void;
+    updateLeader: (leaderId: string, data: { displayName: string; title: string; bio: string; photo?: string; expertiseAreas: HelpCategory[]; credentials: string[]; yearsOfPractice?: number; personalityTraits: string[]; spiritualFocusAreas: string[]; language: string; sessionType: 'one-time' | 'recurring'; sessionFrequency: string; suitableFor: string[]; anchors: string }) => void;
+    deleteLeader: (leaderId: string) => void;
+    toggleLeaderAvailability: (leaderId: string) => void;
   };
 }
 
@@ -494,6 +498,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
+            onPastorSignup={pastoralCare.addLeader}
           />
         );
 
@@ -578,6 +583,10 @@ export function ViewRenderer(props: ViewRendererProps) {
             onResolveConversation={pastoralCare.resolveConversation}
             onEscalateConversation={pastoralCare.escalateConversation}
             onSetActiveConversation={pastoralCare.setActiveConversationId}
+            onAddLeader={pastoralCare.addLeader}
+            onUpdateLeader={pastoralCare.updateLeader}
+            onDeleteLeader={pastoralCare.deleteLeader}
+            onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
             onBack={() => setView('dashboard')}
             churchName={churchName}
           />

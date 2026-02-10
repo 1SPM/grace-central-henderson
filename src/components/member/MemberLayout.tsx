@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Users, DollarSign, Calendar, QrCode, ArrowLeft, Home } from 'lucide-react';
+import { Users, DollarSign, Calendar, ArrowLeft, Home, Heart } from 'lucide-react';
 import type { MemberPortalTab } from '../../types';
 
 interface MemberLayoutProps {
@@ -15,7 +15,7 @@ const tabs: { id: MemberPortalTab; label: string; icon: typeof Users }[] = [
   { id: 'directory', label: 'Directory', icon: Users },
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'giving', label: 'Give', icon: DollarSign },
-  { id: 'checkin', label: 'Check In', icon: QrCode },
+  { id: 'pastor-signup', label: 'Serve', icon: Heart },
 ];
 
 export function MemberLayout({

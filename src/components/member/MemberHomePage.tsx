@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Users, DollarSign, Calendar, QrCode, Clock, MapPin, Phone, Mail, Globe, ChevronRight } from 'lucide-react';
+import { Users, DollarSign, Calendar, QrCode, Clock, MapPin, Phone, Mail, Globe, ChevronRight, Heart } from 'lucide-react';
 import type { CalendarEvent, MemberPortalTab } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
@@ -48,6 +48,13 @@ export function MemberHomePage({ churchName, churchProfile, events, onNavigate }
       description: 'Sunday attendance',
       icon: QrCode,
       color: 'from-purple-500 to-violet-600'
+    },
+    {
+      id: 'pastor-signup' as MemberPortalTab,
+      label: 'Pastoral Care',
+      description: 'Serve as a leader',
+      icon: Heart,
+      color: 'from-rose-500 to-pink-600'
     },
   ];
 

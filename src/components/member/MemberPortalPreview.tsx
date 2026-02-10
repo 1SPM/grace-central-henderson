@@ -3,6 +3,7 @@ import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link
 import { MemberPortal } from './MemberPortal';
 import type { Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
+import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
 interface MemberPortalPreviewProps {
   people: Person[];
@@ -15,6 +16,7 @@ interface MemberPortalPreviewProps {
   onBack: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
+  onPastorSignup?: (data: LeaderFormData) => void;
 }
 
 export function MemberPortalPreview({
@@ -27,7 +29,8 @@ export function MemberPortalPreview({
   churchProfile,
   onBack,
   onRSVP,
-  onCheckIn
+  onCheckIn,
+  onPastorSignup
 }: MemberPortalPreviewProps) {
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
   const [copied, setCopied] = useState(false);
@@ -74,6 +77,7 @@ export function MemberPortalPreview({
           onBack={onBack}
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
+          onPastorSignup={onPastorSignup}
         />
       </div>
     );
@@ -144,6 +148,7 @@ export function MemberPortalPreview({
                       churchProfile={churchProfile}
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
+                      onPastorSignup={onPastorSignup}
                     />
                   </div>
                 </div>
