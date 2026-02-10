@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { MessageCircle, Clock, BookOpen, Globe, Sparkles, Calendar } from 'lucide-react';
+import { MessageCircle, Clock, BookOpen, Globe, Sparkles, Calendar, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import type { LeaderProfile, HelpCategory } from '../../types';
 import { VerifiedBadge } from './VerifiedBadge';
 
 interface LeaderProfileCardProps {
   leader: LeaderProfile;
   onStartChat: (leaderId: string) => void;
+  onEdit?: (leader: LeaderProfile) => void;
+  onDelete?: (leaderId: string) => void;
+  onToggleAvailability?: (leaderId: string) => void;
   activeConversations?: number;
   expanded?: boolean;
 }
@@ -24,7 +27,7 @@ const CATEGORY_LABELS: Record<HelpCategory, string> = {
 
 type ProfileTab = 'expertise' | 'spiritual';
 
-export function LeaderProfileCard({ leader, onStartChat, activeConversations = 0, expanded = false }: LeaderProfileCardProps) {
+export function LeaderProfileCard({ leader, onStartChat, onEdit, onDelete, onToggleAvailability, activeConversations = 0, expanded = false }: LeaderProfileCardProps) {
   const [tab, setTab] = useState<ProfileTab>('expertise');
   const [isExpanded, setIsExpanded] = useState(expanded);
 
@@ -127,7 +130,7 @@ export function LeaderProfileCard({ leader, onStartChat, activeConversations = 0
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex items-center gap-2 mt-4 flex-wrap">
           <button
             onClick={() => onStartChat(leader.id)}
             className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-lg transition-colors"
@@ -141,6 +144,43 @@ export function LeaderProfileCard({ leader, onStartChat, activeConversations = 0
           >
             {isExpanded ? 'Hide Profile' : 'View Profile'}
           </button>
+          {onEdit && (
+            <button
+              onClick={() => onEdit(leader)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg transition-colors"
+              title="Edit profile"
+            >
+              <Pencil size={13} />
+              Edit
+            </button>
+          )}
+          {onToggleAvailability && (
+            <button
+              onClick={() => onToggleAvailability(leader.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                leader.isAvailable
+                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20'
+                  : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600'
+              }`}
+              title={leader.isAvailable ? 'Set offline' : 'Set online'}
+            >
+              {leader.isAvailable ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+              {leader.isAvailable ? 'Online' : 'Offline'}
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => {
+                if (confirm(`Remove ${leader.displayName} from pastoral care?`)) {
+                  onDelete(leader.id);
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+              title="Remove leader"
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
         </div>
       </div>
 

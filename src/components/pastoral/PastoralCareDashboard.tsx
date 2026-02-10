@@ -11,13 +11,18 @@ import {
   ArrowRight,
   BarChart3,
   Shield,
+  Link2,
+  Check,
+  UserPlus,
 } from 'lucide-react';
 import type { LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../../types';
 import { HelpIntakeForm } from './HelpIntakeForm';
 import { LeaderProfileCard } from './LeaderProfileCard';
 import { ChatWindow } from './ChatWindow';
+import { LeaderRegistrationForm } from './LeaderRegistrationForm';
+import type { LeaderFormData } from './LeaderRegistrationForm';
 
-type DashboardTab = 'overview' | 'conversations' | 'leaders' | 'new-request';
+type DashboardTab = 'overview' | 'conversations' | 'leaders' | 'new-request' | 'add-leader' | 'edit-leader';
 
 interface PastoralCareDashboardProps {
   leaders: LeaderProfile[];
@@ -31,6 +36,10 @@ interface PastoralCareDashboardProps {
   onResolveConversation: (conversationId: string) => void;
   onEscalateConversation: (conversationId: string) => void;
   onSetActiveConversation: (id: string | null) => void;
+  onAddLeader?: (data: LeaderFormData) => void;
+  onUpdateLeader?: (leaderId: string, data: LeaderFormData) => void;
+  onDeleteLeader?: (leaderId: string) => void;
+  onToggleLeaderAvailability?: (leaderId: string) => void;
   onBack?: () => void;
   churchName?: string;
 }
@@ -74,10 +83,16 @@ export function PastoralCareDashboard({
   onResolveConversation,
   onEscalateConversation,
   onSetActiveConversation,
+  onAddLeader,
+  onUpdateLeader,
+  onDeleteLeader,
+  onToggleLeaderAvailability,
   onBack,
   churchName,
 }: PastoralCareDashboardProps) {
   const [tab, setTab] = useState<DashboardTab>('overview');
+  const [editingLeader, setEditingLeader] = useState<LeaderProfile | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // If there's an active conversation, show the chat
   if (activeConversationId && activeConversation) {
@@ -104,6 +119,56 @@ export function PastoralCareDashboard({
           onSubmit={onCreateHelpRequest}
           onBack={() => setTab('overview')}
           churchName={churchName}
+        />
+      </div>
+    );
+  }
+
+  // Add leader form
+  if (tab === 'add-leader' && onAddLeader) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <LeaderRegistrationForm
+          onSubmit={(data) => {
+            onAddLeader(data);
+            setTab('leaders');
+          }}
+          onBack={() => setTab('leaders')}
+        />
+      </div>
+    );
+  }
+
+  // Edit leader form
+  if (tab === 'edit-leader' && editingLeader && onUpdateLeader) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <LeaderRegistrationForm
+          onSubmit={(data) => {
+            onUpdateLeader(editingLeader.id, data);
+            setEditingLeader(null);
+            setTab('leaders');
+          }}
+          onBack={() => {
+            setEditingLeader(null);
+            setTab('leaders');
+          }}
+          initialData={{
+            displayName: editingLeader.displayName,
+            title: editingLeader.title,
+            bio: editingLeader.bio,
+            photo: editingLeader.photo,
+            expertiseAreas: editingLeader.expertiseAreas,
+            credentials: editingLeader.credentials,
+            yearsOfPractice: editingLeader.yearsOfPractice,
+            personalityTraits: editingLeader.personalityTraits,
+            spiritualFocusAreas: editingLeader.spiritualFocusAreas,
+            language: editingLeader.language,
+            sessionType: editingLeader.sessionType || 'one-time',
+            sessionFrequency: editingLeader.sessionFrequency || 'Weekly',
+            suitableFor: editingLeader.suitableFor || [],
+            anchors: editingLeader.anchors || '',
+          }}
         />
       </div>
     );
@@ -137,13 +202,33 @@ export function PastoralCareDashboard({
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setTab('new-request')}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
-        >
-          <Plus size={16} />
-          New Help Request
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}${window.location.pathname}?portal=pastor-signup`;
+              navigator.clipboard.writeText(url).then(() => {
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 2000);
+              });
+            }}
+            className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors border ${
+              linkCopied
+                ? 'border-emerald-300 dark:border-emerald-600 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700'
+            }`}
+            title="Copy pastor signup link to share"
+          >
+            {linkCopied ? <Check size={16} /> : <Link2 size={16} />}
+            {linkCopied ? 'Copied!' : 'Signup Link'}
+          </button>
+          <button
+            onClick={() => setTab('new-request')}
+            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+          >
+            <Plus size={16} />
+            New Help Request
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -364,20 +449,42 @@ export function PastoralCareDashboard({
       )}
 
       {tab === 'leaders' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {leaders.filter(l => l.isActive).map(leader => {
-            const leaderConvs = conversations.filter(c => c.leaderId === leader.id && c.status === 'active').length;
-            return (
-              <LeaderProfileCard
-                key={leader.id}
-                leader={leader}
-                onStartChat={() => {
-                  setTab('new-request');
-                }}
-                activeConversations={leaderConvs}
-              />
-            );
-          })}
+        <div className="space-y-4">
+          {onAddLeader && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {leaders.filter(l => l.isActive).length} active leader{leaders.filter(l => l.isActive).length !== 1 ? 's' : ''}
+              </p>
+              <button
+                onClick={() => setTab('add-leader')}
+                className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+              >
+                <UserPlus size={16} />
+                Add Leader
+              </button>
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {leaders.filter(l => l.isActive).map(leader => {
+              const leaderConvs = conversations.filter(c => c.leaderId === leader.id && c.status === 'active').length;
+              return (
+                <LeaderProfileCard
+                  key={leader.id}
+                  leader={leader}
+                  onStartChat={() => {
+                    setTab('new-request');
+                  }}
+                  onEdit={onUpdateLeader ? (l) => {
+                    setEditingLeader(l);
+                    setTab('edit-leader');
+                  } : undefined}
+                  onDelete={onDeleteLeader}
+                  onToggleAvailability={onToggleLeaderAvailability}
+                  activeConversations={leaderConvs}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
