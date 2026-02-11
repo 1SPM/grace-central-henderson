@@ -15,6 +15,7 @@ import {
 import type { LeaderProfile, HelpRequest, HelpCategory, MemberPortalTab } from '../../types';
 import { VerifiedBadge } from '../pastoral/VerifiedBadge';
 import { HelpIntakeForm } from '../pastoral/HelpIntakeForm';
+import { DEMO_LEADERS } from './demoLeaders';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   'marriage': 'Marriage', 'addiction': 'Recovery', 'grief': 'Grief',
@@ -28,58 +29,6 @@ const PRIORITY_COLORS: Record<string, string> = {
   high: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400',
   crisis: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
 };
-
-// Demo leaders for display
-const DEMO_LEADERS: LeaderProfile[] = [
-  {
-    id: 'leader-1',
-    displayName: 'Pastor Mike Davis',
-    title: 'Senior Pastor — Marriage & Family',
-    bio: 'Over 20 years of pastoral experience helping couples and families grow stronger in faith and love.',
-    expertiseAreas: ['marriage', 'parenting', 'general'],
-    credentials: ['M.Div — Dallas Theological Seminary', 'Certified Biblical Counselor'],
-    yearsOfPractice: 22,
-    personalityTraits: ['Warm', 'Patient', 'Scripture-focused'],
-    spiritualFocusAreas: ['Prayer Ministry', 'Discipleship'],
-    language: 'English',
-    isVerified: true,
-    isAvailable: true,
-    isActive: true,
-    createdAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: 'leader-2',
-    displayName: 'Pastor Sarah Johnson',
-    title: 'Associate Pastor — Mental Health & Crisis',
-    bio: 'Licensed counselor combining professional expertise with spiritual care for those facing anxiety, depression, and crisis.',
-    expertiseAreas: ['anxiety-depression', 'crisis', 'grief'],
-    credentials: ['Licensed Professional Counselor', 'M.A. Clinical Psychology'],
-    yearsOfPractice: 15,
-    personalityTraits: ['Empathetic', 'Calm', 'Encouraging'],
-    spiritualFocusAreas: ['Healing Ministry', 'Intercessory Prayer'],
-    language: 'English',
-    isVerified: true,
-    isAvailable: true,
-    isActive: true,
-    createdAt: '2025-03-01T00:00:00Z',
-  },
-  {
-    id: 'leader-3',
-    displayName: 'Deacon Robert Flores',
-    title: 'Community Outreach — Financial & Recovery',
-    bio: 'Former social worker with deep experience in financial counseling and addiction recovery support.',
-    expertiseAreas: ['financial', 'addiction', 'crisis'],
-    credentials: ['MSW — Columbia University', 'Certified Financial Counselor'],
-    yearsOfPractice: 18,
-    personalityTraits: ['Direct', 'Practical', 'Compassionate'],
-    spiritualFocusAreas: ['Social Justice', 'Discipleship'],
-    language: 'English',
-    isVerified: true,
-    isAvailable: false,
-    isActive: true,
-    createdAt: '2025-02-01T00:00:00Z',
-  },
-];
 
 type CareView = 'home' | 'leaders' | 'request' | 'my-requests';
 

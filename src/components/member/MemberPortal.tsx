@@ -10,7 +10,8 @@ import { MemberShopPage } from './MemberShopPage';
 import { MemberLegacyPage } from './MemberLegacyPage';
 import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory } from '../../types';
+import { DEMO_LEADERS } from './demoLeaders';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -28,6 +29,7 @@ interface MemberPortalProps {
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
   onPastorSignup?: (data: LeaderFormData) => void;
   onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean }) => void;
+  leaders?: LeaderProfile[];
 }
 
 export function MemberPortal({
@@ -44,6 +46,7 @@ export function MemberPortal({
   onCheckIn,
   onPastorSignup,
   onCreateHelpRequest,
+  leaders = DEMO_LEADERS,
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
 
@@ -132,6 +135,7 @@ export function MemberPortal({
       case 'care':
         return (
           <MemberCarePage
+            leaders={leaders}
             onCreateHelpRequest={onCreateHelpRequest}
             onNavigate={setActiveTab}
             churchName={churchName}
@@ -161,6 +165,7 @@ export function MemberPortal({
       onTabChange={setActiveTab}
       onBack={onBack}
       churchName={churchName}
+      leaders={leaders}
     >
       {renderContent()}
     </MemberLayout>
