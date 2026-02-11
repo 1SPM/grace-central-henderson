@@ -60,7 +60,7 @@ export function MemberLayout({
       <PastoralStories leaders={leaders} onTapLeader={onTabChange} />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-h-0">
         {children}
       </main>
 
