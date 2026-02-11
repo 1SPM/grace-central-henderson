@@ -29,9 +29,9 @@ export function MemberLayout({
   churchName = 'Grace Church'
 }: MemberLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex flex-col">
+    <div className="h-full min-h-screen bg-gray-50 dark:bg-dark-900 flex flex-col">
       {/* Header */}
-      <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 sticky top-0 z-40">
+      <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
         {onBack && (
           <button
             onClick={onBack}
@@ -54,12 +54,12 @@ export function MemberLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pb-20">
+      <main className="flex-1 overflow-auto">
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-850 border-t border-gray-200 dark:border-dark-700 px-2 pb-safe z-50">
+      <nav className="flex-shrink-0 bg-white dark:bg-dark-850 border-t border-gray-200 dark:border-dark-700 px-1 pb-[env(safe-area-inset-bottom)] z-50">
         <div className="flex items-center justify-around max-w-lg mx-auto">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
@@ -67,17 +67,17 @@ export function MemberLayout({
               <button
                 key={id}
                 onClick={() => onTabChange(id)}
-                className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-colors ${
+                className={`flex flex-col items-center py-2 px-1.5 min-w-0 flex-1 transition-colors ${
                   isActive
                     ? 'text-indigo-600 dark:text-indigo-400'
                     : 'text-gray-400 dark:text-dark-500 hover:text-gray-600 dark:hover:text-dark-400'
                 }`}
               >
                 <Icon
-                  size={22}
+                  size={20}
                   className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}
                 />
-                <span className={`text-[10px] mt-0.5 ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                <span className={`text-[9px] mt-0.5 truncate max-w-full ${isActive ? 'font-semibold' : 'font-medium'}`}>
                   {label}
                 </span>
               </button>
