@@ -32,7 +32,7 @@ export function MemberLayout({
   leaders,
 }: MemberLayoutProps) {
   return (
-    <div className="h-full min-h-screen bg-gray-50 dark:bg-dark-900 flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col">
       {/* Header */}
       <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
         {onBack && (

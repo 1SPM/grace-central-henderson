@@ -66,7 +66,7 @@ export function MemberPortalPreview({
   // Full screen mode - just show the portal
   if (viewMode === 'full') {
     return (
-      <div className="h-full">
+      <div className="h-screen">
         <div className="absolute top-4 right-4 z-50">
           <button
             onClick={() => setViewMode('phone')}
@@ -151,8 +151,8 @@ export function MemberPortalPreview({
                   {/* Notch */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-50" />
 
-                  {/* Screen Content - transform creates containing block for fixed elements */}
-                  <div className="h-full overflow-y-auto overflow-x-hidden" style={{ transform: 'translateZ(0)' }}>
+                  {/* Screen Content — internal flex layout handles its own scrolling */}
+                  <div className="h-full overflow-hidden" style={{ transform: 'translateZ(0)' }}>
                     <MemberPortal
                       people={people}
                       events={events}
