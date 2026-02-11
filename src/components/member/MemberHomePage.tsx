@@ -50,9 +50,9 @@ export function MemberHomePage({ churchName, churchProfile, events, onNavigate }
       color: 'from-purple-500 to-violet-600'
     },
     {
-      id: 'pastor-signup' as MemberPortalTab,
+      id: 'care' as MemberPortalTab,
       label: 'Pastoral Care',
-      description: 'Serve as a leader',
+      description: 'Get confidential support',
       icon: Heart,
       color: 'from-rose-500 to-pink-600'
     },

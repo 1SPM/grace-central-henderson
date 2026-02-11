@@ -135,7 +135,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
 }
 
-export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning';
+export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management';
 
 // Family/Household type for grouping
 export interface Family {
@@ -150,7 +150,7 @@ export interface Family {
 }
 
 // Member Portal Tab
-export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy';
+export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy' | 'my-ministry' | 'care';
 
 // ============================================
 // COLLECTION & DONATION MANAGEMENT TYPES
@@ -664,3 +664,128 @@ export const DEFAULT_FUNERAL_CHECKLIST: Omit<FuneralChecklistItem, 'id'>[] = [
   { task: 'Send follow-up card to family', category: 'follow-up', completed: false },
   { task: 'Schedule grief support check-in', category: 'follow-up', completed: false },
 ];
+
+// ============================================
+// LEADER ONBOARDING & SESSION TYPES
+// ============================================
+
+export type LeaderApplicationStatus =
+  | 'submitted'
+  | 'under_review'
+  | 'interview'
+  | 'training'
+  | 'approved'
+  | 'active'
+  | 'suspended'
+  | 'rejected';
+
+export type BackgroundCheckStatus = 'not_started' | 'in_progress' | 'passed' | 'failed' | 'waived';
+
+export interface LeaderReference {
+  name: string;
+  relationship: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+}
+
+export interface LeaderApplication {
+  id: string;
+  personId?: string;
+  displayName: string;
+  title: string;
+  bio?: string;
+  photo?: string;
+  email?: string;
+  phone?: string;
+  expertiseAreas: HelpCategory[];
+  credentials: string[];
+  yearsOfPractice?: number;
+  personalityTraits: string[];
+  spiritualFocusAreas: string[];
+  suitableFor: string[];
+  language: string;
+  anchorVerse?: string;
+  sessionType: 'one-time' | 'recurring';
+  sessionFrequency?: string;
+  status: LeaderApplicationStatus;
+  statusNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  backgroundCheckStatus: BackgroundCheckStatus;
+  backgroundCheckDate?: string;
+  trainingCompleted: boolean;
+  trainingCompletedDate?: string;
+  trainingModulesDone: string[];
+  references: LeaderReference[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PastoralSessionType = 'chat' | 'video' | 'phone' | 'in-person';
+export type PastoralSessionStatus = 'scheduled' | 'active' | 'completed' | 'cancelled' | 'no-show';
+
+export interface PastoralSession {
+  id: string;
+  leaderId: string;
+  personId?: string;
+  helpRequestId?: string;
+  category: HelpCategory;
+  sessionType: PastoralSessionType;
+  startedAt: string;
+  endedAt?: string;
+  durationMinutes?: number;
+  status: PastoralSessionStatus;
+  notes?: string;
+  followUpNeeded: boolean;
+  followUpDate?: string;
+  rating?: number;
+  feedback?: string;
+  isAnonymous: boolean;
+  createdAt: string;
+}
+
+export interface LeaderStats {
+  leaderId: string;
+  leaderName: string;
+  leaderTitle: string;
+  totalSessions: number;
+  completedSessions: number;
+  activeSessions: number;
+  cancelledSessions: number;
+  noShowSessions: number;
+  totalHours: number;
+  averageSessionMinutes: number;
+  averageRating: number;
+  totalRatings: number;
+  categoryBreakdown: { category: HelpCategory; count: number; percentage: number }[];
+  monthlyActivity: { month: string; sessions: number; hours: number }[];
+  responseRate: number;
+  followUpRate: number;
+  isVerified: boolean;
+  isAvailable: boolean;
+  lastSessionDate?: string;
+}
+
+export const LEADER_APPLICATION_STEPS = [
+  { key: 'personal', label: 'Personal Info', description: 'Basic profile details' },
+  { key: 'expertise', label: 'Expertise & Traits', description: 'Areas of ministry focus' },
+  { key: 'credentials', label: 'Credentials', description: 'Education & experience' },
+  { key: 'references', label: 'References', description: 'Character references' },
+  { key: 'review', label: 'Review & Submit', description: 'Confirm your application' },
+] as const;
+
+export type OnboardingStep = typeof LEADER_APPLICATION_STEPS[number]['key'];
+
+export const TRAINING_MODULES = [
+  'Pastoral Ethics & Boundaries',
+  'Crisis Intervention Basics',
+  'Active Listening Skills',
+  'Confidentiality & Privacy',
+  'Mandatory Reporting Guidelines',
+  'Cultural Sensitivity',
+  'Suicide Prevention Awareness',
+  'Referral Network Overview',
+] as const;

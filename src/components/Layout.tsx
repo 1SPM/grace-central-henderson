@@ -22,6 +22,7 @@ import {
   Home,
   Briefcase,
   Heart,
+  ShieldCheck,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -45,6 +46,7 @@ const navItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
   { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
   { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
+  { view: 'leader-management', label: 'Leaders', icon: <ShieldCheck size={18} /> },
   { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
 ];
@@ -99,6 +101,7 @@ const viewLabels: Record<View, string> = {
   'wedding-services': 'Weddings',
   'funeral-services': 'Funerals',
   'estate-planning': 'Legacy Giving',
+  'leader-management': 'Leader Management',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
@@ -230,7 +233,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             const isActive = currentView === item.view ||
               (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
               (item.view === 'people' && currentView === 'person') ||
-              (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
+              (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView)) ||
+              (item.view === 'leader-management' && currentView === 'leader-management');
 
             return (
               <button

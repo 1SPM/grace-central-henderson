@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart } from 'lucide-react';
+import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart, Shield } from 'lucide-react';
 import type { MemberPortalTab } from '../../types';
 
 interface MemberLayoutProps {
@@ -13,11 +13,12 @@ interface MemberLayoutProps {
 const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'events', label: 'Events', icon: Calendar },
-  { id: 'shop', label: 'Shop', icon: ShoppingBag },
+  { id: 'care', label: 'Care', icon: Heart },
   { id: 'giving', label: 'Give', icon: DollarSign },
-  { id: 'pastor-signup', label: 'Serve', icon: Heart },
-  { id: 'legacy', label: 'Legacy', icon: Heart },
+  { id: 'shop', label: 'Shop', icon: ShoppingBag },
+  { id: 'legacy', label: 'Legacy', icon: Shield },
   { id: 'checkin', label: 'Check In', icon: QrCode },
+  { id: 'my-ministry', label: 'Ministry', icon: Shield },
 ];
 
 export function MemberLayout({
