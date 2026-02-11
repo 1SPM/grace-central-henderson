@@ -9,7 +9,8 @@ import { PastorSignupPage } from './PastorSignupPage';
 import { MemberShopPage } from './MemberShopPage';
 import { MemberLegacyPage } from './MemberLegacyPage';
 import { MyMinistryPage } from './MyMinistryPage';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
+import { MemberCarePage } from './MemberCarePage';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -26,6 +27,7 @@ interface MemberPortalProps {
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
   onPastorSignup?: (data: LeaderFormData) => void;
+  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean }) => void;
 }
 
 export function MemberPortal({
@@ -40,15 +42,19 @@ export function MemberPortal({
   onBack,
   onRSVP,
   onCheckIn,
-  onPastorSignup
+  onPastorSignup,
+  onCreateHelpRequest,
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
 
-  // Handle deep link from ?portal=pastor-signup
+  // Handle deep links from ?portal=pastor-signup or ?portal=care
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('portal') === 'pastor-signup') {
+    const portal = params.get('portal');
+    if (portal === 'pastor-signup') {
       setActiveTab('pastor-signup');
+    } else if (portal === 'care') {
+      setActiveTab('care');
     }
   }, []);
 
@@ -123,11 +129,18 @@ export function MemberPortal({
           />
         );
 
-      case 'my-ministry':
+      case 'care':
         return (
-          <MyMinistryPage
+          <MemberCarePage
+            onCreateHelpRequest={onCreateHelpRequest}
+            onNavigate={setActiveTab}
             churchName={churchName}
           />
+        );
+
+      case 'my-ministry':
+        return (
+          <MyMinistryPage />
         );
 
       default:

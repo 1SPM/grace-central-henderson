@@ -13,10 +13,10 @@ interface MemberLayoutProps {
 const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'events', label: 'Events', icon: Calendar },
-  { id: 'shop', label: 'Shop', icon: ShoppingBag },
+  { id: 'care', label: 'Care', icon: Heart },
   { id: 'giving', label: 'Give', icon: DollarSign },
-  { id: 'pastor-signup', label: 'Serve', icon: Heart },
-  { id: 'legacy', label: 'Legacy', icon: Heart },
+  { id: 'shop', label: 'Shop', icon: ShoppingBag },
+  { id: 'legacy', label: 'Legacy', icon: Shield },
   { id: 'checkin', label: 'Check In', icon: QrCode },
   { id: 'my-ministry', label: 'Ministry', icon: Shield },
 ];
