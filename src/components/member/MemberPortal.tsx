@@ -8,6 +8,7 @@ import { MemberCheckInPage } from './MemberCheckInPage';
 import { PastorSignupPage } from './PastorSignupPage';
 import { MemberShopPage } from './MemberShopPage';
 import { MemberLegacyPage } from './MemberLegacyPage';
+import { MyMinistryPage } from './MyMinistryPage';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
@@ -119,6 +120,13 @@ export function MemberPortal({
             churchName={churchName}
             personId={currentMember?.id}
             personName={currentMember ? `${currentMember.firstName} ${currentMember.lastName}` : undefined}
+          />
+        );
+
+      case 'my-ministry':
+        return (
+          <MyMinistryPage
+            churchName={churchName}
           />
         );
 

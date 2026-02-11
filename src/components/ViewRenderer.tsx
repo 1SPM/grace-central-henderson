@@ -10,7 +10,7 @@ import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
-import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../types';
+import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
 // Lazy load less frequently used views for code splitting
@@ -52,6 +52,7 @@ const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
+const LeaderManagement = lazy(() => import('./pastoral/LeaderManagement').then(m => ({ default: m.LeaderManagement })));
 
 
 /**
@@ -184,6 +185,7 @@ interface ViewRendererProps {
     updateLeader: (leaderId: string, data: { displayName: string; title: string; bio: string; photo?: string; expertiseAreas: HelpCategory[]; credentials: string[]; yearsOfPractice?: number; personalityTraits: string[]; spiritualFocusAreas: string[]; language: string; sessionType: 'one-time' | 'recurring'; sessionFrequency: string; suitableFor: string[]; anchors: string }) => void;
     deleteLeader: (leaderId: string) => void;
     toggleLeaderAvailability: (leaderId: string) => void;
+    sessions: PastoralSession[];
   };
 }
 
@@ -634,6 +636,19 @@ export function ViewRenderer(props: ViewRendererProps) {
             people={people}
             onViewPerson={handlers.viewPerson}
             onBack={() => setView('life-services')}
+          />
+        );
+
+      case 'leader-management':
+        return (
+          <LeaderManagement
+            leaders={pastoralCare.leaders}
+            sessions={pastoralCare.sessions}
+            onAddLeader={pastoralCare.addLeader}
+            onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
+            onDeleteLeader={pastoralCare.deleteLeader}
+            onBack={() => setView('pastoral-care')}
+            churchName={churchName}
           />
         );
 

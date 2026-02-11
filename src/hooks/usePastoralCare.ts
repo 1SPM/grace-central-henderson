@@ -4,6 +4,7 @@ import type {
   HelpRequest,
   PastoralConversation,
   PastoralMessage,
+  PastoralSession,
   HelpCategory,
   ConversationPriority,
 } from '../types';
@@ -169,11 +170,28 @@ function getPriority(category: HelpCategory): ConversationPriority {
   return 'medium';
 }
 
+// Demo session data for leader stats
+const DEMO_SESSIONS: PastoralSession[] = [
+  { id: 'ps-1', leaderId: 'leader-1', personId: 'person-5', category: 'marriage', sessionType: 'video', startedAt: '2026-01-15T14:00:00Z', endedAt: '2026-01-15T15:00:00Z', durationMinutes: 60, status: 'completed', followUpNeeded: true, followUpDate: '2026-01-22', rating: 5, feedback: 'Very helpful session.', isAnonymous: false, createdAt: '2026-01-15T14:00:00Z' },
+  { id: 'ps-2', leaderId: 'leader-1', personId: 'person-6', category: 'parenting', sessionType: 'in-person', startedAt: '2026-01-20T10:00:00Z', endedAt: '2026-01-20T10:45:00Z', durationMinutes: 45, status: 'completed', followUpNeeded: false, rating: 4, isAnonymous: false, createdAt: '2026-01-20T10:00:00Z' },
+  { id: 'ps-3', leaderId: 'leader-1', personId: 'person-7', category: 'marriage', sessionType: 'phone', startedAt: '2026-02-01T11:00:00Z', endedAt: '2026-02-01T11:50:00Z', durationMinutes: 50, status: 'completed', followUpNeeded: true, followUpDate: '2026-02-08', rating: 5, isAnonymous: false, createdAt: '2026-02-01T11:00:00Z' },
+  { id: 'ps-4', leaderId: 'leader-2', personId: 'person-8', category: 'grief', sessionType: 'in-person', startedAt: '2026-01-18T09:00:00Z', endedAt: '2026-01-18T10:00:00Z', durationMinutes: 60, status: 'completed', followUpNeeded: true, followUpDate: '2026-01-25', rating: 5, feedback: 'She truly understood my pain.', isAnonymous: false, createdAt: '2026-01-18T09:00:00Z' },
+  { id: 'ps-5', leaderId: 'leader-2', category: 'anxiety-depression', sessionType: 'chat', startedAt: '2026-02-03T15:00:00Z', endedAt: '2026-02-03T15:30:00Z', durationMinutes: 30, status: 'completed', followUpNeeded: false, rating: 4, isAnonymous: true, createdAt: '2026-02-03T15:00:00Z' },
+  { id: 'ps-6', leaderId: 'leader-2', personId: 'person-9', category: 'crisis', sessionType: 'phone', startedAt: '2026-02-05T08:00:00Z', endedAt: '2026-02-05T08:45:00Z', durationMinutes: 45, status: 'completed', followUpNeeded: true, followUpDate: '2026-02-06', rating: 5, isAnonymous: false, createdAt: '2026-02-05T08:00:00Z' },
+  { id: 'ps-7', leaderId: 'leader-3', personId: 'person-10', category: 'addiction', sessionType: 'in-person', startedAt: '2026-01-22T14:00:00Z', endedAt: '2026-01-22T15:00:00Z', durationMinutes: 60, status: 'completed', followUpNeeded: true, followUpDate: '2026-01-29', rating: 4, isAnonymous: false, createdAt: '2026-01-22T14:00:00Z' },
+  { id: 'ps-8', leaderId: 'leader-3', personId: 'person-11', category: 'financial', sessionType: 'video', startedAt: '2026-02-02T16:00:00Z', endedAt: '2026-02-02T16:40:00Z', durationMinutes: 40, status: 'completed', followUpNeeded: false, rating: 3, isAnonymous: false, createdAt: '2026-02-02T16:00:00Z' },
+  { id: 'ps-9', leaderId: 'leader-4', category: 'faith-questions', sessionType: 'chat', startedAt: '2026-02-06T13:00:00Z', endedAt: '2026-02-06T13:25:00Z', durationMinutes: 25, status: 'completed', followUpNeeded: false, rating: 5, feedback: 'Great conversation!', isAnonymous: true, createdAt: '2026-02-06T13:00:00Z' },
+  { id: 'ps-10', leaderId: 'leader-4', personId: 'person-12', category: 'anxiety-depression', sessionType: 'video', startedAt: '2026-02-09T10:00:00Z', endedAt: '2026-02-09T10:50:00Z', durationMinutes: 50, status: 'completed', followUpNeeded: true, followUpDate: '2026-02-16', rating: 4, isAnonymous: false, createdAt: '2026-02-09T10:00:00Z' },
+  { id: 'ps-11', leaderId: 'leader-1', category: 'general', sessionType: 'chat', startedAt: '2026-02-10T09:00:00Z', status: 'active', followUpNeeded: false, isAnonymous: true, createdAt: '2026-02-10T09:00:00Z' },
+  { id: 'ps-12', leaderId: 'leader-2', personId: 'person-13', category: 'grief', sessionType: 'video', startedAt: '2026-02-12T14:00:00Z', status: 'scheduled', followUpNeeded: false, isAnonymous: false, createdAt: '2026-02-08T12:00:00Z' },
+];
+
 export function usePastoralCare() {
   const [leaders, setLeaders] = useState<LeaderProfile[]>(INITIAL_LEADERS);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [conversations, setConversations] = useState<PastoralConversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [sessions] = useState<PastoralSession[]>(DEMO_SESSIONS);
 
   const createHelpRequest = useCallback((request: {
     category: HelpCategory;
@@ -396,5 +414,6 @@ export function usePastoralCare() {
     updateLeader,
     deleteLeader,
     toggleLeaderAvailability,
+    sessions,
   };
 }
