@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart, Shield } from 'lucide-react';
-import type { MemberPortalTab } from '../../types';
+import type { MemberPortalTab, LeaderProfile } from '../../types';
+import { PastoralStories } from './PastoralStories';
 
 interface MemberLayoutProps {
   children: ReactNode;
@@ -8,6 +9,7 @@ interface MemberLayoutProps {
   onTabChange: (tab: MemberPortalTab) => void;
   onBack?: () => void;
   churchName?: string;
+  leaders?: LeaderProfile[];
 }
 
 const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
@@ -26,7 +28,8 @@ export function MemberLayout({
   activeTab,
   onTabChange,
   onBack,
-  churchName = 'Grace Church'
+  churchName = 'Grace Church',
+  leaders,
 }: MemberLayoutProps) {
   return (
     <div className="h-full min-h-screen bg-gray-50 dark:bg-dark-900 flex flex-col">
@@ -52,6 +55,9 @@ export function MemberLayout({
           </div>
         </div>
       </header>
+
+      {/* Online Pastors — Instagram Stories style */}
+      <PastoralStories leaders={leaders} onTapLeader={onTabChange} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
