@@ -128,7 +128,7 @@ interface MyMinistryPageProps {
   churchName?: string;
 }
 
-export function MyMinistryPage({ leader, helpRequests = [], churchName = 'Grace Church' }: MyMinistryPageProps) {
+export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProps) {
   const [activeTab, setActiveTab] = useState<MinistryTab>('overview');
 
   // Use first demo leader if none provided

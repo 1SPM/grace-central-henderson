@@ -2,11 +2,8 @@ import { useState, useMemo } from 'react';
 import {
   ChevronLeft,
   Search,
-  Filter,
   UserPlus,
-  Shield,
   ShieldCheck,
-  ShieldX,
   Clock,
   CheckCircle,
   XCircle,
@@ -14,9 +11,7 @@ import {
   MoreVertical,
   Star,
   BarChart3,
-  MessageCircle,
   BookOpen,
-  AlertTriangle,
   Pause,
   Play,
   Trash2,
@@ -170,7 +165,6 @@ export function LeaderManagement({
   onToggleLeaderAvailability,
   onDeleteLeader,
   onBack,
-  churchName = 'Grace Church',
 }: LeaderManagementProps) {
   const [activeTab, setActiveTab] = useState<ManagementTab>('active');
   const [search, setSearch] = useState('');
@@ -179,8 +173,6 @@ export function LeaderManagement({
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
-
-  const selectedApp = selectedAppId ? applications.find(a => a.id === selectedAppId) : null;
 
   const filteredLeaders = useMemo(() => {
     return leaders.filter(l => {

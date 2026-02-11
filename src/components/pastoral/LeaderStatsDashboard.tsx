@@ -1,17 +1,10 @@
 import { useState, useMemo } from 'react';
 import {
-  BarChart3,
   Clock,
   Star,
   Users,
-  TrendingUp,
   MessageCircle,
-  Calendar,
   CheckCircle,
-  XCircle,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
   ChevronLeft,
   Filter,
 } from 'lucide-react';
@@ -114,7 +107,7 @@ function computeLeaderStats(leader: LeaderProfile, sessions: PastoralSession[]):
   };
 }
 
-export function LeaderStatsDashboard({ leaders, sessions, onBack, onViewLeader }: LeaderStatsDashboardProps) {
+export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsDashboardProps) {
   const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'30d' | '90d' | '1y' | 'all'>('all');
 
