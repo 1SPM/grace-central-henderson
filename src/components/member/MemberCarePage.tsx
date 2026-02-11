@@ -118,7 +118,7 @@ export function MemberCarePage({
     if (chatConversation && onSendMessage) {
       const chatLeader = leaders.find(l => l.id === chatConversation.leaderId);
       return (
-        <div className="h-full">
+        <div className="h-full [&>div]:!h-full [&>div]:!max-h-none [&>div]:rounded-none [&>div]:border-0">
           <ChatWindow
             conversation={chatConversation}
             leader={chatLeader}
