@@ -506,6 +506,11 @@ export function ViewRenderer(props: ViewRendererProps) {
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
             onPastorSignup={pastoralCare.addLeader}
+            leaders={pastoralCare.leaders}
+            onCreateHelpRequest={pastoralCare.createHelpRequest}
+            conversations={pastoralCare.conversations}
+            activeConversation={pastoralCare.activeConversation}
+            onSendMessage={pastoralCare.sendMessage}
           />
         );
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Heart,
   Shield,
@@ -12,9 +12,10 @@ import {
   ChevronLeft,
   UserPlus,
 } from 'lucide-react';
-import type { LeaderProfile, HelpRequest, HelpCategory, MemberPortalTab } from '../../types';
+import type { LeaderProfile, HelpRequest, HelpCategory, MemberPortalTab, PastoralConversation } from '../../types';
 import { VerifiedBadge } from '../pastoral/VerifiedBadge';
 import { HelpIntakeForm } from '../pastoral/HelpIntakeForm';
+import { ChatWindow } from '../pastoral/ChatWindow';
 import { DEMO_LEADERS } from './demoLeaders';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
@@ -30,14 +31,19 @@ const PRIORITY_COLORS: Record<string, string> = {
   crisis: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
 };
 
-type CareView = 'home' | 'leaders' | 'request' | 'my-requests';
+type CareView = 'home' | 'leaders' | 'request' | 'my-requests' | 'chat';
 
 interface MemberCarePageProps {
   leaders?: LeaderProfile[];
   helpRequests?: HelpRequest[];
-  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean }) => void;
+  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean; leaderId?: string }) => void;
   onNavigate?: (tab: MemberPortalTab) => void;
   churchName?: string;
+  conversations?: PastoralConversation[];
+  activeConversation?: PastoralConversation;
+  onSendMessage?: (conversationId: string, content: string) => void;
+  showChat?: boolean;
+  onCloseChat?: () => void;
 }
 
 export function MemberCarePage({
@@ -46,13 +52,26 @@ export function MemberCarePage({
   onCreateHelpRequest,
   onNavigate,
   churchName = 'Grace Church',
+  conversations = [],
+  activeConversation,
+  onSendMessage,
+  showChat = false,
+  onCloseChat,
 }: MemberCarePageProps) {
   const [view, setView] = useState<CareView>('home');
   const [submitted, setSubmitted] = useState(false);
 
+  // When showChat is triggered (e.g. from tapping a pastor story), switch to chat view
+  useEffect(() => {
+    if (showChat && activeConversation) {
+      setView('chat');
+    }
+  }, [showChat, activeConversation]);
+
   const activeLeaders = leaders.filter(l => l.isActive);
   const availableLeaders = activeLeaders.filter(l => l.isAvailable);
   const myRequests = helpRequests.filter(r => r.status !== 'resolved');
+  const activeConversations = conversations.filter(c => c.status === 'active');
 
   if (view === 'request') {
     if (submitted) {
@@ -91,6 +110,25 @@ export function MemberCarePage({
         />
       </div>
     );
+  }
+
+  if (view === 'chat') {
+    // Find the conversation to display — prefer activeConversation, fall back to most recent
+    const chatConversation = activeConversation || conversations.filter(c => c.status === 'active').slice(-1)[0];
+    if (chatConversation && onSendMessage) {
+      const chatLeader = leaders.find(l => l.id === chatConversation.leaderId);
+      return (
+        <div className="h-full">
+          <ChatWindow
+            conversation={chatConversation}
+            leader={chatLeader}
+            onSendMessage={onSendMessage}
+            onBack={() => { setView('home'); onCloseChat?.(); }}
+          />
+        </div>
+      );
+    }
+    // No conversation available — fall through to home view below
   }
 
   if (view === 'leaders') {
@@ -245,6 +283,48 @@ export function MemberCarePage({
           <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">Browse care team profiles</p>
         </button>
       </div>
+
+      {/* Active Conversations */}
+      {activeConversations.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+              My Conversations
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {activeConversations.slice(0, 3).map(conv => {
+              const convLeader = leaders.find(l => l.id === conv.leaderId);
+              const lastMessage = conv.messages[conv.messages.length - 1];
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => onSendMessage && setView('chat')}
+                  className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 text-left hover:shadow-md transition-shadow"
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                      {convLeader?.displayName.split(' ').map(n => n[0]).join('').slice(0, 2) || 'AI'}
+                    </div>
+                    {convLeader?.isAvailable && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-dark-800 bg-emerald-500" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                      {convLeader?.displayName || 'Care Conversation'}
+                    </p>
+                    {lastMessage && (
+                      <p className="text-xs text-gray-500 dark:text-dark-400 truncate">{lastMessage.content}</p>
+                    )}
+                  </div>
+                  <MessageCircle size={16} className="text-violet-500 flex-shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* My Requests (if any) */}
       {myRequests.length > 0 && (

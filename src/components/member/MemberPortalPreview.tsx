@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { MemberPortal } from './MemberPortal';
-import type { Person, CalendarEvent, Giving, Attendance } from '../../types';
+import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -17,6 +17,11 @@ interface MemberPortalPreviewProps {
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
   onPastorSignup?: (data: LeaderFormData) => void;
+  leaders?: LeaderProfile[];
+  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean; leaderId?: string }) => void;
+  conversations?: PastoralConversation[];
+  activeConversation?: PastoralConversation;
+  onSendMessage?: (conversationId: string, content: string) => void;
 }
 
 export function MemberPortalPreview({
@@ -30,7 +35,12 @@ export function MemberPortalPreview({
   onBack,
   onRSVP,
   onCheckIn,
-  onPastorSignup
+  onPastorSignup,
+  leaders,
+  onCreateHelpRequest,
+  conversations,
+  activeConversation,
+  onSendMessage,
 }: MemberPortalPreviewProps) {
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
   const [copied, setCopied] = useState(false);
@@ -78,6 +88,11 @@ export function MemberPortalPreview({
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
           onPastorSignup={onPastorSignup}
+          leaders={leaders}
+          onCreateHelpRequest={onCreateHelpRequest}
+          conversations={conversations}
+          activeConversation={activeConversation}
+          onSendMessage={onSendMessage}
         />
       </div>
     );
@@ -149,6 +164,11 @@ export function MemberPortalPreview({
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
                       onPastorSignup={onPastorSignup}
+                      leaders={leaders}
+                      onCreateHelpRequest={onCreateHelpRequest}
+                      conversations={conversations}
+                      activeConversation={activeConversation}
+                      onSendMessage={onSendMessage}
                     />
                   </div>
                 </div>

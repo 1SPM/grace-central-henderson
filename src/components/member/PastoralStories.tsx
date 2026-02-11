@@ -5,7 +5,7 @@ import { DEMO_LEADERS } from './demoLeaders';
 
 interface PastoralStoriesProps {
   leaders?: LeaderProfile[];
-  onTapLeader?: (tab: MemberPortalTab) => void;
+  onTapLeader?: (tab: MemberPortalTab, leaderId?: string) => void;
 }
 
 export function PastoralStories({
@@ -57,7 +57,7 @@ export function PastoralStories({
           return (
             <button
               key={leader.id}
-              onClick={() => onTapLeader?.('care')}
+              onClick={() => onTapLeader?.('care', leader.id)}
               className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[62px] group"
             >
               {/* Ring + Avatar */}

@@ -6,7 +6,7 @@ import { PastoralStories } from './PastoralStories';
 interface MemberLayoutProps {
   children: ReactNode;
   activeTab: MemberPortalTab;
-  onTabChange: (tab: MemberPortalTab) => void;
+  onTabChange: (tab: MemberPortalTab, leaderId?: string) => void;
   onBack?: () => void;
   churchName?: string;
   leaders?: LeaderProfile[];

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MemberLayout } from './MemberLayout';
 import { MemberHomePage } from './MemberHomePage';
 import { MemberDirectoryPage } from './MemberDirectoryPage';
@@ -11,7 +11,7 @@ import { MemberLegacyPage } from './MemberLegacyPage';
 import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
 import { DEMO_LEADERS } from './demoLeaders';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile } from '../../types';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -28,8 +28,11 @@ interface MemberPortalProps {
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
   onPastorSignup?: (data: LeaderFormData) => void;
-  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean }) => void;
+  onCreateHelpRequest?: (request: { category: HelpCategory; description?: string; isAnonymous: boolean; leaderId?: string }) => void;
   leaders?: LeaderProfile[];
+  conversations?: PastoralConversation[];
+  activeConversation?: PastoralConversation;
+  onSendMessage?: (conversationId: string, content: string) => void;
 }
 
 export function MemberPortal({
@@ -47,8 +50,12 @@ export function MemberPortal({
   onPastorSignup,
   onCreateHelpRequest,
   leaders = DEMO_LEADERS,
+  conversations = [],
+  activeConversation,
+  onSendMessage,
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
+  const [showChat, setShowChat] = useState(false);
 
   // Handle deep links from ?portal=pastor-signup or ?portal=care
   useEffect(() => {
@@ -60,6 +67,25 @@ export function MemberPortal({
       setActiveTab('care');
     }
   }, []);
+
+  const handleTabChange = useCallback((tab: MemberPortalTab, leaderId?: string) => {
+    setActiveTab(tab);
+    if (tab === 'care' && leaderId) {
+      // Check for existing active conversation with this leader
+      const existingConv = conversations.find(
+        c => c.leaderId === leaderId && c.status === 'active'
+      );
+      if (existingConv) {
+        setShowChat(true);
+      } else {
+        // Create a new help request assigned to this specific leader
+        onCreateHelpRequest?.({ category: 'general', isAnonymous: false, leaderId });
+        setShowChat(true);
+      }
+    } else {
+      setShowChat(false);
+    }
+  }, [conversations, onCreateHelpRequest]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -137,8 +163,13 @@ export function MemberPortal({
           <MemberCarePage
             leaders={leaders}
             onCreateHelpRequest={onCreateHelpRequest}
-            onNavigate={setActiveTab}
+            onNavigate={(tab) => handleTabChange(tab)}
             churchName={churchName}
+            conversations={conversations}
+            activeConversation={activeConversation}
+            onSendMessage={onSendMessage}
+            showChat={showChat}
+            onCloseChat={() => setShowChat(false)}
           />
         );
 
@@ -162,7 +193,7 @@ export function MemberPortal({
   return (
     <MemberLayout
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       onBack={onBack}
       churchName={churchName}
       leaders={leaders}
