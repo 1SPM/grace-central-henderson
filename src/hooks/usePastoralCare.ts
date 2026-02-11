@@ -197,8 +197,11 @@ export function usePastoralCare() {
     category: HelpCategory;
     description?: string;
     isAnonymous: boolean;
+    leaderId?: string;
   }) => {
-    const leader = matchLeader(request.category, leaders);
+    const leader = request.leaderId
+      ? leaders.find(l => l.id === request.leaderId) || matchLeader(request.category, leaders)
+      : matchLeader(request.category, leaders);
     const conversationId = `conv-${Date.now()}`;
     const anonymousId = request.isAnonymous ? generateAnonymousId() : undefined;
     const priority = getPriority(request.category);

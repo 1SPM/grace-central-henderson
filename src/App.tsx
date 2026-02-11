@@ -221,6 +221,11 @@ function App() {
             churchProfile={churchSettings?.profile}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
+            leaders={pastoralCare.leaders}
+            onCreateHelpRequest={pastoralCare.createHelpRequest}
+            conversations={pastoralCare.conversations}
+            activeConversation={pastoralCare.activeConversation}
+            onSendMessage={pastoralCare.sendMessage}
           />
         </Suspense>
       </ErrorBoundary>
