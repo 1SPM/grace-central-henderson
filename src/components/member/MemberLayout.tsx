@@ -32,7 +32,7 @@ export function MemberLayout({
   leaders,
 }: MemberLayoutProps) {
   return (
-    <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col relative overflow-hidden">
       {/* Header */}
       <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
         {onBack && (
@@ -57,7 +57,10 @@ export function MemberLayout({
       </header>
 
       {/* Online Pastors — Instagram Stories style */}
-      <PastoralStories leaders={leaders} />
+      <PastoralStories
+        leaders={leaders}
+        onStartChat={(leaderId) => onTabChange('care', leaderId)}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto min-h-0">

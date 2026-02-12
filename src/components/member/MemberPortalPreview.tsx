@@ -151,8 +151,8 @@ export function MemberPortalPreview({
                   {/* Notch */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-50" />
 
-                  {/* Screen Content — internal flex layout handles its own scrolling */}
-                  <div className="h-full overflow-hidden" style={{ transform: 'translateZ(0)' }}>
+                  {/* Screen Content — flex container ensures children fill the frame */}
+                  <div className="h-full overflow-hidden flex flex-col" style={{ transform: 'translateZ(0)' }}>
                     <MemberPortal
                       people={people}
                       events={events}
