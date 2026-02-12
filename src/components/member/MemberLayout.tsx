@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart, Shield } from 'lucide-react';
+import { DollarSign, Calendar, ArrowLeft, Home, Heart } from 'lucide-react';
 import type { MemberPortalTab, LeaderProfile } from '../../types';
 import { PastoralStories } from './PastoralStories';
 
@@ -17,10 +17,6 @@ const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'care', label: 'Care', icon: Heart },
   { id: 'giving', label: 'Give', icon: DollarSign },
-  { id: 'shop', label: 'Shop', icon: ShoppingBag },
-  { id: 'legacy', label: 'Legacy', icon: Shield },
-  { id: 'checkin', label: 'Check In', icon: QrCode },
-  { id: 'my-ministry', label: 'Ministry', icon: Shield },
 ];
 
 export function MemberLayout({
@@ -83,10 +79,10 @@ export function MemberLayout({
                 }`}
               >
                 <Icon
-                  size={20}
+                  size={22}
                   className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}
                 />
-                <span className={`text-[9px] mt-0.5 truncate max-w-full ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                <span className={`text-[10px] mt-0.5 truncate max-w-full ${isActive ? 'font-semibold' : 'font-medium'}`}>
                   {label}
                 </span>
               </button>
