@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { DollarSign, Calendar, QrCode, ArrowLeft, Home, ShoppingBag, Heart, Shield } from 'lucide-react';
+import { DollarSign, Calendar, ArrowLeft, Home, Heart } from 'lucide-react';
 import type { MemberPortalTab, LeaderProfile } from '../../types';
 import { PastoralStories } from './PastoralStories';
 
@@ -17,10 +17,6 @@ const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'care', label: 'Care', icon: Heart },
   { id: 'giving', label: 'Give', icon: DollarSign },
-  { id: 'shop', label: 'Shop', icon: ShoppingBag },
-  { id: 'legacy', label: 'Legacy', icon: Shield },
-  { id: 'checkin', label: 'Check In', icon: QrCode },
-  { id: 'my-ministry', label: 'Ministry', icon: Shield },
 ];
 
 export function MemberLayout({
@@ -32,7 +28,7 @@ export function MemberLayout({
   leaders,
 }: MemberLayoutProps) {
   return (
-    <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col relative overflow-hidden">
       {/* Header */}
       <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
         {onBack && (
@@ -57,7 +53,10 @@ export function MemberLayout({
       </header>
 
       {/* Online Pastors — Instagram Stories style */}
-      <PastoralStories leaders={leaders} />
+      <PastoralStories
+        leaders={leaders}
+        onStartChat={(leaderId) => onTabChange('care', leaderId)}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto min-h-0">
@@ -80,10 +79,10 @@ export function MemberLayout({
                 }`}
               >
                 <Icon
-                  size={20}
+                  size={22}
                   className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}
                 />
-                <span className={`text-[9px] mt-0.5 truncate max-w-full ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                <span className={`text-[10px] mt-0.5 truncate max-w-full ${isActive ? 'font-semibold' : 'font-medium'}`}>
                   {label}
                 </span>
               </button>

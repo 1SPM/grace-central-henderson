@@ -1,18 +1,16 @@
 import { useState, type CSSProperties } from 'react';
-import { MessageCircle, Mail, X, Star, Clock, Globe, ChevronRight, Heart } from 'lucide-react';
+import { MessageCircle, X, Star, Clock, Globe, Heart } from 'lucide-react';
 import type { LeaderProfile } from '../../types';
 import { DEMO_LEADERS } from './demoLeaders';
 
 interface PastoralStoriesProps {
   leaders?: LeaderProfile[];
   onStartChat?: (leaderId: string) => void;
-  onWriteLetter?: (leaderId: string) => void;
 }
 
 export function PastoralStories({
   leaders = DEMO_LEADERS,
   onStartChat,
-  onWriteLetter,
 }: PastoralStoriesProps) {
   const [selectedLeader, setSelectedLeader] = useState<LeaderProfile | null>(null);
   const activeLeaders = leaders.filter(l => l.isActive);
@@ -123,10 +121,6 @@ export function PastoralStories({
             onStartChat?.(id);
             setSelectedLeader(null);
           }}
-          onWriteLetter={(id) => {
-            onWriteLetter?.(id);
-            setSelectedLeader(null);
-          }}
         />
       )}
     </>
@@ -139,7 +133,6 @@ interface PastorProfileSheetProps {
   leader: LeaderProfile;
   onClose: () => void;
   onStartChat: (leaderId: string) => void;
-  onWriteLetter: (leaderId: string) => void;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -148,57 +141,59 @@ const CATEGORY_LABELS: Record<string, string> = {
   'anxiety-depression': 'Mental Health', parenting: 'Parenting', general: 'General',
 };
 
-function PastorProfileSheet({ leader, onClose, onStartChat, onWriteLetter }: PastorProfileSheetProps) {
+function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheetProps) {
   const initials = leader.displayName
     .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
+    <div className="absolute inset-0 z-[60] flex items-end justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
 
-      {/* Sheet */}
-      <div className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-white dark:bg-dark-850 rounded-t-2xl sm:rounded-2xl animate-in slide-in-from-bottom duration-300">
+      {/* Sheet — slides up from bottom, sized for mobile */}
+      <div className="relative w-full max-h-[80%] overflow-y-auto bg-white dark:bg-dark-850 rounded-t-2xl shadow-xl">
+        {/* Drag handle */}
+        <div className="sticky top-0 z-10 flex justify-center pt-3 pb-1 bg-white dark:bg-dark-850">
+          <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-dark-600" />
+        </div>
+
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors z-10"
+          className="absolute top-3 right-3 p-1.5 rounded-full bg-gray-100/80 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors z-10"
         >
-          <X size={16} className="text-gray-500 dark:text-dark-400" />
+          <X size={14} className="text-gray-500 dark:text-dark-400" />
         </button>
 
-        {/* Header — big avatar + name */}
-        <div className="flex flex-col items-center pt-8 pb-4 px-6">
-          <div className="relative mb-3">
+        {/* Avatar + name */}
+        <div className="flex flex-col items-center pt-2 pb-3 px-5">
+          <div className="relative mb-2">
             {leader.photo ? (
               <img
                 src={leader.photo}
                 alt={leader.displayName}
-                className="w-24 h-24 rounded-full object-cover ring-4 ring-white dark:ring-dark-850 shadow-lg"
+                className="w-20 h-20 rounded-full object-cover ring-3 ring-white dark:ring-dark-850 shadow-md"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
                 {initials}
               </div>
             )}
 
-            {/* Online indicator */}
             {leader.isAvailable && (
-              <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 border-[3px] border-white dark:border-dark-850">
-                <div className="w-full h-full rounded-full bg-emerald-500 animate-pulse" />
-              </div>
+              <div className="absolute bottom-0.5 right-0.5 w-4.5 h-4.5 rounded-full bg-emerald-500 border-[2.5px] border-white dark:border-dark-850" />
             )}
           </div>
 
-          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-50 text-center">
+          <h2 className="text-base font-bold text-gray-900 dark:text-dark-50 text-center leading-tight">
             {leader.displayName}
           </h2>
-          <p className="text-sm text-gray-500 dark:text-dark-400 text-center mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-dark-400 text-center mt-0.5">
             {leader.title}
           </p>
 
-          {/* Status pill */}
-          <div className={`mt-2.5 px-3 py-1 rounded-full text-xs font-medium ${
+          {/* Status */}
+          <div className={`mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-medium ${
             leader.isAvailable
               ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
               : 'bg-gray-100 text-gray-500 dark:bg-dark-700 dark:text-dark-400'
@@ -208,39 +203,39 @@ function PastorProfileSheet({ leader, onClose, onStartChat, onWriteLetter }: Pas
         </div>
 
         {/* Bio */}
-        <div className="px-6 pb-4">
-          <p className="text-sm text-gray-600 dark:text-dark-300 leading-relaxed text-center">
+        <div className="px-5 pb-3">
+          <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed text-center">
             {leader.bio}
           </p>
         </div>
 
         {/* Quick stats */}
-        <div className="px-6 pb-4 flex items-center justify-center gap-6">
+        <div className="px-5 pb-3 flex items-center justify-center gap-4">
           {leader.yearsOfPractice && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-dark-400">
-              <Clock size={13} />
-              <span>{leader.yearsOfPractice} years</span>
+            <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-dark-400">
+              <Clock size={12} />
+              <span>{leader.yearsOfPractice}yr exp</span>
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-dark-400">
-            <Globe size={13} />
+          <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-dark-400">
+            <Globe size={12} />
             <span>{leader.language}</span>
           </div>
           {leader.isVerified && (
-            <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
-              <Star size={13} className="fill-current" />
+            <div className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400">
+              <Star size={12} className="fill-current" />
               <span>Verified</span>
             </div>
           )}
         </div>
 
         {/* Expertise tags */}
-        <div className="px-6 pb-4">
-          <div className="flex flex-wrap gap-1.5 justify-center">
+        <div className="px-5 pb-3">
+          <div className="flex flex-wrap gap-1 justify-center">
             {leader.expertiseAreas.map(area => (
               <span
                 key={area}
-                className="px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 text-xs font-medium"
+                className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 text-[10px] font-medium"
               >
                 {CATEGORY_LABELS[area] || area}
               </span>
@@ -248,54 +243,28 @@ function PastorProfileSheet({ leader, onClose, onStartChat, onWriteLetter }: Pas
           </div>
         </div>
 
-        {/* Personality */}
-        {leader.personalityTraits.length > 0 && (
-          <div className="px-6 pb-4">
-            <p className="text-xs text-gray-400 dark:text-dark-500 text-center">
-              {leader.personalityTraits.join(' · ')}
+        {/* Credentials (compact) */}
+        {leader.credentials.length > 0 && (
+          <div className="px-5 pb-3">
+            <p className="text-[10px] text-gray-400 dark:text-dark-500 text-center">
+              {leader.credentials.join(' · ')}
             </p>
           </div>
         )}
 
-        {/* Credentials */}
-        {leader.credentials.length > 0 && (
-          <div className="px-6 pb-4">
-            <div className="bg-gray-50 dark:bg-dark-800 rounded-xl p-3">
-              <p className="text-xs font-semibold text-gray-500 dark:text-dark-400 mb-1.5 uppercase tracking-wider">
-                Credentials
-              </p>
-              {leader.credentials.map((cred, i) => (
-                <p key={i} className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">
-                  {cred}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* CTAs */}
-        <div className="px-6 pb-8 pt-2 flex flex-col gap-2.5">
+        {/* CTA */}
+        <div className="px-5 pb-5 pt-1">
           <button
             onClick={() => onStartChat(leader.id)}
-            className={`flex items-center justify-center gap-2.5 w-full py-3.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all ${
               leader.isAvailable
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20'
                 : 'bg-gray-100 dark:bg-dark-700 text-gray-400 dark:text-dark-500 cursor-not-allowed'
             }`}
             disabled={!leader.isAvailable}
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={16} />
             {leader.isAvailable ? 'Start a Conversation' : 'Not available right now'}
-            {leader.isAvailable && <ChevronRight size={16} className="ml-auto" />}
-          </button>
-
-          <button
-            onClick={() => onWriteLetter(leader.id)}
-            className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-xl font-semibold text-sm bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-200 hover:border-violet-300 dark:hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-400 transition-all"
-          >
-            <Mail size={18} />
-            Write a Letter
-            <ChevronRight size={16} className="ml-auto" />
           </button>
         </div>
       </div>
