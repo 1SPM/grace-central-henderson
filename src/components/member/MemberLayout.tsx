@@ -57,7 +57,7 @@ export function MemberLayout({
       </header>
 
       {/* Online Pastors — Instagram Stories style */}
-      <PastoralStories leaders={leaders} onTapLeader={onTabChange} />
+      <PastoralStories leaders={leaders} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto min-h-0">
