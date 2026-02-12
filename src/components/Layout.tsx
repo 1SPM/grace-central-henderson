@@ -20,9 +20,7 @@ import {
   X,
   Globe,
   Home,
-  Briefcase,
   Heart,
-  ShieldCheck,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -35,20 +33,46 @@ interface LayoutProps {
   isDemo?: boolean;
 }
 
-const navItems: { view: View; label: string; icon: ReactNode }[] = [
-  { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
-  { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
-  { view: 'people', label: 'People', icon: <Users size={18} /> },
-  { view: 'families', label: 'Families', icon: <Home size={18} /> },
-  { view: 'skills', label: 'Skills & Talents', icon: <Briefcase size={18} /> },
-  { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-  { view: 'calendar', label: 'Calendar / Events', icon: <Calendar size={18} /> },
-  { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
-  { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
-  { view: 'leader-management', label: 'Leaders', icon: <ShieldCheck size={18} /> },
-  { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
-  { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
+interface NavSection {
+  label?: string;
+  items: { view: View; label: string; icon: ReactNode }[];
+}
+
+const navSections: NavSection[] = [
+  {
+    items: [
+      { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+      { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
+    ],
+  },
+  {
+    label: 'People',
+    items: [
+      { view: 'people', label: 'People', icon: <Users size={18} /> },
+      { view: 'families', label: 'Families', icon: <Home size={18} /> },
+      { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
+    ],
+  },
+  {
+    label: 'Church',
+    items: [
+      { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
+      { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
+      { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+    ],
+  },
+  {
+    label: 'Care',
+    items: [
+      { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
+      { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
+    ],
+  },
+  {
+    items: [
+      { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
+    ],
+  },
 ];
 
 // View labels for breadcrumbs
@@ -60,7 +84,7 @@ const viewLabels: Record<View, string> = {
   person: 'Profile',
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
-  calendar: 'Calendar / Events',
+  calendar: 'Calendar',
   birthdays: 'Birthdays',
   volunteers: 'Volunteers',
   groups: 'Groups',
@@ -228,41 +252,55 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         )}
 
         {/* Navigation */}
-        <nav className={`flex-1 px-3 py-2 space-y-0.5 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
-          {navItems.map((item) => {
-            const isActive = currentView === item.view ||
-              (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
-              (item.view === 'people' && currentView === 'person') ||
-              (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView)) ||
-              (item.view === 'leader-management' && currentView === 'leader-management');
+        <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+          {navSections.map((section, sectionIdx) => (
+            <div key={sectionIdx} className={sectionIdx > 0 ? 'mt-4' : ''}>
+              {section.label && !sidebarCollapsed && (
+                <p className="px-2.5 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500 lg:block hidden">
+                  {section.label}
+                </p>
+              )}
+              {section.label && sidebarCollapsed && (
+                <div className="hidden lg:block mx-auto w-5 border-t border-gray-200 dark:border-dark-700 mb-1" />
+              )}
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = currentView === item.view ||
+                    (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
+                    (item.view === 'people' && ['person', 'skills'].includes(currentView)) ||
+                    (item.view === 'pastoral-care' && currentView === 'leader-management') ||
+                    (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
 
-            return (
-              <button
-                key={item.view}
-                onClick={() => handleNavClick(item.view)}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
-                  sidebarCollapsed ? 'lg:justify-center' : ''
-                } ${
-                  isActive
-                    ? 'bg-violet-50/80 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-medium shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <span className={isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
-                  {item.icon}
-                </span>
-                <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
+                  return (
+                    <button
+                      key={item.view}
+                      onClick={() => handleNavClick(item.view)}
+                      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
+                        sidebarCollapsed ? 'lg:justify-center' : ''
+                      } ${
+                        isActive
+                          ? 'bg-violet-50/80 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-medium shadow-sm'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                      title={sidebarCollapsed ? item.label : undefined}
+                    >
+                      <span className={isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
+                        {item.icon}
+                      </span>
+                      <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
 
-                {/* Tooltip for collapsed state */}
-                {sidebarCollapsed && (
-                  <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
-                    {item.label}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                      {/* Tooltip for collapsed state */}
+                      {sidebarCollapsed && (
+                        <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
+                          {item.label}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
