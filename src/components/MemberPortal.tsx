@@ -20,6 +20,9 @@ import {
   Download,
   LogOut,
 } from 'lucide-react';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('member-portal');
 
 interface MemberProfile {
   id: string;
@@ -109,7 +112,7 @@ export function MemberPortal({
       await onProfileUpdate(editedProfile);
       setIsEditing(false);
     } catch (err) {
-      console.error('Failed to save profile:', err);
+      log.error('Failed to save profile', err);
     }
     setSaving(false);
   };
@@ -119,7 +122,7 @@ export function MemberPortal({
     try {
       await onPrefsUpdate(prefs);
     } catch (err) {
-      console.error('Failed to save preferences:', err);
+      log.error('Failed to save preferences', err);
     }
     setSaving(false);
   };

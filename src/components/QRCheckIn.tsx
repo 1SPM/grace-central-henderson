@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import {
   QrCode,
   Download,
@@ -100,7 +101,7 @@ export function QRCheckIn({
   const [activeTab, setActiveTab] = useState<'generate' | 'checkin' | 'kiosk'>('generate');
   const [selectedEvent, setSelectedEvent] = useState<string>('sunday-service');
   const [customEventName, setCustomEventName] = useState('');
-  const [copied, setCopied] = useState(false);
+  const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [showKidsCheckIn, setShowKidsCheckIn] = useState(false);
@@ -149,10 +150,8 @@ export function QRCheckIn({
   }, [attendance]);
 
   // Copy URL to clipboard
-  const copyUrl = async () => {
-    await navigator.clipboard.writeText(checkInUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyUrl = () => {
+    copyToClipboard(checkInUrl);
   };
 
   // Download QR code

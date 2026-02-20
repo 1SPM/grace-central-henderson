@@ -3,6 +3,7 @@ import { Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw
 import { Person, Task, PrayerRequest } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 interface GlobalSearchProps {
   people: Person[];
@@ -53,7 +54,7 @@ export function GlobalSearch({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copiedId, copy: copyToClipboard } = useCopyToClipboard();
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -146,9 +147,7 @@ export function GlobalSearch({
   };
 
   const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    copyToClipboard(text, id);
   };
 
   const processAIQuery = async (userQuery: string) => {

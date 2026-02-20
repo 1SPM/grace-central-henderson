@@ -17,6 +17,10 @@ import {
   ExternalLink,
   HelpCircle,
 } from 'lucide-react';
+import { createLogger } from '../utils/logger';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+
+const log = createLogger('text-to-give');
 
 interface Fund {
   id: string;
@@ -43,7 +47,7 @@ interface TextToGiveSetupProps {
 export function TextToGiveSetup({ config: initialConfig, webhookUrl, onSave }: TextToGiveSetupProps) {
   const [config, setConfig] = useState<TextToGiveConfig>(initialConfig);
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState<string | null>(null);
+  const { copiedId: copied, copy: copyToClipboard } = useCopyToClipboard();
   const [newFund, setNewFund] = useState({ keyword: '', name: '' });
   const [showTestModal, setShowTestModal] = useState(false);
   const [testInput, setTestInput] = useState('');
@@ -54,19 +58,13 @@ export function TextToGiveSetup({ config: initialConfig, webhookUrl, onSave }: T
     try {
       await onSave(config);
     } catch (err) {
-      console.error('Failed to save config:', err);
+      log.error('Failed to save config', err);
     }
     setSaving(false);
   };
 
-  const handleCopy = async (text: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(id);
-      setTimeout(() => setCopied(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
+  const handleCopy = (text: string, id: string) => {
+    copyToClipboard(text, id);
   };
 
   const handleAddFund = () => {

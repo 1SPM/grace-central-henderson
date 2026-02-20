@@ -21,6 +21,7 @@ import {
   Globe,
   Home,
   Heart,
+  BarChart3,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -70,6 +71,7 @@ const navSections: NavSection[] = [
   },
   {
     items: [
+      { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
       { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
     ],
   },
@@ -126,6 +128,7 @@ const viewLabels: Record<View, string> = {
   'funeral-services': 'Funerals',
   'estate-planning': 'Legacy Giving',
   'leader-management': 'Leader Management',
+  analytics: 'Analytics',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

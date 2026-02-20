@@ -9,6 +9,10 @@ import { useState, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import { Download, Copy, Check, QrCode, DollarSign, Printer } from 'lucide-react';
+import { createLogger } from '../utils/logger';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+
+const log = createLogger('giving-qr');
 
 interface GivingQRCodeProps {
   givingPageUrl: string;
@@ -19,7 +23,7 @@ interface GivingQRCodeProps {
 export function GivingQRCode({ givingPageUrl, churchName, funds = [] }: GivingQRCodeProps) {
   const [selectedFund, setSelectedFund] = useState<string>('');
   const [suggestedAmount, setSuggestedAmount] = useState<string>('');
-  const [copied, setCopied] = useState(false);
+  const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
   const [qrSize, setQrSize] = useState<'small' | 'medium' | 'large'>('medium');
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -89,14 +93,8 @@ export function GivingQRCode({ givingPageUrl, churchName, funds = [] }: GivingQR
   };
 
   // Copy URL to clipboard
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(qrUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
+  const handleCopy = () => {
+    copyToClipboard(qrUrl);
   };
 
   // Print QR code
@@ -403,7 +401,7 @@ function QuickDownloadButton({
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (err) {
-      console.error('Failed to generate QR code:', err);
+      log.error('Failed to generate QR code', err);
     }
   };
 

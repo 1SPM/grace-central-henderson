@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft, ArrowUpDown } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
-import { exportPeopleToCSV } from '../utils/exportCsv';
+import { exportPeopleToCSV } from '../utils/csvExport';
 import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';

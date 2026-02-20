@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createLogger } from '../utils/logger';
 
 const log = createLogger('sunday-prep');
@@ -171,36 +171,7 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     localStorage.setItem('sermon-sections', JSON.stringify(sections));
   }, [sections]);
 
-  // Load news on mount and when AI settings change
-  useEffect(() => {
-    refreshNews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiSettings.newsCuration]);
-
-  // Get upcoming birthdays (next 7 days)
-  const upcomingBirthdays = people.filter(p => {
-    if (!p.birthDate) return false;
-    const today = new Date();
-    const birthday = new Date(p.birthDate);
-    birthday.setFullYear(today.getFullYear());
-    const diffDays = Math.ceil((birthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays <= 7;
-  });
-
-  // Get recent visitors
-  const recentVisitors = people.filter(p => {
-    if (p.status !== 'visitor') return false;
-    if (!p.firstVisit) return false;
-    const visitDate = new Date(p.firstVisit);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return visitDate >= thirtyDaysAgo;
-  });
-
-  // Get active prayer requests
-  const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 5);
-
-  const refreshNews = async () => {
+  const refreshNews = useCallback(async () => {
     // Skip AI news curation if disabled
     if (!aiSettings.newsCuration) {
       setNewsItems([...fallbackNewsItems].sort(() => Math.random() - 0.5));
@@ -228,7 +199,35 @@ export function SundayPrep({ people, prayers }: SundayPrepProps) {
     }
 
     setIsLoadingNews(false);
-  };
+  }, [aiSettings.newsCuration]);
+
+  // Load news on mount and when AI settings change
+  useEffect(() => {
+    refreshNews();
+  }, [refreshNews]);
+
+  // Get upcoming birthdays (next 7 days)
+  const upcomingBirthdays = people.filter(p => {
+    if (!p.birthDate) return false;
+    const today = new Date();
+    const birthday = new Date(p.birthDate);
+    birthday.setFullYear(today.getFullYear());
+    const diffDays = Math.ceil((birthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 7;
+  });
+
+  // Get recent visitors
+  const recentVisitors = people.filter(p => {
+    if (p.status !== 'visitor') return false;
+    if (!p.firstVisit) return false;
+    const visitDate = new Date(p.firstVisit);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return visitDate >= thirtyDaysAgo;
+  });
+
+  // Get active prayer requests
+  const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 5);
 
   // Add item from sidebar to sermon builder
   const addItemAsSection = (item: DragItem) => {

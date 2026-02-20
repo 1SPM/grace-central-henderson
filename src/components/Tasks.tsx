@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { CheckSquare, Clock, Plus, User, AlertTriangle, Download, Repeat, RefreshCw } from 'lucide-react';
 import { Task, Person, RecurrenceType } from '../types';
 import { PRIORITY_COLORS } from '../constants';
-import { exportTasksToCSV } from '../utils/exportCsv';
+import { exportTasksToCSV } from '../utils/csvExport';
 import { useToast } from './Toast';
 
 interface TasksProps {

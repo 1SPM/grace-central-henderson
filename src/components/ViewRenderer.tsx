@@ -53,7 +53,7 @@ const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ defa
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const LeaderManagement = lazy(() => import('./pastoral/LeaderManagement').then(m => ({ default: m.LeaderManagement })));
-
+const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -655,6 +655,20 @@ export function ViewRenderer(props: ViewRendererProps) {
             onBack={() => setView('pastoral-care')}
             churchName={churchName}
           />
+        );
+
+      case 'analytics':
+        return (
+          <div className="p-6 max-w-7xl mx-auto">
+            <Analytics
+              people={people}
+              tasks={tasks}
+              giving={giving}
+              prayers={prayers}
+              events={events}
+              interactions={interactions}
+            />
+          </div>
         );
 
       default:

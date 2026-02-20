@@ -15,6 +15,7 @@ import {
 import { Person } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 interface Message {
   id: string;
@@ -58,7 +59,7 @@ export function AIAssistant({ people, onClose, onSelectPerson }: AIAssistantProp
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copiedId, copy: copyToClipboard } = useCopyToClipboard();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,9 +89,7 @@ export function AIAssistant({ people, onClose, onSelectPerson }: AIAssistantProp
   }
 
   const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    copyToClipboard(text, id);
   };
 
   const processQuery = async (query: string): Promise<{ content: string; actions?: AIAction[] }> => {

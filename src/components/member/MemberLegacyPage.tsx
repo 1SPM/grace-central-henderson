@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Heart, FileText, Mail, Phone, CheckCircle, Gift, Building, Landmark, BookOpen } from 'lucide-react';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('member-legacy');
 
 interface MemberLegacyPageProps {
   churchName?: string;
@@ -50,7 +53,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, this would send the form to the backend
-    console.log('Legacy giving interest form submitted:', form);
+    log.info('Legacy giving interest form submitted', form);
     setSubmitted(true);
   };
 

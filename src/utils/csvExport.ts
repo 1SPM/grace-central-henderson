@@ -269,6 +269,9 @@ export function exportPrayerRequestsToCSV(prayers: PrayerRequest[], people: Pers
   downloadCSV(csv, filename || `prayer-requests-export-${new Date().toISOString().split('T')[0]}.csv`);
 }
 
+/** Alias for components using the shorter name */
+export const exportPrayersToCSV = exportPrayerRequestsToCSV;
+
 // Export all data as a combined report
 export interface ExportAllOptions {
   people: Person[];

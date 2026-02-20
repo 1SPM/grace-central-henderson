@@ -8,6 +8,9 @@ import {
   Gift,
   Sparkles,
 } from 'lucide-react';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('online-giving');
 import { GIVING_FUNDS, RECURRING_INTERVALS } from '../lib/services/payments';
 import { StripeCheckoutForm } from './StripeCheckoutForm';
 
@@ -345,7 +348,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
         frequency={frequency}
         coverFees={coverFees}
         onSuccess={handlePaymentSuccess}
-        onError={(err) => console.error('Payment error:', err)}
+        onError={(err) => log.error('Payment error', err)}
       />
     </div>
   );

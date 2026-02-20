@@ -4,8 +4,8 @@
  * Provides links to subscribe to the church calendar in various apps.
  */
 
-import { useState } from 'react';
 import { Calendar, Copy, Check, ExternalLink } from 'lucide-react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 interface CalendarSubscribeProps {
   churchId: string;
@@ -13,7 +13,7 @@ interface CalendarSubscribeProps {
 }
 
 export function CalendarSubscribe({ churchId, churchName }: CalendarSubscribeProps) {
-  const [copied, setCopied] = useState(false);
+  const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
 
   // Build the iCal subscription URL
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -25,14 +25,8 @@ export function CalendarSubscribe({ churchId, churchName }: CalendarSubscribePro
   // Google Calendar add URL
   const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(icalUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
+  const handleCopy = () => {
+    copyToClipboard(icalUrl);
   };
 
   return (
