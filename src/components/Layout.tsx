@@ -70,6 +70,7 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    label: 'Insights',
     items: [
       { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
       { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
@@ -371,23 +372,17 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             )}
           </button>
 
-          {/* Version & Connection Status */}
-          <div className={`mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-            <div className="px-2.5 space-y-1.5">
-              {/* Connection Status */}
-              <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium ${
-                isDemo
-                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
-                {isDemo ? 'Demo Mode' : 'Connected to Supabase'}
+          {/* Demo Mode indicator — only shown when in demo mode */}
+          {isDemo && (
+            <div className={`mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              <div className="px-2.5">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Demo Mode
+                </div>
               </div>
-              <p className="text-[10px] text-gray-400 dark:text-dark-500">
-                v1.0 Beta
-              </p>
             </div>
-          </div>
+          )}
         </div>
       </aside>
 

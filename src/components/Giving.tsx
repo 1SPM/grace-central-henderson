@@ -84,14 +84,21 @@ export function Giving({ giving, people }: GivingProps) {
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">By Fund</h2>
           <div className="space-y-3">
-            {Object.entries(byFund).map(([fund, amount]) => (
-              <div key={fund} className="flex items-center justify-between">
-                <span className={`text-sm px-3 py-1 rounded-full ${fundColors[fund]}`}>
-                  {fund.charAt(0).toUpperCase() + fund.slice(1)}
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-dark-100">${amount.toLocaleString()}</span>
+            {Object.keys(byFund).length === 0 ? (
+              <div className="text-center py-8">
+                <DollarSign className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={24} />
+                <p className="text-sm text-gray-400 dark:text-dark-500">No fund data for this period</p>
               </div>
-            ))}
+            ) : (
+              Object.entries(byFund).map(([fund, amount]) => (
+                <div key={fund} className="flex items-center justify-between">
+                  <span className={`text-sm px-3 py-1 rounded-full ${fundColors[fund] || fundColors.other}`}>
+                    {fund.charAt(0).toUpperCase() + fund.slice(1)}
+                  </span>
+                  <span className="font-semibold text-gray-900 dark:text-dark-100">${amount.toLocaleString()}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

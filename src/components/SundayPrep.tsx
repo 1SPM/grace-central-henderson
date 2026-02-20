@@ -545,8 +545,9 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
           {/* Left Panel - Content Sources */}
           <div className="lg:col-span-1 space-y-4 no-print">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
-              Click to Add
+              Sermon Resources
             </h3>
+            <p className="text-xs text-gray-400 dark:text-dark-500 -mt-2">Click any item to add it to your sermon</p>
 
             {/* News & Trending */}
             <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">

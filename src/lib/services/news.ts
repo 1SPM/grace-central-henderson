@@ -123,7 +123,8 @@ Be thoughtful and find genuine connections that would resonate with a congregati
  * Fetch news and curate with Biblical connections
  */
 export async function fetchCuratedNews(maxItems: number = 5): Promise<CuratedNewsItem[]> {
-  const articles = await fetchNewsHeadlines();
+  // Fetch from faith-relevant categories to avoid divisive political content
+  const articles = await fetchNewsHeadlines('general');
   const curatedItems: CuratedNewsItem[] = [];
 
   // Process articles in parallel (limit to maxItems)

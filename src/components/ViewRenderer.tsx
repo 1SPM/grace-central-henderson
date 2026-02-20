@@ -223,6 +223,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewInactive={() => setView('people')}
           onViewActions={() => setView('feed')}
           onViewCalendar={() => setView('calendar')}
+          onViewAnalytics={() => setView('analytics')}
         />
       );
 
@@ -667,6 +668,7 @@ export function ViewRenderer(props: ViewRendererProps) {
               prayers={prayers}
               events={events}
               interactions={interactions}
+              onViewPerson={handlers.viewPerson}
             />
           </div>
         );
