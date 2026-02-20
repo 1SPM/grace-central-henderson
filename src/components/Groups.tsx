@@ -142,7 +142,20 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                   {group.meetingDay && group.meetingTime && (
                     <div className="flex items-center gap-1.5">
                       <Clock size={14} className="text-gray-400 dark:text-dark-500" />
-                      <span>{group.meetingDay}s · {group.meetingTime}</span>
+                      <span>{group.meetingDay}s · {(() => {
+                        // Format time for display (handle both 24h "19:00:00" and 12h "7:00 PM")
+                        const t = group.meetingTime || '';
+                        if (t.includes('AM') || t.includes('PM')) return t;
+                        const parts = t.split(':');
+                        if (parts.length >= 2) {
+                          let h = parseInt(parts[0], 10);
+                          const m = parts[1];
+                          const ampm = h >= 12 ? 'PM' : 'AM';
+                          h = h % 12 || 12;
+                          return `${h}:${m} ${ampm}`;
+                        }
+                        return t;
+                      })()}</span>
                     </div>
                   )}
                   {group.location && (

@@ -31,7 +31,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'sarah.mitchell@email.com',
     phone: '(555) 123-4567',
     status: 'visitor',
-    firstVisit: '2024-12-29',
+    firstVisit: getDateString(-14),
     birthDate: '1995-03-15',
     tags: ['first-time', 'young-adult'],
     smallGroups: [],
@@ -44,7 +44,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'james.p@email.com',
     phone: '(555) 234-5678',
     status: 'member',
-    joinDate: '2023-06-15',
+    joinDate: getDateString(-365),
     birthDate: getBirthDateForUpcoming(2), // Birthday in 2 days!
     tags: ['volunteer', 'greeter'],
     smallGroups: ['1'],
@@ -57,11 +57,11 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'maria.garcia@email.com',
     phone: '(555) 345-6789',
     status: 'regular',
-    firstVisit: '2024-08-10',
+    firstVisit: getDateString(-60),
     birthDate: '1992-07-22',
     tags: ['young-adult'],
     smallGroups: ['2'],
-    notes: 'Brought friend Sarah on 12/29.'
+    notes: 'Brought friend Sarah recently.'
   },
   {
     id: '4',
@@ -70,7 +70,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'robert.chen@email.com',
     phone: '(555) 456-7890',
     status: 'leader',
-    joinDate: '2020-03-01',
+    joinDate: getDateString(-1800),
     birthDate: getBirthDateForUpcoming(5), // Birthday in 5 days!
     tags: ['elder', 'small-group-leader'],
     smallGroups: ['1'],
@@ -83,7 +83,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'emily.j@email.com',
     phone: '(555) 567-8901',
     status: 'inactive',
-    joinDate: '2022-01-10',
+    joinDate: getDateString(-730),
     birthDate: '1988-11-30',
     tags: [],
     smallGroups: [],
@@ -96,7 +96,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'cdeichmiller11@gmail.com', // TEST: Birthday greeting (today!)
     phone: '(555) 678-9012',
     status: 'member',
-    joinDate: '2021-09-20',
+    joinDate: getDateString(-500),
     birthDate: getBirthDateForUpcoming(0), // Birthday TODAY!
     tags: ['worship-team', 'musician'],
     smallGroups: ['2'],
@@ -109,7 +109,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'lisa.t@email.com',
     phone: '(555) 789-0123',
     status: 'visitor',
-    firstVisit: '2025-01-01',
+    firstVisit: getDateString(-10),
     birthDate: '1984-04-12',
     tags: ['first-time', 'family'],
     smallGroups: [],
@@ -122,7 +122,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'michael.b@email.com',
     phone: '(555) 890-1234',
     status: 'member',
-    joinDate: '2019-11-15',
+    joinDate: getDateString(-2000),
     birthDate: '1975-08-03',
     tags: ['deacon', 'finance-team'],
     smallGroups: ['1'],
@@ -139,7 +139,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'amanda.foster@email.com',
     phone: '(555) 901-2345',
     status: 'member',
-    joinDate: '2022-05-20',
+    joinDate: getDateString(-600),
     birthDate: getBirthDateForUpcoming(1), // Birthday tomorrow!
     tags: ['womens-ministry', 'prayer-team'],
     smallGroups: ['3'],
@@ -152,7 +152,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'kevin.m@email.com',
     phone: '(555) 012-3456',
     status: 'member',
-    joinDate: '2021-01-22', // Membership anniversary coming up!
+    joinDate: getDateString(-365 * 2 + 3), // Membership anniversary coming up!
     birthDate: getBirthDateForUpcoming(3), // Birthday in 3 days!
     tags: ['tech-team', 'young-professional'],
     smallGroups: ['2'],
@@ -178,7 +178,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'tom.wright@email.com',
     phone: '(555) 234-5670',
     status: 'leader',
-    joinDate: '2018-06-10',
+    joinDate: getDateString(-2500),
     birthDate: '1970-12-25',
     tags: ['elder', 'missions-team'],
     smallGroups: ['1'],
@@ -188,16 +188,16 @@ export const SAMPLE_PEOPLE: Person[] = [
   // Recent visitors (for New Member Agent testing)
   {
     id: '13',
-    firstName: 'Cam',
-    lastName: '1993',
-    email: 'camd1993@gmail.com', // TEST: Welcome/follow-up emails for recent visitor
+    firstName: 'Jennifer',
+    lastName: 'Adams',
+    email: 'jen.adams@email.com',
     phone: '(555) 345-6780',
     status: 'visitor',
     firstVisit: getDateString(-3), // Visited 3 days ago
     birthDate: '1990-02-14',
     tags: ['first-time', 'young-family'],
     smallGroups: [],
-    notes: 'Test user for AI email features.'
+    notes: 'Looking for a church home. Has two young children.'
   },
   {
     id: '14',
@@ -234,7 +234,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'brian.cooper@email.com',
     phone: '(555) 678-9013',
     status: 'regular',
-    firstVisit: '2024-09-15',
+    firstVisit: getDateString(-120),
     birthDate: '1982-10-30',
     tags: ['mens-group'],
     smallGroups: ['1'],
@@ -247,7 +247,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'nicole.d@email.com',
     phone: '(555) 789-0124',
     status: 'regular',
-    firstVisit: '2024-10-01',
+    firstVisit: getDateString(-90),
     birthDate: getBirthDateForUpcoming(4), // Birthday in 4 days!
     tags: ['young-adult', 'creative'],
     smallGroups: ['2'],
@@ -290,7 +290,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'chris.hall@email.com',
     phone: '(555) 012-3457',
     status: 'regular',
-    firstVisit: '2024-11-10',
+    firstVisit: getDateString(-60),
     birthDate: '1991-03-25',
     tags: ['young-professional'],
     smallGroups: [],
@@ -303,7 +303,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'lauren.w@email.com',
     phone: '(555) 123-4561',
     status: 'member',
-    joinDate: '2023-03-12',
+    joinDate: getDateString(-700),
     birthDate: '1989-08-14',
     tags: ['choir', 'worship-team'],
     smallGroups: ['3'],
@@ -318,7 +318,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'andrew.c@email.com',
     phone: '(555) 234-5671',
     status: 'inactive',
-    joinDate: '2021-04-15',
+    joinDate: getDateString(-1500),
     birthDate: getBirthDateForUpcoming(1), // Birthday tomorrow - good re-engagement opportunity!
     tags: [],
     smallGroups: [],
@@ -331,7 +331,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'michelle.y@email.com',
     phone: '(555) 345-6781',
     status: 'inactive',
-    joinDate: '2020-08-20',
+    joinDate: getDateString(-1800),
     birthDate: '1983-04-02',
     tags: [],
     smallGroups: [],
@@ -346,7 +346,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'richard.a@email.com',
     phone: '(555) 456-7802',
     status: 'member',
-    joinDate: '2015-01-10',
+    joinDate: getDateString(-3650),
     birthDate: '1965-11-12',
     tags: ['elder', 'major-donor'],
     smallGroups: ['1'],
@@ -359,7 +359,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'patricia.t@email.com',
     phone: '(555) 567-8903',
     status: 'member',
-    joinDate: '2017-06-25',
+    joinDate: getDateString(-2800),
     birthDate: '1958-07-30',
     tags: ['prayer-team', 'major-donor'],
     smallGroups: ['3'],
@@ -374,7 +374,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'mark.thompson@email.com',
     phone: '(555) 789-0125',
     status: 'member',
-    joinDate: '2025-01-05',
+    joinDate: getDateString(-10),
     birthDate: '1982-04-18',
     tags: ['family'],
     smallGroups: [],
@@ -388,7 +388,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'emma.thompson@email.com',
     phone: '(555) 789-0125',
     status: 'member',
-    joinDate: '2025-01-05',
+    joinDate: getDateString(-10),
     birthDate: '2017-06-10',
     tags: ['child', 'kids-ministry'],
     smallGroups: [],
@@ -402,7 +402,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: '',
     phone: '',
     status: 'member',
-    joinDate: '2025-01-05',
+    joinDate: getDateString(-10),
     birthDate: '2020-03-22',
     tags: ['child', 'kids-ministry'],
     smallGroups: [],
@@ -417,55 +417,55 @@ export const SAMPLE_TASKS: Task[] = [
     id: '1',
     personId: '1',
     title: 'Follow up with Sarah Mitchell',
-    description: 'First-time visitor on 12/29. Send welcome email and invite to coffee.',
-    dueDate: '2025-01-05',
+    description: 'First-time visitor. Send welcome email and invite to coffee.',
+    dueDate: getDateString(-7),
     completed: false,
     priority: 'high',
     category: 'follow-up',
-    createdAt: '2024-12-29'
+    createdAt: getDateString(-14)
   },
   {
     id: '2',
     personId: '7',
     title: 'Connect Lisa Thompson with kids ministry',
     description: 'New visitor with 2 kids. Introduce to children\'s pastor.',
-    dueDate: '2025-01-06',
+    dueDate: getDateString(-5),
     completed: false,
     priority: 'high',
     category: 'follow-up',
-    createdAt: '2025-01-01'
+    createdAt: getDateString(-10)
   },
   {
     id: '3',
     personId: '5',
     title: 'Check in on Emily Johnson',
     description: 'Inactive 6 weeks. Last mentioned job stress. Care call needed.',
-    dueDate: '2025-01-04',
+    dueDate: getDateString(-3),
     completed: false,
     priority: 'medium',
     category: 'care',
-    createdAt: '2024-12-20'
+    createdAt: getDateString(-21)
   },
   {
     id: '4',
     title: 'Prepare Q1 giving report',
     description: 'Compile giving data for elder meeting.',
-    dueDate: '2025-01-15',
+    dueDate: getDateString(5),
     completed: false,
     priority: 'low',
     category: 'admin',
-    createdAt: '2025-01-01'
+    createdAt: getDateString(-7)
   },
   {
     id: '5',
     personId: '3',
     title: 'Thank Maria for bringing guest',
     description: 'She brought Sarah to service. Send appreciation note.',
-    dueDate: '2025-01-03',
+    dueDate: getDateString(-10),
     completed: true,
     priority: 'medium',
     category: 'outreach',
-    createdAt: '2024-12-30'
+    createdAt: getDateString(-14)
   },
 
   // === NEW TASKS FOR AI TESTING ===
@@ -645,8 +645,8 @@ export const SAMPLE_PRAYERS: PrayerRequest[] = [
     content: 'Please pray for guidance in my job search. Feeling overwhelmed.',
     isPrivate: false,
     isAnswered: false,
-    createdAt: '2024-12-15',
-    updatedAt: '2024-12-15'
+    createdAt: getDateString(-14),
+    updatedAt: getDateString(-14)
   },
   {
     id: '2',
@@ -654,8 +654,8 @@ export const SAMPLE_PRAYERS: PrayerRequest[] = [
     content: 'Thankful for my mother\'s successful surgery. Praying for quick recovery.',
     isPrivate: false,
     isAnswered: false,
-    createdAt: '2024-12-28',
-    updatedAt: '2024-12-28'
+    createdAt: getDateString(-7),
+    updatedAt: getDateString(-7)
   },
   {
     id: '3',
@@ -664,8 +664,8 @@ export const SAMPLE_PRAYERS: PrayerRequest[] = [
     isPrivate: true,
     isAnswered: true,
     testimony: 'God provided clarity through counsel from Pastor and peace in prayer.',
-    createdAt: '2024-11-10',
-    updatedAt: '2024-12-20'
+    createdAt: getDateString(-45),
+    updatedAt: getDateString(-21)
   }
 ];
 
@@ -675,7 +675,7 @@ export const SAMPLE_INTERACTIONS: Interaction[] = [
     personId: '1',
     type: 'note',
     content: 'First visit! Came with Maria Garcia. Very engaged during service. Asked about small groups.',
-    createdAt: '2024-12-29',
+    createdAt: getDateString(-14),
     createdBy: 'Pastor John'
   },
   {
@@ -683,34 +683,34 @@ export const SAMPLE_INTERACTIONS: Interaction[] = [
     personId: '5',
     type: 'call',
     content: 'Called to check in. Emily shared she\'s been stressed with job situation. Prayed together.',
-    createdAt: '2024-12-01',
+    createdAt: getDateString(-30),
     createdBy: 'Pastor John'
   },
   {
     id: '3',
     personId: '7',
     type: 'note',
-    content: 'New Year\'s service visitor. Family of 4. Kids enjoyed children\'s church.',
-    createdAt: '2025-01-01',
+    content: 'Recent visitor. Family of 4. Kids enjoyed children\'s church.',
+    createdAt: getDateString(-10),
     createdBy: 'Welcome Team'
   }
 ];
 
 export const SAMPLE_ATTENDANCE: Attendance[] = [
-  { id: '1', personId: '2', eventType: 'sunday', date: '2025-01-05', checkedInAt: '2025-01-05T09:45:00' },
-  { id: '2', personId: '4', eventType: 'sunday', date: '2025-01-05', checkedInAt: '2025-01-05T09:30:00' },
-  { id: '3', personId: '6', eventType: 'sunday', date: '2025-01-05', checkedInAt: '2025-01-05T09:50:00' },
-  { id: '4', personId: '8', eventType: 'sunday', date: '2025-01-05', checkedInAt: '2025-01-05T09:35:00' },
-  { id: '5', personId: '3', eventType: 'sunday', date: '2025-01-05', checkedInAt: '2025-01-05T10:00:00' },
+  { id: '1', personId: '2', eventType: 'sunday', date: getDateString(-7), checkedInAt: `${getDateString(-7)}T09:45:00` },
+  { id: '2', personId: '4', eventType: 'sunday', date: getDateString(-7), checkedInAt: `${getDateString(-7)}T09:30:00` },
+  { id: '3', personId: '6', eventType: 'sunday', date: getDateString(-7), checkedInAt: `${getDateString(-7)}T09:50:00` },
+  { id: '4', personId: '8', eventType: 'sunday', date: getDateString(-7), checkedInAt: `${getDateString(-7)}T09:35:00` },
+  { id: '5', personId: '3', eventType: 'sunday', date: getDateString(-7), checkedInAt: `${getDateString(-7)}T10:00:00` },
 ];
 
 export const SAMPLE_GIVING: Giving[] = [
   // === ORIGINAL GIVING RECORDS ===
-  { id: '1', personId: '2', amount: 250, fund: 'tithe', date: '2025-01-05', method: 'online', isRecurring: true },
-  { id: '2', personId: '4', amount: 500, fund: 'tithe', date: '2025-01-05', method: 'check', isRecurring: false },
-  { id: '3', personId: '8', amount: 150, fund: 'tithe', date: '2025-01-05', method: 'online', isRecurring: true },
-  { id: '4', personId: '8', amount: 100, fund: 'missions', date: '2025-01-05', method: 'online', isRecurring: false },
-  { id: '5', personId: '6', amount: 75, fund: 'offering', date: '2025-01-05', method: 'cash', isRecurring: false },
+  { id: '1', personId: '2', amount: 250, fund: 'tithe', date: getDateString(-14), method: 'online', isRecurring: true },
+  { id: '2', personId: '4', amount: 500, fund: 'tithe', date: getDateString(-14), method: 'check', isRecurring: false },
+  { id: '3', personId: '8', amount: 150, fund: 'tithe', date: getDateString(-14), method: 'online', isRecurring: true },
+  { id: '4', personId: '8', amount: 100, fund: 'missions', date: getDateString(-14), method: 'online', isRecurring: false },
+  { id: '5', personId: '6', amount: 75, fund: 'offering', date: getDateString(-14), method: 'cash', isRecurring: false },
 
   // === FIRST-TIME GIVERS (for Donation Agent testing) ===
   { id: '6', personId: '20', amount: 50, fund: 'tithe', date: getDateString(-7), method: 'online', isRecurring: false, note: 'First gift! Welcome gift from Christopher.' },
