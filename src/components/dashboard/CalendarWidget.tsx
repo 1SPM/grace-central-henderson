@@ -67,7 +67,7 @@ export function CalendarWidget({ events, onViewCalendar }: CalendarWidgetProps) 
   }, [events]);
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
       <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

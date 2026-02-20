@@ -41,8 +41,12 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
     const ytdGiving = giving.filter((g) => new Date(g.date).getFullYear() === currentYear);
     const ytdTotal = ytdGiving.reduce((sum, g) => sum + g.amount, 0);
 
-    // Unique donors this month
+    // Lifetime total (all giving ever)
+    const lifetimeTotal = giving.reduce((sum, g) => sum + g.amount, 0);
+
+    // Unique donors — use current month if available, otherwise all-time
     const uniqueDonorsThisMonth = new Set(thisMonthGiving.map((g) => g.personId)).size;
+    const uniqueDonorsAllTime = new Set(giving.map((g) => g.personId)).size;
 
     // Recurring count
     const recurringCount = giving.filter((g) => g.isRecurring).length;
@@ -57,14 +61,21 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
 
+    // Determine if we should show lifetime fallback (current period has no data but gifts exist)
+    const hasCurrentData = thisMonthTotal > 0 || ytdTotal > 0;
+    const showLifetimeFallback = !hasCurrentData && lifetimeTotal > 0;
+
     return {
       thisMonthTotal,
       lastMonthTotal,
       ytdTotal,
+      lifetimeTotal,
       uniqueDonorsThisMonth,
+      uniqueDonorsAllTime,
       recurringCount,
       percentChange,
       recentGiving,
+      showLifetimeFallback,
     };
   }, [giving]);
 
@@ -78,10 +89,17 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
     other: 'bg-gray-50 dark:bg-dark-700 text-gray-600 dark:text-dark-300',
   };
 
+  // Decide which values to display based on data availability
+  const displayTotal = stats.showLifetimeFallback ? stats.lifetimeTotal : stats.thisMonthTotal;
+  const displayTotalLabel = stats.showLifetimeFallback ? 'All Time' : 'This Month';
+  const displayYtd = stats.showLifetimeFallback ? stats.lifetimeTotal : stats.ytdTotal;
+  const displayYtdLabel = stats.showLifetimeFallback ? 'Total Gifts' : 'Year to Date';
+  const displayDonors = stats.showLifetimeFallback ? stats.uniqueDonorsAllTime : stats.uniqueDonorsThisMonth;
+
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Giving Overview</h2>
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Overview</h2>
         <button
           onClick={onViewGiving}
           className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
@@ -93,12 +111,12 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg">
-          <p className="text-xs text-emerald-600 dark:text-emerald-400">This Month</p>
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{displayTotalLabel}</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-dark-100 mt-0.5">
-            ${stats.thisMonthTotal.toLocaleString()}
+            ${displayTotal.toLocaleString()}
           </p>
-          {stats.percentChange !== 0 && (
+          {!stats.showLifetimeFallback && stats.percentChange !== 0 && (
             <div className={`flex items-center gap-0.5 mt-1 text-xs ${
               stats.percentChange >= 0
                 ? 'text-emerald-600 dark:text-emerald-400'
@@ -109,23 +127,23 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
             </div>
           )}
         </div>
-        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
-          <p className="text-xs text-gray-500 dark:text-dark-400">Year to Date</p>
+        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-100 dark:border-dark-700">
+          <p className="text-xs text-gray-600 dark:text-dark-400 font-medium">{displayYtdLabel}</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-dark-100 mt-0.5">
-            ${stats.ytdTotal.toLocaleString()}
+            ${displayYtd.toLocaleString()}
           </p>
         </div>
-        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
-          <p className="text-xs text-gray-500 dark:text-dark-400">Donors</p>
+        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-100 dark:border-dark-700">
+          <p className="text-xs text-gray-600 dark:text-dark-400 font-medium">Donors</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Users size={14} className="text-indigo-500" />
             <p className="text-lg font-semibold text-gray-900 dark:text-dark-100">
-              {stats.uniqueDonorsThisMonth}
+              {displayDonors}
             </p>
           </div>
         </div>
-        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
-          <p className="text-xs text-gray-500 dark:text-dark-400">Recurring</p>
+        <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-100 dark:border-dark-700">
+          <p className="text-xs text-gray-600 dark:text-dark-400 font-medium">Recurring</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Repeat size={14} className="text-purple-500" />
             <p className="text-lg font-semibold text-gray-900 dark:text-dark-100">
@@ -135,12 +153,12 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
         </div>
       </div>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions — show top 3 on dashboard for brevity */}
       {stats.recentGiving.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-dark-400 mb-2">Recent Gifts</p>
+          <p className="text-xs font-medium text-gray-600 dark:text-dark-400 mb-2">Recent Gifts</p>
           <div className="space-y-1">
-            {stats.recentGiving.map((gift) => (
+            {stats.recentGiving.slice(0, 3).map((gift) => (
               <div
                 key={gift.id}
                 className="flex items-center justify-between py-2 px-2.5 bg-gray-50 dark:bg-dark-850 rounded-lg"
@@ -152,7 +170,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
                   {gift.isRecurring && (
                     <Repeat size={10} className="text-purple-500" />
                   )}
-                  <span className="text-xs text-gray-400 dark:text-dark-500">
+                  <span className="text-xs text-gray-500 dark:text-dark-500">
                     {new Date(gift.date).toLocaleDateString()}
                   </span>
                 </div>
@@ -168,7 +186,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
       {giving.length === 0 && (
         <div className="text-center py-6">
           <DollarSign className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={24} />
-          <p className="text-gray-400 dark:text-dark-500 text-sm">No giving records yet</p>
+          <p className="text-gray-500 dark:text-dark-500 text-sm">No giving records yet</p>
           <button
             onClick={onViewGiving}
             className="mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium"

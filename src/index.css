@@ -27,6 +27,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   letter-spacing: -0.011em;
+  background-color: #f9fafb; /* gray-50 — light mode default */
+  color: #111827; /* gray-900 */
+}
+
+.dark body,
+body:has(.dark) {
+  background-color: #09090b; /* dark-950 */
+  color: #f4f4f5; /* zinc-100 */
 }
 
 /* Refined heading styles */

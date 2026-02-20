@@ -8,6 +8,8 @@ interface StatCardProps {
   icon?: ReactNode;
   change?: number;
   changeLabel?: string;
+  /** When true, a negative change is treated as positive (e.g., fewer inactive members) */
+  invertTrend?: boolean;
   sparklineData?: number[];
   accentColor?: 'emerald' | 'amber' | 'rose' | 'blue' | 'violet' | 'slate';
   size?: 'default' | 'large';
@@ -65,6 +67,7 @@ export function StatCard({
   icon,
   change,
   changeLabel = 'vs last week',
+  invertTrend = false,
   sparklineData,
   accentColor = 'slate',
   size = 'default',
@@ -76,31 +79,32 @@ export function StatCard({
   const renderChange = () => {
     if (change === undefined) return null;
 
-    const isPositive = change > 0;
     const isNeutral = change === 0;
+    // When invertTrend is true, a negative change is good (e.g., fewer inactive members)
+    const isGoodTrend = invertTrend ? change < 0 : change > 0;
 
     return (
       <div className="flex items-center gap-1 mt-1">
         {isNeutral ? (
           <Minus size={12} className="text-slate-400" />
-        ) : isPositive ? (
-          <TrendingUp size={12} className="text-emerald-500" />
+        ) : change > 0 ? (
+          <TrendingUp size={12} className={isGoodTrend ? 'text-emerald-500' : 'text-rose-500'} />
         ) : (
-          <TrendingDown size={12} className="text-rose-500" />
+          <TrendingDown size={12} className={isGoodTrend ? 'text-emerald-500' : 'text-rose-500'} />
         )}
         <span
           className={`text-xs font-medium ${
             isNeutral
               ? 'text-slate-400'
-              : isPositive
+              : isGoodTrend
               ? 'text-emerald-600 dark:text-emerald-400'
               : 'text-rose-600 dark:text-rose-400'
           }`}
         >
-          {isPositive ? '+' : ''}
+          {change > 0 ? '+' : ''}
           {change}%
         </span>
-        <span className="text-xs text-slate-400 dark:text-slate-500">{changeLabel}</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">{changeLabel}</span>
       </div>
     );
   };
@@ -112,7 +116,7 @@ export function StatCard({
       onClick={onClick}
       className={`${colors.bg} border ${colors.border} rounded-xl ${
         isLarge ? 'p-6' : 'p-4'
-      } transition-all ${onClick ? 'hover:shadow-md cursor-pointer' : ''}`}
+      } transition-all shadow-sm ${onClick ? 'hover:shadow-md cursor-pointer' : ''}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">

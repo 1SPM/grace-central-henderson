@@ -8,8 +8,6 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
-  TrendingUp,
-  Cake,
   Heart,
   LayoutDashboard,
   Church,
@@ -18,15 +16,14 @@ import {
   List,
   Zap,
   BookOpen,
+  BarChart3,
+  DollarSign,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent } from '../types';
-import { DashboardCharts } from './DashboardCharts';
-import { BirthdayWidget } from './BirthdayWidget';
 import { GivingWidget } from './GivingWidget';
 
 import { SundayPrep } from './SundayPrep';
 import { StatCard } from './ui/StatCard';
-import { AvatarStack } from './ui/AvatarStack';
 import { StatusBadge, priorityToVariant } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { KanbanBoard } from './ui/KanbanBoard';
@@ -47,12 +44,13 @@ interface DashboardProps {
   onViewInactive?: () => void;
   onViewActions?: () => void;
   onViewCalendar?: () => void;
+  onViewAnalytics?: () => void;
 }
 
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -260,49 +258,6 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         </>
       ) : (
         <>
-      {/* Quick Action CTAs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Actions CTA */}
-        <button
-          onClick={onViewActions}
-          className="group relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02]"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <Zap className="text-white" size={24} />
-              </div>
-              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-1">Action Center</h3>
-            <p className="text-white/70 text-sm">
-              {pendingTasks.length + visitors.length} items need attention
-            </p>
-          </div>
-        </button>
-
-        {/* Sermon Builder CTA */}
-        <button
-          onClick={() => setActiveTab('sunday-prep')}
-          className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02]"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <BookOpen className="text-white" size={24} />
-              </div>
-              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-1">Sermon Builder</h3>
-            <p className="text-white/70 text-sm">
-              Prepare for Sunday with AI assistance
-            </p>
-          </div>
-        </button>
-      </div>
-
       {/* Stats Grid with Sparklines */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
@@ -331,6 +286,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           icon={<AlertCircle size={20} />}
           change={inactive.length > 0 ? -8 : 0}
           changeLabel="improving"
+          invertTrend
           accentColor="rose"
           onClick={onViewInactive}
         />
@@ -346,64 +302,144 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         />
       </div>
 
-      {/* Main Content + Sidebar Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Main Content Area */}
-        <div className="xl:col-span-3 space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Recent Visitors */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-              {/* Section Header */}
-              <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                      <UserPlus className="text-amber-600 dark:text-amber-400" size={18} />
-                    </div>
-                    <div>
-                      <h2 className="font-medium text-gray-900 dark:text-dark-100">Recent Visitors</h2>
-                      <span className="text-xs text-gray-500 dark:text-dark-400">Last 30 days</span>
-                    </div>
-                  </div>
-                  {visitors.length > 0 && (
-                    <AvatarStack people={visitors.slice(0, 5)} max={4} size="sm" onViewPerson={onViewPerson} />
-                  )}
-                </div>
-              </div>
-              <div className="p-4">
-
-              {visitors.length === 0 ? (
-                <p className="text-gray-400 dark:text-dark-500 text-sm py-6 text-center">No recent visitors</p>
-              ) : (
-                <div className="space-y-1">
-                  {visitors.slice(0, 5).map((person) => (
-                    <button
-                      key={person.id}
-                      onClick={() => onViewPerson(person.id)}
-                      className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-medium">
-                          {person.firstName[0]}{person.lastName[0]}
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
-                          <p className="text-xs text-gray-400 dark:text-dark-500">
-                            {person.firstVisit ? new Date(person.firstVisit).toLocaleDateString() : 'Unknown'}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-400 dark:group-hover:text-dark-500" />
-                    </button>
-                  ))}
-                </div>
-              )}
+      {/* Members Need Care Alert — positioned high for pastoral priority */}
+      {inactive.length > 0 && (
+        <div className="mb-6 bg-rose-50 dark:bg-rose-900/10 rounded-xl p-4 border border-rose-200 dark:border-rose-800/30 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Heart className="text-rose-500" size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Members Need Care</h3>
+              <p className="text-sm text-gray-600 dark:text-dark-400 mt-0.5">
+                {inactive.length} {inactive.length === 1 ? 'person hasn\'t' : 'people haven\'t'} been active recently. Reach out today.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {inactive.slice(0, 3).map((person) => (
+                  <button
+                    key={person.id}
+                    onClick={() => onViewPerson(person.id)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-rose-100 dark:hover:bg-dark-750 border border-gray-200 dark:border-dark-600 transition-colors shadow-sm"
+                  >
+                    {person.firstName} {person.lastName}
+                    <ChevronRight size={12} />
+                  </button>
+                ))}
+                {inactive.length > 3 && (
+                  <button
+                    onClick={onViewInactive}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-100 dark:bg-rose-500/10 rounded-lg text-xs font-medium text-rose-700 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-500/20 transition-colors"
+                  >
+                    +{inactive.length - 3} more
+                    <ArrowRight size={12} />
+                  </button>
+                )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Action CTAs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Actions CTA */}
+        <button
+          onClick={onViewActions}
+          className="group relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-left transition-all hover:shadow-lg hover:scale-[1.01] shadow-sm"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Zap className="text-white" size={20} />
+              </div>
+              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={18} />
+            </div>
+            <h3 className="text-base font-semibold text-white mb-1">Action Center</h3>
+            <p className="text-white/80 text-sm">
+              {pendingTasks.filter(t => t.priority === 'high').length > 0
+                ? `${pendingTasks.filter(t => t.priority === 'high').length} urgent, ${visitors.length} visitors, ${pendingTasks.length - pendingTasks.filter(t => t.priority === 'high').length} tasks`
+                : `${visitors.length} visitors, ${pendingTasks.length} tasks`
+              }
+            </p>
+          </div>
+        </button>
+
+        {/* Sermon Builder CTA */}
+        <button
+          onClick={() => setActiveTab('sunday-prep')}
+          className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-left transition-all hover:shadow-lg hover:scale-[1.01] shadow-sm"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <BookOpen className="text-white" size={20} />
+              </div>
+              <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={18} />
+            </div>
+            <h3 className="text-base font-semibold text-white mb-1">Sermon Builder</h3>
+            <p className="text-white/80 text-sm">
+              Prepare for Sunday with AI assistance
+            </p>
+          </div>
+        </button>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Recent Visitors */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+          <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
+                  <UserPlus className="text-amber-600 dark:text-amber-400" size={18} />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-gray-900 dark:text-dark-100">Recent Visitors</h2>
+                  <span className="text-xs text-gray-500 dark:text-dark-400">Last 30 days</span>
+                </div>
+              </div>
+              {visitors.length > 0 && (
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 px-2 py-0.5 rounded-full">
+                  {visitors.length} new
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="p-4">
+            {visitors.length === 0 ? (
+              <p className="text-gray-400 dark:text-dark-500 text-sm py-6 text-center">No recent visitors</p>
+            ) : (
+              <div className="space-y-1">
+                {visitors.slice(0, 5).map((person) => (
+                  <button
+                    key={person.id}
+                    onClick={() => onViewPerson(person.id)}
+                    className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-medium">
+                        {person.firstName[0]}{person.lastName[0]}
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-500">
+                          {person.firstVisit ? new Date(person.firstVisit).toLocaleDateString() : 'Unknown'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-400 dark:group-hover:text-dark-500" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Priority Tasks */}
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-          {/* Section Header */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -411,7 +447,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                   <CheckCircle2 className="text-indigo-600 dark:text-indigo-400" size={18} />
                 </div>
                 <div>
-                  <h2 className="font-medium text-gray-900 dark:text-dark-100">Priority Follow-Ups</h2>
+                  <h2 className="font-semibold text-gray-900 dark:text-dark-100">Priority Follow-Ups</h2>
                   <span className="text-xs text-gray-500 dark:text-dark-400">Tasks needing attention</span>
                 </div>
               </div>
@@ -425,16 +461,16 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
             </div>
           </div>
           <div className="p-4">
-          {pendingTasks.length === 0 ? (
-            <div className="py-6 text-center">
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <CheckCircle2 className="text-emerald-500" size={24} />
+            {pendingTasks.length === 0 ? (
+              <div className="py-6 text-center">
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle2 className="text-emerald-500" size={24} />
+                </div>
+                <p className="text-gray-500 dark:text-dark-400 text-sm font-medium">All caught up!</p>
               </div>
-              <p className="text-gray-500 dark:text-dark-400 text-sm font-medium">All caught up!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {sortedPendingTasks.map((task) => {
+            ) : (
+              <div className="space-y-2">
+                {sortedPendingTasks.map((task) => {
                   const person = task.personId ? personMap.get(task.personId) : undefined;
                   const isOverdue = new Date(task.dueDate) < new Date();
 
@@ -447,7 +483,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{task.title}</p>
                           {person && (
-                            <p className="text-xs text-gray-400 dark:text-dark-500 mt-0.5">
+                            <p className="text-xs text-gray-500 dark:text-dark-500 mt-0.5">
                               {person.firstName} {person.lastName}
                             </p>
                           )}
@@ -458,129 +494,66 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                       </div>
                       <div className="flex items-center gap-1.5 mt-2">
                         <Clock size={10} className={isOverdue ? 'text-red-500' : 'text-gray-400 dark:text-dark-500'} />
-                        <span className={`text-[10px] ${isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-400 dark:text-dark-500'}`}>
+                        <span className={`text-[10px] ${isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-dark-500'}`}>
                           {isOverdue ? 'Overdue' : 'Due'}: {new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                   );
                 })}
-            </div>
-          )}
+              </div>
+            )}
           </div>
         </div>
-          </div>
-        </div>
+      </div>
 
-        {/* Right Sidebar */}
-        <div className="xl:col-span-1 space-y-4">
-          {/* Quick Team Overview */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="bg-violet-50 dark:bg-violet-900/20 border-b border-violet-100 dark:border-violet-800/30 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <Users className="text-violet-600 dark:text-violet-400" size={18} />
-                </div>
-                <div>
-                  <h2 className="font-medium text-gray-900 dark:text-dark-100">Your Community</h2>
-                  <span className="text-xs text-gray-500 dark:text-dark-400">{people.filter(p => p.status !== 'inactive' && p.status !== 'visitor').length} members</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <AvatarStack
-                  people={people.filter(p => p.status !== 'inactive' && p.status !== 'visitor').slice(0, 8)}
-                  max={6}
-                  size="md"
-                  onViewPerson={onViewPerson}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Members</span>
-                  <span className="font-medium text-emerald-600 dark:text-emerald-400">{people.filter(p => p.status !== 'inactive' && p.status !== 'visitor').length}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Visitors</span>
-                  <span className="font-medium text-amber-600 dark:text-amber-400">{visitors.length}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Inactive</span>
-                  <span className="font-medium text-rose-600 dark:text-rose-400">{inactive.length}</span>
-                </div>
-              </div>
-            </div>
+      {/* Giving + Calendar Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        {/* Giving Widget — spans 2 columns */}
+        {onViewGiving && (
+          <div className="lg:col-span-2">
+            <GivingWidget giving={giving} onViewGiving={onViewGiving} />
           </div>
+        )}
 
-          {/* Calendar Widget */}
+        {/* Calendar Widget — compact, collapses when empty */}
+        <div className="lg:col-span-1">
           <CalendarWidget events={events} onViewCalendar={onViewCalendar} />
-
         </div>
       </div>
 
-      {/* Giving Widget */}
-      {onViewGiving && (
-        <div className="mt-4">
-          <GivingWidget giving={giving} onViewGiving={onViewGiving} />
-        </div>
-      )}
-
-      {/* Inactive Members Alert */}
-      {inactive.length > 0 && (
-        <div className="mt-4 bg-rose-50 dark:bg-rose-900/10 rounded-xl p-4 border border-rose-200 dark:border-rose-800/30">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Heart className="text-rose-500" size={18} />
+      {/* Quick Links to Dedicated Pages */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {onViewAnalytics && (
+          <button
+            onClick={onViewAnalytics}
+            className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
+          >
+            <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+              <BarChart3 className="text-emerald-600 dark:text-emerald-400" size={20} />
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Members Need Care</h3>
-              <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
-                {inactive.length} {inactive.length === 1 ? 'person hasn\'t' : 'people haven\'t'} been active recently.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {inactive.slice(0, 3).map((person) => (
-                  <button
-                    key={person.id}
-                    onClick={() => onViewPerson(person.id)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-rose-100 dark:hover:bg-dark-750 border border-gray-200 dark:border-dark-600 transition-colors"
-                  >
-                    {person.firstName} {person.lastName}
-                    <ChevronRight size={12} />
-                  </button>
-                ))}
-              </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Analytics</p>
+              <p className="text-xs text-gray-500 dark:text-dark-400">Growth metrics & member insights</p>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Charts Section */}
-      <div className="mt-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-            <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={18} />
-          </div>
-          <div>
-            <h2 className="font-medium text-gray-900 dark:text-dark-100">Analytics</h2>
-            <p className="text-xs text-gray-500 dark:text-dark-400">Track your congregation's growth</p>
-          </div>
-        </div>
-        <DashboardCharts people={people} />
-      </div>
-
-      {/* Birthday Widget */}
-      <div className="mt-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
-            <Cake className="text-pink-600 dark:text-pink-400" size={18} />
-          </div>
-          <div>
-            <h2 className="font-medium text-gray-900 dark:text-dark-100">Upcoming Birthdays</h2>
-            <p className="text-xs text-gray-500 dark:text-dark-400">Celebrate with your community</p>
-          </div>
-        </div>
-        <BirthdayWidget people={people} onViewPerson={onViewPerson} />
+            <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
+          </button>
+        )}
+        {onViewGiving && (
+          <button
+            onClick={onViewGiving}
+            className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
+          >
+            <div className="w-10 h-10 bg-violet-50 dark:bg-violet-900/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="text-violet-600 dark:text-violet-400" size={20} />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Details</p>
+              <p className="text-xs text-gray-500 dark:text-dark-400">Full transaction history & reports</p>
+            </div>
+            <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
+          </button>
+        )}
       </div>
       </>
       )}
