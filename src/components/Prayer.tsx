@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Heart, Check, Lock, Unlock, Sparkles, Download } from 'lucide-react';
 import { PrayerRequest, Person } from '../types';
-import { exportPrayersToCSV } from '../utils/exportCsv';
+import { exportPrayersToCSV } from '../utils/csvExport';
 
 interface PrayerProps {
   prayers: PrayerRequest[];

@@ -1,7 +1,7 @@
 import { DollarSign, TrendingUp, Repeat, CreditCard, Banknote, Building, Download } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Giving as GivingType, Person } from '../types';
-import { exportGivingToCSV } from '../utils/exportCsv';
+import { exportGivingToCSV } from '../utils/csvExport';
 
 interface GivingProps {
   giving: GivingType[];

@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import type { View, CalendarEvent, Person, ServiceRequest, ServiceRequestStatus } from '../types';
 import { ServiceRequestForm } from './ServiceRequestForm';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('life-services');
 
 interface LifeServicesProps {
   onNavigate: (view: View) => void;
@@ -181,7 +184,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
     filteredRequests.filter(r => r.status === status);
 
   const handleSubmitRequest = (data: unknown) => {
-    console.log('New service request:', data);
+    log.info('New service request', data);
     // In a real app, this would save to the database
   };
 

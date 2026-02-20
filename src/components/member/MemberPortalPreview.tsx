@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
 import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
@@ -43,7 +44,7 @@ export function MemberPortalPreview({
   onSendMessage,
 }: MemberPortalPreviewProps) {
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
-  const [copied, setCopied] = useState(false);
+  const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
 
   // Generate a shareable URL for the portal
   // Uses /portal route which renders standalone member portal without admin UI
@@ -58,9 +59,7 @@ export function MemberPortalPreview({
   }, [portalUrl]);
 
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText(portalUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(portalUrl);
   };
 
   // Full screen mode - just show the portal

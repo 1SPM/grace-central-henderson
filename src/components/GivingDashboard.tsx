@@ -21,7 +21,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import type { Giving, Person, Campaign, Pledge, GivingAnalytics } from '../types';
-import { exportGivingToCSV } from '../utils/exportCsv';
+import { exportGivingToCSV } from '../utils/csvExport';
 
 interface GivingDashboardProps {
   giving: Giving[];
