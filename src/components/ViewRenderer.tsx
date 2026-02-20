@@ -667,6 +667,7 @@ export function ViewRenderer(props: ViewRendererProps) {
               prayers={prayers}
               events={events}
               interactions={interactions}
+              onViewPerson={handlers.viewPerson}
             />
           </div>
         );

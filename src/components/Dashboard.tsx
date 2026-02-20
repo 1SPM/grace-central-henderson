@@ -23,7 +23,7 @@ import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent } from 
 import { DashboardCharts } from './DashboardCharts';
 import { BirthdayWidget } from './BirthdayWidget';
 import { GivingWidget } from './GivingWidget';
-import { ActivityFeed } from './ActivityFeed';
+
 import { SundayPrep } from './SundayPrep';
 import { StatCard } from './ui/StatCard';
 import { AvatarStack } from './ui/AvatarStack';
@@ -52,7 +52,7 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], interactions = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -516,16 +516,6 @@ export function Dashboard({ people, tasks, events = [], giving = [], interaction
           {/* Calendar Widget */}
           <CalendarWidget events={events} onViewCalendar={onViewCalendar} />
 
-          {/* Compact Activity Feed */}
-          <ActivityFeed
-            people={people}
-            tasks={tasks}
-            interactions={interactions}
-            prayers={prayers}
-            giving={giving}
-            onViewPerson={onViewPerson}
-            limit={6}
-          />
         </div>
       </div>
 

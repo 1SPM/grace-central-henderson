@@ -13,6 +13,9 @@ import {
   UserPlus,
   Heart,
   Clock,
+  TrendingUp,
+  MessageSquare,
+  CheckCircle,
 } from 'lucide-react';
 import type { Person, MemberStatus, Task, Giving, PrayerRequest, CalendarEvent, Interaction } from '../types';
 
@@ -23,6 +26,7 @@ interface AnalyticsProps {
   prayers: PrayerRequest[];
   events: CalendarEvent[];
   interactions: Interaction[];
+  onViewPerson?: (id: string) => void;
 }
 
 type TimeRange = '7d' | '30d' | '90d' | 'all';
@@ -56,6 +60,19 @@ function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
 }
 
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
 /** Simple donut chart ring */
 function DonutRing({ value, max, color, size = 80, strokeWidth = 7 }: { value: number; max: number; color: string; size?: number; strokeWidth?: number }) {
   const r = (size - strokeWidth) / 2;
@@ -79,8 +96,18 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
   );
 }
 
-export function Analytics({ people, tasks, giving, prayers, events, interactions }: AnalyticsProps) {
+const activityIconMap: Record<string, { icon: typeof UserPlus; color: string; bg: string }> = {
+  new_person: { icon: UserPlus, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10' },
+  task_completed: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-500/10' },
+  interaction: { icon: MessageSquare, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-500/10' },
+  prayer: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-100 dark:bg-pink-500/10' },
+  giving: { icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
+};
+
+export function Analytics({ people, tasks, giving, prayers, events, interactions, onViewPerson }: AnalyticsProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   const metrics = useMemo(() => {
     const threshold = getDateThreshold(timeRange);
@@ -153,6 +180,28 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
     }
     const maxMonthlyGiving = Math.max(...givingByMonth.map(m => m.amount), 1);
 
+    // Growth trend by month (last 6 months — people added)
+    const growthByMonth: { label: string; count: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      const count = people.filter(p => {
+        const dateStr = p.firstVisit || p.joinDate;
+        return dateStr && dateStr.startsWith(monthKey);
+      }).length;
+      growthByMonth.push({ label, count });
+    }
+    const maxMonthlyGrowth = Math.max(...growthByMonth.map(m => m.count), 1);
+
+    // Congregation Health Score (0-100)
+    const retentionScore = totalActive > 0 ? Math.min(((totalActive - statusCounts.inactive) / (totalActive + statusCounts.inactive)) * 100, 100) : 0;
+    const engagementScore = people.length > 0 ? Math.min((totalInteractions / people.length) * 25, 100) : 0;
+    const givingScore = people.length > 0 ? Math.min((uniqueDonors / people.length) * 100, 100) : 0;
+    const taskScore = taskCompletionRate;
+    const healthScore = Math.round((retentionScore + engagementScore + givingScore + taskScore) / 4);
+
     return {
       statusCounts, maxStatusCount, totalActive, conversionRate, newPeopleInRange,
       totalGiving, avgGiving, givingByFund, givingByMethod, recurringTotal, uniqueDonors, givingByMonth, maxMonthlyGiving,
@@ -160,8 +209,69 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       prayersInRange, answeredPrayers, activePrayers,
       totalInteractions, interactionsByType,
       upcomingEvents,
+      growthByMonth, maxMonthlyGrowth,
+      healthScore, retentionScore, engagementScore, givingScore, taskScore,
     };
   }, [people, tasks, giving, prayers, events, interactions, timeRange]);
+
+  // Activity feed items
+  const activities = useMemo(() => {
+    const items: { id: string; type: string; title: string; subtitle?: string; timestamp: Date; personId?: string }[] = [];
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+    people.forEach(p => {
+      const dateStr = p.firstVisit || p.joinDate;
+      const addedDate = dateStr ? new Date(dateStr) : null;
+      if (addedDate && addedDate > thirtyDaysAgo) {
+        items.push({ id: `person-${p.id}`, type: 'new_person', title: `${p.firstName} ${p.lastName} was added`, subtitle: p.status === 'visitor' ? 'New visitor' : 'New member', timestamp: addedDate, personId: p.id });
+      }
+    });
+
+    tasks.forEach(t => {
+      if (t.completed) {
+        const taskDate = new Date(t.createdAt);
+        if (taskDate > sevenDaysAgo) {
+          const person = t.personId ? personMap.get(t.personId) : null;
+          items.push({ id: `task-${t.id}`, type: 'task_completed', title: t.title, subtitle: person ? `${person.firstName} ${person.lastName}` : undefined, timestamp: taskDate, personId: t.personId });
+        }
+      }
+    });
+
+    interactions.forEach(i => {
+      const date = new Date(i.createdAt);
+      if (date > sevenDaysAgo) {
+        const person = personMap.get(i.personId);
+        if (person) {
+          items.push({ id: `interaction-${i.id}`, type: 'interaction', title: `${i.type.charAt(0).toUpperCase() + i.type.slice(1)} with ${person.firstName}`, subtitle: i.content?.substring(0, 50) || undefined, timestamp: date, personId: i.personId });
+        }
+      }
+    });
+
+    prayers.forEach(pr => {
+      const date = new Date(pr.createdAt);
+      if (date > fourteenDaysAgo) {
+        const person = personMap.get(pr.personId);
+        items.push({ id: `prayer-${pr.id}`, type: 'prayer', title: pr.content.substring(0, 60) + (pr.content.length > 60 ? '...' : ''), subtitle: person ? `From ${person.firstName}` : undefined, timestamp: date, personId: pr.personId });
+      }
+    });
+
+    giving.forEach(g => {
+      const date = new Date(g.date);
+      if (date > sevenDaysAgo && g.personId) {
+        const person = personMap.get(g.personId);
+        if (person) {
+          items.push({ id: `giving-${g.id}`, type: 'giving', title: `$${g.amount.toFixed(0)} donation`, subtitle: `${person.firstName} ${person.lastName}`, timestamp: date, personId: g.personId });
+        }
+      }
+    });
+
+    return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 15);
+  }, [people, tasks, interactions, prayers, giving, personMap]);
 
   const fundLabels: Record<string, string> = { tithe: 'Tithe', offering: 'Offering', missions: 'Missions', building: 'Building', benevolence: 'Benevolence', other: 'Other' };
   const methodLabels: Record<string, string> = { cash: 'Cash', check: 'Check', card: 'Card', online: 'Online', bank: 'Bank Transfer' };
@@ -193,6 +303,42 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         </div>
       </div>
 
+      {/* Congregation Health Score */}
+      <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
+          <div className="relative flex-shrink-0">
+            <DonutRing value={metrics.healthScore} max={100} color="text-white" size={100} strokeWidth={8} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-3xl font-bold">{metrics.healthScore}</span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold mb-1">Congregation Health Score</h2>
+            <p className="text-white/70 text-sm mb-3">Based on retention, engagement, giving participation, and task completion</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-white/60">Retention</p>
+                <p className="text-lg font-bold">{Math.round(metrics.retentionScore)}%</p>
+              </div>
+              <div className="bg-white/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-white/60">Engagement</p>
+                <p className="text-lg font-bold">{Math.round(metrics.engagementScore)}%</p>
+              </div>
+              <div className="bg-white/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-white/60">Giving</p>
+                <p className="text-lg font-bold">{Math.round(metrics.givingScore)}%</p>
+              </div>
+              <div className="bg-white/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-white/60">Follow-Ups</p>
+                <p className="text-lg font-bold">{Math.round(metrics.taskScore)}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Top-level KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard icon={<Users size={20} />} label="Total People" value={people.length} sub={`${metrics.totalActive} active`} color="indigo" />
@@ -201,7 +347,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         <KpiCard icon={<CheckCircle2 size={20} />} label="Task Completion" value={`${metrics.taskCompletionRate}%`} sub={`${metrics.completedTasks.length}/${metrics.tasksInRange.length} tasks`} color="blue" trend={metrics.taskCompletionRate >= 70 ? 'up' : metrics.taskCompletionRate < 40 ? 'down' : undefined} />
       </div>
 
-      {/* Row 2: People + Giving Trend */}
+      {/* Row 2: People + Growth Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Member Distribution */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
@@ -235,6 +381,33 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
           </div>
         </div>
 
+        {/* Growth Trend */}
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <SectionHeader icon={<TrendingUp size={18} />} title="Growth Trend" subtitle="New people per month" color="emerald" />
+          <div className="mt-5 flex items-end gap-2 h-40">
+            {metrics.growthByMonth.map((m, i) => {
+              const pct = metrics.maxMonthlyGrowth > 0 ? (m.count / metrics.maxMonthlyGrowth) * 100 : 0;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{m.count > 0 ? m.count : ''}</span>
+                  <div className="w-full bg-gray-100 dark:bg-dark-700 rounded-t-lg overflow-hidden" style={{ height: '120px' }}>
+                    <div className="w-full bg-gradient-to-t from-emerald-500 to-teal-400 rounded-t-lg" style={{ height: `${pct}%`, marginTop: `${100 - pct}%`, transition: 'height 0.5s ease-out, margin-top 0.5s ease-out' }} />
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{m.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700 grid grid-cols-3 gap-3">
+            <MiniStat label="Total Active" value={String(metrics.totalActive)} />
+            <MiniStat label="New This Period" value={String(metrics.newPeopleInRange)} />
+            <MiniStat label="Conversion" value={`${metrics.conversionRate}%`} />
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Giving Trend + Giving by Fund */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Giving Trend */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<DollarSign size={18} />} title="Giving Trend" subtitle="Last 6 months" color="green" />
@@ -258,10 +431,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
             <MiniStat label="Donors" value={String(metrics.uniqueDonors)} />
           </div>
         </div>
-      </div>
 
-      {/* Row 3: Giving Breakdown + Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Giving by Fund */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<PieChart size={18} />} title="Giving by Fund" subtitle="Where donations go" color="emerald" />
@@ -291,7 +461,10 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
             </div>
           )}
         </div>
+      </div>
 
+      {/* Row 4: Tasks + Engagement */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Overview */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<CheckCircle2 size={18} />} title="Task Overview" subtitle="Follow-ups & action items" color="blue" />
@@ -336,10 +509,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
             </div>
           )}
         </div>
-      </div>
 
-      {/* Row 4: Engagement + Prayer */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Engagement / Interactions */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<Activity size={18} />} title="Engagement" subtitle="Interactions & outreach" color="violet" />
@@ -363,7 +533,10 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Row 5: Prayer & Events + Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Prayer & Events */}
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<Heart size={18} />} title="Prayer & Events" subtitle="Spiritual life & community" color="pink" />
@@ -389,6 +562,57 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
                 <p className="text-xs text-gray-500 dark:text-gray-400">Upcoming events</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Recent Activity Feed */}
+        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl flex items-center justify-center">
+                  <Clock className="text-slate-600 dark:text-slate-400" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-dark-100">Recent Activity</h3>
+                  <p className="text-sm text-gray-500 dark:text-dark-400">Latest updates across your church</p>
+                </div>
+              </div>
+              <span className="text-lg font-semibold text-slate-700 dark:text-slate-300">{activities.length}</span>
+            </div>
+          </div>
+          <div className="p-4 space-y-1 max-h-[400px] overflow-y-auto">
+            {activities.length === 0 ? (
+              <div className="py-8 text-center">
+                <Calendar className="text-gray-300 dark:text-dark-600 mx-auto mb-2" size={24} />
+                <p className="text-gray-400 dark:text-dark-500 text-sm">No recent activity</p>
+              </div>
+            ) : (
+              activities.map((activity) => {
+                const { icon: Icon, color, bg } = activityIconMap[activity.type] || activityIconMap.interaction;
+                return (
+                  <button
+                    key={activity.id}
+                    onClick={() => activity.personId && onViewPerson?.(activity.personId)}
+                    disabled={!activity.personId || !onViewPerson}
+                    className="w-full flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors text-left disabled:hover:bg-transparent disabled:cursor-default"
+                  >
+                    <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <Icon size={14} className={color} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 dark:text-dark-100 truncate">{activity.title}</p>
+                      {activity.subtitle && (
+                        <p className="text-xs text-gray-400 dark:text-dark-500 truncate">{activity.subtitle}</p>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-gray-400 dark:text-dark-500 flex-shrink-0">
+                      {formatTimeAgo(activity.timestamp)}
+                    </span>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

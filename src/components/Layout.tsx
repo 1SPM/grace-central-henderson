@@ -70,6 +70,7 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    label: 'Insights',
     items: [
       { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
       { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
