@@ -169,12 +169,24 @@ export function GivingDashboard({
     };
   }, [giving, selectedPeriod]);
 
-  // Recent transactions
+  // Recent transactions - filtered by selected period
   const recentTransactions = useMemo(() => {
+    const getPeriodStart = () => {
+      const date = new Date();
+      switch (selectedPeriod) {
+        case 'week': date.setDate(date.getDate() - 7); break;
+        case 'month': date.setMonth(date.getMonth() - 1); break;
+        case 'quarter': date.setMonth(date.getMonth() - 3); break;
+        case 'year': date.setFullYear(date.getFullYear() - 1); break;
+      }
+      return date;
+    };
+    const periodStart = getPeriodStart();
     return [...giving]
+      .filter(g => new Date(g.date) >= periodStart)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 8);
-  }, [giving]);
+  }, [giving, selectedPeriod]);
 
   // Active campaigns
   const activeCampaigns = campaigns.filter(c => c.isActive).slice(0, 3);
@@ -330,6 +342,12 @@ export function GivingDashboard({
         <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">By Fund</h2>
           <div className="space-y-3">
+            {analytics.topFunds.length === 0 && (
+              <div className="text-center py-8">
+                <DollarSign className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={24} />
+                <p className="text-xs text-gray-400 dark:text-dark-500">No fund data for this period</p>
+              </div>
+            )}
             {analytics.topFunds.slice(0, 5).map(({ fund, amount, percentage }) => {
               const colors = fundColors[fund] || fundColors.other;
               return (
@@ -365,6 +383,12 @@ export function GivingDashboard({
             </button>
           </div>
           <div className="space-y-1">
+            {recentTransactions.length === 0 && (
+              <div className="text-center py-8">
+                <DollarSign className="mx-auto text-gray-300 dark:text-dark-600 mb-2" size={24} />
+                <p className="text-xs text-gray-400 dark:text-dark-500">No transactions in this period</p>
+              </div>
+            )}
             {recentTransactions.map((gift) => {
               const person = people.find((p) => p.id === gift.personId);
               const colors = fundColors[gift.fund] || fundColors.other;

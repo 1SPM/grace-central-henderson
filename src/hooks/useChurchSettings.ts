@@ -115,8 +115,14 @@ export function useChurchSettings(churchId: string = 'demo-church') {
         .single();
 
       if (fetchError) {
-        log.error('Failed to load church settings', fetchError);
-        setError(fetchError.message);
+        // Suppress noisy errors for missing rows (common in demo/new setups)
+        if (fetchError.code !== 'PGRST116') {
+          log.error('Failed to load church settings', fetchError);
+        }
+        // Don't set error state for missing rows - just use defaults
+        if (fetchError.code !== 'PGRST116') {
+          setError(fetchError.message);
+        }
       } else if (data?.settings) {
         setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
       }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatLocalDate } from '../utils/validation';
 import {
   ArrowLeft,
   Mail,
@@ -323,13 +324,13 @@ export function PersonProfile({
                   {person.joinDate && (
                     <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">
                       <Calendar size={16} className="text-gray-400 dark:text-dark-500" />
-                      Joined {new Date(person.joinDate).toLocaleDateString()}
+                      Joined {formatLocalDate(person.joinDate)}
                     </div>
                   )}
                   {person.firstVisit && (
                     <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">
                       <Calendar size={16} className="text-gray-400 dark:text-dark-500" />
-                      First visit {new Date(person.firstVisit).toLocaleDateString()}
+                      First visit {formatLocalDate(person.firstVisit)}
                     </div>
                   )}
                 </div>
