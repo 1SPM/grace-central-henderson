@@ -239,6 +239,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (!clerkPubKey) {
+    return (
+      <AuthProviderSecurityBlock>{children}</AuthProviderSecurityBlock>
+    );
+  }
+
   return (
     <ClerkProvider publishableKey={clerkPubKey}>
       <AuthProviderInner>{children}</AuthProviderInner>

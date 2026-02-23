@@ -302,8 +302,8 @@ class AuthService {
 
     const sanitizedParams: InviteUserParams = {
       email: sanitizeInput(params.email, { maxLength: 320 }).toLowerCase(),
-      firstName: sanitizeInput(params.firstName, { maxLength: 100 }),
-      lastName: sanitizeInput(params.lastName, { maxLength: 100 }),
+      firstName: sanitizeInput(params.firstName ?? '', { maxLength: 100 }),
+      lastName: sanitizeInput(params.lastName ?? '', { maxLength: 100 }),
       role: params.role,
     };
 
