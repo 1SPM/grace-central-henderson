@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { escapeHtml } from '../utils/security';
 import {
   QrCode,
   Download,
@@ -171,11 +172,14 @@ export function QRCheckIn({
   const printQR = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const safeChurchName = escapeHtml(churchName);
+      const safeCheckInUrl = escapeHtml(checkInUrl);
+
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Check-In QR Code - ${churchName}</title>
+          <title>Check-In QR Code - ${safeChurchName}</title>
           <style>
             body {
               display: flex;
@@ -193,15 +197,20 @@ export function QRCheckIn({
           </style>
         </head>
         <body>
-          <h1>${churchName}</h1>
+          <h1>${safeChurchName}</h1>
           <p>Scan to Check In</p>
           <div class="qr">${qrCodeSvg}</div>
-          <p class="url">${checkInUrl}</p>
-          <script>window.onload = () => { window.print(); }</script>
+          <p class="url">${safeCheckInUrl}</p>
+          
         </body>
         </html>
       `);
       printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 100);
     }
   };
 

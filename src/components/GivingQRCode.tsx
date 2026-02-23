@@ -11,6 +11,7 @@ import QRCode from 'qrcode';
 import { Download, Copy, Check, QrCode, DollarSign, Printer } from 'lucide-react';
 import { createLogger } from '../utils/logger';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { escapeHtml } from '../utils/security';
 
 const log = createLogger('giving-qr');
 
@@ -108,12 +109,14 @@ export function GivingQRCode({ givingPageUrl, churchName, funds = [] }: GivingQR
     const fundName = selectedFund
       ? funds.find((f) => f.id === selectedFund)?.name || selectedFund
       : 'General';
+    const safeChurchName = escapeHtml(churchName);
+    const safeFundName = escapeHtml(fundName);
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Giving QR Code - ${churchName}</title>
+          <title>Giving QR Code - ${safeChurchName}</title>
           <style>
             body {
               display: flex;
@@ -156,16 +159,21 @@ export function GivingQRCode({ givingPageUrl, churchName, funds = [] }: GivingQR
         </head>
         <body>
           <div class="container">
-            <h1>Give to ${churchName}</h1>
-            <p class="fund">${fundName}</p>
+            <h1>Give to ${safeChurchName}</h1>
+            <p class="fund">${safeFundName}</p>
             <img src="${canvas.toDataURL('image/png')}" alt="QR Code" />
             <p class="instructions">Scan with your phone's camera to give online</p>
           </div>
-          <script>window.onload = function() { window.print(); }</script>
+          
         </body>
       </html>
     `);
     printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 100);
   };
 
   return (
