@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { formatLocalDate } from '../utils/validation';
 import {
   Users,
   UserPlus,
@@ -211,6 +212,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
               tasks={tasks}
               people={people}
               onViewPerson={onViewPerson}
+              onAddTask={onViewTasks}
             />
           ) : (
             <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
@@ -426,7 +428,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                       <div className="text-left">
                         <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
                         <p className="text-xs text-gray-500 dark:text-dark-500">
-                          {person.firstVisit ? new Date(person.firstVisit).toLocaleDateString() : 'Unknown'}
+                          {formatLocalDate(person.firstVisit, 'Unknown')}
                         </p>
                       </div>
                     </div>

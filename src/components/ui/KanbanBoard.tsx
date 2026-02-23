@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Clock, CheckCircle2, AlertCircle, ChevronRight, User } from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, ChevronRight, User, Plus } from 'lucide-react';
 import { Task, Person } from '../../types';
 import { StatusBadge, priorityToVariant } from './StatusBadge';
 
@@ -8,6 +8,7 @@ interface KanbanBoardProps {
   people: Person[];
   onViewTask?: (taskId: string) => void;
   onViewPerson?: (personId: string) => void;
+  onAddTask?: () => void;
 }
 
 type ColumnType = 'overdue' | 'today' | 'upcoming' | 'completed';
@@ -126,7 +127,7 @@ function TaskCard({ task, person, onViewTask, onViewPerson }: TaskCardProps) {
   );
 }
 
-export function KanbanBoard({ tasks, people, onViewTask, onViewPerson }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, people, onViewTask, onViewPerson, onAddTask }: KanbanBoardProps) {
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   const groupedTasks = useMemo(() => {
@@ -189,6 +190,15 @@ export function KanbanBoard({ tasks, people, onViewTask, onViewPerson }: KanbanB
                     onViewPerson={onViewPerson}
                   />
                 ))
+              )}
+              {onAddTask && column.id !== 'completed' && (
+                <button
+                  onClick={onAddTask}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-dark-800/50 rounded-lg transition-colors"
+                >
+                  <Plus size={14} />
+                  Add task
+                </button>
               )}
             </div>
           </div>

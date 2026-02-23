@@ -359,7 +359,7 @@ Blessings,
                   <span className={selectedPeople.length === 0 ? 'text-gray-400' : 'text-gray-900 dark:text-dark-100'}>
                     {selectedPeople.length === 0
                       ? 'Select recipients...'
-                      : `${selectedPeople.length} people selected`}
+                      : `${selectedPeople.length} ${selectedPeople.length === 1 ? 'person' : 'people'} selected`}
                   </span>
                   <ChevronDown size={16} className="text-gray-400" />
                 </button>
