@@ -60,7 +60,7 @@ function parseAmount(str: string): number | null {
 }
 
 // Default configuration (in production, load from database)
-function getConfig(churchId: string): TextToGiveConfig {
+function getConfig(_churchId: string): TextToGiveConfig {
   return {
     churchName: 'Grace Church',
     givingPageUrl: process.env.GIVING_PAGE_URL || 'https://give.example.com',
