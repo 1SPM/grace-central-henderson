@@ -26,6 +26,16 @@ interface TwilioSmsRequest {
   AccountSid: string;
 }
 
+interface TextToGiveLogEntry {
+  from: string;
+  to: string | undefined;
+  churchId: string;
+  messageSid: string | undefined;
+  messagePreview: string;
+  messageLength: number;
+  responsePreview: string;
+}
+
 interface TextToGiveConfig {
   churchName: string;
   givingPageUrl: string;
@@ -33,7 +43,20 @@ interface TextToGiveConfig {
   defaultFund?: string;
   welcomeMessage?: string;
   helpMessage?: string;
+  optOutMessage?: string;
+  restartMessage?: string;
 }
+
+interface ChurchPhoneMap {
+  [phoneNumber: string]: string;
+}
+
+const DEFAULT_CHURCH_ID = process.env.TEXT_TO_GIVE_DEFAULT_CHURCH_ID || 'default';
+const OPT_OUT_COMMANDS = new Set(['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT']);
+const RESTART_COMMANDS = new Set(['START', 'UNSTOP']);
+
+let cachedChurchPhoneMapRaw: string | undefined;
+let cachedChurchPhoneMap: ChurchPhoneMap = {};
 
 // TwiML response helper
 function twimlResponse(message: string): string {
@@ -59,25 +82,138 @@ function parseAmount(str: string): number | null {
   return isNaN(amount) || amount <= 0 ? null : amount;
 }
 
+function normalizePhone(phone: string): string {
+  return phone.replace(/\D/g, '');
+}
+
+function getScopedEnvVar(churchId: string, key: string): string | undefined {
+  const envVarSuffix = churchId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  return process.env[`${key}_${envVarSuffix}`];
+}
+
+function getChurchPhoneMap(): ChurchPhoneMap {
+  const rawMap = process.env.TEXT_TO_GIVE_CHURCH_PHONE_MAP;
+
+  if (!rawMap) {
+    cachedChurchPhoneMapRaw = undefined;
+    cachedChurchPhoneMap = {};
+    return cachedChurchPhoneMap;
+  }
+
+  if (cachedChurchPhoneMapRaw === rawMap) {
+    return cachedChurchPhoneMap;
+  }
+
+  try {
+    const parsed = JSON.parse(rawMap) as unknown;
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('TEXT_TO_GIVE_CHURCH_PHONE_MAP must be a JSON object');
+    }
+
+    const normalizedEntries = Object.entries(parsed as Record<string, unknown>)
+      .map(([phone, churchId]) => {
+        if (typeof churchId !== 'string' || !churchId.trim()) {
+          return null;
+        }
+
+        const normalizedPhone = normalizePhone(phone);
+        if (!normalizedPhone) {
+          return null;
+        }
+
+        return [normalizedPhone, churchId.trim()] as const;
+      })
+      .filter((entry): entry is readonly [string, string] => Boolean(entry));
+
+    cachedChurchPhoneMapRaw = rawMap;
+    cachedChurchPhoneMap = Object.fromEntries(normalizedEntries);
+    return cachedChurchPhoneMap;
+  } catch (error) {
+    console.error('Invalid TEXT_TO_GIVE_CHURCH_PHONE_MAP:', error);
+    cachedChurchPhoneMapRaw = rawMap;
+    cachedChurchPhoneMap = {};
+    return cachedChurchPhoneMap;
+  }
+}
+
+function getChurchIdFromRecipientPhone(toPhone?: string): string {
+  if (!toPhone) {
+    return DEFAULT_CHURCH_ID;
+  }
+
+  const churchPhoneMap = getChurchPhoneMap();
+  const normalizedToPhone = normalizePhone(toPhone);
+
+  return churchPhoneMap[normalizedToPhone] || DEFAULT_CHURCH_ID;
+}
+
+function createMessagePreview(message: string, maxLength = 100): string {
+  const trimmed = message.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, maxLength)}...`;
+}
+
+function createLogEntry(
+  fromPhone: string,
+  toPhone: string | undefined,
+  churchId: string,
+  messageSid: string | undefined,
+  messageBody: string,
+  responseMessage: string
+): TextToGiveLogEntry {
+  return {
+    from: fromPhone,
+    to: toPhone,
+    churchId,
+    messageSid,
+    messagePreview: createMessagePreview(messageBody),
+    messageLength: messageBody.length,
+    responsePreview: createMessagePreview(responseMessage),
+  };
+}
+
 // Default configuration (in production, load from database)
 function getConfig(churchId: string): TextToGiveConfig {
+  const scopedGivingPageUrl = getScopedEnvVar(churchId, 'GIVING_PAGE_URL');
+
   return {
-    churchName: 'Grace Church',
-    givingPageUrl: process.env.GIVING_PAGE_URL || 'https://give.example.com',
+    churchName: getScopedEnvVar(churchId, 'CHURCH_NAME') || 'Grace Church',
+    givingPageUrl: scopedGivingPageUrl || process.env.GIVING_PAGE_URL || 'https://give.example.com',
     funds: [
       { keyword: 'tithe', name: 'General Fund', id: 'general' },
       { keyword: 'missions', name: 'Missions Fund', id: 'missions' },
       { keyword: 'building', name: 'Building Fund', id: 'building' },
       { keyword: 'youth', name: 'Youth Ministry', id: 'youth' },
     ],
-    defaultFund: 'general',
-    welcomeMessage: "Thank you for giving! Here's your personalized giving link:",
-    helpMessage: `Text-to-Give Commands:
+    defaultFund:
+      getScopedEnvVar(churchId, 'TEXT_TO_GIVE_DEFAULT_FUND') ||
+      process.env.TEXT_TO_GIVE_DEFAULT_FUND ||
+      'general',
+    welcomeMessage:
+      getScopedEnvVar(churchId, 'TEXT_TO_GIVE_WELCOME_MESSAGE') ||
+      process.env.TEXT_TO_GIVE_WELCOME_MESSAGE ||
+      "Thank you for giving! Here's your personalized giving link:",
+    helpMessage:
+      getScopedEnvVar(churchId, 'TEXT_TO_GIVE_HELP_MESSAGE') ||
+      process.env.TEXT_TO_GIVE_HELP_MESSAGE ||
+      `Text-to-Give Commands:
 • GIVE - Get giving link
 • GIVE 50 - Give $50 to General Fund
 • GIVE 50 MISSIONS - Give $50 to Missions
 • FUNDS - List available funds
 • HELP - Show this message`,
+    optOutMessage:
+      getScopedEnvVar(churchId, 'TEXT_TO_GIVE_OPT_OUT_MESSAGE') ||
+      process.env.TEXT_TO_GIVE_OPT_OUT_MESSAGE ||
+      'You have been unsubscribed from text-to-give messages. Reply START to re-subscribe.',
+    restartMessage:
+      getScopedEnvVar(churchId, 'TEXT_TO_GIVE_RESTART_MESSAGE') ||
+      process.env.TEXT_TO_GIVE_RESTART_MESSAGE ||
+      'Welcome back! You are subscribed to text-to-give messages again. Reply GIVE to get started.',
   };
 }
 
@@ -88,11 +224,39 @@ function buildGivingUrl(
   fundId?: string,
   phone?: string
 ): string {
-  const url = new URL(baseUrl);
+  let url: URL;
+
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    url = new URL('https://give.example.com');
+  }
+
   if (amount) url.searchParams.set('amount', amount.toString());
   if (fundId) url.searchParams.set('fund', fundId);
   if (phone) url.searchParams.set('phone', phone);
   return url.toString();
+}
+
+function resolveDefaultFund(config: TextToGiveConfig): { id?: string; name: string } {
+  if (!config.defaultFund) {
+    return { id: undefined, name: 'General Fund' };
+  }
+
+  const matchedDefaultFund = config.funds.find((fund) => fund.id === config.defaultFund);
+  if (matchedDefaultFund) {
+    return { id: matchedDefaultFund.id, name: matchedDefaultFund.name };
+  }
+
+  return { id: config.defaultFund, name: config.defaultFund };
+}
+
+function normalizeCommand(rawCommand: string): string {
+  return rawCommand.replace(/[^A-Z0-9?]/g, '');
+}
+
+function normalizeToken(rawToken: string): string {
+  return rawToken.replace(/[^A-Z0-9]/g, '');
 }
 
 // Process the text message and generate response
@@ -101,8 +265,25 @@ function processMessage(
   fromPhone: string,
   config: TextToGiveConfig
 ): string {
-  const parts = body.trim().toUpperCase().split(/\s+/);
-  const command = parts[0];
+  const trimmedBody = body.trim();
+
+  if (!trimmedBody) {
+    return config.helpMessage || 'Text GIVE to get started.';
+  }
+
+  const parts = trimmedBody.toUpperCase().split(/\s+/);
+  const command = normalizeCommand(parts[0]);
+  const secondToken = parts[1] ? normalizeToken(parts[1]) : undefined;
+  const thirdToken = parts[2] ? normalizeToken(parts[2]) : undefined;
+
+  // Twilio compliance and subscription commands
+  if (OPT_OUT_COMMANDS.has(command)) {
+    return config.optOutMessage || 'You have been unsubscribed. Reply START to re-subscribe.';
+  }
+
+  if (RESTART_COMMANDS.has(command)) {
+    return config.restartMessage || 'Welcome back! Reply GIVE to get started.';
+  }
 
   // HELP command
   if (command === 'HELP' || command === '?') {
@@ -118,8 +299,9 @@ function processMessage(
   // GIVE command
   if (command === 'GIVE' || command === 'G') {
     let amount: number | undefined;
-    let fundId = config.defaultFund;
-    let fundName = 'General Fund';
+    const defaultFund = resolveDefaultFund(config);
+    let fundId = defaultFund.id;
+    let fundName = defaultFund.name;
 
     // Check for amount (second part)
     if (parts[1]) {
@@ -128,7 +310,7 @@ function processMessage(
         amount = parsedAmount;
       } else {
         // Maybe it's a fund keyword instead
-        const fund = config.funds.find((f) => f.keyword.toUpperCase() === parts[1]);
+        const fund = config.funds.find((f) => f.keyword.toUpperCase() === secondToken);
         if (fund) {
           fundId = fund.id;
           fundName = fund.name;
@@ -138,14 +320,14 @@ function processMessage(
 
     // Check for fund keyword (second or third part)
     if (parts[2]) {
-      const fund = config.funds.find((f) => f.keyword.toUpperCase() === parts[2]);
+      const fund = config.funds.find((f) => f.keyword.toUpperCase() === thirdToken);
       if (fund) {
         fundId = fund.id;
         fundName = fund.name;
       }
     } else if (parts[1] && !amount) {
       // If second part wasn't an amount, check if it's a fund
-      const fund = config.funds.find((f) => f.keyword.toUpperCase() === parts[1]);
+      const fund = config.funds.find((f) => f.keyword.toUpperCase() === secondToken);
       if (fund) {
         fundId = fund.id;
         fundName = fund.name;
@@ -179,25 +361,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const twilioData = req.body as TwilioSmsRequest;
-    const { From: fromPhone, Body: messageBody, To: toPhone } = twilioData;
+    const { From: fromPhone, Body: messageBody, To: toPhone, MessageSid: messageSid } = twilioData;
 
-    if (!fromPhone || !messageBody) {
+    if (!fromPhone || messageBody === undefined || messageBody === null) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Get configuration (in production, lookup by toPhone to get church-specific config)
-    const config = getConfig('default');
+    // Get configuration by recipient number (supports multi-church text-to-give setup)
+    const churchId = getChurchIdFromRecipientPhone(toPhone);
+    const config = getConfig(churchId);
 
     // Process the message
     const responseMessage = processMessage(messageBody, fromPhone, config);
 
     // Log the interaction (in production, save to database)
-    console.log('Text-to-Give:', {
-      from: fromPhone,
-      to: toPhone,
-      message: messageBody,
-      response: responseMessage.substring(0, 100) + '...',
-    });
+    console.log(
+      'Text-to-Give:',
+      createLogEntry(fromPhone, toPhone, churchId, messageSid, messageBody, responseMessage)
+    );
 
     // Return TwiML response
     res.setHeader('Content-Type', 'text/xml');

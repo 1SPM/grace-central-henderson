@@ -16,6 +16,7 @@ import {
   InviteUserParams,
 } from '../lib/services/auth';
 import { supabase } from '../lib/supabase';
+import { resolveAuthMode } from './authMode';
 
 // Default church ID for demo/fallback mode
 const DEFAULT_CHURCH_ID = 'demo-church';
@@ -220,15 +221,19 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
 // Main Auth Provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // If Clerk is not configured, check if demo mode is allowed
-  if (!clerkPubKey) {
-    // SECURITY: In production, require explicit demo mode opt-in
-    // This prevents accidental admin access if Clerk fails to initialize
-    if (isProduction && !isDemoModeEnabled) {
-      return (
-        <AuthProviderSecurityBlock>{children}</AuthProviderSecurityBlock>
-      );
-    }
+  const authMode = resolveAuthMode({
+    clerkPublishableKey: clerkPubKey,
+    isProduction,
+    isDemoModeEnabled,
+  });
+
+  if (authMode === 'blocked') {
+    return (
+      <AuthProviderSecurityBlock>{children}</AuthProviderSecurityBlock>
+    );
+  }
+
+  if (authMode === 'demo') {
     return (
       <AuthProviderDemo>{children}</AuthProviderDemo>
     );

@@ -5,7 +5,7 @@
  * Handles user sessions, roles, and permissions.
  */
 
-import { secureFetch } from '../../utils/security';
+import { isValidEmail, isValidUUID, sanitizeInput, secureFetch } from '../../utils/security';
 import { createLogger } from '../../utils/logger';
 
 const log = createLogger('auth-service');
@@ -145,6 +145,23 @@ export interface InviteResult {
   error?: string;
 }
 
+
+function validateInviteParams(params: InviteUserParams): string | null {
+  const email = sanitizeInput(params.email, { maxLength: 320 }).toLowerCase();
+  const firstName = sanitizeInput(params.firstName || '', { maxLength: 100 });
+  const lastName = sanitizeInput(params.lastName || '', { maxLength: 100 });
+
+  if (!isValidEmail(email)) {
+    return 'Invalid email address';
+  }
+
+  if (!firstName || !lastName) {
+    return 'First and last name are required';
+  }
+
+  return null;
+}
+
 class AuthService {
   private publishableKey: string | null = null;
   private isInitialized: boolean = false;
@@ -278,13 +295,25 @@ class AuthService {
 
   // Invite a new user to the organization
   async inviteUser(params: InviteUserParams): Promise<InviteResult> {
+    const validationError = validateInviteParams(params);
+    if (validationError) {
+      return { success: false, error: validationError };
+    }
+
+    const sanitizedParams: InviteUserParams = {
+      email: sanitizeInput(params.email, { maxLength: 320 }).toLowerCase(),
+      firstName: sanitizeInput(params.firstName, { maxLength: 100 }),
+      lastName: sanitizeInput(params.lastName, { maxLength: 100 }),
+      role: params.role,
+    };
+
     try {
       const response = await secureFetch('/api/auth/invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(params),
+        body: JSON.stringify(sanitizedParams),
       });
 
       const result = await response.json();
@@ -313,6 +342,10 @@ class AuthService {
     success: boolean;
     error?: string;
   }> {
+    if (!isValidUUID(userId)) {
+      return { success: false, error: 'Invalid user identifier' };
+    }
+
     try {
       const response = await secureFetch(`/api/auth/users/${userId}/role`, {
         method: 'PATCH',
@@ -344,6 +377,10 @@ class AuthService {
     success: boolean;
     error?: string;
   }> {
+    if (!isValidUUID(userId)) {
+      return { success: false, error: 'Invalid user identifier' };
+    }
+
     try {
       const response = await secureFetch(`/api/auth/users/${userId}`, {
         method: 'DELETE',

@@ -16,6 +16,7 @@ import {
   Eye,
   X,
 } from 'lucide-react';
+import { escapeHtml, sanitizeHtml } from '../utils/security';
 
 interface DirectoryMember {
   id: string;
@@ -94,11 +95,14 @@ export function PrintableDirectory({
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const safeChurchName = escapeHtml(churchName);
+    const sanitizedContent = sanitizeHtml(printContent.innerHTML);
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${churchName} Directory</title>
+          <title>${safeChurchName} Directory</title>
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
@@ -138,12 +142,17 @@ export function PrintableDirectory({
           </style>
         </head>
         <body>
-          ${printContent.innerHTML}
-          <script>window.onload = function() { window.print(); window.close(); }</script>
+          ${sanitizedContent}
+          
         </body>
       </html>
     `);
     printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 100);
   };
 
   // Render member based on layout

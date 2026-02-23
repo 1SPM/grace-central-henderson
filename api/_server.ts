@@ -36,7 +36,7 @@ import { initWebhookRoutes } from './_routes/webhooks';
 
 // Import middleware
 import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
-import { csrfProtection } from './_middleware/csrf';
+import { csrfCookie, csrfProtection } from './_middleware/csrf';
 import { rateLimit } from './_middleware/rateLimit';
 
 // Initialize Express
@@ -69,6 +69,9 @@ app.use('/webhooks', express.raw({ type: 'application/json' }));
 
 // JSON body for other routes
 app.use(express.json());
+
+// Issue CSRF cookie for browser clients
+app.use(csrfCookie);
 
 // ============================================
 // ROUTES

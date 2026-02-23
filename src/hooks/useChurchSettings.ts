@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
 
 const log = createLogger('church-settings');
+const isProduction = import.meta.env.PROD;
 
 export interface IntegrationCredentials {
   // Email (Resend) - only non-secret config; API key lives in backend env vars
@@ -94,7 +95,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
   // Load settings from database
   const loadSettings = useCallback(async () => {
     if (!supabase) {
-      // Demo mode - use localStorage
+      // Demo mode fallback: avoid persistent browser storage in production
+      if (isProduction) {
+        setSettings(DEFAULT_SETTINGS);
+        setIsLoading(false);
+        return;
+      }
+
       const stored = localStorage.getItem(`grace-crm-settings-${churchId}`);
       if (stored) {
         try {
@@ -133,8 +140,10 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     const updatedSettings = { ...settings, ...newSettings };
 
     if (!supabase) {
-      // Demo mode - use localStorage
-      localStorage.setItem(`grace-crm-settings-${churchId}`, JSON.stringify(updatedSettings));
+      // Demo mode fallback: avoid persistent browser storage in production
+      if (!isProduction) {
+        localStorage.setItem(`grace-crm-settings-${churchId}`, JSON.stringify(updatedSettings));
+      }
       setSettings(updatedSettings);
       return true;
     }
