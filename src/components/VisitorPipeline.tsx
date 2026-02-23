@@ -1,4 +1,5 @@
 import { ChevronRight, User, TrendingUp } from 'lucide-react';
+import { formatLocalDate } from '../utils/validation';
 import type { Person, MemberStatus } from '../types';
 
 interface VisitorPipelineProps {
@@ -122,12 +123,12 @@ export function VisitorPipeline({ people, onViewPerson }: VisitorPipelineProps) 
                           </p>
                           {person.firstVisit && person.status === 'visitor' && (
                             <p className="text-xs text-gray-500 dark:text-dark-400 truncate">
-                              First visit: {new Date(person.firstVisit).toLocaleDateString()}
+                              First visit: {formatLocalDate(person.firstVisit)}
                             </p>
                           )}
                           {person.joinDate && person.status === 'member' && (
                             <p className="text-xs text-gray-500 dark:text-dark-400 truncate">
-                              Joined: {new Date(person.joinDate).toLocaleDateString()}
+                              Joined: {formatLocalDate(person.joinDate)}
                             </p>
                           )}
                         </div>

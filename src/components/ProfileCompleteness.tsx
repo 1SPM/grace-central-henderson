@@ -108,7 +108,8 @@ export function ProfileCompleteness({ person, showDetails = false }: ProfileComp
 
 // Compact badge version for lists
 export function ProfileCompletenessBadge({ person }: { person: Person }) {
-  const { score } = getProfileCompleteness(person);
+  const { score, fields } = getProfileCompleteness(person);
+  const missingFields = fields.filter(f => !f.filled);
 
   const getBadgeColor = () => {
     if (score >= 80) return 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400';
@@ -116,8 +117,15 @@ export function ProfileCompletenessBadge({ person }: { person: Person }) {
     return 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400';
   };
 
+  const tooltip = missingFields.length > 0
+    ? `Missing: ${missingFields.map(f => f.label).join(', ')}`
+    : 'Profile complete';
+
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getBadgeColor()}`}>
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium ${getBadgeColor()}`}
+      title={tooltip}
+    >
       {score}%
     </span>
   );

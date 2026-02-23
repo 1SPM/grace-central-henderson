@@ -73,11 +73,12 @@ function SafeView({ children, skeleton }: { children: ReactNode; skeleton?: Reac
 function AccessDenied({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center p-16 text-center">
-      <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
-        <ShieldAlert className="text-red-500" size={32} />
+      <div className="w-16 h-16 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center mb-4">
+        <ShieldAlert className="text-amber-500" size={32} />
       </div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">Access Denied</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">Restricted Area</h2>
       <p className="text-gray-500 dark:text-dark-400 max-w-sm">{message}</p>
+      <p className="text-sm text-gray-400 dark:text-dark-500 mt-2">Contact your church administrator to request access.</p>
     </div>
   );
 }

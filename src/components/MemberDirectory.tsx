@@ -12,9 +12,9 @@ export function MemberDirectory({ people, onBack, onViewPerson }: MemberDirector
   const [search, setSearch] = useState('');
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
-  // Only show members and leaders (not visitors or inactive)
+  // Only show members and leaders (not visitors, regulars, or inactive)
   const members = useMemo(() =>
-    people.filter(p => p.status === 'member' || p.status === 'leader' || p.status === 'regular'),
+    people.filter(p => p.status === 'member' || p.status === 'leader'),
     [people]
   );
 

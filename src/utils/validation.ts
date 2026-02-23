@@ -193,3 +193,28 @@ export function validateDate(dateStr: string): { isValid: boolean; date: Date | 
 
   return { isValid: true, date };
 }
+
+/**
+ * Parse a YYYY-MM-DD date string as a local date (not UTC).
+ * Avoids the common timezone off-by-one bug where "2026-02-06"
+ * parsed via `new Date("2026-02-06")` becomes Feb 5 in US timezones.
+ */
+export function parseLocalDate(dateStr: string): Date {
+  if (!dateStr) return new Date(NaN);
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  return new Date(dateStr);
+}
+
+/**
+ * Format a YYYY-MM-DD date string for display using the local timezone.
+ * Returns the formatted date string, or the fallback if the date is invalid.
+ */
+export function formatLocalDate(dateStr: string | undefined, fallback = 'Unknown'): string {
+  if (!dateStr) return fallback;
+  const date = parseLocalDate(dateStr);
+  if (isNaN(date.getTime())) return fallback;
+  return date.toLocaleDateString();
+}

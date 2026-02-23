@@ -18,6 +18,7 @@ export const categoryColors: Record<string, { bg: string; text: string; border: 
   holiday: { bg: 'bg-rose-100 dark:bg-rose-500/15', text: 'text-rose-700 dark:text-rose-400', border: 'border-rose-200 dark:border-rose-500/20', dot: 'bg-rose-500' },
   birthday: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400', border: 'border-pink-200 dark:border-pink-500/20', dot: 'bg-pink-500' },
   anniversary: { bg: 'bg-red-100 dark:bg-red-500/15', text: 'text-red-700 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20', dot: 'bg-red-500' },
+  'life-service': { bg: 'bg-teal-100 dark:bg-teal-500/15', text: 'text-teal-700 dark:text-teal-400', border: 'border-teal-200 dark:border-teal-500/20', dot: 'bg-teal-500' },
   other: { bg: 'bg-gray-100 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', border: 'border-gray-200 dark:border-dark-600', dot: 'bg-gray-500' }
 };
 
@@ -29,6 +30,7 @@ export const categoryLabels: Record<string, string> = {
   holiday: 'Holidays',
   birthday: 'Birthdays',
   anniversary: 'Anniversaries',
+  'life-service': 'Life Services',
   other: 'Other'
 };
 

@@ -279,13 +279,15 @@ function App() {
         />
       )}
 
-      <QuickActions
-        onAddPerson={handlers.addPerson}
-        onAddTask={modals.openQuickTask}
-        onAddPrayer={modals.openQuickPrayer}
-        onAddNote={modals.openQuickNote}
-        onAddDonation={modals.openQuickDonation}
-      />
+      {!modals.showSearch && (
+        <QuickActions
+          onAddPerson={handlers.addPerson}
+          onAddTask={modals.openQuickTask}
+          onAddPrayer={modals.openQuickPrayer}
+          onAddNote={modals.openQuickNote}
+          onAddDonation={modals.openQuickDonation}
+        />
+      )}
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}
       {modals.showQuickPrayer && <QuickPrayerForm people={people} onSave={handlers.addPrayer} onClose={modals.closeQuickPrayer} />}
