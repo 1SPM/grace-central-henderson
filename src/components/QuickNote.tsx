@@ -166,36 +166,33 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
           )}
 
           {/* Note Type Selection */}
-          {selectedPerson && (
-            <>
-              <div className="flex flex-wrap gap-2">
-                {noteTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setNoteType(type.value)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                      noteType === type.value
-                        ? 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
-                        : 'bg-gray-100/80 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-white/10'
-                    }`}
-                  >
-                    {type.icon}
-                    {type.label}
-                  </button>
-                ))}
-              </div>
+          <div className={`flex flex-wrap gap-2 ${!selectedPerson ? 'opacity-50 pointer-events-none' : ''}`}>
+            {noteTypes.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => setNoteType(type.value)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                  noteType === type.value
+                    ? 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                    : 'bg-gray-100/80 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-white/10'
+                }`}
+              >
+                {type.icon}
+                {type.label}
+              </button>
+            ))}
+          </div>
 
-              {/* Note Content */}
-              <textarea
-                ref={contentRef}
-                placeholder={`Add a ${noteType} note...`}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-              />
-            </>
-          )}
+          {/* Note Content */}
+          <textarea
+            ref={contentRef}
+            placeholder={selectedPerson ? `Add a ${noteType} note...` : 'Select a person above to start writing...'}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            disabled={!selectedPerson}
+            className={`w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${!selectedPerson ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
         </div>
 
         {/* Footer */}

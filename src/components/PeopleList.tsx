@@ -265,7 +265,11 @@ export function PeopleList({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">People</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">{people.length} total people in your congregation</p>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">
+            {filtered.length === people.length
+              ? `${people.length} total people in your congregation`
+              : `${filtered.length} of ${people.length} people`}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Sort Dropdown */}

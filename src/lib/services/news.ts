@@ -27,10 +27,14 @@ export interface CuratedNewsItem {
 }
 
 /**
- * Check if news service is available (always true now - uses server-side API)
+ * Check if news service is available.
+ * Disabled in demo mode to avoid fetching potentially inappropriate real-world headlines.
+ * Only enabled when a backend news API is properly configured.
  */
 export function hasNewsApiKey(): boolean {
-  return true;
+  const isDemoMode = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true' || !import.meta.env.VITE_SUPABASE_URL;
+  if (isDemoMode) return false;
+  return !!import.meta.env.VITE_NEWS_API_ENABLED;
 }
 
 /**

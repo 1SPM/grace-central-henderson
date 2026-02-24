@@ -271,7 +271,7 @@ export function useSupabaseData() {
   // PEOPLE CRUD
   // ==========================================
   const addPerson = useCallback(async (person: PersonInsert) => {
-    if (isDemo || !supabase) {
+    const addLocally = () => {
       const newPerson: Person = {
         id: Date.now().toString(),
         church_id: person.church_id,
@@ -296,44 +296,60 @@ export function useSupabaseData() {
       };
       setPeople(prev => [...prev, newPerson]);
       return newPerson;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    const { data, error } = await supabase
-      .from('people')
-      .insert(person)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('people')
+        .insert(person)
+        .select()
+        .single();
 
-    if (error) throw error;
-    const newPerson = data as Person;
-    setPeople(prev => [...prev, newPerson]);
-    return newPerson;
+      if (error) throw error;
+      const newPerson = data as Person;
+      setPeople(prev => [...prev, newPerson]);
+      return newPerson;
+    } catch (err) {
+      log.warn('Supabase write failed for addPerson, falling back to local state', err);
+      return addLocally();
+    }
   }, [isDemo]);
 
   const updatePerson = useCallback(async (id: string, updates: Partial<Person>) => {
-    if (isDemo || !supabase) {
+    const updateLocally = () => {
       setPeople(prev => prev.map(p =>
         p.id === id ? { ...p, ...updates, updated_at: new Date().toISOString() } : p
       ));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    const { error } = await supabase
-      .from('people')
-      .update(updates)
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('people')
+        .update(updates)
+        .eq('id', id);
 
-    if (error) throw error;
-    setPeople(prev => prev.map(p =>
-      p.id === id ? { ...p, ...updates, updated_at: new Date().toISOString() } : p
-    ));
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for updatePerson, falling back to local state', err);
+      updateLocally();
+    }
   }, [isDemo]);
 
   // ==========================================
   // TASKS CRUD
   // ==========================================
   const addTask = useCallback(async (task: TaskInsert) => {
-    if (isDemo || !supabase) {
+    const addLocally = () => {
       const newTask: Task = {
         id: Date.now().toString(),
         church_id: task.church_id,
@@ -351,18 +367,27 @@ export function useSupabaseData() {
       };
       setTasks(prev => [...prev, newTask]);
       return newTask;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert(task)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(task)
+        .select()
+        .single();
 
-    if (error) throw error;
-    const newTask = data as Task;
-    setTasks(prev => [...prev, newTask]);
-    return newTask;
+      if (error) throw error;
+      const newTask = data as Task;
+      setTasks(prev => [...prev, newTask]);
+      return newTask;
+    } catch (err) {
+      log.warn('Supabase write failed for addTask, falling back to local state', err);
+      return addLocally();
+    }
   }, [isDemo]);
 
   const toggleTask = useCallback(async (id: string) => {
@@ -374,29 +399,36 @@ export function useSupabaseData() {
       completed_at: !task.completed ? new Date().toISOString() : null,
     };
 
-    if (isDemo || !supabase) {
+    const updateLocally = () => {
       setTasks(prev => prev.map(t =>
         t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
       ));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    const { error } = await supabase
-      .from('tasks')
-      .update(updates)
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update(updates)
+        .eq('id', id);
 
-    if (error) throw error;
-    setTasks(prev => prev.map(t =>
-      t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
-    ));
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for toggleTask, falling back to local state', err);
+      updateLocally();
+    }
   }, [isDemo, tasks]);
 
   // ==========================================
   // INTERACTIONS CRUD
   // ==========================================
   const addInteraction = useCallback(async (interaction: InteractionInsert) => {
-    if (isDemo || !supabase) {
+    const addLocally = () => {
       const newInteraction: Interaction = {
         id: Date.now().toString(),
         church_id: interaction.church_id,
@@ -409,18 +441,27 @@ export function useSupabaseData() {
       };
       setInteractions(prev => [newInteraction, ...prev]);
       return newInteraction;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    const { data, error } = await supabase
-      .from('interactions')
-      .insert(interaction)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('interactions')
+        .insert(interaction)
+        .select()
+        .single();
 
-    if (error) throw error;
-    const newInteraction = data as Interaction;
-    setInteractions(prev => [newInteraction, ...prev]);
-    return newInteraction;
+      if (error) throw error;
+      const newInteraction = data as Interaction;
+      setInteractions(prev => [newInteraction, ...prev]);
+      return newInteraction;
+    } catch (err) {
+      log.warn('Supabase write failed for addInteraction, falling back to local state', err);
+      return addLocally();
+    }
   }, [isDemo]);
 
   // ==========================================
@@ -433,26 +474,33 @@ export function useSupabaseData() {
       updated_at: new Date().toISOString(),
     };
 
-    if (isDemo || !supabase) {
+    const updateLocally = () => {
       setPrayers(prev => prev.map(p =>
         p.id === id ? { ...p, ...updates } : p
       ));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    const { error } = await supabase
-      .from('prayer_requests')
-      .update(updates)
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('prayer_requests')
+        .update(updates)
+        .eq('id', id);
 
-    if (error) throw error;
-    setPrayers(prev => prev.map(p =>
-      p.id === id ? { ...p, ...updates } : p
-    ));
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for markPrayerAnswered, falling back to local state', err);
+      updateLocally();
+    }
   }, [isDemo]);
 
   const addPrayer = useCallback(async (prayer: PrayerRequestInsert) => {
-    if (isDemo || !supabase) {
+    const addLocally = () => {
       const newPrayer: PrayerRequest = {
         id: Date.now().toString(),
         church_id: prayer.church_id,
@@ -466,18 +514,27 @@ export function useSupabaseData() {
       };
       setPrayers(prev => [newPrayer, ...prev]);
       return newPrayer;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    const { data, error } = await supabase
-      .from('prayer_requests')
-      .insert(prayer)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('prayer_requests')
+        .insert(prayer)
+        .select()
+        .single();
 
-    if (error) throw error;
-    const newPrayer = data as PrayerRequest;
-    setPrayers(prev => [newPrayer, ...prev]);
-    return newPrayer;
+      if (error) throw error;
+      const newPrayer = data as PrayerRequest;
+      setPrayers(prev => [newPrayer, ...prev]);
+      return newPrayer;
+    } catch (err) {
+      log.warn('Supabase write failed for addPrayer, falling back to local state', err);
+      return addLocally();
+    }
   }, [isDemo]);
 
   // Add giving record
@@ -491,7 +548,7 @@ export function useSupabaseData() {
     is_recurring?: boolean;
     note?: string | null;
   }) => {
-    if (isDemo) {
+    const addLocally = () => {
       const newGiving: Giving = {
         id: `giving-${Date.now()}`,
         church_id: givingData.church_id,
@@ -507,22 +564,27 @@ export function useSupabaseData() {
       };
       setGiving(prev => [newGiving, ...prev]);
       return newGiving;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { data, error } = await supabase
+        .from('giving')
+        .insert(givingData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      const newGiving = data as Giving;
+      setGiving(prev => [newGiving, ...prev]);
+      return newGiving;
+    } catch (err) {
+      log.warn('Supabase write failed for addGiving, falling back to local state', err);
+      return addLocally();
     }
-
-    const { data, error } = await supabase
-      .from('giving')
-      .insert(givingData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    const newGiving = data as Giving;
-    setGiving(prev => [newGiving, ...prev]);
-    return newGiving;
   }, [isDemo]);
 
   // Create a new group
@@ -535,7 +597,7 @@ export function useSupabaseData() {
     meeting_time?: string;
     location?: string;
   }) => {
-    if (isDemo) {
+    const addLocally = () => {
       const newGroup: SmallGroupWithMembers = {
         id: `group-${Date.now()}`,
         church_id: groupData.church_id,
@@ -551,118 +613,116 @@ export function useSupabaseData() {
         members: groupData.leader_id ? [groupData.leader_id] : [],
       };
       setGroups(prev => [...prev, newGroup]);
-
-      // If there's a leader, add them as a member too
-      if (groupData.leader_id) {
-        // In demo mode, members array is already set above
-      }
       return newGroup;
-    }
-
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
-    }
-
-    const { data, error } = await supabase
-      .from('small_groups')
-      .insert({
-        church_id: groupData.church_id,
-        name: groupData.name,
-        description: groupData.description || null,
-        leader_id: groupData.leader_id || null,
-        meeting_day: groupData.meeting_day || null,
-        meeting_time: groupData.meeting_time || null,
-        location: groupData.location || null,
-        is_active: true,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    const newGroup: SmallGroupWithMembers = {
-      ...(data as SmallGroup),
-      members: [],
     };
 
-    // If there's a leader, add them as a member
-    if (groupData.leader_id) {
-      await supabase
-        .from('group_memberships')
-        .insert({
-          group_id: newGroup.id,
-          person_id: groupData.leader_id,
-        });
-      newGroup.members = [groupData.leader_id];
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    setGroups(prev => [...prev, newGroup]);
-    return newGroup;
+    try {
+      const { data, error } = await supabase
+        .from('small_groups')
+        .insert({
+          church_id: groupData.church_id,
+          name: groupData.name,
+          description: groupData.description || null,
+          leader_id: groupData.leader_id || null,
+          meeting_day: groupData.meeting_day || null,
+          meeting_time: groupData.meeting_time || null,
+          location: groupData.location || null,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newGroup: SmallGroupWithMembers = {
+        ...(data as SmallGroup),
+        members: [],
+      };
+
+      // If there's a leader, add them as a member
+      if (groupData.leader_id) {
+        await supabase
+          .from('group_memberships')
+          .insert({
+            group_id: newGroup.id,
+            person_id: groupData.leader_id,
+          });
+        newGroup.members = [groupData.leader_id];
+      }
+
+      setGroups(prev => [...prev, newGroup]);
+      return newGroup;
+    } catch (err) {
+      log.warn('Supabase write failed for createGroup, falling back to local state', err);
+      return addLocally();
+    }
   }, [isDemo]);
 
   // Add member to group
   const addGroupMember = useCallback(async (groupId: string, personId: string) => {
-    if (isDemo) {
+    const updateLocally = () => {
       setGroups(prev => prev.map(g => {
         if (g.id === groupId && !g.members.includes(personId)) {
           return { ...g, members: [...g.members, personId] };
         }
         return g;
       }));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { error } = await supabase
+        .from('group_memberships')
+        .insert({
+          group_id: groupId,
+          person_id: personId,
+        });
+
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for addGroupMember, falling back to local state', err);
+      updateLocally();
     }
-
-    const { error } = await supabase
-      .from('group_memberships')
-      .insert({
-        group_id: groupId,
-        person_id: personId,
-      });
-
-    if (error) throw error;
-
-    setGroups(prev => prev.map(g => {
-      if (g.id === groupId && !g.members.includes(personId)) {
-        return { ...g, members: [...g.members, personId] };
-      }
-      return g;
-    }));
   }, [isDemo]);
 
   // Remove member from group
   const removeGroupMember = useCallback(async (groupId: string, personId: string) => {
-    if (isDemo) {
+    const updateLocally = () => {
       setGroups(prev => prev.map(g => {
         if (g.id === groupId) {
           return { ...g, members: g.members.filter(m => m !== personId) };
         }
         return g;
       }));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { error } = await supabase
+        .from('group_memberships')
+        .delete()
+        .eq('group_id', groupId)
+        .eq('person_id', personId);
+
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for removeGroupMember, falling back to local state', err);
+      updateLocally();
     }
-
-    const { error } = await supabase
-      .from('group_memberships')
-      .delete()
-      .eq('group_id', groupId)
-      .eq('person_id', personId);
-
-    if (error) throw error;
-
-    setGroups(prev => prev.map(g => {
-      if (g.id === groupId) {
-        return { ...g, members: g.members.filter(m => m !== personId) };
-      }
-      return g;
-    }));
   }, [isDemo]);
 
   // Add event
@@ -676,7 +736,7 @@ export function useSupabaseData() {
     location?: string;
     category: EventCategory;
   }) => {
-    if (isDemo) {
+    const addLocally = () => {
       const newEvent: CalendarEvent = {
         id: `event-${Date.now()}`,
         church_id: eventData.church_id,
@@ -694,33 +754,38 @@ export function useSupabaseData() {
         new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
       ));
       return newEvent;
+    };
+
+    if (isDemo || !supabase) {
+      return addLocally();
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .insert({
+          church_id: eventData.church_id,
+          title: eventData.title,
+          description: eventData.description || null,
+          start_date: eventData.start_date,
+          end_date: eventData.end_date || null,
+          all_day: eventData.all_day,
+          location: eventData.location || null,
+          category: eventData.category,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEvents(prev => [...prev, data as CalendarEvent].sort((a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      ));
+      return data as CalendarEvent;
+    } catch (err) {
+      log.warn('Supabase write failed for addEvent, falling back to local state', err);
+      return addLocally();
     }
-
-    const { data, error } = await supabase
-      .from('calendar_events')
-      .insert({
-        church_id: eventData.church_id,
-        title: eventData.title,
-        description: eventData.description || null,
-        start_date: eventData.start_date,
-        end_date: eventData.end_date || null,
-        all_day: eventData.all_day,
-        location: eventData.location || null,
-        category: eventData.category,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    setEvents(prev => [...prev, data as CalendarEvent].sort((a, b) =>
-      new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-    ));
-    return data as CalendarEvent;
   }, [isDemo]);
 
   // Update event
@@ -733,52 +798,56 @@ export function useSupabaseData() {
     location: string | null;
     category: EventCategory;
   }>) => {
-    if (isDemo) {
+    const updateLocally = () => {
       setEvents(prev => prev.map(e =>
         e.id === eventId ? { ...e, ...updates, updated_at: new Date().toISOString() } : e
       ).sort((a, b) =>
         new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
       ));
+    };
+
+    if (isDemo || !supabase) {
+      updateLocally();
       return;
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', eventId);
+
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for updateEvent, falling back to local state', err);
+      updateLocally();
     }
-
-    const { error } = await supabase
-      .from('calendar_events')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', eventId);
-
-    if (error) throw error;
-
-    setEvents(prev => prev.map(e =>
-      e.id === eventId ? { ...e, ...updates, updated_at: new Date().toISOString() } : e
-    ).sort((a, b) =>
-      new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-    ));
   }, [isDemo]);
 
   // Delete event
   const deleteEvent = useCallback(async (eventId: string) => {
-    if (isDemo) {
+    const deleteLocally = () => {
       setEvents(prev => prev.filter(e => e.id !== eventId));
+    };
+
+    if (isDemo || !supabase) {
+      deleteLocally();
       return;
     }
 
-    if (!supabase) {
-      throw new Error('Supabase is not configured');
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('id', eventId);
+
+      if (error) throw error;
+      deleteLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for deleteEvent, falling back to local state', err);
+      deleteLocally();
     }
-
-    const { error } = await supabase
-      .from('calendar_events')
-      .delete()
-      .eq('id', eventId);
-
-    if (error) throw error;
-
-    setEvents(prev => prev.filter(e => e.id !== eventId));
   }, [isDemo]);
 
   return {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bookmark, Plus, Check, Trash2 } from 'lucide-react';
 import { MemberStatus } from '../types';
 
@@ -27,6 +27,25 @@ export function SavedFilters({ currentFilters, onApplyFilter }: SavedFiltersProp
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [newFilterName, setNewFilterName] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    // Use a timeout to avoid closing immediately from the same click that opened it
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Load saved filters from localStorage
   useEffect(() => {
@@ -78,7 +97,7 @@ export function SavedFilters({ currentFilters, onApplyFilter }: SavedFiltersProp
     currentFilters.search;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`inline-flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
