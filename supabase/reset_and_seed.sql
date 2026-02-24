@@ -1,3 +1,1743 @@
+-- ============================================================
+-- GRACE CRM - Combined Reset, Migration & Seed Script
+-- ============================================================
+-- This file drops all tables, re-creates them via migrations,
+-- and populates seed data. Safe to run on a fresh or existing DB.
+-- ============================================================
+
+-- ############################################################
+-- SECTION 1: RESET - Drop all tables in reverse dependency order
+-- ############################################################
+
+-- 004: Agent logging tables
+DROP TABLE IF EXISTS agent_executions CASCADE;
+DROP TABLE IF EXISTS agent_stats CASCADE;
+DROP TABLE IF EXISTS agent_logs CASCADE;
+
+-- 003: AI messaging tables
+DROP TABLE IF EXISTS drip_campaign_enrollments CASCADE;
+DROP TABLE IF EXISTS drip_campaign_steps CASCADE;
+DROP TABLE IF EXISTS drip_campaigns CASCADE;
+DROP TABLE IF EXISTS daily_digests CASCADE;
+DROP TABLE IF EXISTS inbound_messages CASCADE;
+DROP TABLE IF EXISTS message_archive CASCADE;
+DROP TABLE IF EXISTS scheduled_messages CASCADE;
+
+-- 002: Collection & donation tables
+DROP TABLE IF EXISTS giving_statements CASCADE;
+DROP TABLE IF EXISTS recurring_giving CASCADE;
+DROP TABLE IF EXISTS batch_items CASCADE;
+DROP TABLE IF EXISTS donation_batches CASCADE;
+DROP TABLE IF EXISTS pledges CASCADE;
+DROP TABLE IF EXISTS campaigns CASCADE;
+
+-- 002: Leader onboarding tables
+DROP TABLE IF EXISTS leader_availability CASCADE;
+DROP TABLE IF EXISTS pastoral_sessions CASCADE;
+DROP TABLE IF EXISTS leader_applications CASCADE;
+
+-- 001: Core tables (reverse dependency order)
+DROP TABLE IF EXISTS giving CASCADE;
+DROP TABLE IF EXISTS attendance CASCADE;
+DROP TABLE IF EXISTS calendar_events CASCADE;
+DROP TABLE IF EXISTS prayer_requests CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS interactions CASCADE;
+DROP TABLE IF EXISTS group_memberships CASCADE;
+DROP TABLE IF EXISTS small_groups CASCADE;
+DROP TABLE IF EXISTS people CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS churches CASCADE;
+
+-- Drop helper functions
+DROP FUNCTION IF EXISTS calculate_pledge_fulfillment(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_pending_messages(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_daily_digest_data(UUID, DATE) CASCADE;
+DROP FUNCTION IF EXISTS insert_agent_log(UUID, VARCHAR, VARCHAR, TEXT, JSONB) CASCADE;
+DROP FUNCTION IF EXISTS update_agent_stats(UUID, VARCHAR, INTEGER, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS update_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS public.get_church_id() CASCADE;
+
+
+-- ############################################################
+-- SECTION 2: Migration 001 - Initial Schema
+-- ############################################################
+
+-- GRACE CRM Initial Schema
+-- Multi-tenant church management with Row-Level Security
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================
+-- TABLES
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS churches (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  zip TEXT,
+  website TEXT,
+  logo_url TEXT,
+  timezone TEXT NOT NULL DEFAULT 'America/New_York',
+  settings JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE SET NULL,
+  clerk_id TEXT UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  first_name TEXT,
+  last_name TEXT,
+  role TEXT NOT NULL DEFAULT 'volunteer' CHECK (role IN ('admin', 'staff', 'volunteer')),
+  avatar_url TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS people (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  status TEXT NOT NULL DEFAULT 'visitor' CHECK (status IN ('visitor', 'regular', 'member', 'leader', 'inactive')),
+  photo_url TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  zip TEXT,
+  birth_date DATE,
+  join_date DATE,
+  first_visit DATE,
+  notes TEXT,
+  tags TEXT[] NOT NULL DEFAULT '{}',
+  family_id UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS small_groups (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  leader_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  meeting_day TEXT,
+  meeting_time TEXT,
+  location TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS group_memberships (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  group_id UUID NOT NULL REFERENCES small_groups(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (group_id, person_id)
+);
+
+CREATE TABLE IF NOT EXISTS interactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('note', 'call', 'email', 'visit', 'text', 'prayer')),
+  content TEXT NOT NULL,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_by_name TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  due_date DATE NOT NULL,
+  completed BOOLEAN NOT NULL DEFAULT false,
+  completed_at TIMESTAMPTZ,
+  priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  category TEXT NOT NULL DEFAULT 'follow-up' CHECK (category IN ('follow-up', 'care', 'admin', 'outreach')),
+  assigned_to UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS prayer_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  is_private BOOLEAN NOT NULL DEFAULT false,
+  is_answered BOOLEAN NOT NULL DEFAULT false,
+  testimony TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS calendar_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  start_date TIMESTAMPTZ NOT NULL,
+  end_date TIMESTAMPTZ,
+  all_day BOOLEAN NOT NULL DEFAULT false,
+  location TEXT,
+  category TEXT NOT NULL DEFAULT 'other' CHECK (category IN (
+    'service', 'meeting', 'event', 'small-group', 'holiday',
+    'wedding', 'funeral', 'baptism', 'dedication', 'counseling',
+    'rehearsal', 'outreach', 'class', 'other'
+  )),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS attendance (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  event_id UUID REFERENCES calendar_events(id) ON DELETE SET NULL,
+  event_type TEXT NOT NULL CHECK (event_type IN ('sunday', 'wednesday', 'small-group', 'special')),
+  event_name TEXT,
+  date DATE NOT NULL,
+  checked_in_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS giving (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  amount NUMERIC(10, 2) NOT NULL CHECK (amount > 0),
+  fund TEXT NOT NULL DEFAULT 'tithe' CHECK (fund IN ('tithe', 'offering', 'missions', 'building', 'benevolence', 'other')),
+  date DATE NOT NULL,
+  method TEXT NOT NULL DEFAULT 'cash' CHECK (method IN ('cash', 'check', 'card', 'online', 'bank')),
+  is_recurring BOOLEAN NOT NULL DEFAULT false,
+  stripe_payment_id TEXT,
+  note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================
+-- INDEXES
+-- ============================================
+
+CREATE INDEX IF NOT EXISTS idx_users_church_id ON users(church_id);
+CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX IF NOT EXISTS idx_people_church_id ON people(church_id);
+CREATE INDEX IF NOT EXISTS idx_people_status ON people(church_id, status);
+CREATE INDEX IF NOT EXISTS idx_people_last_name ON people(church_id, last_name);
+CREATE INDEX IF NOT EXISTS idx_small_groups_church_id ON small_groups(church_id);
+CREATE INDEX IF NOT EXISTS idx_group_memberships_group ON group_memberships(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_memberships_person ON group_memberships(person_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_church_id ON interactions(church_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_person_id ON interactions(person_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(church_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tasks_church_id ON tasks(church_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(church_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to) WHERE NOT completed;
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_church_id ON prayer_requests(church_id);
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_person_id ON prayer_requests(person_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_church_id ON calendar_events(church_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_date ON calendar_events(church_id, start_date);
+CREATE INDEX IF NOT EXISTS idx_attendance_church_id ON attendance(church_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_person ON attendance(person_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(church_id, date);
+CREATE INDEX IF NOT EXISTS idx_giving_church_id ON giving(church_id);
+CREATE INDEX IF NOT EXISTS idx_giving_person ON giving(person_id);
+CREATE INDEX IF NOT EXISTS idx_giving_date ON giving(church_id, date DESC);
+
+-- ============================================
+-- ROW-LEVEL SECURITY (enabled, policies in 005_row_level_security.sql)
+-- NOTE: RLS policies require auth.jwt() which is only available at runtime,
+-- not in the SQL editor. Policies are deferred to a separate migration
+-- that can be applied once Supabase auth is fully configured.
+-- ============================================
+
+ALTER TABLE churches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE people ENABLE ROW LEVEL SECURITY;
+ALTER TABLE small_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE group_memberships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE interactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prayer_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE giving ENABLE ROW LEVEL SECURITY;
+
+-- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON churches;
+DROP POLICY IF EXISTS "Service role full access" ON users;
+DROP POLICY IF EXISTS "Service role full access" ON people;
+DROP POLICY IF EXISTS "Service role full access" ON small_groups;
+DROP POLICY IF EXISTS "Service role full access" ON group_memberships;
+DROP POLICY IF EXISTS "Service role full access" ON interactions;
+DROP POLICY IF EXISTS "Service role full access" ON tasks;
+DROP POLICY IF EXISTS "Service role full access" ON prayer_requests;
+DROP POLICY IF EXISTS "Service role full access" ON calendar_events;
+DROP POLICY IF EXISTS "Service role full access" ON attendance;
+DROP POLICY IF EXISTS "Service role full access" ON giving;
+
+CREATE POLICY "Service role full access" ON churches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON users FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON people FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON small_groups FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON group_memberships FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON interactions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON tasks FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON prayer_requests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON calendar_events FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON attendance FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON giving FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================
+-- UPDATED_AT TRIGGER
+-- ============================================
+
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_updated_at ON churches;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON churches
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON users;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON people;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON people
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON small_groups;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON small_groups
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON tasks;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON tasks
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON prayer_requests;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON prayer_requests
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON calendar_events;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON calendar_events
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+
+-- ############################################################
+-- SECTION 3: Migration 002 - Collection & Donation System
+-- ############################################################
+
+-- Collection & Donation Management System
+-- Adds pledges, campaigns, donation batches, and recurring subscriptions
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
+
+-- ============================================
+-- CAMPAIGNS (Fundraising campaigns)
+-- ============================================
+CREATE TABLE IF NOT EXISTS campaigns (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  goal_amount DECIMAL(12, 2),
+  start_date DATE NOT NULL,
+  end_date DATE,
+  fund VARCHAR(50) DEFAULT 'other',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_campaigns_church ON campaigns(church_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_active ON campaigns(church_id, is_active);
+
+-- ============================================
+-- PLEDGES (Commitment tracking)
+-- ============================================
+CREATE TABLE IF NOT EXISTS pledges (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  campaign_id UUID REFERENCES campaigns(id) ON DELETE SET NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  frequency VARCHAR(20) DEFAULT 'one-time', -- one-time, weekly, monthly, quarterly, annually
+  start_date DATE NOT NULL,
+  end_date DATE,
+  fund VARCHAR(50) DEFAULT 'tithe',
+  status VARCHAR(20) DEFAULT 'active', -- active, completed, cancelled
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pledges_church ON pledges(church_id);
+CREATE INDEX IF NOT EXISTS idx_pledges_person ON pledges(person_id);
+CREATE INDEX IF NOT EXISTS idx_pledges_campaign ON pledges(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_pledges_status ON pledges(church_id, status);
+
+-- ============================================
+-- DONATION BATCHES (For in-person collections)
+-- ============================================
+CREATE TABLE IF NOT EXISTS donation_batches (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  batch_date DATE NOT NULL,
+  batch_name VARCHAR(255), -- e.g., "Sunday Morning Service 01/12/2025"
+  status VARCHAR(20) DEFAULT 'open', -- open, closed, reconciled
+  total_cash DECIMAL(10, 2) DEFAULT 0,
+  total_checks DECIMAL(10, 2) DEFAULT 0,
+  total_amount DECIMAL(10, 2) DEFAULT 0,
+  check_count INTEGER DEFAULT 0,
+  notes TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  closed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  closed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_batches_church ON donation_batches(church_id);
+CREATE INDEX IF NOT EXISTS idx_batches_date ON donation_batches(church_id, batch_date);
+CREATE INDEX IF NOT EXISTS idx_batches_status ON donation_batches(church_id, status);
+
+-- ============================================
+-- BATCH ITEMS (Individual donations in a batch)
+-- ============================================
+CREATE TABLE IF NOT EXISTS batch_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  batch_id UUID REFERENCES donation_batches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  method VARCHAR(20) NOT NULL, -- cash, check
+  fund VARCHAR(50) DEFAULT 'tithe',
+  check_number VARCHAR(50),
+  memo TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_batch_items_batch ON batch_items(batch_id);
+CREATE INDEX IF NOT EXISTS idx_batch_items_person ON batch_items(person_id);
+
+-- ============================================
+-- RECURRING GIVING (Subscription tracking)
+-- ============================================
+CREATE TABLE IF NOT EXISTS recurring_giving (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  frequency VARCHAR(20) NOT NULL, -- weekly, monthly, quarterly, annually
+  fund VARCHAR(50) DEFAULT 'tithe',
+  next_date DATE NOT NULL,
+  stripe_subscription_id VARCHAR(255),
+  stripe_customer_id VARCHAR(255),
+  payment_method_last4 VARCHAR(4),
+  payment_method_brand VARCHAR(20),
+  status VARCHAR(20) DEFAULT 'active', -- active, paused, cancelled
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_church ON recurring_giving(church_id);
+CREATE INDEX IF NOT EXISTS idx_recurring_person ON recurring_giving(person_id);
+CREATE INDEX IF NOT EXISTS idx_recurring_status ON recurring_giving(church_id, status);
+CREATE INDEX IF NOT EXISTS idx_recurring_next ON recurring_giving(church_id, next_date);
+
+-- ============================================
+-- GIVING STATEMENTS (Year-end tax statements)
+-- ============================================
+CREATE TABLE IF NOT EXISTS giving_statements (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  year INTEGER NOT NULL,
+  total_amount DECIMAL(12, 2) NOT NULL,
+  by_fund JSONB DEFAULT '{}',
+  generated_at TIMESTAMPTZ DEFAULT NOW(),
+  sent_at TIMESTAMPTZ,
+  sent_method VARCHAR(20), -- email, print
+  pdf_url TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_statements_church ON giving_statements(church_id);
+CREATE INDEX IF NOT EXISTS idx_statements_person ON giving_statements(person_id);
+CREATE INDEX IF NOT EXISTS idx_statements_year ON giving_statements(church_id, year);
+
+-- ============================================
+-- Add batch_id and pledge_id to giving table
+-- ============================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'giving' AND column_name = 'batch_id') THEN
+    ALTER TABLE giving ADD COLUMN batch_id UUID REFERENCES donation_batches(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'giving' AND column_name = 'pledge_id') THEN
+    ALTER TABLE giving ADD COLUMN pledge_id UUID REFERENCES pledges(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'giving' AND column_name = 'campaign_id') THEN
+    ALTER TABLE giving ADD COLUMN campaign_id UUID REFERENCES campaigns(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_giving_batch ON giving(batch_id);
+CREATE INDEX IF NOT EXISTS idx_giving_pledge ON giving(pledge_id);
+CREATE INDEX IF NOT EXISTS idx_giving_campaign ON giving(campaign_id);
+
+-- ============================================
+-- RLS Policies for new tables
+-- ============================================
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pledges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE donation_batches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE batch_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_giving ENABLE ROW LEVEL SECURITY;
+ALTER TABLE giving_statements ENABLE ROW LEVEL SECURITY;
+
+-- Allow full access via service role key (used by the app)
+-- Proper scoped policies are in 005_row_level_security.sql
+DROP POLICY IF EXISTS "Service role full access" ON campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON pledges;
+DROP POLICY IF EXISTS "Service role full access" ON donation_batches;
+DROP POLICY IF EXISTS "Service role full access" ON batch_items;
+DROP POLICY IF EXISTS "Service role full access" ON recurring_giving;
+DROP POLICY IF EXISTS "Service role full access" ON giving_statements;
+
+CREATE POLICY "Service role full access" ON campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pledges FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON donation_batches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON batch_items FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON recurring_giving FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON giving_statements FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================
+-- Triggers for updated_at
+-- ============================================
+DROP TRIGGER IF EXISTS update_campaigns_updated_at ON campaigns;
+CREATE TRIGGER update_campaigns_updated_at BEFORE UPDATE ON campaigns
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS update_pledges_updated_at ON pledges;
+CREATE TRIGGER update_pledges_updated_at BEFORE UPDATE ON pledges
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS update_batches_updated_at ON donation_batches;
+CREATE TRIGGER update_batches_updated_at BEFORE UPDATE ON donation_batches
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS update_recurring_updated_at ON recurring_giving;
+CREATE TRIGGER update_recurring_updated_at BEFORE UPDATE ON recurring_giving
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
+-- Helper function to calculate pledge fulfillment
+-- ============================================
+CREATE OR REPLACE FUNCTION calculate_pledge_fulfillment(pledge_uuid UUID)
+RETURNS TABLE(
+  total_pledged DECIMAL,
+  total_given DECIMAL,
+  percentage DECIMAL,
+  remaining DECIMAL
+) AS $$
+DECLARE
+  p pledges%ROWTYPE;
+  total_pledged_amount DECIMAL;
+  total_given_amount DECIMAL;
+BEGIN
+  SELECT * INTO p FROM pledges WHERE id = pledge_uuid;
+
+  IF p.frequency = 'one-time' THEN
+    total_pledged_amount := p.amount;
+  ELSE
+    -- Calculate based on frequency and date range
+    total_pledged_amount := p.amount * (
+      CASE p.frequency
+        WHEN 'weekly' THEN CEIL((COALESCE(p.end_date, CURRENT_DATE) - p.start_date) / 7.0)
+        WHEN 'monthly' THEN CEIL(EXTRACT(MONTH FROM AGE(COALESCE(p.end_date, CURRENT_DATE), p.start_date)) + 1)
+        WHEN 'quarterly' THEN CEIL((EXTRACT(MONTH FROM AGE(COALESCE(p.end_date, CURRENT_DATE), p.start_date)) + 1) / 3.0)
+        WHEN 'annually' THEN CEIL(EXTRACT(YEAR FROM AGE(COALESCE(p.end_date, CURRENT_DATE), p.start_date)) + 1)
+        ELSE 1
+      END
+    );
+  END IF;
+
+  SELECT COALESCE(SUM(amount), 0) INTO total_given_amount
+  FROM giving WHERE pledge_id = pledge_uuid;
+
+  RETURN QUERY SELECT
+    total_pledged_amount,
+    total_given_amount,
+    CASE WHEN total_pledged_amount > 0 THEN ROUND((total_given_amount / total_pledged_amount) * 100, 2) ELSE 0 END,
+    GREATEST(total_pledged_amount - total_given_amount, 0);
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ############################################################
+-- SECTION 4: Migration 002 - Leader Onboarding & Sessions
+-- ############################################################
+
+-- GRACE CRM - Leader Onboarding & Pastoral Sessions
+-- Migration: 002_leader_onboarding_sessions.sql
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
+
+-- ============================================
+-- LEADER APPLICATIONS (Onboarding Pipeline)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS leader_applications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+
+  -- Applicant info
+  display_name TEXT NOT NULL,
+  title TEXT NOT NULL,
+  bio TEXT,
+  photo_url TEXT,
+  email TEXT,
+  phone TEXT,
+
+  -- Qualifications
+  expertise_areas TEXT[] NOT NULL DEFAULT '{}',
+  credentials TEXT[] NOT NULL DEFAULT '{}',
+  years_of_practice INTEGER,
+  personality_traits TEXT[] NOT NULL DEFAULT '{}',
+  spiritual_focus_areas TEXT[] NOT NULL DEFAULT '{}',
+  suitable_for TEXT[] NOT NULL DEFAULT '{}',
+  language TEXT NOT NULL DEFAULT 'English',
+  anchor_verse TEXT,
+
+  -- Session preferences
+  session_type TEXT NOT NULL DEFAULT 'one-time' CHECK (session_type IN ('one-time', 'recurring')),
+  session_frequency TEXT DEFAULT 'Weekly',
+
+  -- Pipeline status
+  status TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN (
+    'submitted', 'under_review', 'interview', 'training', 'approved', 'active', 'suspended', 'rejected'
+  )),
+  status_notes TEXT,
+
+  -- Review tracking
+  reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ,
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  approved_at TIMESTAMPTZ,
+
+  -- Background check
+  background_check_status TEXT DEFAULT 'not_started' CHECK (background_check_status IN (
+    'not_started', 'in_progress', 'passed', 'failed', 'waived'
+  )),
+  background_check_date DATE,
+
+  -- Training
+  training_completed BOOLEAN NOT NULL DEFAULT false,
+  training_completed_date DATE,
+  training_modules_done TEXT[] NOT NULL DEFAULT '{}',
+
+  -- References
+  reference_contacts JSONB NOT NULL DEFAULT '[]',
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================
+-- PASTORAL SESSIONS (Session Tracking)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS pastoral_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+
+  -- Participants
+  leader_id TEXT NOT NULL,           -- References LeaderProfile.id
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  help_request_id TEXT,              -- References HelpRequest.id
+
+  -- Session details
+  category TEXT NOT NULL CHECK (category IN (
+    'marriage', 'addiction', 'grief', 'faith-questions', 'crisis',
+    'financial', 'anxiety-depression', 'parenting', 'general'
+  )),
+  session_type TEXT NOT NULL DEFAULT 'chat' CHECK (session_type IN (
+    'chat', 'video', 'phone', 'in-person'
+  )),
+
+  -- Timing
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ended_at TIMESTAMPTZ,
+  duration_minutes INTEGER,
+
+  -- Outcome
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN (
+    'scheduled', 'active', 'completed', 'cancelled', 'no-show'
+  )),
+  notes TEXT,
+  follow_up_needed BOOLEAN NOT NULL DEFAULT false,
+  follow_up_date DATE,
+
+  -- Feedback
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  feedback TEXT,
+
+  -- Privacy
+  is_anonymous BOOLEAN NOT NULL DEFAULT false,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================
+-- LEADER AVAILABILITY
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS leader_availability (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
+  leader_id TEXT NOT NULL,           -- References LeaderProfile.id
+  day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6), -- 0=Sunday
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================
+-- INDEXES
+-- ============================================
+
+CREATE INDEX IF NOT EXISTS idx_leader_applications_church ON leader_applications(church_id);
+CREATE INDEX IF NOT EXISTS idx_leader_applications_status ON leader_applications(church_id, status);
+CREATE INDEX IF NOT EXISTS idx_leader_applications_person ON leader_applications(person_id);
+
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_church ON pastoral_sessions(church_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_leader ON pastoral_sessions(leader_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_person ON pastoral_sessions(person_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_date ON pastoral_sessions(church_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_category ON pastoral_sessions(church_id, category);
+
+CREATE INDEX IF NOT EXISTS idx_leader_availability_leader ON leader_availability(leader_id);
+
+-- ============================================
+-- ROW-LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
+-- ============================================
+
+ALTER TABLE leader_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pastoral_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leader_availability ENABLE ROW LEVEL SECURITY;
+
+-- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON leader_applications;
+DROP POLICY IF EXISTS "Service role full access" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Service role full access" ON leader_availability;
+
+CREATE POLICY "Service role full access" ON leader_applications FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pastoral_sessions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON leader_availability FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================
+-- UPDATED_AT TRIGGERS
+-- ============================================
+
+DROP TRIGGER IF EXISTS set_updated_at ON leader_applications;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON leader_applications
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS set_updated_at ON pastoral_sessions;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON pastoral_sessions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+
+-- ############################################################
+-- SECTION 5: Migration 003 - AI Messaging System
+-- ############################################################
+
+-- AI Messaging System Schema
+-- Adds support for content calendar, message scheduling, and reply handling
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
+
+-- ============================================
+-- SCHEDULED MESSAGES
+-- Stores all planned/scheduled outgoing messages
+-- ============================================
+CREATE TABLE IF NOT EXISTS scheduled_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+
+  -- Message content
+  channel VARCHAR(20) NOT NULL CHECK (channel IN ('email', 'sms', 'both')),
+  subject VARCHAR(255),
+  body TEXT NOT NULL,
+
+  -- Scheduling
+  scheduled_for TIMESTAMPTZ NOT NULL,
+  sent_at TIMESTAMPTZ,
+  status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('draft', 'scheduled', 'sent', 'failed', 'cancelled')),
+
+  -- Source tracking
+  source_type VARCHAR(30) NOT NULL CHECK (source_type IN ('manual', 'drip_campaign', 'birthday', 'anniversary', 'donation', 'follow_up', 'pastoral_care', 'ai_generated')),
+  source_agent VARCHAR(50),
+  campaign_id UUID,
+
+  -- AI metadata
+  ai_generated BOOLEAN DEFAULT false,
+  ai_prompt TEXT,
+
+  -- Tracking
+  external_message_id VARCHAR(255),
+  error_message TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_church_date ON scheduled_messages(church_id, scheduled_for);
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_status ON scheduled_messages(status) WHERE status = 'scheduled';
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_person ON scheduled_messages(person_id);
+
+-- ============================================
+-- MESSAGE ARCHIVE
+-- Historical record of all sent messages
+-- ============================================
+CREATE TABLE IF NOT EXISTS message_archive (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+  scheduled_message_id UUID REFERENCES scheduled_messages(id) ON DELETE SET NULL,
+
+  -- Message details
+  channel VARCHAR(20) NOT NULL CHECK (channel IN ('email', 'sms')),
+  direction VARCHAR(10) NOT NULL CHECK (direction IN ('outbound', 'inbound')),
+  subject VARCHAR(255),
+  body TEXT NOT NULL,
+
+  -- Delivery info
+  sent_at TIMESTAMPTZ,
+  delivered_at TIMESTAMPTZ,
+  opened_at TIMESTAMPTZ,
+  clicked_at TIMESTAMPTZ,
+  replied_at TIMESTAMPTZ,
+
+  -- Provider info
+  provider VARCHAR(20) CHECK (provider IN ('resend', 'twilio')),
+  external_id VARCHAR(255),
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'sent' CHECK (status IN ('sent', 'delivered', 'opened', 'clicked', 'bounced', 'failed')),
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_message_archive_church ON message_archive(church_id);
+CREATE INDEX IF NOT EXISTS idx_message_archive_person ON message_archive(church_id, person_id);
+CREATE INDEX IF NOT EXISTS idx_message_archive_sent ON message_archive(sent_at DESC);
+
+-- ============================================
+-- INBOUND MESSAGES
+-- Stores replies and incoming messages
+-- ============================================
+CREATE TABLE IF NOT EXISTS inbound_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE SET NULL,
+
+  -- Message content
+  channel VARCHAR(20) NOT NULL CHECK (channel IN ('email', 'sms')),
+  from_address VARCHAR(255) NOT NULL,
+  subject VARCHAR(255),
+  body TEXT NOT NULL,
+
+  -- AI classification
+  ai_category VARCHAR(30) CHECK (ai_category IN ('question', 'thanks', 'concern', 'prayer_request', 'event_rsvp', 'unsubscribe', 'spam', 'other')),
+  ai_sentiment VARCHAR(20) CHECK (ai_sentiment IN ('positive', 'neutral', 'negative', 'urgent')),
+  ai_suggested_response TEXT,
+  ai_confidence DECIMAL(3,2),
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'archived', 'flagged')),
+  replied_at TIMESTAMPTZ,
+  replied_by UUID REFERENCES users(id) ON DELETE SET NULL,
+
+  -- Linking
+  in_reply_to UUID REFERENCES message_archive(id) ON DELETE SET NULL,
+
+  received_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_church ON inbound_messages(church_id);
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_status ON inbound_messages(status) WHERE status = 'new';
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_person ON inbound_messages(person_id);
+
+-- ============================================
+-- DAILY DIGESTS
+-- Stores AI-generated daily summaries
+-- ============================================
+CREATE TABLE IF NOT EXISTS daily_digests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+
+  -- Content
+  digest_date DATE NOT NULL,
+  priority_tasks JSONB NOT NULL DEFAULT '[]',
+  people_to_contact JSONB NOT NULL DEFAULT '[]',
+  messages_to_send JSONB NOT NULL DEFAULT '[]',
+  birthdays_today JSONB NOT NULL DEFAULT '[]',
+  follow_ups_due JSONB NOT NULL DEFAULT '[]',
+
+  -- AI insights
+  ai_summary TEXT,
+  ai_recommendations JSONB DEFAULT '[]',
+
+  -- Status
+  generated_at TIMESTAMPTZ DEFAULT NOW(),
+  viewed_at TIMESTAMPTZ,
+
+  UNIQUE(church_id, user_id, digest_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_digests_lookup ON daily_digests(church_id, user_id, digest_date);
+
+-- ============================================
+-- DRIP CAMPAIGNS
+-- Defines automated message sequences
+-- ============================================
+CREATE TABLE IF NOT EXISTS drip_campaigns (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
+
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  trigger_type VARCHAR(30) NOT NULL CHECK (trigger_type IN ('new_member', 'new_visitor', 'donation', 'event_registration', 'manual')),
+
+  is_active BOOLEAN DEFAULT true,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_drip_campaigns_church ON drip_campaigns(church_id);
+
+-- ============================================
+-- DRIP CAMPAIGN STEPS
+-- Individual messages in a drip sequence
+-- ============================================
+CREATE TABLE IF NOT EXISTS drip_campaign_steps (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  campaign_id UUID REFERENCES drip_campaigns(id) ON DELETE CASCADE NOT NULL,
+
+  step_number INT NOT NULL,
+  delay_days INT NOT NULL DEFAULT 0,
+  delay_hours INT NOT NULL DEFAULT 0,
+
+  channel VARCHAR(20) NOT NULL CHECK (channel IN ('email', 'sms', 'both')),
+  subject VARCHAR(255),
+  body TEXT NOT NULL,
+
+  use_ai_personalization BOOLEAN DEFAULT false,
+  ai_prompt TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(campaign_id, step_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_drip_steps_campaign ON drip_campaign_steps(campaign_id);
+
+-- ============================================
+-- DRIP CAMPAIGN ENROLLMENTS
+-- Tracks people enrolled in campaigns
+-- ============================================
+CREATE TABLE IF NOT EXISTS drip_campaign_enrollments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  campaign_id UUID REFERENCES drip_campaigns(id) ON DELETE CASCADE NOT NULL,
+  person_id UUID REFERENCES people(id) ON DELETE CASCADE NOT NULL,
+
+  current_step INT NOT NULL DEFAULT 1,
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'paused', 'cancelled')),
+
+  enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  next_message_at TIMESTAMPTZ,
+
+  UNIQUE(campaign_id, person_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_enrollments_campaign ON drip_campaign_enrollments(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_next ON drip_campaign_enrollments(next_message_at) WHERE status = 'active';
+
+-- ============================================
+-- ROW LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
+-- ============================================
+
+ALTER TABLE scheduled_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE message_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inbound_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_digests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaign_steps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaign_enrollments ENABLE ROW LEVEL SECURITY;
+
+-- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON scheduled_messages;
+DROP POLICY IF EXISTS "Service role full access" ON message_archive;
+DROP POLICY IF EXISTS "Service role full access" ON inbound_messages;
+DROP POLICY IF EXISTS "Service role full access" ON daily_digests;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_enrollments;
+
+CREATE POLICY "Service role full access" ON scheduled_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON message_archive FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON inbound_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON daily_digests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_steps FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_enrollments FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================
+-- HELPER FUNCTIONS
+-- ============================================
+
+-- Function to get pending scheduled messages
+CREATE OR REPLACE FUNCTION get_pending_messages(p_church_id UUID)
+RETURNS TABLE (
+  id UUID,
+  person_id UUID,
+  person_name TEXT,
+  channel VARCHAR(20),
+  subject VARCHAR(255),
+  body TEXT,
+  scheduled_for TIMESTAMPTZ,
+  source_type VARCHAR(30)
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sm.id,
+    sm.person_id,
+    COALESCE(p.first_name || ' ' || p.last_name, 'Unknown') as person_name,
+    sm.channel,
+    sm.subject,
+    sm.body,
+    sm.scheduled_for,
+    sm.source_type
+  FROM scheduled_messages sm
+  LEFT JOIN people p ON sm.person_id = p.id
+  WHERE sm.church_id = p_church_id
+    AND sm.status = 'scheduled'
+    AND sm.scheduled_for <= NOW()
+  ORDER BY sm.scheduled_for ASC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get daily digest data
+CREATE OR REPLACE FUNCTION get_daily_digest_data(p_church_id UUID, p_date DATE)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'birthdays', (
+      SELECT json_agg(json_build_object(
+        'id', id,
+        'name', first_name || ' ' || last_name,
+        'email', email,
+        'phone', phone
+      ))
+      FROM people
+      WHERE church_id = p_church_id
+        AND EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM p_date)
+        AND EXTRACT(DAY FROM birth_date) = EXTRACT(DAY FROM p_date)
+    ),
+    'scheduled_messages', (
+      SELECT json_agg(json_build_object(
+        'id', sm.id,
+        'person_name', COALESCE(p.first_name || ' ' || p.last_name, 'Unknown'),
+        'channel', sm.channel,
+        'scheduled_for', sm.scheduled_for,
+        'source_type', sm.source_type
+      ))
+      FROM scheduled_messages sm
+      LEFT JOIN people p ON sm.person_id = p.id
+      WHERE sm.church_id = p_church_id
+        AND sm.status = 'scheduled'
+        AND DATE(sm.scheduled_for) = p_date
+    ),
+    'pending_tasks', (
+      SELECT json_agg(json_build_object(
+        'id', t.id,
+        'title', t.title,
+        'priority', t.priority,
+        'person_name', COALESCE(p.first_name || ' ' || p.last_name, NULL),
+        'due_date', t.due_date
+      ))
+      FROM tasks t
+      LEFT JOIN people p ON t.person_id = p.id
+      WHERE t.church_id = p_church_id
+        AND t.completed = false
+        AND DATE(t.due_date) <= p_date
+      ORDER BY t.priority DESC, t.due_date ASC
+      LIMIT 20
+    ),
+    'new_inbound', (
+      SELECT COUNT(*)
+      FROM inbound_messages
+      WHERE church_id = p_church_id
+        AND status = 'new'
+    )
+  ) INTO result;
+
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- ############################################################
+-- SECTION 6: Migration 004 - Agent Logging System
+-- ############################################################
+
+-- Agent Logging System
+-- Provides persistent storage for AI agent execution logs and statistics
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
+
+-- ============================================
+-- AGENT LOGS
+-- ============================================
+CREATE TABLE IF NOT EXISTS agent_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
+  agent_id VARCHAR(100) NOT NULL,
+  level VARCHAR(20) NOT NULL CHECK (level IN ('info', 'warning', 'error')),
+  message TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_logs_church ON agent_logs(church_id);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_agent ON agent_logs(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_level ON agent_logs(level);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_created ON agent_logs(created_at DESC);
+
+-- ============================================
+-- AGENT STATS
+-- ============================================
+CREATE TABLE IF NOT EXISTS agent_stats (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
+  agent_id VARCHAR(100) NOT NULL,
+  total_actions INTEGER DEFAULT 0,
+  successful_actions INTEGER DEFAULT 0,
+  failed_actions INTEGER DEFAULT 0,
+  last_run_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(church_id, agent_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_stats_church ON agent_stats(church_id);
+
+-- ============================================
+-- AGENT EXECUTIONS (detailed run history)
+-- ============================================
+CREATE TABLE IF NOT EXISTS agent_executions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
+  agent_id VARCHAR(100) NOT NULL,
+  status VARCHAR(20) NOT NULL CHECK (status IN ('running', 'completed', 'failed')),
+  dry_run BOOLEAN DEFAULT false,
+  actions_executed INTEGER DEFAULT 0,
+  actions_failed INTEGER DEFAULT 0,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  error_message TEXT,
+  metadata JSONB DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_executions_church ON agent_executions(church_id);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_agent ON agent_executions(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_status ON agent_executions(status);
+
+-- ============================================
+-- HELPER FUNCTIONS
+-- ============================================
+
+-- Function to insert a log and auto-cleanup old logs
+CREATE OR REPLACE FUNCTION insert_agent_log(
+  p_church_id UUID,
+  p_agent_id VARCHAR(100),
+  p_level VARCHAR(20),
+  p_message TEXT,
+  p_metadata JSONB DEFAULT '{}'
+) RETURNS UUID AS $$
+DECLARE
+  v_log_id UUID;
+BEGIN
+  INSERT INTO agent_logs (church_id, agent_id, level, message, metadata)
+  VALUES (p_church_id, p_agent_id, p_level, p_message, p_metadata)
+  RETURNING id INTO v_log_id;
+
+  -- Auto-cleanup: keep only last 1000 logs per church
+  DELETE FROM agent_logs
+  WHERE church_id = p_church_id
+    AND id NOT IN (
+      SELECT id FROM agent_logs
+      WHERE church_id = p_church_id
+      ORDER BY created_at DESC
+      LIMIT 1000
+    );
+
+  RETURN v_log_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to update agent stats
+CREATE OR REPLACE FUNCTION update_agent_stats(
+  p_church_id UUID,
+  p_agent_id VARCHAR(100),
+  p_actions_executed INTEGER DEFAULT 0,
+  p_actions_failed INTEGER DEFAULT 0
+) RETURNS void AS $$
+BEGIN
+  INSERT INTO agent_stats (church_id, agent_id, total_actions, successful_actions, failed_actions, last_run_at)
+  VALUES (
+    p_church_id,
+    p_agent_id,
+    p_actions_executed + p_actions_failed,
+    p_actions_executed,
+    p_actions_failed,
+    NOW()
+  )
+  ON CONFLICT (church_id, agent_id) DO UPDATE SET
+    total_actions = agent_stats.total_actions + EXCLUDED.total_actions,
+    successful_actions = agent_stats.successful_actions + EXCLUDED.successful_actions,
+    failed_actions = agent_stats.failed_actions + EXCLUDED.failed_actions,
+    last_run_at = NOW(),
+    updated_at = NOW();
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
+-- ROW LEVEL SECURITY
+-- ============================================
+ALTER TABLE agent_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_stats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_executions ENABLE ROW LEVEL SECURITY;
+
+-- Policies for authenticated users (via service role key)
+DROP POLICY IF EXISTS "Service role can manage agent_logs" ON agent_logs;
+DROP POLICY IF EXISTS "Service role can manage agent_stats" ON agent_stats;
+DROP POLICY IF EXISTS "Service role can manage agent_executions" ON agent_executions;
+
+CREATE POLICY "Service role can manage agent_logs"
+  ON agent_logs FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Service role can manage agent_stats"
+  ON agent_stats FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Service role can manage agent_executions"
+  ON agent_executions FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+
+-- ############################################################
+-- SECTION 7: Migration 005 - Row Level Security
+-- ############################################################
+
+-- GRACE CRM - Row Level Security Policies
+-- Migration: 005_row_level_security.sql
+-- NOTE: All statements use DROP IF EXISTS before CREATE for idempotent re-runs.
+--
+-- This migration adds proper church-scoped RLS policies.
+-- Prerequisites: Supabase auth must be configured with app_metadata.church_id in JWT claims.
+--
+-- To apply: Run this in the Supabase SQL editor AFTER configuring auth,
+-- or it will be applied automatically via Supabase CLI migrations.
+
+-- ============================================
+-- HELPER FUNCTION
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.get_church_id()
+RETURNS UUID AS $$
+  SELECT (auth.jwt() -> 'app_metadata' ->> 'church_id')::UUID;
+$$ LANGUAGE sql STABLE;
+
+-- ============================================
+-- DROP PERMISSIVE POLICIES (from initial migrations)
+-- ============================================
+
+DROP POLICY IF EXISTS "Service role full access" ON churches;
+DROP POLICY IF EXISTS "Service role full access" ON users;
+DROP POLICY IF EXISTS "Service role full access" ON people;
+DROP POLICY IF EXISTS "Service role full access" ON small_groups;
+DROP POLICY IF EXISTS "Service role full access" ON group_memberships;
+DROP POLICY IF EXISTS "Service role full access" ON interactions;
+DROP POLICY IF EXISTS "Service role full access" ON tasks;
+DROP POLICY IF EXISTS "Service role full access" ON prayer_requests;
+DROP POLICY IF EXISTS "Service role full access" ON calendar_events;
+DROP POLICY IF EXISTS "Service role full access" ON attendance;
+DROP POLICY IF EXISTS "Service role full access" ON giving;
+DROP POLICY IF EXISTS "Service role full access" ON leader_applications;
+DROP POLICY IF EXISTS "Service role full access" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Service role full access" ON leader_availability;
+DROP POLICY IF EXISTS "Service role full access" ON scheduled_messages;
+DROP POLICY IF EXISTS "Service role full access" ON message_archive;
+DROP POLICY IF EXISTS "Service role full access" ON inbound_messages;
+DROP POLICY IF EXISTS "Service role full access" ON daily_digests;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_enrollments;
+DROP POLICY IF EXISTS "Service role full access" ON campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON pledges;
+DROP POLICY IF EXISTS "Service role full access" ON donation_batches;
+DROP POLICY IF EXISTS "Service role full access" ON batch_items;
+DROP POLICY IF EXISTS "Service role full access" ON recurring_giving;
+DROP POLICY IF EXISTS "Service role full access" ON giving_statements;
+
+-- ============================================
+-- DROP ALL SCOPED POLICIES (for idempotent re-runs)
+-- ============================================
+
+-- 001 tables
+DROP POLICY IF EXISTS "Users can view own church" ON churches;
+DROP POLICY IF EXISTS "Users can view same-church users" ON users;
+DROP POLICY IF EXISTS "Church members can view people" ON people;
+DROP POLICY IF EXISTS "Church members can insert people" ON people;
+DROP POLICY IF EXISTS "Church members can update people" ON people;
+DROP POLICY IF EXISTS "Church admins can delete people" ON people;
+DROP POLICY IF EXISTS "Church members can view groups" ON small_groups;
+DROP POLICY IF EXISTS "Church members can manage groups" ON small_groups;
+DROP POLICY IF EXISTS "Church members can view memberships" ON group_memberships;
+DROP POLICY IF EXISTS "Church members can manage memberships" ON group_memberships;
+DROP POLICY IF EXISTS "Church members can view interactions" ON interactions;
+DROP POLICY IF EXISTS "Church members can create interactions" ON interactions;
+DROP POLICY IF EXISTS "Church members can view tasks" ON tasks;
+DROP POLICY IF EXISTS "Church members can manage tasks" ON tasks;
+DROP POLICY IF EXISTS "Church members can view public prayers" ON prayer_requests;
+DROP POLICY IF EXISTS "Church members can manage prayers" ON prayer_requests;
+DROP POLICY IF EXISTS "Church members can view events" ON calendar_events;
+DROP POLICY IF EXISTS "Church members can manage events" ON calendar_events;
+DROP POLICY IF EXISTS "Church members can view attendance" ON attendance;
+DROP POLICY IF EXISTS "Church members can manage attendance" ON attendance;
+DROP POLICY IF EXISTS "Church members can view giving" ON giving;
+DROP POLICY IF EXISTS "Church members can manage giving" ON giving;
+
+-- 002 leader tables
+DROP POLICY IF EXISTS "Church members can view leader applications" ON leader_applications;
+DROP POLICY IF EXISTS "Church members can manage leader applications" ON leader_applications;
+DROP POLICY IF EXISTS "Church members can view pastoral sessions" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Church members can manage pastoral sessions" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Church members can view leader availability" ON leader_availability;
+DROP POLICY IF EXISTS "Church members can manage leader availability" ON leader_availability;
+
+-- 003 tables
+DROP POLICY IF EXISTS "Users can view scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can insert scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can update scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can delete scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can view message_archive for their church" ON message_archive;
+DROP POLICY IF EXISTS "Users can insert message_archive for their church" ON message_archive;
+DROP POLICY IF EXISTS "Users can view inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can update inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can insert inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can view their own daily_digests" ON daily_digests;
+DROP POLICY IF EXISTS "Users can insert daily_digests for their church" ON daily_digests;
+DROP POLICY IF EXISTS "Users can view drip_campaigns for their church" ON drip_campaigns;
+DROP POLICY IF EXISTS "Users can manage drip_campaigns for their church" ON drip_campaigns;
+DROP POLICY IF EXISTS "Users can view drip_campaign_steps for their campaigns" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Users can view enrollments for their campaigns" ON drip_campaign_enrollments;
+DROP POLICY IF EXISTS "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments;
+
+-- 002 collection tables
+DROP POLICY IF EXISTS "Church members can view campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Church members can manage campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Church members can view pledges" ON pledges;
+DROP POLICY IF EXISTS "Church members can manage pledges" ON pledges;
+DROP POLICY IF EXISTS "Church members can view donation batches" ON donation_batches;
+DROP POLICY IF EXISTS "Church members can manage donation batches" ON donation_batches;
+DROP POLICY IF EXISTS "Church members can view batch items" ON batch_items;
+DROP POLICY IF EXISTS "Church members can manage batch items" ON batch_items;
+DROP POLICY IF EXISTS "Church members can view recurring giving" ON recurring_giving;
+DROP POLICY IF EXISTS "Church members can manage recurring giving" ON recurring_giving;
+DROP POLICY IF EXISTS "Church members can view giving statements" ON giving_statements;
+DROP POLICY IF EXISTS "Church members can manage giving statements" ON giving_statements;
+
+-- ============================================
+-- 001 TABLE POLICIES
+-- ============================================
+
+-- Churches: users can only see their own church
+CREATE POLICY "Users can view own church"
+  ON churches FOR SELECT
+  USING (id = public.get_church_id());
+
+-- Users: scoped to same church
+CREATE POLICY "Users can view same-church users"
+  ON users FOR SELECT
+  USING (church_id = public.get_church_id());
+
+-- People: full CRUD scoped to church
+CREATE POLICY "Church members can view people"
+  ON people FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can insert people"
+  ON people FOR INSERT
+  WITH CHECK (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can update people"
+  ON people FOR UPDATE
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church admins can delete people"
+  ON people FOR DELETE
+  USING (church_id = public.get_church_id());
+
+-- Small Groups: scoped to church
+CREATE POLICY "Church members can view groups"
+  ON small_groups FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage groups"
+  ON small_groups FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Group Memberships: via group's church_id
+CREATE POLICY "Church members can view memberships"
+  ON group_memberships FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM small_groups
+      WHERE small_groups.id = group_memberships.group_id
+      AND small_groups.church_id = public.get_church_id()
+    )
+  );
+
+CREATE POLICY "Church members can manage memberships"
+  ON group_memberships FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM small_groups
+      WHERE small_groups.id = group_memberships.group_id
+      AND small_groups.church_id = public.get_church_id()
+    )
+  );
+
+-- Interactions: scoped to church
+CREATE POLICY "Church members can view interactions"
+  ON interactions FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can create interactions"
+  ON interactions FOR INSERT
+  WITH CHECK (church_id = public.get_church_id());
+
+-- Tasks: scoped to church
+CREATE POLICY "Church members can view tasks"
+  ON tasks FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage tasks"
+  ON tasks FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Prayer Requests: scoped to church, private ones visible to staff+
+CREATE POLICY "Church members can view public prayers"
+  ON prayer_requests FOR SELECT
+  USING (
+    church_id = public.get_church_id()
+    AND (
+      NOT is_private
+      OR EXISTS (
+        SELECT 1 FROM users
+        WHERE users.id = auth.uid()
+        AND users.role IN ('admin', 'staff')
+      )
+    )
+  );
+
+CREATE POLICY "Church members can manage prayers"
+  ON prayer_requests FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Calendar Events: scoped to church
+CREATE POLICY "Church members can view events"
+  ON calendar_events FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage events"
+  ON calendar_events FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Attendance: scoped to church
+CREATE POLICY "Church members can view attendance"
+  ON attendance FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage attendance"
+  ON attendance FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Giving: scoped to church
+CREATE POLICY "Church members can view giving"
+  ON giving FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage giving"
+  ON giving FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- ============================================
+-- 002 TABLE POLICIES
+-- ============================================
+
+-- Leader Applications: scoped to church
+CREATE POLICY "Church members can view leader applications"
+  ON leader_applications FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage leader applications"
+  ON leader_applications FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Pastoral Sessions: scoped to church
+CREATE POLICY "Church members can view pastoral sessions"
+  ON pastoral_sessions FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage pastoral sessions"
+  ON pastoral_sessions FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Leader Availability: scoped to church
+CREATE POLICY "Church members can view leader availability"
+  ON leader_availability FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage leader availability"
+  ON leader_availability FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- ============================================
+-- 003 TABLE POLICIES
+-- ============================================
+
+-- Scheduled Messages
+CREATE POLICY "Users can view scheduled_messages for their church" ON scheduled_messages
+  FOR SELECT USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can insert scheduled_messages for their church" ON scheduled_messages
+  FOR INSERT WITH CHECK (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can update scheduled_messages for their church" ON scheduled_messages
+  FOR UPDATE USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can delete scheduled_messages for their church" ON scheduled_messages
+  FOR DELETE USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+-- Message Archive
+CREATE POLICY "Users can view message_archive for their church" ON message_archive
+  FOR SELECT USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can insert message_archive for their church" ON message_archive
+  FOR INSERT WITH CHECK (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+-- Inbound Messages
+CREATE POLICY "Users can view inbound_messages for their church" ON inbound_messages
+  FOR SELECT USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can update inbound_messages for their church" ON inbound_messages
+  FOR UPDATE USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can insert inbound_messages for their church" ON inbound_messages
+  FOR INSERT WITH CHECK (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+-- Daily Digests
+CREATE POLICY "Users can view their own daily_digests" ON daily_digests
+  FOR SELECT USING (
+    user_id IN (SELECT id FROM users WHERE clerk_id = auth.uid()::text)
+    OR church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text AND role = 'admin')
+  );
+
+CREATE POLICY "Users can insert daily_digests for their church" ON daily_digests
+  FOR INSERT WITH CHECK (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+-- Drip Campaigns
+CREATE POLICY "Users can view drip_campaigns for their church" ON drip_campaigns
+  FOR SELECT USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+CREATE POLICY "Users can manage drip_campaigns for their church" ON drip_campaigns
+  FOR ALL USING (
+    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+  );
+
+-- Drip Campaign Steps
+CREATE POLICY "Users can view drip_campaign_steps for their campaigns" ON drip_campaign_steps
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM drip_campaigns
+      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+    )
+  );
+
+CREATE POLICY "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps
+  FOR ALL USING (
+    campaign_id IN (
+      SELECT id FROM drip_campaigns
+      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+    )
+  );
+
+-- Drip Campaign Enrollments
+CREATE POLICY "Users can view enrollments for their campaigns" ON drip_campaign_enrollments
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM drip_campaigns
+      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+    )
+  );
+
+CREATE POLICY "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments
+  FOR ALL USING (
+    campaign_id IN (
+      SELECT id FROM drip_campaigns
+      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
+    )
+  );
+
+-- ============================================
+-- 002_COLLECTION TABLE POLICIES
+-- ============================================
+
+-- Campaigns: scoped to church
+CREATE POLICY "Church members can view campaigns"
+  ON campaigns FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage campaigns"
+  ON campaigns FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Pledges: scoped to church
+CREATE POLICY "Church members can view pledges"
+  ON pledges FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage pledges"
+  ON pledges FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Donation Batches: scoped to church
+CREATE POLICY "Church members can view donation batches"
+  ON donation_batches FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage donation batches"
+  ON donation_batches FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Batch Items: via batch's church_id
+CREATE POLICY "Church members can view batch items"
+  ON batch_items FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM donation_batches
+      WHERE donation_batches.id = batch_items.batch_id
+      AND donation_batches.church_id = public.get_church_id()
+    )
+  );
+
+CREATE POLICY "Church members can manage batch items"
+  ON batch_items FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM donation_batches
+      WHERE donation_batches.id = batch_items.batch_id
+      AND donation_batches.church_id = public.get_church_id()
+    )
+  );
+
+-- Recurring Giving: scoped to church
+CREATE POLICY "Church members can view recurring giving"
+  ON recurring_giving FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage recurring giving"
+  ON recurring_giving FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Giving Statements: scoped to church
+CREATE POLICY "Church members can view giving statements"
+  ON giving_statements FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage giving statements"
+  ON giving_statements FOR ALL
+  USING (church_id = public.get_church_id());
+
+
+-- ############################################################
+-- SECTION 8: Seed Data
+-- ############################################################
+
 -- Grace CRM Comprehensive Seed Data
 -- Run this after migrations to populate test data
 

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS scheduled_messages (
   status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('draft', 'scheduled', 'sent', 'failed', 'cancelled')),
 
   -- Source tracking
-  source_type VARCHAR(30) NOT NULL CHECK (source_type IN ('manual', 'drip_campaign', 'birthday', 'anniversary', 'donation', 'follow_up', 'ai_generated')),
+  source_type VARCHAR(30) NOT NULL CHECK (source_type IN ('manual', 'drip_campaign', 'birthday', 'anniversary', 'donation', 'follow_up', 'pastoral_care', 'ai_generated')),
   source_agent VARCHAR(50),
   campaign_id UUID,
 
