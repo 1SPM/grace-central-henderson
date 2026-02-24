@@ -154,25 +154,14 @@ ALTER TABLE batch_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recurring_giving ENABLE ROW LEVEL SECURITY;
 ALTER TABLE giving_statements ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own church campaigns" ON campaigns
-  FOR ALL USING (church_id = get_user_church_id());
-
-CREATE POLICY "Users can manage own church pledges" ON pledges
-  FOR ALL USING (church_id = get_user_church_id());
-
-CREATE POLICY "Users can manage own church batches" ON donation_batches
-  FOR ALL USING (church_id = get_user_church_id());
-
-CREATE POLICY "Users can manage batch items" ON batch_items
-  FOR ALL USING (
-    batch_id IN (SELECT id FROM donation_batches WHERE church_id = get_user_church_id())
-  );
-
-CREATE POLICY "Users can manage own church recurring" ON recurring_giving
-  FOR ALL USING (church_id = get_user_church_id());
-
-CREATE POLICY "Users can manage own church statements" ON giving_statements
-  FOR ALL USING (church_id = get_user_church_id());
+-- Allow full access via service role key (used by the app)
+-- Proper scoped policies are in 005_row_level_security.sql
+CREATE POLICY "Service role full access" ON campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pledges FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON donation_batches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON batch_items FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON recurring_giving FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON giving_statements FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================
 -- Triggers for updated_at

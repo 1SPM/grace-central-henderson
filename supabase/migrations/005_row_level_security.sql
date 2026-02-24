@@ -44,6 +44,12 @@ DROP POLICY IF EXISTS "Service role full access" ON daily_digests;
 DROP POLICY IF EXISTS "Service role full access" ON drip_campaigns;
 DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_steps;
 DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_enrollments;
+DROP POLICY IF EXISTS "Service role full access" ON campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON pledges;
+DROP POLICY IF EXISTS "Service role full access" ON donation_batches;
+DROP POLICY IF EXISTS "Service role full access" ON batch_items;
+DROP POLICY IF EXISTS "Service role full access" ON recurring_giving;
+DROP POLICY IF EXISTS "Service role full access" ON giving_statements;
 
 -- ============================================
 -- 001 TABLE POLICIES
@@ -309,3 +315,73 @@ CREATE POLICY "Users can manage enrollments for their campaigns" ON drip_campaig
       WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
     )
   );
+
+-- ============================================
+-- 002_COLLECTION TABLE POLICIES
+-- ============================================
+
+-- Campaigns: scoped to church
+CREATE POLICY "Church members can view campaigns"
+  ON campaigns FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage campaigns"
+  ON campaigns FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Pledges: scoped to church
+CREATE POLICY "Church members can view pledges"
+  ON pledges FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage pledges"
+  ON pledges FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Donation Batches: scoped to church
+CREATE POLICY "Church members can view donation batches"
+  ON donation_batches FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage donation batches"
+  ON donation_batches FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Batch Items: via batch's church_id
+CREATE POLICY "Church members can view batch items"
+  ON batch_items FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM donation_batches
+      WHERE donation_batches.id = batch_items.batch_id
+      AND donation_batches.church_id = public.get_church_id()
+    )
+  );
+
+CREATE POLICY "Church members can manage batch items"
+  ON batch_items FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM donation_batches
+      WHERE donation_batches.id = batch_items.batch_id
+      AND donation_batches.church_id = public.get_church_id()
+    )
+  );
+
+-- Recurring Giving: scoped to church
+CREATE POLICY "Church members can view recurring giving"
+  ON recurring_giving FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage recurring giving"
+  ON recurring_giving FOR ALL
+  USING (church_id = public.get_church_id());
+
+-- Giving Statements: scoped to church
+CREATE POLICY "Church members can view giving statements"
+  ON giving_statements FOR SELECT
+  USING (church_id = public.get_church_id());
+
+CREATE POLICY "Church members can manage giving statements"
+  ON giving_statements FOR ALL
+  USING (church_id = public.get_church_id());
