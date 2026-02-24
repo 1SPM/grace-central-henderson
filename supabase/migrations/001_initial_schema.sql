@@ -213,7 +213,8 @@ ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE giving ENABLE ROW LEVEL SECURITY;
 
 -- Helper: get the current user's church_id from JWT claims
-CREATE OR REPLACE FUNCTION auth.church_id()
+-- NOTE: Uses public schema because Supabase restricts writes to auth schema
+CREATE OR REPLACE FUNCTION public.get_church_id()
 RETURNS UUID AS $$
   SELECT (auth.jwt() -> 'app_metadata' ->> 'church_id')::UUID;
 $$ LANGUAGE sql STABLE;
@@ -221,38 +222,38 @@ $$ LANGUAGE sql STABLE;
 -- Churches: users can only see their own church
 CREATE POLICY "Users can view own church"
   ON churches FOR SELECT
-  USING (id = auth.church_id());
+  USING (id = public.get_church_id());
 
 -- Users: scoped to same church
 CREATE POLICY "Users can view same-church users"
   ON users FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- People: full CRUD scoped to church
 CREATE POLICY "Church members can view people"
   ON people FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can insert people"
   ON people FOR INSERT
-  WITH CHECK (church_id = auth.church_id());
+  WITH CHECK (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can update people"
   ON people FOR UPDATE
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church admins can delete people"
   ON people FOR DELETE
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Small Groups: scoped to church
 CREATE POLICY "Church members can view groups"
   ON small_groups FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage groups"
   ON small_groups FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Group Memberships: via group's church_id
 CREATE POLICY "Church members can view memberships"
@@ -261,7 +262,7 @@ CREATE POLICY "Church members can view memberships"
     EXISTS (
       SELECT 1 FROM small_groups
       WHERE small_groups.id = group_memberships.group_id
-      AND small_groups.church_id = auth.church_id()
+      AND small_groups.church_id = public.get_church_id()
     )
   );
 
@@ -271,33 +272,33 @@ CREATE POLICY "Church members can manage memberships"
     EXISTS (
       SELECT 1 FROM small_groups
       WHERE small_groups.id = group_memberships.group_id
-      AND small_groups.church_id = auth.church_id()
+      AND small_groups.church_id = public.get_church_id()
     )
   );
 
 -- Interactions: scoped to church
 CREATE POLICY "Church members can view interactions"
   ON interactions FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can create interactions"
   ON interactions FOR INSERT
-  WITH CHECK (church_id = auth.church_id());
+  WITH CHECK (church_id = public.get_church_id());
 
 -- Tasks: scoped to church
 CREATE POLICY "Church members can view tasks"
   ON tasks FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage tasks"
   ON tasks FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Prayer Requests: scoped to church, private ones visible to staff+
 CREATE POLICY "Church members can view public prayers"
   ON prayer_requests FOR SELECT
   USING (
-    church_id = auth.church_id()
+    church_id = public.get_church_id()
     AND (
       NOT is_private
       OR EXISTS (
@@ -310,34 +311,34 @@ CREATE POLICY "Church members can view public prayers"
 
 CREATE POLICY "Church members can manage prayers"
   ON prayer_requests FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Calendar Events: scoped to church
 CREATE POLICY "Church members can view events"
   ON calendar_events FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage events"
   ON calendar_events FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Attendance: scoped to church
 CREATE POLICY "Church members can view attendance"
   ON attendance FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage attendance"
   ON attendance FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Giving: scoped to church
 CREATE POLICY "Church members can view giving"
   ON giving FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage giving"
   ON giving FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- ============================================
 -- UPDATED_AT TRIGGER

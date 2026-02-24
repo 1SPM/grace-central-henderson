@@ -150,29 +150,29 @@ ALTER TABLE leader_availability ENABLE ROW LEVEL SECURITY;
 -- Leader Applications: scoped to church
 CREATE POLICY "Church members can view leader applications"
   ON leader_applications FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage leader applications"
   ON leader_applications FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Pastoral Sessions: scoped to church
 CREATE POLICY "Church members can view pastoral sessions"
   ON pastoral_sessions FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage pastoral sessions"
   ON pastoral_sessions FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- Leader Availability: scoped to church
 CREATE POLICY "Church members can view leader availability"
   ON leader_availability FOR SELECT
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 CREATE POLICY "Church members can manage leader availability"
   ON leader_availability FOR ALL
-  USING (church_id = auth.church_id());
+  USING (church_id = public.get_church_id());
 
 -- ============================================
 -- UPDATED_AT TRIGGERS
