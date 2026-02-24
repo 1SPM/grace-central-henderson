@@ -56,7 +56,7 @@ CREATE TABLE leader_applications (
   training_modules_done TEXT[] NOT NULL DEFAULT '{}',
 
   -- References
-  "references" JSONB NOT NULL DEFAULT '[]',
+  reference_contacts JSONB NOT NULL DEFAULT '[]',
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
