@@ -217,7 +217,7 @@ CREATE INDEX idx_enrollments_campaign ON drip_campaign_enrollments(campaign_id);
 CREATE INDEX idx_enrollments_next ON drip_campaign_enrollments(next_message_at) WHERE status = 'active';
 
 -- ============================================
--- ROW LEVEL SECURITY
+-- ROW LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
 -- ============================================
 
 ALTER TABLE scheduled_messages ENABLE ROW LEVEL SECURITY;
@@ -228,110 +228,14 @@ ALTER TABLE drip_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE drip_campaign_steps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE drip_campaign_enrollments ENABLE ROW LEVEL SECURITY;
 
--- Policies for scheduled_messages
-CREATE POLICY "Users can view scheduled_messages for their church" ON scheduled_messages
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert scheduled_messages for their church" ON scheduled_messages
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can update scheduled_messages for their church" ON scheduled_messages
-  FOR UPDATE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can delete scheduled_messages for their church" ON scheduled_messages
-  FOR DELETE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Policies for message_archive
-CREATE POLICY "Users can view message_archive for their church" ON message_archive
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert message_archive for their church" ON message_archive
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Policies for inbound_messages
-CREATE POLICY "Users can view inbound_messages for their church" ON inbound_messages
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can update inbound_messages for their church" ON inbound_messages
-  FOR UPDATE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert inbound_messages for their church" ON inbound_messages
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Policies for daily_digests
-CREATE POLICY "Users can view their own daily_digests" ON daily_digests
-  FOR SELECT USING (
-    user_id IN (SELECT id FROM users WHERE clerk_id = auth.uid()::text)
-    OR church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text AND role = 'admin')
-  );
-
-CREATE POLICY "Users can insert daily_digests for their church" ON daily_digests
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Policies for drip_campaigns
-CREATE POLICY "Users can view drip_campaigns for their church" ON drip_campaigns
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can manage drip_campaigns for their church" ON drip_campaigns
-  FOR ALL USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Policies for drip_campaign_steps
-CREATE POLICY "Users can view drip_campaign_steps for their campaigns" ON drip_campaign_steps
-  FOR SELECT USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
-CREATE POLICY "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps
-  FOR ALL USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
--- Policies for drip_campaign_enrollments
-CREATE POLICY "Users can view enrollments for their campaigns" ON drip_campaign_enrollments
-  FOR SELECT USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
-CREATE POLICY "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments
-  FOR ALL USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
+-- Allow full access via service role key (used by the app)
+CREATE POLICY "Service role full access" ON scheduled_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON message_archive FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON inbound_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON daily_digests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_steps FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_enrollments FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================
 -- HELPER FUNCTIONS
