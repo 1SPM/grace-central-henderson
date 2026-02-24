@@ -1,20 +1,20 @@
--- ============================================================
--- GRACE CRM - Combined Reset, Migration & Seed Script
--- ============================================================
--- This file drops all tables, re-creates them via migrations,
--- and populates seed data. Safe to run on a fresh or existing DB.
--- ============================================================
+-- ============================================
+-- GRACE CRM: Combined Reset, Migrations & Seed
+-- Auto-generated combined file
+-- ============================================
 
--- ############################################################
--- SECTION 1: RESET - Drop all tables in reverse dependency order
--- ############################################################
+-- ############################################
+-- SECTION 1: RESET
+-- Drop all tables in reverse dependency order
+-- and drop all functions
+-- ############################################
 
--- 004: Agent logging tables
+-- Migration 004 tables (agent logging)
 DROP TABLE IF EXISTS agent_executions CASCADE;
 DROP TABLE IF EXISTS agent_stats CASCADE;
 DROP TABLE IF EXISTS agent_logs CASCADE;
 
--- 003: AI messaging tables
+-- Migration 003 tables (AI messaging)
 DROP TABLE IF EXISTS drip_campaign_enrollments CASCADE;
 DROP TABLE IF EXISTS drip_campaign_steps CASCADE;
 DROP TABLE IF EXISTS drip_campaigns CASCADE;
@@ -23,7 +23,12 @@ DROP TABLE IF EXISTS inbound_messages CASCADE;
 DROP TABLE IF EXISTS message_archive CASCADE;
 DROP TABLE IF EXISTS scheduled_messages CASCADE;
 
--- 002: Collection & donation tables
+-- Migration 002b tables (leader onboarding & sessions)
+DROP TABLE IF EXISTS leader_availability CASCADE;
+DROP TABLE IF EXISTS pastoral_sessions CASCADE;
+DROP TABLE IF EXISTS leader_applications CASCADE;
+
+-- Migration 002a tables (collection & donation)
 DROP TABLE IF EXISTS giving_statements CASCADE;
 DROP TABLE IF EXISTS recurring_giving CASCADE;
 DROP TABLE IF EXISTS batch_items CASCADE;
@@ -31,12 +36,7 @@ DROP TABLE IF EXISTS donation_batches CASCADE;
 DROP TABLE IF EXISTS pledges CASCADE;
 DROP TABLE IF EXISTS campaigns CASCADE;
 
--- 002: Leader onboarding tables
-DROP TABLE IF EXISTS leader_availability CASCADE;
-DROP TABLE IF EXISTS pastoral_sessions CASCADE;
-DROP TABLE IF EXISTS leader_applications CASCADE;
-
--- 001: Core tables (reverse dependency order)
+-- Migration 001 tables (core schema - reverse dependency order)
 DROP TABLE IF EXISTS giving CASCADE;
 DROP TABLE IF EXISTS attendance CASCADE;
 DROP TABLE IF EXISTS calendar_events CASCADE;
@@ -49,19 +49,20 @@ DROP TABLE IF EXISTS people CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS churches CASCADE;
 
--- Drop helper functions
+-- Drop all functions
+DROP FUNCTION IF EXISTS update_updated_at() CASCADE;
 DROP FUNCTION IF EXISTS calculate_pledge_fulfillment(UUID) CASCADE;
 DROP FUNCTION IF EXISTS get_pending_messages(UUID) CASCADE;
 DROP FUNCTION IF EXISTS get_daily_digest_data(UUID, DATE) CASCADE;
 DROP FUNCTION IF EXISTS insert_agent_log(UUID, VARCHAR, VARCHAR, TEXT, JSONB) CASCADE;
 DROP FUNCTION IF EXISTS update_agent_stats(UUID, VARCHAR, INTEGER, INTEGER) CASCADE;
-DROP FUNCTION IF EXISTS update_updated_at() CASCADE;
 DROP FUNCTION IF EXISTS public.get_church_id() CASCADE;
 
 
--- ############################################################
+-- ############################################
 -- SECTION 2: Migration 001 - Initial Schema
--- ############################################################
+-- Source: supabase/migrations/001_initial_schema.sql
+-- ############################################
 
 -- GRACE CRM Initial Schema
 -- Multi-tenant church management with Row-Level Security
@@ -346,10 +347,10 @@ DROP TRIGGER IF EXISTS set_updated_at ON calendar_events;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON calendar_events
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-
--- ############################################################
--- SECTION 3: Migration 002 - Collection & Donation System
--- ############################################################
+-- ############################################
+-- SECTION 3: Migration 002a - Collection & Donation System
+-- Source: supabase/migrations/002_collection_donation_system.sql
+-- ############################################
 
 -- Collection & Donation Management System
 -- Adds pledges, campaigns, donation batches, and recurring subscriptions
@@ -595,10 +596,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
--- ############################################################
--- SECTION 4: Migration 002 - Leader Onboarding & Sessions
--- ############################################################
+-- ############################################
+-- SECTION 4: Migration 002b - Leader Onboarding & Sessions
+-- Source: supabase/migrations/002_leader_onboarding_sessions.sql
+-- ############################################
 
 -- GRACE CRM - Leader Onboarding & Pastoral Sessions
 -- Migration: 002_leader_onboarding_sessions.sql
@@ -771,10 +772,10 @@ DROP TRIGGER IF EXISTS set_updated_at ON pastoral_sessions;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON pastoral_sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-
--- ############################################################
+-- ############################################
 -- SECTION 5: Migration 003 - AI Messaging System
--- ############################################################
+-- Source: supabase/migrations/003_ai_messaging_system.sql
+-- ############################################
 
 -- AI Messaging System Schema
 -- Adds support for content calendar, message scheduling, and reply handling
@@ -1121,10 +1122,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-
--- ############################################################
+-- ############################################
 -- SECTION 6: Migration 004 - Agent Logging System
--- ############################################################
+-- Source: supabase/migrations/004_agent_logging_system.sql
+-- ############################################
 
 -- Agent Logging System
 -- Provides persistent storage for AI agent execution logs and statistics
@@ -1273,23 +1274,20 @@ CREATE POLICY "Service role can manage agent_executions"
   USING (true)
   WITH CHECK (true);
 
-
--- ############################################################
+-- ############################################
 -- SECTION 7: Migration 005 - Row Level Security
--- ############################################################
+-- Source: supabase/migrations/005_row_level_security.sql
+-- ############################################
 
 -- GRACE CRM - Row Level Security Policies
 -- Migration: 005_row_level_security.sql
--- NOTE: All statements use DROP IF EXISTS before CREATE for idempotent re-runs.
 --
--- This migration adds proper church-scoped RLS policies.
--- Prerequisites: Supabase auth must be configured with app_metadata.church_id in JWT claims.
---
--- To apply: Run this in the Supabase SQL editor AFTER configuring auth,
--- or it will be applied automatically via Supabase CLI migrations.
+-- DEV MODE: Permissive policies that allow all access.
+-- When Clerk JWT is configured with app_metadata.church_id,
+-- replace these with church-scoped policies for production.
 
 -- ============================================
--- HELPER FUNCTION
+-- HELPER FUNCTION (for future church-scoped policies)
 -- ============================================
 
 CREATE OR REPLACE FUNCTION public.get_church_id()
@@ -1298,9 +1296,42 @@ RETURNS UUID AS $$
 $$ LANGUAGE sql STABLE;
 
 -- ============================================
--- DROP PERMISSIVE POLICIES (from initial migrations)
+-- ENSURE RLS IS ENABLED (required for policies to work)
 -- ============================================
 
+ALTER TABLE churches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE people ENABLE ROW LEVEL SECURITY;
+ALTER TABLE small_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE group_memberships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE interactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prayer_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE giving ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leader_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pastoral_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leader_availability ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scheduled_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE message_archive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inbound_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_digests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaign_steps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drip_campaign_enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pledges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE donation_batches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE batch_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_giving ENABLE ROW LEVEL SECURITY;
+ALTER TABLE giving_statements ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- DROP ALL EXISTING POLICIES (clean slate)
+-- ============================================
+
+-- 001 tables
 DROP POLICY IF EXISTS "Service role full access" ON churches;
 DROP POLICY IF EXISTS "Service role full access" ON users;
 DROP POLICY IF EXISTS "Service role full access" ON people;
@@ -1329,11 +1360,7 @@ DROP POLICY IF EXISTS "Service role full access" ON batch_items;
 DROP POLICY IF EXISTS "Service role full access" ON recurring_giving;
 DROP POLICY IF EXISTS "Service role full access" ON giving_statements;
 
--- ============================================
--- DROP ALL SCOPED POLICIES (for idempotent re-runs)
--- ============================================
-
--- 001 tables
+-- Scoped policies (from previous version of this migration)
 DROP POLICY IF EXISTS "Users can view own church" ON churches;
 DROP POLICY IF EXISTS "Users can view same-church users" ON users;
 DROP POLICY IF EXISTS "Church members can view people" ON people;
@@ -1356,16 +1383,12 @@ DROP POLICY IF EXISTS "Church members can view attendance" ON attendance;
 DROP POLICY IF EXISTS "Church members can manage attendance" ON attendance;
 DROP POLICY IF EXISTS "Church members can view giving" ON giving;
 DROP POLICY IF EXISTS "Church members can manage giving" ON giving;
-
--- 002 leader tables
 DROP POLICY IF EXISTS "Church members can view leader applications" ON leader_applications;
 DROP POLICY IF EXISTS "Church members can manage leader applications" ON leader_applications;
 DROP POLICY IF EXISTS "Church members can view pastoral sessions" ON pastoral_sessions;
 DROP POLICY IF EXISTS "Church members can manage pastoral sessions" ON pastoral_sessions;
 DROP POLICY IF EXISTS "Church members can view leader availability" ON leader_availability;
 DROP POLICY IF EXISTS "Church members can manage leader availability" ON leader_availability;
-
--- 003 tables
 DROP POLICY IF EXISTS "Users can view scheduled_messages for their church" ON scheduled_messages;
 DROP POLICY IF EXISTS "Users can insert scheduled_messages for their church" ON scheduled_messages;
 DROP POLICY IF EXISTS "Users can update scheduled_messages for their church" ON scheduled_messages;
@@ -1383,8 +1406,6 @@ DROP POLICY IF EXISTS "Users can view drip_campaign_steps for their campaigns" O
 DROP POLICY IF EXISTS "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps;
 DROP POLICY IF EXISTS "Users can view enrollments for their campaigns" ON drip_campaign_enrollments;
 DROP POLICY IF EXISTS "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments;
-
--- 002 collection tables
 DROP POLICY IF EXISTS "Church members can view campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Church members can manage campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Church members can view pledges" ON pledges;
@@ -1399,344 +1420,43 @@ DROP POLICY IF EXISTS "Church members can view giving statements" ON giving_stat
 DROP POLICY IF EXISTS "Church members can manage giving statements" ON giving_statements;
 
 -- ============================================
--- 001 TABLE POLICIES
+-- DEV: PERMISSIVE POLICIES (allow all access)
 -- ============================================
+-- These use USING (true) / WITH CHECK (true) so the anon key works.
+-- For production, replace with church-scoped policies.
 
--- Churches: users can only see their own church
-CREATE POLICY "Users can view own church"
-  ON churches FOR SELECT
-  USING (id = public.get_church_id());
+CREATE POLICY "Service role full access" ON churches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON users FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON people FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON small_groups FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON group_memberships FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON interactions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON tasks FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON prayer_requests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON calendar_events FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON attendance FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON giving FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON leader_applications FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pastoral_sessions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON leader_availability FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON scheduled_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON message_archive FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON inbound_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON daily_digests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_steps FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON drip_campaign_enrollments FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON campaigns FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pledges FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON donation_batches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON batch_items FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON recurring_giving FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON giving_statements FOR ALL USING (true) WITH CHECK (true);
 
--- Users: scoped to same church
-CREATE POLICY "Users can view same-church users"
-  ON users FOR SELECT
-  USING (church_id = public.get_church_id());
-
--- People: full CRUD scoped to church
-CREATE POLICY "Church members can view people"
-  ON people FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can insert people"
-  ON people FOR INSERT
-  WITH CHECK (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can update people"
-  ON people FOR UPDATE
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church admins can delete people"
-  ON people FOR DELETE
-  USING (church_id = public.get_church_id());
-
--- Small Groups: scoped to church
-CREATE POLICY "Church members can view groups"
-  ON small_groups FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage groups"
-  ON small_groups FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Group Memberships: via group's church_id
-CREATE POLICY "Church members can view memberships"
-  ON group_memberships FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM small_groups
-      WHERE small_groups.id = group_memberships.group_id
-      AND small_groups.church_id = public.get_church_id()
-    )
-  );
-
-CREATE POLICY "Church members can manage memberships"
-  ON group_memberships FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM small_groups
-      WHERE small_groups.id = group_memberships.group_id
-      AND small_groups.church_id = public.get_church_id()
-    )
-  );
-
--- Interactions: scoped to church
-CREATE POLICY "Church members can view interactions"
-  ON interactions FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can create interactions"
-  ON interactions FOR INSERT
-  WITH CHECK (church_id = public.get_church_id());
-
--- Tasks: scoped to church
-CREATE POLICY "Church members can view tasks"
-  ON tasks FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage tasks"
-  ON tasks FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Prayer Requests: scoped to church, private ones visible to staff+
-CREATE POLICY "Church members can view public prayers"
-  ON prayer_requests FOR SELECT
-  USING (
-    church_id = public.get_church_id()
-    AND (
-      NOT is_private
-      OR EXISTS (
-        SELECT 1 FROM users
-        WHERE users.id = auth.uid()
-        AND users.role IN ('admin', 'staff')
-      )
-    )
-  );
-
-CREATE POLICY "Church members can manage prayers"
-  ON prayer_requests FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Calendar Events: scoped to church
-CREATE POLICY "Church members can view events"
-  ON calendar_events FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage events"
-  ON calendar_events FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Attendance: scoped to church
-CREATE POLICY "Church members can view attendance"
-  ON attendance FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage attendance"
-  ON attendance FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Giving: scoped to church
-CREATE POLICY "Church members can view giving"
-  ON giving FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage giving"
-  ON giving FOR ALL
-  USING (church_id = public.get_church_id());
-
--- ============================================
--- 002 TABLE POLICIES
--- ============================================
-
--- Leader Applications: scoped to church
-CREATE POLICY "Church members can view leader applications"
-  ON leader_applications FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage leader applications"
-  ON leader_applications FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Pastoral Sessions: scoped to church
-CREATE POLICY "Church members can view pastoral sessions"
-  ON pastoral_sessions FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage pastoral sessions"
-  ON pastoral_sessions FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Leader Availability: scoped to church
-CREATE POLICY "Church members can view leader availability"
-  ON leader_availability FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage leader availability"
-  ON leader_availability FOR ALL
-  USING (church_id = public.get_church_id());
-
--- ============================================
--- 003 TABLE POLICIES
--- ============================================
-
--- Scheduled Messages
-CREATE POLICY "Users can view scheduled_messages for their church" ON scheduled_messages
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert scheduled_messages for their church" ON scheduled_messages
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can update scheduled_messages for their church" ON scheduled_messages
-  FOR UPDATE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can delete scheduled_messages for their church" ON scheduled_messages
-  FOR DELETE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Message Archive
-CREATE POLICY "Users can view message_archive for their church" ON message_archive
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert message_archive for their church" ON message_archive
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Inbound Messages
-CREATE POLICY "Users can view inbound_messages for their church" ON inbound_messages
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can update inbound_messages for their church" ON inbound_messages
-  FOR UPDATE USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can insert inbound_messages for their church" ON inbound_messages
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Daily Digests
-CREATE POLICY "Users can view their own daily_digests" ON daily_digests
-  FOR SELECT USING (
-    user_id IN (SELECT id FROM users WHERE clerk_id = auth.uid()::text)
-    OR church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text AND role = 'admin')
-  );
-
-CREATE POLICY "Users can insert daily_digests for their church" ON daily_digests
-  FOR INSERT WITH CHECK (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Drip Campaigns
-CREATE POLICY "Users can view drip_campaigns for their church" ON drip_campaigns
-  FOR SELECT USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
-CREATE POLICY "Users can manage drip_campaigns for their church" ON drip_campaigns
-  FOR ALL USING (
-    church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-  );
-
--- Drip Campaign Steps
-CREATE POLICY "Users can view drip_campaign_steps for their campaigns" ON drip_campaign_steps
-  FOR SELECT USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
-CREATE POLICY "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps
-  FOR ALL USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
--- Drip Campaign Enrollments
-CREATE POLICY "Users can view enrollments for their campaigns" ON drip_campaign_enrollments
-  FOR SELECT USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
-CREATE POLICY "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments
-  FOR ALL USING (
-    campaign_id IN (
-      SELECT id FROM drip_campaigns
-      WHERE church_id IN (SELECT church_id FROM users WHERE clerk_id = auth.uid()::text)
-    )
-  );
-
--- ============================================
--- 002_COLLECTION TABLE POLICIES
--- ============================================
-
--- Campaigns: scoped to church
-CREATE POLICY "Church members can view campaigns"
-  ON campaigns FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage campaigns"
-  ON campaigns FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Pledges: scoped to church
-CREATE POLICY "Church members can view pledges"
-  ON pledges FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage pledges"
-  ON pledges FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Donation Batches: scoped to church
-CREATE POLICY "Church members can view donation batches"
-  ON donation_batches FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage donation batches"
-  ON donation_batches FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Batch Items: via batch's church_id
-CREATE POLICY "Church members can view batch items"
-  ON batch_items FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM donation_batches
-      WHERE donation_batches.id = batch_items.batch_id
-      AND donation_batches.church_id = public.get_church_id()
-    )
-  );
-
-CREATE POLICY "Church members can manage batch items"
-  ON batch_items FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM donation_batches
-      WHERE donation_batches.id = batch_items.batch_id
-      AND donation_batches.church_id = public.get_church_id()
-    )
-  );
-
--- Recurring Giving: scoped to church
-CREATE POLICY "Church members can view recurring giving"
-  ON recurring_giving FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage recurring giving"
-  ON recurring_giving FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Giving Statements: scoped to church
-CREATE POLICY "Church members can view giving statements"
-  ON giving_statements FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage giving statements"
-  ON giving_statements FOR ALL
-  USING (church_id = public.get_church_id());
-
-
--- ############################################################
+-- ############################################
 -- SECTION 8: Seed Data
--- ############################################################
+-- Source: supabase/seed.sql
+-- ############################################
 
 -- Grace CRM Comprehensive Seed Data
 -- Run this after migrations to populate test data
