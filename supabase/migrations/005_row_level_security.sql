@@ -1,14 +1,12 @@
 -- GRACE CRM - Row Level Security Policies
 -- Migration: 005_row_level_security.sql
+-- NOTE: All statements use DROP IF EXISTS before CREATE for idempotent re-runs.
 --
 -- This migration adds proper church-scoped RLS policies.
 -- Prerequisites: Supabase auth must be configured with app_metadata.church_id in JWT claims.
 --
 -- To apply: Run this in the Supabase SQL editor AFTER configuring auth,
 -- or it will be applied automatically via Supabase CLI migrations.
---
--- IMPORTANT: Before running this migration, drop the permissive "Service role full access"
--- policies from tables that will get proper scoped policies below.
 
 -- ============================================
 -- HELPER FUNCTION
@@ -50,6 +48,75 @@ DROP POLICY IF EXISTS "Service role full access" ON donation_batches;
 DROP POLICY IF EXISTS "Service role full access" ON batch_items;
 DROP POLICY IF EXISTS "Service role full access" ON recurring_giving;
 DROP POLICY IF EXISTS "Service role full access" ON giving_statements;
+
+-- ============================================
+-- DROP ALL SCOPED POLICIES (for idempotent re-runs)
+-- ============================================
+
+-- 001 tables
+DROP POLICY IF EXISTS "Users can view own church" ON churches;
+DROP POLICY IF EXISTS "Users can view same-church users" ON users;
+DROP POLICY IF EXISTS "Church members can view people" ON people;
+DROP POLICY IF EXISTS "Church members can insert people" ON people;
+DROP POLICY IF EXISTS "Church members can update people" ON people;
+DROP POLICY IF EXISTS "Church admins can delete people" ON people;
+DROP POLICY IF EXISTS "Church members can view groups" ON small_groups;
+DROP POLICY IF EXISTS "Church members can manage groups" ON small_groups;
+DROP POLICY IF EXISTS "Church members can view memberships" ON group_memberships;
+DROP POLICY IF EXISTS "Church members can manage memberships" ON group_memberships;
+DROP POLICY IF EXISTS "Church members can view interactions" ON interactions;
+DROP POLICY IF EXISTS "Church members can create interactions" ON interactions;
+DROP POLICY IF EXISTS "Church members can view tasks" ON tasks;
+DROP POLICY IF EXISTS "Church members can manage tasks" ON tasks;
+DROP POLICY IF EXISTS "Church members can view public prayers" ON prayer_requests;
+DROP POLICY IF EXISTS "Church members can manage prayers" ON prayer_requests;
+DROP POLICY IF EXISTS "Church members can view events" ON calendar_events;
+DROP POLICY IF EXISTS "Church members can manage events" ON calendar_events;
+DROP POLICY IF EXISTS "Church members can view attendance" ON attendance;
+DROP POLICY IF EXISTS "Church members can manage attendance" ON attendance;
+DROP POLICY IF EXISTS "Church members can view giving" ON giving;
+DROP POLICY IF EXISTS "Church members can manage giving" ON giving;
+
+-- 002 leader tables
+DROP POLICY IF EXISTS "Church members can view leader applications" ON leader_applications;
+DROP POLICY IF EXISTS "Church members can manage leader applications" ON leader_applications;
+DROP POLICY IF EXISTS "Church members can view pastoral sessions" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Church members can manage pastoral sessions" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Church members can view leader availability" ON leader_availability;
+DROP POLICY IF EXISTS "Church members can manage leader availability" ON leader_availability;
+
+-- 003 tables
+DROP POLICY IF EXISTS "Users can view scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can insert scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can update scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can delete scheduled_messages for their church" ON scheduled_messages;
+DROP POLICY IF EXISTS "Users can view message_archive for their church" ON message_archive;
+DROP POLICY IF EXISTS "Users can insert message_archive for their church" ON message_archive;
+DROP POLICY IF EXISTS "Users can view inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can update inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can insert inbound_messages for their church" ON inbound_messages;
+DROP POLICY IF EXISTS "Users can view their own daily_digests" ON daily_digests;
+DROP POLICY IF EXISTS "Users can insert daily_digests for their church" ON daily_digests;
+DROP POLICY IF EXISTS "Users can view drip_campaigns for their church" ON drip_campaigns;
+DROP POLICY IF EXISTS "Users can manage drip_campaigns for their church" ON drip_campaigns;
+DROP POLICY IF EXISTS "Users can view drip_campaign_steps for their campaigns" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Users can manage drip_campaign_steps for their campaigns" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Users can view enrollments for their campaigns" ON drip_campaign_enrollments;
+DROP POLICY IF EXISTS "Users can manage enrollments for their campaigns" ON drip_campaign_enrollments;
+
+-- 002 collection tables
+DROP POLICY IF EXISTS "Church members can view campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Church members can manage campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Church members can view pledges" ON pledges;
+DROP POLICY IF EXISTS "Church members can manage pledges" ON pledges;
+DROP POLICY IF EXISTS "Church members can view donation batches" ON donation_batches;
+DROP POLICY IF EXISTS "Church members can manage donation batches" ON donation_batches;
+DROP POLICY IF EXISTS "Church members can view batch items" ON batch_items;
+DROP POLICY IF EXISTS "Church members can manage batch items" ON batch_items;
+DROP POLICY IF EXISTS "Church members can view recurring giving" ON recurring_giving;
+DROP POLICY IF EXISTS "Church members can manage recurring giving" ON recurring_giving;
+DROP POLICY IF EXISTS "Church members can view giving statements" ON giving_statements;
+DROP POLICY IF EXISTS "Church members can manage giving statements" ON giving_statements;
 
 -- ============================================
 -- 001 TABLE POLICIES

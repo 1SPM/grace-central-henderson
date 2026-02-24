@@ -1,11 +1,12 @@
 -- GRACE CRM - Leader Onboarding & Pastoral Sessions
 -- Migration: 002_leader_onboarding_sessions.sql
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
 
 -- ============================================
 -- LEADER APPLICATIONS (Onboarding Pipeline)
 -- ============================================
 
-CREATE TABLE leader_applications (
+CREATE TABLE IF NOT EXISTS leader_applications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -66,7 +67,7 @@ CREATE TABLE leader_applications (
 -- PASTORAL SESSIONS (Session Tracking)
 -- ============================================
 
-CREATE TABLE pastoral_sessions (
+CREATE TABLE IF NOT EXISTS pastoral_sessions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
 
@@ -112,7 +113,7 @@ CREATE TABLE pastoral_sessions (
 -- LEADER AVAILABILITY
 -- ============================================
 
-CREATE TABLE leader_availability (
+CREATE TABLE IF NOT EXISTS leader_availability (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   leader_id TEXT NOT NULL,           -- References LeaderProfile.id
@@ -127,17 +128,17 @@ CREATE TABLE leader_availability (
 -- INDEXES
 -- ============================================
 
-CREATE INDEX idx_leader_applications_church ON leader_applications(church_id);
-CREATE INDEX idx_leader_applications_status ON leader_applications(church_id, status);
-CREATE INDEX idx_leader_applications_person ON leader_applications(person_id);
+CREATE INDEX IF NOT EXISTS idx_leader_applications_church ON leader_applications(church_id);
+CREATE INDEX IF NOT EXISTS idx_leader_applications_status ON leader_applications(church_id, status);
+CREATE INDEX IF NOT EXISTS idx_leader_applications_person ON leader_applications(person_id);
 
-CREATE INDEX idx_pastoral_sessions_church ON pastoral_sessions(church_id);
-CREATE INDEX idx_pastoral_sessions_leader ON pastoral_sessions(leader_id);
-CREATE INDEX idx_pastoral_sessions_person ON pastoral_sessions(person_id);
-CREATE INDEX idx_pastoral_sessions_date ON pastoral_sessions(church_id, started_at DESC);
-CREATE INDEX idx_pastoral_sessions_category ON pastoral_sessions(church_id, category);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_church ON pastoral_sessions(church_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_leader ON pastoral_sessions(leader_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_person ON pastoral_sessions(person_id);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_date ON pastoral_sessions(church_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pastoral_sessions_category ON pastoral_sessions(church_id, category);
 
-CREATE INDEX idx_leader_availability_leader ON leader_availability(leader_id);
+CREATE INDEX IF NOT EXISTS idx_leader_availability_leader ON leader_availability(leader_id);
 
 -- ============================================
 -- ROW-LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
@@ -148,6 +149,10 @@ ALTER TABLE pastoral_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leader_availability ENABLE ROW LEVEL SECURITY;
 
 -- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON leader_applications;
+DROP POLICY IF EXISTS "Service role full access" ON pastoral_sessions;
+DROP POLICY IF EXISTS "Service role full access" ON leader_availability;
+
 CREATE POLICY "Service role full access" ON leader_applications FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON pastoral_sessions FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON leader_availability FOR ALL USING (true) WITH CHECK (true);
@@ -156,8 +161,10 @@ CREATE POLICY "Service role full access" ON leader_availability FOR ALL USING (t
 -- UPDATED_AT TRIGGERS
 -- ============================================
 
+DROP TRIGGER IF EXISTS set_updated_at ON leader_applications;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON leader_applications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON pastoral_sessions;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON pastoral_sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
