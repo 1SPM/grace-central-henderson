@@ -274,7 +274,7 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
 
 // Demo auth provider for when Clerk is not configured
 // SECURITY: Only enabled in development or when explicitly opted-in
-// Uses 'staff' role (not admin) to limit blast radius of demo access
+// Uses 'admin' role so demo users can explore all features (including Settings)
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
   const demoUser: User = {
     id: 'demo-user',
@@ -282,7 +282,7 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     email: 'demo@grace-crm.com',
     firstName: 'Demo',
     lastName: 'User',
-    role: 'staff',
+    role: 'admin',
     churchId: DEFAULT_CHURCH_ID,
     createdAt: new Date().toISOString(),
   };
@@ -292,12 +292,12 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     isSignedIn: true,
     user: demoUser,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: ROLE_PERMISSIONS.staff,
+    permissions: ROLE_PERMISSIONS.admin,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => ROLE_PERMISSIONS.staff[permission],
-    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.staff[p]),
+    hasPermission: (permission) => ROLE_PERMISSIONS.admin[permission],
+    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.admin[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),

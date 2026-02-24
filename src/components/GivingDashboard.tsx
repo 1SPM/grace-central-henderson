@@ -55,7 +55,7 @@ export function GivingDashboard({
   pledges = [],
   onNavigate,
 }: GivingDashboardProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter' | 'year' | 'all'>('month');
 
   // Calculate analytics
   const analytics: GivingAnalytics = useMemo(() => {
@@ -64,7 +64,8 @@ export function GivingDashboard({
     const lastYear = currentYear - 1;
 
     // Filter by period
-    const getPeriodStart = () => {
+    const getPeriodStart = (): Date | null => {
+      if (selectedPeriod === 'all') return null;
       const date = new Date();
       switch (selectedPeriod) {
         case 'week':
@@ -84,7 +85,7 @@ export function GivingDashboard({
     };
 
     const periodStart = getPeriodStart();
-    const periodGiving = giving.filter(g => new Date(g.date) >= periodStart);
+    const periodGiving = periodStart ? giving.filter(g => new Date(g.date) >= periodStart) : giving;
 
     // Current year vs last year
     const currentYearGiving = giving.filter(g => new Date(g.date).getFullYear() === currentYear);
@@ -96,7 +97,8 @@ export function GivingDashboard({
     const totalGiving = periodGiving.reduce((sum, g) => sum + g.amount, 0);
 
     // Monthly average
-    const monthsInPeriod = selectedPeriod === 'week' ? 0.25 :
+    const monthsInPeriod = selectedPeriod === 'all' ? Math.max(1, Math.ceil((now.getTime() - Math.min(...giving.map(g => new Date(g.date).getTime()), now.getTime())) / (1000 * 60 * 60 * 24 * 30))) :
+                          selectedPeriod === 'week' ? 0.25 :
                           selectedPeriod === 'month' ? 1 :
                           selectedPeriod === 'quarter' ? 3 : 12;
     const monthlyAverage = monthsInPeriod > 0 ? totalGiving / monthsInPeriod : totalGiving;
@@ -137,7 +139,7 @@ export function GivingDashboard({
     // Donor stats
     const uniqueDonors = new Set(periodGiving.map(g => g.personId).filter(Boolean));
     const previousPeriodDonors = new Set(
-      giving
+      periodStart ? giving
         .filter(g => {
           const date = new Date(g.date);
           const prevPeriodStart = new Date(periodStart);
@@ -145,7 +147,7 @@ export function GivingDashboard({
           return date >= prevPeriodStart && date < periodStart;
         })
         .map(g => g.personId)
-        .filter(Boolean)
+        .filter(Boolean) : []
     );
     const returningDonors = [...uniqueDonors].filter(d => previousPeriodDonors.has(d as string));
     const donorRetention = previousPeriodDonors.size > 0
@@ -210,6 +212,7 @@ export function GivingDashboard({
             <option value="month">Last 30 days</option>
             <option value="quarter">Last quarter</option>
             <option value="year">Last year</option>
+            <option value="all">All time</option>
           </select>
           <button
             onClick={() => exportGivingToCSV(giving, people)}

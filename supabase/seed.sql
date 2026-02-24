@@ -507,7 +507,242 @@ INSERT INTO giving_statements (id, church_id, person_id, year, total_amount, by_
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
+-- EXPANDED DATA: 15 NEW PEOPLE (36-50)
+-- ============================================
+
+-- The Rodriguez Family (fam-rodriguez)
+-- Carlos (deacon, men's group), Elena (women's ministry, hospitality), Isabella (youth), Diego (kids)
+-- The Washington Family (fam-washington)
+-- Derek (usher, men's group), Keisha (choir, women's ministry), Zion (kids)
+-- The Patel Couple (fam-patel) - young professionals, regular attenders
+-- Raj, Priya
+-- Singles/Other:
+-- Ruth Patterson - 78, longest-standing member, prayer warrior
+-- Marcus Greene - 29, tech team volunteer, recently joined
+-- Olivia Foster - 23, college student, recent visitor
+-- Samuel Jackson - 33, single dad, regular
+-- Lily Jackson - 8, Samuel's daughter (fam-jackson)
+-- Dorothy Mitchell - 73, inactive due to health
+
+INSERT INTO people (id, church_id, first_name, last_name, email, phone, date_of_birth, gender, marital_status, membership_status, family_id, family_role, address_line1, city, state, zip_code, joined_date, first_visit_date, photo_url, tags, notes, custom_fields, engagement_score) VALUES
+  -- Rodriguez Family
+  ('00000000-0000-0000-0000-000000000036', '11111111-1111-1111-1111-111111111111', 'Carlos', 'Rodriguez', 'carlos.rodriguez@email.com', '(555) 901-2345', '1983-07-14', 'male', 'married', 'member', 'fam-rodriguez', 'head', '890 Cedar Lane', 'Springfield', 'IL', '62704', '2021-03-15', '2021-01-10', NULL, '["deacon", "mens-group", "spanish-ministry"]', 'Bilingual. Serves as deacon - leads Spanish-language prayer group. Construction business owner.', '{"occupation": "Business Owner", "employer": "Rodriguez Construction", "spiritual_gifts": ["leadership", "service"], "language": "English/Spanish"}', 88),
+  ('00000000-0000-0000-0000-000000000037', '11111111-1111-1111-1111-111111111111', 'Elena', 'Rodriguez', 'elena.rodriguez@email.com', '(555) 901-2346', '1985-11-22', 'female', 'married', 'member', 'fam-rodriguez', 'spouse', '890 Cedar Lane', 'Springfield', 'IL', '62704', '2021-03-15', '2021-01-10', NULL, '["womens-ministry", "hospitality", "spanish-ministry"]', 'Coordinates church potlucks. Active in women''s Bible study. Nurse at Springfield General.', '{"occupation": "Registered Nurse", "employer": "Springfield General Hospital", "spiritual_gifts": ["hospitality", "mercy"], "language": "English/Spanish"}', 85),
+  ('00000000-0000-0000-0000-000000000038', '11111111-1111-1111-1111-111111111111', 'Isabella', 'Rodriguez', NULL, NULL, '2011-09-30', 'female', 'single', 'member', 'fam-rodriguez', 'child', '890 Cedar Lane', 'Springfield', 'IL', '62704', '2021-03-15', '2021-01-10', NULL, '["youth-group", "child"]', '8th grader. Active in youth worship band - plays guitar.', '{"school": "Springfield Middle School", "grade": "8th"}', 65),
+  ('00000000-0000-0000-0000-000000000039', '11111111-1111-1111-1111-111111111111', 'Diego', 'Rodriguez', NULL, NULL, '2015-04-18', 'male', 'single', 'member', 'fam-rodriguez', 'child', '890 Cedar Lane', 'Springfield', 'IL', '62704', '2021-03-15', '2021-01-10', NULL, '["kids-ministry", "child"]', '5th grader. Loves the kids ministry program.', '{"school": "Lincoln Elementary", "grade": "5th"}', 55),
+
+  -- Washington Family
+  ('00000000-0000-0000-0000-000000000040', '11111111-1111-1111-1111-111111111111', 'Derek', 'Washington', 'derek.washington@email.com', '(555) 234-5678', '1980-08-05', 'male', 'married', 'member', 'fam-washington', 'head', '456 Elm Street', 'Springfield', 'IL', '62701', '2022-06-12', '2022-04-03', NULL, '["usher", "mens-group", "volunteer"]', 'Faithful usher. Joined men''s group immediately. Works at the fire department.', '{"occupation": "Firefighter", "employer": "Springfield Fire Department", "spiritual_gifts": ["service", "helps"]}', 82),
+  ('00000000-0000-0000-0000-000000000041', '11111111-1111-1111-1111-111111111111', 'Keisha', 'Washington', 'keisha.washington@email.com', '(555) 234-5679', '1982-03-19', 'female', 'married', 'member', 'fam-washington', 'spouse', '456 Elm Street', 'Springfield', 'IL', '62701', '2022-06-12', '2022-04-03', NULL, '["choir", "womens-ministry"]', 'Beautiful voice - joined choir first week. Active in women''s ministry. Elementary school teacher.', '{"occupation": "Teacher", "employer": "Springfield Elementary", "spiritual_gifts": ["teaching", "encouragement"]}', 80),
+  ('00000000-0000-0000-0000-000000000042', '11111111-1111-1111-1111-111111111111', 'Zion', 'Washington', NULL, NULL, '2018-01-30', 'male', 'single', 'member', 'fam-washington', 'child', '456 Elm Street', 'Springfield', 'IL', '62701', '2022-06-12', '2022-04-03', NULL, '["child", "kids-ministry"]', '2nd grader. Energetic and loves Sunday school crafts.', '{"school": "Springfield Elementary", "grade": "2nd"}', 50),
+
+  -- Patel Couple
+  ('00000000-0000-0000-0000-000000000043', '11111111-1111-1111-1111-111111111111', 'Raj', 'Patel', 'raj.patel@techcorp.com', '(555) 345-6789', '1988-10-12', 'male', 'married', 'regular', 'fam-patel', 'head', '1200 Tech Parkway, Apt 305', 'Springfield', 'IL', '62702', NULL, '2024-10-20', NULL, '["young-professional", "newcomer"]', 'Software engineer, relocated from Bay Area. Exploring faith. Attends regularly but hasn''t committed to membership yet.', '{"occupation": "Software Engineer", "employer": "TechCorp Inc", "how_found_us": "Google search"}', 52),
+  ('00000000-0000-0000-0000-000000000044', '11111111-1111-1111-1111-111111111111', 'Priya', 'Patel', 'priya.patel@email.com', '(555) 345-6790', '1990-06-08', 'female', 'married', 'regular', 'fam-patel', 'spouse', '1200 Tech Parkway, Apt 305', 'Springfield', 'IL', '62702', NULL, '2024-10-20', NULL, '["young-adult", "newcomer"]', 'Interested in women''s group but hasn''t attended yet. Graphic designer, works from home.', '{"occupation": "Graphic Designer", "employer": "Freelance", "how_found_us": "Came with husband"}', 40),
+
+  -- Singles/Other
+  ('00000000-0000-0000-0000-000000000045', '11111111-1111-1111-1111-111111111111', 'Ruth', 'Patterson', 'ruth.patterson@email.com', '(555) 111-2233', '1947-05-20', 'female', 'widowed', 'member', NULL, NULL, '22 Quiet Oaks Drive', 'Springfield', 'IL', '62703', '2008-01-15', '2007-11-04', NULL, '["prayer-team", "senior", "founding-member"]', 'Longest-standing active member. Prayer warrior - leads Tuesday morning prayer. Widowed 2019. Retired schoolteacher. Beloved by everyone.', '{"occupation": "Retired Teacher", "spiritual_gifts": ["prayer", "wisdom", "encouragement"], "emergency_contact": "Daughter: Susan Patterson (555) 111-4455"}', 90),
+  ('00000000-0000-0000-0000-000000000046', '11111111-1111-1111-1111-111111111111', 'Marcus', 'Greene', 'marcus.greene@email.com', '(555) 456-1122', '1996-03-28', 'male', 'single', 'member', NULL, NULL, '789 Downtown Lofts, Unit 12', 'Springfield', 'IL', '62701', '2024-01-20', '2023-11-05', NULL, '["tech-team", "young-adult", "volunteer"]', 'Runs the sound board and live stream every Sunday. IT professional. Started attending after breakup, found community here.', '{"occupation": "IT Specialist", "employer": "State of Illinois", "spiritual_gifts": ["service", "administration"], "how_found_us": "Friend invitation"}', 75),
+  ('00000000-0000-0000-0000-000000000047', '11111111-1111-1111-1111-111111111111', 'Olivia', 'Foster', 'olivia.foster@university.edu', '(555) 567-3344', '2002-08-15', 'female', 'single', 'visitor', NULL, NULL, '300 University Ave, Dorm B-204', 'Springfield', 'IL', '62701', NULL, '2026-02-09', NULL, '["first-time", "college-student"]', 'UIS grad student studying social work. Visited twice so far. Looking for community away from home. From Chicago.', '{"occupation": "Graduate Student", "employer": "University of Illinois Springfield", "how_found_us": "Campus flyer"}', 15),
+  ('00000000-0000-0000-0000-000000000048', '11111111-1111-1111-1111-111111111111', 'Samuel', 'Jackson', 'sam.jackson@email.com', '(555) 678-4455', '1992-12-03', 'male', 'divorced', 'regular', 'fam-jackson', 'head', '155 Maple Court', 'Springfield', 'IL', '62704', NULL, '2024-07-14', NULL, '["single-parent", "volunteer"]', 'Single dad raising Lily. Works nights at warehouse. Attends when schedule allows. Helped with fall festival setup. Going through tough custody situation.', '{"occupation": "Warehouse Supervisor", "employer": "Springfield Distribution Center", "how_found_us": "Neighbor invitation"}', 45),
+  ('00000000-0000-0000-0000-000000000049', '11111111-1111-1111-1111-111111111111', 'Lily', 'Jackson', NULL, NULL, '2017-10-25', 'female', 'single', 'regular', 'fam-jackson', 'child', '155 Maple Court', 'Springfield', 'IL', '62704', NULL, '2024-07-14', NULL, '["child", "kids-ministry"]', 'Sweet girl. Loves kids ministry. Dad brings her whenever he can.', '{"school": "Maple Elementary", "grade": "3rd"}', 35),
+  ('00000000-0000-0000-0000-000000000050', '11111111-1111-1111-1111-111111111111', 'Dorothy', 'Mitchell', 'dorothy.mitchell@email.com', '(555) 789-5566', '1952-09-18', 'female', 'married', 'inactive', NULL, NULL, '45 Sunrise Senior Living', 'Springfield', 'IL', '62703', '2012-05-10', '2012-03-18', NULL, '["senior", "homebound"]', 'Moved to assisted living after hip surgery in 2024. Husband Harold visits church occasionally. Misses the community terribly. Would love visitors.', '{"occupation": "Retired", "emergency_contact": "Husband: Harold Mitchell (555) 789-5567", "health_notes": "Hip replacement 2024, limited mobility"}', 10)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: INTERACTIONS FOR NEW PEOPLE
+-- ============================================
+INSERT INTO interactions (id, church_id, person_id, interaction_type, direction, channel, subject, body, logged_by, interaction_date) VALUES
+  -- Carlos Rodriguez
+  ('22222222-2222-2222-2222-222222222236', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'meeting', 'outbound', 'in_person', 'Deacon board meeting', 'Carlos attended monthly deacon meeting. Discussed Spanish ministry expansion and building fund progress.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-20 19:00:00'),
+  ('22222222-2222-2222-2222-222222222237', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'note', 'outbound', 'in_person', 'Carlos volunteered for building project', 'Carlos offered his construction company to do pro-bono work on the fellowship hall renovation. Huge blessing.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-12 11:00:00'),
+  -- Elena Rodriguez
+  ('22222222-2222-2222-2222-222222222238', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'note', 'outbound', 'in_person', 'Elena organized potluck', 'Elena coordinated the January fellowship dinner. 85 people attended - great turnout!', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2025-01-18 14:00:00'),
+  -- Derek Washington
+  ('22222222-2222-2222-2222-222222222239', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'call', 'outbound', 'phone', 'Check-in call with Derek', 'Called to check in after Derek missed two weeks. He was on shift at fire station. All good - back this Sunday.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-15 10:30:00'),
+  -- Keisha Washington
+  ('22222222-2222-2222-2222-222222222240', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 'note', 'outbound', 'in_person', 'Keisha choir solo', 'Keisha sang a beautiful solo during worship. Several people mentioned how moved they were. She has a real gift.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2025-01-19 12:00:00'),
+  -- Raj Patel
+  ('22222222-2222-2222-2222-222222222241', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'meeting', 'outbound', 'in_person', 'Coffee with Raj', 'Met Raj for coffee to discuss his faith journey. He grew up Hindu, wife is Christian. Very open and asking good questions. Gave him a Bible.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-08 14:00:00'),
+  ('22222222-2222-2222-2222-222222222242', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'note', 'outbound', 'in_person', 'Raj offered to help with church website', 'Raj mentioned he could help modernize our website. Connected him with Marcus Greene on tech team.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-19 11:00:00'),
+  -- Ruth Patterson
+  ('22222222-2222-2222-2222-222222222243', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'visit', 'outbound', 'in_person', 'Home visit with Ruth', 'Visited Ruth at home. She is doing well physically but lonely since Harold passed. Prayed together. She is still sharp as a tack at 78.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-22 14:00:00'),
+  ('22222222-2222-2222-2222-222222222244', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'note', 'outbound', 'in_person', 'Ruth mentoring young women', 'Ruth has been informally mentoring several younger women in the church. A real Titus 2 woman. Should recognize her somehow.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2025-01-10 09:00:00'),
+  -- Marcus Greene
+  ('22222222-2222-2222-2222-222222222245', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'note', 'outbound', 'in_person', 'Marcus sound system upgrade', 'Marcus researched and proposed a sound system upgrade. Budget ~$3,500. Presented to deacons.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2025-01-21 18:00:00'),
+  -- Olivia Foster (visitor)
+  ('22222222-2222-2222-2222-222222222246', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000047', 'note', 'outbound', 'in_person', 'First-time visitor: Olivia Foster', 'College student from UIS. Seemed a bit shy but stayed for coffee after service. Connected her with Ashley Bennett (similar age).', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2026-02-09 12:30:00'),
+  ('22222222-2222-2222-2222-222222222247', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000047', 'note', 'outbound', 'in_person', 'Olivia returned - 2nd visit', 'Olivia came back! Sat with Ashley this time. Mentioned she is studying social work and wants to make a difference. Good fit for outreach team eventually.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2026-02-16 12:30:00'),
+  -- Samuel Jackson
+  ('22222222-2222-2222-2222-222222222248', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 'call', 'inbound', 'phone', 'Samuel called about custody situation', 'Samuel called upset about custody hearing next week. Prayed with him on the phone. Connected him with the church pro-bono legal contact.', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-20 21:00:00'),
+  ('22222222-2222-2222-2222-222222222249', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 'note', 'outbound', 'in_person', 'Samuel helped with fall festival', 'Samuel showed up early Saturday to set up the fall festival. Really stepped up despite his tough schedule. Lily had a blast.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2024-10-26 09:00:00'),
+  -- Dorothy Mitchell
+  ('22222222-2222-2222-2222-222222222250', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 'visit', 'outbound', 'in_person', 'Visited Dorothy at Sunrise Senior Living', 'Brought Dorothy communion and flowers from the church. She cried - so grateful. Harold was there too. She watches the livestream every Sunday (Marcus set her up).', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2025-01-16 15:00:00'),
+  ('22222222-2222-2222-2222-222222222251', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 'call', 'outbound', 'phone', 'Called Dorothy to check in', 'Weekly check-in call. Dorothy sounded good. PT is helping with mobility. Mentioned she would love visitors from the women group.', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2025-01-23 10:00:00')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: ATTENDANCE FOR NEW PEOPLE
+-- ============================================
+INSERT INTO attendance (id, church_id, person_id, event_type, event_name, attended_at) VALUES
+  -- Carlos Rodriguez - very consistent
+  ('88880036-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880036-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880036-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880036-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'small_group', 'Men of Faith', '2025-01-14 19:00:00'),
+  ('88880036-8888-8888-8888-888888880105', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'small_group', 'Men of Faith', '2025-01-21 19:00:00'),
+  -- Elena Rodriguez
+  ('88880037-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880037-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880037-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880037-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'small_group', 'Women''s Bible Study', '2025-01-08 09:30:00'),
+  ('88880037-8888-8888-8888-888888880105', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'small_group', 'Women''s Bible Study', '2025-01-15 09:30:00'),
+  ('88880037-8888-8888-8888-888888880106', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'small_group', 'Women''s Bible Study', '2025-01-22 09:30:00'),
+  -- Isabella Rodriguez (youth)
+  ('88880038-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000038', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880038-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000038', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880038-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000038', 'small_group', 'Youth Group', '2025-01-10 18:30:00'),
+  ('88880038-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000038', 'small_group', 'Youth Group', '2025-01-17 18:30:00'),
+  -- Diego Rodriguez (kids)
+  ('88880039-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000039', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880039-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000039', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  -- Derek Washington
+  ('88880040-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880040-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880040-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'small_group', 'Men of Faith', '2025-01-07 19:00:00'),
+  ('88880040-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'small_group', 'Men of Faith', '2025-01-21 19:00:00'),
+  -- Keisha Washington
+  ('88880041-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880041-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880041-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880041-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 'small_group', 'Women''s Bible Study', '2025-01-08 09:30:00'),
+  -- Zion Washington
+  ('88880042-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000042', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880042-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000042', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  -- Raj Patel - regular but not every week
+  ('88880043-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880043-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  -- Priya Patel
+  ('88880044-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000044', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880044-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000044', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  -- Ruth Patterson - never misses
+  ('88880045-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880045-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880045-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880045-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'other', 'Tuesday Morning Prayer', '2025-01-07 06:00:00'),
+  ('88880045-8888-8888-8888-888888880105', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'other', 'Tuesday Morning Prayer', '2025-01-14 06:00:00'),
+  ('88880045-8888-8888-8888-888888880106', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'other', 'Tuesday Morning Prayer', '2025-01-21 06:00:00'),
+  -- Marcus Greene - consistent member + tech team
+  ('88880046-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880046-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'sunday_service', 'Sunday Worship', '2025-01-12 10:00:00'),
+  ('88880046-8888-8888-8888-888888880103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  ('88880046-8888-8888-8888-888888880104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'volunteer', 'Tech Team Setup', '2025-01-05 08:30:00'),
+  ('88880046-8888-8888-8888-888888880105', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'volunteer', 'Tech Team Setup', '2025-01-12 08:30:00'),
+  ('88880046-8888-8888-8888-888888880106', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 'volunteer', 'Tech Team Setup', '2025-01-19 08:30:00'),
+  -- Olivia Foster - 2 visits
+  ('88880047-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000047', 'sunday_service', 'Sunday Worship', '2026-02-09 10:00:00'),
+  ('88880047-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000047', 'sunday_service', 'Sunday Worship', '2026-02-16 10:00:00'),
+  -- Samuel Jackson - sporadic
+  ('88880048-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880048-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00'),
+  -- Lily Jackson
+  ('88880049-8888-8888-8888-888888880101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000049', 'sunday_service', 'Sunday Worship', '2025-01-05 10:00:00'),
+  ('88880049-8888-8888-8888-888888880102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000049', 'sunday_service', 'Sunday Worship', '2025-01-19 10:00:00')
+  -- Dorothy Mitchell - no attendance (homebound, watches livestream)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: GIVING FOR NEW PEOPLE
+-- ============================================
+INSERT INTO giving (id, church_id, person_id, amount, fund, method, given_at, batch_id, notes) VALUES
+  -- Carlos Rodriguez - generous, consistent tither
+  ('99990036-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 500.00, 'tithe', 'check', '2025-01-05 10:00:00', 'bbbbbb01-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  ('99990036-9999-9999-9999-999999990102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 500.00, 'tithe', 'check', '2025-01-12 10:00:00', 'bbbbbb02-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  ('99990036-9999-9999-9999-999999990103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 500.00, 'tithe', 'check', '2025-01-19 10:00:00', 'bbbbbb03-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  ('99990036-9999-9999-9999-999999990104', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 1000.00, 'building', 'check', '2025-01-19 10:00:00', 'bbbbbb03-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Extra building fund gift'),
+  -- Elena Rodriguez
+  ('99990037-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 200.00, 'tithe', 'online', '2025-01-05 10:00:00', NULL, NULL),
+  ('99990037-9999-9999-9999-999999990102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 200.00, 'tithe', 'online', '2025-01-12 10:00:00', NULL, NULL),
+  ('99990037-9999-9999-9999-999999990103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 200.00, 'tithe', 'online', '2025-01-19 10:00:00', NULL, NULL),
+  -- Derek Washington - solid giver
+  ('99990040-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 300.00, 'tithe', 'online', '2025-01-05 10:00:00', NULL, NULL),
+  ('99990040-9999-9999-9999-999999990102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 300.00, 'tithe', 'online', '2025-01-19 10:00:00', NULL, NULL),
+  ('99990040-9999-9999-9999-999999990103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 100.00, 'benevolence', 'cash', '2025-01-19 10:00:00', 'bbbbbb03-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  -- Keisha Washington
+  ('99990041-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000041', 150.00, 'tithe', 'online', '2025-01-12 10:00:00', NULL, NULL),
+  -- Raj Patel - occasional, exploring
+  ('99990043-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 100.00, 'general', 'online', '2025-01-19 10:00:00', NULL, 'First gift'),
+  -- Ruth Patterson - faithful, modest fixed income
+  ('99990045-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 50.00, 'tithe', 'check', '2025-01-05 10:00:00', 'bbbbbb01-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  ('99990045-9999-9999-9999-999999990102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 50.00, 'tithe', 'check', '2025-01-12 10:00:00', 'bbbbbb02-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  ('99990045-9999-9999-9999-999999990103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 50.00, 'tithe', 'check', '2025-01-19 10:00:00', 'bbbbbb03-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  -- Marcus Greene
+  ('99990046-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 100.00, 'tithe', 'online', '2025-01-05 10:00:00', NULL, NULL),
+  ('99990046-9999-9999-9999-999999990102', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 100.00, 'tithe', 'online', '2025-01-12 10:00:00', NULL, NULL),
+  ('99990046-9999-9999-9999-999999990103', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 100.00, 'tithe', 'online', '2025-01-19 10:00:00', NULL, NULL),
+  -- Samuel Jackson - gives when he can
+  ('99990048-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 40.00, 'general', 'cash', '2025-01-19 10:00:00', 'bbbbbb03-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL),
+  -- Dorothy Mitchell - still gives from home
+  ('99990050-9999-9999-9999-999999990101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 100.00, 'tithe', 'check', '2025-01-10 10:00:00', NULL, 'Mailed in by Harold')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: PRAYER REQUESTS FOR NEW PEOPLE
+-- ============================================
+INSERT INTO prayer_requests (id, church_id, person_id, request, is_public, status, prayed_count, submitted_at) VALUES
+  ('77770036-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 'Pray for our construction business - we have a big project bid coming up that could help fund the building renovation.', true, 'active', 12, '2025-01-15 10:00:00'),
+  ('77770037-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 'Please pray for my mother in Mexico who is having health issues. We are trying to get her a visa to visit.', true, 'active', 18, '2025-01-18 09:00:00'),
+  ('77770040-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 'Safety on the job. We responded to a bad fire last week and it reminded me how dangerous the work is.', true, 'active', 22, '2025-01-13 20:00:00'),
+  ('77770043-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'Pray for me as I explore Christianity. My Hindu family does not understand my interest and it is causing tension.', false, 'active', 8, '2025-01-10 15:00:00'),
+  ('77770045-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 'Continued strength and health. Also praying for the young people of our church - they are the future.', true, 'active', 30, '2025-01-06 07:00:00'),
+  ('77770048-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000048', 'Please pray for my custody situation with Lily. The hearing is next week and I need Gods peace and favor.', false, 'active', 15, '2025-01-20 21:30:00'),
+  ('77770050-7777-7777-7777-777777770101', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 'Pray for my recovery from hip surgery and that I can return to church someday. I miss my church family so much.', true, 'active', 25, '2025-01-05 11:00:00')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: GIVING STATEMENTS FOR NEW PEOPLE (2024)
+-- ============================================
+INSERT INTO giving_statements (id, church_id, person_id, year, total_amount, by_fund, generated_at, sent_at, sent_method) VALUES
+  ('44445555-4444-5555-4444-555544445561', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000036', 2024, 28000.00, '{"tithe": 24000, "building": 4000}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'email'),
+  ('44445555-4444-5555-4444-555544445562', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000037', 2024, 9600.00, '{"tithe": 9600}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'email'),
+  ('44445555-4444-5555-4444-555544445563', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000040', 2024, 10800.00, '{"tithe": 9000, "benevolence": 1800}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'email'),
+  ('44445555-4444-5555-4444-555544445564', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000045', 2024, 2600.00, '{"tithe": 2600}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'print'),
+  ('44445555-4444-5555-4444-555544445565', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000046', 2024, 3600.00, '{"tithe": 3600}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'email'),
+  ('44445555-4444-5555-4444-555544445566', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 2024, 5200.00, '{"tithe": 5200}', '2025-01-15 10:00:00', '2025-01-16 09:00:00', 'print')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: SCHEDULED MESSAGES FOR NEW PEOPLE
+-- ============================================
+INSERT INTO scheduled_messages (id, church_id, person_id, channel, subject, body, scheduled_for, status, source_type, source_agent, ai_generated, created_by) VALUES
+  -- Welcome message for Olivia Foster (recent visitor)
+  ('cccccc12-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000047', 'email', 'So Glad You Visited, Olivia!', 'Hi Olivia,\n\nIt was wonderful to meet you at Grace Community Church! We hope you felt welcome. As a grad student, we know how important community is - especially away from home.\n\nOur young adults group meets Thursdays at 7:30 PM. Ashley Bennett would love to introduce you around!\n\nBlessings,\nPastor John', '2026-02-11 10:00:00', 'sent', 'follow_up', 'new-member-agent', true, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+  -- Check-in for Dorothy Mitchell
+  ('cccccc13-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000050', 'email', 'Thinking of You, Dorothy', 'Dear Dorothy,\n\nWe miss you at Grace Community Church! We wanted you to know that you are thought of and prayed for every week.\n\nWe hope you are enjoying the livestream. Several ladies from the womens group would love to visit you soon.\n\nWith love,\nGrace Community Church', '2025-01-25 10:00:00', 'scheduled', 'pastoral_care', 'life-event-agent', true, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+  -- First-time giver thank you for Raj
+  ('cccccc14-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000043', 'email', 'Thank You for Your First Gift, Raj!', 'Dear Raj,\n\nThank you so much for your generous gift to Grace Community Church! We are honored that you chose to support our ministry.\n\nYour generosity helps us serve our community and share Gods love.\n\nBlessings,\nPastor John', '2025-01-20 14:00:00', 'sent', 'donation', 'donation-processing-agent', true, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- EXPANDED: DRIP CAMPAIGN ENROLLMENTS FOR NEW PEOPLE
+-- ============================================
+INSERT INTO drip_campaign_enrollments (id, campaign_id, person_id, current_step, status, enrolled_at, completed_at, next_message_at) VALUES
+  -- Olivia Foster - visitor welcome sequence
+  ('33334444-3333-4444-3333-444433334451', '11112222-1111-2222-1111-222211112222', '00000000-0000-0000-0000-000000000047', 1, 'active', '2026-02-09 12:00:00', NULL, '2026-02-12 12:00:00'),
+  -- Raj Patel - first-time giver follow-up
+  ('33334444-3333-4444-3333-444433334452', '11112222-1111-2222-1111-222211112224', '00000000-0000-0000-0000-000000000043', 1, 'active', '2025-01-19 15:00:00', NULL, '2025-01-26 15:00:00')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
 -- END OF SEED DATA
 -- ============================================
--- Run this file with: psql -f seed.sql
--- Or in Supabase dashboard: SQL Editor > paste and run
+-- Total: 50 people in congregation
+-- 9 families: Johnson, Thompson, Davis, Williams, Anderson, Lee, Rodriguez, Washington, Jackson
+-- 2 couples: Martinez, Patel
+-- 5 singles: Ruth Patterson, Marcus Greene, Olivia Foster, Dorothy Mitchell, plus existing singles
+--
+-- HOW TO LOAD INTO SUPABASE (no CLI needed):
+-- 1. Go to Supabase Dashboard > SQL Editor
+-- 2. Run each migration file (001 through 004) in order
+-- 3. Then paste and run this entire seed.sql file
+-- All inserts use ON CONFLICT DO NOTHING so it is safe to re-run

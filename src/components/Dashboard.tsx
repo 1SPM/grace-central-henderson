@@ -276,7 +276,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           label="New Visitors"
           value={visitors.length}
           icon={<UserPlus size={20} />}
-          change={visitors.length > 0 ? 25 : 0}
+          change={visitors.length > 0 ? Math.min(visitors.length * 10, 25) : 0}
           changeLabel="this week"
           sparklineData={visitorsSparkline}
           accentColor="amber"
@@ -296,7 +296,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           label="Tasks Done"
           value={`${taskCompletionRate}%`}
           icon={<ListTodo size={20} />}
-          change={15}
+          change={taskCompletionRate > 0 ? 15 : 0}
           changeLabel="this week"
           sparklineData={tasksSparkline}
           accentColor="emerald"
@@ -359,10 +359,15 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
             </div>
             <h3 className="text-base font-semibold text-white mb-1">Action Center</h3>
             <p className="text-white/80 text-sm">
-              {pendingTasks.filter(t => t.priority === 'high').length > 0
-                ? `${pendingTasks.filter(t => t.priority === 'high').length} urgent, ${visitors.length} visitors, ${pendingTasks.length - pendingTasks.filter(t => t.priority === 'high').length} tasks`
-                : `${visitors.length} visitors, ${pendingTasks.length} tasks`
-              }
+              {(() => {
+                const urgentCount = pendingTasks.filter(t => t.priority === 'high').length;
+                const otherTaskCount = pendingTasks.length - urgentCount;
+                const parts: string[] = [];
+                if (urgentCount > 0) parts.push(`${urgentCount} urgent`);
+                parts.push(`${visitors.length} ${visitors.length === 1 ? 'visitor' : 'visitors'}`);
+                if (otherTaskCount > 0) parts.push(`${otherTaskCount} ${otherTaskCount === 1 ? 'task' : 'tasks'}`);
+                return parts.join(', ');
+              })()}
             </p>
           </div>
         </button>

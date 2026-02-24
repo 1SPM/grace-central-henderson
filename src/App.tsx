@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -23,6 +23,7 @@ import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
 import { useChurchSettings } from './hooks/useChurchSettings';
 import { usePastoralCare } from './hooks/usePastoralCare';
+import { useHashRouter } from './hooks/useHashRouter';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -32,12 +33,9 @@ import {
   toEventLegacy,
   toGivingLegacy,
 } from './utils/typeConverters';
-import type { View } from './types';
-
 function App() {
   const { churchId } = useAuthContext();
-  const [view, setView] = useState<View>('dashboard');
-  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
   const {
