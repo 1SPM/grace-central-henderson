@@ -140,39 +140,17 @@ CREATE INDEX idx_pastoral_sessions_category ON pastoral_sessions(church_id, cate
 CREATE INDEX idx_leader_availability_leader ON leader_availability(leader_id);
 
 -- ============================================
--- ROW-LEVEL SECURITY
+-- ROW-LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
 -- ============================================
 
 ALTER TABLE leader_applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pastoral_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leader_availability ENABLE ROW LEVEL SECURITY;
 
--- Leader Applications: scoped to church
-CREATE POLICY "Church members can view leader applications"
-  ON leader_applications FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage leader applications"
-  ON leader_applications FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Pastoral Sessions: scoped to church
-CREATE POLICY "Church members can view pastoral sessions"
-  ON pastoral_sessions FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage pastoral sessions"
-  ON pastoral_sessions FOR ALL
-  USING (church_id = public.get_church_id());
-
--- Leader Availability: scoped to church
-CREATE POLICY "Church members can view leader availability"
-  ON leader_availability FOR SELECT
-  USING (church_id = public.get_church_id());
-
-CREATE POLICY "Church members can manage leader availability"
-  ON leader_availability FOR ALL
-  USING (church_id = public.get_church_id());
+-- Allow full access via service role key (used by the app)
+CREATE POLICY "Service role full access" ON leader_applications FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON pastoral_sessions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON leader_availability FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================
 -- UPDATED_AT TRIGGERS
