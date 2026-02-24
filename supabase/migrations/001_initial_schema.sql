@@ -1,5 +1,6 @@
 -- GRACE CRM Initial Schema
 -- Multi-tenant church management with Row-Level Security
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -8,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- TABLES
 -- ============================================
 
-CREATE TABLE churches (
+CREATE TABLE IF NOT EXISTS churches (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -26,7 +27,7 @@ CREATE TABLE churches (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE SET NULL,
   clerk_id TEXT UNIQUE,
@@ -40,7 +41,7 @@ CREATE TABLE users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE people (
+CREATE TABLE IF NOT EXISTS people (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   first_name TEXT NOT NULL,
@@ -63,7 +64,7 @@ CREATE TABLE people (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE small_groups (
+CREATE TABLE IF NOT EXISTS small_groups (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -77,7 +78,7 @@ CREATE TABLE small_groups (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE group_memberships (
+CREATE TABLE IF NOT EXISTS group_memberships (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   group_id UUID NOT NULL REFERENCES small_groups(id) ON DELETE CASCADE,
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
@@ -85,7 +86,7 @@ CREATE TABLE group_memberships (
   UNIQUE (group_id, person_id)
 );
 
-CREATE TABLE interactions (
+CREATE TABLE IF NOT EXISTS interactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
@@ -96,7 +97,7 @@ CREATE TABLE interactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -112,7 +113,7 @@ CREATE TABLE tasks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE prayer_requests (
+CREATE TABLE IF NOT EXISTS prayer_requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
@@ -124,7 +125,7 @@ CREATE TABLE prayer_requests (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE calendar_events (
+CREATE TABLE IF NOT EXISTS calendar_events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -142,7 +143,7 @@ CREATE TABLE calendar_events (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE attendance (
+CREATE TABLE IF NOT EXISTS attendance (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
@@ -153,7 +154,7 @@ CREATE TABLE attendance (
   checked_in_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE giving (
+CREATE TABLE IF NOT EXISTS giving (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -171,30 +172,30 @@ CREATE TABLE giving (
 -- INDEXES
 -- ============================================
 
-CREATE INDEX idx_users_church_id ON users(church_id);
-CREATE INDEX idx_users_clerk_id ON users(clerk_id);
-CREATE INDEX idx_people_church_id ON people(church_id);
-CREATE INDEX idx_people_status ON people(church_id, status);
-CREATE INDEX idx_people_last_name ON people(church_id, last_name);
-CREATE INDEX idx_small_groups_church_id ON small_groups(church_id);
-CREATE INDEX idx_group_memberships_group ON group_memberships(group_id);
-CREATE INDEX idx_group_memberships_person ON group_memberships(person_id);
-CREATE INDEX idx_interactions_church_id ON interactions(church_id);
-CREATE INDEX idx_interactions_person_id ON interactions(person_id);
-CREATE INDEX idx_interactions_created_at ON interactions(church_id, created_at DESC);
-CREATE INDEX idx_tasks_church_id ON tasks(church_id);
-CREATE INDEX idx_tasks_due_date ON tasks(church_id, due_date);
-CREATE INDEX idx_tasks_assigned ON tasks(assigned_to) WHERE NOT completed;
-CREATE INDEX idx_prayer_requests_church_id ON prayer_requests(church_id);
-CREATE INDEX idx_prayer_requests_person_id ON prayer_requests(person_id);
-CREATE INDEX idx_calendar_events_church_id ON calendar_events(church_id);
-CREATE INDEX idx_calendar_events_date ON calendar_events(church_id, start_date);
-CREATE INDEX idx_attendance_church_id ON attendance(church_id);
-CREATE INDEX idx_attendance_person ON attendance(person_id, date);
-CREATE INDEX idx_attendance_date ON attendance(church_id, date);
-CREATE INDEX idx_giving_church_id ON giving(church_id);
-CREATE INDEX idx_giving_person ON giving(person_id);
-CREATE INDEX idx_giving_date ON giving(church_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_users_church_id ON users(church_id);
+CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX IF NOT EXISTS idx_people_church_id ON people(church_id);
+CREATE INDEX IF NOT EXISTS idx_people_status ON people(church_id, status);
+CREATE INDEX IF NOT EXISTS idx_people_last_name ON people(church_id, last_name);
+CREATE INDEX IF NOT EXISTS idx_small_groups_church_id ON small_groups(church_id);
+CREATE INDEX IF NOT EXISTS idx_group_memberships_group ON group_memberships(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_memberships_person ON group_memberships(person_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_church_id ON interactions(church_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_person_id ON interactions(person_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(church_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tasks_church_id ON tasks(church_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(church_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to) WHERE NOT completed;
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_church_id ON prayer_requests(church_id);
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_person_id ON prayer_requests(person_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_church_id ON calendar_events(church_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_date ON calendar_events(church_id, start_date);
+CREATE INDEX IF NOT EXISTS idx_attendance_church_id ON attendance(church_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_person ON attendance(person_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(church_id, date);
+CREATE INDEX IF NOT EXISTS idx_giving_church_id ON giving(church_id);
+CREATE INDEX IF NOT EXISTS idx_giving_person ON giving(person_id);
+CREATE INDEX IF NOT EXISTS idx_giving_date ON giving(church_id, date DESC);
 
 -- ============================================
 -- ROW-LEVEL SECURITY (enabled, policies in 005_row_level_security.sql)
@@ -216,6 +217,18 @@ ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE giving ENABLE ROW LEVEL SECURITY;
 
 -- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON churches;
+DROP POLICY IF EXISTS "Service role full access" ON users;
+DROP POLICY IF EXISTS "Service role full access" ON people;
+DROP POLICY IF EXISTS "Service role full access" ON small_groups;
+DROP POLICY IF EXISTS "Service role full access" ON group_memberships;
+DROP POLICY IF EXISTS "Service role full access" ON interactions;
+DROP POLICY IF EXISTS "Service role full access" ON tasks;
+DROP POLICY IF EXISTS "Service role full access" ON prayer_requests;
+DROP POLICY IF EXISTS "Service role full access" ON calendar_events;
+DROP POLICY IF EXISTS "Service role full access" ON attendance;
+DROP POLICY IF EXISTS "Service role full access" ON giving;
+
 CREATE POLICY "Service role full access" ON churches FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON people FOR ALL USING (true) WITH CHECK (true);
@@ -240,23 +253,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS set_updated_at ON churches;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON churches
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON users;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON people;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON people
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON small_groups;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON small_groups
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON tasks;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON tasks
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON prayer_requests;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON prayer_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at ON calendar_events;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON calendar_events
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

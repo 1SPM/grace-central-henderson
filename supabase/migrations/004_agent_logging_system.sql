@@ -1,10 +1,11 @@
 -- Agent Logging System
 -- Provides persistent storage for AI agent execution logs and statistics
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
 
 -- ============================================
 -- AGENT LOGS
 -- ============================================
-CREATE TABLE agent_logs (
+CREATE TABLE IF NOT EXISTS agent_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
   agent_id VARCHAR(100) NOT NULL,
@@ -14,15 +15,15 @@ CREATE TABLE agent_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_agent_logs_church ON agent_logs(church_id);
-CREATE INDEX idx_agent_logs_agent ON agent_logs(agent_id);
-CREATE INDEX idx_agent_logs_level ON agent_logs(level);
-CREATE INDEX idx_agent_logs_created ON agent_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_church ON agent_logs(church_id);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_agent ON agent_logs(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_level ON agent_logs(level);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_created ON agent_logs(created_at DESC);
 
 -- ============================================
 -- AGENT STATS
 -- ============================================
-CREATE TABLE agent_stats (
+CREATE TABLE IF NOT EXISTS agent_stats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
   agent_id VARCHAR(100) NOT NULL,
@@ -35,12 +36,12 @@ CREATE TABLE agent_stats (
   UNIQUE(church_id, agent_id)
 );
 
-CREATE INDEX idx_agent_stats_church ON agent_stats(church_id);
+CREATE INDEX IF NOT EXISTS idx_agent_stats_church ON agent_stats(church_id);
 
 -- ============================================
 -- AGENT EXECUTIONS (detailed run history)
 -- ============================================
-CREATE TABLE agent_executions (
+CREATE TABLE IF NOT EXISTS agent_executions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
   agent_id VARCHAR(100) NOT NULL,
@@ -54,9 +55,9 @@ CREATE TABLE agent_executions (
   metadata JSONB DEFAULT '{}'
 );
 
-CREATE INDEX idx_agent_executions_church ON agent_executions(church_id);
-CREATE INDEX idx_agent_executions_agent ON agent_executions(agent_id);
-CREATE INDEX idx_agent_executions_status ON agent_executions(status);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_church ON agent_executions(church_id);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_agent ON agent_executions(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_status ON agent_executions(status);
 
 -- ============================================
 -- HELPER FUNCTIONS
@@ -125,6 +126,10 @@ ALTER TABLE agent_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_executions ENABLE ROW LEVEL SECURITY;
 
 -- Policies for authenticated users (via service role key)
+DROP POLICY IF EXISTS "Service role can manage agent_logs" ON agent_logs;
+DROP POLICY IF EXISTS "Service role can manage agent_stats" ON agent_stats;
+DROP POLICY IF EXISTS "Service role can manage agent_executions" ON agent_executions;
+
 CREATE POLICY "Service role can manage agent_logs"
   ON agent_logs FOR ALL
   USING (true)

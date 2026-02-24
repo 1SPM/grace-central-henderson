@@ -1,11 +1,12 @@
 -- AI Messaging System Schema
 -- Adds support for content calendar, message scheduling, and reply handling
+-- NOTE: All statements use IF NOT EXISTS / IF EXISTS for idempotent re-runs.
 
 -- ============================================
 -- SCHEDULED MESSAGES
 -- Stores all planned/scheduled outgoing messages
 -- ============================================
-CREATE TABLE scheduled_messages (
+CREATE TABLE IF NOT EXISTS scheduled_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -38,15 +39,15 @@ CREATE TABLE scheduled_messages (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_scheduled_messages_church_date ON scheduled_messages(church_id, scheduled_for);
-CREATE INDEX idx_scheduled_messages_status ON scheduled_messages(status) WHERE status = 'scheduled';
-CREATE INDEX idx_scheduled_messages_person ON scheduled_messages(person_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_church_date ON scheduled_messages(church_id, scheduled_for);
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_status ON scheduled_messages(status) WHERE status = 'scheduled';
+CREATE INDEX IF NOT EXISTS idx_scheduled_messages_person ON scheduled_messages(person_id);
 
 -- ============================================
 -- MESSAGE ARCHIVE
 -- Historical record of all sent messages
 -- ============================================
-CREATE TABLE message_archive (
+CREATE TABLE IF NOT EXISTS message_archive (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -75,15 +76,15 @@ CREATE TABLE message_archive (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_message_archive_church ON message_archive(church_id);
-CREATE INDEX idx_message_archive_person ON message_archive(church_id, person_id);
-CREATE INDEX idx_message_archive_sent ON message_archive(sent_at DESC);
+CREATE INDEX IF NOT EXISTS idx_message_archive_church ON message_archive(church_id);
+CREATE INDEX IF NOT EXISTS idx_message_archive_person ON message_archive(church_id, person_id);
+CREATE INDEX IF NOT EXISTS idx_message_archive_sent ON message_archive(sent_at DESC);
 
 -- ============================================
 -- INBOUND MESSAGES
 -- Stores replies and incoming messages
 -- ============================================
-CREATE TABLE inbound_messages (
+CREATE TABLE IF NOT EXISTS inbound_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
   person_id UUID REFERENCES people(id) ON DELETE SET NULL,
@@ -112,15 +113,15 @@ CREATE TABLE inbound_messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_inbound_messages_church ON inbound_messages(church_id);
-CREATE INDEX idx_inbound_messages_status ON inbound_messages(status) WHERE status = 'new';
-CREATE INDEX idx_inbound_messages_person ON inbound_messages(person_id);
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_church ON inbound_messages(church_id);
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_status ON inbound_messages(status) WHERE status = 'new';
+CREATE INDEX IF NOT EXISTS idx_inbound_messages_person ON inbound_messages(person_id);
 
 -- ============================================
 -- DAILY DIGESTS
 -- Stores AI-generated daily summaries
 -- ============================================
-CREATE TABLE daily_digests (
+CREATE TABLE IF NOT EXISTS daily_digests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -144,13 +145,13 @@ CREATE TABLE daily_digests (
   UNIQUE(church_id, user_id, digest_date)
 );
 
-CREATE INDEX idx_daily_digests_lookup ON daily_digests(church_id, user_id, digest_date);
+CREATE INDEX IF NOT EXISTS idx_daily_digests_lookup ON daily_digests(church_id, user_id, digest_date);
 
 -- ============================================
 -- DRIP CAMPAIGNS
 -- Defines automated message sequences
 -- ============================================
-CREATE TABLE drip_campaigns (
+CREATE TABLE IF NOT EXISTS drip_campaigns (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE NOT NULL,
 
@@ -165,13 +166,13 @@ CREATE TABLE drip_campaigns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_drip_campaigns_church ON drip_campaigns(church_id);
+CREATE INDEX IF NOT EXISTS idx_drip_campaigns_church ON drip_campaigns(church_id);
 
 -- ============================================
 -- DRIP CAMPAIGN STEPS
 -- Individual messages in a drip sequence
 -- ============================================
-CREATE TABLE drip_campaign_steps (
+CREATE TABLE IF NOT EXISTS drip_campaign_steps (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   campaign_id UUID REFERENCES drip_campaigns(id) ON DELETE CASCADE NOT NULL,
 
@@ -192,13 +193,13 @@ CREATE TABLE drip_campaign_steps (
   UNIQUE(campaign_id, step_number)
 );
 
-CREATE INDEX idx_drip_steps_campaign ON drip_campaign_steps(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_drip_steps_campaign ON drip_campaign_steps(campaign_id);
 
 -- ============================================
 -- DRIP CAMPAIGN ENROLLMENTS
 -- Tracks people enrolled in campaigns
 -- ============================================
-CREATE TABLE drip_campaign_enrollments (
+CREATE TABLE IF NOT EXISTS drip_campaign_enrollments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   campaign_id UUID REFERENCES drip_campaigns(id) ON DELETE CASCADE NOT NULL,
   person_id UUID REFERENCES people(id) ON DELETE CASCADE NOT NULL,
@@ -213,8 +214,8 @@ CREATE TABLE drip_campaign_enrollments (
   UNIQUE(campaign_id, person_id)
 );
 
-CREATE INDEX idx_enrollments_campaign ON drip_campaign_enrollments(campaign_id);
-CREATE INDEX idx_enrollments_next ON drip_campaign_enrollments(next_message_at) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_enrollments_campaign ON drip_campaign_enrollments(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_next ON drip_campaign_enrollments(next_message_at) WHERE status = 'active';
 
 -- ============================================
 -- ROW LEVEL SECURITY (policies deferred to 005_row_level_security.sql)
@@ -229,6 +230,14 @@ ALTER TABLE drip_campaign_steps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE drip_campaign_enrollments ENABLE ROW LEVEL SECURITY;
 
 -- Allow full access via service role key (used by the app)
+DROP POLICY IF EXISTS "Service role full access" ON scheduled_messages;
+DROP POLICY IF EXISTS "Service role full access" ON message_archive;
+DROP POLICY IF EXISTS "Service role full access" ON inbound_messages;
+DROP POLICY IF EXISTS "Service role full access" ON daily_digests;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaigns;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_steps;
+DROP POLICY IF EXISTS "Service role full access" ON drip_campaign_enrollments;
+
 CREATE POLICY "Service role full access" ON scheduled_messages FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON message_archive FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON inbound_messages FOR ALL USING (true) WITH CHECK (true);
