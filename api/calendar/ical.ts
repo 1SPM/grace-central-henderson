@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * iCal Calendar Export API
@@ -110,31 +111,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // In production, this would fetch events from the database
-    // For now, return sample events or empty calendar
-    const sampleEvents: CalendarEvent[] = [
-      {
-        id: 'sunday-service',
-        title: 'Sunday Service',
-        description: 'Weekly worship service',
-        startDate: getNextSunday(10, 0), // 10:00 AM
-        endDate: getNextSunday(12, 0), // 12:00 PM
-        location: 'Main Sanctuary',
-        category: 'service',
-      },
-      {
-        id: 'wednesday-prayer',
-        title: 'Wednesday Prayer',
-        description: 'Midweek prayer meeting',
-        startDate: getNextWednesday(19, 0), // 7:00 PM
-        endDate: getNextWednesday(20, 30), // 8:30 PM
-        location: 'Fellowship Hall',
-        category: 'prayer',
-      },
-    ];
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    let events: CalendarEvent[] = [];
+
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('id, title, description, start_date, end_date, all_day, location, category')
+        .eq('church_id', churchId)
+        .gte('start_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+        .order('start_date', { ascending: true });
+
+      if (!error && data) {
+        events = data.map(e => ({
+          id: e.id,
+          title: e.title,
+          description: e.description || undefined,
+          startDate: e.start_date,
+          endDate: e.end_date || undefined,
+          location: e.location || undefined,
+          allDay: e.all_day || false,
+          category: e.category || undefined,
+        }));
+      }
+    }
 
     const ical = buildIcal(
-      sampleEvents,
+      events,
       typeof churchName === 'string' ? churchName : 'Grace Church',
       churchId
     );
@@ -151,21 +157,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-// Helper functions to get next occurrence of a day
-function getNextSunday(hour: number, minute: number): string {
-  const today = new Date();
-  const daysUntilSunday = (7 - today.getDay()) % 7 || 7;
-  const nextSunday = new Date(today);
-  nextSunday.setDate(today.getDate() + daysUntilSunday);
-  nextSunday.setHours(hour, minute, 0, 0);
-  return nextSunday.toISOString();
-}
-
-function getNextWednesday(hour: number, minute: number): string {
-  const today = new Date();
-  const daysUntilWednesday = (3 - today.getDay() + 7) % 7 || 7;
-  const nextWednesday = new Date(today);
-  nextWednesday.setDate(today.getDate() + daysUntilWednesday);
-  nextWednesday.setHours(hour, minute, 0, 0);
-  return nextWednesday.toISOString();
-}

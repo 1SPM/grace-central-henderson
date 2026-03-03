@@ -2,7 +2,7 @@
  * Type conversion utilities for converting between database and legacy component types
  */
 
-import type { Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction } from '../types';
+import type { Person as LegacyPerson, Task as LegacyTask, Interaction as LegacyInteraction, Attendance as LegacyAttendance } from '../types';
 
 // Database person type
 export interface DbPerson {
@@ -204,5 +204,26 @@ export function toGivingLegacy(g: DbGiving) {
     method: g.method as 'cash' | 'check' | 'online' | 'bank',
     isRecurring: g.is_recurring,
     note: g.note || undefined,
+  };
+}
+
+// Attendance converter
+interface DbAttendance {
+  id: string;
+  person_id: string;
+  event_type: string;
+  event_name: string | null;
+  date: string;
+  checked_in_at: string;
+}
+
+export function toAttendanceLegacy(a: DbAttendance): LegacyAttendance {
+  return {
+    id: a.id,
+    personId: a.person_id,
+    eventType: a.event_type as LegacyAttendance['eventType'],
+    eventName: a.event_name || undefined,
+    date: a.date,
+    checkedInAt: a.checked_in_at,
   };
 }

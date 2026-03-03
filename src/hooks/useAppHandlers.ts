@@ -64,6 +64,7 @@ interface UseAppHandlersProps {
     category: EventCategory;
   }>) => Promise<unknown>;
   deleteEvent?: (id: string) => Promise<unknown>;
+  checkIn?: (churchId: string, personId: string, eventType: Attendance['eventType'], eventName?: string) => Promise<unknown>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
@@ -87,6 +88,7 @@ export function useAppHandlers({
   addEvent,
   updateEvent,
   deleteEvent,
+  checkIn: checkInToDb,
   setView,
   setSelectedPersonId,
   openPersonForm,
@@ -161,17 +163,21 @@ export function useAppHandlers({
     await markPrayerAnswered(id, testimony);
   }, [markPrayerAnswered]);
 
-  const handleCheckIn = useCallback((personId: string, eventType: Attendance['eventType'], eventName?: string) => {
-    const newRecord: Attendance = {
-      id: `attendance-${Date.now()}`,
-      personId,
-      eventType,
-      eventName,
-      date: new Date().toISOString().split('T')[0],
-      checkedInAt: new Date().toISOString(),
-    };
-    setAttendanceRecords((prev) => [...prev, newRecord]);
-  }, []);
+  const handleCheckIn = useCallback(async (personId: string, eventType: Attendance['eventType'], eventName?: string) => {
+    if (checkInToDb) {
+      await checkInToDb(churchId, personId, eventType, eventName);
+    } else {
+      const newRecord: Attendance = {
+        id: `attendance-${Date.now()}`,
+        personId,
+        eventType,
+        eventName,
+        date: new Date().toISOString().split('T')[0],
+        checkedInAt: new Date().toISOString(),
+      };
+      setAttendanceRecords((prev) => [...prev, newRecord]);
+    }
+  }, [checkInToDb, churchId]);
 
   const handleRSVP = useCallback((eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0) => {
     setRsvps((prev) => {
@@ -356,14 +362,14 @@ export function useAppHandlers({
           phone,
           status,
           photo_url: null,
-          address: null,
-          city: null,
-          state: null,
-          zip: null,
-          birth_date: null,
-          join_date: null,
-          first_visit: null,
-          notes: null,
+          address: person.address ? sanitizeInput(person.address, { maxLength: 200 }) : null,
+          city: person.city ? sanitizeInput(person.city, { maxLength: 100 }) : null,
+          state: person.state ? sanitizeInput(person.state, { maxLength: 50 }) : null,
+          zip: person.zip ? sanitizeInput(person.zip, { maxLength: 20 }) : null,
+          birth_date: person.birthDate || null,
+          join_date: person.joinDate || null,
+          first_visit: person.firstVisit || null,
+          notes: person.notes ? sanitizeInput(person.notes, { maxLength: 2000 }) : null,
           tags: person.tags || [],
           family_id: null,
         });

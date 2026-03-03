@@ -236,9 +236,7 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
   const previewPeople = useMemo(() => {
     if (!csvData.length || !mappings.length) return [];
 
-    const dataRows = hasHeaderRow ? csvData : csvData;
-
-    return dataRows.slice(0, 5).map((row, rowIndex) => {
+    return csvData.slice(0, 5).map((row, rowIndex) => {
       const person: Partial<Person> = {};
 
       mappings.forEach((mapping, colIndex) => {

@@ -74,14 +74,35 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
   // Memoize person lookup map for O(1) access
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
-  // Generate trend data for sparklines (simulating weekly trends)
+  // Generate trend data for sparklines from real data
   const completedTasks = tasks.filter(t => t.completed).length;
   const taskCompletionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
-  // Mock sparkline data (in a real app, this would come from historical data)
-  const peopleSparkline = [45, 48, 52, 50, 55, 58, people.length];
-  const visitorsSparkline = [2, 4, 3, 5, 4, 6, visitors.length];
-  const tasksSparkline = [8, 6, 9, 5, 7, 4, pendingTasks.length];
+  // Compute weekly sparkline data from created_at dates (last 7 weeks)
+  const { peopleSparkline, visitorsSparkline, tasksSparkline } = useMemo(() => {
+    const now = new Date();
+    const weeks = 7;
+    const peopleCounts: number[] = [];
+    const visitorCounts: number[] = [];
+    const taskCounts: number[] = [];
+
+    for (let w = weeks - 1; w >= 0; w--) {
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() - w * 7);
+      const weekEndStr = weekEnd.toISOString();
+
+      peopleCounts.push(people.filter(p => (p.joinDate || p.firstVisit || '') <= weekEndStr).length || people.length);
+      visitorCounts.push(people.filter(p => p.status === 'visitor' && (p.firstVisit || '') <= weekEndStr).length || visitors.length);
+      taskCounts.push(tasks.filter(t => !t.completed && (t.createdAt || '') <= weekEndStr).length || pendingTasks.length);
+    }
+
+    // Ensure the last point matches the current live count
+    peopleCounts[weeks - 1] = people.length;
+    visitorCounts[weeks - 1] = visitors.length;
+    taskCounts[weeks - 1] = pendingTasks.length;
+
+    return { peopleSparkline: peopleCounts, visitorsSparkline: visitorCounts, tasksSparkline: taskCounts };
+  }, [people, visitors, tasks, pendingTasks]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

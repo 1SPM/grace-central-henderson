@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Text-to-Give Webhook Handler
@@ -374,11 +375,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Process the message
     const responseMessage = processMessage(messageBody, fromPhone, config);
 
-    // Log the interaction (in production, save to database)
-    console.log(
-      'Text-to-Give:',
-      createLogEntry(fromPhone, toPhone, churchId, messageSid, messageBody, responseMessage)
-    );
+    // Log the interaction
+    const logEntry = createLogEntry(fromPhone, toPhone, churchId, messageSid, messageBody, responseMessage);
+    console.log('Text-to-Give:', logEntry);
+
+    // Persist to Supabase (non-blocking — don't delay TwiML response)
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+    const defaultChurchUuid = process.env.TEXT_TO_GIVE_DEFAULT_CHURCH_UUID;
+
+    if (supabaseUrl && supabaseKey && defaultChurchUuid) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Determine command category for ai_category
+      const trimmedBody = messageBody.trim().toUpperCase();
+      const firstWord = trimmedBody.split(/\s+/)[0] || '';
+      let category = 'unknown';
+      if (firstWord === 'GIVE' || firstWord === 'G') category = 'give';
+      else if (firstWord === 'HELP' || firstWord === '?') category = 'help';
+      else if (firstWord === 'FUNDS' || firstWord === 'FUND') category = 'funds';
+      else if (OPT_OUT_COMMANDS.has(firstWord)) category = 'opt-out';
+      else if (RESTART_COMMANDS.has(firstWord)) category = 'restart';
+
+      supabase
+        .from('inbound_messages')
+        .insert({
+          church_id: defaultChurchUuid,
+          channel: 'sms',
+          from_address: fromPhone,
+          body: messageBody,
+          ai_category: `text-to-give:${category}`,
+          ai_suggested_response: responseMessage,
+          status: 'processed',
+          received_at: new Date().toISOString(),
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error('Text-to-Give DB insert failed:', error.message);
+          }
+        });
+    }
 
     // Return TwiML response
     res.setHeader('Content-Type', 'text/xml');

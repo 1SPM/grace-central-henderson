@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   FileText,
   Download,
@@ -16,6 +16,7 @@ import {
   Send,
   AlertCircle,
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import type { Giving, Person, GivingStatement } from '../types';
 
 // Helper function moved outside component
@@ -25,6 +26,201 @@ const formatCurrency = (amount: number) => {
     currency: 'USD',
   }).format(amount);
 };
+
+// Render a giving statement onto a jsPDF doc (on the current page)
+function renderStatementPage(
+  doc: jsPDF,
+  person: Person,
+  personGiving: { total: number; byFund: Record<string, number>; transactions: Giving[] },
+  year: number,
+  churchName: string,
+  churchAddress: string,
+  churchPhone: string,
+  churchEmail: string,
+): void {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const contentWidth = pageWidth - margin * 2;
+  let y = 25;
+
+  // Church header (centered)
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(churchName, pageWidth / 2, y, { align: 'center' });
+  y += 7;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100);
+  doc.text(churchAddress, pageWidth / 2, y, { align: 'center' });
+  y += 5;
+  doc.text(`${churchPhone}  •  ${churchEmail}`, pageWidth / 2, y, { align: 'center' });
+  y += 8;
+
+  // Divider line
+  doc.setDrawColor(200);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 12;
+
+  // Statement title
+  doc.setTextColor(0);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Contribution Statement', pageWidth / 2, y, { align: 'center' });
+  y += 7;
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(80);
+  doc.text(`For the Year ${year}`, pageWidth / 2, y, { align: 'center' });
+  y += 14;
+
+  // Donor info box
+  doc.setFillColor(248, 248, 248);
+  doc.roundedRect(margin, y - 4, contentWidth, 28, 3, 3, 'F');
+  doc.setTextColor(0);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${person.firstName} ${person.lastName}`, margin + 8, y + 4);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80);
+  let infoY = y + 10;
+  if (person.address) {
+    doc.text(person.address, margin + 8, infoY);
+    infoY += 4;
+  }
+  if (person.city && person.state && person.zip) {
+    doc.text(`${person.city}, ${person.state} ${person.zip}`, margin + 8, infoY);
+    infoY += 4;
+  }
+  if (person.email) {
+    doc.text(person.email, margin + 8, infoY);
+  }
+  y += 32;
+
+  // Contribution Summary table
+  doc.setTextColor(0);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Contribution Summary', margin, y);
+  y += 8;
+
+  // Table header
+  doc.setFillColor(245, 245, 245);
+  doc.rect(margin, y - 4, contentWidth, 8, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(100);
+  doc.text('FUND', margin + 4, y);
+  doc.text('AMOUNT', pageWidth - margin - 4, y, { align: 'right' });
+  y += 8;
+
+  // Fund rows
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(40);
+  doc.setFontSize(10);
+  const fundEntries = Object.entries(personGiving.byFund);
+  fundEntries.forEach(([fund, amount]) => {
+    doc.text(fund.charAt(0).toUpperCase() + fund.slice(1), margin + 4, y);
+    doc.text(formatCurrency(amount), pageWidth - margin - 4, y, { align: 'right' });
+    y += 6;
+  });
+
+  // Total row
+  doc.setDrawColor(200);
+  doc.line(margin, y - 2, pageWidth - margin, y - 2);
+  y += 4;
+  doc.setFillColor(245, 245, 245);
+  doc.rect(margin, y - 4, contentWidth, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total Contributions', margin + 4, y);
+  doc.setTextColor(22, 163, 74); // green
+  doc.text(formatCurrency(personGiving.total), pageWidth - margin - 4, y, { align: 'right' });
+  y += 14;
+
+  // Transaction Detail table
+  doc.setTextColor(0);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Contribution Detail', margin, y);
+  y += 8;
+
+  // Detail header
+  doc.setFillColor(245, 245, 245);
+  doc.rect(margin, y - 4, contentWidth, 8, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(100);
+  const col1 = margin + 4;
+  const col2 = margin + 45;
+  const col3 = margin + 95;
+  const col4 = pageWidth - margin - 4;
+  doc.text('DATE', col1, y);
+  doc.text('FUND', col2, y);
+  doc.text('METHOD', col3, y);
+  doc.text('AMOUNT', col4, y, { align: 'right' });
+  y += 8;
+
+  // Transaction rows
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(40);
+  doc.setFontSize(9);
+  const sortedTransactions = [...personGiving.transactions].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  sortedTransactions.forEach((t) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 25;
+    }
+    doc.text(new Date(t.date).toLocaleDateString(), col1, y);
+    doc.text(t.fund.charAt(0).toUpperCase() + t.fund.slice(1), col2, y);
+    doc.text(t.method.charAt(0).toUpperCase() + t.method.slice(1), col3, y);
+    doc.text(formatCurrency(t.amount), col4, y, { align: 'right' });
+    y += 6;
+  });
+  y += 8;
+
+  // Footer
+  if (y > 255) {
+    doc.addPage();
+    y = 25;
+  }
+  doc.setDrawColor(200);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 8;
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(
+    'No goods or services were provided in exchange for these contributions.',
+    pageWidth / 2, y, { align: 'center' }
+  );
+  y += 5;
+  doc.text(
+    `${churchName} is a 501(c)(3) non-profit organization.`,
+    pageWidth / 2, y, { align: 'center' }
+  );
+  y += 5;
+  doc.setFontSize(8);
+  doc.text(
+    `Statement generated on ${new Date().toLocaleDateString()}`,
+    pageWidth / 2, y, { align: 'center' }
+  );
+}
+
+// Create a single-person statement PDF
+function generateStatementPdf(
+  person: Person,
+  personGiving: { total: number; byFund: Record<string, number>; transactions: Giving[] },
+  year: number,
+  churchName: string,
+  churchAddress: string,
+  churchPhone: string,
+  churchEmail: string,
+): jsPDF {
+  const doc = new jsPDF();
+  renderStatementPage(doc, person, personGiving, year, churchName, churchAddress, churchPhone, churchEmail);
+  return doc;
+}
 
 // StatementPreview component moved outside parent to avoid recreating on each render
 interface StatementPreviewProps {
@@ -339,6 +535,39 @@ export function GivingStatements({
     });
   };
 
+  // Download a single statement as PDF
+  const handleDownloadPdf = useCallback((person: Person) => {
+    const data = givingByPerson[person.id];
+    if (!data) return;
+    const doc = generateStatementPdf(
+      person, data, selectedYear,
+      churchName, churchAddress, churchPhone, churchEmail,
+    );
+    doc.save(`${person.lastName}_${person.firstName}_Statement_${selectedYear}.pdf`);
+  }, [givingByPerson, selectedYear, churchName, churchAddress, churchPhone, churchEmail]);
+
+  // Download all selected (or all) statements as a merged PDF
+  const handleDownloadAllPdf = useCallback(() => {
+    const targets = selectedPeople.size > 0
+      ? peopleWithGiving.filter(p => selectedPeople.has(p.id))
+      : peopleWithGiving;
+    if (targets.length === 0) return;
+
+    if (targets.length === 1) {
+      handleDownloadPdf(targets[0]);
+      return;
+    }
+
+    const doc = new jsPDF();
+    targets.forEach((p, idx) => {
+      const data = givingByPerson[p.id];
+      if (!data) return;
+      if (idx > 0) doc.addPage();
+      renderStatementPage(doc, p, data, selectedYear, churchName, churchAddress, churchPhone, churchEmail);
+    });
+    doc.save(`Giving_Statements_${selectedYear}_All.pdf`);
+  }, [selectedPeople, peopleWithGiving, givingByPerson, selectedYear, churchName, churchAddress, churchPhone, churchEmail, handleDownloadPdf]);
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -562,7 +791,7 @@ export function GivingStatements({
                           <Eye size={16} />
                         </button>
                         <button
-                          onClick={() => onGenerateStatement(person.id, selectedYear)}
+                          onClick={() => handleDownloadPdf(person)}
                           className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg"
                           title="Download PDF"
                         >
@@ -606,8 +835,7 @@ export function GivingStatements({
           churchEmail={churchEmail}
           onClose={() => setPreviewPerson(null)}
           onDownload={() => {
-            onGenerateStatement(previewPerson.id, selectedYear);
-            setPreviewPerson(null);
+            handleDownloadPdf(previewPerson);
           }}
         />
       )}
@@ -690,7 +918,9 @@ export function GivingStatements({
               </button>
               <button
                 onClick={() => {
-                  // In a real implementation, this would trigger the bulk send
+                  if (bulkSendMethod === 'print') {
+                    handleDownloadAllPdf();
+                  }
                   setShowBulkSend(false);
                 }}
                 className="flex-1 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 flex items-center justify-center gap-2"
