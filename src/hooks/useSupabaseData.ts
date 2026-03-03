@@ -176,6 +176,7 @@ export function useSupabaseData() {
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [giving, setGiving] = useState<Giving[]>([]);
+  const [attendance, setAttendance] = useState<import('../lib/database.types').Attendance[]>([]);
 
   // Load initial data
   useEffect(() => {
@@ -208,6 +209,7 @@ export function useSupabaseData() {
           eventsRes,
           givingRes,
           membershipsRes,
+          attendanceRes,
         ] = await Promise.all([
           supabase.from('people').select('*').order('last_name'),
           supabase.from('tasks').select('*').order('due_date'),
@@ -217,6 +219,7 @@ export function useSupabaseData() {
           supabase.from('calendar_events').select('*').order('start_date'),
           supabase.from('giving').select('*').order('date', { ascending: false }),
           supabase.from('group_memberships').select('*'),
+          supabase.from('attendance').select('*').gte('date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]).order('date', { ascending: false }),
         ]);
 
         if (peopleRes.error) throw peopleRes.error;
@@ -227,6 +230,7 @@ export function useSupabaseData() {
         if (eventsRes.error) throw eventsRes.error;
         if (givingRes.error) throw givingRes.error;
         if (membershipsRes.error) throw membershipsRes.error;
+        if (attendanceRes.error) throw attendanceRes.error;
 
         const memberships = (membershipsRes.data || []) as GroupMembership[];
         const groupsData = (groupsRes.data || []) as SmallGroup[];
@@ -246,6 +250,7 @@ export function useSupabaseData() {
         setPrayers((prayersRes.data || []) as PrayerRequest[]);
         setEvents((eventsRes.data || []) as CalendarEvent[]);
         setGiving((givingRes.data || []) as Giving[]);
+        setAttendance((attendanceRes.data || []) as import('../lib/database.types').Attendance[]);
         setIsDemo(false);
       } catch (err) {
         log.error('Failed to load data from Supabase', err);
@@ -850,6 +855,48 @@ export function useSupabaseData() {
     }
   }, [isDemo]);
 
+  // ==========================================
+  // ATTENDANCE CRUD
+  // ==========================================
+  const checkIn = useCallback(async (churchId: string, personId: string, eventType: import('../lib/database.types').AttendanceType, eventName?: string) => {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const record = {
+      church_id: churchId,
+      person_id: personId,
+      event_type: eventType,
+      event_name: eventName || null,
+      date: dateStr,
+      checked_in_at: now.toISOString(),
+      event_id: null,
+    };
+
+    const addLocally = (id: string) => {
+      setAttendance(prev => [{ id, ...record }, ...prev]);
+    };
+
+    if (isDemo || !isSupabaseConfigured() || !supabase) {
+      addLocally(`attendance-${Date.now()}`);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('attendance')
+        .insert(record)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setAttendance(prev => [data as import('../lib/database.types').Attendance, ...prev]);
+      }
+    } catch (err) {
+      log.warn('Supabase write failed for checkIn, falling back to local state', err);
+      addLocally(`attendance-${Date.now()}`);
+    }
+  }, [isDemo]);
+
   return {
     // State
     isLoading,
@@ -864,6 +911,7 @@ export function useSupabaseData() {
     prayers,
     events,
     giving,
+    attendance,
 
     // People actions
     addPerson,
@@ -892,5 +940,8 @@ export function useSupabaseData() {
     addEvent,
     updateEvent,
     deleteEvent,
+
+    // Attendance actions
+    checkIn,
   };
 }

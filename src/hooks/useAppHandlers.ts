@@ -64,6 +64,7 @@ interface UseAppHandlersProps {
     category: EventCategory;
   }>) => Promise<unknown>;
   deleteEvent?: (id: string) => Promise<unknown>;
+  checkIn?: (churchId: string, personId: string, eventType: Attendance['eventType'], eventName?: string) => Promise<unknown>;
   setView: (view: View) => void;
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
@@ -87,6 +88,7 @@ export function useAppHandlers({
   addEvent,
   updateEvent,
   deleteEvent,
+  checkIn: checkInToDb,
   setView,
   setSelectedPersonId,
   openPersonForm,
@@ -161,17 +163,21 @@ export function useAppHandlers({
     await markPrayerAnswered(id, testimony);
   }, [markPrayerAnswered]);
 
-  const handleCheckIn = useCallback((personId: string, eventType: Attendance['eventType'], eventName?: string) => {
-    const newRecord: Attendance = {
-      id: `attendance-${Date.now()}`,
-      personId,
-      eventType,
-      eventName,
-      date: new Date().toISOString().split('T')[0],
-      checkedInAt: new Date().toISOString(),
-    };
-    setAttendanceRecords((prev) => [...prev, newRecord]);
-  }, []);
+  const handleCheckIn = useCallback(async (personId: string, eventType: Attendance['eventType'], eventName?: string) => {
+    if (checkInToDb) {
+      await checkInToDb(churchId, personId, eventType, eventName);
+    } else {
+      const newRecord: Attendance = {
+        id: `attendance-${Date.now()}`,
+        personId,
+        eventType,
+        eventName,
+        date: new Date().toISOString().split('T')[0],
+        checkedInAt: new Date().toISOString(),
+      };
+      setAttendanceRecords((prev) => [...prev, newRecord]);
+    }
+  }, [checkInToDb, churchId]);
 
   const handleRSVP = useCallback((eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0) => {
     setRsvps((prev) => {

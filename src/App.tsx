@@ -32,6 +32,7 @@ import {
   toPrayerLegacy,
   toEventLegacy,
   toGivingLegacy,
+  toAttendanceLegacy,
 } from './utils/typeConverters';
 function App() {
   const { churchId } = useAuthContext();
@@ -62,6 +63,8 @@ function App() {
     addEvent,
     updateEvent,
     deleteEvent,
+    attendance: dbAttendance,
+    checkIn,
   } = useSupabaseData();
 
   // Convert to legacy types for existing components (memoized)
@@ -77,6 +80,7 @@ function App() {
   const prayers = useMemo(() => dbPrayers.map(toPrayerLegacy), [dbPrayers]);
   const events = useMemo(() => dbEvents.map(toEventLegacy), [dbEvents]);
   const giving = useMemo(() => dbGiving.map(toGivingLegacy), [dbGiving]);
+  const attendanceFromDb = useMemo(() => dbAttendance.map(toAttendanceLegacy), [dbAttendance]);
 
   // Custom hooks for state management
   const modals = useModals();
@@ -103,6 +107,7 @@ function App() {
     addEvent,
     updateEvent,
     deleteEvent,
+    checkIn,
     setView,
     setSelectedPersonId,
     openPersonForm: modals.openPersonForm,
@@ -214,7 +219,7 @@ function App() {
             people={people}
             events={events}
             giving={giving}
-            attendance={attendanceRecords}
+            attendance={[...attendanceFromDb, ...attendanceRecords]}
             rsvps={rsvps}
             churchName={churchName}
             churchProfile={churchSettings?.profile}
@@ -247,7 +252,7 @@ function App() {
             prayers={prayers}
             events={events}
             giving={giving}
-            attendanceRecords={attendanceRecords}
+            attendanceRecords={[...attendanceFromDb, ...attendanceRecords]}
             rsvps={rsvps}
             volunteerAssignments={volunteerAssignments}
             selectedPerson={selectedPerson}
