@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuthContext } from '../contexts/AuthContext';
 import {
   Mail,
   Save,
@@ -143,6 +145,7 @@ const MERGE_TAGS = [
 ];
 
 export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderProps) {
+  const { churchId } = useAuthContext();
   const [template, setTemplate] = useState<EmailTemplate>({
     id: `tpl-${Date.now()}`,
     name: 'New Template',
@@ -272,7 +275,31 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
     setShowTemplates(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Save to Supabase if configured
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase
+          .from('email_templates')
+          .upsert({
+            id: template.id.startsWith('tpl-') ? undefined : template.id,
+            church_id: churchId,
+            name: template.name,
+            subject: template.subject,
+            blocks: template.blocks,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'id' });
+
+        if (!error) {
+          onSave?.(template);
+          return;
+        }
+      } catch {
+        // Fall through to localStorage
+      }
+    }
+
+    // Fallback: save to localStorage
     const savedTemplates = JSON.parse(localStorage.getItem('email-templates') || '[]');
     const existingIndex = savedTemplates.findIndex((t: EmailTemplate) => t.id === template.id);
 
