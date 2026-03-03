@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   ArrowLeft,
   Zap,
@@ -21,6 +21,8 @@ import {
   Settings,
   RefreshCw,
 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuthContext } from '../contexts/AuthContext';
 import type { Person, Task, Interaction } from '../types';
 
 interface FollowUpAutomationProps {
@@ -196,55 +198,95 @@ const actionLabels: Record<ActionType, { label: string; icon: React.ReactNode }>
 };
 
 export function FollowUpAutomation({
-  people: _people,
+  people,
   tasks: _tasks,
   interactions: _interactions,
   onAddTask: _onAddTask,
   onBack,
 }: FollowUpAutomationProps) {
-  // Reserved for future integration with actual data
-  void _people;
   void _tasks;
   void _interactions;
   void _onAddTask;
+  const { churchId } = useAuthContext();
   const [rules, setRules] = useState<AutomationRule[]>(defaultRules);
   const [activeTab, setActiveTab] = useState<'rules' | 'activity' | 'create'>('rules');
   const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [triggeredEvents, setTriggeredEvents] = useState<TriggeredEvent[]>([]);
+  const [, setIsLoaded] = useState(false);
 
-  // Simulated triggered events for demo
-  const [triggeredEvents] = useState<TriggeredEvent[]>([
-    {
-      id: '1',
-      ruleId: '1',
-      ruleName: 'First Visit Follow-up',
-      personId: 'p1',
-      personName: 'Sarah Johnson',
-      triggeredAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      actionTaken: 'Created task: Follow up with Sarah - First Time Visitor',
-      status: 'success',
-    },
-    {
-      id: '2',
-      ruleId: '2',
-      ruleName: 'Third Visit Alert',
-      personId: 'p2',
-      personName: 'Michael Chen',
-      triggeredAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      actionTaken: 'Notification sent to Pastor, Admin',
-      status: 'success',
-    },
-    {
-      id: '3',
-      ruleId: '3',
-      ruleName: 'Inactive Member Check-in',
-      personId: 'p3',
-      personName: 'David Williams',
-      triggeredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      actionTaken: 'Created task: Check in with David',
-      status: 'success',
-    },
-  ]);
+  // Build person lookup for event display
+  const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
+
+  // Load rules and events from Supabase
+  useEffect(() => {
+    const sb = isSupabaseConfigured() ? supabase : null;
+    if (!sb) {
+      setIsLoaded(true);
+      return;
+    }
+
+    const loadData = async () => {
+      // Load rules
+      const { data: dbRules, error: rulesErr } = await sb
+        .from('automation_rules')
+        .select('*')
+        .eq('church_id', churchId)
+        .order('created_at', { ascending: false });
+
+      if (!rulesErr && dbRules && dbRules.length > 0) {
+        setRules(dbRules.map((r: Record<string, unknown>) => ({
+          id: r.id as string,
+          name: r.name as string,
+          description: (r.description as string) || '',
+          enabled: r.is_active as boolean,
+          trigger: {
+            type: (r.trigger_type as TriggerType),
+            config: ((r.trigger_config as Record<string, unknown>) || {}),
+          },
+          conditions: ((r.trigger_config as Record<string, unknown>)?.conditions as AutomationRule['conditions']) || [],
+          action: {
+            type: (r.action_type as ActionType),
+            config: ((r.action_config as Record<string, unknown>) || {}),
+          },
+          createdAt: r.created_at as string,
+          lastTriggered: (r.last_run_at as string) || undefined,
+          triggerCount: (r.run_count as number) || 0,
+        })));
+      }
+      // If no DB rules, keep defaultRules for demo
+
+      // Load recent events (last 30 days)
+      const { data: dbEvents, error: eventsErr } = await sb
+        .from('automation_events')
+        .select('*')
+        .eq('church_id', churchId)
+        .gte('triggered_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .order('triggered_at', { ascending: false })
+        .limit(50);
+
+      if (!eventsErr && dbEvents) {
+        setTriggeredEvents(dbEvents.map((e: Record<string, unknown>) => {
+          const person = personMap.get(e.person_id as string);
+          const rule = rules.find(r => r.id === (e.rule_id as string));
+          return {
+            id: e.id as string,
+            ruleId: e.rule_id as string,
+            ruleName: rule?.name || 'Unknown Rule',
+            personId: (e.person_id as string) || '',
+            personName: person ? `${person.firstName} ${person.lastName}` : 'Unknown',
+            triggeredAt: e.triggered_at as string,
+            actionTaken: (e.details as string) || (e.result as string) || 'Action executed',
+            status: ((e.result as string) === 'failed' ? 'failed' : 'success') as TriggeredEvent['status'],
+          };
+        }));
+      }
+
+      setIsLoaded(true);
+    };
+
+    loadData();
+  }, [churchId, personMap]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // New rule form state
   const [newRule, setNewRule] = useState<Partial<AutomationRule>>({
@@ -269,34 +311,103 @@ export function FollowUpAutomation({
     return { activeRules, totalTriggers, recentTriggers };
   }, [rules, triggeredEvents]);
 
-  const toggleRule = (ruleId: string) => {
+  const toggleRule = useCallback(async (ruleId: string) => {
+    const rule = rules.find(r => r.id === ruleId);
+    if (!rule) return;
+    const newEnabled = !rule.enabled;
+
+    // Optimistic update
     setRules(prev => prev.map(r =>
-      r.id === ruleId ? { ...r, enabled: !r.enabled } : r
+      r.id === ruleId ? { ...r, enabled: newEnabled } : r
     ));
-  };
 
-  const deleteRule = (ruleId: string) => {
-    if (confirm('Are you sure you want to delete this automation rule?')) {
-      setRules(prev => prev.filter(r => r.id !== ruleId));
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase
+        .from('automation_rules')
+        .update({ is_active: newEnabled, updated_at: new Date().toISOString() })
+        .eq('id', ruleId);
+      if (error) {
+        console.error('Failed to toggle rule:', error.message);
+        // Revert on failure
+        setRules(prev => prev.map(r =>
+          r.id === ruleId ? { ...r, enabled: !newEnabled } : r
+        ));
+      }
     }
-  };
+  }, [rules]);
 
-  const handleCreateRule = () => {
+  const deleteRule = useCallback(async (ruleId: string) => {
+    if (!confirm('Are you sure you want to delete this automation rule?')) return;
+
+    setRules(prev => prev.filter(r => r.id !== ruleId));
+
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase
+        .from('automation_rules')
+        .delete()
+        .eq('id', ruleId);
+      if (error) {
+        console.error('Failed to delete rule:', error.message);
+      }
+    }
+  }, []);
+
+  const handleCreateRule = useCallback(async () => {
     if (!newRule.name || !newRule.trigger || !newRule.action) return;
 
-    const rule: AutomationRule = {
-      id: Date.now().toString(),
-      name: newRule.name,
-      description: newRule.description || '',
-      enabled: newRule.enabled ?? true,
-      trigger: newRule.trigger as AutomationRule['trigger'],
+    const triggerConfig = {
+      ...newRule.trigger.config,
       conditions: newRule.conditions || [],
-      action: newRule.action as AutomationRule['action'],
-      createdAt: new Date().toISOString(),
-      triggerCount: 0,
     };
 
-    setRules(prev => [...prev, rule]);
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase
+        .from('automation_rules')
+        .insert({
+          church_id: churchId,
+          name: newRule.name,
+          description: newRule.description || null,
+          trigger_type: newRule.trigger.type,
+          trigger_config: triggerConfig,
+          action_type: newRule.action.type,
+          action_config: newRule.action.config,
+          is_active: newRule.enabled ?? true,
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        const rule: AutomationRule = {
+          id: data.id,
+          name: data.name,
+          description: data.description || '',
+          enabled: data.is_active,
+          trigger: { type: data.trigger_type as TriggerType, config: data.trigger_config || {} },
+          conditions: (data.trigger_config as Record<string, unknown>)?.conditions as AutomationRule['conditions'] || [],
+          action: { type: data.action_type as ActionType, config: data.action_config || {} },
+          createdAt: data.created_at,
+          triggerCount: 0,
+        };
+        setRules(prev => [rule, ...prev]);
+      } else if (error) {
+        console.error('Failed to create rule:', error.message);
+      }
+    } else {
+      // Fallback: local-only
+      const rule: AutomationRule = {
+        id: Date.now().toString(),
+        name: newRule.name,
+        description: newRule.description || '',
+        enabled: newRule.enabled ?? true,
+        trigger: newRule.trigger as AutomationRule['trigger'],
+        conditions: newRule.conditions || [],
+        action: newRule.action as AutomationRule['action'],
+        createdAt: new Date().toISOString(),
+        triggerCount: 0,
+      };
+      setRules(prev => [rule, ...prev]);
+    }
+
     setShowCreateModal(false);
     setNewRule({
       name: '',
@@ -307,12 +418,11 @@ export function FollowUpAutomation({
       action: { type: 'create_task', config: { title: '', category: 'follow-up', priority: 'medium', daysUntilDue: 3 } },
     });
     setActiveTab('rules');
-  };
+  }, [newRule, churchId]);
 
-  const runRuleManually = (rule: AutomationRule) => {
-    // Demo: show what would happen
+  const runRuleManually = useCallback((rule: AutomationRule) => {
     alert(`Running "${rule.name}" would check all people matching the trigger conditions and execute the action. In production, this would create tasks, send notifications, etc.`);
-  };
+  }, []);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
