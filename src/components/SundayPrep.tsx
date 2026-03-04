@@ -56,6 +56,7 @@ interface DragItem {
   id: string;
   title: string;
   content: string;
+  imageUrl?: string | null;
 }
 
 const sectionTypeConfig = {
@@ -454,6 +455,14 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         onClick={() => addItemAsSection(item)}
         className={`w-full text-left p-3 ${styles.bg} rounded-lg cursor-pointer border ${styles.border} hover:shadow-md hover:scale-[1.02] transition-all group`}
       >
+        {item.imageUrl && (
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="w-full h-24 object-cover rounded-md mb-2"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        )}
         <div className="flex items-start gap-2">
           <Icon size={16} className={`${styles.icon} mt-0.5 flex-shrink-0`} />
           <div className="flex-1 min-w-0">
@@ -601,6 +610,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                       id: news.id,
                       title: news.headline,
                       content: news.connection,
+                      imageUrl: news.imageUrl,
                     }}
                     icon={Lightbulb}
                     color="cyan"

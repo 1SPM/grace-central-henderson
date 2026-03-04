@@ -65,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const data = await response.json() as { articles: Array<{ title: string; description: string; source: { name: string }; url: string; publishedAt: string }> };
+    const data = await response.json() as { articles: Array<{ title: string; description: string; source: { name: string }; url: string; urlToImage: string | null; publishedAt: string }> };
 
     // Transform and filter articles
     const articles = data.articles
@@ -75,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         description: string;
         source: { name: string };
         url: string;
+        urlToImage: string | null;
         publishedAt: string
       }, index: number) => ({
         id: `news-${Date.now()}-${index}`,
@@ -82,6 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         description: article.description || '',
         source: article.source?.name || 'Unknown',
         url: article.url,
+        imageUrl: article.urlToImage || null,
         publishedAt: article.publishedAt,
       }));
 

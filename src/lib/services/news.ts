@@ -13,6 +13,7 @@ export interface NewsArticle {
   description: string;
   source: string;
   url: string;
+  imageUrl?: string | null;
   publishedAt: string;
 }
 
@@ -24,6 +25,7 @@ export interface CuratedNewsItem {
   scripture?: string;
   source: string;
   url: string;
+  imageUrl?: string | null;
 }
 
 /**
@@ -149,6 +151,7 @@ export async function fetchCuratedNews(maxItems: number = 5): Promise<CuratedNew
         scripture,
         source: article.source,
         url: article.url,
+        imageUrl: article.imageUrl,
       };
     })
   );
