@@ -55,7 +55,7 @@ export function TutorialSpotlight({ targetElement, padding = 8 }: TutorialSpotli
 
   return (
     <svg
-      className="fixed inset-0 w-full h-full z-[60] pointer-events-auto"
+      className="fixed inset-0 w-full h-full z-[60] pointer-events-none"
       style={{ transition: 'opacity 0.2s ease' }}
     >
       <defs>
