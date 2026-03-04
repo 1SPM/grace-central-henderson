@@ -58,14 +58,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const response = await fetch(`${NEWS_API_BASE}/top-headlines?${params}`);
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error('NewsAPI error:', error);
+      const errorBody = await response.json() as { message?: string };
+      console.error('NewsAPI error:', errorBody);
       return res.status(response.status).json({
-        error: error.message || 'Failed to fetch news'
+        error: errorBody.message || 'Failed to fetch news'
       });
     }
 
-    const data = await response.json();
+    const data = await response.json() as { articles: Array<{ title: string; description: string; source: { name: string }; url: string; publishedAt: string }> };
 
     // Transform and filter articles
     const articles = data.articles
