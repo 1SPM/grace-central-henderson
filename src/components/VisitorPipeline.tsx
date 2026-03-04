@@ -51,7 +51,7 @@ export function VisitorPipeline({ people, onViewPerson }: VisitorPipelineProps) 
   const activePeople = people.filter(p => p.status !== 'inactive');
 
   return (
-    <div className="p-8">
+    <div data-tutorial="pipeline-visitors" className="p-8">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">

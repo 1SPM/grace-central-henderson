@@ -180,6 +180,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
             Export
           </button>
           <button
+            data-tutorial="tasks-add"
             onClick={() => setShowAdd(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
           >

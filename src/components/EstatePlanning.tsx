@@ -13,7 +13,7 @@ import {
   Shield,
   Heart,
   Building,
-  ArrowLeft,
+  ChevronRight,
   AlertTriangle,
   BookOpen,
   Phone,
@@ -264,19 +264,19 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            </button>
-          )}
           <div className="p-2 bg-emerald-100 dark:bg-emerald-500/15 rounded-xl">
             <Shield className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
+            {onBack && (
+              <nav className="flex items-center gap-1.5 text-sm mb-1">
+                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                  Life Services
+                </button>
+                <ChevronRight size={14} className="text-gray-400 dark:text-dark-500" />
+                <span className="text-gray-900 dark:text-dark-100 font-medium">Estate Planning & Legacy Giving</span>
+              </nav>
+            )}
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Estate Planning & Legacy Giving</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Help members plan their legacy and charitable giving

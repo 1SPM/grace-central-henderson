@@ -16,7 +16,7 @@ import {
   BookOpen,
   Music,
   Flower2,
-  ArrowLeft,
+  ChevronRight,
   Church,
 } from 'lucide-react';
 import type { Person, CalendarEvent } from '../types';
@@ -339,19 +339,19 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            </button>
-          )}
           <div className="p-2 bg-stone-100 dark:bg-stone-500/15 rounded-xl">
             <Flower2 className="w-6 h-6 text-stone-600 dark:text-stone-400" />
           </div>
           <div>
+            {onBack && (
+              <nav className="flex items-center gap-1.5 text-sm mb-1">
+                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                  Life Services
+                </button>
+                <ChevronRight size={14} className="text-gray-400 dark:text-dark-500" />
+                <span className="text-gray-900 dark:text-dark-100 font-medium">Funeral & Memorial Services</span>
+              </nav>
+            )}
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Funeral & Memorial Services</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage funeral services and memorial planning

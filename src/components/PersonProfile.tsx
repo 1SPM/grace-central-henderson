@@ -354,7 +354,7 @@ export function PersonProfile({
           </div>
 
           {/* Add Interaction */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div data-tutorial="people-interaction" className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">Log Interaction</h2>
             <div className="flex flex-wrap gap-2 mb-4">
               {interactionTypes.map(({ type, icon, label }) => (

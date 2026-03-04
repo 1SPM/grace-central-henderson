@@ -344,7 +344,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
             )}
           </div>
           {onAddEvent && (
-            <button onClick={openCreateEventModal} className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 flex items-center gap-2">
+            <button data-tutorial="calendar-new-event" onClick={openCreateEventModal} className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 flex items-center gap-2">
               <Plus size={18} /> Create Event
             </button>
           )}
@@ -440,7 +440,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
               ))}
             </div>
 
-            <div className="grid grid-cols-7">
+            <div data-tutorial="calendar-grid" className="grid grid-cols-7">
               {calendarDays.map((day, i) => {
                 const dayEvents = day !== null ? getEventsForDay(day) : [];
                 const dayBirthdays = day !== null ? getBirthdaysForDay(day) : [];

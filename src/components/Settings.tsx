@@ -18,6 +18,7 @@ import {
   ToggleRight,
   Accessibility,
   Heart,
+  GraduationCap,
 } from 'lucide-react';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
@@ -42,6 +43,8 @@ interface SettingsProps {
   groups?: SmallGroup[];
   prayers?: PrayerRequest[];
   onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
+  onRunWizard?: () => void;
+  onOpenTutorials?: () => void;
 }
 
 export function Settings({
@@ -52,6 +55,8 @@ export function Settings({
   groups = [],
   prayers = [],
   onNavigate,
+  onRunWizard,
+  onOpenTutorials,
 }: SettingsProps) {
   const { status, saveIntegrations } = useIntegrations();
   const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
@@ -160,6 +165,54 @@ export function Settings({
         <p className="text-gray-500 dark:text-dark-400 mt-1">Manage your GRACE CRM configuration</p>
       </div>
 
+      {/* Run Setup Wizard */}
+      {onRunWizard && (
+        <div className="mb-8 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-2xl border border-violet-200 dark:border-violet-800 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-500/10 rounded-xl flex items-center justify-center">
+                <Sparkles className="text-violet-600 dark:text-violet-400" size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-dark-100">Setup Wizard</h2>
+                <p className="text-sm text-gray-500 dark:text-dark-400">Re-run the guided setup to update your church profile</p>
+              </div>
+            </div>
+            <button
+              onClick={onRunWizard}
+              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+            >
+              <Sparkles size={14} />
+              Run Setup Wizard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Run Tutorials */}
+      {onOpenTutorials && (
+        <div className="mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                <GraduationCap className="text-indigo-600 dark:text-indigo-400" size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-dark-100">Guided Tutorials</h2>
+                <p className="text-sm text-gray-500 dark:text-dark-400">Walk through scenario-based workflows step by step</p>
+              </div>
+            </div>
+            <button
+              onClick={onOpenTutorials}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+            >
+              <GraduationCap size={14} />
+              Run Tutorials
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Life Services Section - Quick Access */}
       {onNavigate && (
         <div className="bg-gradient-to-r from-rose-50 to-emerald-50 dark:from-rose-900/20 dark:to-emerald-900/20 rounded-2xl border border-rose-200 dark:border-rose-800 p-6 mb-8">
@@ -219,6 +272,7 @@ export function Settings({
           Integrations
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div data-tutorial="settings-email">
           <IntegrationCard
             title="Email (Resend)"
             description="Send automated emails"
@@ -228,6 +282,7 @@ export function Settings({
             setupUrl="https://resend.com/docs"
             onConfigure={() => setShowEmailConfig(true)}
           />
+          </div>
 
           <IntegrationCard
             title="SMS (Twilio)"

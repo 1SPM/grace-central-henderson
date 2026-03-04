@@ -279,7 +279,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
   const interactionLabels: Record<string, string> = { note: 'Notes', call: 'Calls', email: 'Emails', visit: 'Visits', text: 'Texts', prayer: 'Prayer' };
 
   return (
-    <div className="space-y-6">
+    <div data-tutorial="analytics-overview" className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

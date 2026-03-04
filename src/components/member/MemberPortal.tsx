@@ -10,6 +10,7 @@ import { MemberShopPage } from './MemberShopPage';
 import { MemberLegacyPage } from './MemberLegacyPage';
 import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
+import { MemberScanPage } from './MemberScanPage';
 import { DEMO_LEADERS } from './demoLeaders';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
@@ -177,6 +178,9 @@ export function MemberPortal({
         return (
           <MyMinistryPage />
         );
+
+      case 'scan':
+        return <MemberScanPage />;
 
       default:
         return (

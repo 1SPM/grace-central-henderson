@@ -496,7 +496,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         }
       `}</style>
 
-      <div className="space-y-6">
+      <div data-tutorial="sunday-prep-main" className="space-y-6">
         {/* Header */}
         <div className="relative overflow-hidden rounded-xl h-32 no-print">
           <img

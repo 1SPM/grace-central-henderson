@@ -97,8 +97,8 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
       </div>
 
       {/* Groups Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {activeGroups.map((group) => {
+      <div data-tutorial="groups-list" className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {activeGroups.map((group, groupIndex) => {
           const leader = group.leaderId ? personMap.get(group.leaderId) : undefined;
           const members = group.members.map(id => personMap.get(id)).filter(Boolean) as Person[];
           const isExpanded = expandedGroup === group.id;
@@ -107,6 +107,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
           return (
             <div
               key={group.id}
+              {...(groupIndex === 0 ? { 'data-tutorial': 'group-card' } : {})}
               className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden"
             >
               {/* Group Header */}

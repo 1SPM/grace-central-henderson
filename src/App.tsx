@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import type { View } from './types';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -12,9 +13,13 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { EmailSidebar } from './components/EmailSidebar';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { TutorialProvider } from './contexts/TutorialContext';
+import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
+import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
 
 // Lazy load MemberPortal for standalone access
 const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -34,6 +39,20 @@ import {
   toGivingLegacy,
   toAttendanceLegacy,
 } from './utils/typeConverters';
+import { useTutorial } from './contexts/TutorialContext';
+
+/** Bridges the App-level showTutorialPicker state to the TutorialContext (which must be inside TutorialProvider) */
+function TutorialPickerAutoOpen({ show, onShown }: { show: boolean; onShown: () => void }) {
+  const { openPicker } = useTutorial();
+  useEffect(() => {
+    if (show) {
+      openPicker();
+      onShown();
+    }
+  }, [show, openPicker, onShown]);
+  return null;
+}
+
 function App() {
   const { churchId } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
@@ -87,7 +106,13 @@ function App() {
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
   const pastoralCare = usePastoralCare();
-  const { settings: churchSettings } = useChurchSettings(churchId);
+  const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
+  const [showWizard, setShowWizard] = useState(false);
+  const [showTutorialPicker, setShowTutorialPicker] = useState(false);
+
+  const reopenWizard = useCallback(() => {
+    setShowWizard(true);
+  }, []);
 
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
@@ -191,6 +216,25 @@ function App() {
   // Check if we're accessing the standalone member portal
   const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
 
+  // Show onboarding wizard for first-time users
+  useEffect(() => {
+    if (!settingsLoading && !isPortalRoute && churchSettings &&
+        !churchSettings.onboarding?.wizardCompleted &&
+        !churchSettings.onboarding?.wizardDismissed) {
+      setShowWizard(true);
+    }
+  }, [settingsLoading, isPortalRoute, churchSettings]);
+
+  // Show tutorial picker after wizard completion (one-time)
+  useEffect(() => {
+    if (!settingsLoading && !isPortalRoute && churchSettings &&
+        churchSettings.onboarding?.wizardCompleted &&
+        !churchSettings.onboarding?.tutorialPickerShown &&
+        !showWizard) {
+      setShowTutorialPicker(true);
+    }
+  }, [settingsLoading, isPortalRoute, churchSettings, showWizard]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -239,6 +283,12 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <TutorialProvider
+        setView={(v: View) => setView(v)}
+        currentView={view}
+        onboarding={churchSettings?.onboarding}
+        saveOnboarding={saveOnboarding}
+      >
       <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
         <ErrorBoundary>
           <ViewRenderer
@@ -262,6 +312,7 @@ function App() {
             agents={agents}
             pastoralCare={pastoralCare}
             onOpenEmailSidebar={modals.openEmailSidebar}
+            onReopenWizard={reopenWizard}
           />
         </ErrorBoundary>
       </Layout>
@@ -314,6 +365,25 @@ function App() {
       />
 
       <PWAInstallPrompt />
+
+      {showWizard && (
+        <Suspense fallback={null}>
+          <OnboardingWizard
+            churchSettings={churchSettings}
+            onSaveProfile={saveChurchProfile}
+            onSaveSettings={saveChurchSettings}
+            onOpenPersonForm={modals.openPersonForm}
+            onSetView={(v: string) => setView(v as View)}
+            onComplete={() => setShowWizard(false)}
+            onDismiss={() => setShowWizard(false)}
+          />
+        </Suspense>
+      )}
+
+      <TutorialPickerModal />
+      <TutorialOverlay />
+      <TutorialPickerAutoOpen show={showTutorialPicker} onShown={() => setShowTutorialPicker(false)} />
+      </TutorialProvider>
     </ErrorBoundary>
   );
 }

@@ -569,7 +569,7 @@ export function GivingStatements({
   }, [selectedPeople, peopleWithGiving, givingByPerson, selectedYear, churchName, churchAddress, churchPhone, churchEmail, handleDownloadPdf]);
 
   return (
-    <div className="p-8">
+    <div data-tutorial="giving-statements" className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>

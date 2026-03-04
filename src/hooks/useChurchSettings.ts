@@ -46,6 +46,19 @@ export interface ChurchProfile {
   serviceTimes: ServiceTime[];
 }
 
+export interface OnboardingState {
+  wizardCompleted: boolean;
+  wizardCompletedAt?: string;
+  wizardDismissed: boolean;
+  completedSteps: string[];
+  checklistDismissed: boolean;
+  tutorialPickerShown?: boolean;
+  completedTutorials?: string[];
+  activeTutorial?: string | null;
+  activeTutorialStep?: number;
+  selectedTutorials?: string[];
+}
+
 export interface ChurchSettings {
   profile: ChurchProfile;
   integrations: IntegrationCredentials;
@@ -59,6 +72,7 @@ export interface ChurchSettings {
     primaryColor?: string;
     logoUrl?: string;
   };
+  onboarding?: OnboardingState;
 }
 
 const DEFAULT_SETTINGS: ChurchSettings = {
@@ -85,6 +99,12 @@ const DEFAULT_SETTINGS: ChurchSettings = {
     birthdayReminders: true,
   },
   branding: {},
+  onboarding: {
+    wizardCompleted: false,
+    wizardDismissed: false,
+    completedSteps: [],
+    checklistDismissed: false,
+  },
 };
 
 export function useChurchSettings(churchId: string = 'demo-church') {
@@ -191,6 +211,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     });
   }, [saveSettings, settings.integrations]);
 
+  // Save just onboarding state
+  const saveOnboarding = useCallback(async (onboarding: Partial<OnboardingState>): Promise<boolean> => {
+    return saveSettings({
+      onboarding: { ...DEFAULT_SETTINGS.onboarding!, ...settings.onboarding, ...onboarding }
+    });
+  }, [saveSettings, settings.onboarding]);
+
   // Clear a specific integration's frontend config
   const clearIntegration = useCallback(async (integration: 'email' | 'sms' | 'payments' | 'auth'): Promise<boolean> => {
     const clearedIntegrations = { ...settings.integrations };
@@ -226,6 +253,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     saveSettings,
     saveProfile,
     saveIntegrations,
+    saveOnboarding,
     clearIntegration,
     reloadSettings: loadSettings,
   };

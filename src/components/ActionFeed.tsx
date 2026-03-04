@@ -633,7 +633,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div data-tutorial="action-feed" className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Hero Header */}
       <div className="relative overflow-hidden rounded-xl h-32">
         <img

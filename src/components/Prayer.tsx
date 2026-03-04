@@ -36,6 +36,7 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
           <p className="text-gray-500 dark:text-dark-400 mt-1">Lift up your community in prayer</p>
         </div>
         <button
+          data-tutorial="prayer-add"
           onClick={() => exportPrayersToCSV(prayers, people)}
           className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
         >
@@ -62,7 +63,7 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
       </div>
 
       {/* Prayer List */}
-      <div className="space-y-4">
+      <div data-tutorial="prayer-list" className="space-y-4">
         {filtered.map((prayer) => {
           const person = prayer.personId ? personMap.get(prayer.personId) : undefined;
 

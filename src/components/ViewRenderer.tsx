@@ -10,6 +10,7 @@ import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
+import { useTutorial } from '../contexts/TutorialContext';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
@@ -99,6 +100,7 @@ interface ViewRendererProps {
   volunteerAssignments: { id: string; eventId: string; roleId: string; personId: string; status: 'confirmed' | 'pending' | 'declined' }[];
   selectedPerson?: Person;
   onOpenEmailSidebar?: (recipients?: string[], groupId?: string) => void;
+  onReopenWizard?: () => void;
   handlers: {
     viewPerson: (id: string) => void;
     backToPeople: () => void;
@@ -193,11 +195,12 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
-    collectionMgmt, charityBasketMgmt, agents, pastoralCare, onOpenEmailSidebar } = props;
+    collectionMgmt, charityBasketMgmt, agents, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
 
-  const { settings } = useChurchSettings(churchId);
+  const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
   const { getBlockedMessage } = useRouteGuard();
+  const { openPicker: openTutorialPicker } = useTutorial();
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -225,6 +228,13 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewActions={() => setView('feed')}
           onViewCalendar={() => setView('calendar')}
           onViewAnalytics={() => setView('analytics')}
+          churchSettings={settings}
+          groupsCount={groups.length}
+          eventsCount={events.length}
+          onNavigate={(v) => setView(v as View)}
+          onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
+          onReopenWizard={onReopenWizard}
+          onOpenTutorials={openTutorialPicker}
         />
       );
 
@@ -472,6 +482,8 @@ export function ViewRenderer(props: ViewRendererProps) {
             groups={groups}
             prayers={prayers}
             onNavigate={(subView) => setView(subView)}
+            onRunWizard={onReopenWizard}
+            onOpenTutorials={openTutorialPicker}
           />
         );
 

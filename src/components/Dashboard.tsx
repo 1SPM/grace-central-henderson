@@ -21,6 +21,8 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent } from '../types';
+import type { ChurchSettings } from '../hooks/useChurchSettings';
+import { SetupChecklist } from './SetupChecklist';
 import { GivingWidget } from './GivingWidget';
 
 import { SundayPrep } from './SundayPrep';
@@ -46,12 +48,19 @@ interface DashboardProps {
   onViewActions?: () => void;
   onViewCalendar?: () => void;
   onViewAnalytics?: () => void;
+  churchSettings?: ChurchSettings;
+  groupsCount?: number;
+  eventsCount?: number;
+  onNavigate?: (view: string) => void;
+  onDismissChecklist?: () => void;
+  onReopenWizard?: () => void;
+  onOpenTutorials?: () => void;
 }
 
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -157,6 +166,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
               Tasks
             </button>
             <button
+              data-tutorial="dashboard-sunday-prep"
               onClick={() => setActiveTab('sunday-prep')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'sunday-prep'
@@ -167,6 +177,15 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
               <Church size={16} />
               Sunday Prep
             </button>
+            {onOpenTutorials && (
+              <button
+                onClick={onOpenTutorials}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all bg-white/10 text-white/90 hover:bg-white/20 border border-white/10 ml-auto"
+              >
+                <BookOpen size={16} />
+                Take a Tour
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -281,8 +300,22 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         </>
       ) : (
         <>
+      {/* Setup Checklist */}
+      {churchSettings && onNavigate && onDismissChecklist && !churchSettings.onboarding?.checklistDismissed && (
+        <SetupChecklist
+          churchSettings={churchSettings}
+          peopleCount={people.length}
+          groupsCount={groupsCount}
+          eventsCount={eventsCount}
+          onNavigate={onNavigate}
+          onDismiss={onDismissChecklist}
+          onReopenWizard={onReopenWizard}
+          onOpenTutorials={onOpenTutorials}
+        />
+      )}
+
       {/* Stats Grid with Sparklines */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div data-tutorial="dashboard-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           label="Total People"
           value={people.length}
@@ -327,7 +360,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
 
       {/* Members Need Care Alert — positioned high for pastoral priority */}
       {inactive.length > 0 && (
-        <div className="mb-6 bg-rose-50 dark:bg-rose-900/10 rounded-xl p-4 border border-rose-200 dark:border-rose-800/30 shadow-sm">
+        <div data-tutorial="dashboard-care-alert" className="mb-6 bg-rose-50 dark:bg-rose-900/10 rounded-xl p-4 border border-rose-200 dark:border-rose-800/30 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
               <Heart className="text-rose-500" size={18} />
@@ -417,7 +450,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Recent Visitors */}
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+        <div data-tutorial="dashboard-visitors" className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
           <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -467,7 +500,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         </div>
 
         {/* Priority Tasks */}
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+        <div data-tutorial="dashboard-tasks" className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

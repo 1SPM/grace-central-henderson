@@ -286,7 +286,7 @@ export function GivingDashboard({
       </div>
 
       {/* Stats Grid - Clean cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
