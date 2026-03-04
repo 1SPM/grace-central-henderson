@@ -11,7 +11,7 @@ import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
 import { useTutorial } from '../contexts/TutorialContext';
-import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory } from '../types';
+import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory, Announcement, AnnouncementCategory, DiscipleshipMilestone, MilestoneType } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
 // Lazy load less frequently used views for code splitting
@@ -55,6 +55,8 @@ const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ defa
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const LeaderManagement = lazy(() => import('./pastoral/LeaderManagement').then(m => ({ default: m.LeaderManagement })));
 const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
+const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
+const DiscipleshipDashboard = lazy(() => import('./DiscipleshipDashboard').then(m => ({ default: m.DiscipleshipDashboard })));
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -172,6 +174,20 @@ interface ViewRendererProps {
     updateConfig: (agentId: string, config: Partial<AgentConfig>) => void;
     runAgent: (agentId: string) => Promise<unknown>;
   };
+  announcementData: {
+    announcements: Announcement[];
+    activeAnnouncements: Announcement[];
+    addAnnouncement: (data: { title: string; body?: string; category: AnnouncementCategory; pinned: boolean; expiresAt?: string }) => void;
+    updateAnnouncement: (id: string, data: Partial<Omit<Announcement, 'id' | 'churchId' | 'createdAt'>>) => void;
+    deleteAnnouncement: (id: string) => void;
+  };
+  discipleshipData: {
+    milestones: DiscipleshipMilestone[];
+    addMilestone: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string; notes?: string }) => void;
+    removeMilestone: (id: string) => void;
+    updateMilestone: (id: string, data: Partial<Pick<DiscipleshipMilestone, 'completedAt' | 'notes' | 'verifiedBy'>>) => void;
+    getPersonMilestones: (personId: string) => DiscipleshipMilestone[];
+  };
   pastoralCare: {
     leaders: LeaderProfile[];
     helpRequests: HelpRequest[];
@@ -195,7 +211,7 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
-    collectionMgmt, charityBasketMgmt, agents, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
+    collectionMgmt, charityBasketMgmt, agents, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
 
   const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
@@ -272,6 +288,9 @@ export function ViewRenderer(props: ViewRendererProps) {
           tasks={tasks}
           giving={giving}
           groups={groups}
+          milestones={discipleshipData.getPersonMilestones(selectedPerson.id)}
+          onAddMilestone={discipleshipData.addMilestone}
+          onRemoveMilestone={discipleshipData.removeMilestone}
           onBack={handlers.backToPeople}
           onAddInteraction={handlers.addInteraction}
           onAddTask={handlers.addTask}
@@ -516,6 +535,8 @@ export function ViewRenderer(props: ViewRendererProps) {
             rsvps={rsvps}
             churchName={churchName}
             churchProfile={settings?.profile}
+            announcements={announcementData.activeAnnouncements}
+            prayers={prayers}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
@@ -684,6 +705,27 @@ export function ViewRenderer(props: ViewRendererProps) {
               onViewPerson={handlers.viewPerson}
             />
           </div>
+        );
+
+      case 'announcements':
+        return (
+          <AnnouncementManager
+            announcements={announcementData.announcements}
+            onAdd={announcementData.addAnnouncement}
+            onUpdate={announcementData.updateAnnouncement}
+            onDelete={announcementData.deleteAnnouncement}
+          />
+        );
+
+      case 'discipleship':
+        return (
+          <DiscipleshipDashboard
+            people={people}
+            milestones={discipleshipData.milestones}
+            onAddMilestone={discipleshipData.addMilestone}
+            onRemoveMilestone={discipleshipData.removeMilestone}
+            onViewPerson={handlers.viewPerson}
+          />
         );
 
       default:

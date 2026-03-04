@@ -12,7 +12,7 @@ import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
 import { MemberScanPage } from './MemberScanPage';
 import { DEMO_LEADERS } from './demoLeaders';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation } from '../../types';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -25,6 +25,8 @@ interface MemberPortalProps {
   currentMember?: Person | null;
   churchName?: string;
   churchProfile?: ChurchProfile;
+  announcements?: Announcement[];
+  prayers?: PrayerRequest[];
   onBack?: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -45,6 +47,8 @@ export function MemberPortal({
   currentMember,
   churchName = 'Grace Church',
   churchProfile,
+  announcements = [],
+  prayers = [],
   onBack,
   onRSVP,
   onCheckIn,
@@ -96,6 +100,9 @@ export function MemberPortal({
             churchName={churchName}
             churchProfile={churchProfile}
             events={events}
+            announcements={announcements}
+            people={people}
+            prayers={prayers}
             onNavigate={setActiveTab}
           />
         );
@@ -188,6 +195,9 @@ export function MemberPortal({
             churchName={churchName}
             churchProfile={churchProfile}
             events={events}
+            announcements={announcements}
+            people={people}
+            prayers={prayers}
             onNavigate={setActiveTab}
           />
         );

@@ -1,44 +1,19 @@
-import { useMemo } from 'react';
-import { Users, QrCode, Clock, MapPin, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield } from 'lucide-react';
-import type { CalendarEvent, MemberPortalTab } from '../../types';
+import { Users, QrCode, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield, MapPin } from 'lucide-react';
+import { AnnouncementFeed } from './AnnouncementFeed';
+import type { CalendarEvent, MemberPortalTab, Announcement, Person, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 
 interface MemberHomePageProps {
   churchName: string;
   churchProfile?: ChurchProfile;
   events: CalendarEvent[];
+  announcements?: Announcement[];
+  people?: Person[];
+  prayers?: PrayerRequest[];
   onNavigate: (tab: MemberPortalTab) => void;
 }
 
-export function MemberHomePage({ churchName, churchProfile, events, onNavigate }: MemberHomePageProps) {
-  // Get upcoming events (next 2)
-  const upcomingEvents = useMemo(() => {
-    const now = new Date();
-    return events
-      .filter(e => new Date(e.startDate) >= now)
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-      .slice(0, 2);
-  }, [events]);
-
-  const formatEventDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (date.toDateString() === now.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow';
-    } else {
-      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    }
-  };
-
-  const formatEventTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  };
-
+export function MemberHomePage({ churchName, churchProfile, events, announcements = [], people = [], prayers = [], onNavigate }: MemberHomePageProps) {
   return (
     <div className="p-4 space-y-5">
       {/* Welcome Header */}
@@ -71,81 +46,18 @@ export function MemberHomePage({ churchName, churchProfile, events, onNavigate }
         <ChevronRight size={16} className="text-gray-400" />
       </button>
 
-      {/* Upcoming Events */}
-      {upcomingEvents.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
-              Upcoming
-            </h2>
-            <button
-              onClick={() => onNavigate('events')}
-              className="text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5"
-            >
-              All Events
-              <ChevronRight size={14} />
-            </button>
-          </div>
-          <div className="space-y-2">
-            {upcomingEvents.map(event => (
-              <div
-                key={event.id}
-                className="bg-white dark:bg-dark-800 rounded-xl p-3.5 border border-gray-100 dark:border-dark-700"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-11 h-11 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex flex-col items-center justify-center">
-                    <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-                      {new Date(event.startDate).toLocaleDateString('en-US', { month: 'short' })}
-                    </span>
-                    <span className="text-base font-bold text-indigo-700 dark:text-indigo-300 leading-none">
-                      {new Date(event.startDate).getDate()}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-dark-100 text-sm truncate">
-                      {event.title}
-                    </h3>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-dark-400">
-                      <span className="flex items-center gap-1">
-                        <Clock size={11} />
-                        {formatEventDate(event.startDate)} · {formatEventTime(event.startDate)}
-                      </span>
-                    </div>
-                    {event.location && (
-                      <p className="text-xs text-gray-400 dark:text-dark-500 mt-0.5 flex items-center gap-1">
-                        <MapPin size={11} />
-                        {event.location}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Service Times */}
-      {(churchProfile?.serviceTimes?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-2 px-1">
-            Service Times
-          </h2>
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
-            {churchProfile?.serviceTimes.map((service, idx) => (
-              <div key={idx} className="px-4 py-3 flex items-center gap-3">
-                <div className="w-9 h-9 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
-                  <Clock size={16} className="text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">{service.name}</h3>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">{service.day} · {service.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Announcement Feed */}
+      <div>
+        <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-2 px-1">
+          What's Happening
+        </h2>
+        <AnnouncementFeed
+          announcements={announcements}
+          events={events}
+          people={people}
+          prayers={prayers}
+        />
+      </div>
 
       {/* More — features moved from nav */}
       <div>

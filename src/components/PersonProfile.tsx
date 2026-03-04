@@ -20,10 +20,11 @@ import {
   X,
   Users,
 } from 'lucide-react';
-import { Person, Interaction, Task, Giving, SmallGroup } from '../types';
+import { Person, Interaction, Task, Giving, SmallGroup, DiscipleshipMilestone, MilestoneType } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { PersonGivingHistory } from './PersonGivingHistory';
+import { DiscipleshipTimeline } from './DiscipleshipTimeline';
 import { escapeHtml } from '../utils/security';
 import { AISuggestButton } from './AIAssistant';
 
@@ -33,6 +34,9 @@ interface PersonProfileProps {
   tasks: Task[];
   giving?: Giving[];
   groups?: SmallGroup[];
+  milestones?: DiscipleshipMilestone[];
+  onAddMilestone?: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string; notes?: string }) => void;
+  onRemoveMilestone?: (id: string) => void;
   onBack: () => void;
   onAddInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
@@ -67,6 +71,9 @@ export function PersonProfile({
   tasks,
   giving = [],
   groups = [],
+  milestones = [],
+  onAddMilestone,
+  onRemoveMilestone,
   onBack,
   onAddInteraction,
   onAddTask,
@@ -352,6 +359,16 @@ export function PersonProfile({
               </div>
             )}
           </div>
+
+          {/* Spiritual Journey */}
+          {onAddMilestone && (
+            <DiscipleshipTimeline
+              personId={person.id}
+              milestones={milestones}
+              onAddMilestone={onAddMilestone}
+              onRemoveMilestone={onRemoveMilestone}
+            />
+          )}
 
           {/* Add Interaction */}
           <div data-tutorial="people-interaction" className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">

@@ -22,6 +22,8 @@ import {
   Home,
   Heart,
   BarChart3,
+  Megaphone,
+  TrendingUp,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -60,6 +62,7 @@ const navSections: NavSection[] = [
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
       { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
+      { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
     ],
   },
   {
@@ -67,6 +70,7 @@ const navSections: NavSection[] = [
     items: [
       { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
       { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
+      { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
     ],
   },
   {
@@ -130,6 +134,8 @@ const viewLabels: Record<View, string> = {
   'estate-planning': 'Legacy Giving',
   'leader-management': 'Leader Management',
   analytics: 'Analytics',
+  announcements: 'Announcements',
+  discipleship: 'Discipleship',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

@@ -135,7 +135,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
 }
 
-export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics';
+export type View = 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship';
 
 // Family/Household type for grouping
 export interface Family {
@@ -789,3 +789,56 @@ export const TRAINING_MODULES = [
   'Suicide Prevention Awareness',
   'Referral Network Overview',
 ] as const;
+
+// ============================================
+// ANNOUNCEMENT TYPES
+// ============================================
+
+export type AnnouncementCategory = 'general' | 'urgent' | 'event' | 'update' | 'celebration';
+
+export interface Announcement {
+  id: string;
+  churchId: string;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+  category: AnnouncementCategory;
+  pinned: boolean;
+  publishedAt: string;
+  expiresAt?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+// ============================================
+// DISCIPLESHIP TYPES
+// ============================================
+
+export type MilestoneType = 'first_visit' | 'attended_class' | 'baptized' | 'joined_group' | 'serving' | 'leading';
+
+export interface DiscipleshipMilestone {
+  id: string;
+  churchId: string;
+  personId: string;
+  milestoneType: MilestoneType;
+  completedAt: string;
+  notes?: string;
+  verifiedBy?: string;
+  createdAt: string;
+}
+
+export interface MilestoneDefinition {
+  type: MilestoneType;
+  label: string;
+  icon: string; // lucide icon name
+  color: string; // tailwind color key
+}
+
+export const DEFAULT_MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
+  { type: 'first_visit', label: 'First Visit', icon: 'Door', color: 'blue' },
+  { type: 'attended_class', label: 'Attended Class', icon: 'BookOpen', color: 'purple' },
+  { type: 'baptized', label: 'Baptized', icon: 'Droplets', color: 'cyan' },
+  { type: 'joined_group', label: 'Joined Group', icon: 'Users', color: 'green' },
+  { type: 'serving', label: 'Serving', icon: 'HandHeart', color: 'amber' },
+  { type: 'leading', label: 'Leading', icon: 'Crown', color: 'rose' },
+];

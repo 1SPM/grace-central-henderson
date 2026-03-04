@@ -28,6 +28,8 @@ import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
 import { useChurchSettings } from './hooks/useChurchSettings';
 import { usePastoralCare } from './hooks/usePastoralCare';
+import { useAnnouncements } from './hooks/useAnnouncements';
+import { useDiscipleship } from './hooks/useDiscipleship';
 import { useHashRouter } from './hooks/useHashRouter';
 import {
   toPersonLegacy,
@@ -106,6 +108,8 @@ function App() {
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
   const pastoralCare = usePastoralCare();
+  const announcementData = useAnnouncements();
+  const discipleshipData = useDiscipleship(people);
   const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
   const [showTutorialPicker, setShowTutorialPicker] = useState(false);
@@ -267,6 +271,8 @@ function App() {
             rsvps={rsvps}
             churchName={churchName}
             churchProfile={churchSettings?.profile}
+            announcements={announcementData.activeAnnouncements}
+            prayers={prayers}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
             leaders={pastoralCare.leaders}
@@ -310,6 +316,8 @@ function App() {
             collectionMgmt={collectionMgmt}
             charityBasketMgmt={charityBasketMgmt}
             agents={agents}
+            announcementData={announcementData}
+            discipleshipData={discipleshipData}
             pastoralCare={pastoralCare}
             onOpenEmailSidebar={modals.openEmailSidebar}
             onReopenWizard={reopenWizard}
