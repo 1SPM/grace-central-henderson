@@ -258,7 +258,7 @@ export function CSVImportWizard({ onImport, onClose }: CSVImportWizardProps) {
 
       return { data: person, row: rowIndex + 1 };
     });
-  }, [csvData, mappings, hasHeaderRow]);
+  }, [csvData, mappings]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];

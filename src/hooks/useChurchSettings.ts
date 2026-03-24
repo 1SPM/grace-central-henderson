@@ -153,7 +153,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
       } else if (data?.settings) {
         setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
       }
-    } catch (err) {
+    } catch (_err) {
       // Supabase may be configured but non-functional - silently fall back to defaults
       log.warn('Church settings unavailable, using defaults');
     }
@@ -189,7 +189,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
 
       setSettings(updatedSettings);
       return true;
-    } catch (err) {
+    } catch (_err) {
       log.warn('Church settings save failed, updating local state only');
       // Fall back to local state
       setSettings(updatedSettings);
