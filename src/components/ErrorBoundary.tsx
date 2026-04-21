@@ -28,6 +28,23 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     log.error('ErrorBoundary caught an error', { error: error.message, stack: error.stack, componentStack: errorInfo.componentStack });
     this.props.onError?.(error, errorInfo);
+
+    // Auto-recover from stale chunk references after a deploy.
+    // Vite hashes filenames; service workers can hold old chunk URLs that now 404.
+    // Detect the common messages and force a one-time reload.
+    const msg = error.message || '';
+    const isChunkLoadError =
+      /Failed to fetch dynamically imported module/i.test(msg) ||
+      /Loading chunk \d+ failed/i.test(msg) ||
+      /Importing a module script failed/i.test(msg) ||
+      /ChunkLoadError/i.test(error.name || '');
+    if (isChunkLoadError && typeof window !== 'undefined') {
+      const flag = 'grace-chunk-reload';
+      if (!sessionStorage.getItem(flag)) {
+        sessionStorage.setItem(flag, String(Date.now()));
+        window.location.reload();
+      }
+    }
   }
 
   handleRetry = (): void => {

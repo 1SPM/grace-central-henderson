@@ -53,6 +53,7 @@ interface NavSection {
   items: { view: View; label: string; icon: ReactNode }[];
 }
 
+// Four tight sections — Attio/Linear-style. Everything else lives behind "More…"
 const navSections: NavSection[] = [
   {
     items: [
@@ -64,39 +65,19 @@ const navSections: NavSection[] = [
     label: 'People',
     items: [
       { view: 'people', label: 'People', icon: <Users size={18} /> },
-      { view: 'families', label: 'Families', icon: <Home size={18} /> },
       { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
+      { view: 'pastoral-care', label: 'Care', icon: <Heart size={18} /> },
+      { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
     ],
   },
   {
-    label: 'Church',
+    label: 'Ministry',
     items: [
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
+      { view: 'sunday-prep', label: 'Sunday', icon: <Church size={18} /> },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
       { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
-    ],
-  },
-  {
-    label: 'Sunday',
-    items: [
-      { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
-      { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
-      { view: 'child-checkin', label: 'Child Check-in', icon: <Baby size={18} /> },
-    ],
-  },
-  {
-    label: 'Care',
-    items: [
-      { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
-      { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
-      { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
-    ],
-  },
-  {
-    label: 'Insights',
-    items: [
       { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-      { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
     ],
   },
 ];
@@ -104,17 +85,22 @@ const navSections: NavSection[] = [
 // Power-user views tucked behind "More…" to keep the primary nav clean.
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
+  { view: 'families', label: 'Families', icon: <Home size={18} /> },
+  { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
+  { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
+  { view: 'life-services', label: 'Life services', icon: <Heart size={18} /> },
+  { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
   { view: 'pipeline', label: 'Pipeline', icon: <Workflow size={18} /> },
   { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
   { view: 'leader-management', label: 'Leaders', icon: <ShieldCheck size={18} /> },
-  { view: 'skills', label: 'Skills & Talents', icon: <Sparkles size={18} /> },
+  { view: 'skills', label: 'Skills & talents', icon: <Sparkles size={18} /> },
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
-  { view: 'email-templates', label: 'Email Templates', icon: <Mail size={18} /> },
+  { view: 'email-templates', label: 'Email templates', icon: <Mail size={18} /> },
   { view: 'follow-up-automation', label: 'Automations', icon: <Workflow size={18} /> },
-  { view: 'agents', label: 'Rules Engine', icon: <Workflow size={18} /> },
-  { view: 'planning-center-import', label: 'Planning Center Import', icon: <Import size={18} /> },
+  { view: 'agents', label: 'Rules engine', icon: <Workflow size={18} /> },
+  { view: 'planning-center-import', label: 'Planning Center import', icon: <Import size={18} /> },
 ];
 
 // View labels for breadcrumbs
