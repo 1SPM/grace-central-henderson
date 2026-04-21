@@ -1,24 +1,14 @@
 import { useState, useMemo } from 'react';
 import {
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Repeat,
-  Users,
-  Download,
-  FileText,
-  Package,
-  Target,
   ArrowRight,
-  Calendar,
-  BarChart3,
-  CreditCard,
   Banknote,
   Building,
-  Heart,
-  ShoppingBasket,
-  Search,
-  UserCheck,
+  Calendar,
+  CreditCard,
+  DollarSign,
+  Download,
+  Repeat,
+  TrendingUp,
 } from 'lucide-react';
 import type { Giving, Person, Campaign, Pledge, GivingAnalytics } from '../types';
 import { exportGivingToCSV } from '../utils/csvExport';
