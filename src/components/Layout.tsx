@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   ChevronRight,
+  ChevronDown,
   FileText,
   Church,
   X,
@@ -24,6 +25,17 @@ import {
   BarChart3,
   Megaphone,
   TrendingUp,
+  UserCheck,
+  Baby,
+  MoreHorizontal,
+  Tag,
+  Workflow,
+  Mail,
+  ClipboardList,
+  Cake,
+  Sparkles,
+  Import,
+  ShieldCheck,
 } from 'lucide-react';
 import { View } from '../types';
 import { useTheme } from '../ThemeContext';
@@ -44,7 +56,7 @@ interface NavSection {
 const navSections: NavSection[] = [
   {
     items: [
-      { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+      { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
       { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
     ],
   },
@@ -60,17 +72,24 @@ const navSections: NavSection[] = [
     label: 'Church',
     items: [
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
-      { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
       { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
+    ],
+  },
+  {
+    label: 'Sunday',
+    items: [
+      { view: 'sunday-prep', label: 'Sunday Prep', icon: <Church size={18} /> },
+      { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
+      { view: 'child-checkin', label: 'Child Check-in', icon: <Baby size={18} /> },
     ],
   },
   {
     label: 'Care',
     items: [
       { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={18} /> },
-      { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
       { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
+      { view: 'life-services', label: 'Life Services', icon: <Heart size={18} /> },
     ],
   },
   {
@@ -82,9 +101,25 @@ const navSections: NavSection[] = [
   },
 ];
 
+// Power-user views tucked behind "More…" to keep the primary nav clean.
+// Every view is still reachable; just not promoted in daily-driver nav.
+const moreItems: { view: View; label: string; icon: ReactNode }[] = [
+  { view: 'pipeline', label: 'Pipeline', icon: <Workflow size={18} /> },
+  { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
+  { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
+  { view: 'leader-management', label: 'Leaders', icon: <ShieldCheck size={18} /> },
+  { view: 'skills', label: 'Skills & Talents', icon: <Sparkles size={18} /> },
+  { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
+  { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
+  { view: 'email-templates', label: 'Email Templates', icon: <Mail size={18} /> },
+  { view: 'follow-up-automation', label: 'Automations', icon: <Workflow size={18} /> },
+  { view: 'agents', label: 'Rules Engine', icon: <Workflow size={18} /> },
+  { view: 'planning-center-import', label: 'Planning Center Import', icon: <Import size={18} /> },
+];
+
 // View labels for breadcrumbs
 const viewLabels: Record<View, string> = {
-  dashboard: 'Dashboard',
+  dashboard: 'Home',
   feed: 'Actions',
   pipeline: 'Pipeline',
   people: 'People',
@@ -105,7 +140,8 @@ const viewLabels: Record<View, string> = {
   'charity-baskets': 'Charity Baskets',
   'donation-tracker': 'Donation Tracker',
   'member-stats': 'Member Stats',
-  agents: 'AI Agents',
+  agents: 'Rules Engine',
+  'follow-up-automation': 'Automations',
   tags: 'Tags',
   reports: 'Reports',
   settings: 'Settings',
@@ -126,7 +162,6 @@ const viewLabels: Record<View, string> = {
   'reminders': 'Automated Reminders',
   'planning-center-import': 'Planning Center Import',
   'qr-checkin': 'QR Check-In',
-  'follow-up-automation': 'Follow-up Automation',
   'pastoral-care': 'Pastoral Care',
   'life-services': 'Life Services',
   'wedding-services': 'Weddings',
@@ -144,6 +179,10 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
     return saved === 'true';
+  });
+  const [moreOpen, setMoreOpen] = useState(() => {
+    // Auto-open when current view lives inside More…
+    return moreItems.some(item => item.view === currentView);
   });
 
   // Save collapsed state
@@ -311,6 +350,48 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               </div>
             </div>
           ))}
+
+          {/* More… — collapsible power-user views */}
+          <div className="mt-4">
+            <button
+              onClick={() => setMoreOpen(o => !o)}
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors ${
+                sidebarCollapsed ? 'lg:justify-center' : ''
+              }`}
+              title={sidebarCollapsed ? 'More' : undefined}
+              aria-expanded={moreOpen}
+            >
+              <MoreHorizontal size={18} className="text-gray-400" />
+              <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>More</span>
+              <ChevronDown
+                size={14}
+                className={`text-gray-400 transition-transform ${moreOpen ? 'rotate-180' : ''} ${sidebarCollapsed ? 'lg:hidden' : ''}`}
+              />
+            </button>
+            {moreOpen && !sidebarCollapsed && (
+              <div className="mt-1 space-y-0.5">
+                {moreItems.map(item => {
+                  const isActive = currentView === item.view;
+                  return (
+                    <button
+                      key={item.view}
+                      onClick={() => handleNavClick(item.view)}
+                      className={`w-full flex items-center gap-2.5 pl-5 pr-2.5 py-1.5 rounded-xl text-sm transition-all duration-200 ${
+                        isActive
+                          ? 'bg-slate-50/80 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      <span className={isActive ? 'text-slate-600 dark:text-slate-400' : 'text-gray-400 dark:text-gray-500'}>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Footer */}
