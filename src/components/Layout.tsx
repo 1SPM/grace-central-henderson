@@ -247,7 +247,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100/50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="flex h-screen dark:bg-dark-950">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -258,9 +258,10 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
       {/* Sidebar - Glass effect */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl flex flex-col transform transition-all duration-200 ease-out border-r border-gray-200/50 dark:border-white/5 ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 dark:bg-dark-900 flex flex-col transform transition-all duration-200 ease-out border-r border-stone-300/70 dark:border-white/5 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
+        style={{ backgroundColor: 'var(--paper-sink)' }}
       >
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
@@ -281,31 +282,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           </button>
         </div>
 
-        {/* Search */}
-        {onOpenSearch && (
-          <div className={`px-3 py-2 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
-            <button
-              onClick={onOpenSearch}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${
-                sidebarCollapsed ? 'lg:justify-center' : ''
-              }`}
-              title={sidebarCollapsed ? 'Search (⌘K)' : undefined}
-            >
-              <Search size={16} />
-              <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Search</span>
-              <kbd className={`text-[10px] font-medium text-gray-400 dark:text-dark-500 bg-gray-100 dark:bg-dark-700 px-1.5 py-0.5 rounded ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-                ⌘K
-              </kbd>
-            </button>
-          </div>
-        )}
 
         {/* Navigation */}
         <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className={sectionIdx > 0 ? 'mt-4' : ''}>
               {section.label && !sidebarCollapsed && (
-                <p className="px-2.5 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500 lg:block hidden">
+                <p className="px-2.5 mb-1 text-[11px] font-medium text-gray-400 dark:text-dark-500 lg:block hidden">
                   {section.label}
                 </p>
               )}
@@ -324,12 +307,12 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                     <button
                       key={item.view}
                       onClick={() => handleNavClick(item.view)}
-                      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
+                      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors group relative ${
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-slate-50/80 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 font-medium shadow-sm'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
+                          ? 'bg-stone-200/70 dark:bg-slate-500/10 text-gray-900 dark:text-slate-300 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-stone-200/50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
@@ -475,8 +458,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header - Glass effect */}
-        <header className="flex items-center h-14 px-4 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5">
+        {/* Header */}
+        <header className="flex items-center h-12 px-4 border-b border-stone-300/60 dark:border-white/5">
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -485,35 +468,51 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             <Menu size={20} className="text-gray-600 dark:text-dark-400" />
           </button>
 
-          {/* Breadcrumbs */}
+          {/* Breadcrumbs — only show when nested (single-page crumbs are redundant) */}
           <nav className="flex items-center gap-1 text-sm flex-1">
-            {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.view} className="flex items-center">
-                {index > 0 && (
-                  <ChevronRight size={14} className="mx-1 text-gray-300 dark:text-dark-600" />
-                )}
-                <button
-                  onClick={() => setView(crumb.view)}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${
-                    index === breadcrumbs.length - 1
-                      ? 'font-medium text-gray-900 dark:text-dark-100'
-                      : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
-                  }`}
-                >
-                  {crumb.label}
-                </button>
-              </div>
-            ))}
+            {breadcrumbs.length > 1 ? (
+              breadcrumbs.map((crumb, index) => (
+                <div key={crumb.view} className="flex items-center">
+                  {index > 0 && (
+                    <ChevronRight size={14} className="mx-1 text-gray-300 dark:text-dark-600" />
+                  )}
+                  <button
+                    onClick={() => setView(crumb.view)}
+                    className={`px-1.5 py-0.5 rounded transition-colors ${
+                      index === breadcrumbs.length - 1
+                        ? 'font-medium text-gray-900 dark:text-dark-100'
+                        : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
+                    }`}
+                  >
+                    {crumb.label}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <span className="px-1.5 font-medium text-gray-900 dark:text-dark-100">
+                {breadcrumbs[0]?.label}
+              </span>
+            )}
           </nav>
 
-          {/* Mobile search */}
+          {/* Cmd+K hint (desktop) / search icon (mobile) */}
           {onOpenSearch && (
-            <button
-              onClick={onOpenSearch}
-              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
-            >
-              <Search size={20} className="text-gray-500 dark:text-dark-400" />
-            </button>
+            <>
+              <button
+                onClick={onOpenSearch}
+                className="hidden lg:flex items-center gap-2 px-2.5 py-1 text-xs text-gray-500 dark:text-dark-400 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
+              >
+                <Search size={13} />
+                <span>Jump to…</span>
+                <kbd className="ml-1 text-[10px] font-medium text-gray-400 dark:text-dark-500 bg-stone-100 dark:bg-dark-700 px-1.5 py-0.5 rounded">⌘K</kbd>
+              </button>
+              <button
+                onClick={onOpenSearch}
+                className="lg:hidden p-2 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-lg"
+              >
+                <Search size={20} className="text-gray-500 dark:text-dark-400" />
+              </button>
+            </>
           )}
         </header>
 
