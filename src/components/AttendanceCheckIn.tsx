@@ -29,7 +29,7 @@ const eventTypeLabels: Record<EventType, string> = {
 
 const eventTypeColors: Record<EventType, string> = {
   sunday: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400',
-  wednesday: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400',
+  wednesday: 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400',
   'small-group': 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400',
   special: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
 };
@@ -175,7 +175,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
         {/* Check-In Panel */}
         <div data-tutorial="attendance-checkin" className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-slate-600 rounded-xl flex items-center justify-center">
               <UserCheck className="text-white" size={20} />
             </div>
             <div>
@@ -266,7 +266,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium">
                           {person.firstName[0]}{person.lastName[0]}
                         </div>
                         <div className="text-left">
@@ -348,8 +348,8 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
       {/* Weekly Attendance Chart */}
       <div className="mt-6 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-xl flex items-center justify-center">
-            <BarChart3 className="text-purple-600 dark:text-purple-400" size={20} />
+          <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/20 rounded-xl flex items-center justify-center">
+            <BarChart3 className="text-slate-600 dark:text-slate-400" size={20} />
           </div>
           <div>
             <h2 className="font-semibold text-gray-900 dark:text-dark-100">Weekly Overview</h2>
@@ -401,7 +401,7 @@ function WeeklyChart({ attendance, selectedEventType }: { attendance: Attendance
             <div
               className={`w-full rounded-t-lg transition-all ${
                 day.isToday
-                  ? 'bg-gradient-to-t from-indigo-500 to-purple-500'
+                  ? 'bg-gradient-to-t from-indigo-500 to-slate-500'
                   : 'bg-gray-200 dark:bg-dark-700'
               }`}
               style={{

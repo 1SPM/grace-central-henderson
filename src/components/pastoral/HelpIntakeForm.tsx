@@ -29,7 +29,7 @@ const CATEGORIES: { id: HelpCategory; label: string; icon: typeof Heart; descrip
   { id: 'marriage', label: 'Marriage & Relationships', icon: Heart, description: 'Relationship guidance & support', color: 'text-rose-500 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' },
   { id: 'addiction', label: 'Addiction & Recovery', icon: Link2, description: 'Freedom from substance & behavioral addiction', color: 'text-amber-600 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' },
   { id: 'grief', label: 'Grief & Loss', icon: CloudRain, description: 'Support through loss and mourning', color: 'text-blue-500 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20' },
-  { id: 'faith-questions', label: 'Faith Questions', icon: BookOpen, description: 'Exploring faith, doubt, and spiritual growth', color: 'text-violet-500 bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20' },
+  { id: 'faith-questions', label: 'Faith Questions', icon: BookOpen, description: 'Exploring faith, doubt, and spiritual growth', color: 'text-slate-500 bg-slate-50 dark:bg-slate-500/10 border-slate-200 dark:border-slate-500/20' },
   { id: 'crisis', label: 'Crisis / Urgent', icon: AlertTriangle, description: 'Immediate help for an urgent situation', color: 'text-red-600 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20' },
   { id: 'financial', label: 'Financial Help', icon: DollarSign, description: 'Financial counseling & assistance', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' },
   { id: 'anxiety-depression', label: 'Anxiety & Depression', icon: Brain, description: 'Mental health support & encouragement', color: 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20' },
@@ -86,7 +86,7 @@ export function HelpIntakeForm({ onSubmit, onBack, churchName = 'Our Church' }: 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Share as much or as little as you'd like. This helps us connect you with the right person..."
               rows={4}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
             />
           </div>
 
@@ -100,7 +100,7 @@ export function HelpIntakeForm({ onSubmit, onBack, churchName = 'Our Church' }: 
               />
               <div className={`w-5 h-5 rounded-md border-2 transition-colors ${
                 isAnonymous
-                  ? 'bg-violet-600 border-violet-600'
+                  ? 'bg-slate-600 border-slate-600'
                   : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400'
               }`}>
                 {isAnonymous && (
@@ -120,7 +120,7 @@ export function HelpIntakeForm({ onSubmit, onBack, churchName = 'Our Church' }: 
 
           <button
             onClick={handleSubmit}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-xl transition-colors shadow-sm"
           >
             Start Conversation
             <ArrowRight size={18} />

@@ -224,8 +224,8 @@ export function PrintableDirectory({
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-            <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="p-2 bg-slate-100 dark:bg-slate-900/30 rounded-lg">
+            <Users className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </div>
           <div>
             <h2 className="font-semibold text-gray-900 dark:text-white">Printable Directory</h2>
@@ -245,7 +245,7 @@ export function PrintableDirectory({
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
           >
             <Printer className="w-4 h-4" />
             Print
@@ -265,7 +265,7 @@ export function PrintableDirectory({
               onClick={() => setLayout('grid')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm transition-colors ${
                 layout === 'grid'
-                  ? 'bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-400'
+                  ? 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-900/30 dark:border-slate-700 dark:text-slate-400'
                   : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
@@ -276,7 +276,7 @@ export function PrintableDirectory({
               onClick={() => setLayout('list')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm transition-colors ${
                 layout === 'list'
-                  ? 'bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-400'
+                  ? 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-900/30 dark:border-slate-700 dark:text-slate-400'
                   : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
@@ -287,7 +287,7 @@ export function PrintableDirectory({
               onClick={() => setLayout('compact')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm transition-colors ${
                 layout === 'compact'
-                  ? 'bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-400'
+                  ? 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-900/30 dark:border-slate-700 dark:text-slate-400'
                   : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
@@ -397,7 +397,7 @@ export function PrintableDirectory({
               .slice(0, 3)
               .map(([initial, sectionMembers]) => (
                 <div key={initial} className="mb-4">
-                  <h3 className="text-lg font-bold text-purple-600 border-b border-gray-200 pb-1 mb-2">
+                  <h3 className="text-lg font-bold text-slate-600 border-b border-gray-200 pb-1 mb-2">
                     {initial}
                   </h3>
                   <div
@@ -462,7 +462,7 @@ export function PrintableDirectory({
               <div className="flex gap-2">
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm"
                 >
                   <Printer className="w-4 h-4" />
                   Print
@@ -486,7 +486,7 @@ export function PrintableDirectory({
                   .sort(([a], [b]) => a.localeCompare(b))
                   .map(([initial, sectionMembers]) => (
                     <div key={initial} className="mb-6">
-                      <h3 className="text-xl font-bold text-purple-600 border-b border-gray-200 pb-1 mb-3">
+                      <h3 className="text-xl font-bold text-slate-600 border-b border-gray-200 pb-1 mb-3">
                         {initial}
                       </h3>
                       <div

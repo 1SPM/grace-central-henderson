@@ -620,8 +620,8 @@ export function GivingStatements({
         </div>
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center">
-              <FileText className="text-purple-600 dark:text-purple-400" size={20} />
+            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
+              <FileText className="text-slate-600 dark:text-slate-400" size={20} />
             </div>
             <span className="text-sm text-gray-500 dark:text-dark-400">Statements Sent</span>
           </div>
@@ -748,7 +748,7 @@ export function GivingStatements({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                           {person.firstName[0]}{person.lastName[0]}
                         </div>
                         <span className="font-medium text-gray-900 dark:text-dark-100">
@@ -800,7 +800,7 @@ export function GivingStatements({
                         {person.email && (
                           <button
                             onClick={() => statement && onSendStatement(statement.id, 'email')}
-                            className="p-2 text-gray-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg"
+                            className="p-2 text-gray-400 hover:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-500/10 rounded-lg"
                             title="Send via Email"
                           >
                             <Mail size={16} />

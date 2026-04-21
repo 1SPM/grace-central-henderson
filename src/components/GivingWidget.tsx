@@ -82,7 +82,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
   const fundColors: Record<string, string> = {
     tithe: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
     offering: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400',
-    missions: 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400',
+    missions: 'bg-slate-50 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400',
     building: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400',
     benevolence: 'bg-pink-50 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400',
     youth: 'bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400',
@@ -145,7 +145,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
         <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-100 dark:border-dark-700">
           <p className="text-xs text-gray-600 dark:text-dark-400 font-medium">Recurring</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <Repeat size={14} className="text-purple-500" />
+            <Repeat size={14} className="text-slate-500" />
             <p className="text-lg font-semibold text-gray-900 dark:text-dark-100">
               {stats.recurringCount}
             </p>
@@ -168,7 +168,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
                     ${gift.amount.toLocaleString()}
                   </span>
                   {gift.isRecurring && (
-                    <Repeat size={10} className="text-purple-500" />
+                    <Repeat size={10} className="text-slate-500" />
                   )}
                   <span className="text-xs text-gray-500 dark:text-dark-500">
                     {new Date(gift.date).toLocaleDateString()}

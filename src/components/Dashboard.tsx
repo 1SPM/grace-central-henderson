@@ -401,7 +401,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         {/* Actions CTA */}
         <button
           onClick={onViewActions}
-          className="group relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-left transition-all hover:shadow-lg hover:scale-[1.01] shadow-sm"
+          className="group relative overflow-hidden bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl p-5 text-left transition-all hover:shadow-lg hover:scale-[1.01] shadow-sm"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -605,8 +605,8 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
             onClick={onViewGiving}
             className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
           >
-            <div className="w-10 h-10 bg-violet-50 dark:bg-violet-900/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="text-violet-600 dark:text-violet-400" size={20} />
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="text-slate-600 dark:text-slate-400" size={20} />
             </div>
             <div className="flex-1 text-left">
               <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Details</p>

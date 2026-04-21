@@ -72,7 +72,7 @@ export function PWAInstallPrompt() {
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 animate-slide-up">
       <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
+        <div className="bg-gradient-to-r from-indigo-500 to-slate-600 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -118,7 +118,7 @@ export function PWAInstallPrompt() {
             </button>
             <button
               onClick={handleInstall}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-xl transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-slate-600 hover:from-indigo-600 hover:to-slate-700 rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <Download size={16} />
               Install

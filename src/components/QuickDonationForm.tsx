@@ -144,7 +144,7 @@ export function QuickDonationForm({
                       onClick={() => handleSelectPerson(person)}
                       className="w-full p-2 text-left hover:bg-gray-50 dark:hover:bg-dark-700 flex items-center gap-2"
                     >
-                      <div className="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                      <div className="w-7 h-7 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                         {person.firstName[0]}{person.lastName[0]}
                       </div>
                       <div>

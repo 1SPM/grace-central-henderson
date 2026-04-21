@@ -17,7 +17,7 @@ import type { Announcement, AnnouncementCategory } from '../types';
 const CATEGORY_CONFIG: Record<AnnouncementCategory, { label: string; icon: typeof Megaphone; bg: string; text: string }> = {
   general: { label: 'General', icon: Megaphone, bg: 'bg-blue-100 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
   urgent: { label: 'Urgent', icon: AlertTriangle, bg: 'bg-red-100 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' },
-  event: { label: 'Event', icon: Calendar, bg: 'bg-purple-100 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400' },
+  event: { label: 'Event', icon: Calendar, bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400' },
   update: { label: 'Update', icon: RefreshCw, bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
   celebration: { label: 'Celebration', icon: PartyPopper, bg: 'bg-green-100 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400' },
 };

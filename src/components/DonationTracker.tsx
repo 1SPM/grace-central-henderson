@@ -84,7 +84,7 @@ const METHOD_ICONS: Record<string, React.ReactNode> = {
 const FUND_COLORS: Record<string, { bg: string; text: string }> = {
   tithe: { bg: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-700 dark:text-green-400' },
   offering: { bg: 'bg-blue-100 dark:bg-blue-500/15', text: 'text-blue-700 dark:text-blue-400' },
-  missions: { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400' },
+  missions: { bg: 'bg-slate-100 dark:bg-slate-500/15', text: 'text-slate-700 dark:text-slate-400' },
   building: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-400' },
   benevolence: { bg: 'bg-pink-100 dark:bg-pink-500/15', text: 'text-pink-700 dark:text-pink-400' },
   youth: { bg: 'bg-cyan-100 dark:bg-cyan-500/15', text: 'text-cyan-700 dark:text-cyan-400' },
@@ -273,7 +273,7 @@ export function DonationTracker({
           <p className="text-sm text-gray-500 dark:text-dark-400">Transactions</p>
         </div>
         <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-          <TrendingUp className="text-purple-500 mb-2" size={20} />
+          <TrendingUp className="text-slate-500 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">
             ${stats.average.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
@@ -455,7 +455,7 @@ export function DonationTracker({
                     </div>
                     <div className="h-1.5 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
                       <div
-                        className={`h-full ${colors.bg.includes('green') ? 'bg-green-500' : colors.bg.includes('blue') ? 'bg-blue-500' : colors.bg.includes('purple') ? 'bg-purple-500' : colors.bg.includes('amber') ? 'bg-amber-500' : 'bg-gray-500'} rounded-full`}
+                        className={`h-full ${colors.bg.includes('green') ? 'bg-green-500' : colors.bg.includes('blue') ? 'bg-blue-500' : colors.bg.includes('purple') ? 'bg-slate-500' : colors.bg.includes('amber') ? 'bg-amber-500' : 'bg-gray-500'} rounded-full`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -664,7 +664,7 @@ export function DonationTracker({
                       </td>
                       <td className="px-6 py-4 text-center">
                         {donation.isRecurring ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400">
+                          <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
                             <Repeat size={12} />
                             Recurring
                           </span>

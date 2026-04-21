@@ -24,16 +24,31 @@ export default {
           900: '#18181b',
           950: '#09090b',
         },
-        // Premium accent colors
+        // Professional slate-navy accent (replaces prior violet)
         accent: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+        },
+        // Paper / parchment palette — warm neutral canvas
+        paper: {
+          canvas: '#ede8dc',   // body background (parchment)
+          card:   '#faf7f0',   // cards, modals, stat cards
+          raised: '#fdfbf5',   // inputs (subtly lighter than card)
+          sink:   '#e4ddcd',   // sidebar, nested surfaces (deeper than canvas)
+          line:   '#d6cfbd',   // visible borders on paper surfaces
+        },
+        // Ink — primary text + navy brand
+        ink: {
+          DEFAULT: '#1c2434', // body text, dark-slate navy
+          900:     '#0f172a', // deepest (blue-950 territory)
+          800:     '#1e3a8a', // brand navy (blue-900) — CTAs, active nav
+          700:     '#1e40af', // hover on brand navy
         }
       },
       fontFamily: {
@@ -49,8 +64,8 @@ export default {
         'glass-inset': 'inset 0 1px 1px rgba(255, 255, 255, 0.1)',
         'premium': '0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05)',
         'premium-lg': '0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08)',
-        'glow': '0 0 20px rgba(139, 92, 246, 0.15)',
-        'glow-sm': '0 0 10px rgba(139, 92, 246, 0.1)',
+        'glow': '0 0 20px rgba(71, 85, 105, 0.12)',
+        'glow-sm': '0 0 10px rgba(71, 85, 105, 0.08)',
       },
       borderRadius: {
         '2xl': '1rem',

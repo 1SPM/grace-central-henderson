@@ -128,7 +128,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
               {form.photo ? (
                 <img src={form.photo} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white">
                   <Camera size={24} />
                 </div>
               )}
@@ -147,7 +147,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                   type="text"
                   value={form.displayName}
                   onChange={(e) => setForm(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   placeholder="Pastor Marcus Daniels"
                   required
                 />
@@ -158,7 +158,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   placeholder="Senior Pastor — Marriage & Family"
                   required
                 />
@@ -173,7 +173,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
               value={form.bio}
               onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
               placeholder="Describe your counseling approach, background, and what drives your ministry..."
             />
           </div>
@@ -191,8 +191,8 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                     onClick={() => toggleExpertise(opt.value)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                       isSelected
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-violet-100 dark:hover:bg-violet-500/10'
+                        ? 'bg-slate-600 text-white'
+                        : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-slate-100 dark:hover:bg-slate-500/10'
                     }`}
                     aria-pressed={isSelected}
                   >
@@ -249,7 +249,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
               type="text"
               value={form.anchors}
               onChange={(e) => setForm(prev => ({ ...prev, anchors: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
               placeholder="Bear one another's burdens — Galatians 6:2"
             />
           </div>
@@ -286,7 +286,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
               <select
                 value={form.sessionType}
                 onChange={(e) => setForm(prev => ({ ...prev, sessionType: e.target.value as 'one-time' | 'recurring' }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 <option value="one-time">One-time</option>
                 <option value="recurring">Recurring</option>
@@ -297,7 +297,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
               <select
                 value={form.sessionFrequency}
                 onChange={(e) => setForm(prev => ({ ...prev, sessionFrequency: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 <option value="Weekly">Weekly</option>
                 <option value="Bi-weekly">Bi-weekly</option>
@@ -315,7 +315,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                 type="text"
                 value={form.language}
                 onChange={(e) => setForm(prev => ({ ...prev, language: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 placeholder="English"
               />
             </div>
@@ -325,7 +325,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                 type="number"
                 value={form.yearsOfPractice || ''}
                 onChange={(e) => setForm(prev => ({ ...prev, yearsOfPractice: e.target.value ? parseInt(e.target.value) : undefined }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 min={0}
                 placeholder="20"
               />
@@ -354,7 +354,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
                 onChange={(e) => setCredentialInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCredential())}
                 placeholder="Add credential (e.g. M.Div, Certified Biblical Counselor)"
-                className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
               <button
                 type="button"
@@ -377,7 +377,7 @@ export function LeaderRegistrationForm({ onSubmit, onBack, initialData }: Leader
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition-colors"
+              className="flex-1 px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
             >
               {initialData ? 'Save Changes' : 'Register'}
             </button>

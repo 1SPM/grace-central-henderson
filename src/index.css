@@ -3,9 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: 139 92 246; /* violet-500 - more premium */
-  --color-primary-dark: 124 58 237; /* violet-600 */
-  --color-accent: 139 92 246;
+  /* Brand ink (primary navy) */
+  --color-primary: 30 58 138;      /* blue-900 — CTAs, active nav */
+  --color-primary-dark: 23 37 84;  /* blue-950 — hover */
+  --color-accent: 55 65 81;        /* gray-700 */
+
+  /* Paper palette — single source of truth, matches tailwind.paper.* */
+  --paper-canvas: #ede8dc; /* body background */
+  --paper-card:   #faf7f0; /* cards, modals, stat cards */
+  --paper-raised: #fdfbf5; /* inputs */
+  --paper-sink:   #e4ddcd; /* sidebar, nested surfaces */
+  --paper-line:   #d6cfbd; /* borders on paper surfaces */
+
+  /* Ink (text) */
+  --ink:          #1c2434;
 
   /* Glass effect variables */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -27,8 +38,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   letter-spacing: -0.011em;
-  background-color: #f9fafb; /* gray-50 — light mode default */
-  color: #111827; /* gray-900 */
+  background-color: #ede8dc; /* warm paper — parchment-ish, not white */
+  color: #1c2434; /* deep slate-navy */
 }
 
 .dark body,
@@ -159,12 +170,12 @@ select:focus {
   }
 
   .btn-primary {
-    @apply bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(124, 58, 237, 0.2);
+    @apply bg-blue-900 text-white hover:bg-blue-950 active:bg-blue-950;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(30, 58, 138, 0.2);
   }
 
   .btn-primary:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 2px 3px rgba(124, 58, 237, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 2px 3px rgba(30, 58, 138, 0.25);
     transform: translateY(-0.5px);
   }
 
@@ -186,11 +197,10 @@ select:focus {
     @apply text-gray-400 hover:bg-white/5 hover:text-gray-200;
   }
 
-  /* Premium cards */
+  /* Premium cards — warm paper, not pure white */
   .card {
-    @apply bg-white/80 rounded-2xl border border-gray-200/50;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    @apply rounded-2xl border border-stone-300/70;
+    background-color: #faf7f0; /* warm off-white paper */
     box-shadow: var(--shadow);
   }
 
@@ -200,7 +210,8 @@ select:focus {
   }
 
   .card-solid {
-    @apply bg-white rounded-2xl border border-gray-100;
+    @apply rounded-2xl border border-stone-300/70;
+    background-color: #faf7f0;
     box-shadow: var(--shadow);
   }
 
@@ -209,16 +220,17 @@ select:focus {
     box-shadow: none;
   }
 
-  /* Refined inputs */
+  /* Refined inputs — paper tone */
   .input {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-200/80 bg-white/60 text-gray-900 placeholder-gray-400;
-    backdrop-filter: blur(8px);
+    @apply w-full px-4 py-3 rounded-xl border border-stone-300 text-gray-900 placeholder-gray-400;
+    background-color: #fdfbf5;
     font-weight: 450;
   }
 
   .input:focus {
-    @apply bg-white border-violet-400/50;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
+    @apply border-blue-900/40;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.10);
   }
 
   .dark .input {
@@ -226,9 +238,9 @@ select:focus {
   }
 
   .dark .input:focus {
-    @apply border-violet-500/30;
+    @apply border-slate-400/40;
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
   }
 
   /* Premium badges */
@@ -244,11 +256,10 @@ select:focus {
     @apply bg-white/5 text-gray-400;
   }
 
-  /* Stat cards with glass */
+  /* Stat cards — paper tone */
   .stat-card {
-    @apply p-5 rounded-2xl bg-white/60 border border-gray-200/40;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    @apply p-5 rounded-2xl border border-stone-300/70;
+    background-color: #faf7f0;
   }
 
   .dark .stat-card {
@@ -257,18 +268,17 @@ select:focus {
 
   /* Premium divider */
   .divider {
-    @apply border-t border-gray-200/60;
+    @apply border-t border-stone-300/60;
   }
 
   .dark .divider {
     @apply border-white/5;
   }
 
-  /* Sidebar glass effect */
+  /* Sidebar — deeper paper tone, distinct from main canvas */
   .sidebar-glass {
-    @apply bg-gray-50/90 border-r border-gray-200/50;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    @apply border-r border-stone-300/70;
+    background-color: #e4ddcd; /* parchment, a notch deeper than body */
   }
 
   .dark .sidebar-glass {
@@ -285,7 +295,7 @@ select:focus {
   }
 
   .nav-item.active {
-    @apply bg-violet-50/80 text-violet-700;
+    @apply bg-blue-50 text-blue-900;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
   }
 
@@ -298,7 +308,7 @@ select:focus {
   }
 
   .dark .nav-item.active {
-    @apply bg-violet-500/10 text-violet-400;
+    @apply bg-slate-500/15 text-slate-200;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
   }
 
@@ -313,11 +323,10 @@ select:focus {
     @apply bg-black/60;
   }
 
-  /* Modal content with glass */
+  /* Modal content — warm paper */
   .modal-content {
-    @apply bg-white/95 rounded-2xl;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    @apply rounded-2xl border border-stone-300/70;
+    background-color: #faf7f0;
     box-shadow: var(--shadow-xl), 0 0 1px rgba(0, 0, 0, 0.1);
   }
 
@@ -365,11 +374,11 @@ a:focus-visible,
 
 /* Subtle gradient backgrounds */
 .bg-gradient-premium {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.04) 0%, rgba(148, 163, 184, 0.04) 100%);
 }
 
 .dark .bg-gradient-premium {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.08) 0%, rgba(148, 163, 184, 0.06) 100%);
 }
 
 /* Animated gradient border (for special elements) */
@@ -383,7 +392,7 @@ a:focus-visible,
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.25), rgba(148, 163, 184, 0.20));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;

@@ -25,7 +25,7 @@ interface ChatWindowProps {
 
 const SENDER_CONFIG: Record<MessageSender, { icon: typeof User; label: string; color: string }> = {
   user: { icon: User, label: 'You', color: 'bg-gray-100 dark:bg-dark-700 text-gray-900 dark:text-gray-100' },
-  ai: { icon: Bot, label: 'AI Assistant', color: 'bg-violet-50 dark:bg-violet-500/10 text-violet-900 dark:text-violet-100' },
+  ai: { icon: Bot, label: 'AI Assistant', color: 'bg-slate-50 dark:bg-slate-500/10 text-slate-900 dark:text-slate-100' },
   leader: { icon: UserCheck, label: 'Pastor', color: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-100' },
 };
 
@@ -38,14 +38,14 @@ function MessageBubble({ message, isOwn }: { message: PastoralMessage; isOwn: bo
     <div className={`flex gap-2.5 ${isOwn ? 'flex-row-reverse' : ''}`}>
       <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
         message.sender === 'ai'
-          ? 'bg-violet-100 dark:bg-violet-500/20'
+          ? 'bg-slate-100 dark:bg-slate-500/20'
           : message.sender === 'leader'
           ? 'bg-emerald-100 dark:bg-emerald-500/20'
           : 'bg-gray-200 dark:bg-dark-600'
       }`}>
         <Icon size={14} className={
           message.sender === 'ai'
-            ? 'text-violet-600 dark:text-violet-400'
+            ? 'text-slate-600 dark:text-slate-400'
             : message.sender === 'leader'
             ? 'text-emerald-600 dark:text-emerald-400'
             : 'text-gray-500 dark:text-gray-400'
@@ -240,13 +240,13 @@ export function ChatWindow({
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
-              className="flex-1 px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-dark-700 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none max-h-32"
+              className="flex-1 px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-dark-700 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none max-h-32"
               style={{ minHeight: '40px' }}
             />
             <button
               onClick={handleSend}
               disabled={!message.trim()}
-              className="p-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 disabled:hover:bg-violet-600 text-white rounded-xl transition-colors"
+              className="p-2.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-600 text-white rounded-xl transition-colors"
             >
               <Send size={16} />
             </button>

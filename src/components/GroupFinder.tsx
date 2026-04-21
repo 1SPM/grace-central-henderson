@@ -55,7 +55,7 @@ const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'F
 const CATEGORY_COLORS: Record<string, string> = {
   'mens': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   'womens': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-  'couples': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  'couples': 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400',
   'young-adults': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   'seniors': 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
   'mixed': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',

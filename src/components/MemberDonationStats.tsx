@@ -22,7 +22,7 @@ interface MemberDonationStatsProps {
 const FUND_COLORS: Record<string, string> = {
   tithe: 'bg-green-500',
   offering: 'bg-blue-500',
-  missions: 'bg-purple-500',
+  missions: 'bg-slate-500',
   building: 'bg-amber-500',
   benevolence: 'bg-pink-500',
   youth: 'bg-cyan-500',
@@ -402,8 +402,8 @@ export function MemberDonationStats({
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{overallStats.newDonorsThisYear}</p>
           <p className="text-sm text-gray-600 dark:text-dark-300">New This Year</p>
         </div>
-        <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl p-5">
-          <BarChart3 className="text-purple-600 dark:text-purple-400 mb-2" size={24} />
+        <div className="bg-slate-50 dark:bg-slate-500/10 rounded-xl p-5">
+          <BarChart3 className="text-slate-600 dark:text-slate-400 mb-2" size={24} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">
             ${overallStats.avgPerDonor.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>

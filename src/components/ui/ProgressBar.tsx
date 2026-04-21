@@ -18,7 +18,7 @@ const colorClasses = {
   blue: 'bg-blue-500',
   amber: 'bg-amber-500',
   rose: 'bg-rose-500',
-  violet: 'bg-violet-500',
+  violet: 'bg-slate-500',
   slate: 'bg-slate-500',
 };
 
@@ -27,7 +27,7 @@ const bgClasses = {
   blue: 'bg-blue-100 dark:bg-blue-900/30',
   amber: 'bg-amber-100 dark:bg-amber-900/30',
   rose: 'bg-rose-100 dark:bg-rose-900/30',
-  violet: 'bg-violet-100 dark:bg-violet-900/30',
+  violet: 'bg-slate-100 dark:bg-slate-900/30',
   slate: 'bg-slate-100 dark:bg-slate-800',
 };
 

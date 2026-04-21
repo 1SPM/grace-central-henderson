@@ -162,7 +162,7 @@ function MemberCard({ person }: { person: Person }) {
             }}
           />
         ) : null}
-        <div className={`w-11 h-11 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 ${person.photo ? 'hidden' : ''}`}>
+        <div className={`w-11 h-11 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 ${person.photo ? 'hidden' : ''}`}>
           {person.firstName[0]}{person.lastName[0]}
         </div>
 

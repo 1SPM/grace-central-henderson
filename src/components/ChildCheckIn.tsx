@@ -206,7 +206,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                           : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
                     >
-                      <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                      <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium">
                         {child.firstName[0]}
                       </div>
                       <div className="flex-1">
@@ -233,7 +233,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
           ) : (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-slate-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                   {selectedChild.firstName[0]}
                 </div>
                 <div>
@@ -452,7 +452,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden">
             {/* Badge Preview */}
-            <div className="p-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+            <div className="p-6 bg-gradient-to-br from-indigo-500 to-slate-600 text-white">
               <div className="text-center">
                 <p className="text-sm opacity-80">Grace Church</p>
                 <p className="text-2xl font-bold mt-1">{printBadge.childName}</p>

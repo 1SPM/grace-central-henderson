@@ -21,7 +21,7 @@ interface PersonGivingHistoryProps {
 const fundColors: Record<string, string> = {
   tithe: 'bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400',
   offering: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400',
-  missions: 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400',
+  missions: 'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400',
   building: 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400',
   benevolence: 'bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-400',
   youth: 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-400',
@@ -189,7 +189,7 @@ export function PersonGivingHistory({
           <p className="text-xl font-bold text-gray-900 dark:text-dark-100">
             {stats.recurringCount > 0 ? (
               <span className="flex items-center gap-1">
-                <Repeat size={16} className="text-purple-500" />
+                <Repeat size={16} className="text-slate-500" />
                 Yes
               </span>
             ) : (
@@ -244,7 +244,7 @@ export function PersonGivingHistory({
                       ${gift.amount.toLocaleString()}
                     </span>
                     {gift.isRecurring && (
-                      <Repeat size={12} className="text-purple-500" />
+                      <Repeat size={12} className="text-slate-500" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-400">

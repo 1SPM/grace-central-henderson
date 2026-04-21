@@ -6,7 +6,7 @@ const categoryColors: Record<string, string> = {
   service: 'bg-indigo-500',
   meeting: 'bg-amber-500',
   event: 'bg-green-500',
-  'small-group': 'bg-purple-500',
+  'small-group': 'bg-slate-500',
   holiday: 'bg-rose-500',
   other: 'bg-gray-500'
 };

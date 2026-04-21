@@ -114,7 +114,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
   const getStatusColor = (status: Person['status']) => {
     switch (status) {
       case 'member': return 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400';
-      case 'leader': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400';
+      case 'leader': return 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400';
       case 'regular': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400';
       case 'visitor': return 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400';
       default: return 'bg-gray-100 text-gray-700 dark:bg-dark-700 dark:text-dark-300';

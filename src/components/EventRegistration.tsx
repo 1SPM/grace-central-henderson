@@ -50,7 +50,7 @@ const CATEGORY_OPTIONS: { value: CalendarEvent['category']; label: string; color
   { value: 'service', label: 'Service', color: 'bg-indigo-500' },
   { value: 'meeting', label: 'Meeting', color: 'bg-amber-500' },
   { value: 'event', label: 'Event', color: 'bg-green-500' },
-  { value: 'small-group', label: 'Small Group', color: 'bg-purple-500' },
+  { value: 'small-group', label: 'Small Group', color: 'bg-slate-500' },
   { value: 'holiday', label: 'Holiday', color: 'bg-rose-500' },
   { value: 'other', label: 'Other', color: 'bg-gray-500' },
 ];
@@ -307,7 +307,7 @@ export function EventRegistration({
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium"
         >
           <Plus size={18} />
           Create Event
@@ -346,7 +346,7 @@ export function EventRegistration({
             type="checkbox"
             checked={showPastEvents}
             onChange={(e) => setShowPastEvents(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+            className="w-4 h-4 rounded border-gray-300 text-slate-600 focus:ring-slate-500"
           />
           <span className="text-sm text-gray-700 dark:text-dark-300">Show past events</span>
         </label>
@@ -437,7 +437,7 @@ export function EventRegistration({
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                             isAtCapacity
                               ? 'bg-gray-100 dark:bg-dark-800 text-gray-400 cursor-not-allowed'
-                              : 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20'
+                              : 'bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-500/20'
                           }`}
                         >
                           <UserPlus size={16} />
@@ -471,7 +471,7 @@ export function EventRegistration({
                           ) : (
                             <div
                               key={reg.id}
-                              className="w-7 h-7 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white dark:border-dark-850"
+                              className="w-7 h-7 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white dark:border-dark-850"
                               title={`${person.firstName} ${person.lastName}`}
                             >
                               {person.firstName[0]}{person.lastName[0]}
@@ -510,7 +510,7 @@ export function EventRegistration({
             {!searchQuery && filterCategory === 'all' && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium"
               >
                 <Plus size={18} />
                 Create Event
@@ -579,7 +579,7 @@ export function EventRegistration({
                       onClick={() => setEventForm({ ...eventForm, category: cat.value })}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
                         eventForm.category === cat.value
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                          ? 'border-slate-500 bg-slate-50 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400'
                           : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-dark-500'
                       }`}
                     >
@@ -596,7 +596,7 @@ export function EventRegistration({
                   type="checkbox"
                   checked={eventForm.allDay}
                   onChange={(e) => setEventForm({ ...eventForm, allDay: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                  className="w-4 h-4 rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-dark-300">All day event</span>
               </label>
@@ -723,7 +723,7 @@ export function EventRegistration({
                     type="checkbox"
                     checked={eventForm.requiresRegistration}
                     onChange={(e) => setEventForm({ ...eventForm, requiresRegistration: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                    className="w-4 h-4 rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-dark-300">Require registration</span>
                 </label>
@@ -770,7 +770,7 @@ export function EventRegistration({
               <button
                 onClick={handleCreateEvent}
                 disabled={!eventForm.title || !eventForm.startDate}
-                className="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Check size={18} />
                 Create Event
@@ -887,7 +887,7 @@ function RegistrationModal({
             onClick={() => setActiveTab('list')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === 'list'
-                ? 'text-violet-600 border-b-2 border-violet-600'
+                ? 'text-slate-600 border-b-2 border-slate-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -897,7 +897,7 @@ function RegistrationModal({
             onClick={() => setActiveTab('register')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === 'register'
-                ? 'text-violet-600 border-b-2 border-violet-600'
+                ? 'text-slate-600 border-b-2 border-slate-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -926,14 +926,14 @@ function RegistrationModal({
                       {person.photo ? (
                         <img src={person.photo} alt="" className="w-10 h-10 rounded-full object-cover" />
                       ) : (
-                        <div className="w-10 h-10 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        <div className="w-10 h-10 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                           {person.firstName[0]}{person.lastName[0]}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <button
                           onClick={() => onViewPerson?.(person.id)}
-                          className="font-medium text-gray-900 dark:text-dark-100 hover:text-violet-600 text-left"
+                          className="font-medium text-gray-900 dark:text-dark-100 hover:text-slate-600 text-left"
                         >
                           {person.firstName} {person.lastName}
                         </button>
@@ -987,13 +987,13 @@ function RegistrationModal({
                           key={person.id}
                           onClick={() => setSelectedPersonId(person.id)}
                           className={`w-full flex items-center gap-3 p-2.5 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors text-left ${
-                            selectedPersonId === person.id ? 'bg-violet-50 dark:bg-violet-500/10' : ''
+                            selectedPersonId === person.id ? 'bg-slate-50 dark:bg-slate-500/10' : ''
                           }`}
                         >
                           {person.photo ? (
                             <img src={person.photo} alt="" className="w-8 h-8 rounded-full object-cover" />
                           ) : (
-                            <div className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                            <div className="w-8 h-8 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                               {person.firstName[0]}{person.lastName[0]}
                             </div>
                           )}
@@ -1001,7 +1001,7 @@ function RegistrationModal({
                             {person.firstName} {person.lastName}
                           </span>
                           {selectedPersonId === person.id && (
-                            <Check size={16} className="ml-auto text-violet-600" />
+                            <Check size={16} className="ml-auto text-slate-600" />
                           )}
                         </button>
                       ))}
@@ -1034,7 +1034,7 @@ function RegistrationModal({
                   <button
                     onClick={handleRegister}
                     disabled={!selectedPersonId}
-                    className="w-full py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <UserPlus size={18} />
                     Register

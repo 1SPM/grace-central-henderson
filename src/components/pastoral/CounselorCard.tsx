@@ -40,7 +40,7 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
               className="w-14 h-14 rounded-full object-cover"
             />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-semibold text-lg">
               {initials}
             </div>
           )}
@@ -82,7 +82,7 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
         {leader.expertiseAreas.map(area => (
           <span
             key={area}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400"
+            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400"
           >
             {CATEGORY_LABELS[area]}
           </span>
@@ -109,7 +109,7 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
         </div>
         <button
           onClick={() => onStartChat(leader.id)}
-          className="flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
         >
           <MessageCircle size={14} />
           Chat

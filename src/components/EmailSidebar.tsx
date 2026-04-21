@@ -294,7 +294,7 @@ Blessings,
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-2">
-            <Mail className="text-violet-600" size={20} />
+            <Mail className="text-slate-600" size={20} />
             <h2 className="font-semibold text-gray-900 dark:text-dark-100">Compose Email</h2>
           </div>
           <button
@@ -389,7 +389,7 @@ Blessings,
                           <div
                             className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
                               selectedPeople.includes(person.id)
-                                ? 'bg-violet-600 border-violet-600'
+                                ? 'bg-slate-600 border-slate-600'
                                 : 'border-gray-300 dark:border-dark-500'
                             }`}
                           >
@@ -414,7 +414,7 @@ Blessings,
                     <div className="p-2 border-t border-gray-100 dark:border-dark-700 flex justify-end">
                       <button
                         onClick={() => setShowPeopleDropdown(false)}
-                        className="px-3 py-1.5 text-sm font-medium text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg"
+                        className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500/10 rounded-lg"
                       >
                         Done
                       </button>
@@ -431,12 +431,12 @@ Blessings,
                       return (
                         <span
                           key={id}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 text-xs rounded-full"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 text-xs rounded-full"
                         >
                           {person.firstName} {person.lastName}
                           <button
                             onClick={() => togglePerson(id)}
-                            className="hover:text-violet-900 dark:hover:text-violet-100"
+                            className="hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             <X size={12} />
                           </button>
@@ -482,7 +482,7 @@ Blessings,
                             setShowGroupDropdown(false);
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors ${
-                            selectedGroup === group.id ? 'bg-violet-50 dark:bg-violet-500/10' : ''
+                            selectedGroup === group.id ? 'bg-slate-50 dark:bg-slate-500/10' : ''
                           }`}
                         >
                           <Users size={16} className="text-gray-400" />
@@ -495,7 +495,7 @@ Blessings,
                             </p>
                           </div>
                           {selectedGroup === group.id && (
-                            <Check size={16} className="text-violet-600" />
+                            <Check size={16} className="text-slate-600" />
                           )}
                         </button>
                       );
@@ -533,7 +533,7 @@ Blessings,
               </label>
               <button
                 onClick={() => setShowTemplates(!showTemplates)}
-                className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700"
+                className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-700"
               >
                 <FileText size={12} />
                 Templates
@@ -577,7 +577,7 @@ Blessings,
               </label>
               <button
                 onClick={() => setShowAiAssist(!showAiAssist)}
-                className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700"
+                className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-700"
               >
                 <Sparkles size={12} />
                 AI Assist
@@ -586,21 +586,21 @@ Blessings,
 
             {/* AI Assist Panel */}
             {showAiAssist && (
-              <div className="mb-2 p-3 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/10 rounded-xl border border-violet-200 dark:border-violet-500/20">
-                <p className="text-xs font-medium text-violet-700 dark:text-violet-300 mb-2">
+              <div className="mb-2 p-3 bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-500/10 dark:to-slate-500/10 rounded-xl border border-slate-200 dark:border-slate-500/20">
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Describe what you want to write:
                 </p>
                 <textarea
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="e.g., A warm invitation to our upcoming Easter service..."
-                  className="w-full px-3 py-2 text-sm border border-violet-200 dark:border-violet-500/30 rounded-lg bg-white dark:bg-dark-800 resize-none h-16"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-500/30 rounded-lg bg-white dark:bg-dark-800 resize-none h-16"
                 />
                 <div className="flex justify-end mt-2">
                   <button
                     onClick={generateWithAI}
                     disabled={!aiPrompt.trim() || isGenerating}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 text-white text-sm rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isGenerating ? (
                       <>
@@ -717,7 +717,7 @@ Blessings,
           <button
             onClick={handleSend}
             disabled={recipientInfo.count === 0 || !subject.trim() || !body.trim() || isSending}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSending ? (
               <>

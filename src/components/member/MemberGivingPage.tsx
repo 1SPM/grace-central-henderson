@@ -103,8 +103,8 @@ export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Ch
           onClick={() => setView('give')}
           className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 active:scale-[0.99] transition-transform"
         >
-          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center">
-            <Repeat className="text-purple-600 dark:text-purple-400" size={20} />
+          <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-lg flex items-center justify-center">
+            <Repeat className="text-slate-600 dark:text-slate-400" size={20} />
           </div>
           <div className="flex-1 text-left">
             <p className="font-medium text-gray-900 dark:text-white">Set Up Recurring</p>
@@ -203,7 +203,7 @@ function GiveForm({
           {isRecurring && (
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Frequency</span>
-              <span className="font-medium text-purple-600 capitalize">{frequency}ly</span>
+              <span className="font-medium text-slate-600 capitalize">{frequency}ly</span>
             </div>
           )}
         </div>
@@ -408,13 +408,13 @@ function GiveForm({
       <div className="bg-gray-50 dark:bg-dark-800 rounded-xl p-4 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Repeat className="text-purple-500" size={18} />
+            <Repeat className="text-slate-500" size={18} />
             <span className="font-medium text-gray-900 dark:text-white text-sm">Make recurring</span>
           </div>
           <button
             onClick={() => setIsRecurring(!isRecurring)}
             className={`relative w-11 h-6 rounded-full transition-colors ${
-              isRecurring ? 'bg-purple-500' : 'bg-gray-300 dark:bg-dark-600'
+              isRecurring ? 'bg-slate-500' : 'bg-gray-300 dark:bg-dark-600'
             }`}
           >
             <div
@@ -432,7 +432,7 @@ function GiveForm({
                 onClick={() => setFrequency(interval.id)}
                 className={`py-2 rounded-lg text-xs font-medium transition-all ${
                   frequency === interval.id
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-slate-500 text-white'
                     : 'bg-white dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
                 }`}
               >
@@ -521,7 +521,7 @@ function GivingHistory({
                   {gift.method}
                 </span>
                 {gift.isRecurring && (
-                  <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-500/10 rounded text-purple-600 dark:text-purple-400">
+                  <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-500/10 rounded text-slate-600 dark:text-slate-400">
                     Recurring
                   </span>
                 )}

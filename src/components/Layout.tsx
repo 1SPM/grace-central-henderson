@@ -226,7 +226,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-violet-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
               <span className="text-white font-semibold text-sm">G</span>
             </div>
             <span className={`font-semibold text-gray-900 dark:text-gray-100 tracking-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
@@ -289,12 +289,12 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-violet-50/80 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-medium shadow-sm'
+                          ? 'bg-slate-50/80 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 font-medium shadow-sm'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
-                      <span className={isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
+                      <span className={isActive ? 'text-slate-600 dark:text-slate-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
                         {item.icon}
                       </span>
                       <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>

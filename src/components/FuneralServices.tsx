@@ -345,7 +345,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
           <div>
             {onBack && (
               <nav className="flex items-center gap-1.5 text-sm mb-1">
-                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors">
                   Life Services
                 </button>
                 <ChevronRight size={14} className="text-gray-400 dark:text-dark-500" />
@@ -736,7 +736,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
                         {selectedService.selectedHymns.length > 0 ? (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {selectedService.selectedHymns.map((hymn, i) => (
-                              <span key={i} className="px-2 py-1 bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 rounded text-sm">
+                              <span key={i} className="px-2 py-1 bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400 rounded text-sm">
                                 {hymn}
                               </span>
                             ))}

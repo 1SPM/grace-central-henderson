@@ -509,8 +509,8 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
               </div>
               <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
-                    <Award size={20} className="text-purple-600 dark:text-purple-400" />
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/20 rounded-lg flex items-center justify-center">
+                    <Award size={20} className="text-slate-600 dark:text-slate-400" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">

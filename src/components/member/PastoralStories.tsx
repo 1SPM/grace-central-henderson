@@ -74,7 +74,7 @@ export function PastoralStories({
                           className="w-[50px] h-[50px] rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm group-hover:from-violet-600 group-hover:to-purple-700 transition-colors">
+                        <div className="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-sm group-hover:from-slate-600 group-hover:to-slate-700 transition-colors">
                           {initials}
                         </div>
                       )}
@@ -175,7 +175,7 @@ function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheet
                 className="w-20 h-20 rounded-full object-cover ring-3 ring-white dark:ring-dark-850 shadow-md"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
                 {initials}
               </div>
             )}
@@ -235,7 +235,7 @@ function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheet
             {leader.expertiseAreas.map(area => (
               <span
                 key={area}
-                className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 text-[10px] font-medium"
+                className="px-2 py-0.5 rounded-full bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 text-[10px] font-medium"
               >
                 {CATEGORY_LABELS[area] || area}
               </span>

@@ -270,7 +270,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
 
       {/* Featured Items Banner */}
       {featuredItems.length > 0 && categoryFilter === 'all' && searchTerm === '' && (
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-indigo-500 to-slate-600 rounded-xl p-4 text-white">
           <div className="flex items-center gap-2 mb-2">
             <Tag className="w-4 h-4" />
             <span className="font-semibold text-sm">Featured Items</span>

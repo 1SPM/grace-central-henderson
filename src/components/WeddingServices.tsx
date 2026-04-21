@@ -105,7 +105,7 @@ interface WeddingServicesProps {
 const statusColors: Record<WeddingCeremony['status'], { bg: string; text: string; label: string }> = {
   inquiry: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-700 dark:text-gray-300', label: 'Inquiry' },
   booked: { bg: 'bg-blue-100 dark:bg-blue-500/15', text: 'text-blue-700 dark:text-blue-400', label: 'Booked' },
-  counseling: { bg: 'bg-purple-100 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-400', label: 'Counseling' },
+  counseling: { bg: 'bg-slate-100 dark:bg-slate-500/15', text: 'text-slate-700 dark:text-slate-400', label: 'Counseling' },
   planning: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-400', label: 'Planning' },
   rehearsed: { bg: 'bg-indigo-100 dark:bg-indigo-500/15', text: 'text-indigo-700 dark:text-indigo-400', label: 'Rehearsed' },
   completed: { bg: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-700 dark:text-green-400', label: 'Completed' },
@@ -255,7 +255,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
           <div>
             {onBack && (
               <nav className="flex items-center gap-1.5 text-sm mb-1">
-                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors">
                   Life Services
                 </button>
                 <ChevronRight size={14} className="text-gray-400 dark:text-dark-500" />
@@ -284,7 +284,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
           <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-          <p className="text-2xl font-bold text-purple-600">
+          <p className="text-2xl font-bold text-slate-600">
             {weddings.filter(w => w.status === 'counseling').length}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">In Counseling</p>
@@ -403,7 +403,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
         {/* Detail Panel */}
         {selectedWedding && (
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-pink-50 to-slate-50 dark:from-pink-900/20 dark:to-slate-900/20">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -483,7 +483,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
                         </span>
                       )}
                       {selectedWedding.certificateSigned && (
-                        <span className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 rounded-full text-xs">
+                        <span className="flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400 rounded-full text-xs">
                           <CheckCircle className="w-3 h-3" /> Certificate Signed
                         </span>
                       )}
@@ -533,7 +533,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
                   className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-purple-500" />
+                    <BookOpen className="w-4 h-4 text-slate-500" />
                     Pre-Marital Counseling ({selectedWedding.counselingSessions.length} sessions)
                   </span>
                   {expandedSections.counseling ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

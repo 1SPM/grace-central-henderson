@@ -85,13 +85,13 @@ const sectionTypeConfig = {
   point: {
     label: 'Main Point',
     icon: Target,
-    bgLight: 'bg-violet-50',
-    bgDark: 'dark:bg-violet-500/10',
-    borderLight: 'border-violet-100',
-    borderDark: 'dark:border-violet-500/20',
-    textLight: 'text-violet-700',
-    textDark: 'dark:text-violet-400',
-    iconColor: 'text-violet-600 dark:text-violet-400',
+    bgLight: 'bg-slate-50',
+    bgDark: 'dark:bg-slate-500/10',
+    borderLight: 'border-slate-100',
+    borderDark: 'dark:border-slate-500/20',
+    textLight: 'text-slate-700',
+    textDark: 'dark:text-slate-400',
+    iconColor: 'text-slate-600 dark:text-slate-400',
   },
   illustration: {
     label: 'Illustration',
@@ -440,10 +440,10 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
       text: 'text-amber-700 dark:text-amber-400',
     },
     purple: {
-      bg: 'bg-purple-50 dark:bg-purple-500/10',
-      border: 'border-purple-100 dark:border-purple-500/20',
-      icon: 'text-purple-500',
-      text: 'text-purple-700 dark:text-purple-400',
+      bg: 'bg-slate-50 dark:bg-slate-500/10',
+      border: 'border-slate-100 dark:border-slate-500/20',
+      icon: 'text-slate-500',
+      text: 'text-slate-700 dark:text-slate-400',
     },
   };
 
@@ -676,9 +676,9 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
             {/* Prayer Requests */}
             {activePrayers.length > 0 && (
               <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-                <div className="bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800/30 p-3">
+                <div className="bg-slate-50 dark:bg-slate-900/20 border-b border-slate-100 dark:border-slate-800/30 p-3">
                   <div className="flex items-center gap-2">
-                    <Heart size={16} className="text-purple-500" />
+                    <Heart size={16} className="text-slate-500" />
                     <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Prayer Requests</span>
                   </div>
                 </div>
@@ -713,14 +713,14 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                 value={sermonTitle}
                 onChange={(e) => setSermonTitle(e.target.value)}
                 placeholder="Enter Sermon Title..."
-                className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
               {aiSettings.sermonGenerator && (
                 <>
                   <button
                     onClick={generateFullSermon}
                     disabled={isGeneratingFullSermon}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-slate-600 via-slate-600 to-indigo-600 hover:from-slate-700 hover:via-slate-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-slate-500/25 hover:shadow-slate-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {isGeneratingFullSermon ? (
                       <>
@@ -815,9 +815,9 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                                 title="Expand with AI"
                               >
                                 {expandingSection === section.id ? (
-                                  <Loader2 size={14} className="text-violet-500 animate-spin" />
+                                  <Loader2 size={14} className="text-slate-500 animate-spin" />
                                 ) : (
-                                  <Sparkles size={14} className="text-violet-500" />
+                                  <Sparkles size={14} className="text-slate-500" />
                                 )}
                               </button>
                             )}

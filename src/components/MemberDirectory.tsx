@@ -151,7 +151,7 @@ export function MemberDirectory({ people, onBack, onViewPerson }: MemberDirector
                     }`}
                   >
                     {/* Avatar */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
                       {person.firstName[0]}{person.lastName[0]}
                     </div>
 

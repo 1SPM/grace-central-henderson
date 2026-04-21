@@ -84,7 +84,7 @@ export function QuickActions({ onAddPerson, onAddTask, onAddPrayer, onAddNote, o
         className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 ${
           isOpen
             ? 'bg-gray-700 dark:bg-dark-600 rotate-45'
-            : 'bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 hover:scale-110'
+            : 'bg-gradient-to-br from-indigo-500 to-slate-600 hover:from-indigo-600 hover:to-slate-700 hover:scale-110'
         }`}
       >
         {isOpen ? (

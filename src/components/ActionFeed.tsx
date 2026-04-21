@@ -562,7 +562,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                         item.type === 'visitor' ? 'welcome follow-up' : 'follow-up',
                         item
                       )}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-500/20 transition-colors"
                     >
                       <MessageSquare size={12} />
                       Text
@@ -619,7 +619,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                 {item.person && (
                   <button
                     onClick={() => onSelectPerson(item.person!.id)}
-                    className="text-xs text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                    className="text-xs text-gray-500 dark:text-dark-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors"
                   >
                     View →
                   </button>
@@ -641,7 +641,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
           alt="Actions"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/90 via-purple-800/80 to-violet-900/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/70" />
         <div className="relative h-full p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -682,10 +682,10 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
           const colorClasses = {
             violet: {
-              bg: isActive ? 'bg-violet-100 dark:bg-violet-500/20' : 'bg-white dark:bg-dark-800',
-              border: isActive ? 'border-violet-300 dark:border-violet-500/30' : 'border-gray-200 dark:border-dark-700',
-              icon: 'text-violet-500',
-              text: isActive ? 'text-violet-700 dark:text-violet-400' : 'text-gray-900 dark:text-dark-100',
+              bg: isActive ? 'bg-slate-100 dark:bg-slate-500/20' : 'bg-white dark:bg-dark-800',
+              border: isActive ? 'border-slate-300 dark:border-slate-500/30' : 'border-gray-200 dark:border-dark-700',
+              icon: 'text-slate-500',
+              text: isActive ? 'text-slate-700 dark:text-slate-400' : 'text-gray-900 dark:text-dark-100',
             },
             blue: {
               bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-white dark:bg-dark-800',
@@ -821,7 +821,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                     </div>
                     <button
                       onClick={() => handleUndo(completed)}
-                      className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                      className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-dark-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors"
                     >
                       <RotateCcw size={12} />
                       Undo

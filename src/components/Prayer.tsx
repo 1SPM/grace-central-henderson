@@ -77,7 +77,7 @@ export function Prayer({ prayers, people, onMarkAnswered }: PrayerProps) {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   {person && (
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium">
                       {person.firstName[0]}{person.lastName[0]}
                     </div>
                   )}

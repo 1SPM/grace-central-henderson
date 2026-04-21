@@ -42,7 +42,7 @@ const ANNOUNCEMENT_ICONS: Record<string, typeof Megaphone> = {
 const ANNOUNCEMENT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   general: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-l-blue-500' },
   urgent: { bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-l-red-500' },
-  event: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500' },
+  event: { bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400', border: 'border-l-slate-500' },
   update: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-l-amber-500' },
   celebration: { bg: 'bg-green-50 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400', border: 'border-l-green-500' },
 };

@@ -18,7 +18,7 @@ const colors = [
   'bg-emerald-500',
   'bg-amber-500',
   'bg-rose-500',
-  'bg-violet-500',
+  'bg-slate-500',
   'bg-cyan-500',
   'bg-pink-500',
   'bg-indigo-500',

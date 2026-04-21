@@ -90,7 +90,7 @@ export function EventFormModal({ eventForm, editingEvent, onFormChange, onSave, 
                 { value: 'service', label: 'Service', activeClass: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-500/30' },
                 { value: 'meeting', label: 'Meeting', activeClass: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/30' },
                 { value: 'event', label: 'Event', activeClass: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-500/30' },
-                { value: 'small-group', label: 'Small Group', activeClass: 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-300 dark:border-purple-500/30' },
+                { value: 'small-group', label: 'Small Group', activeClass: 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-300 dark:border-slate-500/30' },
                 { value: 'holiday', label: 'Holiday', activeClass: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-500/30' },
                 { value: 'other', label: 'Other', activeClass: 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-300 border-gray-300 dark:border-dark-500' },
               ].map(({ value, label, activeClass }) => (

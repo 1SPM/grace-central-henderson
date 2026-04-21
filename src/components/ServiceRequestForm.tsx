@@ -226,7 +226,7 @@ export function ServiceRequestForm({
         <div className="px-4 pt-4">
           <div className="h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-violet-600 transition-all duration-300"
+              className="h-full bg-slate-600 transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
             />
           </div>
@@ -251,13 +251,13 @@ export function ServiceRequestForm({
                         onClick={() => selectServiceType(type)}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${
                           isSelected
-                            ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20'
+                            ? 'border-slate-500 bg-slate-50 dark:bg-slate-900/20'
                             : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-dark-500'
                         }`}
                       >
                         <Icon
                           size={24}
-                          className={isSelected ? 'text-violet-600' : 'text-gray-400'}
+                          className={isSelected ? 'text-slate-600' : 'text-gray-400'}
                         />
                         <h4 className="font-medium text-gray-900 dark:text-dark-100 mt-2">
                           {info.label}
@@ -314,7 +314,7 @@ export function ServiceRequestForm({
                           onClick={() => selectPerson(person)}
                           className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-dark-700 flex items-center gap-3"
                         >
-                          <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-sm font-medium text-violet-600 dark:text-violet-400">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900/30 flex items-center justify-center text-sm font-medium text-slate-600 dark:text-slate-400">
                             {person.firstName[0]}
                             {person.lastName[0]}
                           </div>
@@ -454,7 +454,7 @@ export function ServiceRequestForm({
                       type="checkbox"
                       checked={formData.needsCounseling ?? true}
                       onChange={(e) => updateForm({ needsCounseling: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                      className="w-4 h-4 rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                     />
                     <span className="text-sm text-gray-700 dark:text-dark-300">
                       Pre-marital counseling required
@@ -533,7 +533,7 @@ export function ServiceRequestForm({
                           type="radio"
                           checked={formData.isBelieverssBaptism === true}
                           onChange={() => updateForm({ isBelieverssBaptism: true })}
-                          className="w-4 h-4 border-gray-300 text-violet-600 focus:ring-violet-500"
+                          className="w-4 h-4 border-gray-300 text-slate-600 focus:ring-slate-500"
                         />
                         <span className="text-sm text-gray-700 dark:text-dark-300">
                           Believer's Baptism
@@ -544,7 +544,7 @@ export function ServiceRequestForm({
                           type="radio"
                           checked={formData.isBelieverssBaptism === false}
                           onChange={() => updateForm({ isBelieverssBaptism: false })}
-                          className="w-4 h-4 border-gray-300 text-violet-600 focus:ring-violet-500"
+                          className="w-4 h-4 border-gray-300 text-slate-600 focus:ring-slate-500"
                         />
                         <span className="text-sm text-gray-700 dark:text-dark-300">
                           Infant Baptism
@@ -769,7 +769,7 @@ export function ServiceRequestForm({
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canProceed()}
-              className="flex items-center gap-1 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue
               <ChevronRight size={18} />
@@ -777,7 +777,7 @@ export function ServiceRequestForm({
           ) : (
             <button
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
+              className="flex items-center gap-2 px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
             >
               <Check size={18} />
               Submit Request

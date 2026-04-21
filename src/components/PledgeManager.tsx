@@ -188,7 +188,7 @@ export function PledgeManager({
           onClick={() => setActiveTab('campaigns')}
           className={`px-4 py-2 rounded-xl font-medium transition-all ${
             activeTab === 'campaigns'
-              ? 'bg-purple-500 text-white'
+              ? 'bg-slate-500 text-white'
               : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
           }`}
         >
@@ -199,7 +199,7 @@ export function PledgeManager({
           onClick={() => setActiveTab('pledges')}
           className={`px-4 py-2 rounded-xl font-medium transition-all ${
             activeTab === 'pledges'
-              ? 'bg-purple-500 text-white'
+              ? 'bg-slate-500 text-white'
               : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-200 dark:hover:bg-dark-700'
           }`}
         >
@@ -214,8 +214,8 @@ export function PledgeManager({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center">
-                  <Target className="text-purple-600 dark:text-purple-400" size={20} />
+                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
+                  <Target className="text-slate-600 dark:text-slate-400" size={20} />
                 </div>
                 <span className="text-sm text-gray-500 dark:text-dark-400">Active Campaigns</span>
               </div>
@@ -266,7 +266,7 @@ export function PledgeManager({
               </h2>
               <button
                 onClick={() => setShowNewCampaign(true)}
-                className="px-4 py-2 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-slate-500 text-white rounded-xl font-medium hover:bg-slate-600 transition-colors flex items-center gap-2"
               >
                 <Plus size={18} />
                 New Campaign
@@ -324,13 +324,13 @@ export function PledgeManager({
                           <span className="text-gray-500 dark:text-dark-400">
                             ${campaign.totalGiven.toLocaleString()} of ${campaign.goalAmount.toLocaleString()}
                           </span>
-                          <span className="font-medium text-purple-600 dark:text-purple-400">
+                          <span className="font-medium text-slate-600 dark:text-slate-400">
                             {campaign.percentage.toFixed(1)}%
                           </span>
                         </div>
                         <div className="h-2 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-slate-500 to-indigo-500 rounded-full transition-all duration-500"
                             style={{ width: `${campaign.percentage}%` }}
                           />
                         </div>
@@ -433,7 +433,7 @@ export function PledgeManager({
                           <div className="flex items-center gap-3">
                             {person ? (
                               <>
-                                <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                                   {person.firstName[0]}{person.lastName[0]}
                                 </div>
                                 <span className="font-medium text-gray-900 dark:text-dark-100">
@@ -553,7 +553,7 @@ export function PledgeManager({
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
                   placeholder="e.g., Building Fund 2025"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -566,7 +566,7 @@ export function PledgeManager({
                   onChange={(e) => setCampaignDescription(e.target.value)}
                   placeholder="Describe the purpose of this campaign..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -581,7 +581,7 @@ export function PledgeManager({
                     value={campaignGoal}
                     onChange={(e) => setCampaignGoal(e.target.value)}
                     placeholder="50000"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -595,7 +595,7 @@ export function PledgeManager({
                     type="date"
                     value={campaignStartDate}
                     onChange={(e) => setCampaignStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
                 <div>
@@ -606,7 +606,7 @@ export function PledgeManager({
                     type="date"
                     value={campaignEndDate}
                     onChange={(e) => setCampaignEndDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -618,7 +618,7 @@ export function PledgeManager({
                 <select
                   value={campaignFund}
                   onChange={(e) => setCampaignFund(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   {GIVING_FUNDS.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -642,7 +642,7 @@ export function PledgeManager({
               <button
                 onClick={handleCreateCampaign}
                 disabled={!campaignName || !campaignStartDate}
-                className="flex-1 py-3 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 bg-slate-500 text-white rounded-xl font-medium hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create Campaign
               </button>

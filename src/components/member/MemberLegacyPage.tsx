@@ -96,7 +96,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-br from-indigo-600 to-slate-700 rounded-2xl p-6 text-white">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
             <Heart className="w-6 h-6" />

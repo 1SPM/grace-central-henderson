@@ -55,11 +55,11 @@ export function ComposeModal({
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 type === 'email'
                   ? 'bg-blue-100 dark:bg-blue-500/20'
-                  : 'bg-purple-100 dark:bg-purple-500/20'
+                  : 'bg-slate-100 dark:bg-slate-500/20'
               }`}>
                 {type === 'email'
                   ? <Mail size={20} className="text-blue-600 dark:text-blue-400" />
-                  : <MessageSquare size={20} className="text-purple-600 dark:text-purple-400" />
+                  : <MessageSquare size={20} className="text-slate-600 dark:text-slate-400" />
                 }
               </div>
               <div>
@@ -86,7 +86,7 @@ export function ComposeModal({
             <button
               onClick={onAIDraft}
               disabled={isGenerating}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-xl font-medium hover:from-slate-600 hover:to-slate-700 disabled:opacity-50 transition-all"
             >
               {isGenerating ? (
                 <>
@@ -113,7 +113,7 @@ export function ComposeModal({
                   value={emailSubject}
                   onChange={(e) => onEmailSubjectChange(e.target.value)}
                   placeholder="Enter subject..."
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 />
               </div>
               <div>
@@ -125,7 +125,7 @@ export function ComposeModal({
                   onChange={(e) => onEmailBodyChange(e.target.value)}
                   placeholder="Write your message or click 'Generate with AI'..."
                   rows={6}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
                 />
               </div>
             </>
@@ -140,7 +140,7 @@ export function ComposeModal({
                 placeholder="Write your message or click 'Generate with AI'..."
                 rows={4}
                 maxLength={160}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
               />
               <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
                 {smsMessage.length}/160 characters
@@ -191,7 +191,7 @@ export function ComposeModal({
                 className={`px-4 py-2 text-white rounded-xl text-sm font-medium flex items-center gap-2 disabled:opacity-50 transition-colors ${
                   type === 'email'
                     ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-purple-600 hover:bg-purple-700'
+                    : 'bg-slate-600 hover:bg-slate-700'
                 }`}
               >
                 {isSending ? (

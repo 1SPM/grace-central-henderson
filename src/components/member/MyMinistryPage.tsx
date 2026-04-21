@@ -163,7 +163,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
   return (
     <div className="p-4 space-y-5 max-w-2xl mx-auto">
       {/* Leader Profile Card */}
-      <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl p-5 text-white">
+      <div className="bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl p-5 text-white">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">
             {currentLeader.displayName.charAt(0)}
@@ -173,7 +173,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
               <h2 className="text-lg font-bold">{currentLeader.displayName}</h2>
               {currentLeader.isVerified && <VerifiedBadge size="sm" />}
             </div>
-            <p className="text-sm text-violet-200">{currentLeader.title}</p>
+            <p className="text-sm text-slate-200">{currentLeader.title}</p>
           </div>
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
             currentLeader.isAvailable
@@ -194,9 +194,9 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
             { label: 'Active', value: active.length, icon: Heart },
           ].map(stat => (
             <div key={stat.label} className="text-center bg-white/10 rounded-xl py-2.5 px-2">
-              <stat.icon size={16} className="mx-auto mb-1 text-violet-200" />
+              <stat.icon size={16} className="mx-auto mb-1 text-slate-200" />
               <p className="text-lg font-bold">{stat.value}</p>
-              <p className="text-[10px] text-violet-200">{stat.label}</p>
+              <p className="text-[10px] text-slate-200">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -261,9 +261,9 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
                 {scheduled.map(session => {
                   const SessionIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;
                   return (
-                    <div key={session.id} className="flex items-center gap-3 p-3 bg-violet-50 dark:bg-violet-500/5 rounded-lg">
-                      <div className="w-9 h-9 rounded-full bg-violet-100 dark:bg-violet-500/10 flex items-center justify-center">
-                        <SessionIcon size={16} className="text-violet-600 dark:text-violet-400" />
+                    <div key={session.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-500/5 rounded-lg">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-500/10 flex items-center justify-center">
+                        <SessionIcon size={16} className="text-slate-600 dark:text-slate-400" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
@@ -275,7 +275,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
                           {session.isAnonymous && ' (Anonymous)'}
                         </p>
                       </div>
-                      <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 rounded-full text-[10px] font-medium">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-300 rounded-full text-[10px] font-medium">
                         Scheduled
                       </span>
                     </div>
@@ -320,9 +320,9 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
               {currentLeader.expertiseAreas.map(area => {
                 const AreaIcon = CATEGORY_ICONS[area] || Heart;
                 return (
-                  <div key={area} className="flex items-center gap-1.5 px-3 py-2 bg-violet-50 dark:bg-violet-500/5 rounded-lg">
-                    <AreaIcon size={14} className="text-violet-600 dark:text-violet-400" />
-                    <span className="text-sm text-violet-700 dark:text-violet-300 font-medium">{CATEGORY_LABELS[area]}</span>
+                  <div key={area} className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-slate-500/5 rounded-lg">
+                    <AreaIcon size={14} className="text-slate-600 dark:text-slate-400" />
+                    <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{CATEGORY_LABELS[area]}</span>
                   </div>
                 );
               })}
@@ -364,7 +364,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
               .map(session => {
                 const SessionIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;
                 const statusColors: Record<string, string> = {
-                  scheduled: 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300',
+                  scheduled: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-300',
                   active: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
                   completed: 'bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400',
                   cancelled: 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400',

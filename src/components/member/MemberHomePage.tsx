@@ -17,7 +17,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
   return (
     <div className="p-4 space-y-5">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 rounded-2xl p-5 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-600 via-slate-600 to-indigo-700 rounded-2xl p-5 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -36,7 +36,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
         onClick={() => onNavigate('checkin')}
         className="w-full bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-100 dark:border-dark-700 text-left hover:shadow-md transition-shadow active:scale-[0.98] flex items-center gap-4"
       >
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center flex-shrink-0">
           <QrCode size={24} className="text-white" />
         </div>
         <div className="flex-1">
@@ -69,7 +69,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
             { id: 'directory' as MemberPortalTab, label: 'Member Directory', desc: 'Find & connect with members', icon: Users, iconColor: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-100 dark:bg-blue-500/20' },
             { id: 'shop' as MemberPortalTab, label: 'Church Shop', desc: 'Merch & resources', icon: ShoppingBag, iconColor: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-100 dark:bg-emerald-500/20' },
             { id: 'legacy' as MemberPortalTab, label: 'Legacy Planning', desc: 'Estate & planned giving', icon: Shield, iconColor: 'text-amber-600 dark:text-amber-400', bgColor: 'bg-amber-100 dark:bg-amber-500/20' },
-            { id: 'my-ministry' as MemberPortalTab, label: 'My Ministry', desc: 'Serve & volunteer', icon: Shield, iconColor: 'text-violet-600 dark:text-violet-400', bgColor: 'bg-violet-100 dark:bg-violet-500/20' },
+            { id: 'my-ministry' as MemberPortalTab, label: 'My Ministry', desc: 'Serve & volunteer', icon: Shield, iconColor: 'text-slate-600 dark:text-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-500/20' },
           ].map(({ id, label, desc, icon: Icon, iconColor, bgColor }) => (
             <button
               key={id}

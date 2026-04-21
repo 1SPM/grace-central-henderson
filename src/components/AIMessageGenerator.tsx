@@ -118,7 +118,7 @@ export function AIMessageGenerator({
     return (
       <button
         onClick={generate}
-        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors"
+        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-500/10 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-500/20 transition-colors"
       >
         <Sparkles size={16} />
         Generate with AI
@@ -161,16 +161,16 @@ export function AIMessageGenerator({
 
   // Generated message preview
   return (
-    <div className="border border-purple-200 dark:border-purple-500/30 rounded-lg p-4 bg-purple-50/50 dark:bg-purple-500/5">
+    <div className="border border-slate-200 dark:border-slate-500/30 rounded-lg p-4 bg-slate-50/50 dark:bg-slate-500/5">
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400">
+        <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400">
           <Sparkles size={16} />
           AI Generated
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={generate}
-            className="p-1.5 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors"
             title="Regenerate"
           >
             <RefreshCw size={16} />
@@ -226,7 +226,7 @@ export function AIGenerateButton({ onGenerate, onResult, disabled }: AIGenerateB
     <button
       onClick={handleClick}
       disabled={disabled || isGenerating}
-      className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 rounded hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-500/10 rounded hover:bg-slate-100 dark:hover:bg-slate-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       title="Generate with AI"
     >
       {isGenerating ? (

@@ -116,7 +116,7 @@ export function SetupChecklist({
               <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor"
                 className="text-gray-100 dark:text-dark-700" strokeWidth="3" />
               <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor"
-                className="text-violet-500" strokeWidth="3" strokeLinecap="round"
+                className="text-slate-500" strokeWidth="3" strokeLinecap="round"
                 strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
                 style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
             </svg>
@@ -142,7 +142,7 @@ export function SetupChecklist({
           {onReopenWizard && (
             <button
               onClick={onReopenWizard}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 hover:bg-violet-100 dark:hover:bg-violet-500/20 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-500/10 hover:bg-slate-100 dark:hover:bg-slate-500/20 rounded-lg transition-colors"
             >
               <Sparkles size={12} />
               Resume setup

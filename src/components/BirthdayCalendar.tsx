@@ -203,7 +203,7 @@ export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps
           {/* Upcoming (Next 30 Days) */}
           <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center gap-2">
-              <Gift size={18} className="text-purple-500" />
+              <Gift size={18} className="text-slate-500" />
               <h3 className="font-semibold text-gray-900 dark:text-dark-100">Coming Up</h3>
               <span className="ml-auto text-sm text-gray-500 dark:text-dark-400">
                 Next 30 days

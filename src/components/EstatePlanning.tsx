@@ -270,7 +270,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
           <div>
             {onBack && (
               <nav className="flex items-center gap-1.5 text-sm mb-1">
-                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                <button onClick={onBack} className="text-gray-500 dark:text-dark-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors">
                   Life Services
                 </button>
                 <ChevronRight size={14} className="text-gray-400 dark:text-dark-500" />
@@ -307,7 +307,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
           <p className="text-sm text-gray-500 dark:text-gray-400">With Church Gifts</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-          <p className="text-2xl font-bold text-purple-600">{formatCurrency(legacyStats.totalExpectedValue)}</p>
+          <p className="text-2xl font-bold text-slate-600">{formatCurrency(legacyStats.totalExpectedValue)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Expected Value</p>
         </div>
       </div>
@@ -414,7 +414,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
                       </div>
                     )}
                     {plan.plannedGiftAmount && (
-                      <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                      <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
                         <DollarSign className="w-3.5 h-3.5" />
                         <span>{formatCurrency(plan.plannedGiftAmount)}</span>
                       </div>

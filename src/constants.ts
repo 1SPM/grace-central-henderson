@@ -876,7 +876,7 @@ export const STATUS_COLORS: Record<string, string> = {
   visitor: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400',
   regular: 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400',
   member: 'bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-400',
-  leader: 'bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-400',
+  leader: 'bg-slate-100 text-slate-800 dark:bg-slate-500/15 dark:text-slate-400',
   inactive: 'bg-gray-100 text-gray-600 dark:bg-dark-700 dark:text-dark-400'
 };
 

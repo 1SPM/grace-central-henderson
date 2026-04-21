@@ -89,7 +89,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium"
         >
           <Plus size={18} />
           New Group
@@ -114,7 +114,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-11 h-11 bg-gradient-to-br from-slate-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
                       <Users2 className="text-white" size={20} />
                     </div>
                     <div>
@@ -183,7 +183,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                         ) : (
                           <div
                             key={member.id}
-                            className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white dark:border-dark-850"
+                            className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white dark:border-dark-850"
                             title={`${member.firstName} ${member.lastName}`}
                           >
                             {member.firstName[0]}{member.lastName[0]}
@@ -216,7 +216,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                         setAddingMemberTo(isAddingMember ? null : group.id);
                         setMemberSearch('');
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10 rounded-lg transition-colors"
                     >
                       <UserPlus size={16} />
                       Add
@@ -242,7 +242,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                       placeholder="Search people to add..."
                       value={memberSearch}
                       onChange={(e) => setMemberSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-sm focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                       autoFocus
                     />
                   </div>
@@ -256,7 +256,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                         {person.photo ? (
                           <img src={person.photo} alt="" className="w-8 h-8 rounded-full object-cover" />
                         ) : (
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                             {person.firstName[0]}{person.lastName[0]}
                           </div>
                         )}
@@ -266,7 +266,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                           </p>
                           <p className="text-xs text-gray-500 dark:text-dark-400 truncate">{person.email}</p>
                         </div>
-                        <Plus size={16} className="text-purple-600 dark:text-purple-400" />
+                        <Plus size={16} className="text-slate-600 dark:text-slate-400" />
                       </button>
                     ))}
                     {filteredAvailablePeople.length === 0 && (
@@ -293,7 +293,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                         {member.photo ? (
                           <img src={member.photo} alt="" className="w-9 h-9 rounded-full object-cover" />
                         ) : (
-                          <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                          <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                             {member.firstName[0]}{member.lastName[0]}
                           </div>
                         )}
@@ -301,7 +301,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                           <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
                             {member.firstName} {member.lastName}
                             {member.id === group.leaderId && (
-                              <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
+                              <span className="ml-2 text-xs bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400 px-1.5 py-0.5 rounded-full">
                                 Leader
                               </span>
                             )}
@@ -335,8 +335,8 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
       {/* Empty State */}
       {activeGroups.length === 0 && (
         <div className="text-center py-16 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
-          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Users2 className="text-purple-600 dark:text-purple-400" size={32} />
+          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Users2 className="text-slate-600 dark:text-slate-400" size={32} />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-2">No small groups yet</h3>
           <p className="text-gray-500 dark:text-dark-400 mb-6 max-w-sm mx-auto">
@@ -344,7 +344,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium"
           >
             <Plus size={18} />
             Create Your First Group
@@ -417,7 +417,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Young Adults, Men's Bible Study"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               required
             />
           </div>
@@ -431,7 +431,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What is this group about?"
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
             />
           </div>
 
@@ -442,7 +442,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
             <select
               value={leaderId}
               onChange={(e) => setLeaderId(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             >
               <option value="">Select a leader...</option>
               {leaders.map(person => (
@@ -461,7 +461,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               <select
                 value={meetingDay}
                 onChange={(e) => setMeetingDay(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               >
                 <option value="">Select day...</option>
                 <option value="Sunday">Sunday</option>
@@ -481,7 +481,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
                 type="time"
                 value={meetingTime}
                 onChange={(e) => setMeetingTime(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -495,7 +495,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., Room 101, Smith's Home"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
           </div>
 
@@ -509,7 +509,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium flex items-center justify-center gap-2"
             >
               <Check size={18} />
               Create Group

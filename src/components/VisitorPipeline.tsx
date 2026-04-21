@@ -32,9 +32,9 @@ const stages: { status: MemberStatus; label: string; color: string; bgColor: str
   {
     status: 'leader',
     label: 'Leaders',
-    color: 'text-purple-700 dark:text-purple-400',
-    bgColor: 'bg-purple-50 dark:bg-purple-500/10',
-    borderColor: 'border-purple-200 dark:border-purple-500/30'
+    color: 'text-slate-700 dark:text-slate-400',
+    bgColor: 'bg-slate-50 dark:bg-slate-500/10',
+    borderColor: 'border-slate-200 dark:border-slate-500/30'
   },
 ];
 
@@ -42,7 +42,7 @@ const avatarGradients: Record<MemberStatus, string> = {
   visitor: 'from-amber-400 to-orange-500',
   regular: 'from-blue-400 to-cyan-500',
   member: 'from-green-400 to-emerald-500',
-  leader: 'from-purple-400 to-pink-500',
+  leader: 'from-slate-400 to-pink-500',
   inactive: 'from-gray-400 to-gray-500',
 };
 
@@ -54,7 +54,7 @@ export function VisitorPipeline({ people, onViewPerson }: VisitorPipelineProps) 
     <div className="p-8">
       <div data-tutorial="pipeline-visitors" className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-slate-600 rounded-xl flex items-center justify-center">
             <TrendingUp className="text-white" size={20} />
           </div>
           <div>

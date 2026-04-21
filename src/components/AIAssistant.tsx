@@ -273,7 +273,7 @@ Provide a helpful, concise response. If they're asking for something you can't d
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl flex items-center justify-center">
               <Sparkles size={20} className="text-white" />
             </div>
             <div>
@@ -299,7 +299,7 @@ Provide a helpful, concise response. If they're asking for something you can't d
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   message.role === 'user'
-                    ? 'bg-violet-600 text-white'
+                    ? 'bg-slate-600 text-white'
                     : 'bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100'
                 }`}
               >
@@ -388,13 +388,13 @@ Provide a helpful, concise response. If they're asking for something you can't d
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything... (e.g., 'Draft a welcome email')"
-              className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder:text-gray-400 dark:placeholder:text-dark-500"
+              className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 placeholder:text-gray-400 dark:placeholder:text-dark-500"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="p-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-3 bg-slate-600 text-white rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -481,7 +481,7 @@ Give 3-4 bullet points for conversation topics.`,
       type="button"
       onClick={handleGenerate}
       disabled={isLoading}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-500/20 disabled:opacity-50 transition-colors ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-500/20 disabled:opacity-50 transition-colors ${className}`}
     >
       {isLoading ? (
         <Loader2 size={12} className="animate-spin" />

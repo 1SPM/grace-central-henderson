@@ -112,7 +112,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                   }}
                 />
               ) : null}
-              <div className={`w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${formData.photo ? 'hidden' : ''}`}>
+              <div className={`w-16 h-16 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${formData.photo ? 'hidden' : ''}`}>
                 {formData.firstName?.[0] || '?'}{formData.lastName?.[0] || ''}
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">

@@ -133,7 +133,7 @@ function AutomationCard({
             <div>
               <h3 className="font-medium text-gray-900 dark:text-white">{title}</h3>
               {enabled && aiEnabled && (
-                <span className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400">
+                <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
                   <Sparkles className="w-3 h-3" /> AI personalization on
                 </span>
               )}
@@ -161,7 +161,7 @@ function AutomationCard({
           <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
             <label className="flex items-center justify-between cursor-pointer">
               <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <Sparkles className="w-4 h-4 text-purple-500" />
+                <Sparkles className="w-4 h-4 text-slate-500" />
                 Use AI for personalized messages
               </span>
               <Toggle
@@ -609,7 +609,7 @@ export function AgentDashboard({
                     <span className="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 rounded">Christmas</span>
                   )}
                   {charityBasketConfig.settings.holidaySchedule.easter && (
-                    <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400 rounded">Easter</span>
+                    <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400 rounded">Easter</span>
                   )}
                   {charityBasketConfig.settings.holidaySchedule.backToSchool && (
                     <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 rounded">Back to School</span>
@@ -647,7 +647,7 @@ export function AgentDashboard({
                       className={`p-2 rounded-lg ${
                         event.type === 'birthday'
                           ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
-                          : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                          : 'bg-slate-100 dark:bg-slate-900/30 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       {event.type === 'birthday' ? (
@@ -1071,7 +1071,7 @@ export function AgentDashboardSimple({
                     className={`p-1.5 rounded ${
                       event.type === 'birthday'
                         ? 'bg-pink-100 text-pink-600'
-                        : 'bg-purple-100 text-purple-600'
+                        : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     <Cake className="w-4 h-4" />

@@ -46,10 +46,10 @@ export function PersonalityTraitSelector({
               disabled={isDisabled}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 isSelected
-                  ? 'bg-violet-600 text-white shadow-sm'
+                  ? 'bg-slate-600 text-white shadow-sm'
                   : isDisabled
                     ? 'bg-gray-100 dark:bg-dark-700 text-gray-300 dark:text-dark-600 cursor-not-allowed'
-                    : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-violet-100 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-400'
+                    : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-slate-100 dark:hover:bg-slate-500/10 hover:text-slate-700 dark:hover:text-slate-400'
               }`}
               aria-pressed={isSelected}
             >

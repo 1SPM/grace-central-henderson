@@ -161,7 +161,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
       <div className="bg-gray-50 dark:bg-dark-800 rounded-xl p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Repeat className="text-purple-500" size={20} />
+            <Repeat className="text-slate-500" size={20} />
             <div>
               <p className="font-medium text-gray-900 dark:text-dark-100">Make this recurring</p>
               <p className="text-sm text-gray-500 dark:text-dark-400">Set up automatic giving</p>
@@ -170,7 +170,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
           <button
             onClick={() => setIsRecurring(!isRecurring)}
             className={`relative w-12 h-6 rounded-full transition-colors ${
-              isRecurring ? 'bg-purple-500' : 'bg-gray-300 dark:bg-dark-600'
+              isRecurring ? 'bg-slate-500' : 'bg-gray-300 dark:bg-dark-600'
             }`}
           >
             <div
@@ -188,7 +188,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
                 onClick={() => setFrequency(interval.id)}
                 className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                   frequency === interval.id
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-slate-500 text-white'
                     : 'bg-white dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
                 }`}
               >
@@ -329,7 +329,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
         {isRecurring && (
           <div className="flex justify-between text-sm">
             <span className="text-gray-500 dark:text-dark-400">Frequency</span>
-            <span className="font-medium text-purple-600 dark:text-purple-400 capitalize">{frequency}ly</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 capitalize">{frequency}ly</span>
           </div>
         )}
         <div className="border-t border-gray-200 dark:border-dark-600 pt-3 flex justify-between">
@@ -379,7 +379,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
         {isRecurring && (
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-dark-400">Frequency</span>
-            <span className="font-medium text-purple-600 dark:text-purple-400 capitalize">{frequency}ly</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 capitalize">{frequency}ly</span>
           </div>
         )}
         <div className="flex justify-between">

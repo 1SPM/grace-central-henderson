@@ -36,7 +36,7 @@ interface ActivityFeedProps {
 const iconMap = {
   new_person: { icon: UserPlus, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10' },
   task_completed: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-500/10' },
-  interaction: { icon: MessageSquare, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-500/10' },
+  interaction: { icon: MessageSquare, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-500/10' },
   prayer: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-100 dark:bg-pink-500/10' },
   giving: { icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
 };

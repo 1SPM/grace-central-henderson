@@ -32,7 +32,7 @@ const MILESTONE_ICONS: Record<MilestoneType, typeof DoorOpen> = {
 
 const MILESTONE_COLORS: Record<MilestoneType, string> = {
   first_visit: 'text-blue-500',
-  attended_class: 'text-purple-500',
+  attended_class: 'text-slate-500',
   baptized: 'text-cyan-500',
   joined_group: 'text-green-500',
   serving: 'text-amber-500',
@@ -109,7 +109,7 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-slate-600 rounded-xl flex items-center justify-center">
           <TrendingUp className="text-white" size={20} />
         </div>
         <div>
@@ -194,7 +194,7 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
                           onClick={() => onViewPerson?.(person.id)}
                           className="flex items-center gap-2.5 text-left hover:text-indigo-600 dark:hover:text-indigo-400"
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                             {person.firstName[0]}{person.lastName[0]}
                           </div>
                           <div>

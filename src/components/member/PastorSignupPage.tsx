@@ -28,7 +28,7 @@ export function PastorSignupPage({ churchName = 'Grace Church', onSubmit, onBack
           {onBack && (
             <button
               onClick={onBack}
-              className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors"
+              className="px-6 py-2.5 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors"
             >
               Return Home
             </button>
@@ -41,18 +41,18 @@ export function PastorSignupPage({ churchName = 'Grace Church', onSubmit, onBack
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 rounded-2xl p-6 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-slate-600 via-slate-600 to-slate-700 rounded-2xl p-6 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
         </div>
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
-            <Heart size={20} className="text-violet-200" />
-            <span className="text-violet-200 text-sm font-medium">Pastoral Care Ministry</span>
+            <Heart size={20} className="text-slate-200" />
+            <span className="text-slate-200 text-sm font-medium">Pastoral Care Ministry</span>
           </div>
           <h1 className="text-xl font-bold mb-1">Become a Pastoral Leader</h1>
-          <p className="text-violet-100 text-sm">
+          <p className="text-slate-100 text-sm">
             Join {churchName}'s pastoral care team and help serve our community through counseling, prayer, and spiritual guidance.
           </p>
         </div>

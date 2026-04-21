@@ -35,7 +35,7 @@ const statusColors: Record<MemberStatus, { bar: string; bg: string; text: string
   visitor: { bar: 'bg-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
   regular: { bar: 'bg-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
   member: { bar: 'bg-green-500', bg: 'bg-green-50 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400' },
-  leader: { bar: 'bg-purple-500', bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400' },
+  leader: { bar: 'bg-slate-500', bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400' },
   inactive: { bar: 'bg-gray-400', bg: 'bg-gray-50 dark:bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400' },
 };
 
@@ -99,7 +99,7 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
 const activityIconMap: Record<string, { icon: typeof UserPlus; color: string; bg: string }> = {
   new_person: { icon: UserPlus, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10' },
   task_completed: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-500/10' },
-  interaction: { icon: MessageSquare, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-500/10' },
+  interaction: { icon: MessageSquare, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-500/10' },
   prayer: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-100 dark:bg-pink-500/10' },
   giving: { icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
 };
@@ -304,7 +304,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       </div>
 
       {/* Congregation Health Score */}
-      <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl p-6 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
@@ -523,7 +523,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
                   <div key={type} className="flex items-center gap-3">
                     <span className="text-sm text-gray-600 dark:text-gray-400 w-16 shrink-0">{interactionLabels[type] || type}</span>
                     <div className="flex-1 h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-violet-500 rounded-full" style={{ width: `${(count / maxType) * 100}%`, transition: 'width 0.5s ease-out' }} />
+                      <div className="h-full bg-slate-500 rounded-full" style={{ width: `${(count / maxType) * 100}%`, transition: 'width 0.5s ease-out' }} />
                     </div>
                     <span className="text-sm font-semibold text-gray-900 dark:text-dark-100 w-8 text-right">{count}</span>
                   </div>
@@ -627,7 +627,7 @@ function SectionHeader({ icon, title, subtitle, color }: { icon: React.ReactNode
     green: 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400',
     emerald: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
     blue: 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
-    violet: 'bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400',
+    violet: 'bg-slate-100 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400',
     pink: 'bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400',
   };
   return (

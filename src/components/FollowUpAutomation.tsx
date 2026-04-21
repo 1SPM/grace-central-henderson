@@ -460,7 +460,7 @@ export function FollowUpAutomation({
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors"
         >
           <Plus size={18} />
           New Rule
@@ -482,8 +482,8 @@ export function FollowUpAutomation({
         </div>
         <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-violet-100 dark:bg-violet-500/20 rounded-lg">
-              <Zap size={20} className="text-violet-600 dark:text-violet-400" />
+            <div className="p-2 bg-slate-100 dark:bg-slate-500/20 rounded-lg">
+              <Zap size={20} className="text-slate-600 dark:text-slate-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalTriggers}</p>
@@ -510,7 +510,7 @@ export function FollowUpAutomation({
           onClick={() => setActiveTab('rules')}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
             activeTab === 'rules'
-              ? 'border-violet-600 text-violet-600 dark:text-violet-400'
+              ? 'border-slate-600 text-slate-600 dark:text-slate-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
@@ -523,7 +523,7 @@ export function FollowUpAutomation({
           onClick={() => setActiveTab('activity')}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
             activeTab === 'activity'
-              ? 'border-violet-600 text-violet-600 dark:text-violet-400'
+              ? 'border-slate-600 text-slate-600 dark:text-slate-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
@@ -551,7 +551,7 @@ export function FollowUpAutomation({
                   <div className="flex items-start gap-3">
                     <div className={`p-2 rounded-lg ${
                       rule.enabled
-                        ? 'bg-violet-100 dark:bg-violet-500/20'
+                        ? 'bg-slate-100 dark:bg-slate-500/20'
                         : 'bg-gray-100 dark:bg-dark-700'
                     }`}>
                       {triggerLabels[rule.trigger.type].icon}
@@ -659,7 +659,7 @@ export function FollowUpAutomation({
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors"
               >
                 Create First Rule
               </button>
@@ -778,17 +778,17 @@ export function FollowUpAutomation({
                       }))}
                       className={`p-3 rounded-lg border text-left transition-colors ${
                         newRule.trigger?.type === type
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
+                          ? 'border-slate-500 bg-slate-50 dark:bg-slate-500/10'
                           : 'border-gray-200 dark:border-dark-600 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={newRule.trigger?.type === type ? 'text-violet-600' : 'text-gray-400'}>
+                        <span className={newRule.trigger?.type === type ? 'text-slate-600' : 'text-gray-400'}>
                           {triggerLabels[type].icon}
                         </span>
                         <span className={`text-sm font-medium ${
                           newRule.trigger?.type === type
-                            ? 'text-violet-700 dark:text-violet-400'
+                            ? 'text-slate-700 dark:text-slate-400'
                             : 'text-gray-700 dark:text-gray-300'
                         }`}>
                           {triggerLabels[type].label}
@@ -881,17 +881,17 @@ export function FollowUpAutomation({
                       }))}
                       className={`p-3 rounded-lg border text-left transition-colors ${
                         newRule.action?.type === type
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
+                          ? 'border-slate-500 bg-slate-50 dark:bg-slate-500/10'
                           : 'border-gray-200 dark:border-dark-600 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={newRule.action?.type === type ? 'text-violet-600' : 'text-gray-400'}>
+                        <span className={newRule.action?.type === type ? 'text-slate-600' : 'text-gray-400'}>
                           {actionLabels[type].icon}
                         </span>
                         <span className={`text-sm font-medium ${
                           newRule.action?.type === type
-                            ? 'text-violet-700 dark:text-violet-400'
+                            ? 'text-slate-700 dark:text-slate-400'
                             : 'text-gray-700 dark:text-gray-300'
                         }`}>
                           {actionLabels[type].label}
@@ -998,7 +998,7 @@ export function FollowUpAutomation({
               <button
                 onClick={handleCreateRule}
                 disabled={!newRule.name || !newRule.trigger || !newRule.action}
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
               >
                 <Save size={16} />
                 Create Rule
@@ -1052,7 +1052,7 @@ export function FollowUpAutomation({
                   id="enabled"
                   checked={editingRule.enabled}
                   onChange={(e) => setEditingRule(prev => prev ? { ...prev, enabled: e.target.checked } : null)}
-                  className="w-4 h-4 text-violet-600 rounded"
+                  className="w-4 h-4 text-slate-600 rounded"
                 />
                 <label htmlFor="enabled" className="text-sm text-gray-700 dark:text-gray-300">
                   Rule enabled
@@ -1071,7 +1071,7 @@ export function FollowUpAutomation({
                   setRules(prev => prev.map(r => r.id === editingRule.id ? editingRule : r));
                   setEditingRule(null);
                 }}
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg flex items-center gap-2"
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg flex items-center gap-2"
               >
                 <Save size={16} />
                 Save Changes

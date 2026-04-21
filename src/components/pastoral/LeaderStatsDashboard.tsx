@@ -27,7 +27,7 @@ const CATEGORY_COLORS: Record<HelpCategory, string> = {
   'marriage': 'bg-pink-500',
   'addiction': 'bg-orange-500',
   'grief': 'bg-blue-500',
-  'faith-questions': 'bg-violet-500',
+  'faith-questions': 'bg-slate-500',
   'crisis': 'bg-red-500',
   'financial': 'bg-emerald-500',
   'anxiety-depression': 'bg-cyan-500',
@@ -174,7 +174,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
         {[
           { label: 'Total Sessions', value: totalSessions, icon: MessageCircle, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-500/10' },
           { label: 'Completed', value: completedSessions, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
-          { label: 'Total Hours', value: totalHours, icon: Clock, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/10' },
+          { label: 'Total Hours', value: totalHours, icon: Clock, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10' },
           { label: 'Avg Rating', value: avgRating > 0 ? `${avgRating}/5` : '---', icon: Star, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10' },
           { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
         ].map(stat => (
@@ -219,13 +219,13 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                     onClick={() => setSelectedLeaderId(stat.leaderId === selectedLeaderId ? null : stat.leaderId)}
                     className={`cursor-pointer transition-colors ${
                       stat.leaderId === selectedLeaderId
-                        ? 'bg-violet-50 dark:bg-violet-500/5'
+                        ? 'bg-slate-50 dark:bg-slate-500/5'
                         : 'hover:bg-gray-50 dark:hover:bg-dark-750'
                     }`}
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white text-sm font-bold">
                           {stat.leaderName.charAt(0)}
                         </div>
                         <div>
@@ -295,7 +295,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
         <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
                 {selectedStats.leaderName.charAt(0)}
               </div>
               <div>
@@ -319,7 +319,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
             <div className="grid grid-cols-4 gap-3">
               {[
                 { label: 'Avg Session', value: `${selectedStats.averageSessionMinutes}min`, color: 'text-blue-600 dark:text-blue-400' },
-                { label: 'Follow-up Rate', value: `${Math.round(selectedStats.followUpRate)}%`, color: 'text-purple-600 dark:text-purple-400' },
+                { label: 'Follow-up Rate', value: `${Math.round(selectedStats.followUpRate)}%`, color: 'text-slate-600 dark:text-slate-400' },
                 { label: 'Active Cases', value: selectedStats.activeSessions, color: 'text-emerald-600 dark:text-emerald-400' },
                 { label: 'No-shows', value: selectedStats.noShowSessions, color: 'text-red-600 dark:text-red-400' },
               ].map(m => (
@@ -364,7 +364,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                         <span className="text-[10px] text-gray-500 dark:text-dark-400">{month.sessions}</span>
                         <div className="w-full bg-gray-100 dark:bg-dark-700 rounded-t-lg relative" style={{ height: '80px' }}>
                           <div
-                            className="absolute bottom-0 left-0 right-0 bg-violet-500 dark:bg-violet-400 rounded-t-lg transition-all"
+                            className="absolute bottom-0 left-0 right-0 bg-slate-500 dark:bg-slate-400 rounded-t-lg transition-all"
                             style={{ height: `${heightPct}%` }}
                           />
                         </div>

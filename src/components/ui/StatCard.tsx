@@ -46,10 +46,10 @@ const accentColors = {
     sparkline: '#3b82f6',
   },
   violet: {
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-800/50',
-    icon: 'text-violet-600 dark:text-violet-400',
-    iconBg: 'bg-white dark:bg-violet-900/30',
+    bg: 'bg-slate-50 dark:bg-slate-900/20',
+    border: 'border-slate-200 dark:border-slate-800/50',
+    icon: 'text-slate-600 dark:text-slate-400',
+    iconBg: 'bg-white dark:bg-slate-900/30',
     sparkline: '#8b5cf6',
   },
   slate: {

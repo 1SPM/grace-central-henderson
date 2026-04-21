@@ -11,7 +11,7 @@ interface GivingProps {
 const fundColors: Record<string, string> = {
   tithe: 'bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400',
   offering: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400',
-  missions: 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400',
+  missions: 'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-400',
   building: 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400',
   other: 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-dark-300'
 };
@@ -57,8 +57,8 @@ export function Giving({ giving, people }: GivingProps) {
           <p className="text-sm opacity-80 mt-1">Total This Period</p>
         </div>
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center mb-4">
-            <Repeat className="text-purple-600 dark:text-purple-400" size={20} />
+          <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center mb-4">
+            <Repeat className="text-slate-600 dark:text-slate-400" size={20} />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">{recurringCount}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">Recurring Gifts</p>
@@ -112,7 +112,7 @@ export function Giving({ giving, people }: GivingProps) {
                 <div key={gift.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-dark-700 last:border-0">
                   <div className="flex items-center gap-3">
                     {person && (
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                         {person.firstName[0]}{person.lastName[0]}
                       </div>
                     )}
@@ -124,7 +124,7 @@ export function Giving({ giving, people }: GivingProps) {
                         {methodIcons[gift.method]}
                         <span>{gift.method}</span>
                         {gift.isRecurring && (
-                          <span className="flex items-center gap-1 text-purple-500 dark:text-purple-400">
+                          <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                             <Repeat size={10} />
                             recurring
                           </span>

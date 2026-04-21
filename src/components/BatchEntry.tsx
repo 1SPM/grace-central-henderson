@@ -276,8 +276,8 @@ export function BatchEntry({
                       ${selectedBatch.totalChecks.toLocaleString()}
                     </p>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-1">
+                  <div className="bg-slate-50 dark:bg-slate-500/10 rounded-xl p-4">
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                       <DollarSign size={16} />
                       <span className="text-sm font-medium">Total</span>
                     </div>
@@ -482,7 +482,7 @@ export function BatchEntry({
                           onClick={() => handleSelectPerson(person)}
                           className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-dark-700 flex items-center gap-3"
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                             {person.firstName[0]}{person.lastName[0]}
                           </div>
                           <div>

@@ -119,7 +119,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
                       onClick={() => handleSelectPerson(person)}
                       className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors text-left"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                         {person.firstName[0]}
                         {person.lastName[0]}
                       </div>
@@ -143,7 +143,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
           ) : (
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-800 rounded-xl">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium">
                   {selectedPerson.firstName[0]}
                   {selectedPerson.lastName[0]}
                 </div>
@@ -173,7 +173,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
                 onClick={() => setNoteType(type.value)}
                 className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                   noteType === type.value
-                    ? 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                    ? 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400'
                     : 'bg-gray-100/80 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-white/10'
                 }`}
               >

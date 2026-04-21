@@ -194,7 +194,7 @@ export function PastoralCareDashboard({
           )}
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Heart size={22} className="text-violet-600" />
+              <Heart size={22} className="text-slate-600" />
               Pastoral Care
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -223,7 +223,7 @@ export function PastoralCareDashboard({
           </button>
           <button
             onClick={() => setTab('new-request')}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
           >
             <Plus size={16} />
             New Help Request
@@ -256,7 +256,7 @@ export function PastoralCareDashboard({
             <StatCard icon={Clock} label="Waiting" value={waitingCount} color="text-amber-500 bg-amber-50 dark:bg-amber-500/10" />
             <StatCard icon={AlertTriangle} label="Crisis" value={crisisCount} color="text-red-500 bg-red-50 dark:bg-red-500/10" />
             <StatCard icon={CheckCircle} label="Resolved" value={resolvedCount} color="text-gray-500 bg-gray-50 dark:bg-gray-500/10" />
-            <StatCard icon={Users} label="Leaders Online" value={availableLeaders} color="text-violet-500 bg-violet-50 dark:bg-violet-500/10" />
+            <StatCard icon={Users} label="Leaders Online" value={availableLeaders} color="text-slate-500 bg-slate-50 dark:bg-slate-500/10" />
           </div>
 
           {/* Quick Actions */}
@@ -267,7 +267,7 @@ export function PastoralCareDashboard({
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Conversations</h2>
                 <button
                   onClick={() => setTab('conversations')}
-                  className="text-xs text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
+                  className="text-xs text-slate-600 dark:text-slate-400 hover:underline flex items-center gap-1"
                 >
                   View all <ArrowRight size={12} />
                 </button>
@@ -278,7 +278,7 @@ export function PastoralCareDashboard({
                   <p className="text-sm text-gray-500 dark:text-gray-400">No conversations yet</p>
                   <button
                     onClick={() => setTab('new-request')}
-                    className="text-xs text-violet-600 dark:text-violet-400 hover:underline mt-1"
+                    className="text-xs text-slate-600 dark:text-slate-400 hover:underline mt-1"
                   >
                     Create a help request
                   </button>
@@ -325,7 +325,7 @@ export function PastoralCareDashboard({
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Leader Status</h2>
                 <button
                   onClick={() => setTab('leaders')}
-                  className="text-xs text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
+                  className="text-xs text-slate-600 dark:text-slate-400 hover:underline flex items-center gap-1"
                 >
                   View all <ArrowRight size={12} />
                 </button>
@@ -334,7 +334,7 @@ export function PastoralCareDashboard({
                 {leaders.filter(l => l.isActive).map(leader => (
                   <div key={leader.id} className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-semibold text-xs">
                         {leader.displayName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                       </div>
                       <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-dark-800 ${
@@ -390,7 +390,7 @@ export function PastoralCareDashboard({
               </p>
               <button
                 onClick={() => setTab('new-request')}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors"
               >
                 <Plus size={16} />
                 New Help Request
@@ -457,7 +457,7 @@ export function PastoralCareDashboard({
               </p>
               <button
                 onClick={() => setTab('add-leader')}
-                className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
               >
                 <UserPlus size={16} />
                 Add Leader

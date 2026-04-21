@@ -58,7 +58,7 @@ interface VolunteerSchedulingProps {
 const defaultRoles: VolunteerRole[] = [
   { id: 'greeter', name: 'Greeter', description: 'Welcome guests at the door', minVolunteers: 2, maxVolunteers: 4, color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400', requiredSkills: ['hospitality', 'greeter', 'welcoming'] },
   { id: 'usher', name: 'Usher', description: 'Help seat guests and collect offering', minVolunteers: 2, maxVolunteers: 4, color: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400', requiredSkills: ['hospitality', 'usher'] },
-  { id: 'worship', name: 'Worship Team', description: 'Lead worship music', minVolunteers: 3, maxVolunteers: 8, color: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400', requiredSkills: ['vocals', 'piano', 'guitar', 'drums', 'bass', 'strings', 'worship-leading'] },
+  { id: 'worship', name: 'Worship Team', description: 'Lead worship music', minVolunteers: 3, maxVolunteers: 8, color: 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400', requiredSkills: ['vocals', 'piano', 'guitar', 'drums', 'bass', 'strings', 'worship-leading'] },
   { id: 'av', name: 'A/V Tech', description: 'Run sound and projection', minVolunteers: 1, maxVolunteers: 3, color: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400', requiredSkills: ['sound-mixing', 'lighting', 'video-production', 'live-streaming', 'projection', 'it-support'] },
   { id: 'childcare', name: 'Children\'s Ministry', description: 'Lead children\'s programs', minVolunteers: 2, maxVolunteers: 6, color: 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-400', requiredSkills: ['childcare', 'early-childhood', 'elementary', 'youth-work', 'teaching-children'] },
   { id: 'parking', name: 'Parking Team', description: 'Direct traffic and parking', minVolunteers: 1, maxVolunteers: 3, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400', requiredSkills: ['parking-team'] },
@@ -85,7 +85,7 @@ const SKILL_LEVEL_VALUES: Record<string, number> = {
 // Get skill level badge color
 const getSkillLevelColor = (level: PersonSkill['level']) => {
   switch (level) {
-    case 'expert': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400';
+    case 'expert': return 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400';
     case 'advanced': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400';
     case 'intermediate': return 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400';
     case 'beginner': return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
@@ -397,7 +397,7 @@ export function VolunteerScheduling({
                                   className="flex items-center justify-between text-sm bg-white dark:bg-dark-800 rounded-lg px-2 py-1.5 border border-gray-100 dark:border-dark-700"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                    <div className="w-6 h-6 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
                                       {person.firstName[0]}
                                     </div>
                                     <span className="text-gray-700 dark:text-dark-300 truncate max-w-[100px]">
@@ -524,7 +524,7 @@ export function VolunteerScheduling({
                                     assignPerson === person.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
                                   }`}
                                 >
-                                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                                     {person.firstName[0]}{person.lastName[0]}
                                   </div>
                                   <div className="flex-1 min-w-0">

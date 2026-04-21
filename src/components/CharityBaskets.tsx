@@ -40,7 +40,7 @@ const BASKET_TYPES: { value: BasketType; label: string; icon: React.ReactNode; c
   { value: 'school', label: 'School Supplies', icon: <BookOpen size={16} />, color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400' },
   { value: 'baby', label: 'Baby Care', icon: <Baby size={16} />, color: 'bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-400' },
   { value: 'household', label: 'Household', icon: <Home size={16} />, color: 'bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-400' },
-  { value: 'other', label: 'Other', icon: <Sparkles size={16} />, color: 'bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400' },
+  { value: 'other', label: 'Other', icon: <Sparkles size={16} />, color: 'bg-slate-100 text-slate-700 dark:bg-slate-500/15 dark:text-slate-400' },
 ];
 
 const ITEM_CATEGORIES: { value: ItemCategory; label: string }[] = [
@@ -545,8 +545,8 @@ export function CharityBaskets({
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stats.distributed}</p>
           <p className="text-sm text-gray-600 dark:text-dark-300">Distributed</p>
         </div>
-        <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl p-4">
-          <Package className="text-purple-600 dark:text-purple-400 mb-2" size={20} />
+        <div className="bg-slate-50 dark:bg-slate-500/10 rounded-xl p-4">
+          <Package className="text-slate-600 dark:text-slate-400 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stats.totalItems}</p>
           <p className="text-sm text-gray-600 dark:text-dark-300">Total Items</p>
         </div>

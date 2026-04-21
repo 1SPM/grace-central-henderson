@@ -167,11 +167,11 @@ export function Settings({
 
       {/* Run Setup Wizard */}
       {onRunWizard && (
-        <div className="mb-8 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-2xl border border-violet-200 dark:border-violet-800 p-5">
+        <div className="mb-8 bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-slate-900/20 dark:to-indigo-900/20 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-500/10 rounded-xl flex items-center justify-center">
-                <Sparkles className="text-violet-600 dark:text-violet-400" size={20} />
+              <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
+                <Sparkles className="text-slate-600 dark:text-slate-400" size={20} />
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-dark-100">Setup Wizard</h2>
@@ -180,7 +180,7 @@ export function Settings({
             </div>
             <button
               onClick={onRunWizard}
-              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
             >
               <Sparkles size={14} />
               Run Setup Wizard
@@ -297,8 +297,8 @@ export function Settings({
           <IntegrationCard
             title="Payments (Stripe)"
             description="Online giving & donations"
-            icon={<CreditCard className="text-purple-600 dark:text-purple-400" size={20} />}
-            iconBg="bg-purple-100 dark:bg-purple-500/10"
+            icon={<CreditCard className="text-slate-600 dark:text-slate-400" size={20} />}
+            iconBg="bg-slate-100 dark:bg-slate-500/10"
             isConfigured={status.payments}
             setupUrl="https://stripe.com/docs"
             onConfigure={() => setShowPaymentConfig(true)}
@@ -321,7 +321,7 @@ export function Settings({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
-              <Sparkles className="text-violet-500" size={20} />
+              <Sparkles className="text-slate-500" size={20} />
               AI Features
             </h2>
             <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">
@@ -356,7 +356,7 @@ export function Settings({
                     <h3 className="font-medium text-gray-900 dark:text-dark-100">
                       {feature.name}
                     </h3>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 rounded-full">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-500/10 rounded-full">
                       <MapPin size={10} />
                       {feature.location}
                     </span>
@@ -714,8 +714,8 @@ export function Settings({
 
         <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-xl flex items-center justify-center">
-              <Users className="text-purple-600 dark:text-purple-400" size={20} />
+            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
+              <Users className="text-slate-600 dark:text-slate-400" size={20} />
             </div>
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-dark-100">Team Members</h2>
@@ -803,7 +803,7 @@ export function Settings({
         />
       </div>
 
-      <div className="mt-8 p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl text-white">
+      <div className="mt-8 p-6 bg-gradient-to-r from-indigo-500 to-slate-600 rounded-2xl text-white">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">GRACE CRM</h2>

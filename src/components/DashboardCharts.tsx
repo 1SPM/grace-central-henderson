@@ -10,7 +10,7 @@ const statusColors: Record<MemberStatus, { bar: string; text: string }> = {
   visitor: { bar: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400' },
   regular: { bar: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400' },
   member: { bar: 'bg-green-500', text: 'text-green-600 dark:text-green-400' },
-  leader: { bar: 'bg-purple-500', text: 'text-purple-600 dark:text-purple-400' },
+  leader: { bar: 'bg-slate-500', text: 'text-slate-600 dark:text-slate-400' },
   inactive: { bar: 'bg-gray-400', text: 'text-gray-600 dark:text-gray-400' },
 };
 
@@ -152,7 +152,7 @@ export function DashboardCharts({ people }: DashboardChartsProps) {
           </div>
 
           {/* Member Engagement */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-500/10 dark:to-pink-500/10 rounded-xl p-4">
+          <div className="bg-gradient-to-br from-slate-50 to-pink-50 dark:from-slate-500/10 dark:to-pink-500/10 rounded-xl p-4">
             <div className="flex items-center justify-center mb-3">
               <div className="relative w-20 h-20">
                 <svg className="w-20 h-20 transform -rotate-90">
@@ -173,21 +173,21 @@ export function DashboardCharts({ people }: DashboardChartsProps) {
                     strokeWidth="6"
                     fill="none"
                     strokeLinecap="round"
-                    className="text-purple-500"
+                    className="text-slate-500"
                     strokeDasharray={`${statusCounts.leader > 0 ? Math.min(((statusCounts.leader / (statusCounts.member + statusCounts.leader || 1)) * 100) * 2.2, 220) : 0} 220`}
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                  <span className="text-xl font-bold text-slate-600 dark:text-slate-400">
                     {statusCounts.leader}
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-center text-sm font-medium text-purple-700 dark:text-purple-400">
+            <p className="text-center text-sm font-medium text-slate-700 dark:text-slate-400">
               Leaders
             </p>
-            <p className="text-center text-xs text-purple-600/70 dark:text-purple-400/70 mt-1">
+            <p className="text-center text-xs text-slate-600/70 dark:text-slate-400/70 mt-1">
               Active in ministry
             </p>
           </div>

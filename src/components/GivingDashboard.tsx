@@ -34,7 +34,7 @@ interface GivingDashboardProps {
 const fundColors: Record<string, { bg: string; text: string; bar: string }> = {
   tithe: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', bar: 'bg-emerald-500' },
   offering: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-400', bar: 'bg-blue-500' },
-  missions: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-700 dark:text-purple-400', bar: 'bg-purple-500' },
+  missions: { bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-700 dark:text-slate-400', bar: 'bg-slate-500' },
   building: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', bar: 'bg-amber-500' },
   benevolence: { bg: 'bg-pink-50 dark:bg-pink-500/10', text: 'text-pink-700 dark:text-pink-400', bar: 'bg-pink-500' },
   youth: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-400', bar: 'bg-cyan-500' },
@@ -320,8 +320,8 @@ export function GivingDashboard({
         </div>
 
         <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
-          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center mb-3">
-            <Repeat className="text-purple-600 dark:text-purple-400" size={16} />
+          <div className="w-8 h-8 bg-slate-100 dark:bg-slate-500/10 rounded-lg flex items-center justify-center mb-3">
+            <Repeat className="text-slate-600 dark:text-slate-400" size={16} />
           </div>
           <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
             ${analytics.recurringTotal.toLocaleString()}
@@ -418,7 +418,7 @@ export function GivingDashboard({
                         {methodIcons[gift.method]}
                         <span>{new Date(gift.date).toLocaleDateString()}</span>
                         {gift.isRecurring && (
-                          <span className="text-purple-500 dark:text-purple-400 flex items-center gap-0.5">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
                             <Repeat size={10} />
                           </span>
                         )}
