@@ -252,8 +252,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-white font-semibold text-sm">G</span>
+            <div className="w-7 h-7 bg-blue-900 rounded-md flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-semibold text-[13px]">G</span>
             </div>
             <span className={`font-semibold text-gray-900 dark:text-gray-100 tracking-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               Grace

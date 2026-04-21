@@ -31,14 +31,15 @@ interface GivingDashboardProps {
   onNavigate: (view: 'online-giving' | 'batch-entry' | 'pledges' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats') => void;
 }
 
+// One accent (navy) with varying opacity — replaces the old rainbow
 const fundColors: Record<string, { bg: string; text: string; bar: string }> = {
-  tithe: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', bar: 'bg-emerald-500' },
-  offering: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-400', bar: 'bg-blue-500' },
-  missions: { bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-700 dark:text-slate-400', bar: 'bg-slate-500' },
-  building: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', bar: 'bg-amber-500' },
-  benevolence: { bg: 'bg-pink-50 dark:bg-pink-500/10', text: 'text-pink-700 dark:text-pink-400', bar: 'bg-pink-500' },
-  youth: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-400', bar: 'bg-cyan-500' },
-  other: { bg: 'bg-gray-50 dark:bg-dark-700', text: 'text-gray-700 dark:text-dark-300', bar: 'bg-gray-400' },
+  tithe:       { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900' },
+  offering:    { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900/80' },
+  missions:    { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900/65' },
+  building:    { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900/50' },
+  benevolence: { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900/40' },
+  youth:       { bg: 'bg-blue-50',  text: 'text-blue-900',    bar: 'bg-blue-900/30' },
+  other:       { bg: 'bg-stone-50', text: 'text-gray-600',    bar: 'bg-gray-400' },
 };
 
 const methodIcons: Record<string, React.ReactNode> = {
@@ -224,119 +225,90 @@ export function GivingDashboard({
         </div>
       </div>
 
-      {/* Quick Actions - Clean grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {/* Quick actions — single primary, rest as quiet links */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
         <button
           onClick={() => onNavigate('online-giving')}
-          className="group p-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-white text-left transition-colors"
+          className="px-3 py-1.5 bg-blue-900 hover:bg-blue-950 text-white text-sm font-medium rounded-md transition-colors"
         >
-          <Heart className="mb-3" size={20} />
-          <p className="font-medium text-sm">Online Giving</p>
-          <p className="text-xs text-indigo-200 mt-0.5">Accept donations</p>
+          New gift
         </button>
         <button
           onClick={() => onNavigate('batch-entry')}
-          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="px-3 py-1.5 text-sm text-gray-700 dark:text-dark-300 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <Package className="mb-3 text-gray-400" size={20} />
-          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Batch Entry</p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">Cash & checks</p>
+          Batch entry
         </button>
         <button
           onClick={() => onNavigate('pledges')}
-          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="px-3 py-1.5 text-sm text-gray-700 dark:text-dark-300 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <Target className="mb-3 text-gray-400" size={20} />
-          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Pledges</p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">{pledges.filter(p => p.status === 'active').length} active</p>
+          Pledges <span className="text-gray-400 ml-0.5">· {pledges.filter(p => p.status === 'active').length}</span>
         </button>
         <button
           onClick={() => onNavigate('statements')}
-          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="px-3 py-1.5 text-sm text-gray-700 dark:text-dark-300 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <FileText className="mb-3 text-gray-400" size={20} />
-          <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Statements</p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">Tax receipts</p>
+          Statements
         </button>
-      </div>
-
-      {/* Secondary Actions */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        <span className="text-gray-300 dark:text-dark-600">·</span>
         <button
           onClick={() => onNavigate('charity-baskets')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="px-3 py-1.5 text-sm text-gray-500 dark:text-dark-400 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <ShoppingBasket size={14} className="text-orange-500" />
-          <span className="text-gray-700 dark:text-dark-300">Charity Baskets</span>
+          Charity baskets
         </button>
         <button
           onClick={() => onNavigate('donation-tracker')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="px-3 py-1.5 text-sm text-gray-500 dark:text-dark-400 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <Search size={14} className="text-indigo-500" />
-          <span className="text-gray-700 dark:text-dark-300">Donation Tracker</span>
+          Tracker
         </button>
         <button
           onClick={() => onNavigate('member-stats')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="px-3 py-1.5 text-sm text-gray-500 dark:text-dark-400 hover:bg-stone-200/70 dark:hover:bg-dark-800 rounded-md transition-colors"
         >
-          <UserCheck size={14} className="text-teal-500" />
-          <span className="text-gray-700 dark:text-dark-300">Member Stats</span>
+          Member stats
         </button>
       </div>
 
-      {/* Stats Grid - Clean cards */}
-      <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="text-emerald-600 dark:text-emerald-400" size={16} />
-            </div>
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
+      {/* Stats — typographic hierarchy, no icon chips */}
+      <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-px mb-6 bg-stone-200 dark:bg-dark-700 rounded-lg overflow-hidden border border-stone-200 dark:border-dark-700">
+        <div className="p-4 bg-stone-50 dark:bg-dark-800">
+          <p className="text-xs text-gray-500 dark:text-dark-400">Total this period</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
             ${analytics.totalGiving.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Total this period</p>
         </div>
 
-        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
-              <BarChart3 className="text-blue-600 dark:text-blue-400" size={16} />
-            </div>
-            <span className={`text-xs font-medium flex items-center gap-0.5 ${
-              analytics.yearOverYearChange >= 0
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-red-600 dark:text-red-400'
-            }`}>
-              {analytics.yearOverYearChange >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              {Math.abs(analytics.yearOverYearChange).toFixed(1)}%
-            </span>
+        <div className="p-4 bg-stone-50 dark:bg-dark-800">
+          <p className="text-xs text-gray-500 dark:text-dark-400">Monthly average</p>
+          <div className="flex items-baseline gap-2 mt-1">
+            <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 tabular-nums">
+              ${analytics.monthlyAverage.toLocaleString()}
+            </p>
+            {analytics.yearOverYearChange !== 0 && (
+              <span className={`text-xs font-medium tabular-nums ${
+                analytics.yearOverYearChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+              }`}>
+                {analytics.yearOverYearChange >= 0 ? '+' : ''}{analytics.yearOverYearChange.toFixed(1)}%
+              </span>
+            )}
           </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
-            ${analytics.monthlyAverage.toLocaleString()}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Monthly average</p>
         </div>
 
-        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
-          <div className="w-8 h-8 bg-slate-100 dark:bg-slate-500/10 rounded-lg flex items-center justify-center mb-3">
-            <Repeat className="text-slate-600 dark:text-slate-400" size={16} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
+        <div className="p-4 bg-stone-50 dark:bg-dark-800">
+          <p className="text-xs text-gray-500 dark:text-dark-400">{analytics.recurringCount} recurring</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
             ${analytics.recurringTotal.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{analytics.recurringCount} recurring</p>
         </div>
 
-        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
-          <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-lg flex items-center justify-center mb-3">
-            <Users className="text-amber-600 dark:text-amber-400" size={16} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100">
+        <div className="p-4 bg-stone-50 dark:bg-dark-800">
+          <p className="text-xs text-gray-500 dark:text-dark-400">New donors · {analytics.donorRetention.toFixed(0)}% retention</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
             {analytics.newDonorCount}
           </p>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">New donors · {analytics.donorRetention.toFixed(0)}% retention</p>
         </div>
       </div>
 
