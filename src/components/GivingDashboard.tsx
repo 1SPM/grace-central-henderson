@@ -219,7 +219,7 @@ export function GivingDashboard({
       <div className="flex flex-wrap items-center gap-2 mb-6">
         <button
           onClick={() => onNavigate('online-giving')}
-          className="px-3 py-1.5 bg-blue-900 hover:bg-blue-950 text-white text-sm font-medium rounded-md transition-colors"
+          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-950 text-white text-sm font-medium rounded-md transition-colors"
         >
           New gift
         </button>

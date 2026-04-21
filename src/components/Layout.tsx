@@ -252,8 +252,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-7 h-7 bg-blue-900 rounded-md flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-semibold text-[13px]">G</span>
+            <div className="w-7 h-7 gold-gradient rounded-md flex items-center justify-center flex-shrink-0 shadow-sm">
+              <span className="text-slate-900 font-bold text-[13px] tracking-tight">G</span>
             </div>
             <span className={`font-semibold text-gray-900 dark:text-gray-100 tracking-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               Grace
@@ -297,8 +297,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-stone-200/70 dark:bg-slate-500/10 text-gray-900 dark:text-slate-300 font-medium'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-stone-200/50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
+                          ? 'bg-white/70 dark:bg-slate-500/10 text-slate-900 dark:text-slate-200 font-medium border-l-2 border-amber-600 pl-[8px]'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-white/40 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-gray-200'
                       }`}
                       title={sidebarCollapsed ? item.label : undefined}
                     >

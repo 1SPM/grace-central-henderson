@@ -3,20 +3,25 @@
 @tailwind utilities;
 
 :root {
-  /* Brand ink (primary navy) */
-  --color-primary: 30 58 138;      /* blue-900 — CTAs, active nav */
-  --color-primary-dark: 23 37 84;  /* blue-950 — hover */
+  /* Brand ink — deep slate-navy, editorial */
+  --color-primary: 15 23 42;       /* slate-900 — CTAs, active nav */
+  --color-primary-dark: 2 6 23;    /* slate-950 — hover */
   --color-accent: 55 65 81;        /* gray-700 */
 
-  /* Paper palette — neutral warm stone, not parchment-brown */
-  --paper-canvas: #f4f2ee; /* body background — very soft warm gray */
-  --paper-card:   #fbfaf7; /* cards, modals, stat cards — nearly white */
-  --paper-raised: #ffffff; /* inputs — pure white */
-  --paper-sink:   #eceae4; /* sidebar, nested surfaces */
-  --paper-line:   #dfdbd2; /* borders on paper surfaces */
+  /* Gold accent — muted old-gold, for highlights, pinned, active indicators */
+  --gold:         #a67a2f;
+  --gold-soft:    #c9a65a;
+  --gold-line:    #d9c793;
+
+  /* Canvas palette — warm editorial gray, more grey than beige */
+  --paper-canvas: #ebe8e0; /* body background — warm gray */
+  --paper-card:   #f7f5ef; /* cards, modals — soft lift */
+  --paper-raised: #ffffff; /* inputs — crisp white */
+  --paper-sink:   #dcd8cb; /* sidebar — aged parchment depth */
+  --paper-line:   #cdc7b5; /* borders on paper surfaces */
 
   /* Ink (text) */
-  --ink:          #1c2434;
+  --ink:          #0f172a;
 
   /* Glass effect variables */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -38,8 +43,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   letter-spacing: -0.011em;
-  background-color: #f4f2ee; /* warmer parchment — knocked back a notch */
-  color: #1c2434; /* deep slate-navy */
+  background-color: #ebe8e0; /* warm editorial gray */
+  color: #0f172a; /* deep slate-navy */
 }
 
 .dark body,
@@ -170,13 +175,29 @@ select:focus {
   }
 
   .btn-primary {
-    @apply bg-blue-900 text-white hover:bg-blue-950 active:bg-blue-950;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(30, 58, 138, 0.2);
+    background-color: #0f172a; /* slate-900 navy */
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
   }
 
   .btn-primary:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 2px 3px rgba(30, 58, 138, 0.25);
-    transform: translateY(-0.5px);
+    background-color: #020617; /* slate-950 */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Gold gradient — used sparingly for highlights: logo, pinned items, key indicators */
+  .gold-gradient {
+    background-image: linear-gradient(135deg, #e7c77f 0%, #b38b3e 45%, #8b5e1a 100%);
+  }
+  .gold-gradient-soft {
+    background-image: linear-gradient(135deg, #f1dba7 0%, #c9a65a 60%, #a67a2f 100%);
+  }
+  .gold-text-gradient {
+    background-image: linear-gradient(135deg, #c9a65a 0%, #8b5e1a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .btn-secondary {
@@ -200,7 +221,7 @@ select:focus {
   /* Premium cards — warm paper, not pure white */
   .card {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #fbfaf7; /* warm off-white paper */
+    background-color: #f7f5ef; /* warm off-white paper */
     box-shadow: var(--shadow);
   }
 
@@ -211,7 +232,7 @@ select:focus {
 
   .card-solid {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #fbfaf7;
+    background-color: #f7f5ef;
     box-shadow: var(--shadow);
   }
 
@@ -259,7 +280,7 @@ select:focus {
   /* Stat cards — paper tone */
   .stat-card {
     @apply p-5 rounded-2xl border border-stone-300/70;
-    background-color: #fbfaf7;
+    background-color: #f7f5ef;
   }
 
   .dark .stat-card {
@@ -278,7 +299,7 @@ select:focus {
   /* Sidebar — deeper paper tone, distinct from main canvas */
   .sidebar-glass {
     @apply border-r border-stone-300/70;
-    background-color: #eceae4; /* parchment, a notch deeper than body */
+    background-color: #dcd8cb; /* parchment, a notch deeper than body */
   }
 
   .dark .sidebar-glass {
@@ -326,7 +347,7 @@ select:focus {
   /* Modal content — warm paper */
   .modal-content {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #fbfaf7;
+    background-color: #f7f5ef;
     box-shadow: var(--shadow-xl), 0 0 1px rgba(0, 0, 0, 0.1);
   }
 
