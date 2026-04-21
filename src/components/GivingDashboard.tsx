@@ -189,8 +189,8 @@ export function GivingDashboard({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-100">Giving</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">Track donations and stewardship</p>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Giving</h1>
+          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">Track donations and stewardship</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Period Selector */}
@@ -263,23 +263,23 @@ export function GivingDashboard({
       </div>
 
       {/* Stats — typographic hierarchy, no icon chips */}
-      <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-px mb-6 bg-stone-200 dark:bg-dark-700 rounded-lg overflow-hidden border border-stone-200 dark:border-dark-700">
-        <div className="p-4 bg-stone-50 dark:bg-dark-800">
-          <p className="text-xs text-gray-500 dark:text-dark-400">Total this period</p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
+      <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-px mb-6 bg-stone-900/8 rounded-xl overflow-hidden" style={{ backgroundColor: 'rgb(15 23 42 / 0.08)' }}>
+        <div className="p-5 bg-[#f7f5ef] dark:bg-dark-800">
+          <p className="section-eyebrow">Total this period</p>
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             ${analytics.totalGiving.toLocaleString()}
           </p>
         </div>
 
-        <div className="p-4 bg-stone-50 dark:bg-dark-800">
-          <p className="text-xs text-gray-500 dark:text-dark-400">Monthly average</p>
-          <div className="flex items-baseline gap-2 mt-1">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 tabular-nums">
+        <div className="p-5 bg-[#f7f5ef] dark:bg-dark-800">
+          <p className="section-eyebrow">Monthly average</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            <p className="stat-number text-3xl text-slate-900 dark:text-dark-100">
               ${analytics.monthlyAverage.toLocaleString()}
             </p>
             {analytics.yearOverYearChange !== 0 && (
               <span className={`text-xs font-medium tabular-nums ${
-                analytics.yearOverYearChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                analytics.yearOverYearChange >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
               }`}>
                 {analytics.yearOverYearChange >= 0 ? '+' : ''}{analytics.yearOverYearChange.toFixed(1)}%
               </span>
@@ -287,16 +287,16 @@ export function GivingDashboard({
           </div>
         </div>
 
-        <div className="p-4 bg-stone-50 dark:bg-dark-800">
-          <p className="text-xs text-gray-500 dark:text-dark-400">{analytics.recurringCount} recurring</p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
+        <div className="p-5 bg-[#f7f5ef] dark:bg-dark-800">
+          <p className="section-eyebrow">{analytics.recurringCount} recurring</p>
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             ${analytics.recurringTotal.toLocaleString()}
           </p>
         </div>
 
-        <div className="p-4 bg-stone-50 dark:bg-dark-800">
-          <p className="text-xs text-gray-500 dark:text-dark-400">New donors · {analytics.donorRetention.toFixed(0)}% retention</p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1 tabular-nums">
+        <div className="p-5 bg-[#f7f5ef] dark:bg-dark-800">
+          <p className="section-eyebrow">New donors · {analytics.donorRetention.toFixed(0)}% retention</p>
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             {analytics.newDonorCount}
           </p>
         </div>

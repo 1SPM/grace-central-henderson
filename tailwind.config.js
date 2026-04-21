@@ -54,6 +54,10 @@ export default {
       fontFamily: {
         sans: ['Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
         display: ['Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        serif: ['Fraunces', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+      },
+      transitionDuration: {
+        '120': '120ms',
       },
       backdropBlur: {
         xs: '2px',

@@ -36,9 +36,10 @@
   --shadow-xl: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Premium typography */
+/* Editorial typography */
 body {
   font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -46,6 +47,42 @@ body {
   background-color: #ebe8e0; /* warm editorial gray */
   color: #0f172a; /* deep slate-navy */
 }
+
+/* Tabular numbers everywhere by default for stats/currency/dates */
+.tabular-nums,
+.stat-number,
+.currency,
+.count,
+time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Serif editorial accent — KPIs, hero numbers, H1s that want presence */
+.stat-number,
+.serif {
+  font-family: 'Fraunces', Georgia, Cambria, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quiet section headers — Attio pattern */
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgb(100 116 139); /* slate-500 */
+}
+
+/* Hairline divider — Mercury pattern */
+.hairline {
+  border-color: rgb(15 23 42 / 0.08);
+  border-width: 0.5px;
+}
+.hairline-b { border-bottom: 0.5px solid rgb(15 23 42 / 0.08); }
+.hairline-t { border-top:    0.5px solid rgb(15 23 42 / 0.08); }
 
 .dark body,
 body:has(.dark) {
@@ -218,27 +255,27 @@ select:focus {
     @apply text-gray-400 hover:bg-white/5 hover:text-gray-200;
   }
 
-  /* Premium cards — warm paper, not pure white */
+  /* Cards — hairline border, no shadow (Mercury/Attio pattern) */
   .card {
-    @apply rounded-2xl border border-stone-300/70;
-    background-color: #f7f5ef; /* warm off-white paper */
-    box-shadow: var(--shadow);
+    @apply rounded-xl;
+    background-color: #f7f5ef;
+    border: 0.5px solid rgb(15 23 42 / 0.08);
   }
 
   .dark .card {
-    @apply bg-dark-900/70 border-white/5;
-    box-shadow: var(--shadow), inset 0 1px 1px rgba(255, 255, 255, 0.02);
+    @apply bg-dark-900/70;
+    border-color: rgb(255 255 255 / 0.06);
   }
 
   .card-solid {
-    @apply rounded-2xl border border-stone-300/70;
+    @apply rounded-xl;
     background-color: #f7f5ef;
-    box-shadow: var(--shadow);
+    border: 0.5px solid rgb(15 23 42 / 0.08);
   }
 
   .dark .card-solid {
-    @apply bg-dark-850 border-dark-700;
-    box-shadow: none;
+    @apply bg-dark-850;
+    border-color: rgb(255 255 255 / 0.06);
   }
 
   /* Inputs — tighter radius */
@@ -277,10 +314,11 @@ select:focus {
     @apply bg-white/5 text-gray-400;
   }
 
-  /* Stat cards — paper tone */
+  /* Stat cards — hairline, no shadow, no colored chip */
   .stat-card {
-    @apply p-5 rounded-2xl border border-stone-300/70;
+    @apply p-5 rounded-xl;
     background-color: #f7f5ef;
+    border: 0.5px solid rgb(15 23 42 / 0.08);
   }
 
   .dark .stat-card {
@@ -344,11 +382,12 @@ select:focus {
     @apply bg-black/60;
   }
 
-  /* Modal content — warm paper */
+  /* Modal content — hairline only on backdrop-dimmed overlay */
   .modal-content {
-    @apply rounded-2xl border border-stone-300/70;
+    @apply rounded-xl;
     background-color: #f7f5ef;
-    box-shadow: var(--shadow-xl), 0 0 1px rgba(0, 0, 0, 0.1);
+    border: 0.5px solid rgb(15 23 42 / 0.12);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
   }
 
   .dark .modal-content {
@@ -368,24 +407,26 @@ select:focus {
   }
 }
 
-/* Smooth transitions for all interactive elements */
-* {
+/* Fast, deliberate transitions (Superhuman) — 120ms, not 300ms */
+button, a, [tabindex], input, textarea, select,
+.card, .stat-card, .nav-item, .btn, [role="button"] {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 120ms;
 }
 
-/* Better focus states - subtle and elegant */
+/* Raycast-style inset focus ring — tighter, more deliberate than browser default */
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid rgb(var(--color-primary) / 0.5);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px rgb(var(--color-primary)), 0 0 0 3px rgb(var(--color-primary) / 0.12);
 }
 
-/* Selection color */
+/* Selection — warm gold, editorial */
 ::selection {
-  background: rgb(var(--color-primary) / 0.2);
+  background: rgba(217, 199, 147, 0.45); /* --gold-line */
+  color: #0f172a;
 }
 
 /* Premium number styling */
