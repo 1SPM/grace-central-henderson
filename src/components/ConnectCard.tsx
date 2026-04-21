@@ -127,7 +127,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-gray-900 dark:to-indigo-950 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
@@ -160,7 +160,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
 
         {/* Share Panel (admin only) */}
         {mode === 'admin' && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-5 mb-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl shadow-xl p-5 mb-6">
             <button
               type="button"
               onClick={() => setShareOpen(!shareOpen)}
@@ -250,7 +250,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
         )}
 
         {/* Form */}
-        <form data-tutorial="connect-card-share" onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 space-y-5">
+        <form data-tutorial="connect-card-share" onSubmit={handleSubmit} className="bg-stone-100 dark:bg-gray-800 rounded-2xl shadow-xl p-6 space-y-5">
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
               {error}
@@ -270,7 +270,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
                   required
                   value={formData.firstName}
                   onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="John"
                 />
               </div>
@@ -284,7 +284,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
                 required
                 value={formData.lastName}
                 onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Doe"
               />
             </div>
@@ -301,7 +301,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="john@example.com"
               />
             </div>
@@ -318,7 +318,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="(555) 123-4567"
               />
             </div>
@@ -332,7 +332,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
             <select
               value={formData.howDidYouHear}
               onChange={(e) => setFormData(prev => ({ ...prev, howDidYouHear: e.target.value }))}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="">Select one...</option>
               <option value="friend">Friend or Family</option>
@@ -378,7 +378,7 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
               value={formData.prayerRequest}
               onChange={(e) => setFormData(prev => ({ ...prev, prayerRequest: e.target.value }))}
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
               placeholder="Let us know how we can pray for you..."
             />
           </div>

@@ -221,7 +221,7 @@ export function PrintableDirectory({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-slate-100 dark:bg-slate-900/30 rounded-lg">
@@ -319,7 +319,7 @@ export function PrintableDirectory({
                 <Filter className="w-5 h-5" />
               </button>
               {showFilterMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 z-10 min-w-[200px]">
+                <div className="absolute right-0 top-full mt-1 bg-stone-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 z-10 min-w-[200px]">
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm">
                       <input
@@ -388,7 +388,7 @@ export function PrintableDirectory({
       {/* Preview Mini View */}
       <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-[300px] overflow-auto">
         <div className="text-center text-sm text-gray-500 mb-3">Directory Preview (scroll to see more)</div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 p-4 rounded border border-gray-200 dark:border-gray-700">
           {Object.keys(groupedMembers).length === 0 ? (
             <p className="text-center text-gray-500 py-8">No members match your filters</p>
           ) : (
@@ -456,7 +456,7 @@ export function PrintableDirectory({
       {/* Full Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="font-semibold">Directory Preview</h3>
               <div className="flex gap-2">

@@ -119,7 +119,7 @@ function AutomationCard({
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg border transition-all ${
+      className={`bg-stone-100 dark:bg-gray-800 rounded-lg border transition-all ${
         enabled
           ? 'border-indigo-200 dark:border-indigo-800 shadow-sm'
           : 'border-gray-200 dark:border-gray-700 opacity-75'
@@ -232,7 +232,7 @@ function AgentCard({
 }) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg border transition-all ${
+      className={`bg-stone-100 dark:bg-gray-800 rounded-lg border transition-all ${
         config.enabled
           ? 'border-indigo-200 dark:border-indigo-800 shadow-sm'
           : 'border-gray-200 dark:border-gray-700 opacity-75'
@@ -622,7 +622,7 @@ export function AgentDashboard({
       )}
 
       {activeTab === 'upcoming' && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-indigo-600" />
@@ -688,7 +688,7 @@ export function AgentDashboard({
       )}
 
       {activeTab === 'logs' && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-indigo-600" />
@@ -781,7 +781,7 @@ function AgentConfigModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+      <div className="bg-stone-100 dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Configure {agentId}
         </h2>
@@ -1060,7 +1060,7 @@ export function AgentDashboardSimple({
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             Upcoming This Week
           </h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
             {upcomingLifeEvents.slice(0, 5).map((event, idx) => (
               <div
                 key={`${event.personId}-${idx}`}
@@ -1108,7 +1108,7 @@ export function AgentDashboardSimple({
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             Recent Activity
           </h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
             {recentLogs.slice(0, 5).map((log) => (
               <div key={log.id} className="p-3 flex items-start gap-3">
                 <div

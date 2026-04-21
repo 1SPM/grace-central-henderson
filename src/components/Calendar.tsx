@@ -306,7 +306,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
             {showExportMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
-                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-850 rounded-xl shadow-lg border border-gray-200 dark:border-dark-700 z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-64 bg-stone-100 dark:bg-dark-850 rounded-xl shadow-lg border border-gray-200 dark:border-dark-700 z-50 overflow-hidden">
                   <div className="p-2">
                     <p className="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-dark-500 uppercase">Export Calendar</p>
                     <button
@@ -418,7 +418,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Calendar Grid */}
         <div className="xl:col-span-2">
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center gap-2">
                 <button onClick={prevMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors">
@@ -494,7 +494,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
         {/* Upcoming Sidebar */}
         <div className="xl:col-span-1 space-y-4">
           {showBirthdays && upcomingBirthdays.length > 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-pink-50 dark:bg-pink-500/10">
                 <div className="flex items-center gap-2">
                   <Cake className="text-pink-500" size={18} />
@@ -531,7 +531,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
           )}
 
           {showAnniversaries && upcomingAnniversaries.length > 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-red-50 dark:bg-red-500/10">
                 <div className="flex items-center gap-2">
                   <Heart className="text-red-500" size={18} />
@@ -568,7 +568,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
           )}
 
           {showEvents && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-dark-700">
                 <h3 className="font-semibold text-gray-900 dark:text-dark-100">Upcoming Events</h3>
                 <p className="text-sm text-gray-500 dark:text-dark-400">Next 30 days</p>

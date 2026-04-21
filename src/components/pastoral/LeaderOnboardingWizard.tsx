@@ -195,7 +195,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   value={form.photo || ''}
                   onChange={(e) => setForm(prev => ({ ...prev, photo: e.target.value || undefined }))}
                   placeholder="Photo URL"
-                  className="mt-2 w-20 text-[10px] text-center px-1 py-0.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-500 dark:text-dark-400 rounded"
+                  className="mt-2 w-20 text-[10px] text-center px-1 py-0.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-500 dark:text-dark-400 rounded"
                 />
               </div>
               <div className="flex-1 space-y-3">
@@ -205,7 +205,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                     type="text"
                     value={form.displayName}
                     onChange={(e) => setForm(prev => ({ ...prev, displayName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="Pastor Marcus Daniels"
                     required
                   />
@@ -216,7 +216,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                     type="text"
                     value={form.title}
                     onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                     placeholder="Senior Pastor — Marriage & Family"
                     required
                   />
@@ -231,7 +231,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   placeholder="pastor@church.org"
                 />
               </div>
@@ -241,7 +241,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   placeholder="(555) 123-4567"
                 />
               </div>
@@ -253,7 +253,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                 value={form.bio}
                 onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
                 placeholder="Describe your counseling approach, background, and what drives your ministry..."
               />
             </div>
@@ -264,7 +264,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                 type="text"
                 value={form.anchors}
                 onChange={(e) => setForm(prev => ({ ...prev, anchors: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 placeholder="Bear one another's burdens — Galatians 6:2"
               />
             </div>
@@ -287,7 +287,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                       className={`p-3 rounded-xl text-left transition-all border ${
                         isSelected
                           ? 'bg-slate-50 dark:bg-slate-500/10 border-slate-300 dark:border-slate-500/30'
-                          : 'bg-white dark:bg-dark-800 border-gray-200 dark:border-dark-700 hover:border-slate-200 dark:hover:border-slate-500/20'
+                          : 'bg-stone-100 dark:bg-dark-800 border-gray-200 dark:border-dark-700 hover:border-slate-200 dark:hover:border-slate-500/20'
                       }`}
                     >
                       <span className={`text-sm font-medium ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-gray-700 dark:text-dark-300'}`}>
@@ -374,7 +374,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   type="number"
                   value={form.yearsOfPractice || ''}
                   onChange={(e) => setForm(prev => ({ ...prev, yearsOfPractice: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   min={0}
                   placeholder="20"
                 />
@@ -385,7 +385,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   type="text"
                   value={form.language}
                   onChange={(e) => setForm(prev => ({ ...prev, language: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   placeholder="English"
                 />
               </div>
@@ -397,7 +397,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                 <select
                   value={form.sessionType}
                   onChange={(e) => setForm(prev => ({ ...prev, sessionType: e.target.value as 'one-time' | 'recurring' }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 >
                   <option value="one-time">One-time</option>
                   <option value="recurring">Recurring</option>
@@ -408,7 +408,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                 <select
                   value={form.sessionFrequency}
                   onChange={(e) => setForm(prev => ({ ...prev, sessionFrequency: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 >
                   <option value="Weekly">Weekly</option>
                   <option value="Bi-weekly">Bi-weekly</option>
@@ -440,7 +440,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                   onChange={(e) => setCredentialInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCredential())}
                   placeholder="Add credential (e.g. M.Div, Certified Biblical Counselor)"
-                  className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 />
                 <button
                   type="button"
@@ -488,7 +488,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                       type="text"
                       value={refForm.name}
                       onChange={(e) => setRefForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="John Smith"
                     />
                   </div>
@@ -498,7 +498,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                       type="text"
                       value={refForm.relationship}
                       onChange={(e) => setRefForm(prev => ({ ...prev, relationship: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="Senior Pastor, Former Mentor"
                     />
                   </div>
@@ -510,7 +510,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                       type="email"
                       value={refForm.email || ''}
                       onChange={(e) => setRefForm(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="john@church.org"
                     />
                   </div>
@@ -520,7 +520,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
                       type="tel"
                       value={refForm.phone || ''}
                       onChange={(e) => setRefForm(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -651,7 +651,7 @@ export function LeaderOnboardingWizard({ onSubmit, onBack, initialData, existing
         Back
       </button>
 
-      <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700/50">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Leader Application</h2>

@@ -191,7 +191,7 @@ export function AnnouncementFeed({ announcements, events, people, prayers = [] }
           return (
             <div
               key={item.id}
-              className={`bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 border-l-4 ${colors.border} p-3.5`}
+              className={`bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 border-l-4 ${colors.border} p-3.5`}
             >
               <div className="flex items-start gap-3">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${colors.bg}`}>
@@ -223,7 +223,7 @@ export function AnnouncementFeed({ announcements, events, people, prayers = [] }
         return (
           <div
             key={item.id}
-            className={`bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 border-l-4 ${config.border} p-3.5`}
+            className={`bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 border-l-4 ${config.border} p-3.5`}
           >
             <div className="flex items-start gap-3">
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${config.bg}`}>

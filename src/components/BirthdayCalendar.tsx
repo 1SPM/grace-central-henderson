@@ -81,7 +81,7 @@ export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar View */}
-        <div className="lg:col-span-2 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           {/* Month Navigation */}
           <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
             <button
@@ -161,7 +161,7 @@ export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps
         {/* Upcoming Birthdays Sidebar */}
         <div className="space-y-6">
           {/* This Month */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center gap-2">
               <Cake size={18} className="text-pink-500" />
               <h3 className="font-semibold text-gray-900 dark:text-dark-100">This Month</h3>
@@ -201,7 +201,7 @@ export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps
           </div>
 
           {/* Upcoming (Next 30 Days) */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center gap-2">
               <Gift size={18} className="text-slate-500" />
               <h3 className="font-semibold text-gray-900 dark:text-dark-100">Coming Up</h3>

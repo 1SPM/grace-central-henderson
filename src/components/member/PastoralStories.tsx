@@ -31,7 +31,7 @@ export function PastoralStories({
 
   return (
     <>
-      <div className="flex-shrink-0 bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700">
+      <div className="flex-shrink-0 bg-stone-100 dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700">
         <div
           className="flex items-start gap-3 px-4 py-3 overflow-x-auto"
           style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' } as CSSProperties}
@@ -66,7 +66,7 @@ export function PastoralStories({
                         : 'bg-gradient-to-tr from-gray-200 via-gray-300 to-gray-200 dark:from-dark-600 dark:via-dark-500 dark:to-dark-600'
                     }`}
                   >
-                    <div className="w-[54px] h-[54px] rounded-full bg-white dark:bg-dark-850 flex items-center justify-center">
+                    <div className="w-[54px] h-[54px] rounded-full bg-stone-100 dark:bg-dark-850 flex items-center justify-center">
                       {leader.photo ? (
                         <img
                           src={leader.photo}
@@ -151,9 +151,9 @@ function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheet
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
 
       {/* Sheet — slides up from bottom, sized for mobile */}
-      <div className="relative w-full max-h-[80%] overflow-y-auto bg-white dark:bg-dark-850 rounded-t-2xl shadow-xl">
+      <div className="relative w-full max-h-[80%] overflow-y-auto bg-stone-100 dark:bg-dark-850 rounded-t-2xl shadow-xl">
         {/* Drag handle */}
-        <div className="sticky top-0 z-10 flex justify-center pt-3 pb-1 bg-white dark:bg-dark-850">
+        <div className="sticky top-0 z-10 flex justify-center pt-3 pb-1 bg-stone-100 dark:bg-dark-850">
           <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-dark-600" />
         </div>
 

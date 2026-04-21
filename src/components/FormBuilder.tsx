@@ -213,7 +213,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
 
         {/* Forms List */}
         {forms.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-16 bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <FormInput className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No forms yet</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-6">Create your first form to collect responses</p>
@@ -230,7 +230,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
             {forms.map(form => (
               <div
                 key={form.id}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between"
+                className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between"
               >
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 dark:text-white">{form.name}</h3>
@@ -288,7 +288,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
         {/* Template Modal */}
         {showTemplates && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Create New Form</h2>
 
               <button
@@ -387,7 +387,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Field Types */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sticky top-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sticky top-6">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Add Field</h3>
             <div className="grid grid-cols-2 gap-2">
               {FIELD_TYPES.map(ft => (
@@ -407,7 +407,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
         {/* Form Fields / Preview */}
         <div className="lg:col-span-2">
           {showPreview ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{editingForm.name}</h2>
               {editingForm.description && (
                 <p className="text-gray-500 dark:text-gray-400 mb-6">{editingForm.description}</p>
@@ -459,7 +459,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
           ) : (
             <div className="space-y-3">
               {editingForm.fields.length === 0 ? (
-                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
+                <div className="text-center py-16 bg-stone-100 dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
                   <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                   <p className="text-gray-500">Add fields from the left panel</p>
                 </div>
@@ -467,7 +467,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
                 editingForm.fields.map((field) => (
                   <div
                     key={field.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
+                    className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
                   >
                     <div className="flex items-start gap-3">
                       <div className="p-1 text-gray-400 cursor-move">
@@ -483,7 +483,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
                             type="text"
                             value={field.label}
                             onChange={e => updateField(field.id, { label: e.target.value })}
-                            className="flex-1 px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                            className="flex-1 px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                             placeholder="Field label"
                           />
                           <label className="flex items-center gap-1 text-sm text-gray-500">
@@ -501,7 +501,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
                           type="text"
                           value={field.placeholder || ''}
                           onChange={e => updateField(field.id, { placeholder: e.target.value })}
-                          className="w-full px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                          className="w-full px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
                           placeholder="Placeholder text (optional)"
                         />
 
@@ -513,7 +513,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
                               onChange={e =>
                                 updateField(field.id, { options: e.target.value.split('\n').filter(Boolean) })
                               }
-                              className="w-full px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                              className="w-full px-2 py-1 border border-gray-200 dark:border-gray-700 rounded bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
                               rows={3}
                             />
                           </div>

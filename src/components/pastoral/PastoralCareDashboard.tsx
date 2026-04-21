@@ -239,7 +239,7 @@ export function PastoralCareDashboard({
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors capitalize ${
               tab === t
-                ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+                ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
           >
@@ -262,7 +262,7 @@ export function PastoralCareDashboard({
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Recent Conversations */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Conversations</h2>
                 <button
@@ -320,7 +320,7 @@ export function PastoralCareDashboard({
             </div>
 
             {/* Available Leaders */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Leader Status</h2>
                 <button
@@ -359,7 +359,7 @@ export function PastoralCareDashboard({
           </div>
 
           {/* Category breakdown */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5">
             <div className="flex items-center gap-2 mb-4">
               <BarChart3 size={16} className="text-gray-400" />
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Quick Stats</h2>
@@ -382,7 +382,7 @@ export function PastoralCareDashboard({
       {tab === 'conversations' && (
         <div className="space-y-3">
           {conversations.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50">
+            <div className="text-center py-16 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50">
               <MessageCircle className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">No conversations yet</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -404,7 +404,7 @@ export function PastoralCareDashboard({
                 <button
                   key={conv.id}
                   onClick={() => onSetActiveConversation(conv.id)}
-                  className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4 hover:shadow-md transition-all text-left"
+                  className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4 hover:shadow-md transition-all text-left"
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${
@@ -499,7 +499,7 @@ function StatCard({ icon: Icon, label, value, color }: {
   color: string;
 }) {
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}>
         <Icon size={16} />
       </div>

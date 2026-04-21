@@ -290,7 +290,7 @@ Blessings,
       />
 
       {/* Sidebar */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-dark-900 shadow-2xl z-50 flex flex-col animate-slide-in-right">
+      <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-stone-100 dark:bg-dark-900 shadow-2xl z-50 flex flex-col animate-slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ Blessings,
               onClick={() => setRecipientType('individual')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                 recipientType === 'individual'
-                  ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                   : 'text-gray-500 dark:text-dark-400 hover:text-gray-700'
               }`}
             >
@@ -324,7 +324,7 @@ Blessings,
               onClick={() => setRecipientType('group')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                 recipientType === 'group'
-                  ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                   : 'text-gray-500 dark:text-dark-400 hover:text-gray-700'
               }`}
             >
@@ -335,7 +335,7 @@ Blessings,
               onClick={() => setRecipientType('custom')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                 recipientType === 'custom'
-                  ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                   : 'text-gray-500 dark:text-dark-400 hover:text-gray-700'
               }`}
             >
@@ -354,7 +354,7 @@ Blessings,
               <div className="relative">
                 <button
                   onClick={() => setShowPeopleDropdown(!showPeopleDropdown)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-left"
+                  className="w-full flex items-center justify-between px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-left"
                 >
                   <span className={selectedPeople.length === 0 ? 'text-gray-400' : 'text-gray-900 dark:text-dark-100'}>
                     {selectedPeople.length === 0
@@ -365,7 +365,7 @@ Blessings,
                 </button>
 
                 {showPeopleDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-64 overflow-hidden">
+                  <div className="absolute z-10 w-full mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-64 overflow-hidden">
                     <div className="p-2 border-b border-gray-100 dark:border-dark-700">
                       <div className="relative">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -457,7 +457,7 @@ Blessings,
               <div className="relative">
                 <button
                   onClick={() => setShowGroupDropdown(!showGroupDropdown)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-left"
+                  className="w-full flex items-center justify-between px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-left"
                 >
                   <span className={!selectedGroup ? 'text-gray-400' : 'text-gray-900 dark:text-dark-100'}>
                     {selectedGroup
@@ -468,7 +468,7 @@ Blessings,
                 </button>
 
                 {showGroupDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-64 overflow-y-auto">
                     {groups.filter(g => g.isActive).map((group) => {
                       const memberCount = group.members.length;
                       const emailCount = people.filter(
@@ -515,7 +515,7 @@ Blessings,
                 value={customEmails}
                 onChange={(e) => setCustomEmails(e.target.value)}
                 placeholder="Enter email addresses (comma or line separated)"
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm resize-none h-24"
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm resize-none h-24"
               />
             )}
 
@@ -544,7 +544,7 @@ Blessings,
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Email subject..."
-              className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm"
             />
 
             {/* Templates dropdown */}
@@ -558,7 +558,7 @@ Blessings,
                     <button
                       key={template.id}
                       onClick={() => applyTemplate(template)}
-                      className="w-full flex items-center gap-2 px-2 py-2 text-sm text-left rounded-lg hover:bg-white dark:hover:bg-dark-700 transition-colors"
+                      className="w-full flex items-center gap-2 px-2 py-2 text-sm text-left rounded-lg hover:bg-stone-100 dark:hover:bg-dark-700 transition-colors"
                     >
                       <FileText size={14} className="text-gray-400" />
                       <span className="text-gray-700 dark:text-dark-300">{template.name}</span>
@@ -594,7 +594,7 @@ Blessings,
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="e.g., A warm invitation to our upcoming Easter service..."
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-500/30 rounded-lg bg-white dark:bg-dark-800 resize-none h-16"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-500/30 rounded-lg bg-stone-100 dark:bg-dark-800 resize-none h-16"
                 />
                 <div className="flex justify-end mt-2">
                   <button
@@ -662,7 +662,7 @@ Blessings,
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write your message..."
-              className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm resize-none h-48"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm resize-none h-48"
             />
 
             {/* Merge tags hint */}

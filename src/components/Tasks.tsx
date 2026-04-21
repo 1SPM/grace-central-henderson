@@ -191,7 +191,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             {(['pending', 'all', 'completed', 'overdue'] as const).map((f) => (
@@ -230,7 +230,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
       {/* Add Task Modal */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl p-6 w-full max-w-md">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">New Task</h2>
             <div className="space-y-4">
               <input
@@ -238,26 +238,26 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                 placeholder="Task title..."
                 value={newTask.title}
                 onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <textarea
                 placeholder="Description (optional)..."
                 value={newTask.description}
                 onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                 rows={2}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               />
               <div className="grid grid-cols-2 gap-4">
                 <input
                   type="date"
                   value={newTask.dueDate}
                   onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <select
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
@@ -268,7 +268,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                 <select
                   value={newTask.category}
                   onChange={(e) => setNewTask({ ...newTask, category: e.target.value as Task['category'] })}
-                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="follow-up">Follow-Up</option>
                   <option value="care">Care</option>
@@ -278,7 +278,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                 <select
                   value={newTask.personId}
                   onChange={(e) => setNewTask({ ...newTask, personId: e.target.value })}
-                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">No person linked</option>
                   {people.map((p) => (
@@ -294,7 +294,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
                 <select
                   value={newTask.recurrence}
                   onChange={(e) => setNewTask({ ...newTask, recurrence: e.target.value as RecurrenceType })}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   {(Object.keys(recurrenceLabels) as RecurrenceType[]).map((key) => (
                     <option key={key} value={key}>{recurrenceLabels[key]}</option>
@@ -330,7 +330,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
           return (
             <div
               key={task.id}
-              className={`bg-white dark:bg-dark-850 rounded-xl border p-4 transition-all ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-xl border p-4 transition-all ${
                 task.completed
                   ? 'border-gray-100 dark:border-dark-700 bg-gray-50 dark:bg-dark-800/50'
                   : isOverdue
@@ -391,7 +391,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
       </div>
 
       {sortedTasks.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+        <div className="text-center py-12 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
           <CheckSquare className="mx-auto text-gray-300 dark:text-dark-600 mb-3" size={48} />
           <p className="text-gray-400 dark:text-dark-400">No tasks found</p>
         </div>

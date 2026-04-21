@@ -364,7 +364,7 @@ export function AutomatedReminders({
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                 : 'text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-dark-200'
             }`}
           >
@@ -384,7 +384,7 @@ export function AutomatedReminders({
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className={`bg-white dark:bg-dark-800 rounded-xl border ${
+              className={`bg-stone-100 dark:bg-dark-800 rounded-xl border ${
                 rule.enabled
                   ? 'border-gray-200 dark:border-dark-700'
                   : 'border-gray-100 dark:border-dark-750'
@@ -475,7 +475,7 @@ export function AutomatedReminders({
           {upcomingReminders.map((reminder) => (
             <div
               key={reminder.id}
-              className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+              className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -543,7 +543,7 @@ export function AutomatedReminders({
       {/* Edit Rule Modal */}
       {selectedRule && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Edit Reminder Rule
@@ -560,7 +560,7 @@ export function AutomatedReminders({
                   onChange={(e) =>
                     setSelectedRule({ ...selectedRule, name: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -576,7 +576,7 @@ export function AutomatedReminders({
                       type: e.target.value as ReminderType,
                     })
                   }
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   {Object.entries(typeLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -630,7 +630,7 @@ export function AutomatedReminders({
                       timing: e.target.value as ReminderTiming,
                     })
                   }
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   {Object.entries(timingLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -654,7 +654,7 @@ export function AutomatedReminders({
                   }
                   rows={3}
                   placeholder="Use {{name}}, {{date}}, {{event}}, etc."
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
                 <p className="mt-1 text-xs text-gray-400 dark:text-dark-500">
                   Variables: {"{{name}}, {{date}}, {{event}}, {{task}}, {{time}}, {{years}}"}
@@ -715,7 +715,7 @@ function CreateRuleModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 dark:border-dark-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
             Create Reminder Rule
@@ -733,7 +733,7 @@ function CreateRuleModal({
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="e.g., Weekly Prayer Reminder"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             />
           </div>
 
@@ -749,7 +749,7 @@ function CreateRuleModal({
                   type: e.target.value as ReminderType,
                 })
               }
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             >
               {Object.entries(typeLabels).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -803,7 +803,7 @@ function CreateRuleModal({
                   timing: e.target.value as ReminderTiming,
                 })
               }
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             >
               {Object.entries(timingLabels).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -827,7 +827,7 @@ function CreateRuleModal({
               }
               rows={3}
               placeholder="Use {{name}}, {{date}}, {{event}}, etc."
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             />
           </div>
         </div>

@@ -277,7 +277,7 @@ export function PeopleList({
             <select
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value as SortOption)}
-              className="appearance-none pl-9 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="appearance-none pl-9 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               {Object.entries(sortLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -336,21 +336,21 @@ export function PeopleList({
                 <>
                   <button
                     onClick={() => { setShowBulkActions(true); setBulkAction('status'); }}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-stone-100 dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
                   >
                     <UserCog size={16} />
                     Change Status
                   </button>
                   <button
                     onClick={() => { setShowBulkActions(true); setBulkAction('tag'); }}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-stone-100 dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
                   >
                     <Tag size={16} />
                     Add Tag
                   </button>
                   <button
                     onClick={handleExportSelected}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-stone-100 dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
                   >
                     <Download size={16} />
                     Export Selected
@@ -361,7 +361,7 @@ export function PeopleList({
                   <select
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value as MemberStatus)}
-                    className="px-3 py-2 border border-indigo-200 dark:border-indigo-500/30 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                    className="px-3 py-2 border border-indigo-200 dark:border-indigo-500/30 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                   >
                     {Object.entries(statusLabels).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
@@ -387,7 +387,7 @@ export function PeopleList({
                     placeholder="Enter tag name..."
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
-                    className="px-3 py-2 border border-indigo-200 dark:border-indigo-500/30 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                    className="px-3 py-2 border border-indigo-200 dark:border-indigo-500/30 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                   />
                   <button
                     onClick={handleBulkAddTag}
@@ -410,7 +410,7 @@ export function PeopleList({
       )}
 
       {/* Filters */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-400" size={18} />
@@ -419,7 +419,7 @@ export function PeopleList({
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
           <button
@@ -468,7 +468,7 @@ export function PeopleList({
                 <select
                   value={tagFilter}
                   onChange={(e) => setTagFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                 >
                   <option value="">Any tag</option>
                   {allTags.map(tag => (
@@ -481,7 +481,7 @@ export function PeopleList({
                 <select
                   value={hasEmailFilter === null ? '' : hasEmailFilter ? 'yes' : 'no'}
                   onChange={(e) => setHasEmailFilter(e.target.value === '' ? null : e.target.value === 'yes')}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                 >
                   <option value="">Any</option>
                   <option value="yes">Yes</option>
@@ -493,7 +493,7 @@ export function PeopleList({
                 <select
                   value={hasPhoneFilter === null ? '' : hasPhoneFilter ? 'yes' : 'no'}
                   onChange={(e) => setHasPhoneFilter(e.target.value === '' ? null : e.target.value === 'yes')}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                 >
                   <option value="">Any</option>
                   <option value="yes">Yes</option>
@@ -541,7 +541,7 @@ export function PeopleList({
           {paginatedPeople.map((person) => (
             <div
               key={person.id}
-              className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-sm transition-all group"
+              className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-sm transition-all group"
             >
               <div className="flex items-center gap-4">
                 {(onBulkUpdateStatus || onBulkAddTag) && (
@@ -600,7 +600,7 @@ export function PeopleList({
         </div>
       ) : (
         /* Table View */
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700">
               <tr>
@@ -694,7 +694,7 @@ export function PeopleList({
 
       {/* Pagination */}
       {filtered.length > 0 && (
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-dark-400">
             <span>
               Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length}
@@ -704,7 +704,7 @@ export function PeopleList({
               <select
                 value={pageSize}
                 onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-                className="px-2 py-1 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                className="px-2 py-1 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -717,14 +717,14 @@ export function PeopleList({
             <button
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               First
             </button>
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 text-gray-700 dark:text-dark-300 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={18} />
             </button>
@@ -758,14 +758,14 @@ export function PeopleList({
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 text-gray-700 dark:text-dark-300 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight size={18} />
             </button>
             <button
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-300 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Last
             </button>

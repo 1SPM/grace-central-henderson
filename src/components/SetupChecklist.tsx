@@ -106,7 +106,7 @@ export function SetupChecklist({
   const strokeDashoffset = circumference - (pct / 100) * circumference;
 
   return (
-    <div className="mb-6 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+    <div className="mb-6 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-dark-700/50">
         <div className="flex items-center gap-3">

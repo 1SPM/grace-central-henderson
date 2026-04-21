@@ -205,7 +205,7 @@ export function GroupFinder({ groups, churchName, onInterestSubmit }: GroupFinde
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, leader, or location..."
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
 
@@ -230,7 +230,7 @@ export function GroupFinder({ groups, churchName, onInterestSubmit }: GroupFinde
               <select
                 value={selectedDay}
                 onChange={(e) => setSelectedDay(e.target.value)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-stone-100 dark:bg-gray-700"
               >
                 <option value="">Any Day</option>
                 {meetingDays.map((day) => (
@@ -248,7 +248,7 @@ export function GroupFinder({ groups, churchName, onInterestSubmit }: GroupFinde
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-stone-100 dark:bg-gray-700"
                 >
                   <option value="">All Categories</option>
                   {categories.map((cat) => (
@@ -285,7 +285,7 @@ export function GroupFinder({ groups, churchName, onInterestSubmit }: GroupFinde
           {filteredGroups.map((group) => (
             <div
               key={group.id}
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="p-5">
                 {/* Category Badge */}
@@ -378,7 +378,7 @@ export function GroupFinder({ groups, churchName, onInterestSubmit }: GroupFinde
       {/* Interest Modal */}
       {showInterestModal && selectedGroup && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
             {/* Modal Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <div>

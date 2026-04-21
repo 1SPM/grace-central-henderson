@@ -33,7 +33,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
@@ -61,7 +61,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Follow up with new visitor"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               autoFocus
             />
           </div>
@@ -73,7 +73,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
             <select
               value={personId}
               onChange={(e) => setPersonId(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="">No specific person</option>
               {people.map((person) => (
@@ -92,7 +92,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -108,7 +108,7 @@ export function QuickTaskForm({ people, onSave, onClose }: QuickTaskFormProps) {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
           </div>

@@ -212,7 +212,7 @@ export function PledgeManager({
         <div className="space-y-6">
           {/* Campaign Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
                   <Target className="text-slate-600 dark:text-slate-400" size={20} />
@@ -223,7 +223,7 @@ export function PledgeManager({
                 {campaigns.filter((c) => c.isActive).length}
               </p>
             </div>
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-green-100 dark:bg-green-500/10 rounded-xl flex items-center justify-center">
                   <DollarSign className="text-green-600 dark:text-green-400" size={20} />
@@ -234,7 +234,7 @@ export function PledgeManager({
                 ${pledges.reduce((sum, p) => sum + (p.totalPledged || p.amount), 0).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
                   <TrendingUp className="text-blue-600 dark:text-blue-400" size={20} />
@@ -245,7 +245,7 @@ export function PledgeManager({
                 ${pledges.reduce((sum, p) => sum + (p.totalGiven || 0), 0).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/10 rounded-xl flex items-center justify-center">
                   <Users className="text-amber-600 dark:text-amber-400" size={20} />
@@ -259,7 +259,7 @@ export function PledgeManager({
           </div>
 
           {/* Campaigns List */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Fundraising Campaigns
@@ -369,7 +369,7 @@ export function PledgeManager({
               <select
                 value={selectedCampaignId || ''}
                 onChange={(e) => setSelectedCampaignId(e.target.value || null)}
-                className="w-full max-w-xs px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full max-w-xs px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               >
                 <option value="">All Pledges</option>
                 {campaigns.map((c) => (
@@ -389,7 +389,7 @@ export function PledgeManager({
           </div>
 
           {/* Pledges List */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             {filteredPledges.length === 0 ? (
               <div className="text-center py-12">
                 <Flag className="mx-auto text-gray-300 dark:text-dark-600 mb-4" size={48} />
@@ -527,7 +527,7 @@ export function PledgeManager({
       {/* New Campaign Modal */}
       {showNewCampaign && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Create Campaign
@@ -553,7 +553,7 @@ export function PledgeManager({
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
                   placeholder="e.g., Building Fund 2025"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -566,7 +566,7 @@ export function PledgeManager({
                   onChange={(e) => setCampaignDescription(e.target.value)}
                   placeholder="Describe the purpose of this campaign..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -581,7 +581,7 @@ export function PledgeManager({
                     value={campaignGoal}
                     onChange={(e) => setCampaignGoal(e.target.value)}
                     placeholder="50000"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -595,7 +595,7 @@ export function PledgeManager({
                     type="date"
                     value={campaignStartDate}
                     onChange={(e) => setCampaignStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
                 <div>
@@ -606,7 +606,7 @@ export function PledgeManager({
                     type="date"
                     value={campaignEndDate}
                     onChange={(e) => setCampaignEndDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -618,7 +618,7 @@ export function PledgeManager({
                 <select
                   value={campaignFund}
                   onChange={(e) => setCampaignFund(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   {GIVING_FUNDS.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -654,7 +654,7 @@ export function PledgeManager({
       {/* New Pledge Modal */}
       {showNewPledge && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Create Pledge
@@ -678,7 +678,7 @@ export function PledgeManager({
                 <select
                   value={pledgePersonId}
                   onChange={(e) => setPledgePersonId(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">Select a person (optional)</option>
                   {people.map((p) => (
@@ -696,7 +696,7 @@ export function PledgeManager({
                 <select
                   value={pledgeCampaignId}
                   onChange={(e) => setPledgeCampaignId(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">No campaign (general pledge)</option>
                   {campaigns.filter((c) => c.isActive).map((c) => (
@@ -719,7 +719,7 @@ export function PledgeManager({
                       value={pledgeAmount}
                       onChange={(e) => setPledgeAmount(e.target.value)}
                       placeholder="100"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     />
                   </div>
                 </div>
@@ -730,7 +730,7 @@ export function PledgeManager({
                   <select
                     value={pledgeFrequency}
                     onChange={(e) => setPledgeFrequency(e.target.value as PledgeFrequency)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   >
                     {FREQUENCY_OPTIONS.map((f) => (
                       <option key={f.id} value={f.id}>
@@ -750,7 +750,7 @@ export function PledgeManager({
                     type="date"
                     value={pledgeStartDate}
                     onChange={(e) => setPledgeStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
                 <div>
@@ -761,7 +761,7 @@ export function PledgeManager({
                     type="date"
                     value={pledgeEndDate}
                     onChange={(e) => setPledgeEndDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -773,7 +773,7 @@ export function PledgeManager({
                 <select
                   value={pledgeFund}
                   onChange={(e) => setPledgeFund(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   {GIVING_FUNDS.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -792,7 +792,7 @@ export function PledgeManager({
                   onChange={(e) => setPledgeNotes(e.target.value)}
                   placeholder="Any additional notes..."
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
             </div>

@@ -45,7 +45,7 @@ export function SettingsDataExport({
 }: SettingsDataExportProps) {
   return (
     <>
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-green-100 dark:bg-green-500/10 rounded-xl flex items-center justify-center">
             <Database className="text-green-600 dark:text-green-400" size={20} />
@@ -118,7 +118,7 @@ export function SettingsDataExport({
       </div>
 
       {/* Data Import */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
             <Upload size={20} className="text-blue-600 dark:text-blue-400" />

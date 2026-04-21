@@ -64,7 +64,7 @@ export function BirthdayWidget({ people, onViewPerson }: BirthdayWidgetProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
           <Cake className="text-white" size={20} />

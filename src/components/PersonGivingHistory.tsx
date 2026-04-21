@@ -86,7 +86,7 @@ export function PersonGivingHistory({
 
   if (personGiving.length === 0) {
     return (
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="text-green-500" size={20} />
           <h3 className="font-semibold text-gray-900 dark:text-dark-100">Giving History</h3>
@@ -102,7 +102,7 @@ export function PersonGivingHistory({
   if (compact) {
     // Compact view for sidebar or small spaces
     return (
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <DollarSign className="text-green-500" size={18} />
@@ -138,7 +138,7 @@ export function PersonGivingHistory({
 
   // Full view
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <DollarSign className="text-green-500" size={20} />

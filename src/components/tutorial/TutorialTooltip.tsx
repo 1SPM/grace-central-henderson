@@ -95,7 +95,7 @@ export function TutorialTooltip({
       role="dialog"
       aria-label={`Tutorial step ${currentStep + 1} of ${totalSteps}: ${title}`}
       tabIndex={-1}
-      className={`z-[70] w-80 bg-white dark:bg-dark-800 rounded-xl shadow-2xl border border-gray-200 dark:border-dark-700 outline-none transition-all duration-200 ${
+      className={`z-[70] w-80 bg-stone-100 dark:bg-dark-800 rounded-xl shadow-2xl border border-gray-200 dark:border-dark-700 outline-none transition-all duration-200 ${
         visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
       }`}
       style={floatingStyles}
@@ -154,7 +154,7 @@ export function TutorialTooltip({
           {!isFirst && (
             <button
               onClick={onPrev}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-dark-300 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-650 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-dark-300 bg-stone-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-650 transition-colors"
             >
               <ChevronLeft size={12} />
               Back

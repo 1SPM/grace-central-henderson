@@ -177,7 +177,7 @@ export function GivingQRCode({ givingPageUrl, churchName, funds = [] }: GivingQR
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
           <QrCode className="w-5 h-5 text-green-600 dark:text-green-400" />

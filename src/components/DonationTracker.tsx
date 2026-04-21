@@ -267,24 +267,24 @@ export function DonationTracker({
           <p className="text-2xl font-bold">${stats.total.toLocaleString()}</p>
           <p className="text-sm opacity-80">Total Donations</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <BarChart3 className="text-blue-500 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stats.count}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400">Transactions</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <TrendingUp className="text-slate-500 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">
             ${stats.average.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-sm text-gray-500 dark:text-dark-400">Avg. Donation</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <Users className="text-indigo-500 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stats.uniqueDonors}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400">Unique Donors</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <Repeat className="text-amber-500 mb-2" size={20} />
           <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stats.recurring}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400">Recurring</p>
@@ -327,7 +327,7 @@ export function DonationTracker({
                 return (
                   <div
                     key={goal.id}
-                    className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5"
+                    className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -420,7 +420,7 @@ export function DonationTracker({
       {/* Charts Row */}
       <div className="grid grid-cols-3 gap-6 mb-6">
         {/* Daily Trend */}
-        <div className="col-span-2 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="col-span-2 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-4">Daily Donations (Last 30 Days)</h3>
           <div className="h-32 flex items-end gap-0.5">
             {stats.dailyTrend.map((day, i) => (
@@ -438,7 +438,7 @@ export function DonationTracker({
         </div>
 
         {/* By Fund */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-4">By Fund</h3>
           <div className="space-y-2">
             {Object.entries(stats.byFund)
@@ -467,7 +467,7 @@ export function DonationTracker({
       </div>
 
       {/* Filters Row */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
         <div className="flex items-center gap-4">
           {/* Search */}
           <div className="relative flex-1 max-w-md">
@@ -477,7 +477,7 @@ export function DonationTracker({
               placeholder="Search by name, fund, or amount..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -489,7 +489,7 @@ export function DonationTracker({
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   dateRange === range
-                    ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                     : 'text-gray-600 dark:text-dark-400 hover:text-gray-900'
                 }`}
               >
@@ -530,7 +530,7 @@ export function DonationTracker({
               <select
                 value={filters.fund || ''}
                 onChange={(e) => setFilters({ ...filters, fund: e.target.value || undefined })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
               >
                 <option value="">All Funds</option>
                 <option value="tithe">Tithe</option>
@@ -545,7 +545,7 @@ export function DonationTracker({
               <select
                 value={filters.method || ''}
                 onChange={(e) => setFilters({ ...filters, method: e.target.value || undefined })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
               >
                 <option value="">All Methods</option>
                 <option value="cash">Cash</option>
@@ -561,7 +561,7 @@ export function DonationTracker({
                 placeholder="$0"
                 value={filters.minAmount || ''}
                 onChange={(e) => setFilters({ ...filters, minAmount: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
               />
             </div>
             <div>
@@ -571,7 +571,7 @@ export function DonationTracker({
                 placeholder="No limit"
                 value={filters.maxAmount || ''}
                 onChange={(e) => setFilters({ ...filters, maxAmount: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-lg text-sm"
               />
             </div>
           </div>
@@ -579,7 +579,7 @@ export function DonationTracker({
       </div>
 
       {/* Donations Table */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
           <h3 className="font-semibold text-gray-900 dark:text-dark-100">
             Donations ({filteredDonations.length})

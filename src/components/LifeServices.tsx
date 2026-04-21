@@ -205,7 +205,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
               onClick={() => setViewMode('cards')}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'cards'
-                  ? 'bg-white dark:bg-dark-700 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
                   : 'hover:bg-gray-200 dark:hover:bg-dark-700'
               }`}
               title="Cards view"
@@ -216,7 +216,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
               onClick={() => setViewMode('pipeline')}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'pipeline'
-                  ? 'bg-white dark:bg-dark-700 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
                   : 'hover:bg-gray-200 dark:hover:bg-dark-700'
               }`}
               title="Pipeline view"
@@ -227,7 +227,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-dark-700 shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
                   : 'hover:bg-gray-200 dark:hover:bg-dark-700'
               }`}
               title="List view"
@@ -262,7 +262,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
                 <button
                   key={card.id}
                   onClick={() => onNavigate(card.id as View)}
-                  className="group bg-white dark:bg-dark-850 rounded-xl p-5 text-left shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-dark-700 hover:border-gray-200 dark:hover:border-dark-600"
+                  className="group bg-stone-100 dark:bg-dark-850 rounded-xl p-5 text-left shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-dark-700 hover:border-gray-200 dark:hover:border-dark-600"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses} flex items-center justify-center shadow-sm`}>
@@ -291,7 +291,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
           {/* Upcoming Events & Quick Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Upcoming Events */}
-            <div className="lg:col-span-2 bg-white dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700">
+            <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700">
               <div className="p-4 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
                 <h2 className="font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
                   <Calendar size={18} className="text-slate-600" />
@@ -346,7 +346,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700">
               <div className="p-4 border-b border-gray-100 dark:border-dark-700">
                 <h2 className="font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-2">
                   <Sparkles size={18} className="text-slate-600" />
@@ -430,7 +430,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
                       return (
                         <div
                           key={request.id}
-                          className="bg-white dark:bg-dark-850 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-dark-700 hover:shadow-md transition-shadow cursor-pointer"
+                          className="bg-stone-100 dark:bg-dark-850 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-dark-700 hover:shadow-md transition-shadow cursor-pointer"
                         >
                           <div className="flex items-start gap-2 mb-2">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${typeColor}`}>
@@ -472,7 +472,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
 
       {/* List View */}
       {viewMode === 'list' && (
-        <div className="bg-white dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl shadow-sm border border-gray-100 dark:border-dark-700 overflow-hidden">
           {/* Filter bar */}
           <div className="p-4 border-b border-gray-100 dark:border-dark-700 flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-500 dark:text-dark-400">Filter:</span>
@@ -572,7 +572,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
       {/* Resources & Forms */}
       <div className="bg-gradient-to-br from-slate-50 to-slate-50 dark:from-slate-900/20 dark:to-slate-900/20 rounded-xl p-6 border border-slate-100 dark:border-slate-800/30">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-white dark:bg-dark-800 rounded-xl flex items-center justify-center shadow-sm">
+          <div className="w-12 h-12 bg-stone-100 dark:bg-dark-800 rounded-xl flex items-center justify-center shadow-sm">
             <FileText className="w-6 h-6 text-slate-600 dark:text-slate-400" />
           </div>
           <div className="flex-1">
@@ -583,16 +583,16 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
               Access wedding applications, funeral planning guides, and legacy giving information packets.
             </p>
             <div className="flex flex-wrap gap-2">
-              <button className="px-3 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
+              <button className="px-3 py-1.5 bg-stone-100 dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
                 Wedding Application
               </button>
-              <button className="px-3 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
+              <button className="px-3 py-1.5 bg-stone-100 dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
                 Funeral Planning Guide
               </button>
-              <button className="px-3 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
+              <button className="px-3 py-1.5 bg-stone-100 dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
                 Legacy Giving Packet
               </button>
-              <button className="px-3 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
+              <button className="px-3 py-1.5 bg-stone-100 dark:bg-dark-800 rounded-lg text-sm font-medium text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors shadow-sm">
                 Baptism Request
               </button>
             </div>
@@ -602,7 +602,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
 
       {/* Stats Footer */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
               <Heart size={18} className="text-rose-600 dark:text-rose-400" />
@@ -613,7 +613,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-900/20 flex items-center justify-center">
               <Flower2 size={18} className="text-slate-600 dark:text-slate-400" />
@@ -624,7 +624,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
               <Users size={18} className="text-blue-600 dark:text-blue-400" />
@@ -635,7 +635,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
               <Gift size={18} className="text-amber-600 dark:text-amber-400" />

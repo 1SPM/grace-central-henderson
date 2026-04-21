@@ -119,7 +119,7 @@ export function SavedFilters({ currentFilters, onApplyFilter }: SavedFiltersProp
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-50 overflow-hidden">
+          <div className="absolute top-full left-0 mt-2 w-72 bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-50 overflow-hidden">
             <div className="p-3 border-b border-gray-100 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-gray-900 dark:text-dark-100">Saved Filters</h3>
@@ -187,7 +187,7 @@ export function SavedFilters({ currentFilters, onApplyFilter }: SavedFiltersProp
       {/* Save Modal */}
       {showSaveModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Save Filter
@@ -202,7 +202,7 @@ export function SavedFilters({ currentFilters, onApplyFilter }: SavedFiltersProp
                 value={newFilterName}
                 onChange={(e) => setNewFilterName(e.target.value)}
                 placeholder="e.g., New Visitors, Active Members"
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 autoFocus
               />
               <div className="mt-3 p-3 bg-gray-50 dark:bg-dark-800 rounded-lg">

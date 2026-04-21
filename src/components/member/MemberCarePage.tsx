@@ -77,7 +77,7 @@ export function MemberCarePage({
     if (submitted) {
       return (
         <div className="p-4 max-w-lg mx-auto text-center">
-          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-8">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-8">
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Heart size={32} className="text-emerald-600 dark:text-emerald-400" />
             </div>
@@ -183,7 +183,7 @@ export function MemberCarePage({
         </div>
 
         {myRequests.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+          <div className="text-center py-12 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
             <MessageCircle size={40} className="mx-auto mb-3 text-gray-300 dark:text-dark-600" />
             <p className="text-sm text-gray-500 dark:text-dark-400">No active requests</p>
             <button
@@ -196,7 +196,7 @@ export function MemberCarePage({
         ) : (
           <div className="space-y-3">
             {myRequests.map(req => (
-              <div key={req.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <div key={req.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
@@ -264,7 +264,7 @@ export function MemberCarePage({
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => setView('request')}
-          className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left hover:shadow-md transition-shadow active:scale-[0.98]"
+          className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left hover:shadow-md transition-shadow active:scale-[0.98]"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mb-3">
             <MessageCircle size={20} className="text-white" />
@@ -274,7 +274,7 @@ export function MemberCarePage({
         </button>
         <button
           onClick={() => setView('leaders')}
-          className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left hover:shadow-md transition-shadow active:scale-[0.98]"
+          className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left hover:shadow-md transition-shadow active:scale-[0.98]"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center mb-3">
             <Shield size={20} className="text-white" />
@@ -300,7 +300,7 @@ export function MemberCarePage({
                 <button
                   key={conv.id}
                   onClick={() => onSendMessage && setView('chat')}
-                  className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 text-left hover:shadow-md transition-shadow"
+                  className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 text-left hover:shadow-md transition-shadow"
                 >
                   <div className="relative flex-shrink-0">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-xs">
@@ -343,7 +343,7 @@ export function MemberCarePage({
           </div>
           <div className="space-y-2">
             {myRequests.slice(0, 2).map(req => (
-              <div key={req.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3">
+              <div key={req.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{CATEGORY_LABELS[req.category]}</p>
@@ -372,7 +372,7 @@ export function MemberCarePage({
         </div>
         <div className="space-y-2">
           {availableLeaders.slice(0, 3).map(leader => (
-            <div key={leader.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <div className="flex items-center gap-3">
                 <div className="relative flex-shrink-0">
                   <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-sm">
@@ -404,7 +404,7 @@ export function MemberCarePage({
             </div>
           ))}
           {availableLeaders.length === 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 text-center">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 text-center">
               <Clock size={24} className="mx-auto mb-2 text-gray-300 dark:text-dark-600" />
               <p className="text-sm text-gray-500 dark:text-dark-400">No leaders online right now</p>
               <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">Submit a request and we'll connect you when someone is available</p>
@@ -426,7 +426,7 @@ export function MemberCarePage({
             </div>
             <button
               onClick={() => onNavigate('pastor-signup')}
-              className="px-3 py-1.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 text-xs font-medium rounded-lg hover:bg-white dark:hover:bg-dark-800 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 text-xs font-medium rounded-lg hover:bg-stone-100 dark:hover:bg-dark-800 transition-colors flex items-center gap-1"
             >
               Apply
               <ChevronRight size={14} />
@@ -447,7 +447,7 @@ export function MemberCarePage({
 // Simplified leader card for the leaders list view
 function LeaderCard({ leader, onGetHelp }: { leader: LeaderProfile; onGetHelp: () => void }) {
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
       <div className="flex items-start gap-4">
         <div className="relative flex-shrink-0">
           <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-lg">

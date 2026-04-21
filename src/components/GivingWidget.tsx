@@ -97,7 +97,7 @@ export function GivingWidget({ giving, onViewGiving }: GivingWidgetProps) {
   const displayDonors = stats.showLifetimeFallback ? stats.uniqueDonorsAllTime : stats.uniqueDonorsThisMonth;
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 shadow-sm">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Overview</h2>
         <button

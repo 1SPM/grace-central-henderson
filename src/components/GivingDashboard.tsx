@@ -206,7 +206,7 @@ export function GivingDashboard({
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-            className="px-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300"
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300"
           >
             <option value="week">Last 7 days</option>
             <option value="month">Last 30 days</option>
@@ -236,7 +236,7 @@ export function GivingDashboard({
         </button>
         <button
           onClick={() => onNavigate('batch-entry')}
-          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
           <Package className="mb-3 text-gray-400" size={20} />
           <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Batch Entry</p>
@@ -244,7 +244,7 @@ export function GivingDashboard({
         </button>
         <button
           onClick={() => onNavigate('pledges')}
-          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
           <Target className="mb-3 text-gray-400" size={20} />
           <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Pledges</p>
@@ -252,7 +252,7 @@ export function GivingDashboard({
         </button>
         <button
           onClick={() => onNavigate('statements')}
-          className="group p-4 bg-white dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
+          className="group p-4 bg-stone-100 dark:bg-dark-800 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors border border-gray-200 dark:border-dark-700"
         >
           <FileText className="mb-3 text-gray-400" size={20} />
           <p className="font-medium text-sm text-gray-900 dark:text-dark-100">Statements</p>
@@ -264,21 +264,21 @@ export function GivingDashboard({
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => onNavigate('charity-baskets')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
           <ShoppingBasket size={14} className="text-orange-500" />
           <span className="text-gray-700 dark:text-dark-300">Charity Baskets</span>
         </button>
         <button
           onClick={() => onNavigate('donation-tracker')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
           <Search size={14} className="text-indigo-500" />
           <span className="text-gray-700 dark:text-dark-300">Donation Tracker</span>
         </button>
         <button
           onClick={() => onNavigate('member-stats')}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors whitespace-nowrap"
         >
           <UserCheck size={14} className="text-teal-500" />
           <span className="text-gray-700 dark:text-dark-300">Member Stats</span>
@@ -287,7 +287,7 @@ export function GivingDashboard({
 
       {/* Stats Grid - Clean cards */}
       <div data-tutorial="giving-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
               <DollarSign className="text-emerald-600 dark:text-emerald-400" size={16} />
@@ -299,7 +299,7 @@ export function GivingDashboard({
           <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Total this period</p>
         </div>
 
-        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="flex items-center justify-between mb-3">
             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
               <BarChart3 className="text-blue-600 dark:text-blue-400" size={16} />
@@ -319,7 +319,7 @@ export function GivingDashboard({
           <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Monthly average</p>
         </div>
 
-        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="w-8 h-8 bg-slate-100 dark:bg-slate-500/10 rounded-lg flex items-center justify-center mb-3">
             <Repeat className="text-slate-600 dark:text-slate-400" size={16} />
           </div>
@@ -329,7 +329,7 @@ export function GivingDashboard({
           <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{analytics.recurringCount} recurring</p>
         </div>
 
-        <div className="p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-lg flex items-center justify-center mb-3">
             <Users className="text-amber-600 dark:text-amber-400" size={16} />
           </div>
@@ -342,7 +342,7 @@ export function GivingDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fund Breakdown */}
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">By Fund</h2>
           <div className="space-y-3">
             {analytics.topFunds.length === 0 && (
@@ -374,7 +374,7 @@ export function GivingDashboard({
         </div>
 
         {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Recent Transactions</h2>
             <button
@@ -442,7 +442,7 @@ export function GivingDashboard({
 
       {/* Active Campaigns */}
       {activeCampaigns.length > 0 && (
-        <div className="mt-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="mt-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Active Campaigns</h2>
             <button
@@ -505,7 +505,7 @@ export function GivingDashboard({
 
       {/* Monthly Trend */}
       {analytics.monthlyTrend.length > 1 && (
-        <div className="mt-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="mt-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">Monthly Trend</h2>
           <div className="flex items-end justify-between gap-1 h-32">
             {analytics.monthlyTrend.map(({ month, amount }) => {

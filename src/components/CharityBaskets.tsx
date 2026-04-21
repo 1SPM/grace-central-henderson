@@ -222,7 +222,7 @@ export function CharityBaskets({
           Back to Baskets
         </button>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 mb-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 mb-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${typeConfig.color}`}>
@@ -296,7 +296,7 @@ export function CharityBaskets({
         </div>
 
         {/* Items List */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Basket Items</h2>
             {selectedBasket.status === 'collecting' && (
@@ -367,7 +367,7 @@ export function CharityBaskets({
         {/* Add Item Modal */}
         {showAddItemModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg">
               <div className="p-6 border-b border-gray-200 dark:border-dark-700">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Add Item</h2>
@@ -389,7 +389,7 @@ export function CharityBaskets({
                     value={newItem.name}
                     onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                     placeholder="e.g., Canned vegetables"
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -400,7 +400,7 @@ export function CharityBaskets({
                     <select
                       value={newItem.category}
                       onChange={(e) => setNewItem({ ...newItem, category: e.target.value as ItemCategory })}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       {ITEM_CATEGORIES.map((cat) => (
                         <option key={cat.value} value={cat.value}>
@@ -418,7 +418,7 @@ export function CharityBaskets({
                       min="1"
                       value={newItem.quantity}
                       onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -432,7 +432,7 @@ export function CharityBaskets({
                       value={newItem.unit}
                       onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
                       placeholder="e.g., cans, boxes"
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                   <div>
@@ -446,7 +446,7 @@ export function CharityBaskets({
                       value={newItem.estimatedValue}
                       onChange={(e) => setNewItem({ ...newItem, estimatedValue: e.target.value })}
                       placeholder="0.00"
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -457,7 +457,7 @@ export function CharityBaskets({
                   <select
                     value={newItem.donorId}
                     onChange={(e) => setNewItem({ ...newItem, donorId: e.target.value, donorName: '' })}
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Select member or enter name below</option>
                     {people.map((person) => (
@@ -472,7 +472,7 @@ export function CharityBaskets({
                       value={newItem.donorName}
                       onChange={(e) => setNewItem({ ...newItem, donorName: e.target.value })}
                       placeholder="Or enter donor name"
-                      className="w-full mt-2 px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full mt-2 px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   )}
                 </div>
@@ -569,13 +569,13 @@ export function CharityBaskets({
             placeholder="Search baskets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value as BasketType | 'all')}
-          className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="all">All Types</option>
           {BASKET_TYPES.map((type) => (
@@ -587,7 +587,7 @@ export function CharityBaskets({
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as BasketStatus | 'all')}
-          className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="all">All Status</option>
           <option value="collecting">Collecting</option>
@@ -598,7 +598,7 @@ export function CharityBaskets({
 
       {/* Baskets Grid */}
       {filteredBaskets.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+        <div className="text-center py-16 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
           <ShoppingBasket className="mx-auto text-gray-300 dark:text-dark-600 mb-4" size={48} />
           <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100 mb-2">No baskets found</h3>
           <p className="text-gray-500 dark:text-dark-400 mb-4">
@@ -624,7 +624,7 @@ export function CharityBaskets({
               <button
                 key={basket.id}
                 onClick={() => setSelectedBasket(basket)}
-                className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors"
+                className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 text-left hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${typeConfig.color}`}>
@@ -662,7 +662,7 @@ export function CharityBaskets({
       {/* Create Basket Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Create Charity Basket</h2>
@@ -684,7 +684,7 @@ export function CharityBaskets({
                   value={newBasket.name}
                   onChange={(e) => setNewBasket({ ...newBasket, name: e.target.value })}
                   placeholder="e.g., Smith Family Holiday Basket"
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -722,7 +722,7 @@ export function CharityBaskets({
                   onChange={(e) => setNewBasket({ ...newBasket, description: e.target.value })}
                   placeholder="Optional description..."
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                 />
               </div>
               <div>
@@ -732,7 +732,7 @@ export function CharityBaskets({
                 <select
                   value={newBasket.recipientId}
                   onChange={(e) => setNewBasket({ ...newBasket, recipientId: e.target.value, recipientName: '' })}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">Select member or enter name below</option>
                   {people.map((person) => (
@@ -747,7 +747,7 @@ export function CharityBaskets({
                     value={newBasket.recipientName}
                     onChange={(e) => setNewBasket({ ...newBasket, recipientName: e.target.value })}
                     placeholder="Or enter recipient name (for external recipients)"
-                    className="w-full mt-2 px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full mt-2 px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 )}
               </div>
@@ -759,7 +759,7 @@ export function CharityBaskets({
                   type="date"
                   value={newBasket.targetDate}
                   onChange={(e) => setNewBasket({ ...newBasket, targetDate: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -771,7 +771,7 @@ export function CharityBaskets({
                   onChange={(e) => setNewBasket({ ...newBasket, notes: e.target.value })}
                   placeholder="Any special instructions or notes..."
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                 />
               </div>
             </div>

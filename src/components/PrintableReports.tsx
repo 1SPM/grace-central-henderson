@@ -326,7 +326,7 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
             className={`p-4 rounded-xl border text-left transition-all ${
               selectedReport === report.id
                 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
-                : 'border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 hover:border-indigo-200 dark:hover:border-indigo-500/30'
+                : 'border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 hover:border-indigo-200 dark:hover:border-indigo-500/30'
             }`}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -346,7 +346,7 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
 
       {/* Report Preview */}
       {selectedReport && (
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 dark:text-dark-100">Preview</h2>
             <button

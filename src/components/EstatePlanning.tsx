@@ -294,19 +294,19 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-emerald-600">{legacyStats.totalPlans}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Total Plans</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-green-600">{legacyStats.confirmedPlans}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Confirmed</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-blue-600">{legacyStats.plansWithGifts}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">With Church Gifts</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-slate-600">{formatCurrency(legacyStats.totalExpectedValue)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Expected Value</p>
         </div>
@@ -335,7 +335,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white"
           />
         </div>
         <div className="relative">
@@ -343,7 +343,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as EstatePlan['status'] | 'all')}
-            className="pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none"
+            className="pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white appearance-none"
           >
             <option value="all">All Status</option>
             <option value="inquiry">Inquiry</option>
@@ -358,7 +358,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
         {/* Plan List */}
         <div className="lg:col-span-1 space-y-3">
           {filteredPlans.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
               <Shield className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
               <p className="text-gray-500 dark:text-gray-400 mb-4">No estate plans found</p>
               <button
@@ -377,7 +377,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
                 <button
                   key={plan.id}
                   onClick={() => setSelectedPlan(plan)}
-                  className={`w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 border transition-all ${
+                  className={`w-full text-left bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border transition-all ${
                     isSelected
                       ? 'border-emerald-500 ring-2 ring-emerald-500/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600'
@@ -442,7 +442,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
         {/* Plan Details */}
         <div className="lg:col-span-2">
           {selectedPlan ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Detail Header */}
               <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20">
                 <div className="flex items-start justify-between">
@@ -470,7 +470,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
                     </span>
                     <button
                       onClick={() => handleEditPlan(selectedPlan)}
-                      className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      className="p-2 hover:bg-stone-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <Edit2 className="w-4 h-4 text-gray-500" />
                     </button>
@@ -757,7 +757,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
               <Shield className="w-16 h-16 mx-auto text-gray-200 dark:text-gray-700 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Plan Selected</h3>
               <p className="text-gray-500 dark:text-gray-400">Select a plan from the list to view details</p>
@@ -838,7 +838,7 @@ function EstatePlanFormModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {plan ? 'Edit Estate Plan' : 'New Estate Plan'}
@@ -855,7 +855,7 @@ function EstatePlanFormModal({
                   type="text"
                   value={formData.personName}
                   onChange={(e) => setFormData(prev => ({ ...prev, personName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -865,7 +865,7 @@ function EstatePlanFormModal({
                   type="text"
                   value={formData.spouseName}
                   onChange={(e) => setFormData(prev => ({ ...prev, spouseName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -874,7 +874,7 @@ function EstatePlanFormModal({
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -883,7 +883,7 @@ function EstatePlanFormModal({
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -910,7 +910,7 @@ function EstatePlanFormModal({
                       type="date"
                       value={formData.willDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, willDate: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                   </div>
                 )}
@@ -931,7 +931,7 @@ function EstatePlanFormModal({
                     <select
                       value={formData.trustType}
                       onChange={(e) => setFormData(prev => ({ ...prev, trustType: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     >
                       <option value="">Select type...</option>
                       <option value="revocable">Revocable Living Trust</option>
@@ -959,7 +959,7 @@ function EstatePlanFormModal({
                       type="text"
                       value={formData.poaAgent}
                       onChange={(e) => setFormData(prev => ({ ...prev, poaAgent: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                   </div>
                 )}
@@ -981,7 +981,7 @@ function EstatePlanFormModal({
                       type="text"
                       value={formData.healthcareAgent}
                       onChange={(e) => setFormData(prev => ({ ...prev, healthcareAgent: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                   </div>
                 )}
@@ -1020,7 +1020,7 @@ function EstatePlanFormModal({
                     <select
                       value={formData.plannedGiftType}
                       onChange={(e) => setFormData(prev => ({ ...prev, plannedGiftType: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     >
                       <option value="">Select type...</option>
                       {Object.entries(plannedGiftTypes).map(([value, label]) => (
@@ -1033,7 +1033,7 @@ function EstatePlanFormModal({
                     <select
                       value={formData.designatedFund}
                       onChange={(e) => setFormData(prev => ({ ...prev, designatedFund: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                     >
                       <option value="">Select fund...</option>
                       {fundOptions.map(fund => (
@@ -1047,7 +1047,7 @@ function EstatePlanFormModal({
                       type="number"
                       value={formData.plannedGiftAmount}
                       onChange={(e) => setFormData(prev => ({ ...prev, plannedGiftAmount: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                       placeholder="0"
                     />
                   </div>
@@ -1057,7 +1057,7 @@ function EstatePlanFormModal({
                       type="number"
                       value={formData.plannedGiftPercentage}
                       onChange={(e) => setFormData(prev => ({ ...prev, plannedGiftPercentage: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                       placeholder="0"
                       min="0"
                       max="100"
@@ -1069,7 +1069,7 @@ function EstatePlanFormModal({
                       type="text"
                       value={formData.giftPurpose}
                       onChange={(e) => setFormData(prev => ({ ...prev, giftPurpose: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                       placeholder="e.g., To support youth ministry"
                     />
                   </div>
@@ -1109,7 +1109,7 @@ function EstatePlanFormModal({
                         type="number"
                         value={formData.lifeInsuranceAmount}
                         onChange={(e) => setFormData(prev => ({ ...prev, lifeInsuranceAmount: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                         placeholder="0"
                       />
                     </div>
@@ -1149,7 +1149,7 @@ function EstatePlanFormModal({
             <select
               value={formData.status}
               onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as EstatePlan['status'] }))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
             >
               <option value="inquiry">Inquiry</option>
               <option value="in-progress">In Progress</option>
@@ -1165,7 +1165,7 @@ function EstatePlanFormModal({
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
               placeholder="Additional notes about the estate plan..."
             />
           </div>

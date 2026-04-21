@@ -369,23 +369,23 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-stone-600">{upcomingServices.length}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-amber-600">
             {services.filter(s => s.status === 'planning').length}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">In Planning</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-green-600">
             {services.filter(s => s.status === 'completed').length}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Completed</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-blue-600">
             {services.filter(s => s.wasMember).length}
           </p>
@@ -402,7 +402,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white"
           />
         </div>
         <div className="relative">
@@ -410,7 +410,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as FuneralService['status'] | 'all')}
-            className="pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none"
+            className="pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white appearance-none"
           >
             <option value="all">All Status</option>
             <option value="inquiry">Inquiry</option>
@@ -426,7 +426,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
         {/* Service List */}
         <div className="lg:col-span-1 space-y-3">
           {filteredServices.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
               <Flower2 className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
               <p className="text-gray-500 dark:text-gray-400 mb-4">No services found</p>
               <button
@@ -444,7 +444,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
                 <button
                   key={service.id}
                   onClick={() => setSelectedService(service)}
-                  className={`w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 border transition-all ${
+                  className={`w-full text-left bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border transition-all ${
                     isSelected
                       ? 'border-stone-500 ring-2 ring-stone-500/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-stone-300 dark:hover:border-stone-600'
@@ -492,7 +492,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
         {/* Service Details */}
         <div className="lg:col-span-2">
           {selectedService ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Detail Header */}
               <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-stone-50 to-stone-100 dark:from-stone-900/20 dark:to-stone-800/20">
                 <div className="flex items-start justify-between">
@@ -518,7 +518,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
                     </span>
                     <button
                       onClick={() => handleEditService(selectedService)}
-                      className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      className="p-2 hover:bg-stone-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <Edit2 className="w-4 h-4 text-gray-500" />
                     </button>
@@ -789,7 +789,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
               <Flower2 className="w-16 h-16 mx-auto text-gray-200 dark:text-gray-700 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Service Selected</h3>
               <p className="text-gray-500 dark:text-gray-400">Select a service from the list to view details</p>
@@ -878,7 +878,7 @@ function FuneralFormModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {service ? 'Edit Service' : 'New Funeral/Memorial Service'}
@@ -895,7 +895,7 @@ function FuneralFormModal({
                   type="text"
                   value={formData.deceasedName}
                   onChange={(e) => setFormData(prev => ({ ...prev, deceasedName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -915,7 +915,7 @@ function FuneralFormModal({
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -924,7 +924,7 @@ function FuneralFormModal({
                   type="date"
                   value={formData.dateOfDeath}
                   onChange={(e) => setFormData(prev => ({ ...prev, dateOfDeath: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -941,7 +941,7 @@ function FuneralFormModal({
                   type="text"
                   value={formData.primaryContactName}
                   onChange={(e) => setFormData(prev => ({ ...prev, primaryContactName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -952,7 +952,7 @@ function FuneralFormModal({
                   value={formData.primaryContactRelation}
                   onChange={(e) => setFormData(prev => ({ ...prev, primaryContactRelation: e.target.value }))}
                   placeholder="e.g., Spouse, Son, Daughter"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -962,7 +962,7 @@ function FuneralFormModal({
                   type="tel"
                   value={formData.primaryContactPhone}
                   onChange={(e) => setFormData(prev => ({ ...prev, primaryContactPhone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -971,7 +971,7 @@ function FuneralFormModal({
                   type="email"
                   value={formData.primaryContactEmail}
                   onChange={(e) => setFormData(prev => ({ ...prev, primaryContactEmail: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -986,7 +986,7 @@ function FuneralFormModal({
                 <select
                   value={formData.serviceType}
                   onChange={(e) => setFormData(prev => ({ ...prev, serviceType: e.target.value as FuneralService['serviceType'] }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 >
                   <option value="funeral">Funeral Service</option>
                   <option value="memorial">Memorial Service</option>
@@ -1000,7 +1000,7 @@ function FuneralFormModal({
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as FuneralService['status'] }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 >
                   <option value="inquiry">Inquiry</option>
                   <option value="planning">Planning</option>
@@ -1014,7 +1014,7 @@ function FuneralFormModal({
                   type="date"
                   value={formData.serviceDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, serviceDate: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -1024,7 +1024,7 @@ function FuneralFormModal({
                   type="time"
                   value={formData.serviceTime}
                   onChange={(e) => setFormData(prev => ({ ...prev, serviceTime: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -1035,7 +1035,7 @@ function FuneralFormModal({
                   value={formData.serviceLocation}
                   onChange={(e) => setFormData(prev => ({ ...prev, serviceLocation: e.target.value }))}
                   placeholder="Church name or venue"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -1045,7 +1045,7 @@ function FuneralFormModal({
                   type="text"
                   value={formData.officiantName}
                   onChange={(e) => setFormData(prev => ({ ...prev, officiantName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -1054,7 +1054,7 @@ function FuneralFormModal({
                   type="text"
                   value={formData.funeralHome}
                   onChange={(e) => setFormData(prev => ({ ...prev, funeralHome: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -1070,7 +1070,7 @@ function FuneralFormModal({
                   type="date"
                   value={formData.wakeDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, wakeDate: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -1079,7 +1079,7 @@ function FuneralFormModal({
                   type="time"
                   value={formData.wakeTime}
                   onChange={(e) => setFormData(prev => ({ ...prev, wakeTime: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -1088,7 +1088,7 @@ function FuneralFormModal({
                   type="text"
                   value={formData.wakeLocation}
                   onChange={(e) => setFormData(prev => ({ ...prev, wakeLocation: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -1140,7 +1140,7 @@ function FuneralFormModal({
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
               placeholder="Special requests, family preferences, etc."
             />
           </div>

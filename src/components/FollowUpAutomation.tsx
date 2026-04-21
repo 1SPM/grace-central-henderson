@@ -469,7 +469,7 @@ export function FollowUpAutomation({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-lg">
               <Play size={20} className="text-green-600 dark:text-green-400" />
@@ -480,7 +480,7 @@ export function FollowUpAutomation({
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-slate-100 dark:bg-slate-500/20 rounded-lg">
               <Zap size={20} className="text-slate-600 dark:text-slate-400" />
@@ -491,7 +491,7 @@ export function FollowUpAutomation({
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
               <Clock size={20} className="text-blue-600 dark:text-blue-400" />
@@ -540,7 +540,7 @@ export function FollowUpAutomation({
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className={`bg-white dark:bg-dark-800 rounded-xl border transition-all ${
+              className={`bg-stone-100 dark:bg-dark-800 rounded-xl border transition-all ${
                 rule.enabled
                   ? 'border-gray-200 dark:border-dark-700'
                   : 'border-gray-200 dark:border-dark-700 opacity-60'
@@ -649,7 +649,7 @@ export function FollowUpAutomation({
           ))}
 
           {rules.length === 0 && (
-            <div className="text-center py-12 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+            <div className="text-center py-12 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
               <Zap size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 No automation rules yet
@@ -670,7 +670,7 @@ export function FollowUpAutomation({
 
       {/* Activity Tab */}
       {activeTab === 'activity' && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="divide-y divide-gray-100 dark:divide-dark-700">
             {triggeredEvents.map((event) => (
               <div key={event.id} className="p-4 flex items-start gap-3">
@@ -721,7 +721,7 @@ export function FollowUpAutomation({
       {/* Create Rule Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Create Automation Rule
@@ -745,7 +745,7 @@ export function FollowUpAutomation({
                   value={newRule.name || ''}
                   onChange={(e) => setNewRule(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., First Visit Follow-up"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -759,7 +759,7 @@ export function FollowUpAutomation({
                   onChange={(e) => setNewRule(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Describe what this rule does..."
                   rows={2}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -819,7 +819,7 @@ export function FollowUpAutomation({
                         config: { count: parseInt(e.target.value) }
                       }
                     }))}
-                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700"
+                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700"
                   />
                 </div>
               )}
@@ -840,7 +840,7 @@ export function FollowUpAutomation({
                         config: { weeks: parseInt(e.target.value) }
                       }
                     }))}
-                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700"
+                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700"
                   />
                 </div>
               )}
@@ -861,7 +861,7 @@ export function FollowUpAutomation({
                         config: { daysBefore: parseInt(e.target.value) }
                       }
                     }))}
-                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700"
+                    className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700"
                   />
                 </div>
               )}
@@ -920,7 +920,7 @@ export function FollowUpAutomation({
                         }
                       }))}
                       placeholder="Follow up with {firstName}"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -937,7 +937,7 @@ export function FollowUpAutomation({
                             config: { ...prev.action!.config, category: e.target.value }
                           }
                         }))}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800"
                       >
                         <option value="follow-up">Follow-up</option>
                         <option value="care">Care</option>
@@ -958,7 +958,7 @@ export function FollowUpAutomation({
                             config: { ...prev.action!.config, priority: e.target.value }
                           }
                         }))}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -981,7 +981,7 @@ export function FollowUpAutomation({
                           config: { ...prev.action!.config, daysUntilDue: parseInt(e.target.value) }
                         }
                       }))}
-                      className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800"
+                      className="w-32 px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800"
                     />
                   </div>
                 </div>
@@ -1011,7 +1011,7 @@ export function FollowUpAutomation({
       {/* Edit Rule Modal - Similar structure */}
       {editingRule && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-800 rounded-2xl w-full max-w-md p-6">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                 Edit Rule
@@ -1032,7 +1032,7 @@ export function FollowUpAutomation({
                   type="text"
                   value={editingRule.name}
                   onChange={(e) => setEditingRule(prev => prev ? { ...prev, name: e.target.value } : null)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700"
                 />
               </div>
               <div>
@@ -1043,7 +1043,7 @@ export function FollowUpAutomation({
                   value={editingRule.description}
                   onChange={(e) => setEditingRule(prev => prev ? { ...prev, description: e.target.value } : null)}
                   rows={2}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-700"
                 />
               </div>
               <div className="flex items-center gap-2">

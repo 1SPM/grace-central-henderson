@@ -10,7 +10,7 @@ export function Skeleton({ className = '' }: { className?: string }) {
 // Person card skeleton
 export function PersonCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Skeleton className="w-12 h-12 rounded-full" />
         <div className="space-y-2">
@@ -29,7 +29,7 @@ export function PersonCardSkeleton() {
 // Dashboard stat card skeleton
 export function StatCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
       <div className="flex items-center justify-between mb-4">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="w-10 h-10 rounded-xl" />
@@ -43,7 +43,7 @@ export function StatCardSkeleton() {
 // Task item skeleton
 export function TaskItemSkeleton() {
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
       <div className="flex items-start gap-3">
         <Skeleton className="w-5 h-5 rounded mt-0.5" />
         <div className="flex-1 space-y-2">
@@ -70,7 +70,7 @@ export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
 // Calendar event skeleton
 export function EventCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 space-y-3">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 space-y-3">
       <Skeleton className="h-5 w-3/4" />
       <div className="flex items-center gap-2">
         <Skeleton className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function DashboardSkeleton() {
 
       {/* Content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <Skeleton className="h-6 w-32 mb-4" />
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -136,7 +136,7 @@ export function DashboardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <Skeleton className="h-6 w-32 mb-4" />
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (

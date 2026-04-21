@@ -53,7 +53,7 @@ export function ProfileCompleteness({ person, showDetails = false }: ProfileComp
   const missingFields = fields.filter(f => !f.filled);
 
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-medium text-gray-900 dark:text-dark-100">Profile Completeness</h3>
         <span className={`text-lg font-bold ${getScoreColor()}`}>{score}%</span>

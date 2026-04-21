@@ -154,7 +154,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
           {tags.map((tag) => (
             <div
               key={tag.name}
-              className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+              className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
             >
               <div className="flex items-start justify-between mb-3">
                 {editingTag === tag.name ? (
@@ -163,7 +163,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
                       type="text"
                       value={newTagName}
                       onChange={(e) => setNewTagName(e.target.value)}
-                      className="flex-1 px-3 py-1.5 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-3 py-1.5 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       autoFocus
                     />
                     <button
@@ -232,7 +232,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+        <div className="text-center py-12 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
           <Tag className="mx-auto text-gray-300 dark:text-dark-600 mb-3" size={48} />
           <p className="text-gray-500 dark:text-dark-400">No tags created yet</p>
           <button
@@ -247,7 +247,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
       {/* Merge Modal */}
       {showMergeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Merge Tags
@@ -264,7 +264,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
                 <select
                   value={mergeSource}
                   onChange={(e) => setMergeSource(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">Select tag</option>
                   {tags.map((tag) => (
@@ -281,7 +281,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
                 <select
                   value={mergeTarget}
                   onChange={(e) => setMergeTarget(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">Select tag</option>
                   {tags.map((tag) => (
@@ -314,7 +314,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
       {/* Create Tag Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Create New Tag
@@ -330,7 +330,7 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
                   value={createTagName}
                   onChange={(e) => setCreateTagName(e.target.value)}
                   placeholder="e.g., Youth, Volunteer, New Member"
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
               <div>

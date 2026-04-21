@@ -240,7 +240,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 shadow-sm'
+                ? 'bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 shadow-sm'
                 : 'text-gray-500 dark:text-dark-400'
             }`}
           >
@@ -255,7 +255,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
         <div className="space-y-4">
           {/* Upcoming Sessions */}
           {scheduled.length > 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-3">Upcoming Sessions</h3>
               <div className="space-y-2">
                 {scheduled.map(session => {
@@ -287,7 +287,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
 
           {/* Active Sessions */}
           {active.length > 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-3">Active Sessions</h3>
               <div className="space-y-2">
                 {active.map(session => (
@@ -314,7 +314,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
           )}
 
           {/* Expertise Areas */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-3">Your Expertise</h3>
             <div className="flex flex-wrap gap-2">
               {currentLeader.expertiseAreas.map(area => {
@@ -331,7 +331,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
 
           {/* Follow-ups Due */}
           {followUps.length > 0 && (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100 mb-3">Follow-ups Due</h3>
               <div className="space-y-2">
                 {followUps.map(session => (
@@ -372,7 +372,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
                 };
 
                 return (
-                  <div key={session.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+                  <div key={session.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center">
@@ -423,7 +423,7 @@ export function MyMinistryPage({ leader, helpRequests = [] }: MyMinistryPageProp
             </div>
           ) : (
             pendingRequests.map(req => (
-              <div key={req.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <div key={req.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{CATEGORY_LABELS[req.category]} Request</p>

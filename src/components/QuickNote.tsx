@@ -71,7 +71,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-[10vh]">
       <div
-        className="bg-white dark:bg-dark-850 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+        className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -107,12 +107,12 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
                 placeholder="Search for a person..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
 
               {/* Search Results */}
               {filteredPeople.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 overflow-hidden">
+                <div className="absolute left-0 right-0 top-full mt-2 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 overflow-hidden">
                   {filteredPeople.map((person) => (
                     <button
                       key={person.id}
@@ -135,7 +135,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
               )}
 
               {search && filteredPeople.length === 0 && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 p-4 text-center text-gray-500 dark:text-dark-400 text-sm">
+                <div className="absolute left-0 right-0 top-full mt-2 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 p-4 text-center text-gray-500 dark:text-dark-400 text-sm">
                   No people found
                 </div>
               )}
@@ -191,7 +191,7 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
             onChange={(e) => setContent(e.target.value)}
             rows={4}
             disabled={!selectedPerson}
-            className={`w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${!selectedPerson ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${!selectedPerson ? 'opacity-50 cursor-not-allowed' : ''}`}
           />
         </div>
 

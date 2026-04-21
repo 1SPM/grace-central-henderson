@@ -579,7 +579,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                   <BellOff size={12} />
                   Snooze
                 </button>
-                <div className="absolute left-0 top-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[140px]">
+                <div className="absolute left-0 top-full mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[140px]">
                   <button
                     onClick={() => handleSnooze(item, 1)}
                     className="w-full px-3 py-2 text-left text-xs text-gray-700 dark:text-dark-200 hover:bg-gray-50 dark:hover:bg-dark-700 first:rounded-t-lg"
@@ -682,25 +682,25 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
           const colorClasses = {
             violet: {
-              bg: isActive ? 'bg-slate-100 dark:bg-slate-500/20' : 'bg-white dark:bg-dark-800',
+              bg: isActive ? 'bg-slate-100 dark:bg-slate-500/20' : 'bg-stone-100 dark:bg-dark-800',
               border: isActive ? 'border-slate-300 dark:border-slate-500/30' : 'border-gray-200 dark:border-dark-700',
               icon: 'text-slate-500',
               text: isActive ? 'text-slate-700 dark:text-slate-400' : 'text-gray-900 dark:text-dark-100',
             },
             blue: {
-              bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-white dark:bg-dark-800',
+              bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-stone-100 dark:bg-dark-800',
               border: isActive ? 'border-blue-300 dark:border-blue-500/30' : 'border-gray-200 dark:border-dark-700',
               icon: 'text-blue-500',
               text: isActive ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-dark-100',
             },
             pink: {
-              bg: isActive ? 'bg-pink-100 dark:bg-pink-500/20' : 'bg-white dark:bg-dark-800',
+              bg: isActive ? 'bg-pink-100 dark:bg-pink-500/20' : 'bg-stone-100 dark:bg-dark-800',
               border: isActive ? 'border-pink-300 dark:border-pink-500/30' : 'border-gray-200 dark:border-dark-700',
               icon: 'text-pink-500',
               text: isActive ? 'text-pink-700 dark:text-pink-400' : 'text-gray-900 dark:text-dark-100',
             },
             amber: {
-              bg: isActive ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-white dark:bg-dark-800',
+              bg: isActive ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-stone-100 dark:bg-dark-800',
               border: isActive ? 'border-amber-300 dark:border-amber-500/30' : 'border-gray-200 dark:border-dark-700',
               icon: 'text-amber-500',
               text: isActive ? 'text-amber-700 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100',
@@ -729,7 +729,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
       {/* Feed Items grouped by time */}
       {feedItems.length === 0 ? (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-12 text-center">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-12 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCheck size={32} className="text-green-500" />
           </div>
@@ -746,7 +746,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             const isUrgent = group === 'overdue';
 
             return (
-              <div key={group} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div key={group} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
                 {/* Section header */}
                 <button
                   onClick={() => toggleSection(group)}
@@ -783,7 +783,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
       {/* Recently Completed Section */}
       {completedItems.length > 0 && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <button
             onClick={() => setShowRecentlyCompleted(!showRecentlyCompleted)}
             className="w-full px-4 py-3 flex items-center justify-between bg-green-50 dark:bg-green-500/10"
@@ -837,7 +837,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
       {/* Completion Note Modal */}
       {completionModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md shadow-2xl">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="font-semibold text-gray-900 dark:text-dark-100">
                 Mark as Done
@@ -855,7 +855,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
                 onChange={(e) => setCompletionModal({ ...completionModal, note: e.target.value })}
                 placeholder="Left voicemail, will call back Tuesday..."
                 rows={3}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
               />
             </div>
             <div className="p-4 border-t border-gray-200 dark:border-dark-700 flex justify-end gap-3">

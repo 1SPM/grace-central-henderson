@@ -15,7 +15,7 @@ export function PastorSignupPage({ churchName = 'Grace Church', onSubmit, onBack
   if (submitted) {
     return (
       <div className="p-6 max-w-lg mx-auto text-center">
-        <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-gray-700/50 p-8">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-gray-700/50 p-8">
           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={32} className="text-emerald-600 dark:text-emerald-400" />
           </div>

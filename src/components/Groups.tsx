@@ -108,7 +108,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
             <div
               key={group.id}
               {...(groupIndex === 0 ? { 'data-tutorial': 'group-card' } : {})}
-              className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden"
+              className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden"
             >
               {/* Group Header */}
               <div className="p-5">
@@ -242,7 +242,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                       placeholder="Search people to add..."
                       value={memberSearch}
                       onChange={(e) => setMemberSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-sm focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                      className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-sm focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                       autoFocus
                     />
                   </div>
@@ -334,7 +334,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
 
       {/* Empty State */}
       {activeGroups.length === 0 && (
-        <div className="text-center py-16 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+        <div className="text-center py-16 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
           <div className="w-16 h-16 bg-slate-100 dark:bg-slate-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users2 className="text-slate-600 dark:text-slate-400" size={32} />
           </div>
@@ -399,7 +399,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg shadow-xl">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg shadow-xl">
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-dark-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Create New Group</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg">
@@ -417,7 +417,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Young Adults, Men's Bible Study"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               required
             />
           </div>
@@ -431,7 +431,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What is this group about?"
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
             />
           </div>
 
@@ -442,7 +442,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
             <select
               value={leaderId}
               onChange={(e) => setLeaderId(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             >
               <option value="">Select a leader...</option>
               {leaders.map(person => (
@@ -461,7 +461,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               <select
                 value={meetingDay}
                 onChange={(e) => setMeetingDay(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               >
                 <option value="">Select day...</option>
                 <option value="Sunday">Sunday</option>
@@ -481,7 +481,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
                 type="time"
                 value={meetingTime}
                 onChange={(e) => setMeetingTime(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -495,7 +495,7 @@ function CreateGroupModal({ people, onClose, onCreate }: CreateGroupModalProps) 
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., Room 101, Smith's Home"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
           </div>
 

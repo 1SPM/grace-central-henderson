@@ -302,7 +302,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
           />
         </div>
         <div className="relative">
@@ -310,7 +310,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ShopItem['category'] | 'all')}
-            className="pl-9 pr-8 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm appearance-none"
+            className="pl-9 pr-8 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm appearance-none"
           >
             <option value="all">All Categories</option>
             {Object.entries(categoryLabels).map(([value, label]) => (
@@ -331,7 +331,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
           filteredItems.map(item => (
             <div
               key={item.id}
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+              className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
               {/* Product Image Placeholder */}
               <div className="relative aspect-square bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -379,7 +379,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
       {/* Item Detail Modal */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setSelectedItem(null)}>
-          <div className="bg-white dark:bg-gray-800 w-full rounded-t-3xl p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
+          <div className="bg-stone-100 dark:bg-gray-800 w-full rounded-t-3xl p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">{selectedItem.name}</h3>
@@ -453,7 +453,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
       {/* Cart Drawer */}
       {showCart && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowCart(false)}>
-          <div className="bg-white dark:bg-gray-800 w-full rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+          <div className="bg-stone-100 dark:bg-gray-800 w-full rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Cart Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Shopping Cart ({cartCount})</h3>
@@ -547,7 +547,7 @@ export function MemberShopPage({ churchName = 'Grace Church' }: MemberShopPagePr
       {/* Checkout Success Modal */}
       {showCheckout && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center max-w-sm w-full">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl p-6 text-center max-w-sm w-full">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>

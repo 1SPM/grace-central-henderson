@@ -81,7 +81,7 @@ export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Ch
         {personId && (
           <button
             onClick={() => setView('history')}
-            className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 active:scale-[0.99] transition-transform"
+            className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 active:scale-[0.99] transition-transform"
           >
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
               <History className="text-blue-600 dark:text-blue-400" size={20} />
@@ -101,7 +101,7 @@ export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Ch
 
         <button
           onClick={() => setView('give')}
-          className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 active:scale-[0.99] transition-transform"
+          className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 flex items-center gap-3 active:scale-[0.99] transition-transform"
         >
           <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-lg flex items-center justify-center">
             <Repeat className="text-slate-600 dark:text-slate-400" size={20} />
@@ -241,7 +241,7 @@ function GiveForm({
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-white text-base"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-white text-base"
                 placeholder="John"
               />
             </div>
@@ -253,7 +253,7 @@ function GiveForm({
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-white text-base"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-white text-base"
                 placeholder="Smith"
               />
             </div>
@@ -267,7 +267,7 @@ function GiveForm({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-white text-base"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-white text-base"
               placeholder="john@example.com"
             />
           </div>
@@ -433,7 +433,7 @@ function GiveForm({
                 className={`py-2 rounded-lg text-xs font-medium transition-all ${
                   frequency === interval.id
                     ? 'bg-slate-500 text-white'
-                    : 'bg-white dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
+                    : 'bg-stone-100 dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
                 }`}
               >
                 {interval.name}
@@ -505,7 +505,7 @@ function GivingHistory({
           {myGiving.map((gift) => (
             <div
               key={gift.id}
-              className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+              className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-bold text-gray-900 dark:text-white">${gift.amount.toFixed(2)}</span>

@@ -141,7 +141,7 @@ export function TextToGiveSetup({ config: initialConfig, webhookUrl, onSave }: T
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
           <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -378,7 +378,7 @@ export function TextToGiveSetup({ config: initialConfig, webhookUrl, onSave }: T
       {/* Test Modal */}
       {showTestModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Test Text-to-Give</h3>
 
             <div className="mb-4">

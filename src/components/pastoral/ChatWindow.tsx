@@ -130,7 +130,7 @@ export function ChatWindow({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-h-[700px] bg-white dark:bg-dark-900 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-8rem)] max-h-[700px] bg-stone-100 dark:bg-dark-900 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700/50 bg-white/80 dark:bg-dark-800/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ export function ChatWindow({
               <MoreVertical size={16} />
             </button>
             {showActions && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-10 py-1">
+              <div className="absolute right-0 top-full mt-1 w-44 bg-stone-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-10 py-1">
                 {onResolve && (
                   <button
                     onClick={() => { onResolve(conversation.id); setShowActions(false); }}
@@ -240,7 +240,7 @@ export function ChatWindow({
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
-              className="flex-1 px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-dark-700 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none max-h-32"
+              className="flex-1 px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-stone-100 dark:bg-dark-700 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none max-h-32"
               style={{ minHeight: '40px' }}
             />
             <button

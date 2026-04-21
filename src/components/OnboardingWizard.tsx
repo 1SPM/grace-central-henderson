@@ -108,7 +108,7 @@ export function OnboardingWizard({
       aria-modal="true"
       aria-label="Church setup wizard"
     >
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export function OnboardingWizard({
                   value={churchName}
                   onChange={e => setChurchName(e.target.value)}
                   placeholder="e.g. Grace Community Church"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-transparent outline-none transition-all text-lg"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-dark-600 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-transparent outline-none transition-all text-lg"
                   autoFocus
                   onKeyDown={e => e.key === 'Enter' && canProceed() && goNext()}
                 />

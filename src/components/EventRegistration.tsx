@@ -323,7 +323,7 @@ export function EventRegistration({
             placeholder="Search events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm"
           />
         </div>
 
@@ -332,7 +332,7 @@ export function EventRegistration({
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as CalendarEvent['category'] | 'all')}
-            className="px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm"
+            className="px-3 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm"
           >
             <option value="all">All Categories</option>
             {CATEGORY_OPTIONS.map(cat => (
@@ -364,7 +364,7 @@ export function EventRegistration({
           return (
             <div
               key={event.id}
-              className={`bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5 hover:border-gray-300 dark:hover:border-dark-600 transition-colors ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5 hover:border-gray-300 dark:hover:border-dark-600 transition-colors ${
                 isPast ? 'opacity-60' : ''
               }`}
             >
@@ -497,7 +497,7 @@ export function EventRegistration({
         })}
 
         {filteredEvents.length === 0 && (
-          <div className="text-center py-16 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+          <div className="text-center py-16 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
             <CalendarDays className="mx-auto text-gray-300 dark:text-dark-600 mb-4" size={48} />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-2">
               No events found
@@ -523,8 +523,8 @@ export function EventRegistration({
       {/* Create Event Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="sticky top-0 bg-white dark:bg-dark-850 flex items-center justify-between p-5 border-b border-gray-200 dark:border-dark-700">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="sticky top-0 bg-stone-100 dark:bg-dark-850 flex items-center justify-between p-5 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Create Event
               </h2>
@@ -547,7 +547,7 @@ export function EventRegistration({
                   value={eventForm.title}
                   onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
                   placeholder="e.g., Sunday Service, Youth Night"
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                   required
                 />
               </div>
@@ -562,7 +562,7 @@ export function EventRegistration({
                   onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
                   placeholder="Event details..."
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 resize-none"
                 />
               </div>
 
@@ -611,7 +611,7 @@ export function EventRegistration({
                     type="date"
                     value={eventForm.startDate}
                     onChange={(e) => setEventForm({ ...eventForm, startDate: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                     required
                   />
                 </div>
@@ -624,7 +624,7 @@ export function EventRegistration({
                       type="time"
                       value={eventForm.startTime}
                       onChange={(e) => setEventForm({ ...eventForm, startTime: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                     />
                   </div>
                 )}
@@ -640,7 +640,7 @@ export function EventRegistration({
                     type="date"
                     value={eventForm.endDate}
                     onChange={(e) => setEventForm({ ...eventForm, endDate: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                   />
                 </div>
                 {!eventForm.allDay && (
@@ -652,7 +652,7 @@ export function EventRegistration({
                       type="time"
                       value={eventForm.endTime}
                       onChange={(e) => setEventForm({ ...eventForm, endTime: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                     />
                   </div>
                 )}
@@ -668,7 +668,7 @@ export function EventRegistration({
                   value={eventForm.location}
                   onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
                   placeholder="e.g., Main Sanctuary, Fellowship Hall"
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                 />
               </div>
 
@@ -683,7 +683,7 @@ export function EventRegistration({
                 <select
                   value={eventForm.recurrence}
                   onChange={(e) => setEventForm({ ...eventForm, recurrence: e.target.value as RecurrenceType })}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                 >
                   {RECURRENCE_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -701,7 +701,7 @@ export function EventRegistration({
                     type="date"
                     value={eventForm.recurrenceEndDate}
                     onChange={(e) => setEventForm({ ...eventForm, recurrenceEndDate: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                   />
                   <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
                     Leave empty for no end date
@@ -740,7 +740,7 @@ export function EventRegistration({
                         onChange={(e) => setEventForm({ ...eventForm, capacity: e.target.value })}
                         placeholder="Unlimited"
                         min="1"
-                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                       />
                     </div>
                     <div>
@@ -751,7 +751,7 @@ export function EventRegistration({
                         type="date"
                         value={eventForm.registrationDeadline}
                         onChange={(e) => setEventForm({ ...eventForm, registrationDeadline: e.target.value })}
-                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                       />
                     </div>
                   </div>
@@ -760,7 +760,7 @@ export function EventRegistration({
             </div>
 
             {/* Actions */}
-            <div className="sticky bottom-0 bg-white dark:bg-dark-850 p-5 border-t border-gray-200 dark:border-dark-700 flex gap-3">
+            <div className="sticky bottom-0 bg-stone-100 dark:bg-dark-850 p-5 border-t border-gray-200 dark:border-dark-700 flex gap-3">
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors font-medium"
@@ -848,7 +848,7 @@ function RegistrationModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
         {/* Header */}
         <div className="p-5 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center justify-between mb-2">
@@ -978,7 +978,7 @@ function RegistrationModal({
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search by name..."
-                        className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-sm"
+                        className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-sm"
                       />
                     </div>
                     <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-dark-600 rounded-xl">
@@ -1024,7 +1024,7 @@ function RegistrationModal({
                       onChange={(e) => setGuestCount(Math.max(0, parseInt(e.target.value) || 0))}
                       min={0}
                       max={remainingCapacity !== null ? Math.max(0, remainingCapacity - 1) : 10}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800"
                     />
                     <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
                       Number of guests coming with this person

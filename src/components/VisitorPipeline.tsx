@@ -111,7 +111,7 @@ export function VisitorPipeline({ people, onViewPerson }: VisitorPipelineProps) 
                     <button
                       key={person.id}
                       onClick={() => onViewPerson(person.id)}
-                      className="w-full p-3 bg-white dark:bg-dark-850 rounded-lg border border-gray-200 dark:border-dark-700 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all text-left group"
+                      className="w-full p-3 bg-stone-100 dark:bg-dark-850 rounded-lg border border-gray-200 dark:border-dark-700 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all text-left group"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 bg-gradient-to-br ${avatarGradients[person.status]} rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0`}>

@@ -137,7 +137,7 @@ export function MemberPortal({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-stone-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {profile.photoUrl ? (
@@ -172,7 +172,7 @@ export function MemberPortal({
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <nav className="bg-stone-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex space-x-1 overflow-x-auto">
             {tabs.map(({ id, label, icon: Icon }) => (
@@ -197,7 +197,7 @@ export function MemberPortal({
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Profile Tab */}
         {activeTab === 'profile' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Personal Information
@@ -453,7 +453,7 @@ export function MemberPortal({
               .map(([year, { total, records }]) => (
                 <div
                   key={year}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
                   <button
                     onClick={() => setExpandedYear(expandedYear === Number(year) ? 0 : Number(year))}
@@ -532,7 +532,7 @@ export function MemberPortal({
               ))}
 
             {Object.keys(givingByYear).length === 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+              <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
                 <DollarSign className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">No giving records found</p>
               </div>
@@ -542,7 +542,7 @@ export function MemberPortal({
 
         {/* Volunteer Schedule Tab */}
         {activeTab === 'volunteer' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-white">Upcoming Assignments</h2>
             </div>
@@ -594,7 +594,7 @@ export function MemberPortal({
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">

@@ -31,7 +31,7 @@ export function MemberLayout({
   return (
     <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col relative overflow-hidden">
       {/* Header */}
-      <header className="bg-white dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
+      <header className="bg-stone-100 dark:bg-dark-850 border-b border-gray-100 dark:border-dark-700 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-40">
         {onBack && (
           <button
             onClick={onBack}
@@ -65,7 +65,7 @@ export function MemberLayout({
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="flex-shrink-0 bg-white dark:bg-dark-850 border-t border-gray-200 dark:border-dark-700 px-1 pb-[env(safe-area-inset-bottom)] z-50">
+      <nav className="flex-shrink-0 bg-stone-100 dark:bg-dark-850 border-t border-gray-200 dark:border-dark-700 px-1 pb-[env(safe-area-inset-bottom)] z-50">
         <div className="flex items-center justify-around max-w-lg mx-auto">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;

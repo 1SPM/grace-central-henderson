@@ -80,7 +80,7 @@ interface TaskCardProps {
 function TaskCard({ task, person, onViewTask, onViewPerson }: TaskCardProps) {
   return (
     <div
-      className="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-stone-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => onViewTask?.(task.id)}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -167,7 +167,7 @@ export function KanbanBoard({ tasks, people, onViewTask, onViewPerson, onAddTask
                 {column.icon}
                 <h3 className={`font-medium text-sm ${column.color}`}>{column.title}</h3>
               </div>
-              <span className={`text-xs font-semibold ${column.color} bg-white dark:bg-dark-800 px-2 py-0.5 rounded-full`}>
+              <span className={`text-xs font-semibold ${column.color} bg-stone-100 dark:bg-dark-800 px-2 py-0.5 rounded-full`}>
                 {groupedTasks[column.id].length}
               </span>
             </div>

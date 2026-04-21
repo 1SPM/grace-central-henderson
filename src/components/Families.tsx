@@ -149,13 +149,13 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
             placeholder="Search families..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-11 pr-4 py-3 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
                 <Home size={20} className="text-indigo-600 dark:text-indigo-400" />
@@ -166,7 +166,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Users size={20} className="text-green-600 dark:text-green-400" />
@@ -179,7 +179,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
                 <UserPlus size={20} className="text-amber-600 dark:text-amber-400" />
@@ -197,7 +197,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
           {filteredFamilies.map(family => (
             <div
               key={family.id}
-              className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden"
+              className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden"
             >
               {/* Family Header */}
               <div className="p-4 bg-gray-50 dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700">
@@ -305,7 +305,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
           ))}
 
           {filteredFamilies.length === 0 && (
-            <div className="text-center py-12 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+            <div className="text-center py-12 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
               <Home size={48} className="mx-auto text-gray-300 dark:text-dark-600 mb-4" />
               <p className="text-gray-500 dark:text-dark-400">No families found</p>
               <button
@@ -324,7 +324,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">
               Unassigned People
             </h2>
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="divide-y divide-gray-100 dark:divide-dark-700">
                 {unassignedPeople.slice(0, 10).map(person => (
                   <div
@@ -380,7 +380,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
       {/* Create Family Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Create Family</h2>
@@ -402,7 +402,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
                   value={newFamilyName}
                   onChange={(e) => setNewFamilyName(e.target.value)}
                   placeholder="e.g., Smith Family"
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
                   autoFocus
                 />
               </div>
@@ -432,7 +432,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
       {/* Add Member Modal */}
       {showAddMemberModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Add Family Member</h2>
@@ -455,7 +455,7 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   placeholder="Search by name or email..."
-                  className="w-full pl-11 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-11 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
                   autoFocus
                 />
               </div>

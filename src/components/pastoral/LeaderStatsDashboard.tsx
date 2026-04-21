@@ -159,7 +159,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as typeof timeRange)}
-            className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg"
+            className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg"
           >
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
@@ -178,7 +178,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
           { label: 'Avg Rating', value: avgRating > 0 ? `${avgRating}/5` : '---', icon: Star, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10' },
           { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div key={stat.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className={`p-1.5 rounded-lg ${stat.bg}`}>
                 <stat.icon size={14} className={stat.color} />
@@ -191,7 +191,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
       </div>
 
       {/* Leader Performance Table */}
-      <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-dark-700">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Leader Performance</h3>
         </div>
@@ -292,7 +292,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
 
       {/* Selected Leader Detail */}
       {selectedStats && selectedLeader && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">

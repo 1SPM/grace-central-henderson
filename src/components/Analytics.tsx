@@ -293,7 +293,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
               onClick={() => setTimeRange(value)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                 timeRange === value
-                  ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+                  ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
@@ -350,7 +350,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       {/* Row 2: People + Growth Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Member Distribution */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<BarChart3 size={18} />} title="Member Distribution" subtitle="By membership status" color="indigo" />
           <div className="space-y-3 mt-5">
             {activeStatuses.map(status => {
@@ -382,7 +382,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         </div>
 
         {/* Growth Trend */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<TrendingUp size={18} />} title="Growth Trend" subtitle="New people per month" color="emerald" />
           <div className="mt-5 flex items-end gap-2 h-40">
             {metrics.growthByMonth.map((m, i) => {
@@ -409,7 +409,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       {/* Row 3: Giving Trend + Giving by Fund */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Giving Trend */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<DollarSign size={18} />} title="Giving Trend" subtitle="Last 6 months" color="green" />
           <div className="mt-5 flex items-end gap-2 h-40">
             {metrics.givingByMonth.map((m, i) => {
@@ -433,7 +433,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         </div>
 
         {/* Giving by Fund */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<PieChart size={18} />} title="Giving by Fund" subtitle="Where donations go" color="emerald" />
           <div className="mt-5 space-y-3">
             {Object.entries(metrics.givingByFund).sort((a, b) => b[1] - a[1]).map(([fund, amount]) => {
@@ -466,7 +466,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       {/* Row 4: Tasks + Engagement */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Overview */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<CheckCircle2 size={18} />} title="Task Overview" subtitle="Follow-ups & action items" color="blue" />
           <div className="mt-5 grid grid-cols-2 gap-4">
             <div className="relative flex flex-col items-center p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl">
@@ -511,7 +511,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         </div>
 
         {/* Engagement / Interactions */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<Activity size={18} />} title="Engagement" subtitle="Interactions & outreach" color="violet" />
           <div className="mt-5">
             <div className="text-3xl font-bold text-gray-900 dark:text-white">{metrics.totalInteractions}</div>
@@ -538,7 +538,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       {/* Row 5: Prayer & Events + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Prayer & Events */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <SectionHeader icon={<Heart size={18} />} title="Prayer & Events" subtitle="Spiritual life & community" color="pink" />
           <div className="mt-5 grid grid-cols-2 gap-4">
             <div className="p-4 bg-pink-50 dark:bg-pink-500/10 rounded-xl text-center">
@@ -566,7 +566,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -650,7 +650,7 @@ function KpiCard({ icon, label, value, sub, color, trend }: { icon: React.ReactN
     blue: 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
   };
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
       <div className="flex items-center justify-between mb-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[color] || colorMap.indigo}`}>{icon}</div>
         {trend && (

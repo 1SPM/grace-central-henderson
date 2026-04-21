@@ -189,7 +189,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
                 className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                   frequency === interval.id
                     ? 'bg-slate-500 text-white'
-                    : 'bg-white dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
+                    : 'bg-stone-100 dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-200 dark:border-dark-600'
                 }`}
               >
                 {interval.name}
@@ -234,7 +234,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               placeholder="John"
             />
           </div>
@@ -246,7 +246,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               placeholder="Smith"
             />
           </div>
@@ -260,7 +260,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+            className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             placeholder="john@example.com"
           />
         </div>
@@ -408,7 +408,7 @@ export function OnlineGivingForm({ churchName = 'Grace Church', onBack, onSucces
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-dark-900 dark:to-dark-850 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white dark:bg-dark-850 rounded-3xl shadow-xl p-8">
+      <div className="w-full max-w-md bg-stone-100 dark:bg-dark-850 rounded-3xl shadow-xl p-8">
         {onBack && step !== 'success' && (
           <button
             onClick={onBack}

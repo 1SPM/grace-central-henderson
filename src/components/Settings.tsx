@@ -228,7 +228,7 @@ export function Settings({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => onNavigate('wedding-services')}
-              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-pink-200 dark:border-pink-800 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-500/10 transition-colors text-left shadow-sm"
+              className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 border border-pink-200 dark:border-pink-800 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-500/10 transition-colors text-left shadow-sm"
             >
               <div className="w-12 h-12 bg-pink-100 dark:bg-pink-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Heart className="text-pink-600 dark:text-pink-400" size={24} />
@@ -240,7 +240,7 @@ export function Settings({
             </button>
             <button
               onClick={() => onNavigate('funeral-services')}
-              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-500/10 transition-colors text-left shadow-sm"
+              className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-500/10 transition-colors text-left shadow-sm"
             >
               <div className="w-12 h-12 bg-stone-100 dark:bg-stone-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Users className="text-stone-600 dark:text-stone-400" size={24} />
@@ -252,7 +252,7 @@ export function Settings({
             </button>
             <button
               onClick={() => onNavigate('estate-planning')}
-              className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left shadow-sm"
+              className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left shadow-sm"
             >
               <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/15 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Shield className="text-emerald-600 dark:text-emerald-400" size={24} />
@@ -343,7 +343,7 @@ export function Settings({
             </button>
           </div>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
           {AI_FEATURES.map((feature) => {
             const isEnabled = aiSettings[feature.id as keyof AISettings];
             return (
@@ -394,7 +394,7 @@ export function Settings({
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">
           Accessibility
         </h2>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center">
               <Accessibility className="text-cyan-600 dark:text-cyan-400" size={20} />
@@ -478,7 +478,7 @@ export function Settings({
       {/* Church Settings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Church Profile */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center">
               <Church className="text-indigo-600 dark:text-indigo-400" size={20} />
@@ -498,7 +498,7 @@ export function Settings({
                 placeholder="Your Church Name"
                 value={churchProfile.name}
                 onChange={(e) => setChurchProfile({ ...churchProfile, name: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
@@ -510,7 +510,7 @@ export function Settings({
                 placeholder="123 Main Street"
                 value={churchProfile.address}
                 onChange={(e) => setChurchProfile({ ...churchProfile, address: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -523,7 +523,7 @@ export function Settings({
                   placeholder="City"
                   value={churchProfile.city}
                   onChange={(e) => setChurchProfile({ ...churchProfile, city: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -535,7 +535,7 @@ export function Settings({
                   placeholder="CA"
                   value={churchProfile.state}
                   onChange={(e) => setChurchProfile({ ...churchProfile, state: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -547,7 +547,7 @@ export function Settings({
                   placeholder="90210"
                   value={churchProfile.zip}
                   onChange={(e) => setChurchProfile({ ...churchProfile, zip: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
@@ -561,7 +561,7 @@ export function Settings({
                   placeholder="(555) 123-4567"
                   value={churchProfile.phone}
                   onChange={(e) => setChurchProfile({ ...churchProfile, phone: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -573,7 +573,7 @@ export function Settings({
                   placeholder="info@church.org"
                   value={churchProfile.email}
                   onChange={(e) => setChurchProfile({ ...churchProfile, email: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
@@ -586,7 +586,7 @@ export function Settings({
                 placeholder="https://yourchurch.org"
                 value={churchProfile.website}
                 onChange={(e) => setChurchProfile({ ...churchProfile, website: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <button
@@ -612,7 +612,7 @@ export function Settings({
         </div>
 
         {/* Service Times */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center">
@@ -650,7 +650,7 @@ export function Settings({
                       newTimes[index] = { ...newTimes[index], day: e.target.value };
                       setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
                     }}
-                    className="px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
                       <option key={day} value={day}>{day}</option>
@@ -665,7 +665,7 @@ export function Settings({
                       setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
                     }}
                     placeholder="10:00 AM"
-                    className="w-24 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-24 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     type="text"
@@ -676,7 +676,7 @@ export function Settings({
                       setChurchProfile({ ...churchProfile, serviceTimes: newTimes });
                     }}
                     placeholder="Service name"
-                    className="flex-1 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex-1 px-2 py-1.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <button
                     onClick={() => {
@@ -712,7 +712,7 @@ export function Settings({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
               <Users className="text-slate-600 dark:text-slate-400" size={20} />
@@ -738,7 +738,7 @@ export function Settings({
           )}
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/10 rounded-xl flex items-center justify-center">
               <Bell className="text-amber-600 dark:text-amber-400" size={20} />
@@ -835,7 +835,7 @@ export function Settings({
               value={emailConfig.emailFromAddress}
               onChange={(e) => setEmailConfig({ ...emailConfig, emailFromAddress: e.target.value })}
               placeholder="noreply@yourdomain.com"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -847,7 +847,7 @@ export function Settings({
               value={emailConfig.emailFromName}
               onChange={(e) => setEmailConfig({ ...emailConfig, emailFromName: e.target.value })}
               placeholder="Grace Community Church"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <button
@@ -880,7 +880,7 @@ export function Settings({
               value={smsConfig.twilioPhoneNumber}
               onChange={(e) => setSmsConfig({ ...smsConfig, twilioPhoneNumber: e.target.value })}
               placeholder="+1234567890"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <button

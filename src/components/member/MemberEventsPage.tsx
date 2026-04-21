@@ -149,7 +149,7 @@ export function MemberEventsPage({ events, rsvps = [], personId, onRSVP }: Membe
                       <button
                         key={event.id}
                         onClick={() => setSelectedEvent(event)}
-                        className="w-full bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left active:scale-[0.99] transition-transform"
+                        className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-left active:scale-[0.99] transition-transform"
                       >
                         <div className="flex items-start gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${colors.bg}`}>
@@ -299,7 +299,7 @@ function EventDetails({
 
       {/* RSVP Section */}
       {personId && onRSVP && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Will you attend?</h3>
 
           <div className="grid grid-cols-3 gap-2 mb-4">

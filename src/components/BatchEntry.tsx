@@ -147,7 +147,7 @@ export function BatchEntry({
         {/* Batch List */}
         <div className="lg:col-span-1 space-y-4">
           {/* Open Batches */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
             <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-3 flex items-center gap-2">
               <Package className="text-green-500" size={18} />
               Open Batches
@@ -189,7 +189,7 @@ export function BatchEntry({
           </div>
 
           {/* Recent Closed Batches */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
             <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-3 flex items-center gap-2">
               <Lock className="text-gray-400" size={18} />
               Recent Closed
@@ -225,7 +225,7 @@ export function BatchEntry({
         {/* Batch Details & Entry */}
         <div className="lg:col-span-2">
           {selectedBatch ? (
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               {/* Batch Header */}
               <div className="p-6 border-b border-gray-200 dark:border-dark-700">
                 <div className="flex items-center justify-between mb-4">
@@ -350,7 +350,7 @@ export function BatchEntry({
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-12 text-center">
+            <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-12 text-center">
               <Package className="mx-auto text-gray-300 dark:text-dark-600 mb-4" size={64} />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-2">
                 No Batch Selected
@@ -373,7 +373,7 @@ export function BatchEntry({
       {/* New Batch Modal */}
       {showNewBatch && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Create New Batch
@@ -395,7 +395,7 @@ export function BatchEntry({
                   type="date"
                   value={batchDate}
                   onChange={(e) => setBatchDate(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -408,7 +408,7 @@ export function BatchEntry({
                   value={batchName}
                   onChange={(e) => setBatchName(e.target.value)}
                   placeholder="e.g., Sunday Morning Service"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
             </div>
@@ -435,7 +435,7 @@ export function BatchEntry({
       {/* Add Item Modal */}
       {showAddItem && selectedBatch && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Add Donation
@@ -466,11 +466,11 @@ export function BatchEntry({
                     }}
                     onFocus={() => setShowPersonDropdown(true)}
                     placeholder="Search by name..."
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
                 {showPersonDropdown && personSearch && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                     {filteredPeople.length === 0 ? (
                       <div className="p-3 text-sm text-gray-500 dark:text-dark-400 text-center">
                         No matching people found
@@ -512,7 +512,7 @@ export function BatchEntry({
                     placeholder="0.00"
                     min="0.01"
                     step="0.01"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               </div>
@@ -559,7 +559,7 @@ export function BatchEntry({
                     value={itemCheckNumber}
                     onChange={(e) => setItemCheckNumber(e.target.value)}
                     placeholder="e.g., 1234"
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                   />
                 </div>
               )}
@@ -573,7 +573,7 @@ export function BatchEntry({
                   <select
                     value={itemFund}
                     onChange={(e) => setItemFund(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 appearance-none"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 appearance-none"
                   >
                     {GIVING_FUNDS.map((f) => (
                       <option key={f.id} value={f.id}>
@@ -595,7 +595,7 @@ export function BatchEntry({
                   value={itemMemo}
                   onChange={(e) => setItemMemo(e.target.value)}
                   placeholder="Add a note..."
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
             </div>

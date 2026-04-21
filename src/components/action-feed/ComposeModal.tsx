@@ -48,7 +48,7 @@ export function ComposeModal({
 }: ComposeModalProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="compose-modal-title" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg shadow-2xl">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg shadow-2xl">
         <div className="p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export function ComposeModal({
                   value={emailSubject}
                   onChange={(e) => onEmailSubjectChange(e.target.value)}
                   placeholder="Enter subject..."
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                 />
               </div>
               <div>
@@ -125,7 +125,7 @@ export function ComposeModal({
                   onChange={(e) => onEmailBodyChange(e.target.value)}
                   placeholder="Write your message or click 'Generate with AI'..."
                   rows={6}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
                 />
               </div>
             </>
@@ -140,7 +140,7 @@ export function ComposeModal({
                 placeholder="Write your message or click 'Generate with AI'..."
                 rows={4}
                 maxLength={160}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none"
               />
               <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
                 {smsMessage.length}/160 characters

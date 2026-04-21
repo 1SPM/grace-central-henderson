@@ -86,7 +86,7 @@ export function HelpIntakeForm({ onSubmit, onBack, churchName = 'Our Church' }: 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Share as much or as little as you'd like. This helps us connect you with the right person..."
               rows={4}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent resize-none"
             />
           </div>
 

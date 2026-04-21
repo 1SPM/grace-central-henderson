@@ -254,9 +254,9 @@ function StatementPreview({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Preview Header */}
-        <div className="sticky top-0 bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-stone-100 dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 p-4 flex items-center justify-between">
           <h3 className="font-semibold text-gray-900 dark:text-dark-100">
             Statement Preview
           </h3>
@@ -594,7 +594,7 @@ export function GivingStatements({
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-500/10 rounded-xl flex items-center justify-center">
               <DollarSign className="text-green-600 dark:text-green-400" size={20} />
@@ -607,7 +607,7 @@ export function GivingStatements({
             )}
           </p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
               <Users className="text-blue-600 dark:text-blue-400" size={20} />
@@ -618,7 +618,7 @@ export function GivingStatements({
             {peopleWithGiving.length}
           </p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
               <FileText className="text-slate-600 dark:text-slate-400" size={20} />
@@ -632,7 +632,7 @@ export function GivingStatements({
       </div>
 
       {/* Filters & Actions */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 mb-6">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           {/* Year Selector */}
           <div className="relative">
@@ -640,7 +640,7 @@ export function GivingStatements({
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="pl-10 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 font-medium appearance-none"
+              className="pl-10 pr-8 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 font-medium appearance-none"
             >
               {years.map((year) => (
                 <option key={year} value={year}>
@@ -659,7 +659,7 @@ export function GivingStatements({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search donors..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             />
           </div>
 
@@ -686,7 +686,7 @@ export function GivingStatements({
       </div>
 
       {/* Donors List */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         {peopleWithGiving.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="mx-auto text-gray-300 dark:text-dark-600 mb-4" size={48} />
@@ -843,7 +843,7 @@ export function GivingStatements({
       {/* Bulk Send Modal */}
       {showBulkSend && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Send Statements

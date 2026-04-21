@@ -559,7 +559,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
             <p className="text-xs text-gray-400 dark:text-dark-500 -mt-2">Click any item to add it to your sermon</p>
 
             {/* News & Trending */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="bg-cyan-50 dark:bg-cyan-900/20 border-b border-cyan-100 dark:border-cyan-800/30 p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -621,7 +621,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
 
             {/* Birthdays */}
             {upcomingBirthdays.length > 0 && (
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
                 <div className="bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-800/30 p-3">
                   <div className="flex items-center gap-2">
                     <Gift size={16} className="text-pink-500" />
@@ -648,7 +648,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
 
             {/* Visitors */}
             {recentVisitors.length > 0 && (
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
                 <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-3">
                   <div className="flex items-center gap-2">
                     <Users size={16} className="text-amber-500" />
@@ -675,7 +675,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
 
             {/* Prayer Requests */}
             {activePrayers.length > 0 && (
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
                 <div className="bg-slate-50 dark:bg-slate-900/20 border-b border-slate-100 dark:border-slate-800/30 p-3">
                   <div className="flex items-center gap-2">
                     <Heart size={16} className="text-slate-500" />
@@ -713,7 +713,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                 value={sermonTitle}
                 onChange={(e) => setSermonTitle(e.target.value)}
                 placeholder="Enter Sermon Title..."
-                className="w-full px-4 py-3 text-xl font-semibold bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-4 py-3 text-xl font-semibold bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 placeholder-gray-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
               {aiSettings.sermonGenerator && (
                 <>
@@ -777,7 +777,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
                   return (
                     <div
                       key={section.id}
-                      className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
+                      className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm hover:shadow-md transition-all"
                     >
                       {/* Section Header */}
                       <div className={`${config.bgLight} ${config.bgDark} border-b ${config.borderLight} ${config.borderDark} px-4 py-2 flex items-center justify-between`}>

@@ -60,7 +60,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
   if (submitted) {
     return (
       <div className="px-4 py-8">
-        <div className="bg-white dark:bg-dark-850 rounded-2xl p-8 text-center max-w-md mx-auto shadow-sm">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-8 text-center max-w-md mx-auto shadow-sm">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
@@ -122,7 +122,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
               {giftTypeOptions.slice(0, 4).map(({ id, label, icon: Icon, description }) => (
                 <div
                   key={id}
-                  className="bg-white dark:bg-dark-850 rounded-xl p-4 flex items-start gap-3 shadow-sm"
+                  className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 flex items-start gap-3 shadow-sm"
                 >
                   <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -175,7 +175,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
           </div>
 
           {/* Contact Info */}
-          <div className="bg-white dark:bg-dark-850 rounded-xl p-4 shadow-sm">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 shadow-sm">
             <h3 className="font-medium text-gray-900 dark:text-dark-100 mb-3">
               Have Questions?
             </h3>
@@ -200,7 +200,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
       ) : (
         /* Interest Form */
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white dark:bg-dark-850 rounded-xl p-4 shadow-sm space-y-4">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 shadow-sm space-y-4">
             <h2 className="font-semibold text-gray-900 dark:text-dark-100">
               Express Your Interest
             </h2>
@@ -213,7 +213,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
                 type="text"
                 value={form.name}
                 onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 required
               />
             </div>
@@ -226,7 +226,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
                 type="email"
                 value={form.email}
                 onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 required
               />
             </div>
@@ -239,7 +239,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
                 type="tel"
                 value={form.phone}
                 onChange={e => setForm(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
 
@@ -264,7 +264,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
             </div>
           </div>
 
-          <div className="bg-white dark:bg-dark-850 rounded-xl p-4 shadow-sm space-y-4">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 shadow-sm space-y-4">
             <h3 className="font-medium text-gray-900 dark:text-dark-100">
               I'm interested in learning about:
             </h3>
@@ -301,7 +301,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
             </div>
           </div>
 
-          <div className="bg-white dark:bg-dark-850 rounded-xl p-4 shadow-sm">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-xl p-4 shadow-sm">
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1">
               Additional Comments (Optional)
             </label>
@@ -309,7 +309,7 @@ export function MemberLegacyPage({ churchName = 'Grace Church', personName }: Me
               value={form.message}
               onChange={e => setForm(prev => ({ ...prev, message: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
               placeholder="Any questions or specific interests..."
             />
           </div>

@@ -126,7 +126,7 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
             <button
               key={s.type}
               onClick={() => setFilterStatus(filterStatus === s.type ? 'all' : s.type)}
-              className={`bg-white dark:bg-dark-850 rounded-xl border p-3 text-center transition-all ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-xl border p-3 text-center transition-all ${
                 filterStatus === s.type
                   ? 'border-indigo-500 ring-1 ring-indigo-500'
                   : 'border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600'
@@ -150,13 +150,13 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-xl text-sm text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2.5 bg-stone-100 dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-xl text-sm text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Matrix Table */}
-      <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -189,7 +189,7 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
                   const personMilestones = milestonesByPerson.get(person.id);
                   return (
                     <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-dark-800/50">
-                      <td className="px-4 py-3 sticky left-0 bg-white dark:bg-dark-850 z-10">
+                      <td className="px-4 py-3 sticky left-0 bg-stone-100 dark:bg-dark-850 z-10">
                         <button
                           onClick={() => onViewPerson?.(person.id)}
                           className="flex items-center gap-2.5 text-left hover:text-indigo-600 dark:hover:text-indigo-400"

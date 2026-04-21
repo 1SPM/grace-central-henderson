@@ -135,7 +135,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl flex items-center justify-center">
               <UserCheck className="text-indigo-600 dark:text-indigo-400" size={20} />
@@ -146,7 +146,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">checked in</p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-xl flex items-center justify-center">
               <Users className="text-green-600 dark:text-green-400" size={20} />
@@ -157,7 +157,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">total attendance</p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center">
               <TrendingUp className="text-amber-600 dark:text-amber-400" size={20} />
@@ -173,7 +173,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Check-In Panel */}
-        <div data-tutorial="attendance-checkin" className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div data-tutorial="attendance-checkin" className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-slate-600 rounded-xl flex items-center justify-center">
               <UserCheck className="text-white" size={20} />
@@ -199,7 +199,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
             </button>
 
             {showEventDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-stone-100 dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-10 overflow-hidden">
                 {(Object.keys(eventTypeLabels) as EventType[]).map((type) => (
                   <button
                     key={type}
@@ -227,7 +227,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
               placeholder="Event name (e.g., Easter Service)"
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              className="w-full px-4 py-3 mb-4 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-3 mb-4 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           )}
 
@@ -239,7 +239,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
               placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg"
+              className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg"
               autoFocus
             />
           </div>
@@ -262,7 +262,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
                       className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
                         isCheckedIn
                           ? 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30 cursor-default'
-                          : 'bg-white dark:bg-dark-800 border-gray-200 dark:border-dark-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md cursor-pointer'
+                          : 'bg-stone-100 dark:bg-dark-800 border-gray-200 dark:border-dark-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md cursor-pointer'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -295,7 +295,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
         </div>
 
         {/* Recent Check-Ins */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-xl flex items-center justify-center">
               <Clock className="text-green-600 dark:text-green-400" size={20} />
@@ -346,7 +346,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
       </div>
 
       {/* Weekly Attendance Chart */}
-      <div className="mt-6 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+      <div className="mt-6 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/20 rounded-xl flex items-center justify-center">
             <BarChart3 className="text-slate-600 dark:text-slate-400" size={20} />

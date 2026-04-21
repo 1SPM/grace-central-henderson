@@ -34,7 +34,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
       {/* Check In — prominent standalone action */}
       <button
         onClick={() => onNavigate('checkin')}
-        className="w-full bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-100 dark:border-dark-700 text-left hover:shadow-md transition-shadow active:scale-[0.98] flex items-center gap-4"
+        className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl p-4 border border-gray-100 dark:border-dark-700 text-left hover:shadow-md transition-shadow active:scale-[0.98] flex items-center gap-4"
       >
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center flex-shrink-0">
           <QrCode size={24} className="text-white" />
@@ -64,7 +64,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
         <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-2 px-1">
           More
         </h2>
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
           {[
             { id: 'directory' as MemberPortalTab, label: 'Member Directory', desc: 'Find & connect with members', icon: Users, iconColor: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-100 dark:bg-blue-500/20' },
             { id: 'shop' as MemberPortalTab, label: 'Church Shop', desc: 'Merch & resources', icon: ShoppingBag, iconColor: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-100 dark:bg-emerald-500/20' },
@@ -94,7 +94,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
         <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-2 px-1">
           Contact Us
         </h2>
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 p-4 space-y-2.5">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 p-4 space-y-2.5">
           {churchProfile?.phone && (
             <a href={`tel:${churchProfile.phone}`} className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-300 hover:text-indigo-600 dark:hover:text-indigo-400">
               <Phone size={15} className="text-gray-400" />

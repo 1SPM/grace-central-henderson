@@ -56,21 +56,21 @@ export function Giving({ giving, people }: GivingProps) {
           <p className="text-3xl font-bold">${totalThisMonth.toLocaleString()}</p>
           <p className="text-sm opacity-80 mt-1">Total This Period</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center mb-4">
             <Repeat className="text-slate-600 dark:text-slate-400" size={20} />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">{recurringCount}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">Recurring Gifts</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center mb-4">
             <TrendingUp className="text-blue-600 dark:text-blue-400" size={20} />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">${recurringTotal.toLocaleString()}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">Monthly Recurring</p>
         </div>
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/10 rounded-xl flex items-center justify-center mb-4">
             <DollarSign className="text-amber-600 dark:text-amber-400" size={20} />
           </div>
@@ -81,7 +81,7 @@ export function Giving({ giving, people }: GivingProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* By Fund */}
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">By Fund</h2>
           <div className="space-y-3">
             {Object.keys(byFund).length === 0 ? (
@@ -103,7 +103,7 @@ export function Giving({ giving, people }: GivingProps) {
         </div>
 
         {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">Recent Transactions</h2>
           <div className="space-y-3">
             {giving.slice(0, 8).map((gift) => {

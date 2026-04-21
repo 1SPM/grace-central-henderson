@@ -12,7 +12,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
         onClick={() => onViewChange('card')}
         className={`p-2 rounded-md transition-all ${
           view === 'card'
-            ? 'bg-white dark:bg-dark-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+            ? 'bg-stone-100 dark:bg-dark-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
             : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
         }`}
         title="Card view"
@@ -23,7 +23,7 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
         onClick={() => onViewChange('table')}
         className={`p-2 rounded-md transition-all ${
           view === 'table'
-            ? 'bg-white dark:bg-dark-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+            ? 'bg-stone-100 dark:bg-dark-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
             : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
         }`}
         title="Table view"

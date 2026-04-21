@@ -181,7 +181,7 @@ function DemoCardForm({
           onClick={() => setPaymentMethod('card')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
             paymentMethod === 'card'
-              ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+              ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
               : 'text-gray-500 dark:text-dark-400'
           }`}
         >
@@ -193,7 +193,7 @@ function DemoCardForm({
           onClick={() => setPaymentMethod('bank')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
             paymentMethod === 'bank'
-              ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+              ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
               : 'text-gray-500 dark:text-dark-400'
           }`}
         >
@@ -216,7 +216,7 @@ function DemoCardForm({
                 onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                 placeholder="1234 5678 9012 3456"
                 maxLength={19}
-                className="w-full px-4 py-3 pr-12 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-4 py-3 pr-12 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
               <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             </div>
@@ -234,7 +234,7 @@ function DemoCardForm({
                 onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                 placeholder="MM/YY"
                 maxLength={5}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -247,7 +247,7 @@ function DemoCardForm({
                 onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="123"
                 maxLength={4}
-                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
           </div>

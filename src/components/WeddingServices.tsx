@@ -279,23 +279,23 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-pink-600">{upcomingWeddings.length}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-slate-600">
             {weddings.filter(w => w.status === 'counseling').length}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">In Counseling</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-green-600">
             {weddings.filter(w => w.status === 'completed').length}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Completed</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-2xl font-bold text-blue-600">
             {weddings.filter(w => w.status === 'inquiry').length}
           </p>
@@ -312,7 +312,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
             placeholder="Search couples or venues..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as WeddingCeremony['status'] | 'all')}
-            className="px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="px-3 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
           >
             <option value="all">All Status</option>
             {Object.entries(statusColors).map(([key, { label }]) => (
@@ -335,7 +335,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
         {/* List Panel */}
         <div className="space-y-4">
           {filteredWeddings.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
               <Heart className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p className="text-gray-500 dark:text-gray-400">No weddings found</p>
               <button
@@ -353,7 +353,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
                 <div
                   key={wedding.id}
                   onClick={() => setSelectedWedding(wedding)}
-                  className={`bg-white dark:bg-gray-800 rounded-xl border-2 p-4 cursor-pointer transition-all ${
+                  className={`bg-stone-100 dark:bg-gray-800 rounded-xl border-2 p-4 cursor-pointer transition-all ${
                     selectedWedding?.id === wedding.id
                       ? 'border-pink-500 shadow-lg'
                       : 'border-gray-200 dark:border-gray-700 hover:border-pink-300'
@@ -402,7 +402,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
 
         {/* Detail Panel */}
         {selectedWedding && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-pink-50 to-slate-50 dark:from-pink-900/20 dark:to-slate-900/20">
               <div className="flex items-center justify-between">
                 <div>
@@ -586,7 +586,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
                         {selectedWedding.vendors.map(vendor => (
                           <div key={vendor.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg">
+                              <div className="p-2 bg-stone-100 dark:bg-gray-800 rounded-lg">
                                 {vendorIcons[vendor.type]}
                               </div>
                               <div>
@@ -663,7 +663,7 @@ function WeddingFormModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {wedding ? 'Edit Wedding' : 'New Wedding'}
@@ -681,21 +681,21 @@ function WeddingFormModal({
                   value={formData.brideName}
                   onChange={(e) => setFormData({ ...formData, brideName: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
                 <input
                   type="email"
                   placeholder="Bride's Email"
                   value={formData.brideEmail}
                   onChange={(e) => setFormData({ ...formData, brideEmail: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
                 <input
                   type="tel"
                   placeholder="Bride's Phone"
                   value={formData.bridePhone}
                   onChange={(e) => setFormData({ ...formData, bridePhone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
               <div className="space-y-3">
@@ -705,21 +705,21 @@ function WeddingFormModal({
                   value={formData.groomName}
                   onChange={(e) => setFormData({ ...formData, groomName: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
                 <input
                   type="email"
                   placeholder="Groom's Email"
                   value={formData.groomEmail}
                   onChange={(e) => setFormData({ ...formData, groomEmail: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
                 <input
                   type="tel"
                   placeholder="Groom's Phone"
                   value={formData.groomPhone}
                   onChange={(e) => setFormData({ ...formData, groomPhone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
             </div>
@@ -736,7 +736,7 @@ function WeddingFormModal({
                   value={formData.weddingDate}
                   onChange={(e) => setFormData({ ...formData, weddingDate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
               <div>
@@ -746,7 +746,7 @@ function WeddingFormModal({
                   value={formData.weddingTime}
                   onChange={(e) => setFormData({ ...formData, weddingTime: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
               <div>
@@ -755,7 +755,7 @@ function WeddingFormModal({
                   type="date"
                   value={formData.rehearsalDate}
                   onChange={(e) => setFormData({ ...formData, rehearsalDate: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
               <div>
@@ -764,7 +764,7 @@ function WeddingFormModal({
                   type="time"
                   value={formData.rehearsalTime}
                   onChange={(e) => setFormData({ ...formData, rehearsalTime: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
               </div>
             </div>
@@ -780,14 +780,14 @@ function WeddingFormModal({
                 value={formData.venue}
                 onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
               <input
                 type="text"
                 placeholder="Venue Address"
                 value={formData.venueAddress}
                 onChange={(e) => setFormData({ ...formData, venueAddress: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
           </div>
@@ -798,7 +798,7 @@ function WeddingFormModal({
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as WeddingCeremony['status'] })}
-              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
             >
               {Object.entries(statusColors).map(([key, { label }]) => (
                 <option key={key} value={key}>{label}</option>
@@ -814,7 +814,7 @@ function WeddingFormModal({
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
               placeholder="Additional notes..."
-              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-stone-100 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
           </div>
 

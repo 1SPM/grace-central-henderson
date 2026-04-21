@@ -89,7 +89,7 @@ export function QuickDonationForm({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-2">
@@ -127,11 +127,11 @@ export function QuickDonationForm({
                 }}
                 onFocus={() => setShowPersonDropdown(true)}
                 placeholder="Search by name (optional)..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
               />
             </div>
             {showPersonDropdown && personSearch && (
-              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                 {filteredPeople.length === 0 ? (
                   <div className="p-3 text-sm text-gray-500 dark:text-dark-400 text-center">
                     No matching people
@@ -175,7 +175,7 @@ export function QuickDonationForm({
                   min="0.01"
                   step="0.01"
                   required
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                 />
               </div>
             </div>
@@ -190,7 +190,7 @@ export function QuickDonationForm({
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ export function QuickDonationForm({
                 value={checkNumber}
                 onChange={(e) => setCheckNumber(e.target.value)}
                 placeholder="e.g., 1234"
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
               />
             </div>
           )}
@@ -245,7 +245,7 @@ export function QuickDonationForm({
               <select
                 value={fund}
                 onChange={(e) => setFund(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm appearance-none"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm appearance-none"
               >
                 {GIVING_FUNDS.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -267,7 +267,7 @@ export function QuickDonationForm({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Optional note..."
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
             />
           </div>
 

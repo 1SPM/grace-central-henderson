@@ -203,7 +203,7 @@ export function ServiceRequestForm({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div>
@@ -298,7 +298,7 @@ export function ServiceRequestForm({
                 </button>
 
                 {showPersonSearch && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg shadow-lg z-10">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg shadow-lg z-10">
                     <input
                       type="text"
                       value={personSearch}
@@ -348,7 +348,7 @@ export function ServiceRequestForm({
                     type="text"
                     value={formData.primaryContactName}
                     onChange={(e) => updateForm({ primaryContactName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     placeholder="John Smith"
                     required
                   />
@@ -362,7 +362,7 @@ export function ServiceRequestForm({
                     type="email"
                     value={formData.primaryContactEmail}
                     onChange={(e) => updateForm({ primaryContactEmail: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     placeholder="john@example.com"
                     required
                   />
@@ -376,7 +376,7 @@ export function ServiceRequestForm({
                     type="tel"
                     value={formData.primaryContactPhone}
                     onChange={(e) => updateForm({ primaryContactPhone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     placeholder="(555) 123-4567"
                     required
                   />
@@ -404,7 +404,7 @@ export function ServiceRequestForm({
                         type="text"
                         value={formData.partner1Name || ''}
                         onChange={(e) => updateForm({ partner1Name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                         required
                       />
                     </div>
@@ -416,7 +416,7 @@ export function ServiceRequestForm({
                         type="text"
                         value={formData.partner2Name || ''}
                         onChange={(e) => updateForm({ partner2Name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                         required
                       />
                     </div>
@@ -428,7 +428,7 @@ export function ServiceRequestForm({
                     <select
                       value={formData.ceremonyType || 'traditional'}
                       onChange={(e) => updateForm({ ceremonyType: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     >
                       <option value="traditional">Traditional</option>
                       <option value="contemporary">Contemporary</option>
@@ -445,7 +445,7 @@ export function ServiceRequestForm({
                       type="number"
                       value={formData.expectedGuests || ''}
                       onChange={(e) => updateForm({ expectedGuests: parseInt(e.target.value) || undefined })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       placeholder="150"
                     />
                   </div>
@@ -474,7 +474,7 @@ export function ServiceRequestForm({
                       type="text"
                       value={formData.deceasedName || ''}
                       onChange={(e) => updateForm({ deceasedName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       required
                     />
                   </div>
@@ -486,7 +486,7 @@ export function ServiceRequestForm({
                       type="date"
                       value={formData.dateOfDeath || ''}
                       onChange={(e) => updateForm({ dateOfDeath: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       required
                     />
                   </div>
@@ -497,7 +497,7 @@ export function ServiceRequestForm({
                     <select
                       value={formData.serviceType || 'funeral'}
                       onChange={(e) => updateForm({ serviceType: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                     >
                       <option value="funeral">Traditional Funeral</option>
                       <option value="memorial">Memorial Service</option>
@@ -519,7 +519,7 @@ export function ServiceRequestForm({
                       type="text"
                       value={formData.candidateName || ''}
                       onChange={(e) => updateForm({ candidateName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       required
                     />
                   </div>
@@ -561,7 +561,7 @@ export function ServiceRequestForm({
                         type="text"
                         value={formData.parentNames || ''}
                         onChange={(e) => updateForm({ parentNames: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       />
                     </div>
                   )}
@@ -574,7 +574,7 @@ export function ServiceRequestForm({
                         value={formData.testimony || ''}
                         onChange={(e) => updateForm({ testimony: e.target.value })}
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
                         placeholder="Share your faith journey..."
                       />
                     </div>
@@ -593,7 +593,7 @@ export function ServiceRequestForm({
                       type="text"
                       value={formData.childName || ''}
                       onChange={(e) => updateForm({ childName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       required
                     />
                   </div>
@@ -605,7 +605,7 @@ export function ServiceRequestForm({
                       type="date"
                       value={formData.childDateOfBirth || ''}
                       onChange={(e) => updateForm({ childDateOfBirth: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                      className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                       required
                     />
                   </div>
@@ -622,7 +622,7 @@ export function ServiceRequestForm({
                     value={formData.notes || ''}
                     onChange={(e) => updateForm({ notes: e.target.value })}
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
                     placeholder="Tell us more about your needs..."
                   />
                 </div>
@@ -646,7 +646,7 @@ export function ServiceRequestForm({
                   type="date"
                   value={formData.requestedDate || ''}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -675,7 +675,7 @@ export function ServiceRequestForm({
                   type="time"
                   value={formData.requestedTime || ''}
                   onChange={(e) => updateForm({ requestedTime: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 />
               </div>
 
@@ -687,7 +687,7 @@ export function ServiceRequestForm({
                 <select
                   value={formData.location || ''}
                   onChange={(e) => updateForm({ location: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">Select a location...</option>
                   <option value="Main Sanctuary">Main Sanctuary</option>
@@ -706,7 +706,7 @@ export function ServiceRequestForm({
                   value={formData.notes || ''}
                   onChange={(e) => updateForm({ notes: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 resize-none"
                   placeholder="Any special requests or additional information..."
                 />
               </div>

@@ -254,7 +254,7 @@ export function VolunteerScheduling({
       </div>
 
       {/* Week Navigation */}
-      <div className="flex items-center justify-between mb-6 bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+      <div className="flex items-center justify-between mb-6 bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
         <button
           onClick={() => setWeekOffset((prev) => prev - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
@@ -287,7 +287,7 @@ export function VolunteerScheduling({
             return (
               <div
                 key={event.id}
-                className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden"
+                className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden"
               >
                 {/* Event Header */}
                 <div className="p-4 border-b border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-800/50">
@@ -394,7 +394,7 @@ export function VolunteerScheduling({
                               return (
                                 <div
                                   key={assignment.id}
-                                  className="flex items-center justify-between text-sm bg-white dark:bg-dark-800 rounded-lg px-2 py-1.5 border border-gray-100 dark:border-dark-700"
+                                  className="flex items-center justify-between text-sm bg-stone-100 dark:bg-dark-800 rounded-lg px-2 py-1.5 border border-gray-100 dark:border-dark-700"
                                 >
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
@@ -438,7 +438,7 @@ export function VolunteerScheduling({
           })}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
+        <div className="text-center py-12 bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700">
           <Calendar className="mx-auto text-gray-300 dark:text-dark-600 mb-3\" size={48} />
           <p className="text-gray-500 dark:text-dark-400">No events this week</p>
           <p className="text-sm text-gray-400 dark:text-dark-500 mt-1">
@@ -450,7 +450,7 @@ export function VolunteerScheduling({
       {/* Assign Volunteer Modal */}
       {showAssignModal && selectedEvent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Assign Volunteer
@@ -468,7 +468,7 @@ export function VolunteerScheduling({
                 <select
                   value={assignRole}
                   onChange={(e) => setAssignRole(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="">Select a role</option>
                   {defaultRoles.map((role) => (
@@ -615,7 +615,7 @@ export function VolunteerScheduling({
       {/* Reminder Results Modal */}
       {showReminderModal && reminderResults && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-lg">

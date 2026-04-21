@@ -37,7 +37,7 @@ export function TutorialPickerModal() {
       />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div className="relative bg-stone-100 dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-dark-700/50">
           <div className="flex items-center gap-3">

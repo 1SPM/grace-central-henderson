@@ -29,7 +29,7 @@ export function CounselorCard({ leader, onStartChat, activeConversations = 0 }: 
     .slice(0, 2);
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5 hover:shadow-md transition-shadow">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="relative flex-shrink-0">

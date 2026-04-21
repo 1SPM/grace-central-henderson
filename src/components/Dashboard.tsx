@@ -211,7 +211,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                 onClick={() => setTaskViewMode('kanban')}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   taskViewMode === 'kanban'
-                    ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
@@ -222,7 +222,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                 onClick={() => setTaskViewMode('list')}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   taskViewMode === 'list'
-                    ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
@@ -234,7 +234,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
 
           {/* Task Progress */}
           {tasks.length > 0 && (
-            <div className="mb-6 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="mb-6 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-emerald-500" />
@@ -255,7 +255,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
               onAddTask={onViewTasks}
             />
           ) : (
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="divide-y divide-gray-100 dark:divide-dark-700">
                 {tasks.length === 0 ? (
                   <div className="py-12 text-center">
@@ -362,7 +362,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
       {inactive.length > 0 && (
         <div data-tutorial="dashboard-care-alert" className="mb-6 bg-rose-50 dark:bg-rose-900/10 rounded-xl p-4 border border-rose-200 dark:border-rose-800/30 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-10 h-10 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
               <Heart className="text-rose-500" size={18} />
             </div>
             <div className="flex-1 min-w-0">
@@ -375,7 +375,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
                   <button
                     key={person.id}
                     onClick={() => onViewPerson(person.id)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-rose-100 dark:hover:bg-dark-750 border border-gray-200 dark:border-dark-600 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-stone-100 dark:bg-dark-800 rounded-lg text-xs font-medium text-gray-700 dark:text-dark-300 hover:bg-rose-100 dark:hover:bg-dark-750 border border-gray-200 dark:border-dark-600 transition-colors shadow-sm"
                   >
                     {person.firstName} {person.lastName}
                     <ChevronRight size={12} />
@@ -450,11 +450,11 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Recent Visitors */}
-        <div data-tutorial="dashboard-visitors" className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+        <div data-tutorial="dashboard-visitors" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
           <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
                   <UserPlus className="text-amber-600 dark:text-amber-400" size={18} />
                 </div>
                 <div>
@@ -500,11 +500,11 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         </div>
 
         {/* Priority Tasks */}
-        <div data-tutorial="dashboard-tasks" className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
+        <div data-tutorial="dashboard-tasks" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
                   <CheckCircle2 className="text-indigo-600 dark:text-indigo-400" size={18} />
                 </div>
                 <div>
@@ -588,7 +588,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         {onViewAnalytics && (
           <button
             onClick={onViewAnalytics}
-            className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
+            className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
           >
             <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
               <BarChart3 className="text-emerald-600 dark:text-emerald-400" size={20} />
@@ -603,7 +603,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         {onViewGiving && (
           <button
             onClick={onViewGiving}
-            className="flex items-center gap-3 p-4 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
+            className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
           >
             <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900/20 rounded-lg flex items-center justify-center">
               <DollarSign className="text-slate-600 dark:text-slate-400" size={20} />

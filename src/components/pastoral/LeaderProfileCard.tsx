@@ -39,7 +39,7 @@ export function LeaderProfileCard({ leader, onStartChat, onEdit, onDelete, onTog
     .slice(0, 2);
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden hover:shadow-md transition-shadow">
       {/* Header */}
       <div className="p-5">
         <div className="flex items-start gap-4">

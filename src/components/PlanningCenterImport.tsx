@@ -467,7 +467,7 @@ export function PlanningCenterImport({
 
       {/* Upload Step */}
       {step === 'upload' && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8">
           {/* Import Type Selection */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
@@ -554,7 +554,7 @@ export function PlanningCenterImport({
 
       {/* Mapping Step */}
       {step === 'mapping' && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
           <div className="p-4 border-b border-gray-200 dark:border-dark-700">
             <h2 className="font-semibold text-gray-900 dark:text-dark-100">
               Map Fields ({rawData.length} records found)
@@ -579,7 +579,7 @@ export function PlanningCenterImport({
                 <select
                   value={mapping.targetField}
                   onChange={(e) => updateMapping(mapping.sourceField, e.target.value as keyof Person | 'skip')}
-                  className="px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                  className="px-4 py-2 border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
                 >
                   <option value="skip">Skip this field</option>
                   <option value="firstName">First Name</option>
@@ -622,19 +622,19 @@ export function PlanningCenterImport({
         <div className="space-y-6">
           {/* Summary */}
           <div className="grid grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
               <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{preview.total}</p>
               <p className="text-sm text-gray-500 dark:text-dark-400">Total Records</p>
             </div>
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{preview.valid}</p>
               <p className="text-sm text-gray-500 dark:text-dark-400">Valid Records</p>
             </div>
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
               <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{preview.duplicates}</p>
               <p className="text-sm text-gray-500 dark:text-dark-400">Duplicates</p>
             </div>
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
               <p className="text-2xl font-bold text-red-600 dark:text-red-400">{preview.errors.length}</p>
               <p className="text-sm text-gray-500 dark:text-dark-400">Errors</p>
             </div>
@@ -659,7 +659,7 @@ export function PlanningCenterImport({
           )}
 
           {/* Sample Data */}
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700">
               <h3 className="font-semibold text-gray-900 dark:text-dark-100">Preview (first 5 records)</h3>
             </div>
@@ -715,7 +715,7 @@ export function PlanningCenterImport({
 
       {/* Importing Step */}
       {step === 'importing' && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8 text-center">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8 text-center">
           <RefreshCw className="mx-auto text-indigo-600 dark:text-indigo-400 mb-4 animate-spin" size={48} />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">
             Importing Data...
@@ -735,7 +735,7 @@ export function PlanningCenterImport({
 
       {/* Complete Step */}
       {step === 'complete' && importResult && (
-        <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8 text-center">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8 text-center">
           <CheckCircle className="mx-auto text-emerald-500 mb-4" size={64} />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">
             Import Complete!

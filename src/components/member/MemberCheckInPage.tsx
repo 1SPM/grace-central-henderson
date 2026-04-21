@@ -148,7 +148,7 @@ export function MemberCheckInPage({
               return (
                 <div
                   key={event.id}
-                  className={`bg-white dark:bg-dark-800 rounded-xl border p-4 ${
+                  className={`bg-stone-100 dark:bg-dark-800 rounded-xl border p-4 ${
                     checked
                       ? 'border-green-300 dark:border-green-500/30'
                       : 'border-gray-200 dark:border-dark-700'
@@ -259,7 +259,7 @@ export function MemberCheckInPage({
             <Clock size={16} />
             Recent Attendance
           </h3>
-          <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
             {recentAttendance.map(record => (
               <div key={record.id} className="p-3 flex items-center justify-between">
                 <div>

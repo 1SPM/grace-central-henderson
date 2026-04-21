@@ -110,7 +110,7 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 mb-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
               {editingId ? 'Edit Announcement' : 'New Announcement'}
@@ -212,7 +212,7 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
             return (
               <div
                 key={a.id}
-                className={`bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 ${isExpired ? 'opacity-50' : ''}`}
+                className={`bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 ${isExpired ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>

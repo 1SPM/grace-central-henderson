@@ -173,10 +173,10 @@ export function ActivityFeed({
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
               <Clock className="text-slate-600 dark:text-slate-400" size={18} />
             </div>
             <div>
@@ -196,11 +196,11 @@ export function ActivityFeed({
   }
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
       <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
               <Clock className="text-slate-600 dark:text-slate-400" size={18} />
             </div>
             <div>

@@ -79,7 +79,7 @@ export function MemberDirectoryPage({ people }: MemberDirectoryPageProps) {
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
           />
         </div>
       </div>
@@ -147,7 +147,7 @@ function MemberCard({ person }: { person: Person }) {
   return (
     <div
       onClick={() => setShowDetails(!showDetails)}
-      className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-3 active:scale-[0.99] transition-transform cursor-pointer"
+      className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-3 active:scale-[0.99] transition-transform cursor-pointer"
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}

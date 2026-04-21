@@ -265,7 +265,7 @@ export function QRCheckIn({
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
+                ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-dark-100 shadow-sm'
                 : 'text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-dark-200'
             }`}
           >
@@ -279,7 +279,7 @@ export function QRCheckIn({
       {activeTab === 'generate' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* QR Code Display */}
-          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="text-center">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-2">
                 {churchName} Check-In
@@ -331,7 +331,7 @@ export function QRCheckIn({
           {/* Settings */}
           <div className="space-y-4">
             {/* Event Selection */}
-            <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4 flex items-center gap-2">
                 <Calendar size={18} />
                 Event / Service
@@ -424,7 +424,7 @@ export function QRCheckIn({
                     value={customEventName}
                     onChange={(e) => setCustomEventName(e.target.value)}
                     placeholder="Enter event name..."
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-sm"
                   />
                 )}
               </div>
@@ -452,7 +452,7 @@ export function QRCheckIn({
           {/* Search & Check-In */}
           <div className="lg:col-span-2 space-y-4">
             {/* Search */}
-            <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -460,7 +460,7 @@ export function QRCheckIn({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by name, email, or phone..."
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-lg"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-dark-600 rounded-xl bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 text-lg"
                   autoFocus
                 />
               </div>
@@ -517,7 +517,7 @@ export function QRCheckIn({
             </div>
 
             {/* Kids Check-In Toggle */}
-            <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-4">
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center">
@@ -545,7 +545,7 @@ export function QRCheckIn({
           </div>
 
           {/* Recent Check-Ins */}
-          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <h3 className="font-semibold text-gray-900 dark:text-dark-100 mb-4 flex items-center gap-2">
               <Clock size={18} />
               Recent Check-Ins
@@ -585,7 +585,7 @@ export function QRCheckIn({
 
       {/* Kiosk Mode Tab */}
       {activeTab === 'kiosk' && (
-        <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-8 text-center">
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-8 text-center">
           <Smartphone className="mx-auto text-gray-400 dark:text-dark-500 mb-4" size={48} />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-100 mb-2">
             Kiosk Mode
@@ -609,7 +609,7 @@ export function QRCheckIn({
       {/* Family Check-In Modal */}
       {selectedPerson && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
                 Family Check-In

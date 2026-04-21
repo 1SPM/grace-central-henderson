@@ -277,12 +277,12 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
                 placeholder="Search skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-3 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-dark-100 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             {/* Category Filter */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-300 mb-3">Categories</h3>
               <div className="space-y-1">
                 <button
@@ -317,7 +317,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
             </div>
 
             {/* Skills List */}
-            <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
               <div className="p-4 border-b border-gray-100 dark:border-dark-700">
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-300">
                   Skills ({filteredSkills.length})
@@ -361,7 +361,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
           {/* Main Content - People with selected skill */}
           <div className="col-span-8">
             {selectedSkill ? (
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
                 {/* Skill Header */}
                 <div className="p-6 border-b border-gray-200 dark:border-dark-700">
                   <div className="flex items-center justify-between">
@@ -468,7 +468,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
                 </div>
               </div>
             ) : (
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-12 text-center">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-12 text-center">
                 <Award size={64} className="mx-auto text-gray-300 dark:text-dark-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-2">
                   Select a skill
@@ -481,7 +481,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 mt-6">
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
                     <Users size={20} className="text-indigo-600 dark:text-indigo-400" />
@@ -494,7 +494,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                     <Heart size={20} className="text-green-600 dark:text-green-400" />
@@ -507,7 +507,7 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/20 rounded-lg flex items-center justify-center">
                     <Award size={20} className="text-slate-600 dark:text-slate-400" />
@@ -573,7 +573,7 @@ function EditSkillModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-md overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center justify-between">
             <div>
@@ -636,7 +636,7 @@ function EditSkillModal({
               onChange={(e) => setYearsExperience(e.target.value)}
               placeholder="Optional"
               min="0"
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -650,7 +650,7 @@ function EditSkillModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional details..."
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 

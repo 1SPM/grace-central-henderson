@@ -60,7 +60,7 @@ export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onR
   };
 
   return (
-    <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+    <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Spiritual Journey</h2>
         <span className="text-xs font-medium text-gray-500 dark:text-dark-400 bg-gray-100 dark:bg-dark-700 px-2 py-1 rounded-full">
@@ -125,7 +125,7 @@ export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onR
 
                 {/* Popover */}
                 {isActive && (
-                  <div className="absolute top-14 z-20 w-56 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-600 shadow-xl p-3" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+                  <div className="absolute top-14 z-20 w-56 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-600 shadow-xl p-3" style={{ left: '50%', transform: 'translateX(-50%)' }}>
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-100">{def.label}</h4>
                       <button onClick={() => setActivePopover(null)} className="p-0.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded">

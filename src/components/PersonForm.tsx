@@ -83,7 +83,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="person-form-title" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
           <h2 id="person-form-title" className="text-xl font-semibold text-gray-900 dark:text-dark-100">
             {isEditing ? 'Edit Person' : 'Add New Person'}
@@ -128,7 +128,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 value={formData.photo || ''}
                 onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
                 placeholder="https://example.com/photo.jpg"
-                className="w-full px-4 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 aria-invalid={!!validationErrors.firstName}
                 aria-describedby={validationErrors.firstName ? 'firstName-error' : undefined}
-                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.firstName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.firstName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
                 required
               />
               {validationErrors.firstName && <p id="firstName-error" className="text-xs text-red-500 mt-1">{validationErrors.firstName}</p>}
@@ -159,7 +159,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 aria-invalid={!!validationErrors.lastName}
                 aria-describedby={validationErrors.lastName ? 'lastName-error' : undefined}
-                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.lastName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.lastName ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
                 required
               />
               {validationErrors.lastName && <p id="lastName-error" className="text-xs text-red-500 mt-1">{validationErrors.lastName}</p>}
@@ -176,7 +176,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               aria-invalid={!!validationErrors.email}
               aria-describedby={validationErrors.email ? 'email-error' : undefined}
-              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.email ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
+              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 ${validationErrors.email ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-dark-700'}`}
             />
             {validationErrors.email && <p id="email-error" className="text-xs text-red-500 mt-1">{validationErrors.email}</p>}
           </div>
@@ -189,7 +189,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -200,7 +200,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as MemberStatus })}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -217,7 +217,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 type="date"
                 value={formData.firstVisit || ''}
                 onChange={(e) => setFormData({ ...formData, firstVisit: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
@@ -228,7 +228,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 type="date"
                 value={formData.joinDate || ''}
                 onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -257,7 +257,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                 placeholder="Add a tag..."
-                className="flex-1 px-4 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 px-4 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <button
                 type="button"
@@ -277,7 +277,7 @@ export function PersonForm({ person, onSave, onClose }: PersonFormProps) {
               value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               placeholder="Any notes about this person..."
             />
           </div>

@@ -333,7 +333,7 @@ export function LeaderManagement({
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 shadow-sm'
+                ? 'bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 shadow-sm'
                 : 'text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300'
             }`}
           >
@@ -361,14 +361,14 @@ export function LeaderManagement({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`Search ${activeTab === 'active' ? 'leaders' : 'applications'}...`}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
           />
         </div>
         {activeTab === 'applications' && (
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as LeaderApplicationStatus | 'all')}
-            className="px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm"
+            className="px-3 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-xl text-sm"
           >
             <option value="all">All Statuses</option>
             {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
@@ -388,7 +388,7 @@ export function LeaderManagement({
             const avgRating = rated.length > 0 ? Math.round(rated.reduce((s, r) => s + (r.rating || 0), 0) / rated.length * 10) / 10 : 0;
 
             return (
-              <div key={leader.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
+              <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">
                     <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
@@ -410,7 +410,7 @@ export function LeaderManagement({
                       <MoreVertical size={14} className="text-gray-400" />
                     </button>
                     {actionMenuId === leader.id && (
-                      <div className="absolute right-0 top-8 w-48 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-10 py-1">
+                      <div className="absolute right-0 top-8 w-48 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-10 py-1">
                         <button
                           onClick={() => { onToggleLeaderAvailability?.(leader.id); setActionMenuId(null); }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-750 flex items-center gap-2"
@@ -494,7 +494,7 @@ export function LeaderManagement({
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap transition-all ${
                     statusFilter === status
                       ? 'border-slate-300 dark:border-slate-500/30 bg-slate-50 dark:bg-slate-500/5 text-slate-700 dark:text-slate-300'
-                      : 'border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:border-gray-300 dark:hover:border-dark-600'
+                      : 'border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:border-gray-300 dark:hover:border-dark-600'
                   }`}
                 >
                   <config.icon size={14} />
@@ -512,7 +512,7 @@ export function LeaderManagement({
             const isExpanded = selectedAppId === app.id;
 
             return (
-              <div key={app.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+              <div key={app.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
                 {/* App header */}
                 <div
                   className="p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors"
@@ -711,7 +711,7 @@ export function LeaderManagement({
                             value={app.backgroundCheckStatus}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => updateBackgroundCheck(app.id, e.target.value as BackgroundCheckStatus)}
-                            className="px-3 py-2 text-xs border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg"
+                            className="px-3 py-2 text-xs border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 rounded-lg"
                           >
                             <option value="not_started">BG Check: Not Started</option>
                             <option value="in_progress">BG Check: In Progress</option>

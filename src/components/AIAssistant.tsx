@@ -269,7 +269,7 @@ Provide a helpful, concise response. If they're asking for something you can't d
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 pt-16 px-4">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[80vh]">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[80vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">

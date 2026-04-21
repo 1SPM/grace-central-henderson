@@ -422,25 +422,25 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
           <div className="absolute top-2 right-2 flex gap-1">
             <button
               onClick={(e) => { e.stopPropagation(); moveBlock(block.id, 'up'); }}
-              className="p-1 bg-white dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
+              className="p-1 bg-stone-100 dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
             >
               <MoveUp size={14} />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); moveBlock(block.id, 'down'); }}
-              className="p-1 bg-white dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
+              className="p-1 bg-stone-100 dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
             >
               <MoveDown size={14} />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}
-              className="p-1 bg-white dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
+              className="p-1 bg-stone-100 dark:bg-dark-700 rounded shadow hover:bg-gray-100 dark:hover:bg-dark-600"
             >
               <Copy size={14} />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}
-              className="p-1 bg-white dark:bg-dark-700 rounded shadow hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500"
+              className="p-1 bg-stone-100 dark:bg-dark-700 rounded shadow hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500"
             >
               <Trash2 size={14} />
             </button>
@@ -476,7 +476,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 type="text"
                 value={content.title || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -485,7 +485,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 type="text"
                 value={content.subtitle || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { subtitle: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
           </>
@@ -498,7 +498,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
               value={content.html || ''}
               onChange={(e) => updateBlock(selectedBlock.id, { html: e.target.value })}
               rows={6}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 font-mono text-sm"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 font-mono text-sm"
             />
             <p className="text-xs text-gray-500 mt-1">Use merge tags like {'{{'+'first_name'+'}}'}</p>
           </div>
@@ -513,7 +513,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 value={content.url || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { url: e.target.value })}
                 placeholder="https://..."
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -522,7 +522,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 type="text"
                 value={content.alt || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { alt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -533,7 +533,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 onChange={(e) => updateBlock(selectedBlock.id, { width: parseInt(e.target.value) })}
                 min={10}
                 max={100}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
           </>
@@ -547,7 +547,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 type="text"
                 value={content.text || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { text: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -557,7 +557,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 value={content.url || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { url: e.target.value })}
                 placeholder="https://..."
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <div>
@@ -607,7 +607,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
               onChange={(e) => updateBlock(selectedBlock.id, { height: parseInt(e.target.value) })}
               min={10}
               max={200}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
             />
           </div>
         )}
@@ -620,7 +620,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
                 value={content.text || ''}
                 onChange={(e) => updateBlock(selectedBlock.id, { text: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100"
               />
             </div>
             <label className="flex items-center gap-2">
@@ -674,7 +674,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-100 dark:bg-dark-900">
       {/* Header */}
-      <div className="bg-white dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 px-6 py-4">
+      <div className="bg-stone-100 dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {onBack && (
@@ -722,7 +722,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Block Library */}
-        <div className="w-64 bg-white dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 overflow-y-auto">
+        <div className="w-64 bg-stone-100 dark:bg-dark-850 border-r border-gray-200 dark:border-dark-700 overflow-y-auto">
           <div className="p-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-300 mb-3">Add Blocks</h3>
             <div className="space-y-2">
@@ -767,7 +767,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
         {/* Center - Canvas */}
         <div className="flex-1 overflow-y-auto p-8">
           <div
-            className="mx-auto bg-white dark:bg-dark-800 shadow-lg rounded-lg overflow-hidden"
+            className="mx-auto bg-stone-100 dark:bg-dark-800 shadow-lg rounded-lg overflow-hidden"
             style={{
               maxWidth: template.styles.contentWidth,
               backgroundColor: '#ffffff',
@@ -790,7 +790,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
         </div>
 
         {/* Right Panel - Block Editor */}
-        <div className="w-80 bg-white dark:bg-dark-850 border-l border-gray-200 dark:border-dark-700 overflow-y-auto p-4">
+        <div className="w-80 bg-stone-100 dark:bg-dark-850 border-l border-gray-200 dark:border-dark-700 overflow-y-auto p-4">
           {renderBlockEditor()}
         </div>
       </div>
@@ -798,7 +798,7 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
       {/* Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-dark-100">Email Preview</h2>

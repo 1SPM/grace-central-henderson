@@ -70,7 +70,7 @@ export function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 animate-slide-up">
-      <div className="bg-white dark:bg-dark-850 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-500 to-slate-600 p-4">
           <div className="flex items-center justify-between">

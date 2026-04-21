@@ -174,7 +174,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Check-in Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Check In a Child</h2>
 
           {!selectedChild ? (
@@ -186,7 +186,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                   placeholder="Search for child by name..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                   type="text"
                   value={parentName}
                   onChange={e => setParentName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   placeholder="John Smith"
                 />
               </div>
@@ -273,7 +273,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                   type="tel"
                   value={parentPhone}
                   onChange={e => setParentPhone(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   placeholder="(555) 123-4567"
                 />
               </div>
@@ -285,7 +285,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                 <select
                   value={selectedRoom}
                   onChange={e => setSelectedRoom(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                 >
                   <option value="">Select room...</option>
                   {ROOMS.map(room => (
@@ -304,7 +304,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                   type="text"
                   value={allergies}
                   onChange={e => setAllergies(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   placeholder="Peanuts, dairy, etc."
                 />
               </div>
@@ -317,7 +317,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                   type="text"
                   value={medicalNotes}
                   onChange={e => setMedicalNotes(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white"
                   placeholder="Asthma inhaler in bag, etc."
                 />
               </div>
@@ -335,7 +335,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
         </div>
 
         {/* Currently Checked In */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-stone-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-600" />
             Currently Checked In ({activeCheckIns.length})
@@ -394,7 +394,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => setPrintBadge(child)}
-                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-stone-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         <Printer className="w-4 h-4" />
                         Print Badge
@@ -411,7 +411,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
       {/* Checkout Modal */}
       {showCheckout && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-stone-100 dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Shield className="w-6 h-6 text-green-600" />
               Child Check-Out
@@ -424,7 +424,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
               value={checkoutCode}
               onChange={e => setCheckoutCode(e.target.value.toUpperCase().slice(0, 4))}
               placeholder="XXXX"
-              className="w-full px-4 py-4 text-center text-3xl font-mono font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white tracking-widest"
+              className="w-full px-4 py-4 text-center text-3xl font-mono font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-white tracking-widest"
               maxLength={4}
               autoFocus
             />

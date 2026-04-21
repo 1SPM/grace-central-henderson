@@ -10,9 +10,9 @@
 
   /* Paper palette — single source of truth, matches tailwind.paper.* */
   --paper-canvas: #ede8dc; /* body background */
-  --paper-card:   #faf7f0; /* cards, modals, stat cards */
-  --paper-raised: #fdfbf5; /* inputs */
-  --paper-sink:   #e4ddcd; /* sidebar, nested surfaces */
+  --paper-card:   #f3ede0; /* cards, modals, stat cards */
+  --paper-raised: #f7f1e4; /* inputs */
+  --paper-sink:   #ddd5c2; /* sidebar, nested surfaces */
   --paper-line:   #d6cfbd; /* borders on paper surfaces */
 
   /* Ink (text) */
@@ -38,7 +38,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   letter-spacing: -0.011em;
-  background-color: #ede8dc; /* warm paper — parchment-ish, not white */
+  background-color: #e6dfd0; /* warmer parchment — knocked back a notch */
   color: #1c2434; /* deep slate-navy */
 }
 
@@ -200,7 +200,7 @@ select:focus {
   /* Premium cards — warm paper, not pure white */
   .card {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #faf7f0; /* warm off-white paper */
+    background-color: #f3ede0; /* warm off-white paper */
     box-shadow: var(--shadow);
   }
 
@@ -211,7 +211,7 @@ select:focus {
 
   .card-solid {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #faf7f0;
+    background-color: #f3ede0;
     box-shadow: var(--shadow);
   }
 
@@ -223,7 +223,7 @@ select:focus {
   /* Refined inputs — paper tone */
   .input {
     @apply w-full px-4 py-3 rounded-xl border border-stone-300 text-gray-900 placeholder-gray-400;
-    background-color: #fdfbf5;
+    background-color: #f7f1e4;
     font-weight: 450;
   }
 
@@ -259,7 +259,7 @@ select:focus {
   /* Stat cards — paper tone */
   .stat-card {
     @apply p-5 rounded-2xl border border-stone-300/70;
-    background-color: #faf7f0;
+    background-color: #f3ede0;
   }
 
   .dark .stat-card {
@@ -278,7 +278,7 @@ select:focus {
   /* Sidebar — deeper paper tone, distinct from main canvas */
   .sidebar-glass {
     @apply border-r border-stone-300/70;
-    background-color: #e4ddcd; /* parchment, a notch deeper than body */
+    background-color: #ddd5c2; /* parchment, a notch deeper than body */
   }
 
   .dark .sidebar-glass {
@@ -326,7 +326,7 @@ select:focus {
   /* Modal content — warm paper */
   .modal-content {
     @apply rounded-2xl border border-stone-300/70;
-    background-color: #faf7f0;
+    background-color: #f3ede0;
     box-shadow: var(--shadow-xl), 0 0 1px rgba(0, 0, 0, 0.1);
   }
 

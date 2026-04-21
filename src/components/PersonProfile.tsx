@@ -233,7 +233,7 @@ export function PersonProfile({
         {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Profile Card */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-start gap-6">
               <div className="relative">
                 {person.photo ? (
@@ -371,7 +371,7 @@ export function PersonProfile({
           )}
 
           {/* Add Interaction */}
-          <div data-tutorial="people-interaction" className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div data-tutorial="people-interaction" className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">Log Interaction</h2>
             <div className="flex flex-wrap gap-2 mb-4">
               {interactionTypes.map(({ type, icon, label }) => (
@@ -394,7 +394,7 @@ export function PersonProfile({
               onChange={(e) => setNewNote(e.target.value)}
               placeholder="Add a note about this interaction..."
               rows={3}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
             />
             <div className="flex justify-end mt-3">
               <button
@@ -408,7 +408,7 @@ export function PersonProfile({
           </div>
 
           {/* Interaction History */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100 mb-4">History</h2>
             {personInteractions.length === 0 ? (
               <p className="text-gray-400 dark:text-dark-400 text-sm py-4 text-center">No interactions recorded yet</p>
@@ -473,7 +473,7 @@ export function PersonProfile({
           />
 
           {/* Tasks */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Tasks</h2>
               <button
@@ -491,18 +491,18 @@ export function PersonProfile({
                   placeholder="Task title..."
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <input
                   type="date"
                   value={newTask.dueDate}
                   onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <select
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
@@ -564,7 +564,7 @@ export function PersonProfile({
           </div>
 
           {/* Groups */}
-          <div className="bg-white dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Groups</h2>
               {onAddToGroup && availableGroups.length > 0 && (
@@ -578,7 +578,7 @@ export function PersonProfile({
                   {showGroupSelector && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowGroupSelector(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-20 py-2 max-h-64 overflow-y-auto">
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-lg z-20 py-2 max-h-64 overflow-y-auto">
                         <p className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider border-b border-gray-100 dark:border-dark-700">
                           Add to Group
                         </p>
@@ -654,7 +654,7 @@ export function PersonProfile({
       {/* Email Modal */}
       {showEmailModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
@@ -692,7 +692,7 @@ export function PersonProfile({
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
                   placeholder="Enter subject..."
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div>
@@ -719,7 +719,7 @@ export function PersonProfile({
                   onChange={(e) => setEmailBody(e.target.value)}
                   placeholder="Write your message..."
                   rows={5}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                 />
               </div>
               {sendResult && (
@@ -770,7 +770,7 @@ export function PersonProfile({
       {/* SMS Modal */}
       {showSmsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-850 rounded-2xl w-full max-w-lg">
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl w-full max-w-lg">
             <div className="p-6 border-b border-gray-200 dark:border-dark-700">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
@@ -815,7 +815,7 @@ export function PersonProfile({
                   placeholder="Write your message..."
                   rows={4}
                   maxLength={160}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                 />
                 <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
                   {smsMessage.length}/160 characters
