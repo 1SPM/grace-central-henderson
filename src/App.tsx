@@ -337,6 +337,7 @@ function App() {
           onSelectPerson={handlers.viewPerson}
           onSelectTask={() => setView('tasks')}
           onSelectPrayer={() => setView('prayer')}
+          onNavigate={(v) => setView(v)}
           onClose={modals.closeSearch}
         />
       )}

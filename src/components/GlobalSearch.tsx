@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check } from 'lucide-react';
-import { Person, Task, PrayerRequest } from '../types';
+import {
+  Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
+  LayoutDashboard, Users, Calendar, DollarSign, Megaphone, Church, UserCheck, Baby,
+  BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Users2,
+} from 'lucide-react';
+import { Person, Task, PrayerRequest, View } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
@@ -12,16 +16,36 @@ interface GlobalSearchProps {
   onSelectPerson: (id: string) => void;
   onSelectTask: () => void;
   onSelectPrayer: () => void;
+  onNavigate: (view: View) => void;
   onClose: () => void;
 }
 
 type SearchResult = {
-  type: 'person' | 'task' | 'prayer';
+  type: 'view' | 'person' | 'task' | 'prayer';
   id: string;
   title: string;
   subtitle: string;
   icon: React.ReactNode;
+  view?: View;
 };
+
+// Primary views exposed to the command palette. Lean, not all 52.
+const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
+  { view: 'dashboard', label: 'Home', subtitle: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  { view: 'feed', label: 'Actions', subtitle: 'Today\'s follow-ups', icon: <ListTodo size={16} /> },
+  { view: 'people', label: 'People', subtitle: 'Directory', icon: <Users size={16} /> },
+  { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },
+  { view: 'groups', label: 'Groups', subtitle: 'Small groups', icon: <Users2 size={16} /> },
+  { view: 'calendar', label: 'Calendar', subtitle: 'Events', icon: <Calendar size={16} /> },
+  { view: 'giving', label: 'Giving', subtitle: 'Donations & pledges', icon: <DollarSign size={16} /> },
+  { view: 'announcements', label: 'Announcements', subtitle: 'Announcement board', icon: <Megaphone size={16} /> },
+  { view: 'sunday-prep', label: 'Sunday Prep', subtitle: 'This week\'s service', icon: <Church size={16} /> },
+  { view: 'attendance', label: 'Attendance', subtitle: 'Check-in & counts', icon: <UserCheck size={16} /> },
+  { view: 'child-checkin', label: 'Child Check-in', subtitle: 'Kids ministry', icon: <Baby size={16} /> },
+  { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Counseling & chats', icon: <Heart size={16} /> },
+  { view: 'discipleship', label: 'Discipleship', subtitle: 'Spiritual pathways', icon: <TrendingUp size={16} /> },
+  { view: 'analytics', label: 'Analytics', subtitle: 'Trends & stats', icon: <BarChart3 size={16} /> },
+];
 
 type Mode = 'search' | 'ai';
 
@@ -46,17 +70,33 @@ export function GlobalSearch({
   onSelectPerson,
   onSelectTask,
   onSelectPrayer,
+  onNavigate,
   onClose
 }: GlobalSearchProps) {
   const { settings: aiSettings } = useAISettings();
   const [mode, setMode] = useState<Mode>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const { copiedId, copy: copyToClipboard } = useCopyToClipboard();
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Default suggestions shown when the palette opens with no query
+  const defaultResults: SearchResult[] = useMemo(
+    () =>
+      NAV_ITEMS.slice(0, 8).map(item => ({
+        type: 'view' as const,
+        id: item.view,
+        title: item.label,
+        subtitle: item.subtitle,
+        icon: <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>,
+        view: item.view,
+      })),
+    []
+  );
 
   // Memoize person lookup map for O(1) access
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
@@ -85,11 +125,26 @@ export function GlobalSearch({
   useEffect(() => {
     if (mode !== 'search' || !query.trim()) {
       setResults([]);
+      setActiveIndex(0);
       return;
     }
 
     const q = query.toLowerCase();
     const searchResults: SearchResult[] = [];
+
+    // Views first — match on label (exact prefix boosted)
+    NAV_ITEMS.forEach(item => {
+      if (item.label.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q)) {
+        searchResults.push({
+          type: 'view',
+          id: item.view,
+          title: item.label,
+          subtitle: item.subtitle,
+          icon: <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>,
+          view: item.view,
+        });
+      }
+    });
 
     // Search people
     people.forEach((person) => {
@@ -141,11 +196,15 @@ export function GlobalSearch({
       }
     });
 
-    setResults(searchResults.slice(0, 10));
+    setResults(searchResults.slice(0, 12));
+    setActiveIndex(0);
   }, [query, people, tasks, prayers, personMap, mode]);
 
   const handleSelect = (result: SearchResult) => {
     switch (result.type) {
+      case 'view':
+        if (result.view) onNavigate(result.view);
+        break;
       case 'person':
         onSelectPerson(result.id);
         break;
@@ -158,6 +217,28 @@ export function GlobalSearch({
     }
     onClose();
   };
+
+  // Keyboard navigation — arrow keys + enter
+  const visibleResults = query ? results : defaultResults;
+  useEffect(() => {
+    if (mode !== 'search') return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex(i => Math.min(i + 1, visibleResults.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex(i => Math.max(i - 1, 0));
+      } else if (e.key === 'Enter') {
+        if (visibleResults[activeIndex]) {
+          e.preventDefault();
+          handleSelect(visibleResults[activeIndex]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [visibleResults, activeIndex, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCopy = (text: string, id: string) => {
     copyToClipboard(text, id);
@@ -310,48 +391,68 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search people, tasks, prayers..."
+                placeholder="Jump to… or search people, tasks, prayers"
                 className="flex-1 bg-transparent text-gray-900 dark:text-dark-100 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-dark-500"
               />
             </div>
 
-            {results.length > 0 && (
+            {visibleResults.length > 0 && (
               <div className="flex-1 overflow-y-auto p-2">
-                {results.map((result, index) => (
-                  <button
-                    key={`${result.type}-${result.id}-${index}`}
-                    onClick={() => handleSelect(result)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-left"
-                  >
-                    <div className="w-8 h-8 bg-gray-100 dark:bg-dark-700 rounded-lg flex items-center justify-center">
-                      {result.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 dark:text-dark-100 truncate">{result.title}</p>
-                      <p className="text-sm text-gray-400 dark:text-dark-400 truncate">{result.subtitle}</p>
-                    </div>
-                    <span className="text-xs text-gray-400 dark:text-dark-500 capitalize">{result.type}</span>
-                  </button>
-                ))}
+                {!query && (
+                  <div className="px-3 pt-1 pb-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    Jump to
+                  </div>
+                )}
+                {visibleResults.map((result, index) => {
+                  const isActive = index === activeIndex;
+                  return (
+                    <button
+                      key={`${result.type}-${result.id}-${index}`}
+                      onClick={() => handleSelect(result)}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition-colors ${
+                        isActive
+                          ? 'bg-stone-200/70 dark:bg-dark-700'
+                          : 'hover:bg-stone-200/50 dark:hover:bg-dark-800'
+                      }`}
+                    >
+                      <div className="w-7 h-7 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                        {result.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{result.title}</p>
+                        <p className="text-xs text-gray-400 dark:text-dark-400 truncate">{result.subtitle}</p>
+                      </div>
+                      {result.type === 'view' ? (
+                        <ArrowRight size={14} className={`${isActive ? 'text-gray-500' : 'text-gray-300 dark:text-gray-600'}`} />
+                      ) : (
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">{result.type}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
             {query && results.length === 0 && (
-              <div className="p-8 text-center text-gray-400 dark:text-dark-400">
+              <div className="p-8 text-center text-gray-400 dark:text-dark-400 text-sm">
                 No results for "{query}"
               </div>
             )}
 
-            {!query && (
-              <div className="p-8 text-center text-gray-400 dark:text-dark-400">
-                <p className="text-sm">Search people, tasks, and prayers</p>
-                {aiSettings.smartSearch && (
-                  <p className="text-xs mt-2">
-                    <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded">Tab</kbd> to switch to AI
-                  </p>
-                )}
+            {/* Footer hint */}
+            <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-dark-700 text-[11px] text-gray-400 dark:text-gray-500">
+              <div className="flex items-center gap-3">
+                <span><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded text-[10px]">↑↓</kbd> navigate</span>
+                <span><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded text-[10px]">↵</kbd> select</span>
+                <span><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded text-[10px]">esc</kbd> close</span>
               </div>
-            )}
+              {aiSettings.smartSearch && (
+                <button onClick={() => setMode('ai')} className="flex items-center gap-1 hover:text-gray-600 dark:hover:text-gray-300">
+                  <Sparkles size={11} /> AI
+                </button>
+              )}
+            </div>
           </>
         )}
 
