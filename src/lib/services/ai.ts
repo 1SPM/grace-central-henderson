@@ -43,9 +43,11 @@ export async function generateAIText(options: AIGenerateOptions): Promise<AIGene
     const data = await response.json();
 
     if (!response.ok) {
+      const baseError = data.error || `Request failed with status ${response.status}`;
+      const withDetail = data.detail ? `${baseError} — ${data.detail}` : baseError;
       return {
         success: false,
-        error: data.error || `Request failed with status ${response.status}`,
+        error: withDetail,
       };
     }
 

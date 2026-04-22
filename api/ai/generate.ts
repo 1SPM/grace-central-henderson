@@ -5,7 +5,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Rate limiting (simple in-memory, resets on cold start)
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 20; // requests per minute
+const RATE_LIMIT = 120; // requests per minute
 const RATE_WINDOW = 60 * 1000; // 1 minute
 
 function isRateLimited(ip: string): boolean {
@@ -113,16 +113,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('Gemini API error:', error);
 
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        return res.status(401).json({ error: 'Invalid API key configuration' });
-      }
-      if (error.message.includes('quota')) {
-        return res.status(429).json({ error: 'API quota exceeded' });
-      }
+    // Pass through specifics so the client UI can show something useful
+    const message = error instanceof Error ? error.message : String(error);
+
+    // Avoid leaking keys or noisy stack traces; truncate.
+    const publicMessage = message.slice(0, 240);
+
+    if (/API key|invalid key/i.test(message)) {
+      return res.status(401).json({ error: 'Invalid API key', detail: publicMessage });
+    }
+    if (/quota|spending cap|RESOURCE_EXHAUSTED/i.test(message)) {
+      return res.status(429).json({ error: 'API quota or spend cap reached', detail: publicMessage });
+    }
+    if (/safety|blocked|candidate/i.test(message)) {
+      return res.status(400).json({ error: 'Model refused the prompt (safety filter)', detail: publicMessage });
     }
 
-    return res.status(500).json({ error: 'AI generation failed' });
+    return res.status(500).json({ error: 'AI generation failed', detail: publicMessage });
   }
 }
