@@ -300,7 +300,7 @@ export function EventRegistration({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Event Registration</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Event Registration</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">
             {filteredEvents.length} upcoming events
           </p>

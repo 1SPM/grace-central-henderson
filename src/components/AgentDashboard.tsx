@@ -328,7 +328,7 @@ export function AgentDashboard({
             <Bot className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">
               AI Agents
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -849,7 +849,7 @@ export function AgentDashboardSimple({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Automations</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Automations</h1>
           <p className="text-gray-500 dark:text-gray-400">
             Set it and forget it. Automations run in the background.
           </p>

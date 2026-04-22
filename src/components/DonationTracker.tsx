@@ -237,7 +237,7 @@ export function DonationTracker({
             </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Donation Tracker</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Donation Tracker</h1>
             <p className="text-gray-500 dark:text-dark-400 mt-1">
               Track, search, and analyze all donation records
             </p>

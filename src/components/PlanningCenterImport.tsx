@@ -394,7 +394,7 @@ export function PlanningCenterImport({
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+        <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">
           Import from Planning Center
         </h1>
         <p className="text-gray-500 dark:text-dark-400 mt-1">

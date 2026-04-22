@@ -154,7 +154,7 @@ export function ChildCheckIn({ people, onBack }: ChildCheckInProps) {
             </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none flex items-center gap-2">
               <Baby className="w-6 h-6 text-pink-600" />
               Children's Check-In
             </h1>

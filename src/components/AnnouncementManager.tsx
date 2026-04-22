@@ -95,7 +95,7 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
             <Megaphone className="text-indigo-600 dark:text-indigo-400" size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Announcements</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Announcements</h1>
             <p className="text-sm text-gray-500 dark:text-dark-400">{announcements.length} announcement{announcements.length !== 1 ? 's' : ''}</p>
           </div>
         </div>

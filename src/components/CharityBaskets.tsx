@@ -229,7 +229,7 @@ export function CharityBaskets({
                 {typeConfig.icon}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">{selectedBasket.name}</h1>
+                <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">{selectedBasket.name}</h1>
                 <div className="flex items-center gap-3 mt-1">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
                     {statusConfig.icon}
@@ -513,7 +513,7 @@ export function CharityBaskets({
             </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Charity Baskets</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Charity Baskets</h1>
             <p className="text-gray-500 dark:text-dark-400 mt-1">
               Create and manage care baskets for families in need
             </p>

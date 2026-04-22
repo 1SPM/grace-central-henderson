@@ -281,7 +281,7 @@ function StatementPreview({
         <div className="p-8" id="statement-preview">
           {/* Church Header */}
           <div className="text-center mb-8 pb-6 border-b border-gray-200 dark:border-dark-700">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">
               {churchName}
             </h1>
             <p className="text-gray-500 dark:text-dark-400 mt-1">{churchAddress}</p>
@@ -573,7 +573,7 @@ export function GivingStatements({
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">
             Giving Statements
           </h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">

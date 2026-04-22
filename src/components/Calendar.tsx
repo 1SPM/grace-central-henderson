@@ -289,7 +289,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Calendar / Events</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Calendar / Events</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">
             {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
           </p>

@@ -277,7 +277,7 @@ export function EstatePlanning({ people: _people, onViewPerson: _onViewPerson, o
                 <span className="text-gray-900 dark:text-dark-100 font-medium">Estate Planning & Legacy Giving</span>
               </nav>
             )}
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Estate Planning & Legacy Giving</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Estate Planning & Legacy Giving</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Help members plan their legacy and charitable giving
             </p>

@@ -352,7 +352,7 @@ export function FuneralServices({ people: _people, events: _events, onAddEvent, 
                 <span className="text-gray-900 dark:text-dark-100 font-medium">Funeral & Memorial Services</span>
               </nav>
             )}
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Funeral & Memorial Services</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Funeral & Memorial Services</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage funeral services and memorial planning
             </p>

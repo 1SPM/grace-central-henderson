@@ -168,7 +168,7 @@ export function Tasks({ tasks, people, onToggleTask, onAddTask }: TasksProps) {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Follow-Ups</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Follow-Ups</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">Track and manage your care tasks</p>
         </div>
         <div className="flex items-center gap-3">

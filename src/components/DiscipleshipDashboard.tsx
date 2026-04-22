@@ -113,7 +113,7 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
           <TrendingUp className="text-white" size={20} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Discipleship Pathways</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Discipleship Pathways</h1>
           <p className="text-sm text-gray-500 dark:text-dark-400">Track spiritual growth across your congregation</p>
         </div>
       </div>

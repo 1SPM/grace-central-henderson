@@ -193,7 +193,7 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Life Services</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Life Services</h1>
           <p className="text-gray-500 dark:text-dark-400 mt-1">
             Manage weddings, funerals, baptisms, and legacy giving
           </p>

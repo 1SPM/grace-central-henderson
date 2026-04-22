@@ -449,7 +449,7 @@ export function FollowUpAutomation({
             <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none flex items-center gap-2">
               <Zap className="text-amber-500" size={28} />
               Follow-up Automation
             </h1>

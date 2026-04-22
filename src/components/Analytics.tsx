@@ -283,7 +283,7 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Analytics</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Insights into your congregation's health and growth</p>
         </div>
         <div className="flex bg-gray-100 dark:bg-dark-800 rounded-lg p-1">

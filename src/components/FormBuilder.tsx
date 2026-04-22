@@ -193,7 +193,7 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
               </button>
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none flex items-center gap-2">
                 <FormInput className="w-6 h-6 text-indigo-600" />
                 Forms Builder
               </h1>

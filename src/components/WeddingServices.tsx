@@ -262,7 +262,7 @@ export function WeddingServices({ people: _people, events: _events, onAddEvent, 
                 <span className="text-gray-900 dark:text-dark-100 font-medium">Wedding Services</span>
               </nav>
             )}
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Wedding Services</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Wedding Services</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Manage wedding ceremonies and couple preparation
             </p>
