@@ -13,6 +13,7 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { EmailSidebar } from './components/EmailSidebar';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AskGrace } from './components/AskGrace';
 import { TutorialProvider } from './contexts/TutorialContext';
 import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
 import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
@@ -351,6 +352,17 @@ function App() {
           onAddDonation={modals.openQuickDonation}
         />
       )}
+
+      <AskGrace
+        people={people}
+        tasks={tasks}
+        giving={giving}
+        events={events}
+        groups={groups}
+        prayers={prayers}
+        attendance={[...attendanceFromDb, ...attendanceRecords]}
+        churchName={churchSettings?.profile?.name}
+      />
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}
       {modals.showQuickPrayer && <QuickPrayerForm people={people} onSave={handlers.addPrayer} onClose={modals.closeQuickPrayer} />}
