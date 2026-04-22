@@ -4,6 +4,29 @@ import { createLogger } from '../utils/logger';
 
 const log = createLogger('error-boundary');
 
+/**
+ * Nuke the service worker + all caches so the forced reload below gets
+ * fresh HTML. Without this, the SW happily keeps serving the same stale
+ * shell that points at 404'd chunk URLs, and we loop forever.
+ */
+async function recoverFromStaleChunks(): Promise<void> {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) {
+    log.error('Failed to clear SW/caches before reload', e);
+  } finally {
+    // eslint-disable-next-line no-self-assign
+    window.location.href = window.location.href;
+  }
+}
+
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
@@ -31,7 +54,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // Auto-recover from stale chunk references after a deploy.
     // Vite hashes filenames; service workers can hold old chunk URLs that now 404.
-    // Detect the common messages and force a one-time reload.
+    // Detect the common messages and force a one-time reload — but first
+    // aggressively clear the PWA cache + SW so the reload actually gets
+    // fresh HTML (otherwise the SW serves the same stale shell forever).
     const msg = error.message || '';
     const isChunkLoadError =
       /Failed to fetch dynamically imported module/i.test(msg) ||
@@ -40,9 +65,10 @@ export class ErrorBoundary extends Component<Props, State> {
       /ChunkLoadError/i.test(error.name || '');
     if (isChunkLoadError && typeof window !== 'undefined') {
       const flag = 'grace-chunk-reload';
-      if (!sessionStorage.getItem(flag)) {
-        sessionStorage.setItem(flag, String(Date.now()));
-        window.location.reload();
+      const attemptCount = Number(sessionStorage.getItem(flag) || '0');
+      if (attemptCount < 2) {
+        sessionStorage.setItem(flag, String(attemptCount + 1));
+        void recoverFromStaleChunks();
       }
     }
   }
