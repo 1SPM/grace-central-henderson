@@ -19,10 +19,13 @@ import {
   Accessibility,
   Heart,
   GraduationCap,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
+import { useTheme } from '../ThemeContext';
 import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 import { IntegrationCard, ConfigModal, PasswordInput } from './settings/SettingsUI';
 import { SettingsDataExport } from './settings/SettingsDataExport';
@@ -60,6 +63,7 @@ export function Settings({
 }: SettingsProps) {
   const { status, saveIntegrations } = useIntegrations();
   const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
+  const { theme, toggleTheme } = useTheme();
   const { settings: churchSettings, saveProfile, isLoading: settingsLoading } = useChurchSettings();
   const { settings: aiSettings, toggleSetting, enableAll, disableAll } = useAISettings();
 
@@ -447,6 +451,20 @@ export function Settings({
 
           {/* Other accessibility options */}
           <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-dark-700">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div>
+                <span className="text-sm font-medium text-gray-700 dark:text-dark-300">Dark mode</span>
+                <p className="text-xs text-gray-500 dark:text-dark-400">Switch between light and dark themes</p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-dark-700 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+                aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              >
+                {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                <span className="text-sm text-gray-700 dark:text-dark-300">{theme === 'light' ? 'Dark' : 'Light'}</span>
+              </button>
+            </label>
             <label className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-gray-700 dark:text-dark-300">High Contrast</span>

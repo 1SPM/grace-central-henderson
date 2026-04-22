@@ -8,8 +8,6 @@ import {
   Users2,
   DollarSign,
   Settings,
-  Moon,
-  Sun,
   Menu,
   Search,
   PanelLeftClose,
@@ -38,7 +36,6 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { View } from '../types';
-import { useTheme } from '../ThemeContext';
 
 interface LayoutProps {
   currentView: View;
@@ -53,31 +50,18 @@ interface NavSection {
   items: { view: View; label: string; icon: ReactNode }[];
 }
 
-// Four tight sections — Attio/Linear-style. Everything else lives behind "More…"
+// Single flat list — daily-driver views only. Everything else lives behind "More…"
 const navSections: NavSection[] = [
   {
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
       { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
-    ],
-  },
-  {
-    label: 'People',
-    items: [
       { view: 'people', label: 'People', icon: <Users size={18} /> },
       { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-      { view: 'pastoral-care', label: 'Care', icon: <Heart size={18} /> },
-      { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
-    ],
-  },
-  {
-    label: 'Ministry',
-    items: [
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
       { view: 'sunday-prep', label: 'Sunday', icon: <Church size={18} /> },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
-      { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
-      { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
+      { view: 'pastoral-care', label: 'Care', icon: <Heart size={18} /> },
     ],
   },
 ];
@@ -85,6 +69,9 @@ const navSections: NavSection[] = [
 // Power-user views tucked behind "More…" to keep the primary nav clean.
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
+  { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
+  { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
+  { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
@@ -101,6 +88,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'follow-up-automation', label: 'Automations', icon: <Workflow size={18} /> },
   { view: 'agents', label: 'Rules engine', icon: <Workflow size={18} /> },
   { view: 'planning-center-import', label: 'Planning Center import', icon: <Import size={18} /> },
+  { view: 'member-portal', label: 'Member Portal', icon: <Globe size={18} /> },
 ];
 
 // View labels for breadcrumbs
@@ -160,7 +148,6 @@ const viewLabels: Record<View, string> = {
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
-  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
@@ -375,41 +362,6 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           >
             {sidebarCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
             <span className={sidebarCollapsed ? 'hidden' : ''}>Collapse</span>
-          </button>
-
-          <button
-            onClick={toggleTheme}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
-              sidebarCollapsed ? 'lg:justify-center' : ''
-            }`}
-            title={sidebarCollapsed ? (theme === 'light' ? 'Dark mode' : 'Light mode') : undefined}
-          >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
-            {sidebarCollapsed && (
-              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
-                {theme === 'light' ? 'Dark mode' : 'Light mode'}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => handleNavClick('member-portal')}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
-              sidebarCollapsed ? 'lg:justify-center' : ''
-            }`}
-            title={sidebarCollapsed ? 'Member Portal (Preview)' : undefined}
-          >
-            <Globe size={18} />
-            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Member Portal</span>
-            <span className={`text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-medium ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-              Preview
-            </span>
-            {sidebarCollapsed && (
-              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
-                Member Portal
-              </span>
-            )}
           </button>
 
           <button
