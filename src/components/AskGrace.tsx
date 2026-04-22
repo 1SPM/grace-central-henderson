@@ -635,14 +635,18 @@ export function AskGrace(props: AskGraceData & AskGraceHandlers) {
             }}
             className="flex items-center gap-2 px-3 py-2 bg-slate-900/95 hover:bg-slate-900 backdrop-blur border border-slate-700/50 rounded-full shadow-xl transition-colors"
           >
-            <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsOpen(true)}
+              className="w-6 h-6 rounded-full bg-amber-400/20 hover:bg-amber-400/30 flex items-center justify-center shrink-0 transition-colors"
+              aria-label="Open Grace"
+            >
               <Sparkles size={13} className="text-amber-300" />
-            </div>
+            </button>
             <input
               type="text"
               value={dockValue}
               onChange={(e) => setDockValue(e.target.value)}
-              onClick={() => { if (!dockValue) setIsOpen(true); }}
               placeholder="Ask Grace…"
               className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-slate-400"
             />
