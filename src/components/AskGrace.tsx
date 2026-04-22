@@ -371,8 +371,16 @@ export function AskGrace() {
 
       {chat.panelOpen && (
         <>
-          <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={chat.closePanel} />
-          <aside className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[420px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border-l border-stone-300/70 dark:border-white/5 shadow-2xl">
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40" onClick={chat.closePanel} />
+          <aside
+            className="fixed z-50 bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 shadow-2xl
+              inset-0 sm:inset-auto
+              sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2
+              sm:w-[min(580px,calc(100vw-48px))] sm:h-[min(640px,calc(100vh-96px))]
+              sm:rounded-2xl sm:border sm:border-stone-300/70 sm:dark:border-white/5
+              overflow-hidden"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          >
             <AskGraceChat variant="panel" onClose={chat.closePanel} />
           </aside>
         </>
