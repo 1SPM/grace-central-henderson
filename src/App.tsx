@@ -222,13 +222,14 @@ function App() {
   const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
 
   // Show onboarding wizard for first-time users
-  useEffect(() => {
-    if (!settingsLoading && !isPortalRoute && churchSettings &&
-        !churchSettings.onboarding?.wizardCompleted &&
-        !churchSettings.onboarding?.wizardDismissed) {
-      setShowWizard(true);
-    }
-  }, [settingsLoading, isPortalRoute, churchSettings]);
+  // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
+  // useEffect(() => {
+  //   if (!settingsLoading && !isPortalRoute && churchSettings &&
+  //       !churchSettings.onboarding?.wizardCompleted &&
+  //       !churchSettings.onboarding?.wizardDismissed) {
+  //     setShowWizard(true);
+  //   }
+  // }, [settingsLoading, isPortalRoute, churchSettings]);
 
   // Show tutorial picker after wizard completion (one-time)
   useEffect(() => {
