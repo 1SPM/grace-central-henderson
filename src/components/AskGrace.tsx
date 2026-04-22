@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-interface AskGraceProps {
+export interface AskGraceData {
   people: Person[];
   tasks: Task[];
   giving: Giving[];
@@ -29,7 +29,7 @@ const suggestions = [
   'Who has a birthday this week?',
 ];
 
-function buildDataContext(data: AskGraceProps): string {
+function buildDataContext(data: AskGraceData): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -106,9 +106,13 @@ Active prayer requests (${prayers.filter(p => !p.isAnswered).length} total): ${a
 `.trim();
 }
 
-export function AskGrace(props: AskGraceProps) {
+interface AskGraceChatProps extends AskGraceData {
+  variant?: 'panel' | 'inline';
+  onClose?: () => void;
+}
+
+export function AskGraceChat({ variant = 'panel', onClose, ...data }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { id: 'greet', role: 'assistant', content: 'Hi — ask me anything about your church data. Giving, attendance, groups, events, tasks, birthdays.' },
   ]);
@@ -118,8 +122,8 @@ export function AskGrace(props: AskGraceProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen]);
+    if (variant === 'panel') inputRef.current?.focus();
+  }, [variant]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -134,7 +138,7 @@ export function AskGrace(props: AskGraceProps) {
     setInput('');
     setLoading(true);
 
-    const context = buildDataContext(props);
+    const context = buildDataContext(data);
     const prompt = `${context}\n\nUser question: ${query}`;
 
     try {
@@ -150,9 +154,108 @@ export function AskGrace(props: AskGraceProps) {
     }
   };
 
+  const isInline = variant === 'inline';
+
+  return (
+    <div className={isInline
+      ? 'flex flex-col h-[520px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-xl overflow-hidden'
+      : 'flex flex-col h-full'}>
+      {/* Header */}
+      <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center">
+            <Sparkles size={14} className="text-amber-300" />
+          </div>
+          <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-stone-200/70 dark:hover:bg-dark-800 text-gray-500"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        )}
+      </header>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {messages.map(m => (
+          <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
+                m.role === 'user'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-white/70 dark:bg-dark-800 text-slate-900 dark:text-dark-100 border border-stone-200/70 dark:border-white/5'
+              }`}
+            >
+              {m.content}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="px-3.5 py-2.5 rounded-2xl bg-white/70 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5">
+              <Loader2 size={16} className="animate-spin text-gray-500" />
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Suggestions (only when conversation is fresh) */}
+      {messages.length === 1 && (
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5">
+          {suggestions.map(s => (
+            <button
+              key={s}
+              onClick={() => handleSubmit(s)}
+              className="text-xs px-2.5 py-1.5 rounded-full bg-white/60 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5 text-gray-700 dark:text-dark-300 hover:bg-white dark:hover:bg-dark-700 transition-colors"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input */}
+      <form
+        onSubmit={(e) => { e.preventDefault(); handleSubmit(input); }}
+        className="p-3 border-t border-stone-300/60 dark:border-white/5"
+      >
+        <div className="flex items-center gap-2 bg-white/70 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5 rounded-xl px-3 py-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask a question…"
+            className="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-dark-100 placeholder:text-gray-400"
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || loading}
+            className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-950 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+            aria-label="Send"
+          >
+            <Send size={14} />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export function AskGrace(props: AskGraceData) {
+  const { settings: aiSettings } = useAISettings();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!aiSettings.aiAssistant) return null;
+
   return (
     <>
-      {/* Floating button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -164,96 +267,11 @@ export function AskGrace(props: AskGraceProps) {
         </button>
       )}
 
-      {/* Slide-in panel */}
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 bg-black/20 z-40 lg:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-          <aside className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[420px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border-l border-stone-300/70 dark:border-white/5 flex flex-col shadow-2xl">
-            {/* Header */}
-            <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center">
-                  <Sparkles size={14} className="text-amber-300" />
-                </div>
-                <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-stone-200/70 dark:hover:bg-dark-800 text-gray-500"
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
-            </header>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-              {messages.map(m => (
-                <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
-                      m.role === 'user'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-white/70 dark:bg-dark-800 text-slate-900 dark:text-dark-100 border border-stone-200/70 dark:border-white/5'
-                    }`}
-                  >
-                    {m.content}
-                  </div>
-                </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div className="px-3.5 py-2.5 rounded-2xl bg-white/70 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5">
-                    <Loader2 size={16} className="animate-spin text-gray-500" />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Suggestions (only when conversation is fresh) */}
-            {messages.length === 1 && (
-              <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-                {suggestions.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => handleSubmit(s)}
-                    className="text-xs px-2.5 py-1.5 rounded-full bg-white/60 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5 text-gray-700 dark:text-dark-300 hover:bg-white dark:hover:bg-dark-700 transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input */}
-            <form
-              onSubmit={(e) => { e.preventDefault(); handleSubmit(input); }}
-              className="p-3 border-t border-stone-300/60 dark:border-white/5"
-            >
-              <div className="flex items-center gap-2 bg-white/70 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5 rounded-xl px-3 py-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question…"
-                  className="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-dark-100 placeholder:text-gray-400"
-                  disabled={loading}
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || loading}
-                  className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-950 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
-                  aria-label="Send"
-                >
-                  <Send size={14} />
-                </button>
-              </div>
-            </form>
+          <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={() => setIsOpen(false)} />
+          <aside className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[420px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border-l border-stone-300/70 dark:border-white/5 shadow-2xl">
+            <AskGraceChat {...props} variant="panel" onClose={() => setIsOpen(false)} />
           </aside>
         </>
       )}
