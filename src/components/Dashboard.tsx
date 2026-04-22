@@ -20,12 +20,11 @@ import {
   BarChart3,
   DollarSign,
 } from 'lucide-react';
-import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, SmallGroup, Attendance } from '../types';
+import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
 import { GivingWidget } from './GivingWidget';
 import { AskGraceChat } from './AskGrace';
-import type { AskGraceHandlers } from './AskGrace';
 
 import { SundayPrep } from './SundayPrep';
 import { StatCard } from './ui/StatCard';
@@ -41,12 +40,6 @@ interface DashboardProps {
   giving?: Giving[];
   interactions?: Interaction[];
   prayers?: PrayerRequest[];
-  groups?: SmallGroup[];
-  attendance?: Attendance[];
-  onAskGraceAddTask?: AskGraceHandlers['onAddTask'];
-  onAskGraceAddPrayer?: AskGraceHandlers['onAddPrayer'];
-  onAskGraceAddInteraction?: AskGraceHandlers['onAddInteraction'];
-  onAskGraceAddPerson?: AskGraceHandlers['onAddPerson'];
   onViewPerson: (id: string) => void;
   onViewTasks: () => void;
   onViewGiving?: () => void;
@@ -68,7 +61,7 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], groups = [], attendance = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, onAskGraceAddTask, onAskGraceAddPrayer, onAskGraceAddInteraction, onAskGraceAddPerson }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -324,21 +317,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
 
       {/* Ask Grace */}
       <div className="mb-6">
-        <AskGraceChat
-          variant="inline"
-          people={people}
-          tasks={tasks}
-          giving={giving}
-          events={events}
-          groups={groups}
-          prayers={prayers}
-          attendance={attendance}
-          churchName={churchSettings?.profile?.name}
-          onAddTask={onAskGraceAddTask}
-          onAddPrayer={onAskGraceAddPrayer}
-          onAddInteraction={onAskGraceAddInteraction}
-          onAddPerson={onAskGraceAddPerson}
-        />
+        <AskGraceChat variant="inline" />
       </div>
 
       {/* Stats Grid with Sparklines */}

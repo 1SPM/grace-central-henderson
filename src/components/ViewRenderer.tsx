@@ -237,8 +237,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           giving={giving}
           interactions={interactions}
           prayers={prayers}
-          groups={groups}
-          attendance={attendanceRecords}
           onViewPerson={handlers.viewPerson}
           onViewTasks={() => setView('tasks')}
           onViewGiving={() => setView('giving')}
@@ -255,10 +253,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
-          onAskGraceAddTask={handlers.addTask}
-          onAskGraceAddPrayer={handlers.addPrayer}
-          onAskGraceAddInteraction={handlers.addInteraction}
-          onAskGraceAddPerson={handlers.savePerson}
         />
       );
 
@@ -280,21 +274,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">Ask anything about your church — or ask her to add things for you.</p>
           </div>
           <div className="h-[calc(100vh-200px)]">
-            <AskGraceChat
-              variant="full"
-              people={people}
-              tasks={tasks}
-              giving={giving}
-              events={events}
-              groups={groups}
-              prayers={prayers}
-              attendance={attendanceRecords}
-              churchName={settings?.profile?.name}
-              onAddTask={handlers.addTask}
-              onAddPrayer={handlers.addPrayer}
-              onAddInteraction={handlers.addInteraction}
-              onAddPerson={handlers.savePerson}
-            />
+            <AskGraceChat variant="full" />
           </div>
         </div>
       );

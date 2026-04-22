@@ -63,6 +63,44 @@ export async function generateAIText(options: AIGenerateOptions): Promise<AIGene
   }
 }
 
+export interface StreamOptions extends AIGenerateOptions {
+  onChunk: (chunk: string) => void;
+  signal?: AbortSignal;
+}
+
+/**
+ * Stream text from the Gemini AI model. Calls onChunk as tokens arrive.
+ * If streaming isn't available (e.g. server misconfigured), returns without
+ * invoking onChunk so the caller can fall back to generateAIText.
+ */
+export async function generateAIStreamed({ prompt, maxTokens, onChunk, signal }: StreamOptions): Promise<void> {
+  try {
+    const response = await fetch(`${API_ENDPOINT}?stream=1`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens }),
+      signal,
+    });
+
+    if (!response.ok || !response.body) return;
+
+    const contentType = response.headers.get('content-type') || '';
+    // If the server didn't honor the stream flag, bail — caller falls back.
+    if (!contentType.includes('text/plain') && !contentType.includes('text/event-stream')) return;
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value, { stream: true });
+      if (text) onChunk(text);
+    }
+  } catch (e) {
+    log.error('AI stream error', e);
+  }
+}
+
 // ============================================
 // Pre-built prompts for common church CRM tasks
 // ============================================

@@ -14,6 +14,7 @@ import { EmailSidebar } from './components/EmailSidebar';
 import { ViewRenderer } from './components/ViewRenderer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AskGrace } from './components/AskGrace';
+import { GraceChatProvider } from './contexts/GraceChatContext';
 import { TutorialProvider } from './contexts/TutorialContext';
 import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
 import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
@@ -297,6 +298,20 @@ function App() {
         onboarding={churchSettings?.onboarding}
         saveOnboarding={saveOnboarding}
       >
+      <GraceChatProvider
+        people={people}
+        tasks={tasks}
+        giving={giving}
+        events={events}
+        groups={groups}
+        prayers={prayers}
+        attendance={[...attendanceFromDb, ...attendanceRecords]}
+        churchName={churchSettings?.profile?.name}
+        onAddTask={handlers.addTask}
+        onAddPrayer={handlers.addPrayer}
+        onAddInteraction={handlers.addInteraction}
+        onAddPerson={handlers.savePerson}
+      >
       <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
         <ErrorBoundary>
           <ViewRenderer
@@ -354,20 +369,7 @@ function App() {
         />
       )}
 
-      <AskGrace
-        people={people}
-        tasks={tasks}
-        giving={giving}
-        events={events}
-        groups={groups}
-        prayers={prayers}
-        attendance={[...attendanceFromDb, ...attendanceRecords]}
-        churchName={churchSettings?.profile?.name}
-        onAddTask={handlers.addTask}
-        onAddPrayer={handlers.addPrayer}
-        onAddInteraction={handlers.addInteraction}
-        onAddPerson={handlers.savePerson}
-      />
+      <AskGrace />
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}
       {modals.showQuickPrayer && <QuickPrayerForm people={people} onSave={handlers.addPrayer} onClose={modals.closeQuickPrayer} />}
@@ -409,6 +411,7 @@ function App() {
       <TutorialPickerModal />
       <TutorialOverlay />
       <TutorialPickerAutoOpen show={showTutorialPicker} onShown={() => setShowTutorialPicker(false)} />
+      </GraceChatProvider>
       </TutorialProvider>
     </ErrorBoundary>
   );

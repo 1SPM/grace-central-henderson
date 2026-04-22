@@ -65,16 +65,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     fullPrompt = `Context: ${sanitizedContext}\n\nRequest: ${sanitizedPrompt}`;
   }
 
+  const shouldStream = req.query.stream === '1' || req.query.stream === 'true';
+
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const config = {
+      maxOutputTokens: Math.min(maxTokens || 1024, 4096),
+      temperature: 0.7,
+    };
+
+    if (shouldStream) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('X-Accel-Buffering', 'no');
+
+      const stream = await ai.models.generateContentStream({
+        model: 'gemini-2.0-flash',
+        contents: fullPrompt,
+        config,
+      });
+
+      for await (const chunk of stream) {
+        const chunkText = chunk.text;
+        if (chunkText) res.write(chunkText);
+      }
+      res.end();
+      return;
+    }
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: fullPrompt,
-      config: {
-        maxOutputTokens: Math.min(maxTokens || 1024, 4096),
-        temperature: 0.7,
-      },
+      config,
     });
 
     const text = response.text;
