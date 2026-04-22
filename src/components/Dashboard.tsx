@@ -25,6 +25,7 @@ import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
 import { GivingWidget } from './GivingWidget';
 import { AskGraceChat } from './AskGrace';
+import type { AskGraceHandlers } from './AskGrace';
 
 import { SundayPrep } from './SundayPrep';
 import { StatCard } from './ui/StatCard';
@@ -42,6 +43,9 @@ interface DashboardProps {
   prayers?: PrayerRequest[];
   groups?: SmallGroup[];
   attendance?: Attendance[];
+  onAskGraceAddTask?: AskGraceHandlers['onAddTask'];
+  onAskGraceAddPrayer?: AskGraceHandlers['onAddPrayer'];
+  onAskGraceAddInteraction?: AskGraceHandlers['onAddInteraction'];
   onViewPerson: (id: string) => void;
   onViewTasks: () => void;
   onViewGiving?: () => void;
@@ -63,7 +67,7 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], groups = [], attendance = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], groups = [], attendance = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, onAskGraceAddTask, onAskGraceAddPrayer, onAskGraceAddInteraction }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -329,6 +333,9 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           prayers={prayers}
           attendance={attendance}
           churchName={churchSettings?.profile?.name}
+          onAddTask={onAskGraceAddTask}
+          onAddPrayer={onAskGraceAddPrayer}
+          onAddInteraction={onAskGraceAddInteraction}
         />
       </div>
 

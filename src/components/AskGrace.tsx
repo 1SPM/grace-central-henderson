@@ -1,13 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, Loader2, X } from 'lucide-react';
-import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance } from '../types';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote } from 'lucide-react';
+import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
+
+interface PendingAction {
+  type: 'add_task' | 'add_prayer' | 'add_note';
+  title?: string;
+  content?: string;
+  personName?: string;
+  personId?: string;
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  action?: PendingAction;
+  executed?: boolean;
 }
 
 export interface AskGraceData {
@@ -21,13 +33,39 @@ export interface AskGraceData {
   churchName?: string;
 }
 
+export interface AskGraceHandlers {
+  onAddTask?: (task: Omit<Task, 'id' | 'createdAt'>) => void | Promise<void>;
+  onAddPrayer?: (prayer: { personId: string; content: string; isPrivate: boolean }) => void | Promise<void>;
+  onAddInteraction?: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void | Promise<void>;
+}
+
 const suggestions = [
   'Who gave the most last month?',
   'Who hasn\'t attended in 30 days?',
-  'What events are coming up?',
-  'Which groups have open seats?',
+  'Add a task to follow up with visitors this week',
+  'Add a prayer request for my pastor',
   'Who has a birthday this week?',
 ];
+
+function resolvePerson(name: string | undefined, people: Person[]): Person | undefined {
+  if (!name) return undefined;
+  const lower = name.toLowerCase().trim();
+  return people.find(p => `${p.firstName} ${p.lastName}`.toLowerCase() === lower)
+    || people.find(p => p.firstName.toLowerCase() === lower)
+    || people.find(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
+}
+
+function parseAction(text: string): { cleanText: string; action?: PendingAction } {
+  const match = text.match(/<action>([\s\S]*?)<\/action>/);
+  if (!match) return { cleanText: text };
+  try {
+    const parsed = JSON.parse(match[1]);
+    const cleanText = text.replace(match[0], '').trim() || 'Ready to add this? Review and edit, then click Execute.';
+    return { cleanText, action: parsed };
+  } catch {
+    return { cleanText: text };
+  }
+}
 
 function buildDataContext(data: AskGraceData): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName } = data;
@@ -76,7 +114,21 @@ function buildDataContext(data: AskGraceData): string {
   const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 10);
 
   return `
-You are Grace AI, an assistant built into a church CRM. Answer the user's question using ONLY the data below. Be concise. Use bullet lists for multiple items. If the data doesn't answer the question, say so plainly.
+You are Grace AI, an assistant built into a church CRM. Answer questions using ONLY the data below. Be concise. Use bullet lists for multiple items.
+
+WRITE-ACTIONS:
+If the user asks you to add/create a task, prayer request, or note, respond with exactly ONE <action> block followed by a brief confirmation sentence. Do NOT pre-fill values that the user didn't specify — leave them empty if unspecified.
+
+Task format:
+<action>{"type":"add_task","title":"...","personName":"optional name from people list","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
+
+Prayer request format (requires a personName):
+<action>{"type":"add_prayer","content":"the request","personName":"name from people list"}</action>
+
+Note format (requires a personName):
+<action>{"type":"add_note","content":"the note text","personName":"name from people list"}</action>
+
+Never invent a person who isn't in the people list. If the user asks for a task/note/prayer about someone who isn't listed, ask them which existing person or to use 'general' (tasks only).
 
 Church: ${churchName || 'Grace Community Church'}
 Today: ${now.toLocaleDateString()}
@@ -106,12 +158,12 @@ Active prayer requests (${prayers.filter(p => !p.isAnswered).length} total): ${a
 `.trim();
 }
 
-interface AskGraceChatProps extends AskGraceData {
+interface AskGraceChatProps extends AskGraceData, AskGraceHandlers {
   variant?: 'panel' | 'inline';
   onClose?: () => void;
 }
 
-export function AskGraceChat({ variant = 'panel', onClose, ...data }: AskGraceChatProps) {
+export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPrayer, onAddInteraction, ...data }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const [messages, setMessages] = useState<Message[]>([
     { id: 'greet', role: 'assistant', content: 'Hi — ask me anything about your church data. Giving, attendance, groups, events, tasks, birthdays.' },
@@ -146,12 +198,75 @@ export function AskGraceChat({ variant = 'panel', onClose, ...data }: AskGraceCh
       const text = result.success && result.text
         ? result.text
         : result.error || 'Sorry, I couldn\'t answer that. Try rephrasing.';
-      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: text }]);
+      const { cleanText, action } = parseAction(text);
+      let hydratedAction: PendingAction | undefined;
+      if (action) {
+        const matched = resolvePerson(action.personName, data.people);
+        hydratedAction = {
+          ...action,
+          personId: matched?.id,
+          personName: matched ? `${matched.firstName} ${matched.lastName}` : action.personName,
+        };
+      }
+      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: cleanText, action: hydratedAction }]);
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Something went wrong. Try again.' }]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateAction = (id: string, patch: Partial<PendingAction>) => {
+    setMessages(m => m.map(msg =>
+      msg.id === id && msg.action ? { ...msg, action: { ...msg.action, ...patch } } : msg
+    ));
+  };
+
+  const executeAction = async (messageId: string) => {
+    const msg = messages.find(m => m.id === messageId);
+    const action = msg?.action;
+    if (!action) return;
+
+    try {
+      if (action.type === 'add_task' && onAddTask) {
+        await onAddTask({
+          title: action.title || 'Untitled task',
+          personId: action.personId,
+          priority: action.priority || 'medium',
+          dueDate: action.dueDate || new Date(Date.now() + 7 * 86400_000).toISOString().split('T')[0],
+          completed: false,
+          category: 'follow-up',
+        });
+      } else if (action.type === 'add_prayer' && onAddPrayer) {
+        if (!action.personId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A prayer request needs a matching person — please tell me which person, or rephrase.' }]);
+          return;
+        }
+        await onAddPrayer({
+          personId: action.personId,
+          content: action.content || '',
+          isPrivate: false,
+        });
+      } else if (action.type === 'add_note' && onAddInteraction) {
+        if (!action.personId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A note needs a matching person — please tell me which person, or rephrase.' }]);
+          return;
+        }
+        await onAddInteraction({
+          personId: action.personId,
+          type: 'note',
+          content: action.content || '',
+          createdBy: 'Ask Grace',
+        });
+      }
+      setMessages(m => m.map(x => x.id === messageId ? { ...x, executed: true } : x));
+    } catch {
+      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
+    }
+  };
+
+  const dismissAction = (messageId: string) => {
+    setMessages(m => m.map(x => x.id === messageId ? { ...x, action: undefined } : x));
   };
 
   const isInline = variant === 'inline';
@@ -182,16 +297,32 @@ export function AskGraceChat({ variant = 'panel', onClose, ...data }: AskGraceCh
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map(m => (
-          <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
-                m.role === 'user'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white/70 dark:bg-dark-800 text-slate-900 dark:text-dark-100 border border-stone-200/70 dark:border-white/5'
-              }`}
-            >
-              {m.content}
+          <div key={m.id} className="space-y-2">
+            <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
+                  m.role === 'user'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-white/70 dark:bg-dark-800 text-slate-900 dark:text-dark-100 border border-stone-200/70 dark:border-white/5'
+                }`}
+              >
+                {m.content}
+              </div>
             </div>
+            {m.action && !m.executed && (
+              <ActionCard
+                action={m.action}
+                people={data.people}
+                onChange={(patch) => updateAction(m.id, patch)}
+                onExecute={() => executeAction(m.id)}
+                onDismiss={() => dismissAction(m.id)}
+              />
+            )}
+            {m.executed && (
+              <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 pl-1">
+                <Check size={14} /> Done
+              </div>
+            )}
           </div>
         ))}
         {loading && (
@@ -248,7 +379,104 @@ export function AskGraceChat({ variant = 'panel', onClose, ...data }: AskGraceCh
   );
 }
 
-export function AskGrace(props: AskGraceData) {
+interface ActionCardProps {
+  action: PendingAction;
+  people: Person[];
+  onChange: (patch: Partial<PendingAction>) => void;
+  onExecute: () => void;
+  onDismiss: () => void;
+}
+
+function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCardProps) {
+  const icon = action.type === 'add_task' ? <CheckSquare size={14} />
+    : action.type === 'add_prayer' ? <Heart size={14} />
+    : <StickyNote size={14} />;
+  const label = action.type === 'add_task' ? 'New task'
+    : action.type === 'add_prayer' ? 'New prayer request'
+    : 'New note';
+
+  return (
+    <div className="ml-2 p-3 rounded-xl bg-amber-50/60 dark:bg-amber-500/5 border border-amber-200/70 dark:border-amber-500/20">
+      <div className="flex items-center gap-2 mb-2 text-xs font-medium text-amber-800 dark:text-amber-400">
+        {icon}
+        <span>{label}</span>
+      </div>
+
+      <div className="space-y-2">
+        {action.type === 'add_task' && (
+          <>
+            <input
+              value={action.title || ''}
+              onChange={(e) => onChange({ title: e.target.value })}
+              placeholder="Task title"
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            <div className="flex gap-2">
+              <select
+                value={action.priority || 'medium'}
+                onChange={(e) => onChange({ priority: e.target.value as 'low' | 'medium' | 'high' })}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <input
+                type="date"
+                value={action.dueDate || ''}
+                onChange={(e) => onChange({ dueDate: e.target.value })}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+            </div>
+          </>
+        )}
+
+        {(action.type === 'add_prayer' || action.type === 'add_note') && (
+          <textarea
+            value={action.content || ''}
+            onChange={(e) => onChange({ content: e.target.value })}
+            placeholder={action.type === 'add_prayer' ? 'Prayer request' : 'Note content'}
+            rows={2}
+            className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+          />
+        )}
+
+        {(action.type === 'add_task' || action.type === 'add_prayer' || action.type === 'add_note') && (
+          <select
+            value={action.personId || ''}
+            onChange={(e) => {
+              const p = people.find(x => x.id === e.target.value);
+              onChange({ personId: e.target.value || undefined, personName: p ? `${p.firstName} ${p.lastName}` : undefined });
+            }}
+            className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+          >
+            <option value="">{action.type === 'add_task' ? 'No specific person' : 'Pick a person…'}</option>
+            {people.map(p => (
+              <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={onDismiss}
+          className="px-3 py-1.5 text-xs text-gray-600 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onExecute}
+          className="ml-auto px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-md transition-colors"
+        >
+          Execute
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function AskGrace(props: AskGraceData & AskGraceHandlers) {
   const { settings: aiSettings } = useAISettings();
   const [isOpen, setIsOpen] = useState(false);
 

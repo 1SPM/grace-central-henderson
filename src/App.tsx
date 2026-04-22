@@ -363,6 +363,9 @@ function App() {
         prayers={prayers}
         attendance={[...attendanceFromDb, ...attendanceRecords]}
         churchName={churchSettings?.profile?.name}
+        onAddTask={handlers.addTask}
+        onAddPrayer={handlers.addPrayer}
+        onAddInteraction={handlers.addInteraction}
       />
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}

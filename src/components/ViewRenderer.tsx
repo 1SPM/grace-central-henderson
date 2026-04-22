@@ -111,6 +111,7 @@ interface ViewRendererProps {
     savePerson: (person: Omit<Person, 'id'> | Person) => Promise<void>;
     addInteraction: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => Promise<void>;
     addTask: (task: Omit<Task, 'id' | 'createdAt'>) => Promise<void>;
+    addPrayer: (prayer: { personId: string; content: string; isPrivate: boolean }) => Promise<void>;
     toggleTask: (id: string) => Promise<void>;
     markPrayerAnswered: (id: string, testimony?: string) => Promise<void>;
     bulkUpdateStatus: (ids: string[], status: Person['status']) => Promise<void>;
@@ -253,6 +254,9 @@ export function ViewRenderer(props: ViewRendererProps) {
           onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
+          onAskGraceAddTask={handlers.addTask}
+          onAskGraceAddPrayer={handlers.addPrayer}
+          onAskGraceAddInteraction={handlers.addInteraction}
         />
       );
 
