@@ -184,9 +184,11 @@ Active prayer requests (${prayers.filter(p => !p.isAnswered).length} total): ${a
 interface AskGraceChatProps extends AskGraceData, AskGraceHandlers {
   variant?: 'panel' | 'inline' | 'full';
   onClose?: () => void;
+  seedInput?: string;
+  onSeedConsumed?: () => void;
 }
 
-export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, ...data }: AskGraceChatProps) {
+export function AskGraceChat({ variant = 'panel', onClose, seedInput, onSeedConsumed, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, ...data }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const [messages, setMessages] = useState<Message[]>([
     { id: 'greet', role: 'assistant', content: 'Hi — ask me anything about your church data. Giving, attendance, groups, events, tasks, birthdays.' },
@@ -203,6 +205,14 @@ export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPraye
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (seedInput && seedInput.trim()) {
+      handleSubmit(seedInput);
+      onSeedConsumed?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seedInput]);
 
   if (!aiSettings.aiAssistant) return null;
 
@@ -600,27 +610,58 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
 export function AskGrace(props: AskGraceData & AskGraceHandlers) {
   const { settings: aiSettings } = useAISettings();
   const [isOpen, setIsOpen] = useState(false);
+  const [seedInput, setSeedInput] = useState('');
+  const [dockValue, setDockValue] = useState('');
 
   if (!aiSettings.aiAssistant) return null;
+
+  const openWithSeed = (value: string) => {
+    setSeedInput(value);
+    setIsOpen(true);
+    setDockValue('');
+  };
 
   return (
     <>
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 bg-slate-900 hover:bg-slate-950 text-white rounded-full shadow-lg hover:shadow-xl transition-all"
-          aria-label="Ask Grace AI"
+        <div
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[min(520px,calc(100vw-120px))]"
         >
-          <Sparkles size={18} className="text-amber-300" />
-          <span className="text-sm font-medium">Ask Grace</span>
-        </button>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (dockValue.trim()) openWithSeed(dockValue);
+              else setIsOpen(true);
+            }}
+            className="flex items-center gap-2 px-3 py-2 bg-slate-900/95 hover:bg-slate-900 backdrop-blur border border-slate-700/50 rounded-full shadow-xl transition-colors"
+          >
+            <div className="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0">
+              <Sparkles size={13} className="text-amber-300" />
+            </div>
+            <input
+              type="text"
+              value={dockValue}
+              onChange={(e) => setDockValue(e.target.value)}
+              onClick={() => { if (!dockValue) setIsOpen(true); }}
+              placeholder="Ask Grace…"
+              className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-slate-400"
+            />
+            <button
+              type="submit"
+              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Send"
+            >
+              <Send size={13} />
+            </button>
+          </form>
+        </div>
       )}
 
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={() => setIsOpen(false)} />
           <aside className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[420px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border-l border-stone-300/70 dark:border-white/5 shadow-2xl">
-            <AskGraceChat {...props} variant="panel" onClose={() => setIsOpen(false)} />
+            <AskGraceChat {...props} variant="panel" seedInput={seedInput} onSeedConsumed={() => setSeedInput('')} onClose={() => setIsOpen(false)} />
           </aside>
         </>
       )}
