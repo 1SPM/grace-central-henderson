@@ -1,25 +1,36 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote } from 'lucide-react';
-import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction } from '../types';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus } from 'lucide-react';
+import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
 
 interface PendingAction {
-  type: 'add_task' | 'add_prayer' | 'add_note';
+  type: 'add_task' | 'add_prayer' | 'add_note' | 'add_person';
   title?: string;
   content?: string;
   personName?: string;
   personId?: string;
   priority?: 'low' | 'medium' | 'high';
   dueDate?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  status?: MemberStatus;
+}
+
+interface ActionInstance {
+  id: string;
+  action: PendingAction;
+  executed?: boolean;
+  dismissed?: boolean;
 }
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  action?: PendingAction;
-  executed?: boolean;
+  actions?: ActionInstance[];
 }
 
 export interface AskGraceData {
@@ -37,6 +48,7 @@ export interface AskGraceHandlers {
   onAddTask?: (task: Omit<Task, 'id' | 'createdAt'>) => void | Promise<void>;
   onAddPrayer?: (prayer: { personId: string; content: string; isPrivate: boolean }) => void | Promise<void>;
   onAddInteraction?: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void | Promise<void>;
+  onAddPerson?: (person: Omit<Person, 'id'>) => void | Promise<void>;
 }
 
 const suggestions = [
@@ -55,16 +67,23 @@ function resolvePerson(name: string | undefined, people: Person[]): Person | und
     || people.find(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
 }
 
-function parseAction(text: string): { cleanText: string; action?: PendingAction } {
-  const match = text.match(/<action>([\s\S]*?)<\/action>/);
-  if (!match) return { cleanText: text };
-  try {
-    const parsed = JSON.parse(match[1]);
-    const cleanText = text.replace(match[0], '').trim() || 'Ready to add this? Review and edit, then click Execute.';
-    return { cleanText, action: parsed };
-  } catch {
-    return { cleanText: text };
+function parseActions(text: string): { cleanText: string; actions: PendingAction[] } {
+  const matches = [...text.matchAll(/<action>([\s\S]*?)<\/action>/g)];
+  if (matches.length === 0) return { cleanText: text, actions: [] };
+  const actions: PendingAction[] = [];
+  let cleanText = text;
+  for (const m of matches) {
+    try {
+      actions.push(JSON.parse(m[1]));
+    } catch {
+      // skip malformed block
+    }
+    cleanText = cleanText.replace(m[0], '');
   }
+  cleanText = cleanText.trim() || (actions.length === 1
+    ? 'Ready to add this? Review and edit, then click Execute.'
+    : `Ready to add ${actions.length} items. Review each, then click Execute.`);
+  return { cleanText, actions };
 }
 
 function buildDataContext(data: AskGraceData): string {
@@ -117,18 +136,22 @@ function buildDataContext(data: AskGraceData): string {
 You are Grace AI, an assistant built into a church CRM. Answer questions using ONLY the data below. Be concise. Use bullet lists for multiple items.
 
 WRITE-ACTIONS:
-If the user asks you to add/create a task, prayer request, or note, respond with exactly ONE <action> block followed by a brief confirmation sentence. Do NOT pre-fill values that the user didn't specify — leave them empty if unspecified.
+If the user asks you to add/create something, respond with one <action> block per item followed by a brief confirmation sentence. For multiple items in one request, emit multiple <action> blocks (one per item).
+
+Person format (for adding new people to the congregation):
+<action>{"type":"add_person","firstName":"...","lastName":"...","status":"visitor","email":"","phone":""}</action>
+status must be one of: visitor, regular, member, leader, inactive. Default to "visitor" unless the user specifies otherwise.
 
 Task format:
-<action>{"type":"add_task","title":"...","personName":"optional name from people list","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
+<action>{"type":"add_task","title":"...","personName":"optional existing name","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
 
-Prayer request format (requires a personName):
-<action>{"type":"add_prayer","content":"the request","personName":"name from people list"}</action>
+Prayer request format (requires a personName from existing people):
+<action>{"type":"add_prayer","content":"the request","personName":"existing person name"}</action>
 
-Note format (requires a personName):
-<action>{"type":"add_note","content":"the note text","personName":"name from people list"}</action>
+Note format (requires a personName from existing people):
+<action>{"type":"add_note","content":"the note","personName":"existing person name"}</action>
 
-Never invent a person who isn't in the people list. If the user asks for a task/note/prayer about someone who isn't listed, ask them which existing person or to use 'general' (tasks only).
+For prayer/note, never invent a person not in the list — ask for clarification instead. For add_task or add_person, new names are fine.
 
 Church: ${churchName || 'Grace Community Church'}
 Today: ${now.toLocaleDateString()}
@@ -159,11 +182,11 @@ Active prayer requests (${prayers.filter(p => !p.isAnswered).length} total): ${a
 }
 
 interface AskGraceChatProps extends AskGraceData, AskGraceHandlers {
-  variant?: 'panel' | 'inline';
+  variant?: 'panel' | 'inline' | 'full';
   onClose?: () => void;
 }
 
-export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPrayer, onAddInteraction, ...data }: AskGraceChatProps) {
+export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, ...data }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const [messages, setMessages] = useState<Message[]>([
     { id: 'greet', role: 'assistant', content: 'Hi — ask me anything about your church data. Giving, attendance, groups, events, tasks, birthdays.' },
@@ -198,17 +221,19 @@ export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPraye
       const text = result.success && result.text
         ? result.text
         : result.error || 'Sorry, I couldn\'t answer that. Try rephrasing.';
-      const { cleanText, action } = parseAction(text);
-      let hydratedAction: PendingAction | undefined;
-      if (action) {
-        const matched = resolvePerson(action.personName, data.people);
-        hydratedAction = {
-          ...action,
-          personId: matched?.id,
-          personName: matched ? `${matched.firstName} ${matched.lastName}` : action.personName,
+      const { cleanText, actions } = parseActions(text);
+      const hydrated: ActionInstance[] = actions.map((a, i) => {
+        const matched = resolvePerson(a.personName, data.people);
+        return {
+          id: `act-${Date.now()}-${i}`,
+          action: {
+            ...a,
+            personId: matched?.id,
+            personName: matched ? `${matched.firstName} ${matched.lastName}` : a.personName,
+          },
         };
-      }
-      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: cleanText, action: hydratedAction }]);
+      });
+      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: cleanText, actions: hydrated.length ? hydrated : undefined }]);
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Something went wrong. Try again.' }]);
     } finally {
@@ -216,19 +241,36 @@ export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPraye
     }
   };
 
-  const updateAction = (id: string, patch: Partial<PendingAction>) => {
+  const updateAction = (messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>
-      msg.id === id && msg.action ? { ...msg, action: { ...msg.action, ...patch } } : msg
+      msg.id === messageId && msg.actions
+        ? { ...msg, actions: msg.actions.map(a => a.id === actionId ? { ...a, action: { ...a.action, ...patch } } : a) }
+        : msg
     ));
   };
 
-  const executeAction = async (messageId: string) => {
+  const markActionStatus = (messageId: string, actionId: string, patch: Partial<ActionInstance>) => {
+    setMessages(m => m.map(msg =>
+      msg.id === messageId && msg.actions
+        ? { ...msg, actions: msg.actions.map(a => a.id === actionId ? { ...a, ...patch } : a) }
+        : msg
+    ));
+  };
+
+  const executeAction = async (messageId: string, actionId: string) => {
     const msg = messages.find(m => m.id === messageId);
-    const action = msg?.action;
+    const instance = msg?.actions?.find(a => a.id === actionId);
+    const action = instance?.action;
     if (!action) return;
 
     try {
-      if (action.type === 'add_task' && onAddTask) {
+      if (action.type === 'add_person') {
+        if (!action.firstName?.trim()) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A new person needs a first name.' }]);
+          return;
+        }
+        await handleSavePersonViaAction(action);
+      } else if (action.type === 'add_task' && onAddTask) {
         await onAddTask({
           title: action.title || 'Untitled task',
           personId: action.personId,
@@ -259,22 +301,37 @@ export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPraye
           createdBy: 'Ask Grace',
         });
       }
-      setMessages(m => m.map(x => x.id === messageId ? { ...x, executed: true } : x));
+      markActionStatus(messageId, actionId, { executed: true });
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
   };
 
-  const dismissAction = (messageId: string) => {
-    setMessages(m => m.map(x => x.id === messageId ? { ...x, action: undefined } : x));
+  const handleSavePersonViaAction = async (action: PendingAction) => {
+    if (!onAddPerson) return;
+    await onAddPerson({
+      firstName: action.firstName?.trim() || '',
+      lastName: action.lastName?.trim() || '',
+      email: action.email?.trim() || '',
+      phone: action.phone?.trim() || '',
+      status: action.status || 'visitor',
+      tags: [],
+      smallGroups: [],
+    });
   };
 
-  const isInline = variant === 'inline';
+  const dismissAction = (messageId: string, actionId: string) => {
+    markActionStatus(messageId, actionId, { dismissed: true });
+  };
+
+  const wrapperClass = variant === 'inline'
+    ? 'flex flex-col h-[520px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-xl overflow-hidden'
+    : variant === 'full'
+      ? 'flex flex-col h-full bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-xl overflow-hidden'
+      : 'flex flex-col h-full';
 
   return (
-    <div className={isInline
-      ? 'flex flex-col h-[520px] bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-xl overflow-hidden'
-      : 'flex flex-col h-full'}>
+    <div className={wrapperClass}>
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
@@ -309,18 +366,35 @@ export function AskGraceChat({ variant = 'panel', onClose, onAddTask, onAddPraye
                 {m.content}
               </div>
             </div>
-            {m.action && !m.executed && (
-              <ActionCard
-                action={m.action}
-                people={data.people}
-                onChange={(patch) => updateAction(m.id, patch)}
-                onExecute={() => executeAction(m.id)}
-                onDismiss={() => dismissAction(m.id)}
-              />
-            )}
-            {m.executed && (
-              <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 pl-1">
-                <Check size={14} /> Done
+            {m.actions?.filter(a => !a.dismissed).map(a => (
+              a.executed ? (
+                <div key={a.id} className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 pl-1">
+                  <Check size={14} /> Added {a.action.type === 'add_person' ? `${a.action.firstName ?? ''} ${a.action.lastName ?? ''}`.trim() : a.action.type.replace('add_', '')}
+                </div>
+              ) : (
+                <ActionCard
+                  key={a.id}
+                  action={a.action}
+                  people={data.people}
+                  onChange={(patch) => updateAction(m.id, a.id, patch)}
+                  onExecute={() => executeAction(m.id, a.id)}
+                  onDismiss={() => dismissAction(m.id, a.id)}
+                />
+              )
+            ))}
+            {m.actions && m.actions.filter(a => !a.dismissed && !a.executed).length > 1 && (
+              <div className="pl-2">
+                <button
+                  onClick={async () => {
+                    const pending = m.actions?.filter(a => !a.dismissed && !a.executed) ?? [];
+                    for (const a of pending) {
+                      await executeAction(m.id, a.id);
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-md transition-colors"
+                >
+                  Execute all {m.actions.filter(a => !a.dismissed && !a.executed).length}
+                </button>
               </div>
             )}
           </div>
@@ -390,9 +464,11 @@ interface ActionCardProps {
 function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCardProps) {
   const icon = action.type === 'add_task' ? <CheckSquare size={14} />
     : action.type === 'add_prayer' ? <Heart size={14} />
+    : action.type === 'add_person' ? <UserPlus size={14} />
     : <StickyNote size={14} />;
   const label = action.type === 'add_task' ? 'New task'
     : action.type === 'add_prayer' ? 'New prayer request'
+    : action.type === 'add_person' ? 'New person'
     : 'New note';
 
   return (
@@ -403,6 +479,51 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
       </div>
 
       <div className="space-y-2">
+        {action.type === 'add_person' && (
+          <>
+            <div className="flex gap-2">
+              <input
+                value={action.firstName || ''}
+                onChange={(e) => onChange({ firstName: e.target.value })}
+                placeholder="First name"
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+              <input
+                value={action.lastName || ''}
+                onChange={(e) => onChange({ lastName: e.target.value })}
+                placeholder="Last name"
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={action.email || ''}
+                onChange={(e) => onChange({ email: e.target.value })}
+                placeholder="Email (optional)"
+                type="email"
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+              <input
+                value={action.phone || ''}
+                onChange={(e) => onChange({ phone: e.target.value })}
+                placeholder="Phone (optional)"
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+            </div>
+            <select
+              value={action.status || 'visitor'}
+              onChange={(e) => onChange({ status: e.target.value as MemberStatus })}
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            >
+              <option value="visitor">Visitor</option>
+              <option value="regular">Regular</option>
+              <option value="member">Member</option>
+              <option value="leader">Leader</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </>
+        )}
+
         {action.type === 'add_task' && (
           <>
             <input
@@ -441,7 +562,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
           />
         )}
 
-        {(action.type === 'add_task' || action.type === 'add_prayer' || action.type === 'add_note') && (
+        {action.type !== 'add_person' && (
           <select
             value={action.personId || ''}
             onChange={(e) => {

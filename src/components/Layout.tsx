@@ -55,6 +55,7 @@ const navSections: NavSection[] = [
   {
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
+      { view: 'grace', label: 'Grace', icon: <Sparkles size={18} /> },
       { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
       { view: 'people', label: 'People', icon: <Users size={18} /> },
       { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
@@ -145,6 +146,7 @@ const viewLabels: Record<View, string> = {
   analytics: 'Analytics',
   announcements: 'Announcements',
   discipleship: 'Discipleship',
+  grace: 'Grace',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

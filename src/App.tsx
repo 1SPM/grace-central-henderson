@@ -366,6 +366,7 @@ function App() {
         onAddTask={handlers.addTask}
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}
+        onAddPerson={handlers.savePerson}
       />
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}

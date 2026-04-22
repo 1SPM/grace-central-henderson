@@ -46,6 +46,7 @@ interface DashboardProps {
   onAskGraceAddTask?: AskGraceHandlers['onAddTask'];
   onAskGraceAddPrayer?: AskGraceHandlers['onAddPrayer'];
   onAskGraceAddInteraction?: AskGraceHandlers['onAddInteraction'];
+  onAskGraceAddPerson?: AskGraceHandlers['onAddPerson'];
   onViewPerson: (id: string) => void;
   onViewTasks: () => void;
   onViewGiving?: () => void;
@@ -67,7 +68,7 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], groups = [], attendance = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, onAskGraceAddTask, onAskGraceAddPrayer, onAskGraceAddInteraction }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], groups = [], attendance = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, onAskGraceAddTask, onAskGraceAddPrayer, onAskGraceAddInteraction, onAskGraceAddPerson }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
@@ -336,6 +337,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           onAddTask={onAskGraceAddTask}
           onAddPrayer={onAskGraceAddPrayer}
           onAddInteraction={onAskGraceAddInteraction}
+          onAddPerson={onAskGraceAddPerson}
         />
       </div>
 

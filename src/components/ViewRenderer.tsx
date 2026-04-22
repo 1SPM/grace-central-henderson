@@ -2,6 +2,7 @@ import { lazy, Suspense, ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
+import { AskGraceChat } from './AskGrace';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -257,6 +258,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onAskGraceAddTask={handlers.addTask}
           onAskGraceAddPrayer={handlers.addPrayer}
           onAskGraceAddInteraction={handlers.addInteraction}
+          onAskGraceAddPerson={handlers.savePerson}
         />
       );
 
@@ -268,6 +270,33 @@ export function ViewRenderer(props: ViewRendererProps) {
           onToggleTask={handlers.toggleTask}
           onSelectPerson={handlers.viewPerson}
         />
+      );
+
+    case 'grace':
+      return (
+        <div className="p-6 max-w-3xl mx-auto h-full">
+          <div className="mb-4">
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Grace</h1>
+            <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">Ask anything about your church — or ask her to add things for you.</p>
+          </div>
+          <div className="h-[calc(100vh-200px)]">
+            <AskGraceChat
+              variant="full"
+              people={people}
+              tasks={tasks}
+              giving={giving}
+              events={events}
+              groups={groups}
+              prayers={prayers}
+              attendance={attendanceRecords}
+              churchName={settings?.profile?.name}
+              onAddTask={handlers.addTask}
+              onAddPrayer={handlers.addPrayer}
+              onAddInteraction={handlers.addInteraction}
+              onAddPerson={handlers.savePerson}
+            />
+          </div>
+        </div>
       );
 
     case 'people':
