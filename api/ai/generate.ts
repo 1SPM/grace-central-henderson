@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
+import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -25,10 +26,6 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-function sanitizePrompt(prompt: string, maxLength: number = 10000): string {
-  return String(prompt || '').trim().slice(0, maxLength);
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST
   if (req.method !== 'POST') {
@@ -36,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Check configuration
-  if (!GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY && !getHermesConfig().configured) {
     return res.status(503).json({ error: 'AI service not configured' });
   }
 
@@ -58,14 +55,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Prompt is too short' });
   }
 
-  // Build the full prompt with optional context
-  let fullPrompt = sanitizedPrompt;
-  if (context && typeof context === 'string') {
-    const sanitizedContext = sanitizePrompt(context, 5000);
-    fullPrompt = `Context: ${sanitizedContext}\n\nRequest: ${sanitizedPrompt}`;
-  }
+  const fullPrompt = buildFullPrompt(sanitizedPrompt, typeof context === 'string' ? context : undefined);
 
   const shouldStream = req.query.stream === '1' || req.query.stream === 'true';
+
+  const sendHermesFallback = async () => {
+    const hermes = await generateWithHermes({ prompt: fullPrompt, maxTokens });
+    if (!hermes.success || !hermes.text) return false;
+    if (shouldStream) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.write(hermes.text);
+      res.end();
+      return true;
+    }
+    res.status(200).json({ success: true, text: hermes.text, model: hermes.model || 'hermes-agent' });
+    return true;
+  };
+
+  if (!GEMINI_API_KEY) {
+    if (await sendHermesFallback()) return;
+    return res.status(503).json({ error: 'AI service not configured' });
+  }
 
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -122,7 +133,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (/API key|invalid key/i.test(message)) {
       return res.status(401).json({ error: 'Invalid API key' });
     }
-    if (/quota|spending cap|resource exhausted|RESOURCE_EXHAUSTED|429/i.test(message)) {
+    if (isGeminiQuotaError(message)) {
+      if (await sendHermesFallback()) return;
       let friendly = 'Gemini quota hit. Could be the per-minute rate limit, daily quota, or spend cap. Check https://aistudio.google.com/app/spend or wait 60 seconds.';
       if (/per minute|RPM|requests.*minute/i.test(message)) {
         friendly = 'Hit the Gemini per-minute rate limit. Wait 60 seconds and try again, or upgrade tier at https://aistudio.google.com/app/billing';

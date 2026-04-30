@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, R
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, type PendingAction } from '../lib/grace-actions';
+import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 
 export type { PendingAction } from '../lib/grace-actions';
 
@@ -193,6 +194,15 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const [messages, setMessages] = useState<GraceMessage[]>([GRACE_GREETING]);
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [brainEntries, setBrainEntries] = useState<GraceBrainEntry[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, serializeBrainEntries(brainEntries));
+  }, [brainEntries]);
 
   // Memoize context so we're not rebuilding this on every keystroke
   const dataContext = useMemo(() => buildDataContext(data), [
@@ -203,6 +213,8 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const suggestions = useMemo(() => buildSuggestions(data), [
     data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);
+
+  const brainContext = useMemo(() => buildBrainContext(brainEntries), [brainEntries]);
 
   const openPanel = useCallback((seed?: string) => {
     setPanelOpen(true);
@@ -229,6 +241,18 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       { id: assistantMsgId, role: 'assistant', content: '' },
     ]);
     setLoading(true);
+
+    const memoryToSave = parseBrainDirective(query);
+    if (memoryToSave) {
+      setBrainEntries(entries => addBrainEntry(entries, memoryToSave));
+      setMessages(m => m.map(msg =>
+        msg.id === assistantMsgId
+          ? { ...msg, content: `Remembered: ${memoryToSave}` }
+          : msg
+      ));
+      setLoading(false);
+      return;
+    }
 
     if (isTaskBatchFollowUp(query)) {
       const actions = buildTaskCompletionActions(data.tasks);
@@ -272,9 +296,13 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
       .join('\n');
 
+    const basePrompt = brainContext
+      ? `${dataContext}\n\n${brainContext}`
+      : dataContext;
+
     const prompt = recentHistory
-      ? `${dataContext}\n\nRecent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${recentHistory}\n\nUser question: ${query}`
-      : `${dataContext}\n\nUser question: ${query}`;
+      ? `${basePrompt}\n\nRecent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${recentHistory}\n\nUser question: ${query}`
+      : `${basePrompt}\n\nUser question: ${query}`;
 
     try {
       let streamed = false;
@@ -320,7 +348,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, data.people, data.tasks, data.prayers, messages]);
+  }, [dataContext, brainContext, data.people, data.tasks, data.prayers, messages]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>

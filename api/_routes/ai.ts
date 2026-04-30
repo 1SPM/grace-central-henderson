@@ -7,6 +7,7 @@
 
 import { Router, Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
+import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders';
 
 const router = Router();
 
@@ -34,17 +35,13 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-function sanitizePrompt(prompt: string, maxLength: number = 10000): string {
-  return String(prompt || '').trim().slice(0, maxLength);
-}
-
 /**
  * POST /api/ai/generate
  * Generate text using Gemini AI
  */
 router.post('/generate', async (req: Request, res: Response) => {
   // Check configuration
-  if (!GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY && !getHermesConfig().configured) {
     return res.status(503).json({ error: 'AI service not configured' });
   }
 
@@ -66,11 +63,18 @@ router.post('/generate', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Prompt is too short' });
   }
 
-  // Build the full prompt with optional context
-  let fullPrompt = sanitizedPrompt;
-  if (context && typeof context === 'string') {
-    const sanitizedContext = sanitizePrompt(context, 5000);
-    fullPrompt = `Context: ${sanitizedContext}\n\nRequest: ${sanitizedPrompt}`;
+  const fullPrompt = buildFullPrompt(sanitizedPrompt, typeof context === 'string' ? context : undefined);
+
+  const sendHermesFallback = async () => {
+    const hermes = await generateWithHermes({ prompt: fullPrompt, maxTokens });
+    if (!hermes.success || !hermes.text) return false;
+    res.status(200).json({ success: true, text: hermes.text, model: hermes.model || 'hermes-agent' });
+    return true;
+  };
+
+  if (!GEMINI_API_KEY) {
+    if (await sendHermesFallback()) return;
+    return res.status(503).json({ error: 'AI service not configured' });
   }
 
   try {
@@ -104,7 +108,8 @@ router.post('/generate', async (req: Request, res: Response) => {
       if (error.message.includes('API key')) {
         return res.status(401).json({ error: 'Invalid API key configuration' });
       }
-      if (/quota|spending cap|resource exhausted|RESOURCE_EXHAUSTED|429/i.test(error.message)) {
+      if (isGeminiQuotaError(error.message)) {
+        if (await sendHermesFallback()) return;
         return res.status(429).json({ error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend' });
       }
     }
@@ -119,8 +124,12 @@ router.post('/generate', async (req: Request, res: Response) => {
  */
 router.get('/health', (_req: Request, res: Response) => {
   res.json({
-    status: GEMINI_API_KEY ? 'configured' : 'not_configured',
-    model: 'gemini-2.0-flash',
+    status: GEMINI_API_KEY || getHermesConfig().configured ? 'configured' : 'not_configured',
+    model: GEMINI_API_KEY ? 'gemini-2.0-flash' : 'hermes-agent',
+    providers: {
+      gemini: Boolean(GEMINI_API_KEY),
+      hermes: getHermesConfig().configured,
+    },
   });
 });
 
