@@ -604,16 +604,32 @@ interface AskGraceProps {
   hideDock?: boolean;
 }
 
+function useIsOnGracePage(): boolean {
+  const [onGrace, setOnGrace] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.location.hash.startsWith('#/grace');
+  });
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const check = () => setOnGrace(window.location.hash.startsWith('#/grace'));
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
+  return onGrace;
+}
+
 export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
+  const onGracePage = useIsOnGracePage();
+  const shouldHideDock = hideDock || onGracePage;
 
   if (!aiSettings.aiAssistant) return null;
 
   return (
     <>
-      {!chat.panelOpen && !hideDock && (
+      {!chat.panelOpen && !shouldHideDock && (
         <div
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-32px)] sm:w-[min(520px,calc(100vw-120px))]"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
