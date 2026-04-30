@@ -7,8 +7,12 @@ export type ActionType =
   | 'add_person'
   | 'add_event'
   | 'mark_task_done'
+  | 'update_task'
   | 'update_person_status'
-  | 'mark_prayer_answered';
+  | 'mark_prayer_answered'
+  | 'delete_task'
+  | 'delete_person'
+  | 'delete_prayer';
 
 export interface PendingAction {
   type: ActionType;
@@ -43,8 +47,12 @@ const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   'add_person',
   'add_event',
   'mark_task_done',
+  'update_task',
   'update_person_status',
   'mark_prayer_answered',
+  'delete_task',
+  'delete_person',
+  'delete_prayer',
 ]);
 
 const EVENT_CATEGORIES: ReadonlySet<EventCategory> = new Set<EventCategory>([
@@ -89,7 +97,12 @@ export function validateAction(raw: unknown): PendingAction | null {
   if (!raw || typeof raw !== 'object') return null;
   const r = raw as Record<string, unknown>;
   const type = r.type;
-  if (typeof type !== 'string' || !ACTION_TYPES.has(type as ActionType)) return null;
+  if (typeof type !== 'string' || !ACTION_TYPES.has(type as ActionType)) {
+    if (typeof console !== 'undefined') {
+      console.warn('[grace] dropped action with unknown type:', type, raw);
+    }
+    return null;
+  }
 
   const out: PendingAction = { type: type as ActionType };
 
@@ -284,14 +297,14 @@ export function hydrateAction(action: PendingAction, ctx: HydrateContext): Pendi
   const matched = resolvePerson(action.personName, ctx.people);
   let { taskId, prayerId, prayerContent, taskTitle } = action;
 
-  if (action.type === 'mark_task_done' && !taskId) {
+  if ((action.type === 'mark_task_done' || action.type === 'update_task' || action.type === 'delete_task') && !taskId) {
     const t = resolveTask(action.taskTitle, action.personName, ctx.tasks, ctx.people);
     if (t) {
       taskId = t.id;
       taskTitle = t.title;
     }
   }
-  if (action.type === 'mark_prayer_answered' && !prayerId) {
+  if ((action.type === 'mark_prayer_answered' || action.type === 'delete_prayer') && !prayerId) {
     const p = resolvePrayer(action.prayerContent, action.personName, ctx.prayers, ctx.people);
     if (p) {
       prayerId = p.id;

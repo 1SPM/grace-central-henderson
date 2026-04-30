@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff } from 'lucide-react';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil } from 'lucide-react';
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
@@ -16,8 +16,12 @@ function executedSummary(a: PendingAction): string {
   if (a.type === 'add_note') return 'Added note';
   if (a.type === 'add_event') return `Added event: ${a.title ?? 'Untitled'}`;
   if (a.type === 'mark_task_done') return `Task done: ${a.taskTitle ?? ''}`;
+  if (a.type === 'update_task') return `Task updated: ${a.taskTitle ?? ''}`;
   if (a.type === 'update_person_status') return `Updated ${a.personName ?? 'person'} → ${a.status ?? ''}`;
   if (a.type === 'mark_prayer_answered') return `Prayer marked answered`;
+  if (a.type === 'delete_task') return `Task deleted: ${a.taskTitle ?? ''}`;
+  if (a.type === 'delete_person') return `Removed ${a.personName ?? 'person'}`;
+  if (a.type === 'delete_prayer') return `Prayer removed`;
   return 'Done';
 }
 
@@ -277,14 +281,17 @@ interface ActionCardProps {
 }
 
 function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCardProps) {
+  const isDestructive = action.type === 'delete_task' || action.type === 'delete_person' || action.type === 'delete_prayer';
   const icon = action.type === 'add_task' ? <CheckSquare size={14} />
     : action.type === 'add_prayer' ? <Heart size={14} />
     : action.type === 'add_person' ? <UserPlus size={14} />
     : action.type === 'add_note' ? <StickyNote size={14} />
     : action.type === 'add_event' ? <Calendar size={14} />
     : action.type === 'mark_task_done' ? <CheckCircle2 size={14} />
+    : action.type === 'update_task' ? <Pencil size={14} />
     : action.type === 'update_person_status' ? <UserCheck size={14} />
     : action.type === 'mark_prayer_answered' ? <HeartHandshake size={14} />
+    : isDestructive ? <Trash2 size={14} />
     : <StickyNote size={14} />;
   const label = action.type === 'add_task' ? 'New task'
     : action.type === 'add_prayer' ? 'New prayer request'
@@ -292,13 +299,21 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
     : action.type === 'add_note' ? 'New note'
     : action.type === 'add_event' ? 'New event'
     : action.type === 'mark_task_done' ? 'Mark task done'
+    : action.type === 'update_task' ? 'Update task'
     : action.type === 'update_person_status' ? 'Update status'
     : action.type === 'mark_prayer_answered' ? 'Mark prayer answered'
+    : action.type === 'delete_task' ? 'Delete task'
+    : action.type === 'delete_person' ? 'Remove person'
+    : action.type === 'delete_prayer' ? 'Remove prayer'
     : 'Action';
 
   return (
-    <div className="ml-2 p-3 rounded-xl bg-amber-50/60 dark:bg-amber-500/5 border border-amber-200/70 dark:border-amber-500/20">
-      <div className="flex items-center gap-2 mb-2 text-xs font-medium text-amber-800 dark:text-amber-400">
+    <div className={`ml-2 p-3 rounded-xl border ${isDestructive
+      ? 'bg-rose-50/60 dark:bg-rose-500/5 border-rose-200/70 dark:border-rose-500/20'
+      : 'bg-amber-50/60 dark:bg-amber-500/5 border-amber-200/70 dark:border-amber-500/20'}`}>
+      <div className={`flex items-center gap-2 mb-2 text-xs font-medium ${isDestructive
+        ? 'text-rose-800 dark:text-rose-400'
+        : 'text-amber-800 dark:text-amber-400'}`}>
         {icon}
         <span>{label}</span>
       </div>
@@ -395,6 +410,56 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
             )}
             {!action.taskId && (
               <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
+            )}
+          </div>
+        )}
+
+        {action.type === 'update_task' && (
+          <>
+            <div className="text-xs text-gray-600 dark:text-dark-400">Editing: {action.taskTitle || '(no task matched)'}</div>
+            <input
+              value={action.title || ''}
+              onChange={(e) => onChange({ title: e.target.value })}
+              placeholder="New title (leave blank to keep current)"
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            <div className="flex gap-2">
+              <select
+                value={action.priority || ''}
+                onChange={(e) => onChange({ priority: (e.target.value || undefined) as 'low' | 'medium' | 'high' | undefined })}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              >
+                <option value="">— Keep priority —</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <input
+                type="date"
+                value={action.dueDate || ''}
+                onChange={(e) => onChange({ dueDate: e.target.value })}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+            </div>
+            {!action.taskId && (
+              <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
+            )}
+          </>
+        )}
+
+        {(action.type === 'delete_task' || action.type === 'delete_person' || action.type === 'delete_prayer') && (
+          <div className="text-sm space-y-1">
+            <div className="text-rose-700 dark:text-rose-400 font-medium">
+              {action.type === 'delete_task' && (action.taskTitle || '(no task matched)')}
+              {action.type === 'delete_person' && (action.personName || '(no person matched)')}
+              {action.type === 'delete_prayer' && (action.prayerContent ? `"${action.prayerContent.slice(0, 80)}${action.prayerContent.length > 80 ? '…' : ''}"` : '(no prayer matched)')}
+            </div>
+            <div className="text-xs text-rose-600/80 dark:text-rose-400/80">This can't be undone from Grace.</div>
+            {action.type === 'delete_task' && !action.taskId && (
+              <div className="text-xs text-rose-600 dark:text-rose-400">No matching task — pick from the list below.</div>
+            )}
+            {action.type === 'delete_prayer' && !action.prayerId && (
+              <div className="text-xs text-rose-600 dark:text-rose-400">No matching active prayer.</div>
             )}
           </div>
         )}
@@ -502,7 +567,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
           </>
         )}
 
-        {action.type !== 'add_person' && action.type !== 'add_event' && action.type !== 'mark_task_done' && action.type !== 'mark_prayer_answered' && (
+        {action.type !== 'add_person' && action.type !== 'add_event' && action.type !== 'mark_task_done' && action.type !== 'mark_prayer_answered' && action.type !== 'update_task' && action.type !== 'delete_task' && action.type !== 'delete_prayer' && (
           <select
             value={action.personId || ''}
             onChange={(e) => {
@@ -528,9 +593,11 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
         </button>
         <button
           onClick={onExecute}
-          className="ml-auto px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-md transition-colors"
+          className={`ml-auto px-3 py-1.5 text-xs font-medium text-white rounded-md transition-colors ${isDestructive
+            ? 'bg-rose-600 hover:bg-rose-700'
+            : 'bg-slate-900 hover:bg-slate-950'}`}
         >
-          Execute
+          {isDestructive ? 'Confirm delete' : 'Execute'}
         </button>
       </div>
     </div>

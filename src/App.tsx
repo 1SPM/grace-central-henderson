@@ -74,11 +74,15 @@ function App() {
     giving: dbGiving,
     addPerson,
     updatePerson,
+    deletePerson,
     addTask,
     toggleTask,
+    updateTask,
+    deleteTask,
     addInteraction,
     addPrayer,
     markPrayerAnswered,
+    deletePrayer,
     addGiving,
     createGroup,
     addGroupMember,
@@ -313,6 +317,10 @@ function App() {
         onAddPerson={handlers.savePerson}
         onAddEvent={handlers.addEvent}
         onToggleTask={toggleTask}
+        onUpdateTask={updateTask}
+        onDeleteTask={deleteTask}
+        onDeletePerson={deletePerson}
+        onDeletePrayer={deletePrayer}
         onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
         onMarkPrayerAnswered={markPrayerAnswered}
       >

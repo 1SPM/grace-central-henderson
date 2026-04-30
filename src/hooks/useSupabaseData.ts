@@ -429,6 +429,62 @@ export function useSupabaseData() {
     }
   }, [isDemo, tasks]);
 
+  const updateTask = useCallback(async (id: string, updates: { title?: string; due_date?: string; priority?: 'low' | 'medium' | 'high' }) => {
+    const updateLocally = () => {
+      setTasks(prev => prev.map(t =>
+        t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
+      ));
+    };
+    if (isDemo || !supabase) { updateLocally(); return; }
+    try {
+      const { error } = await supabase.from('tasks').update(updates).eq('id', id);
+      if (error) throw error;
+      updateLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for updateTask, falling back to local state', err);
+      updateLocally();
+    }
+  }, [isDemo]);
+
+  const deleteTask = useCallback(async (id: string) => {
+    const deleteLocally = () => setTasks(prev => prev.filter(t => t.id !== id));
+    if (isDemo || !supabase) { deleteLocally(); return; }
+    try {
+      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (error) throw error;
+      deleteLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for deleteTask, falling back to local state', err);
+      deleteLocally();
+    }
+  }, [isDemo]);
+
+  const deletePerson = useCallback(async (id: string) => {
+    const deleteLocally = () => setPeople(prev => prev.filter(p => p.id !== id));
+    if (isDemo || !supabase) { deleteLocally(); return; }
+    try {
+      const { error } = await supabase.from('people').delete().eq('id', id);
+      if (error) throw error;
+      deleteLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for deletePerson, falling back to local state', err);
+      deleteLocally();
+    }
+  }, [isDemo]);
+
+  const deletePrayer = useCallback(async (id: string) => {
+    const deleteLocally = () => setPrayers(prev => prev.filter(p => p.id !== id));
+    if (isDemo || !supabase) { deleteLocally(); return; }
+    try {
+      const { error } = await supabase.from('prayer_requests').delete().eq('id', id);
+      if (error) throw error;
+      deleteLocally();
+    } catch (err) {
+      log.warn('Supabase write failed for deletePrayer, falling back to local state', err);
+      deleteLocally();
+    }
+  }, [isDemo]);
+
   // ==========================================
   // INTERACTIONS CRUD
   // ==========================================
@@ -916,10 +972,13 @@ export function useSupabaseData() {
     // People actions
     addPerson,
     updatePerson,
+    deletePerson,
 
     // Task actions
     addTask,
     toggleTask,
+    updateTask,
+    deleteTask,
 
     // Interaction actions
     addInteraction,
@@ -927,6 +986,7 @@ export function useSupabaseData() {
     // Prayer actions
     markPrayerAnswered,
     addPrayer,
+    deletePrayer,
 
     // Giving actions
     addGiving,

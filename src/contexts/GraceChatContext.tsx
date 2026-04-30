@@ -46,6 +46,10 @@ export interface GraceHandlers {
     category: EventCategory;
   }) => void | Promise<unknown>;
   onToggleTask?: (taskId: string) => void | Promise<unknown>;
+  onUpdateTask?: (taskId: string, updates: { title?: string; due_date?: string; priority?: 'low' | 'medium' | 'high' }) => void | Promise<unknown>;
+  onDeleteTask?: (taskId: string) => void | Promise<unknown>;
+  onDeletePerson?: (personId: string) => void | Promise<unknown>;
+  onDeletePrayer?: (prayerId: string) => void | Promise<unknown>;
   onUpdatePersonStatus?: (personId: string, status: MemberStatus) => void | Promise<unknown>;
   onMarkPrayerAnswered?: (prayerId: string, testimony?: string) => void | Promise<unknown>;
 }
@@ -190,8 +194,14 @@ Create:
 
 Update:
 <action>{"type":"mark_task_done","taskTitle":"X","personName":"optional"}</action>
+<action>{"type":"update_task","taskTitle":"existing","title":"new title","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}</action>
 <action>{"type":"update_person_status","personName":"existing","status":"member"}</action>
 <action>{"type":"mark_prayer_answered","personName":"existing","testimony":"optional"}</action>
+
+Delete (destructive — only when user clearly asks to remove/delete):
+<action>{"type":"delete_task","taskTitle":"existing"}</action>
+<action>{"type":"delete_person","personName":"existing"}</action>
+<action>{"type":"delete_prayer","personName":"existing"}</action>
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
@@ -253,7 +263,7 @@ interface GraceChatProviderProps extends GraceData, GraceHandlers {
   children: ReactNode;
 }
 
-export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
     const stored = loadStoredMessages();
     if (stored) return stored;
@@ -567,6 +577,44 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
             createdBy: 'Grace',
           });
         }
+      } else if (action.type === 'update_task' && onUpdateTask) {
+        if (!action.taskId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an open task matching "${action.taskTitle ?? ''}".` }]);
+          return;
+        }
+        const updates: { title?: string; due_date?: string; priority?: 'low' | 'medium' | 'high' } = {};
+        if (action.title?.trim()) updates.title = action.title.trim();
+        if (action.dueDate) updates.due_date = action.dueDate;
+        if (action.priority) updates.priority = action.priority;
+        if (Object.keys(updates).length === 0) return;
+        await onUpdateTask(action.taskId, updates);
+        const task = data.tasks.find(t => t.id === action.taskId);
+        if (task?.personId && onAddInteraction) {
+          await onAddInteraction({
+            personId: task.personId,
+            type: 'note',
+            content: `Grace updated task: ${task.title}`,
+            createdBy: 'Grace',
+          });
+        }
+      } else if (action.type === 'delete_task' && onDeleteTask) {
+        if (!action.taskId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find a task matching "${action.taskTitle ?? ''}".` }]);
+          return;
+        }
+        await onDeleteTask(action.taskId);
+      } else if (action.type === 'delete_person' && onDeletePerson) {
+        if (!action.personId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find a matching person.` }]);
+          return;
+        }
+        await onDeletePerson(action.personId);
+      } else if (action.type === 'delete_prayer' && onDeletePrayer) {
+        if (!action.prayerId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an active prayer for that person.` }]);
+          return;
+        }
+        await onDeletePrayer(action.prayerId);
       } else if (action.type === 'mark_prayer_answered' && onMarkPrayerAnswered) {
         if (!action.prayerId) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I couldn\'t find an active prayer request for that person.' }]);
@@ -588,7 +636,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });
