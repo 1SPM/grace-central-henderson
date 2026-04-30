@@ -123,9 +123,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid API key' });
     }
     if (/quota|spending cap|resource exhausted|RESOURCE_EXHAUSTED|429/i.test(message)) {
-      return res.status(429).json({
-        error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend',
-      });
+      let friendly = 'Gemini quota hit. Could be the per-minute rate limit, daily quota, or spend cap. Check https://aistudio.google.com/app/spend or wait 60 seconds.';
+      if (/per minute|RPM|requests.*minute/i.test(message)) {
+        friendly = 'Hit the Gemini per-minute rate limit. Wait 60 seconds and try again, or upgrade tier at https://aistudio.google.com/app/billing';
+      } else if (/per day|RPD|requests.*day|daily/i.test(message)) {
+        friendly = 'Hit the Gemini daily quota. Resets at midnight Pacific, or upgrade tier at https://aistudio.google.com/app/billing';
+      } else if (/spending|spend cap|billing/i.test(message)) {
+        friendly = 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend';
+      }
+      return res.status(429).json({ error: friendly });
     }
     if (/safety|blocked|candidate/i.test(message)) {
       return res.status(400).json({ error: 'Model refused the prompt (safety filter)' });
