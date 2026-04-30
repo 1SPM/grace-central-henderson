@@ -6,6 +6,8 @@ import {
   resolveTask,
   resolvePrayer,
   hydrateAction,
+  isTaskBatchFollowUp,
+  buildTaskCompletionActions,
 } from './grace-actions';
 import type { Person, Task, PrayerRequest } from '../types';
 
@@ -179,6 +181,46 @@ describe('resolvePrayer', () => {
 
   it('returns undefined when no match', () => {
     expect(resolvePrayer('nothing', 'Nobody', prayers, people)).toBeUndefined();
+  });
+});
+
+describe('deterministic task follow-up actions', () => {
+  const tasks: Task[] = [
+    { id: 't1', title: 'Thank Christopher Hall for first gift', completed: false, dueDate: '2026-05-01', priority: 'high', category: 'follow-up', createdAt: '2026-04-01' },
+    { id: 't2', title: 'Acknowledge Richard Andersons missions gift', completed: false, dueDate: '2026-05-02', priority: 'medium', category: 'follow-up', createdAt: '2026-04-02' },
+    { id: 't3', title: 'Already done', completed: true, dueDate: '2026-05-03', priority: 'low', category: 'admin', createdAt: '2026-04-03' },
+  ];
+
+  it('detects short follow-up commands that mean complete the listed tasks', () => {
+    expect(isTaskBatchFollowUp('ok do tasks')).toBe(true);
+    expect(isTaskBatchFollowUp('do them')).toBe(true);
+    expect(isTaskBatchFollowUp('handle these')).toBe(true);
+    expect(isTaskBatchFollowUp('complete all tasks')).toBe(true);
+    expect(isTaskBatchFollowUp('what tasks are overdue?')).toBe(false);
+  });
+
+  it('builds mark_task_done action cards for open tasks without calling AI', () => {
+    const actions = buildTaskCompletionActions(tasks);
+    expect(actions).toHaveLength(2);
+    expect(actions[0]).toMatchObject({
+      type: 'mark_task_done',
+      taskId: 't1',
+      taskTitle: 'Thank Christopher Hall for first gift',
+    });
+    expect(actions[1].taskId).toBe('t2');
+  });
+
+  it('caps vague batch completion at 10 tasks', () => {
+    const manyTasks: Task[] = Array.from({ length: 12 }, (_, i) => ({
+      id: `t${i}`,
+      title: `Task ${i}`,
+      completed: false,
+      dueDate: '2026-05-01',
+      priority: 'medium',
+      category: 'follow-up',
+      createdAt: '2026-04-01',
+    }));
+    expect(buildTaskCompletionActions(manyTasks)).toHaveLength(10);
   });
 });
 

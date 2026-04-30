@@ -29,7 +29,7 @@ export interface PendingAction {
   testimony?: string;
 }
 
-const ACTION_TYPES: ReadonlySet<ActionType> = new Set([
+const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   'add_task',
   'add_prayer',
   'add_note',
@@ -164,6 +164,24 @@ export interface HydrateContext {
   people: Person[];
   tasks: Task[];
   prayers: PrayerRequest[];
+}
+
+const TASK_BATCH_FOLLOW_UP_RE = /^(?:ok(?:ay)?\s*)?(?:please\s*)?(?:do|handle|complete|finish|mark|clear)\s+(?:the\s+)?(?:tasks?|them|these|those|all)(?:\s+(?:tasks?|done|off))?[.!?\s]*$/i;
+
+export function isTaskBatchFollowUp(query: string): boolean {
+  return TASK_BATCH_FOLLOW_UP_RE.test(query.trim());
+}
+
+export function buildTaskCompletionActions(tasks: Task[], limit = 10): PendingAction[] {
+  return tasks
+    .filter(t => !t.completed)
+    .slice(0, limit)
+    .map(t => ({
+      type: 'mark_task_done',
+      taskId: t.id,
+      taskTitle: t.title,
+      personId: t.personId,
+    }));
 }
 
 export function hydrateAction(action: PendingAction, ctx: HydrateContext): PendingAction {

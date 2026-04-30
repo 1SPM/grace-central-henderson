@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { parseActions, hydrateAction, type PendingAction } from '../lib/grace-actions';
+import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, type PendingAction } from '../lib/grace-actions';
 
 export type { PendingAction } from '../lib/grace-actions';
 
@@ -58,7 +58,7 @@ interface GraceChatContextValue {
 const GRACE_GREETING: GraceMessage = {
   id: 'greet',
   role: 'assistant',
-  content: 'Hi — ask me anything about your church data, or ask me to add a person, task, prayer, or note.',
+  content: 'Hi — ask me anything about your church data, or ask me to add, update, or complete CRM work. I’ll make editable action cards before anything is saved.',
 };
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
@@ -138,7 +138,9 @@ Match register to context:
 Never moralize. Never preach. Never repeat the user's question back at them. Don't pad with "Great question!" or "I'd be happy to help!"
 
 WRITE-ACTIONS — BE DECISIVE:
-When the user asks you to add a person, task, prayer, or note, ALWAYS respond with one <action> block per item. Do not ask for optional fields like email or phone — they're optional and the user can fill them in the confirm card. Your job is to propose; the user edits and confirms.
+When the user asks you to add a person, task, prayer, note, or to complete/update existing CRM work, ALWAYS respond with one <action> block per item. Do not ask for optional fields like email or phone — they're optional and the user can fill them in the confirm card. Your job is to propose safe, editable actions; the user reviews and confirms before anything is saved.
+
+If the user says "do tasks", "do them", "ok do them", "handle these", "complete these", or similar after you have listed open tasks, do NOT just list the tasks again. Convert the visible/open tasks into editable action cards using mark_task_done actions. If there are more than 10, create actions for the 10 most urgent/recently shown and say you prepared the first 10 for review. Never claim tasks are completed until the user clicks Execute or Execute all.
 
 There are no separate "sections" for leaders, volunteers, etc. — everyone is a person with a status (visitor/regular/member/leader/inactive). "Add X to the leader section" means add_person with status: leader. "Add X as a volunteer" means add_person with status: member (volunteers are just people).
 
@@ -289,6 +291,27 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
+    if (isTaskBatchFollowUp(query)) {
+      const actions = buildTaskCompletionActions(data.tasks);
+      const assistantUpdate: GraceMessage = actions.length > 0
+        ? {
+            id: assistantMsgId,
+            role: 'assistant',
+            content: actions.length === 10 && data.tasks.filter(t => !t.completed).length > 10
+              ? 'I prepared the first 10 open tasks for review. Click Execute on each card when you’re ready.'
+              : `I prepared ${actions.length} open ${actions.length === 1 ? 'task' : 'tasks'} for review. Click Execute on each card when you’re ready.`,
+            actions: actions.map((action, i) => ({ id: `act-${Date.now()}-${i}`, action })),
+          }
+        : {
+            id: assistantMsgId,
+            role: 'assistant',
+            content: 'There are no open tasks to complete right now.',
+          };
+      setMessages(m => m.map(msg => msg.id === assistantMsgId ? assistantUpdate : msg));
+      setLoading(false);
+      return;
+    }
+
     const recentHistory = messages
       .filter(m => m.id !== 'greet' && m.content.trim())
       .slice(-6)
@@ -303,7 +326,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       let streamed = false;
       await generateAIStreamed({
         prompt,
-        maxTokens: 500,
+        maxTokens: 1200,
         onChunk: (chunk) => {
           streamed = true;
           setMessages(m => m.map(msg =>
@@ -314,7 +337,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
 
       if (!streamed) {
         // Fallback to non-streaming
-        const result = await generateAIText({ prompt, maxTokens: 500 });
+        const result = await generateAIText({ prompt, maxTokens: 1200 });
         const text = result.success && result.text
           ? result.text
           : result.error || 'Sorry, I couldn\'t answer that. Try rephrasing.';

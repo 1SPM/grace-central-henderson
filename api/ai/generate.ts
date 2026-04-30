@@ -122,7 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (/API key|invalid key/i.test(message)) {
       return res.status(401).json({ error: 'Invalid API key' });
     }
-    if (/quota|spending cap|RESOURCE_EXHAUSTED/i.test(message)) {
+    if (/quota|spending cap|resource exhausted|RESOURCE_EXHAUSTED|429/i.test(message)) {
       return res.status(429).json({
         error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend',
       });
