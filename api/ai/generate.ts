@@ -120,16 +120,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const publicMessage = message.slice(0, 240);
 
     if (/API key|invalid key/i.test(message)) {
-      return res.status(401).json({ error: 'Invalid API key', detail: publicMessage });
+      return res.status(401).json({ error: 'Invalid API key' });
     }
     if (/quota|spending cap|RESOURCE_EXHAUSTED/i.test(message)) {
       return res.status(429).json({
         error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend',
-        detail: publicMessage,
       });
     }
     if (/safety|blocked|candidate/i.test(message)) {
-      return res.status(400).json({ error: 'Model refused the prompt (safety filter)', detail: publicMessage });
+      return res.status(400).json({ error: 'Model refused the prompt (safety filter)' });
     }
 
     return res.status(500).json({ error: 'AI generation failed', detail: publicMessage });
