@@ -1,6 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake } from 'lucide-react';
-import type { Person, MemberStatus } from '../types';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff } from 'lucide-react';
+import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 
@@ -14,6 +14,7 @@ function executedSummary(a: PendingAction): string {
   if (a.type === 'add_task') return `Added task: ${a.title ?? 'Untitled'}`;
   if (a.type === 'add_prayer') return 'Added prayer request';
   if (a.type === 'add_note') return 'Added note';
+  if (a.type === 'add_event') return `Added event: ${a.title ?? 'Untitled'}`;
   if (a.type === 'mark_task_done') return `Task done: ${a.taskTitle ?? ''}`;
   if (a.type === 'update_person_status') return `Updated ${a.personName ?? 'person'} → ${a.status ?? ''}`;
   if (a.type === 'mark_prayer_answered') return `Prayer marked answered`;
@@ -39,12 +40,66 @@ function renderWithLinks(text: string) {
   );
 }
 
+interface MinimalRecognition {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+function getSpeechRecognitionCtor(): (new () => MinimalRecognition) | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as Record<string, unknown>;
+  const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
+  return (Ctor as new () => MinimalRecognition) || null;
+}
+
+function useVoiceInput(onTranscript: (text: string) => void) {
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<MinimalRecognition | null>(null);
+  const supported = !!getSpeechRecognitionCtor();
+
+  const start = useCallback(() => {
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.lang = navigator.language || 'en-US';
+    rec.interimResults = false;
+    rec.continuous = false;
+    rec.onresult = (e) => {
+      const results = Array.from(e.results) as ArrayLike<{ transcript: string }>[];
+      const transcript = results
+        .map(r => r[0]?.transcript || '')
+        .join(' ')
+        .trim();
+      if (transcript) onTranscript(transcript);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recognitionRef.current = rec;
+    setListening(true);
+    rec.start();
+  }, [onTranscript]);
+
+  const stop = useCallback(() => {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }, []);
+
+  return { listening, supported, start, stop };
+}
+
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const voice = useVoiceInput((text) => setInput(prev => prev ? `${prev} ${text}` : text));
 
   useEffect(() => {
     if (variant === 'panel') inputRef.current?.focus();
@@ -183,10 +238,22 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question…"
+            placeholder={voice.listening ? 'Listening…' : 'Ask a question…'}
             className="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-dark-100 placeholder:text-gray-400"
             disabled={chat.loading}
           />
+          {voice.supported && (
+            <button
+              type="button"
+              onClick={voice.listening ? voice.stop : voice.start}
+              className={`p-1.5 rounded-lg transition-colors ${voice.listening
+                ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                : 'text-gray-500 hover:bg-stone-200/60 dark:hover:bg-dark-700'}`}
+              aria-label={voice.listening ? 'Stop recording' : 'Start voice input'}
+            >
+              {voice.listening ? <MicOff size={14} /> : <Mic size={14} />}
+            </button>
+          )}
           <button
             type="submit"
             disabled={!input.trim() || chat.loading}
@@ -214,6 +281,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
     : action.type === 'add_prayer' ? <Heart size={14} />
     : action.type === 'add_person' ? <UserPlus size={14} />
     : action.type === 'add_note' ? <StickyNote size={14} />
+    : action.type === 'add_event' ? <Calendar size={14} />
     : action.type === 'mark_task_done' ? <CheckCircle2 size={14} />
     : action.type === 'update_person_status' ? <UserCheck size={14} />
     : action.type === 'mark_prayer_answered' ? <HeartHandshake size={14} />
@@ -222,6 +290,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
     : action.type === 'add_prayer' ? 'New prayer request'
     : action.type === 'add_person' ? 'New person'
     : action.type === 'add_note' ? 'New note'
+    : action.type === 'add_event' ? 'New event'
     : action.type === 'mark_task_done' ? 'Mark task done'
     : action.type === 'update_person_status' ? 'Update status'
     : action.type === 'mark_prayer_answered' ? 'Mark prayer answered'
@@ -364,7 +433,76 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
           </>
         )}
 
-        {action.type !== 'add_person' && action.type !== 'mark_task_done' && action.type !== 'mark_prayer_answered' && (
+        {action.type === 'add_event' && (
+          <>
+            <input
+              value={action.title || ''}
+              onChange={(e) => onChange({ title: e.target.value })}
+              placeholder="Event title"
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={action.startDate || ''}
+                onChange={(e) => onChange({ startDate: e.target.value })}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+              <input
+                type="time"
+                value={action.startTime || ''}
+                onChange={(e) => onChange({ startTime: e.target.value })}
+                disabled={action.allDay}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md disabled:opacity-50"
+              />
+              <input
+                type="time"
+                value={action.endTime || ''}
+                onChange={(e) => onChange({ endTime: e.target.value })}
+                disabled={action.allDay}
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md disabled:opacity-50"
+              />
+            </div>
+            <div className="flex gap-2 items-center">
+              <input
+                value={action.location || ''}
+                onChange={(e) => onChange({ location: e.target.value })}
+                placeholder="Location (optional)"
+                className="flex-1 px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              />
+              <select
+                value={action.category || 'event'}
+                onChange={(e) => onChange({ category: e.target.value as EventCategory })}
+                className="px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+              >
+                <option value="event">Event</option>
+                <option value="service">Service</option>
+                <option value="meeting">Meeting</option>
+                <option value="small-group">Small group</option>
+                <option value="rehearsal">Rehearsal</option>
+                <option value="counseling">Counseling</option>
+                <option value="outreach">Outreach</option>
+                <option value="wedding">Wedding</option>
+                <option value="funeral">Funeral</option>
+                <option value="baptism">Baptism</option>
+                <option value="dedication">Dedication</option>
+                <option value="ceremony">Ceremony</option>
+                <option value="holiday">Holiday</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-dark-400">
+              <input
+                type="checkbox"
+                checked={action.allDay || false}
+                onChange={(e) => onChange({ allDay: e.target.checked })}
+                className="rounded"
+              />
+              All-day event
+            </label>
+          </>
+        )}
+
+        {action.type !== 'add_person' && action.type !== 'add_event' && action.type !== 'mark_task_done' && action.type !== 'mark_prayer_answered' && (
           <select
             value={action.personId || ''}
             onChange={(e) => {

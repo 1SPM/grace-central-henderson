@@ -311,6 +311,7 @@ function App() {
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}
         onAddPerson={handlers.savePerson}
+        onAddEvent={handlers.addEvent}
         onToggleTask={toggleTask}
         onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
         onMarkPrayerAnswered={markPrayerAnswered}

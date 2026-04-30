@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
-import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
+import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus, EventCategory } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
@@ -36,6 +36,15 @@ export interface GraceHandlers {
   onAddPrayer?: (prayer: { personId: string; content: string; isPrivate: boolean }) => void | Promise<void>;
   onAddInteraction?: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void | Promise<void>;
   onAddPerson?: (person: Omit<Person, 'id'>) => void | Promise<void>;
+  onAddEvent?: (event: {
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate?: string;
+    allDay: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => void | Promise<unknown>;
   onToggleTask?: (taskId: string) => void | Promise<unknown>;
   onUpdatePersonStatus?: (personId: string, status: MemberStatus) => void | Promise<unknown>;
   onMarkPrayerAnswered?: (prayerId: string, testimony?: string) => void | Promise<unknown>;
@@ -177,6 +186,7 @@ Create:
 <action>{"type":"add_task","title":"X","personName":"optional","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
 <action>{"type":"add_prayer","content":"X","personName":"existing"}</action>
 <action>{"type":"add_note","content":"X","personName":"existing"}</action>
+<action>{"type":"add_event","title":"X","startDate":"YYYY-MM-DD","startTime":"HH:MM","endTime":"HH:MM","location":"optional","category":"event"}</action>
 
 Update:
 <action>{"type":"mark_task_done","taskTitle":"X","personName":"optional"}</action>
@@ -243,7 +253,7 @@ interface GraceChatProviderProps extends GraceData, GraceHandlers {
   children: ReactNode;
 }
 
-export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
     const stored = loadStoredMessages();
     if (stored) return stored;
@@ -497,6 +507,26 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
           content: action.content || '',
           isPrivate: false,
         });
+      } else if (action.type === 'add_event' && onAddEvent) {
+        if (!action.title?.trim() || !action.startDate) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'An event needs a title and a date.' }]);
+          return;
+        }
+        const allDay = action.allDay ?? !action.startTime;
+        const startISO = allDay
+          ? action.startDate
+          : `${action.startDate}T${action.startTime ?? '09:00'}`;
+        const endISO = !allDay && action.endTime
+          ? `${action.startDate}T${action.endTime}`
+          : undefined;
+        await onAddEvent({
+          title: action.title.trim(),
+          startDate: startISO,
+          endDate: endISO,
+          allDay,
+          location: action.location?.trim() || undefined,
+          category: action.category || 'event',
+        });
       } else if (action.type === 'add_note' && onAddInteraction) {
         if (!action.personId) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A note needs a matching person.' }]);
@@ -558,7 +588,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });

@@ -1,10 +1,11 @@
-import type { Person, Task, PrayerRequest, MemberStatus } from '../types';
+import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
 
 export type ActionType =
   | 'add_task'
   | 'add_prayer'
   | 'add_note'
   | 'add_person'
+  | 'add_event'
   | 'mark_task_done'
   | 'update_person_status'
   | 'mark_prayer_answered';
@@ -27,6 +28,12 @@ export interface PendingAction {
   prayerId?: string;
   prayerContent?: string;
   testimony?: string;
+  startDate?: string;
+  startTime?: string;
+  endTime?: string;
+  allDay?: boolean;
+  location?: string;
+  category?: EventCategory;
 }
 
 const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
@@ -34,9 +41,16 @@ const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   'add_prayer',
   'add_note',
   'add_person',
+  'add_event',
   'mark_task_done',
   'update_person_status',
   'mark_prayer_answered',
+]);
+
+const EVENT_CATEGORIES: ReadonlySet<EventCategory> = new Set<EventCategory>([
+  'service', 'meeting', 'event', 'small-group', 'holiday', 'wedding',
+  'funeral', 'obituary', 'ceremony', 'baptism', 'dedication',
+  'counseling', 'rehearsal', 'outreach',
 ]);
 
 export interface ParseResult {
@@ -83,6 +97,7 @@ export function validateAction(raw: unknown): PendingAction | null {
     'title', 'content', 'personName', 'personId',
     'firstName', 'lastName', 'email', 'phone',
     'taskTitle', 'taskId', 'prayerId', 'prayerContent', 'testimony',
+    'location',
   ];
   for (const k of stringFields) {
     const v = r[k as string];
@@ -105,6 +120,22 @@ export function validateAction(raw: unknown): PendingAction | null {
 
   if (typeof r.dueDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dueDate)) {
     out.dueDate = r.dueDate;
+  }
+
+  if (typeof r.startDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.startDate)) {
+    out.startDate = r.startDate;
+  }
+  if (typeof r.startTime === 'string' && /^\d{2}:\d{2}$/.test(r.startTime)) {
+    out.startTime = r.startTime;
+  }
+  if (typeof r.endTime === 'string' && /^\d{2}:\d{2}$/.test(r.endTime)) {
+    out.endTime = r.endTime;
+  }
+  if (typeof r.allDay === 'boolean') {
+    out.allDay = r.allDay;
+  }
+  if (typeof r.category === 'string' && EVENT_CATEGORIES.has(r.category as EventCategory)) {
+    out.category = r.category as EventCategory;
   }
 
   return out;
