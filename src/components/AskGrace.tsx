@@ -399,7 +399,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
   );
 }
 
-function AvatarSkyPanel() {
+export function AvatarSkyPanel() {
   return (
     <div className="hidden sm:flex flex-col w-[220px] shrink-0 relative overflow-hidden border-r border-stone-300/60 dark:border-white/5">
       <div

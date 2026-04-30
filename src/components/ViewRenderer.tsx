@@ -2,7 +2,7 @@ import { lazy, Suspense, ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
-import { AskGraceChat } from './AskGrace';
+import { AskGraceChat, AvatarSkyPanel } from './AskGrace';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -270,13 +270,16 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'grace':
       return (
-        <div className="p-6 max-w-3xl mx-auto h-full">
+        <div className="p-6 max-w-5xl mx-auto h-full">
           <div className="mb-4">
             <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Grace</h1>
             <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">Ask anything about your church — or ask her to add things for you.</p>
           </div>
-          <div className="h-[calc(100vh-200px)]">
-            <AskGraceChat variant="full" />
+          <div className="h-[calc(100vh-200px)] flex bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+            <AvatarSkyPanel />
+            <div className="flex-1 min-w-0">
+              <AskGraceChat variant="panel" />
+            </div>
           </div>
         </div>
       );

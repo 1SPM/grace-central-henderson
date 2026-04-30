@@ -56,11 +56,64 @@ interface GraceChatContextValue {
   suggestions: string[];
 }
 
-const GRACE_GREETING: GraceMessage = {
+const GRACE_MESSAGES_STORAGE_KEY = 'grace-chat-messages-v1';
+const MESSAGES_PERSIST_LIMIT = 50;
+
+const GRACE_GREETING_FALLBACK: GraceMessage = {
   id: 'greet',
   role: 'assistant',
   content: 'Hi — ask me anything about your church data, or ask me to add, update, or complete CRM work. I’ll make editable action cards before anything is saved.',
 };
+
+function buildGreeting(data: GraceData): GraceMessage {
+  const { people, tasks, events, prayers, attendance } = data;
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400_000);
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400_000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400_000);
+
+  const overdue = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < todayStr).length;
+  const newVisitors = people.filter(p => p.status === 'visitor' && p.firstVisit && new Date(p.firstVisit) >= sevenDaysAgo).length;
+  const activePrayers = prayers.filter(p => !p.isAnswered).length;
+  const eventsSoon = events.filter(e => new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow).length;
+  const attendedRecently = new Set(
+    attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId),
+  );
+  const inactive = people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length;
+
+  const lines: string[] = [];
+  if (overdue > 0) lines.push(`${overdue} ${overdue === 1 ? 'task is' : 'tasks are'} overdue`);
+  if (newVisitors > 0) lines.push(`${newVisitors} new ${newVisitors === 1 ? 'visitor' : 'visitors'} this week`);
+  if (inactive > 0) lines.push(`${inactive} ${inactive === 1 ? 'member hasn’t' : 'members haven’t'} attended in 30 days`);
+  if (activePrayers > 0) lines.push(`${activePrayers} active prayer ${activePrayers === 1 ? 'request' : 'requests'}`);
+  if (eventsSoon > 0) lines.push(`${eventsSoon} ${eventsSoon === 1 ? 'event' : 'events'} in the next 7 days`);
+
+  if (lines.length === 0) return GRACE_GREETING_FALLBACK;
+
+  const headline = lines.length === 1
+    ? `Quick read: ${lines[0]}.`
+    : `Quick read:\n• ${lines.slice(0, 4).join('\n• ')}`;
+
+  return {
+    id: 'greet',
+    role: 'assistant',
+    content: `${headline}\n\nAsk me anything, or pick a starter below.`,
+  };
+}
+
+function loadStoredMessages(): GraceMessage[] | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(GRACE_MESSAGES_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    return parsed as GraceMessage[];
+  } catch {
+    return null;
+  }
+}
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
@@ -191,7 +244,11 @@ interface GraceChatProviderProps extends GraceData, GraceHandlers {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
-  const [messages, setMessages] = useState<GraceMessage[]>([GRACE_GREETING]);
+  const [messages, setMessages] = useState<GraceMessage[]>(() => {
+    const stored = loadStoredMessages();
+    if (stored) return stored;
+    return [buildGreeting(data)];
+  });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [brainEntries, setBrainEntries] = useState<GraceBrainEntry[]>(() => {
@@ -203,6 +260,28 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, serializeBrainEntries(brainEntries));
   }, [brainEntries]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const trimmed = messages.length > MESSAGES_PERSIST_LIMIT
+      ? messages.slice(-MESSAGES_PERSIST_LIMIT)
+      : messages;
+    try {
+      window.localStorage.setItem(GRACE_MESSAGES_STORAGE_KEY, JSON.stringify(trimmed));
+    } catch {
+      // storage full or disabled — ignore
+    }
+  }, [messages]);
+
+  // If the only message is the auto-greeting and live data shifts (e.g., a task is added),
+  // refresh it so opening the panel still feels current.
+  useEffect(() => {
+    setMessages(m => {
+      if (m.length !== 1 || m[0].id !== 'greet') return m;
+      return [buildGreeting(data)];
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length]);
 
   // Memoize context so we're not rebuilding this on every keystroke
   const dataContext = useMemo(() => buildDataContext(data), [
@@ -228,8 +307,8 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const closePanel = useCallback(() => setPanelOpen(false), []);
 
   const clearMessages = useCallback(() => {
-    setMessages([GRACE_GREETING]);
-  }, []);
+    setMessages([buildGreeting(data)]);
+  }, [data]);
 
   const sendMessage = useCallback(async (query: string) => {
     if (!query.trim()) return;
@@ -435,24 +514,51 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
           return;
         }
         await onToggleTask(action.taskId);
+        const task = data.tasks.find(t => t.id === action.taskId);
+        if (task?.personId && onAddInteraction) {
+          await onAddInteraction({
+            personId: task.personId,
+            type: 'note',
+            content: `Grace marked task complete: ${task.title}`,
+            createdBy: 'Grace',
+          });
+        }
       } else if (action.type === 'update_person_status' && onUpdatePersonStatus) {
         if (!action.personId || !action.status) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person and a status.' }]);
           return;
         }
         await onUpdatePersonStatus(action.personId, action.status);
+        if (onAddInteraction) {
+          await onAddInteraction({
+            personId: action.personId,
+            type: 'note',
+            content: `Grace updated status to ${action.status}`,
+            createdBy: 'Grace',
+          });
+        }
       } else if (action.type === 'mark_prayer_answered' && onMarkPrayerAnswered) {
         if (!action.prayerId) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I couldn\'t find an active prayer request for that person.' }]);
           return;
         }
         await onMarkPrayerAnswered(action.prayerId, action.testimony);
+        if (action.personId && onAddInteraction) {
+          await onAddInteraction({
+            personId: action.personId,
+            type: 'prayer',
+            content: action.testimony
+              ? `Grace marked prayer answered: ${action.testimony}`
+              : 'Grace marked prayer answered',
+            createdBy: 'Grace',
+          });
+        }
       }
       markActionStatus(messageId, actionId, { executed: true });
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });
