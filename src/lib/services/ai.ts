@@ -21,6 +21,22 @@ export interface AIGenerateResult {
 
 const API_ENDPOINT = '/api/ai/generate';
 
+async function parseJsonOrText(response: Response): Promise<Record<string, unknown>> {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return await response.json();
+  }
+
+  const text = await response.text().catch(() => '');
+  return text ? { error: text } : {};
+}
+
+function getProviderError(data: Record<string, unknown>, status: number): string {
+  const error = data.error;
+  if (typeof error === 'string' && error.trim()) return error.trim();
+  return `Request failed with status ${status}`;
+}
+
 /**
  * Generate text using the Gemini AI model
  */
@@ -40,19 +56,19 @@ export async function generateAIText(options: AIGenerateOptions): Promise<AIGene
       }),
     });
 
-    const data = await response.json();
+    const data = await parseJsonOrText(response);
 
     if (!response.ok) {
       return {
         success: false,
-        error: data.error || `Request failed with status ${response.status}`,
+        error: getProviderError(data, response.status),
       };
     }
 
     return {
       success: true,
-      text: data.text,
-      model: data.model,
+      text: typeof data.text === 'string' ? data.text : '',
+      model: typeof data.model === 'string' ? data.model : undefined,
     };
   } catch (error) {
     log.error('AI service error', error);

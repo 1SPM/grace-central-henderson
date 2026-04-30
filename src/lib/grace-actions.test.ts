@@ -11,6 +11,9 @@ import {
   extractPastedTaskTitles,
   isPastedTaskList,
   buildAddTaskActionsFromInput,
+  isOverdueTasksQuery,
+  getOverdueTasks,
+  formatOverdueTasksResponse,
 } from './grace-actions';
 import type { Person, Task, PrayerRequest } from '../types';
 
@@ -268,6 +271,31 @@ tasks`;
   it('caps pasted task list actions at 20', () => {
     const many = Array.from({ length: 25 }, (_, i) => `Task ${i + 1}`).join('\n');
     expect(buildAddTaskActionsFromInput(`${many}\ntasks`)).toHaveLength(20);
+  });
+});
+
+describe('deterministic overdue task answers', () => {
+  const tasks: Task[] = [
+    { id: 'old2', title: 'Older overdue', completed: false, dueDate: '2026-03-01', priority: 'medium', category: 'follow-up', createdAt: '2026-02-01' },
+    { id: 'done', title: 'Completed overdue', completed: true, dueDate: '2026-03-02', priority: 'medium', category: 'follow-up', createdAt: '2026-02-01' },
+    { id: 'future', title: 'Future task', completed: false, dueDate: '2026-05-02', priority: 'medium', category: 'follow-up', createdAt: '2026-04-01' },
+    { id: 'old1', title: 'Newest overdue', completed: false, dueDate: '2026-04-01', priority: 'high', category: 'follow-up', createdAt: '2026-03-01' },
+  ];
+
+  it('detects overdue task lookup questions', () => {
+    expect(isOverdueTasksQuery('What tasks are overdue?')).toBe(true);
+    expect(isOverdueTasksQuery('show overdue todos')).toBe(true);
+    expect(isOverdueTasksQuery('add a task')).toBe(false);
+  });
+
+  it('returns only incomplete tasks due before today, sorted by due date', () => {
+    const overdue = getOverdueTasks(tasks, '2026-04-30');
+    expect(overdue.map(t => t.id)).toEqual(['old2', 'old1']);
+  });
+
+  it('formats overdue task answers without calling AI', () => {
+    expect(formatOverdueTasksResponse(tasks, '2026-04-30')).toContain('Overdue tasks (2)');
+    expect(formatOverdueTasksResponse([], '2026-04-30')).toBe('No overdue tasks right now.');
   });
 });
 

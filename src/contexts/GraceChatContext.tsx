@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, type PendingAction } from '../lib/grace-actions';
+import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 
 export type { PendingAction } from '../lib/grace-actions';
@@ -248,6 +248,16 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       setMessages(m => m.map(msg =>
         msg.id === assistantMsgId
           ? { ...msg, content: `Remembered: ${memoryToSave}` }
+          : msg
+      ));
+      setLoading(false);
+      return;
+    }
+
+    if (isOverdueTasksQuery(query)) {
+      setMessages(m => m.map(msg =>
+        msg.id === assistantMsgId
+          ? { ...msg, content: formatOverdueTasksResponse(data.tasks) }
           : msg
       ));
       setLoading(false);

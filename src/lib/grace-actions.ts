@@ -232,6 +232,23 @@ export function buildAddTaskActionsFromInput(input: string, limit = 20): Pending
   }));
 }
 
+export function isOverdueTasksQuery(input: string): boolean {
+  return /\b(?:what|show|list|which)\b[\s\S]*\b(?:tasks?|to[-\s]?dos?)\b[\s\S]*\boverdue\b/i.test(input.trim())
+    || /\boverdue\b[\s\S]*\b(?:tasks?|to[-\s]?dos?)\b/i.test(input.trim());
+}
+
+export function getOverdueTasks(tasks: Task[], today = new Date().toISOString().slice(0, 10)): Task[] {
+  return tasks
+    .filter(t => !t.completed && Boolean(t.dueDate) && String(t.dueDate) < today)
+    .sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)));
+}
+
+export function formatOverdueTasksResponse(tasks: Task[], today = new Date().toISOString().slice(0, 10)): string {
+  const overdue = getOverdueTasks(tasks, today);
+  if (overdue.length === 0) return 'No overdue tasks right now.';
+  return `Overdue tasks (${overdue.length}):\n${overdue.map(t => `- ${t.title}${t.dueDate ? ` — due ${t.dueDate}` : ''}`).join('\n')}`;
+}
+
 export function hydrateAction(action: PendingAction, ctx: HydrateContext): PendingAction {
   const matched = resolvePerson(action.personName, ctx.people);
   let { taskId, prayerId, prayerContent, taskTitle } = action;
