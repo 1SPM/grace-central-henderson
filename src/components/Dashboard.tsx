@@ -19,13 +19,11 @@ import {
   BookOpen,
   BarChart3,
   DollarSign,
-  Sparkle,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
 import { GivingWidget } from './GivingWidget';
-import { AskGraceChat } from './AskGrace';
 
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 import { StatCard } from './ui/StatCard';
@@ -73,10 +71,6 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
   const churchName = churchSettings?.profile?.name || 'Grace CRM';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-  const [showInlineGrace, setShowInlineGrace] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem('grace.inlineDismissed') !== '1';
-  });
   const checklistStale = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const key = 'grace.checklistFirstSeenAt';
@@ -87,14 +81,6 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
     }
     return Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000;
   }, []);
-  const dismissInlineGrace = () => {
-    localStorage.setItem('grace.inlineDismissed', '1');
-    setShowInlineGrace(false);
-  };
-  const reopenInlineGrace = () => {
-    localStorage.removeItem('grace.inlineDismissed');
-    setShowInlineGrace(true);
-  };
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
   // Memoize filtered arrays to prevent recalculation on every render
@@ -379,20 +365,6 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
         />
       )}
 
-      {/* Ask Grace */}
-      {showInlineGrace ? (
-        <div className="mb-6">
-          <AskGraceChat variant="inline" onClose={dismissInlineGrace} />
-        </div>
-      ) : (
-        <button
-          onClick={reopenInlineGrace}
-          className="mb-6 inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-dark-400 hover:text-slate-800 dark:hover:text-dark-100 transition-colors"
-        >
-          <Sparkle size={12} className="text-amber-500" />
-          Show Ask Grace inline
-        </button>
-      )}
 
       {/* Stats Grid with Sparklines */}
       <div data-tutorial="dashboard-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
