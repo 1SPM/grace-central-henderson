@@ -184,6 +184,54 @@ export function buildTaskCompletionActions(tasks: Task[], limit = 10): PendingAc
     }));
 }
 
+function normalizeTaskLine(line: string): string {
+  return line
+    .replace(/^\s*(?:[-*•‣–—]|\d+[.)])\s+/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const TASK_LIST_TRAILER_RE = /^(?:tasks?|to[-\s]?dos?|todo list|task list)$/i;
+
+export function extractPastedTaskTitles(input: string, limit = 20): string[] {
+  const rawLines = input
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+  const hasTaskTrailer = rawLines.some(line => TASK_LIST_TRAILER_RE.test(normalizeTaskLine(line)));
+  const bulletLikeCount = rawLines.filter(line => /^\s*(?:[-*•‣–—]|\d+[.)])\s+/.test(line)).length;
+  const lines = rawLines
+    .map(normalizeTaskLine)
+    .filter(Boolean)
+    .filter(line => !TASK_LIST_TRAILER_RE.test(line));
+
+  if (lines.length < 2) return [];
+  if (!hasTaskTrailer && bulletLikeCount < 2 && lines.length < 3) return [];
+
+  const unique: string[] = [];
+  const seen = new Set<string>();
+  for (const line of lines) {
+    const key = line.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(line);
+    if (unique.length >= limit) break;
+  }
+  return unique;
+}
+
+export function isPastedTaskList(input: string): boolean {
+  return extractPastedTaskTitles(input).length >= 2;
+}
+
+export function buildAddTaskActionsFromInput(input: string, limit = 20): PendingAction[] {
+  return extractPastedTaskTitles(input, limit).map(title => ({
+    type: 'add_task',
+    title,
+    priority: 'medium',
+  }));
+}
+
 export function hydrateAction(action: PendingAction, ctx: HydrateContext): PendingAction {
   const matched = resolvePerson(action.personName, ctx.people);
   let { taskId, prayerId, prayerContent, taskTitle } = action;

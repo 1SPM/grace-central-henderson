@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, type PendingAction } from '../lib/grace-actions';
+import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, type PendingAction } from '../lib/grace-actions';
 
 export type { PendingAction } from '../lib/grace-actions';
 
@@ -307,6 +307,21 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
             role: 'assistant',
             content: 'There are no open tasks to complete right now.',
           };
+      setMessages(m => m.map(msg => msg.id === assistantMsgId ? assistantUpdate : msg));
+      setLoading(false);
+      return;
+    }
+
+    if (isPastedTaskList(query)) {
+      const actions = buildAddTaskActionsFromInput(query);
+      const assistantUpdate: GraceMessage = {
+        id: assistantMsgId,
+        role: 'assistant',
+        content: actions.length === 20
+          ? 'I prepared the first 20 pasted tasks for review. Edit anything you want, then click Execute on each card when you’re ready.'
+          : `I prepared ${actions.length} pasted ${actions.length === 1 ? 'task' : 'tasks'} for review. Edit anything you want, then click Execute on each card when you’re ready.`,
+        actions: actions.map((action, i) => ({ id: `act-${Date.now()}-${i}`, action })),
+      };
       setMessages(m => m.map(msg => msg.id === assistantMsgId ? assistantUpdate : msg));
       setLoading(false);
       return;

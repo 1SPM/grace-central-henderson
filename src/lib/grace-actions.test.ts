@@ -8,6 +8,9 @@ import {
   hydrateAction,
   isTaskBatchFollowUp,
   buildTaskCompletionActions,
+  extractPastedTaskTitles,
+  isPastedTaskList,
+  buildAddTaskActionsFromInput,
 } from './grace-actions';
 import type { Person, Task, PrayerRequest } from '../types';
 
@@ -221,6 +224,50 @@ describe('deterministic task follow-up actions', () => {
       createdAt: '2026-04-01',
     }));
     expect(buildTaskCompletionActions(manyTasks)).toHaveLength(10);
+  });
+});
+
+describe('deterministic pasted task list actions', () => {
+  const pasted = `Thank Maria for bringing guest
+* Follow up with Cam 1993
+* Follow up with Marcus Taylor
+* Connect Ashley with young adults
+* Check on Michelle Youngs family
+* Invite Brian Cooper to membership class
+* Thank Christopher Hall for first gift
+* Acknowledge Richard Andersons missions gift
+* Plan March events calendar
+* Birthday outreach to Andrew Clark
+* Review volunteer schedule for March
+tasks`;
+
+  it('detects pasted multiline task lists before calling AI', () => {
+    expect(isPastedTaskList(pasted)).toBe(true);
+    expect(isPastedTaskList('what tasks are overdue?')).toBe(false);
+  });
+
+  it('extracts task titles and ignores bullet markers plus trailing tasks label', () => {
+    const titles = extractPastedTaskTitles(pasted);
+    expect(titles).toHaveLength(11);
+    expect(titles[0]).toBe('Thank Maria for bringing guest');
+    expect(titles[1]).toBe('Follow up with Cam 1993');
+    expect(titles).not.toContain('tasks');
+  });
+
+  it('builds editable add_task cards from pasted lines without Gemini', () => {
+    const actions = buildAddTaskActionsFromInput(pasted);
+    expect(actions).toHaveLength(11);
+    expect(actions[0]).toMatchObject({
+      type: 'add_task',
+      title: 'Thank Maria for bringing guest',
+      priority: 'medium',
+    });
+    expect(actions[10].title).toBe('Review volunteer schedule for March');
+  });
+
+  it('caps pasted task list actions at 20', () => {
+    const many = Array.from({ length: 25 }, (_, i) => `Task ${i + 1}`).join('\n');
+    expect(buildAddTaskActionsFromInput(`${many}\ntasks`)).toHaveLength(20);
   });
 });
 
