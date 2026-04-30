@@ -91,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.setHeader('X-Accel-Buffering', 'no');
 
       const stream = await ai.models.generateContentStream({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: fullPrompt,
         config,
       });
@@ -105,7 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: fullPrompt,
       config,
     });
@@ -119,7 +119,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       text,
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
     });
   } catch (error) {
     console.error('Gemini API error:', error);
