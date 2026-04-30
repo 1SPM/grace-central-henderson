@@ -600,7 +600,11 @@ export function AvatarSkyPanel() {
   );
 }
 
-export function AskGrace() {
+interface AskGraceProps {
+  hideDock?: boolean;
+}
+
+export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
@@ -609,7 +613,7 @@ export function AskGrace() {
 
   return (
     <>
-      {!chat.panelOpen && (
+      {!chat.panelOpen && !hideDock && (
         <div
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-32px)] sm:w-[min(520px,calc(100vw-120px))]"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
