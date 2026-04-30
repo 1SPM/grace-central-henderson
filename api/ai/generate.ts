@@ -123,7 +123,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid API key', detail: publicMessage });
     }
     if (/quota|spending cap|RESOURCE_EXHAUSTED/i.test(message)) {
-      return res.status(429).json({ error: 'API quota or spend cap reached', detail: publicMessage });
+      return res.status(429).json({
+        error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend',
+        detail: publicMessage,
+      });
     }
     if (/safety|blocked|candidate/i.test(message)) {
       return res.status(400).json({ error: 'Model refused the prompt (safety filter)', detail: publicMessage });

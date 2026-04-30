@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus } from 'lucide-react';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake } from 'lucide-react';
 import type { Person, MemberStatus } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
@@ -7,6 +7,36 @@ import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
   onClose?: () => void;
+}
+
+function executedSummary(a: PendingAction): string {
+  if (a.type === 'add_person') return `Added ${`${a.firstName ?? ''} ${a.lastName ?? ''}`.trim() || 'person'}`;
+  if (a.type === 'add_task') return `Added task: ${a.title ?? 'Untitled'}`;
+  if (a.type === 'add_prayer') return 'Added prayer request';
+  if (a.type === 'add_note') return 'Added note';
+  if (a.type === 'mark_task_done') return `Task done: ${a.taskTitle ?? ''}`;
+  if (a.type === 'update_person_status') return `Updated ${a.personName ?? 'person'} → ${a.status ?? ''}`;
+  if (a.type === 'mark_prayer_answered') return `Prayer marked answered`;
+  return 'Done';
+}
+
+function renderWithLinks(text: string) {
+  const parts = text.split(/(https?:\/\/[^\s)]+)/g);
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline text-amber-700 dark:text-amber-400 hover:text-amber-800 break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
 }
 
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
@@ -84,13 +114,17 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
                     : 'bg-white/70 dark:bg-dark-800 text-slate-900 dark:text-dark-100 border border-stone-200/70 dark:border-white/5'
                 }`}
               >
-                {m.content || (m.role === 'assistant' && chat.loading ? <Loader2 size={16} className="animate-spin text-gray-500" /> : '')}
+                {m.content
+                  ? renderWithLinks(m.content)
+                  : m.role === 'assistant' && chat.loading
+                    ? <Loader2 size={16} className="animate-spin text-gray-500" />
+                    : ''}
               </div>
             </div>
             {m.actions?.filter(a => !a.dismissed).map(a => (
               a.executed ? (
                 <div key={a.id} className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 pl-1">
-                  <Check size={14} /> Added {a.action.type === 'add_person' ? `${a.action.firstName ?? ''} ${a.action.lastName ?? ''}`.trim() : a.action.type.replace('add_', '')}
+                  <Check size={14} /> {executedSummary(a.action)}
                 </div>
               ) : (
                 <ActionCard
@@ -124,14 +158,9 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       </div>
 
       {/* Suggestions */}
-      {showSuggestions && (
+      {showSuggestions && chat.suggestions.length > 0 && (
         <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-          {[
-            'Who gave the most last month?',
-            'Who hasn\'t attended in 30 days?',
-            'Add Sean McKay as a visitor',
-            'What events are coming up?',
-          ].map(s => (
+          {chat.suggestions.map(s => (
             <button
               key={s}
               onClick={() => handleSend(s)}
@@ -184,11 +213,19 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
   const icon = action.type === 'add_task' ? <CheckSquare size={14} />
     : action.type === 'add_prayer' ? <Heart size={14} />
     : action.type === 'add_person' ? <UserPlus size={14} />
+    : action.type === 'add_note' ? <StickyNote size={14} />
+    : action.type === 'mark_task_done' ? <CheckCircle2 size={14} />
+    : action.type === 'update_person_status' ? <UserCheck size={14} />
+    : action.type === 'mark_prayer_answered' ? <HeartHandshake size={14} />
     : <StickyNote size={14} />;
   const label = action.type === 'add_task' ? 'New task'
     : action.type === 'add_prayer' ? 'New prayer request'
     : action.type === 'add_person' ? 'New person'
-    : 'New note';
+    : action.type === 'add_note' ? 'New note'
+    : action.type === 'mark_task_done' ? 'Mark task done'
+    : action.type === 'update_person_status' ? 'Update status'
+    : action.type === 'mark_prayer_answered' ? 'Mark prayer answered'
+    : 'Action';
 
   return (
     <div className="ml-2 p-3 rounded-xl bg-amber-50/60 dark:bg-amber-500/5 border border-amber-200/70 dark:border-amber-500/20">
@@ -281,7 +318,53 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
           />
         )}
 
-        {action.type !== 'add_person' && (
+        {action.type === 'mark_task_done' && (
+          <div className="text-sm space-y-1">
+            <div className="text-slate-900 dark:text-dark-100 font-medium">{action.taskTitle || '(no task matched)'}</div>
+            {action.personName && (
+              <div className="text-xs text-gray-600 dark:text-dark-400">For {action.personName}</div>
+            )}
+            {!action.taskId && (
+              <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
+            )}
+          </div>
+        )}
+
+        {action.type === 'update_person_status' && (
+          <select
+            value={action.status || 'visitor'}
+            onChange={(e) => onChange({ status: e.target.value as MemberStatus })}
+            className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+          >
+            <option value="visitor">Visitor</option>
+            <option value="regular">Regular</option>
+            <option value="member">Member</option>
+            <option value="leader">Leader</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        )}
+
+        {action.type === 'mark_prayer_answered' && (
+          <>
+            {action.prayerContent && (
+              <div className="text-xs text-gray-600 dark:text-dark-400 italic px-2.5 py-1.5 bg-white/40 dark:bg-dark-900/30 rounded-md border border-stone-200/50 dark:border-dark-700/50">
+                "{action.prayerContent.length > 120 ? action.prayerContent.slice(0, 120) + '…' : action.prayerContent}"
+              </div>
+            )}
+            <textarea
+              value={action.testimony || ''}
+              onChange={(e) => onChange({ testimony: e.target.value })}
+              placeholder="Testimony (optional)"
+              rows={2}
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            {!action.prayerId && (
+              <div className="text-xs text-rose-600 dark:text-rose-400">No active prayer found for that person.</div>
+            )}
+          </>
+        )}
+
+        {action.type !== 'add_person' && action.type !== 'mark_task_done' && action.type !== 'mark_prayer_answered' && (
           <select
             value={action.personId || ''}
             onChange={(e) => {
@@ -316,6 +399,69 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
   );
 }
 
+function AvatarSkyPanel() {
+  return (
+    <div className="hidden sm:flex flex-col w-[220px] shrink-0 relative overflow-hidden border-r border-stone-300/60 dark:border-white/5">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, #b8cee0 0%, #d6dde0 28%, #ecd9b8 60%, #ecc28e 88%, #d99a64 100%)',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: '14%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '180px',
+          height: '180px',
+          background:
+            'radial-gradient(circle, rgba(255,235,180,0.95) 0%, rgba(255,220,150,0.55) 30%, rgba(255,220,150,0) 70%)',
+          filter: 'blur(2px)',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: '38%',
+          left: '-30%',
+          width: '160px',
+          height: '50px',
+          background:
+            'radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%)',
+          filter: 'blur(8px)',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: '52%',
+          right: '-25%',
+          width: '140px',
+          height: '42px',
+          background:
+            'radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 70%)',
+          filter: 'blur(8px)',
+        }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(160,110,70,0) 0%, rgba(120,80,50,0.18) 65%, rgba(80,55,40,0.32) 100%)',
+        }}
+      />
+      <div className="relative flex-1 flex items-end justify-center pb-5">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-stone-50/80 font-medium drop-shadow-sm">
+          Grace
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function AskGrace() {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
@@ -327,7 +473,7 @@ export function AskGrace() {
     <>
       {!chat.panelOpen && (
         <div
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[min(520px,calc(100vw-120px))]"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-32px)] sm:w-[min(520px,calc(100vw-120px))]"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           <form
@@ -354,7 +500,7 @@ export function AskGrace() {
               type="text"
               value={dockValue}
               onChange={(e) => setDockValue(e.target.value)}
-              placeholder="Ask Grace…"
+              placeholder="Ask Grace to add a task…"
               className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-slate-400"
             />
             <kbd className="hidden sm:inline text-[10px] text-slate-400 font-mono px-1.5 py-0.5 bg-white/5 rounded">⌘/</kbd>
@@ -376,12 +522,15 @@ export function AskGrace() {
             className="fixed z-50 bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 shadow-2xl
               inset-0 sm:inset-auto
               sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2
-              sm:w-[min(580px,calc(100vw-48px))] sm:h-[min(640px,calc(100vh-96px))]
+              sm:w-[min(780px,calc(100vw-48px))] sm:h-[min(640px,calc(100vh-96px))]
               sm:rounded-2xl sm:border sm:border-stone-300/70 sm:dark:border-white/5
-              overflow-hidden"
+              overflow-hidden flex"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
-            <AskGraceChat variant="panel" onClose={chat.closePanel} />
+            <AvatarSkyPanel />
+            <div className="flex-1 min-w-0">
+              <AskGraceChat variant="panel" onClose={chat.closePanel} />
+            </div>
           </aside>
         </>
       )}

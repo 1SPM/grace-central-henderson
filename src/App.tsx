@@ -311,6 +311,9 @@ function App() {
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}
         onAddPerson={handlers.savePerson}
+        onToggleTask={toggleTask}
+        onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
+        onMarkPrayerAnswered={markPrayerAnswered}
       >
       <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
         <ErrorBoundary>

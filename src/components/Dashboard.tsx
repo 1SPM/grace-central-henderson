@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, lazy, Suspense } from 'react';
 import { formatLocalDate } from '../utils/validation';
 import {
   Users,
@@ -19,19 +19,23 @@ import {
   BookOpen,
   BarChart3,
   DollarSign,
+  Sparkle,
 } from 'lucide-react';
-import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent } from '../types';
+import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
 import { GivingWidget } from './GivingWidget';
 import { AskGraceChat } from './AskGrace';
 
-import { SundayPrep } from './SundayPrep';
+const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 import { StatCard } from './ui/StatCard';
 import { StatusBadge, priorityToVariant } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { KanbanBoard } from './ui/KanbanBoard';
 import { CalendarWidget } from './dashboard/CalendarWidget';
+import { VerifiedLeadersCard } from './dashboard/VerifiedLeadersCard';
+import { TodayActionStrip } from './dashboard/TodayActionStrip';
+import { useGraceChat } from '../contexts/GraceChatContext';
 
 interface DashboardProps {
   people: Person[];
@@ -56,13 +60,41 @@ interface DashboardProps {
   onDismissChecklist?: () => void;
   onReopenWizard?: () => void;
   onOpenTutorials?: () => void;
+  leaders?: LeaderProfile[];
+  onViewLeaders?: () => void;
 }
 
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, }: DashboardProps) {
+export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const grace = useGraceChat();
+  const churchName = churchSettings?.profile?.name || 'Grace CRM';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  const [showInlineGrace, setShowInlineGrace] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('grace.inlineDismissed') !== '1';
+  });
+  const checklistStale = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const key = 'grace.checklistFirstSeenAt';
+    let firstSeen = localStorage.getItem(key);
+    if (!firstSeen) {
+      firstSeen = String(Date.now());
+      localStorage.setItem(key, firstSeen);
+    }
+    return Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000;
+  }, []);
+  const dismissInlineGrace = () => {
+    localStorage.setItem('grace.inlineDismissed', '1');
+    setShowInlineGrace(false);
+  };
+  const reopenInlineGrace = () => {
+    localStorage.removeItem('grace.inlineDismissed');
+    setShowInlineGrace(true);
+  };
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
   // Memoize filtered arrays to prevent recalculation on every render
@@ -116,84 +148,116 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Hero Header with Photo */}
-      <div className="mb-6 relative overflow-hidden rounded-2xl h-48">
-        {/* Background Image - Church/Community themed */}
-        <img
-          src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1200&h=400&fit=crop"
-          alt="Church community"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/60" />
-        <div className="relative h-full p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="text-amber-300" size={18} />
-                <span className="text-white/70 text-sm">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}!</span>
-              </div>
-              <h1 className="text-2xl font-bold text-white">Welcome to Grace CRM</h1>
-              <p className="text-white/60 mt-1 text-sm">Here's what needs your attention today.</p>
+      {/* Compact Command Header */}
+      <div className="mb-6 px-5 sm:px-6 py-5 rounded-2xl bg-gradient-to-br from-white via-stone-50 to-amber-50/50 dark:from-dark-800 dark:via-dark-800 dark:to-amber-950/20 border border-stone-200 dark:border-dark-700">
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Sparkles size={13} className="text-amber-500" />
+              <span className="text-[11px] uppercase tracking-[0.15em] text-gray-500 dark:text-dark-400 font-medium">
+                Good {greeting}
+              </span>
             </div>
-            <div className="hidden md:flex items-center gap-3">
-              <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <Heart className="text-white/80" size={28} />
-              </div>
-            </div>
+            <h1 className="serif text-2xl text-slate-900 dark:text-dark-100 leading-tight truncate">
+              {churchName}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+              Here's what needs your attention today.
+            </p>
           </div>
-
-          {/* Tabs */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <button
-              onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'overview'
-                  ? 'bg-white text-slate-800 shadow-md'
-                  : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/10'
-              }`}
+              onClick={() => grace.openPanel()}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-lg transition-colors"
             >
-              <LayoutDashboard size={16} />
-              Overview
+              <Sparkles size={14} className="text-amber-300" />
+              Ask Grace
             </button>
             <button
-              onClick={() => setActiveTab('tasks')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'tasks'
-                  ? 'bg-white text-slate-800 shadow-md'
-                  : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/10'
-              }`}
+              onClick={() => onViewPeople?.()}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white dark:bg-dark-700 hover:bg-stone-100 dark:hover:bg-dark-600 text-slate-800 dark:text-dark-100 border border-stone-300 dark:border-dark-600 rounded-lg transition-colors"
             >
-              <ListTodo size={16} />
+              <UserPlus size={14} />
+              Add person
+            </button>
+            <button
+              onClick={onViewTasks}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white dark:bg-dark-700 hover:bg-stone-100 dark:hover:bg-dark-600 text-slate-800 dark:text-dark-100 border border-stone-300 dark:border-dark-600 rounded-lg transition-colors"
+            >
+              <ListTodo size={14} />
               Tasks
             </button>
-            <button
-              data-tutorial="dashboard-sunday-prep"
-              onClick={() => setActiveTab('sunday-prep')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'sunday-prep'
-                  ? 'bg-white text-slate-800 shadow-md'
-                  : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/10'
-              }`}
-            >
-              <Church size={16} />
-              Sunday Prep
-            </button>
-            {onOpenTutorials && (
-              <button
-                onClick={onOpenTutorials}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all bg-white/10 text-white/90 hover:bg-white/20 border border-white/10 ml-auto"
-              >
-                <BookOpen size={16} />
-                Take a Tour
-              </button>
-            )}
           </div>
+        </div>
+
+        {/* Tab row */}
+        <div className="flex items-center gap-1 -mb-1 border-t border-stone-200 dark:border-dark-700 pt-3">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'overview'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
+            }`}
+          >
+            <LayoutDashboard size={14} />
+            Overview
+          </button>
+          <button
+            data-tutorial="dashboard-sunday-prep"
+            onClick={() => setActiveTab('sunday-prep')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'sunday-prep'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
+            }`}
+          >
+            <Church size={14} />
+            Sunday Prep
+          </button>
+          <button
+            onClick={() => setActiveTab('tasks')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'tasks'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
+            }`}
+          >
+            <ListTodo size={14} />
+            Task Board
+          </button>
+          {onOpenTutorials && (
+            <button
+              onClick={onOpenTutorials}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700 ml-auto"
+            >
+              <BookOpen size={14} />
+              Take a Tour
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Today action strip — only on overview */}
+      {activeTab === 'overview' && (
+        <TodayActionStrip
+          people={people}
+          tasks={tasks}
+          events={events}
+          prayers={prayers}
+          onViewTasks={onViewTasks}
+          onViewVisitors={onViewVisitors}
+          onViewInactive={onViewInactive}
+          onViewCalendar={onViewCalendar}
+          onNavigate={onNavigate}
+        />
+      )}
+
       {/* Tab Content */}
       {activeTab === 'sunday-prep' ? (
-        <SundayPrep people={people} prayers={prayers} onViewPerson={onViewPerson} />
+        <Suspense fallback={<div className="py-12 text-center text-sm text-gray-500">Loading Sunday Prep…</div>}>
+          <SundayPrep people={people} prayers={prayers} onViewPerson={onViewPerson} />
+        </Suspense>
       ) : activeTab === 'tasks' ? (
         <>
           {/* Tasks Header with View Toggle */}
@@ -302,7 +366,7 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
       ) : (
         <>
       {/* Setup Checklist */}
-      {churchSettings && onNavigate && onDismissChecklist && !churchSettings.onboarding?.checklistDismissed && (
+      {churchSettings && onNavigate && onDismissChecklist && !churchSettings.onboarding?.checklistDismissed && !checklistStale && (
         <SetupChecklist
           churchSettings={churchSettings}
           peopleCount={people.length}
@@ -316,9 +380,19 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
       )}
 
       {/* Ask Grace */}
-      <div className="mb-6">
-        <AskGraceChat variant="inline" />
-      </div>
+      {showInlineGrace ? (
+        <div className="mb-6">
+          <AskGraceChat variant="inline" onClose={dismissInlineGrace} />
+        </div>
+      ) : (
+        <button
+          onClick={reopenInlineGrace}
+          className="mb-6 inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-dark-400 hover:text-slate-800 dark:hover:text-dark-100 transition-colors"
+        >
+          <Sparkle size={12} className="text-amber-500" />
+          Show Ask Grace inline
+        </button>
+      )}
 
       {/* Stats Grid with Sparklines */}
       <div data-tutorial="dashboard-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -573,6 +647,13 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           </div>
         </div>
       </div>
+
+      {/* Verified Leaders */}
+      {onViewLeaders && (
+        <div className="mb-6">
+          <VerifiedLeadersCard leaders={leaders} onViewAll={onViewLeaders} />
+        </div>
+      )}
 
       {/* Giving + Calendar Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">

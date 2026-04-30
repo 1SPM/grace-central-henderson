@@ -1,21 +1,9 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
+import { parseActions, hydrateAction, type PendingAction } from '../lib/grace-actions';
 
-export interface PendingAction {
-  type: 'add_task' | 'add_prayer' | 'add_note' | 'add_person';
-  title?: string;
-  content?: string;
-  personName?: string;
-  personId?: string;
-  priority?: 'low' | 'medium' | 'high';
-  dueDate?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  status?: MemberStatus;
-}
+export type { PendingAction } from '../lib/grace-actions';
 
 export interface ActionInstance {
   id: string;
@@ -47,6 +35,9 @@ export interface GraceHandlers {
   onAddPrayer?: (prayer: { personId: string; content: string; isPrivate: boolean }) => void | Promise<void>;
   onAddInteraction?: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void | Promise<void>;
   onAddPerson?: (person: Omit<Person, 'id'>) => void | Promise<void>;
+  onToggleTask?: (taskId: string) => void | Promise<unknown>;
+  onUpdatePersonStatus?: (personId: string, status: MemberStatus) => void | Promise<unknown>;
+  onMarkPrayerAnswered?: (prayerId: string, testimony?: string) => void | Promise<unknown>;
 }
 
 interface GraceChatContextValue {
@@ -61,6 +52,7 @@ interface GraceChatContextValue {
   executeAction: (messageId: string, actionId: string) => Promise<void>;
   dismissAction: (messageId: string, actionId: string) => void;
   people: Person[];
+  suggestions: string[];
 }
 
 const GRACE_GREETING: GraceMessage = {
@@ -70,29 +62,6 @@ const GRACE_GREETING: GraceMessage = {
 };
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
-
-function resolvePerson(name: string | undefined, people: Person[]): Person | undefined {
-  if (!name) return undefined;
-  const lower = name.toLowerCase().trim();
-  return people.find(p => `${p.firstName} ${p.lastName}`.toLowerCase() === lower)
-    || people.find(p => p.firstName.toLowerCase() === lower)
-    || people.find(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
-}
-
-function parseActions(text: string): { cleanText: string; actions: PendingAction[] } {
-  const matches = [...text.matchAll(/<action>([\s\S]*?)<\/action>/g)];
-  if (matches.length === 0) return { cleanText: text, actions: [] };
-  const actions: PendingAction[] = [];
-  let cleanText = text;
-  for (const m of matches) {
-    try { actions.push(JSON.parse(m[1])); } catch { /* skip */ }
-    cleanText = cleanText.replace(m[0], '');
-  }
-  cleanText = cleanText.trim() || (actions.length === 1
-    ? 'Ready to add this? Review and edit, then click Execute.'
-    : `Ready to add ${actions.length} items. Review each, then click Execute.`);
-  return { cleanText, actions };
-}
 
 function buildDataContext(data: GraceData): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName } = data;
@@ -155,6 +124,19 @@ When someone asks you a faith or theological question (e.g. "how do you feel abo
 Good example: "I'm an AI, so I can't feel the way a person does — but I know Jesus is the heart of everything this church does. Want me to show you the upcoming sermons or active prayer requests?"
 Bad example: "I am an AI assistant and do not have feelings."
 
+TONE VARIETY — match the moment, don't sound like a script:
+Don't end every response with "Want me to show you X?" That tic gets old fast. Offer a follow-up only when it actually helps. Short answers can just end.
+
+Match register to context:
+- Celebratory (giving milestone, prayer answered, baptism): "That's $12,400 in March — best month this year. Want to send a thank-you note to the top three?"
+- Soft (grief, illness, crisis): "I'm sorry — that's hard. Sue's been on the prayer list since the 18th. I can mark a follow-up task if it'd help."
+- Efficient (routine confirmation, lookups): "Done — task added for Tuesday." or "Three: Sarah, Marcus, Aiden."
+- Warm (faith / pastoral): see the Good example above.
+- Practical (data with numbers): lead with the number. "47 members. 12 haven't checked in this month — here are the names."
+- Quiet (no-data, all-clear): "Nothing flagged today. Good day to call someone."
+
+Never moralize. Never preach. Never repeat the user's question back at them. Don't pad with "Great question!" or "I'd be happy to help!"
+
 WRITE-ACTIONS — BE DECISIVE:
 When the user asks you to add a person, task, prayer, or note, ALWAYS respond with one <action> block per item. Do not ask for optional fields like email or phone — they're optional and the user can fill them in the confirm card. Your job is to propose; the user edits and confirms.
 
@@ -175,7 +157,21 @@ Prayer request format:
 Note format:
 <action>{"type":"add_note","content":"the note","personName":"existing person name"}</action>
 
-For multiple items in one request ("add X and Y"), emit multiple <action> blocks. For prayer/note, the personName must match someone in the list below — if no match, ask once which person. For add_person and add_task, new names are always fine.
+EDIT ACTIONS — you can also UPDATE existing records, not just create:
+
+Mark task done format:
+<action>{"type":"mark_task_done","taskTitle":"the task title or substring","personName":"optional"}</action>
+Use when the user says "mark X done", "X is finished", "completed Y". Match against the open tasks listed below.
+
+Update person status format:
+<action>{"type":"update_person_status","personName":"existing name","status":"member"}</action>
+Use when the user says "promote X to member", "make X a leader", "X is no longer attending". Status must be: visitor, regular, member, leader, or inactive.
+
+Mark prayer answered format:
+<action>{"type":"mark_prayer_answered","personName":"existing name","testimony":"optional testimony text","prayerContent":"optional content snippet to disambiguate"}</action>
+Use when the user says "mark X's prayer answered", "praise — Y was healed", "her surgery went well". Testimony is the celebration text.
+
+For multiple items in one request ("add X and Y" or "mark these three done"), emit multiple <action> blocks. For prayer/note/edit actions, the personName must match someone in the list below — if no match, ask once which person. For add_person and add_task, new names are always fine.
 
 Church: ${churchName || 'Grace Community Church'}
 Today: ${now.toLocaleDateString()}
@@ -205,11 +201,54 @@ Active prayer requests (${prayers.filter(p => !p.isAnswered).length} total): ${a
 `.trim();
 }
 
+function buildSuggestions(data: GraceData): string[] {
+  const { people, tasks, events, prayers, giving, attendance } = data;
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400_000);
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400_000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400_000);
+
+  const overdue = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < todayStr).length;
+  const newVisitors = people.filter(p => p.status === 'visitor' && p.firstVisit && new Date(p.firstVisit) >= sevenDaysAgo).length;
+  const activePrayers = prayers.filter(p => !p.isAnswered).length;
+  const birthdaysSoon = people.filter(p => {
+    if (!p.birthDate) return false;
+    const bd = new Date(p.birthDate);
+    const thisYear = new Date(now.getFullYear(), bd.getMonth(), bd.getDate());
+    return thisYear >= now && thisYear <= sevenDaysFromNow;
+  }).length;
+  const eventsSoon = events.filter(e => new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow).length;
+  const recentGiving = giving.filter(g => new Date(g.date) >= thirtyDaysAgo).length;
+  const attendedRecently = new Set(
+    attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId),
+  );
+  const inactive = people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length;
+
+  const candidates: Array<{ score: number; text: string }> = [];
+  if (overdue > 0) candidates.push({ score: 100, text: `What tasks are overdue?` });
+  if (newVisitors > 0) candidates.push({ score: 90, text: `Who visited this week?` });
+  if (inactive > 0) candidates.push({ score: 80, text: `Who hasn't attended in 30 days?` });
+  if (activePrayers > 0) candidates.push({ score: 70, text: `Show me active prayer requests` });
+  if (birthdaysSoon > 0) candidates.push({ score: 60, text: `Whose birthday is this week?` });
+  if (eventsSoon > 0) candidates.push({ score: 50, text: `What events are coming up?` });
+  if (recentGiving > 0) candidates.push({ score: 40, text: `Who gave the most last month?` });
+
+  // Always-available fallbacks so we always have at least 4
+  candidates.push({ score: 10, text: `Add a new visitor` });
+  candidates.push({ score: 5, text: `Remind me to follow up tomorrow` });
+
+  return candidates
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map(c => c.text);
+}
+
 interface GraceChatProviderProps extends GraceData, GraceHandlers {
   children: ReactNode;
 }
 
-export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, ...data }: GraceChatProviderProps) {
+export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
   const [messages, setMessages] = useState<GraceMessage[]>([GRACE_GREETING]);
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -218,6 +257,10 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const dataContext = useMemo(() => buildDataContext(data), [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
+  ]);
+
+  const suggestions = useMemo(() => buildSuggestions(data), [
+    data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);
 
   const openPanel = useCallback((seed?: string) => {
@@ -246,7 +289,15 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
-    const prompt = `${dataContext}\n\nUser question: ${query}`;
+    const recentHistory = messages
+      .filter(m => m.id !== 'greet' && m.content.trim())
+      .slice(-6)
+      .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
+      .join('\n');
+
+    const prompt = recentHistory
+      ? `${dataContext}\n\nRecent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${recentHistory}\n\nUser question: ${query}`
+      : `${dataContext}\n\nUser question: ${query}`;
 
     try {
       let streamed = false;
@@ -277,17 +328,10 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
         if (msg.id !== assistantMsgId) return msg;
         const { cleanText, actions } = parseActions(msg.content);
         if (actions.length === 0) return msg;
-        const hydrated: ActionInstance[] = actions.map((a, i) => {
-          const matched = resolvePerson(a.personName, data.people);
-          return {
-            id: `act-${Date.now()}-${i}`,
-            action: {
-              ...a,
-              personId: matched?.id,
-              personName: matched ? `${matched.firstName} ${matched.lastName}` : a.personName,
-            },
-          };
-        });
+        const hydrated: ActionInstance[] = actions.map((a, i) => ({
+          id: `act-${Date.now()}-${i}`,
+          action: hydrateAction(a, { people: data.people, tasks: data.tasks, prayers: data.prayers }),
+        }));
         return { ...msg, content: cleanText, actions: hydrated };
       }));
     } catch {
@@ -299,7 +343,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, data.people]);
+  }, [dataContext, data.people, data.tasks, data.prayers, messages]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>
@@ -370,12 +414,30 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
           content: action.content || '',
           createdBy: 'Grace',
         });
+      } else if (action.type === 'mark_task_done' && onToggleTask) {
+        if (!action.taskId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an open task matching "${action.taskTitle ?? ''}". Try the exact title.` }]);
+          return;
+        }
+        await onToggleTask(action.taskId);
+      } else if (action.type === 'update_person_status' && onUpdatePersonStatus) {
+        if (!action.personId || !action.status) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person and a status.' }]);
+          return;
+        }
+        await onUpdatePersonStatus(action.personId, action.status);
+      } else if (action.type === 'mark_prayer_answered' && onMarkPrayerAnswered) {
+        if (!action.prayerId) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I couldn\'t find an active prayer request for that person.' }]);
+          return;
+        }
+        await onMarkPrayerAnswered(action.prayerId, action.testimony);
       }
       markActionStatus(messageId, actionId, { executed: true });
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction]);
+  }, [messages, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onToggleTask, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });
@@ -408,7 +470,8 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     executeAction,
     dismissAction,
     people: data.people,
-  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, data.people]);
+    suggestions,
+  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, data.people, suggestions]);
 
   return <GraceChatContext.Provider value={value}>{children}</GraceChatContext.Provider>;
 }

@@ -253,6 +253,8 @@ export function ViewRenderer(props: ViewRendererProps) {
           onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
+          leaders={pastoralCare.leaders}
+          onViewLeaders={() => setView('leader-management')}
         />
       );
 

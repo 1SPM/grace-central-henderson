@@ -105,7 +105,7 @@ router.post('/generate', async (req: Request, res: Response) => {
         return res.status(401).json({ error: 'Invalid API key configuration' });
       }
       if (error.message.includes('quota')) {
-        return res.status(429).json({ error: 'API quota exceeded' });
+        return res.status(429).json({ error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend' });
       }
     }
 

@@ -55,8 +55,8 @@ const navSections: NavSection[] = [
   {
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
-      { view: 'grace', label: 'Grace', icon: <Sparkles size={18} /> },
-      { view: 'feed', label: 'Actions', icon: <ListTodo size={18} /> },
+      { view: 'grace', label: 'Ask Grace', icon: <Sparkles size={18} /> },
+      { view: 'feed', label: 'Follow-ups', icon: <ListTodo size={18} /> },
       { view: 'people', label: 'People', icon: <Users size={18} /> },
       { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
