@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil } from 'lucide-react';
+import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil, Mail, MessageSquare } from 'lucide-react';
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
@@ -22,6 +22,8 @@ function executedSummary(a: PendingAction): string {
   if (a.type === 'delete_task') return `Task deleted: ${a.taskTitle ?? ''}`;
   if (a.type === 'delete_person') return `Removed ${a.personName ?? 'person'}`;
   if (a.type === 'delete_prayer') return `Prayer removed`;
+  if (a.type === 'send_email') return `Emailed ${a.personName ?? 'recipient'}: ${a.subject ?? ''}`;
+  if (a.type === 'send_sms') return `Texted ${a.personName ?? 'recipient'}`;
   return 'Done';
 }
 
@@ -291,6 +293,8 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
     : action.type === 'update_task' ? <Pencil size={14} />
     : action.type === 'update_person_status' ? <UserCheck size={14} />
     : action.type === 'mark_prayer_answered' ? <HeartHandshake size={14} />
+    : action.type === 'send_email' ? <Mail size={14} />
+    : action.type === 'send_sms' ? <MessageSquare size={14} />
     : isDestructive ? <Trash2 size={14} />
     : <StickyNote size={14} />;
   const label = action.type === 'add_task' ? 'New task'
@@ -305,6 +309,8 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
     : action.type === 'delete_task' ? 'Delete task'
     : action.type === 'delete_person' ? 'Remove person'
     : action.type === 'delete_prayer' ? 'Remove prayer'
+    : action.type === 'send_email' ? 'Send email'
+    : action.type === 'send_sms' ? 'Send text'
     : 'Action';
 
   return (
@@ -444,6 +450,61 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
             {!action.taskId && (
               <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
             )}
+          </>
+        )}
+
+        {action.type === 'send_email' && (
+          <>
+            {(() => {
+              const recipient = people.find(p => p.id === action.personId);
+              return recipient ? (
+                <div className="text-xs text-gray-600 dark:text-dark-400">
+                  To: {recipient.firstName} {recipient.lastName}
+                  {recipient.email
+                    ? <> · <span className="text-slate-700 dark:text-dark-200">{recipient.email}</span></>
+                    : <span className="text-rose-600 dark:text-rose-400"> · no email on file</span>}
+                </div>
+              ) : null;
+            })()}
+            <input
+              value={action.subject || ''}
+              onChange={(e) => onChange({ subject: e.target.value })}
+              placeholder="Subject"
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            <textarea
+              value={action.body || ''}
+              onChange={(e) => onChange({ body: e.target.value })}
+              placeholder="Email body"
+              rows={5}
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+          </>
+        )}
+
+        {action.type === 'send_sms' && (
+          <>
+            {(() => {
+              const recipient = people.find(p => p.id === action.personId);
+              return recipient ? (
+                <div className="text-xs text-gray-600 dark:text-dark-400">
+                  To: {recipient.firstName} {recipient.lastName}
+                  {recipient.phone
+                    ? <> · <span className="text-slate-700 dark:text-dark-200">{recipient.phone}</span></>
+                    : <span className="text-rose-600 dark:text-rose-400"> · no phone on file</span>}
+                </div>
+              ) : null;
+            })()}
+            <textarea
+              value={action.message || ''}
+              onChange={(e) => onChange({ message: e.target.value })}
+              placeholder="Text message"
+              rows={3}
+              className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
+            />
+            <div className="text-[10px] text-gray-500 dark:text-dark-500 text-right">
+              {(action.message?.length ?? 0)} chars
+            </div>
           </>
         )}
 

@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus, EventCategory } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
+import { emailService } from '../lib/services/email';
+import { smsService } from '../lib/services/sms';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 
@@ -202,6 +204,10 @@ Delete (destructive — only when user clearly asks to remove/delete):
 <action>{"type":"delete_task","taskTitle":"existing"}</action>
 <action>{"type":"delete_person","personName":"existing"}</action>
 <action>{"type":"delete_prayer","personName":"existing"}</action>
+
+Send (only when user explicitly says email/text/send/message — NOT for "follow up", which is add_task):
+<action>{"type":"send_email","personName":"existing","subject":"X","body":"plain-text body, can be multi-line"}</action>
+<action>{"type":"send_sms","personName":"existing","message":"short text under 1000 chars"}</action>
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
@@ -615,6 +621,73 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
           return;
         }
         await onDeletePrayer(action.prayerId);
+      } else if (action.type === 'send_email') {
+        const person = data.people.find(p => p.id === action.personId);
+        if (!person) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to send to.' }]);
+          return;
+        }
+        if (!person.email) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have an email on file.` }]);
+          return;
+        }
+        const subject = action.subject?.trim() || '(no subject)';
+        const bodyText = action.body?.trim() || '';
+        if (!bodyText) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Email body is empty.' }]);
+          return;
+        }
+        const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;line-height:1.6;color:#1f2937">${bodyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>`;
+        const result = await emailService.send({
+          to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
+          subject,
+          html,
+          text: bodyText,
+        });
+        if (!result.success) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${result.error || 'unknown error'}` }]);
+          return;
+        }
+        if (onAddInteraction) {
+          await onAddInteraction({
+            personId: person.id,
+            type: 'email',
+            content: `${subject}\n\n${bodyText}`,
+            createdBy: 'Grace',
+            sentVia: 'resend',
+            messageId: result.messageId,
+          });
+        }
+      } else if (action.type === 'send_sms') {
+        const person = data.people.find(p => p.id === action.personId);
+        if (!person) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to text.' }]);
+          return;
+        }
+        if (!person.phone) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have a phone on file.` }]);
+          return;
+        }
+        const text = action.message?.trim() || '';
+        if (!text) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Text message is empty.' }]);
+          return;
+        }
+        const result = await smsService.send({ to: person.phone, message: text });
+        if (!result.success) {
+          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Text failed: ${result.error || 'unknown error'}` }]);
+          return;
+        }
+        if (onAddInteraction) {
+          await onAddInteraction({
+            personId: person.id,
+            type: 'text',
+            content: text,
+            createdBy: 'Grace',
+            sentVia: 'twilio',
+            messageId: result.messageId,
+          });
+        }
       } else if (action.type === 'mark_prayer_answered' && onMarkPrayerAnswered) {
         if (!action.prayerId) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I couldn\'t find an active prayer request for that person.' }]);
@@ -636,7 +709,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, data.tasks, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, data.people, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });

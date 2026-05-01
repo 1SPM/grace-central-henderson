@@ -12,7 +12,9 @@ export type ActionType =
   | 'mark_prayer_answered'
   | 'delete_task'
   | 'delete_person'
-  | 'delete_prayer';
+  | 'delete_prayer'
+  | 'send_email'
+  | 'send_sms';
 
 export interface PendingAction {
   type: ActionType;
@@ -38,6 +40,9 @@ export interface PendingAction {
   allDay?: boolean;
   location?: string;
   category?: EventCategory;
+  subject?: string;
+  body?: string;
+  message?: string;
 }
 
 const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
@@ -53,6 +58,8 @@ const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   'delete_task',
   'delete_person',
   'delete_prayer',
+  'send_email',
+  'send_sms',
 ]);
 
 const EVENT_CATEGORIES: ReadonlySet<EventCategory> = new Set<EventCategory>([
@@ -110,7 +117,7 @@ export function validateAction(raw: unknown): PendingAction | null {
     'title', 'content', 'personName', 'personId',
     'firstName', 'lastName', 'email', 'phone',
     'taskTitle', 'taskId', 'prayerId', 'prayerContent', 'testimony',
-    'location',
+    'location', 'subject', 'body', 'message',
   ];
   for (const k of stringFields) {
     const v = r[k as string];
