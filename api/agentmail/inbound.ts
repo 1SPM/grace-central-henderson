@@ -28,41 +28,28 @@ interface ParseResult {
 
 function buildParsePrompt(senderName: string, fromEmail: string, subject: string, body: string): string {
   const today = new Date().toISOString().slice(0, 10);
-  return `You are reading an email a church member sent to their pastor's CRM. Decide what to do with it.
+  return `You are reading an email a church member sent to their pastor's CRM. Today: ${today}. Sender: ${senderName} <${fromEmail}>.
 
-Return ONE JSON object (no other text) shaped exactly like:
+Return ONE JSON object (no other text):
 {
   "intent": "informational" | "request" | "pastoral" | "conversational",
-  "actions": [
-    { "type": "add_task" | "add_prayer" | "add_note" | "add_event",
-      "confidence": 0..1,
-      "risk": "low" | "medium" | "high",
-      ...action-specific fields below
-    }
-  ],
-  "suggested_reply": "short plain-text reply, only when intent is informational and a reply makes sense; otherwise empty string"
+  "actions": [{type, confidence:0..1, risk:"low"|"medium"|"high", ...fields}],
+  "suggested_reply": "" or short plain text
 }
 
-Action shapes (personName should be the sender unless another person is clearly named):
+Action shapes (personName defaults to the sender unless someone else is clearly named):
 - add_task: title, personName, priority(low|medium|high), dueDate(YYYY-MM-DD)
 - add_prayer: content, personName
-- add_note: content, personName
-- add_event: title, startDate(YYYY-MM-DD), startTime(HH:MM), location?, category(event|meeting|service|...)
+- add_note: content, personName  (use when sender shares info to log; e.g. "we'll have 4 visitors Sunday")
+- add_event: title, startDate(YYYY-MM-DD), startTime(HH:MM), location?, category
 
-Risk guidance:
-- low = adding a note about what they said, sending an info reply, logging a prayer they shared
-- medium = creating a task, scheduling an event, anything that touches the church calendar or pastor's todo list
-- high = anything affecting another person's record, money, sensitive pastoral matter
+Risk: low=note/log/info-reply. medium=task/event. high=other person's record / money / sensitive.
 
-Confidence guidance:
-- 0.9+ = the email explicitly asks for the action ("please add me to..." / "I'd like prayer for...")
-- 0.6–0.9 = strongly implied
-- <0.6 = your best guess
+CRITICAL — suggested_reply rules:
+- Only fill if you can answer using GENERAL truths or info clearly stated by the sender (acknowledging their message, restating what they said, simple yes/no based on their email).
+- DO NOT make up specific facts the sender asked about (service times, addresses, parking details, prices, schedules) — leave reply empty if the answer requires church-specific info you weren't given.
+- Empty string when in doubt. Pastor would rather see no reply than a fabricated one.
 
-Suggested_reply rules: only fill it for purely informational asks (e.g., "what time is service?" — answer from context). Leave empty for anything pastoral, anything requiring church data you don't have, or anything implying ongoing relationship.
-
-Today: ${today}
-From: ${senderName} <${fromEmail}>
 Subject: ${subject}
 Body:
 ${body}`.slice(0, 8000);
@@ -97,7 +84,12 @@ async function parseEmail(senderName: string, fromEmail: string, subject: string
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 800, temperature: 0.2, responseMimeType: 'application/json' },
+          generationConfig: {
+            maxOutputTokens: 1500,
+            temperature: 0.2,
+            responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       },
     );
@@ -317,7 +309,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   let replySent = false;
-  if (parsed.intent === 'informational' && parsed.suggested_reply && parsed.suggested_reply.length > 0 && parsed.suggested_reply.length < 1500) {
+  if (parsed.suggested_reply && parsed.suggested_reply.length > 0 && parsed.suggested_reply.length < 1500) {
     const replyBody = `${parsed.suggested_reply}\n\n— Grace 🌿 (auto-reply on behalf of the pastor)`;
     replySent = await sendAgentMailReply(msg.inbox_id, msg.message_id, replyBody);
     if (replySent) {
