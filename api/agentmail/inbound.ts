@@ -8,22 +8,58 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const WEBHOOK_SECRET = process.env.AGENTMAIL_WEBHOOK_SECRET;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const AGENTMAIL_API_KEY = process.env.AGENTMAIL_API_KEY;
 const MAX_TIMESTAMP_AGE_SEC = 5 * 60;
+
+const CRISIS_KEYWORDS = /\b(suicide|kill myself|end my life|end it all|self.?harm|abuse|abused|abusing|domestic violence|hurt me|hurt myself|crisis|emergency|hospital|overdose|leaving the church)\b/i;
 
 interface ParsedAction {
   type: string;
+  confidence?: number;
+  risk?: 'low' | 'medium' | 'high';
   [key: string]: unknown;
+}
+
+interface ParseResult {
+  actions: ParsedAction[];
+  intent: 'informational' | 'request' | 'pastoral' | 'conversational' | 'unknown';
+  suggested_reply?: string;
 }
 
 function buildParsePrompt(senderName: string, fromEmail: string, subject: string, body: string): string {
   const today = new Date().toISOString().slice(0, 10);
-  return `You are reading an email a church member sent to their pastor's CRM. Extract any concrete CRM actions the email implies. Return ONLY <action> blocks, one per intended action. Return nothing if the email is purely conversational or has no actionable intent.
+  return `You are reading an email a church member sent to their pastor's CRM. Decide what to do with it.
 
-Schemas (use exact type strings; "personName" should be the sender unless another person is clearly named):
-<action>{"type":"add_task","title":"X","personName":"${senderName}","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
-<action>{"type":"add_prayer","content":"X","personName":"${senderName}"}</action>
-<action>{"type":"add_note","content":"X","personName":"${senderName}"}</action>
-<action>{"type":"add_event","title":"X","startDate":"YYYY-MM-DD","startTime":"HH:MM","location":"optional","category":"event"}</action>
+Return ONE JSON object (no other text) shaped exactly like:
+{
+  "intent": "informational" | "request" | "pastoral" | "conversational",
+  "actions": [
+    { "type": "add_task" | "add_prayer" | "add_note" | "add_event",
+      "confidence": 0..1,
+      "risk": "low" | "medium" | "high",
+      ...action-specific fields below
+    }
+  ],
+  "suggested_reply": "short plain-text reply, only when intent is informational and a reply makes sense; otherwise empty string"
+}
+
+Action shapes (personName should be the sender unless another person is clearly named):
+- add_task: title, personName, priority(low|medium|high), dueDate(YYYY-MM-DD)
+- add_prayer: content, personName
+- add_note: content, personName
+- add_event: title, startDate(YYYY-MM-DD), startTime(HH:MM), location?, category(event|meeting|service|...)
+
+Risk guidance:
+- low = adding a note about what they said, sending an info reply, logging a prayer they shared
+- medium = creating a task, scheduling an event, anything that touches the church calendar or pastor's todo list
+- high = anything affecting another person's record, money, sensitive pastoral matter
+
+Confidence guidance:
+- 0.9+ = the email explicitly asks for the action ("please add me to..." / "I'd like prayer for...")
+- 0.6–0.9 = strongly implied
+- <0.6 = your best guess
+
+Suggested_reply rules: only fill it for purely informational asks (e.g., "what time is service?" — answer from context). Leave empty for anything pastoral, anything requiring church data you don't have, or anything implying ongoing relationship.
 
 Today: ${today}
 From: ${senderName} <${fromEmail}>
@@ -32,24 +68,26 @@ Body:
 ${body}`.slice(0, 8000);
 }
 
-function extractActionBlocks(text: string): ParsedAction[] {
-  const actions: ParsedAction[] = [];
-  const matches = text.matchAll(/<action>([\s\S]*?)<\/action>/g);
-  for (const m of matches) {
-    try {
-      const parsed = JSON.parse(m[1]);
-      if (parsed && typeof parsed === 'object' && typeof parsed.type === 'string') {
-        actions.push(parsed as ParsedAction);
-      }
-    } catch {
-      // skip malformed JSON
-    }
+function safeParseResult(text: string): ParseResult {
+  const fallback: ParseResult = { actions: [], intent: 'unknown' };
+  const cleaned = text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (!parsed || typeof parsed !== 'object') return fallback;
+    const actions = Array.isArray(parsed.actions) ? parsed.actions.filter((a: unknown) =>
+      a && typeof a === 'object' && typeof (a as Record<string, unknown>).type === 'string'
+    ) : [];
+    const intent = ['informational', 'request', 'pastoral', 'conversational'].includes(parsed.intent)
+      ? parsed.intent : 'unknown';
+    const suggested_reply = typeof parsed.suggested_reply === 'string' ? parsed.suggested_reply.trim() : '';
+    return { actions, intent, suggested_reply: suggested_reply || undefined };
+  } catch {
+    return fallback;
   }
-  return actions;
 }
 
-async function parseEmailActions(senderName: string, fromEmail: string, subject: string, body: string): Promise<ParsedAction[]> {
-  if (!GEMINI_API_KEY) return [];
+async function parseEmail(senderName: string, fromEmail: string, subject: string, body: string): Promise<ParseResult> {
+  if (!GEMINI_API_KEY) return { actions: [], intent: 'unknown' };
   const prompt = buildParsePrompt(senderName, fromEmail, subject, body);
   try {
     const response = await fetch(
@@ -59,17 +97,42 @@ async function parseEmailActions(senderName: string, fromEmail: string, subject:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 600, temperature: 0.3 },
+          generationConfig: { maxOutputTokens: 800, temperature: 0.2, responseMimeType: 'application/json' },
         }),
       },
     );
-    if (!response.ok) return [];
+    if (!response.ok) return { actions: [], intent: 'unknown' };
     const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    return extractActionBlocks(text);
+    return safeParseResult(text);
   } catch (err) {
     console.warn('[agentmail-inbound] gemini parse failed', err);
-    return [];
+    return { actions: [], intent: 'unknown' };
+  }
+}
+
+async function sendAgentMailReply(inboxId: string, messageId: string, text: string): Promise<boolean> {
+  if (!AGENTMAIL_API_KEY) return false;
+  try {
+    const response = await fetch(
+      `https://api.agentmail.to/v0/inboxes/${encodeURIComponent(inboxId)}/messages/${encodeURIComponent(messageId)}/reply`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${AGENTMAIL_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      },
+    );
+    if (!response.ok) {
+      console.warn('[agentmail-inbound] reply failed', response.status, await response.text().catch(() => ''));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[agentmail-inbound] reply exception', err);
+    return false;
   }
 }
 
@@ -188,6 +251,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const content = `${subject}\n\n${bodyText}`.slice(0, 50_000);
   const senderName = `${person.first_name} ${person.last_name}`.trim();
 
+  // Always log the inbound as an Interaction so the person's history is complete
+  // even when we skip parsing (crisis path).
   const { error: insertError } = await supabase.from('interactions').insert({
     church_id: person.church_id,
     person_id: person.id,
@@ -196,15 +261,80 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     created_by: 'agentmail-webhook',
     created_by_name: 'Member via Grace',
   });
-
   if (insertError) {
     console.error('[agentmail-inbound] interaction insert failed', insertError);
     return res.status(500).json({ error: 'Insert failed' });
   }
 
-  const parsedActions = await parseEmailActions(senderName, fromEmail, subject, bodyText);
+  // ESCALATE: crisis-keyword fast path — never auto-handle, never run Gemini,
+  // surface to pastor with a flag so they can respond personally.
+  const haystack = `${subject}\n${bodyText}`;
+  if (CRISIS_KEYWORDS.test(haystack)) {
+    await supabase.from('grace_inbox_messages').upsert({
+      church_id: person.church_id,
+      person_id: person.id,
+      source: 'agentmail',
+      source_message_id: msg.message_id,
+      source_thread_id: msg.thread_id,
+      source_inbox_id: msg.inbox_id,
+      from_email: fromEmail,
+      subject,
+      preview: msg.preview || bodyText.slice(0, 200),
+      body_text: bodyText.slice(0, 10_000),
+      parsed_actions: [],
+      flag: 'crisis',
+    }, { onConflict: 'source,source_message_id' });
+    return res.status(200).json({ ok: true, routed: 'escalate', person_id: person.id });
+  }
 
-  const { error: inboxError } = await supabase.from('grace_inbox_messages').upsert({
+  // Parse with Gemini for confidence/risk + suggested reply
+  const parsed = await parseEmail(senderName, fromEmail, subject, bodyText);
+
+  // AUTO: conservative tier — only auto-execute add_note when confidence ≥ 0.85
+  // and risk === 'low'. Send a confirmation reply for explicit info Q&A
+  // (intent === 'informational' + suggested_reply present).
+  const autoNotes = parsed.actions.filter(a =>
+    a.type === 'add_note'
+    && (a.confidence ?? 0) >= 0.85
+    && a.risk === 'low'
+    && typeof a.content === 'string'
+    && (a.content as string).trim().length > 0,
+  );
+  const reviewActions = parsed.actions.filter(a => !autoNotes.includes(a));
+
+  const autoSummaryParts: string[] = [];
+
+  for (const note of autoNotes) {
+    const { error } = await supabase.from('interactions').insert({
+      church_id: person.church_id,
+      person_id: person.id,
+      type: 'note',
+      content: String(note.content),
+      created_by: 'grace-auto',
+      created_by_name: 'Grace (auto)',
+    });
+    if (!error) autoSummaryParts.push(`Note: ${String(note.content).slice(0, 80)}`);
+  }
+
+  let replySent = false;
+  if (parsed.intent === 'informational' && parsed.suggested_reply && parsed.suggested_reply.length > 0 && parsed.suggested_reply.length < 1500) {
+    const replyBody = `${parsed.suggested_reply}\n\n— Grace 🌿 (auto-reply on behalf of the pastor)`;
+    replySent = await sendAgentMailReply(msg.inbox_id, msg.message_id, replyBody);
+    if (replySent) {
+      autoSummaryParts.push(`Replied: ${parsed.suggested_reply.slice(0, 80)}`);
+      await supabase.from('interactions').insert({
+        church_id: person.church_id,
+        person_id: person.id,
+        type: 'email',
+        content: `[Grace auto-reply]\n\n${parsed.suggested_reply}`,
+        created_by: 'grace-auto',
+        created_by_name: 'Grace (auto)',
+      });
+    }
+  }
+
+  const autoHandled = autoSummaryParts.length > 0;
+  await supabase.from('grace_inbox_messages').upsert({
     church_id: person.church_id,
     person_id: person.id,
     source: 'agentmail',
@@ -215,18 +345,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     subject,
     preview: msg.preview || bodyText.slice(0, 200),
     body_text: bodyText.slice(0, 10_000),
-    parsed_actions: parsedActions,
+    parsed_actions: reviewActions,
+    auto_handled_at: autoHandled ? new Date().toISOString() : null,
+    auto_summary: autoHandled ? autoSummaryParts.join(' | ') : null,
+    reply_sent_at: replySent ? new Date().toISOString() : null,
   }, { onConflict: 'source,source_message_id' });
-
-  if (inboxError) {
-    console.error('[agentmail-inbound] inbox upsert failed', inboxError);
-    // Interaction already saved — don't fail the whole webhook
-  }
 
   return res.status(200).json({
     ok: true,
-    person_id: person.id,
-    message_id: msg.message_id,
-    parsed_actions: parsedActions.length,
+    routed: autoHandled ? (reviewActions.length > 0 ? 'auto+review' : 'auto') : 'review',
+    auto: autoNotes.length,
+    review: reviewActions.length,
+    reply_sent: replySent,
   });
 }

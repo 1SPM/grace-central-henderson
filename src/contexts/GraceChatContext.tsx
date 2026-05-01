@@ -742,7 +742,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     const fetchInbox = async () => {
       const { data: rows, error } = await sb
         .from('grace_inbox_messages')
-        .select('id, person_id, from_email, subject, preview, parsed_actions, created_at')
+        .select('id, person_id, from_email, subject, preview, parsed_actions, created_at, flag, auto_summary, reply_sent_at')
         .is('seen_at', null)
         .order('created_at', { ascending: true })
         .limit(20);
@@ -756,22 +756,41 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
         const senderName = senderPerson
           ? `${senderPerson.firstName} ${senderPerson.lastName}`.trim()
           : row.from_email;
+        const subjectLine = row.subject || '(no subject)';
+
+        // Crisis: red banner, no action cards, urge personal response
+        if (row.flag === 'crisis') {
+          return {
+            id: `inbox-${row.id}`,
+            role: 'assistant',
+            content: `🚨 Flagged email from ${senderName}: "${subjectLine}"\n\n${row.preview || ''}\n\nThis matches sensitive language — Grace did NOT auto-handle anything. Please respond personally.`,
+          };
+        }
+
         const rawActions = Array.isArray(row.parsed_actions) ? row.parsed_actions : [];
         const validated = rawActions
           .map((raw: unknown) => validateAction(raw))
           .filter((a): a is PendingAction => a !== null)
           .map(a => hydrateAction(a, { people: data.people, tasks: data.tasks, prayers: data.prayers }));
 
-        const header = `📧 New email from ${senderName}: "${row.subject || '(no subject)'}"`;
-        const previewLine = row.preview ? `\n\n${row.preview}` : '';
-        const actionLine = validated.length > 0
-          ? `\n\nI parsed ${validated.length} possible action${validated.length === 1 ? '' : 's'} — review below.`
-          : '\n\n(No actions detected — logged as an interaction.)';
+        const lines: string[] = [`📧 New email from ${senderName}: "${subjectLine}"`];
+        if (row.preview) lines.push('', String(row.preview));
+        if (row.auto_summary) {
+          lines.push('', `✓ Grace already handled: ${row.auto_summary}`);
+        }
+        if (row.reply_sent_at) {
+          lines.push('✓ Auto-reply sent to sender');
+        }
+        if (validated.length > 0) {
+          lines.push('', `${validated.length} more action${validated.length === 1 ? '' : 's'} need your review:`);
+        } else if (!row.auto_summary) {
+          lines.push('', '(No actions detected — logged as an interaction.)');
+        }
 
         return {
           id: `inbox-${row.id}`,
           role: 'assistant',
-          content: header + previewLine + actionLine,
+          content: lines.join('\n'),
           actions: validated.map((action, i) => ({
             id: `inbox-act-${row.id}-${i}`,
             action,
