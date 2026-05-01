@@ -258,7 +258,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     person_id: person.id,
     type: 'email',
     content,
-    created_by: 'agentmail-webhook',
+    created_by: null,
     created_by_name: 'Member via Grace',
   });
   if (insertError) {
@@ -310,7 +310,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       person_id: person.id,
       type: 'note',
       content: String(note.content),
-      created_by: 'grace-auto',
+      created_by: null,
       created_by_name: 'Grace (auto)',
     });
     if (!error) autoSummaryParts.push(`Note: ${String(note.content).slice(0, 80)}`);
