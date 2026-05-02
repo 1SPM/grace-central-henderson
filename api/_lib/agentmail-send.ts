@@ -42,7 +42,7 @@ export async function replyToThread(args: {
       const detail = await r.text().catch(() => '');
       return { ok: false, status: r.status, error: detail.slice(0, 200) };
     }
-    const data = await r.json().catch(() => ({} as ResponseShape));
+    const data = (await r.json().catch(() => ({}))) as ResponseShape;
     return { ok: true, status: r.status, message_id: data.message_id, thread_id: data.thread_id };
   } catch (err) {
     return { ok: false, status: 0, error: err instanceof Error ? err.message : 'fetch failed' };
@@ -83,7 +83,7 @@ export async function sendFresh(args: {
       const detail = await r.text().catch(() => '');
       return { ok: false, status: r.status, error: detail.slice(0, 200) };
     }
-    const data = await r.json().catch(() => ({} as ResponseShape));
+    const data = (await r.json().catch(() => ({}))) as ResponseShape;
     return { ok: true, status: r.status, message_id: data.message_id, thread_id: data.thread_id };
   } catch (err) {
     return { ok: false, status: 0, error: err instanceof Error ? err.message : 'fetch failed' };
