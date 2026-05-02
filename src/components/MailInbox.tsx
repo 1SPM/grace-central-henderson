@@ -50,7 +50,7 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [sendingId, setSendingId] = useState<string | null>(null);
-  const [draftingId, setDraftingId] = useState<string | null>(null);
+  const [draftingIds, setDraftingIds] = useState<Set<string>>(new Set());
   const [sendError, setSendError] = useState<Record<string, string>>({});
   const chat = useGraceChat();
 
@@ -118,9 +118,11 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   }, [chat, people]);
 
   const draftWithGrace = useCallback(async (row: MailRow) => {
+    if (draftingIds.has(row.id)) return;
     const senderPerson = people.find(p => p.id === row.person_id);
     const senderName = senderPerson ? `${senderPerson.firstName} ${senderPerson.lastName}` : row.from_email;
-    setDraftingId(row.id);
+    const firstName = senderName.split(' ')[0] || senderName;
+    setDraftingIds(prev => new Set(prev).add(row.id));
     setSendError(prev => ({ ...prev, [row.id]: '' }));
     try {
       const prompt = `You're a pastor's assistant drafting a reply to a member's email. Be warm, brief (2-4 sentences), plainspoken. Do NOT make up specific facts (service times, addresses, schedules) — if the question requires church-specific info you weren't given, acknowledge the question and say the pastor will follow up with details. Sign as "Grace" only — no other signature line, no "Warmly,", no "Hi pastor", no quoted reply.
@@ -130,7 +132,7 @@ Subject: ${row.subject ?? '(no subject)'}
 Body:
 ${row.body_text ?? row.preview ?? ''}
 
-Draft the reply body only. No subject line. No greeting boilerplate beyond a single "Hi ${senderName.split(' ')[0]}," at the start.`;
+Draft the reply body only. No subject line. No greeting boilerplate beyond a single "Hi ${firstName}," at the start.`;
 
       const result = await generateAIText({ prompt, maxTokens: 500 });
       if (!result.success || !result.text) {
@@ -141,9 +143,13 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
     } catch (err) {
       setSendError(prev => ({ ...prev, [row.id]: err instanceof Error ? err.message : 'Draft failed' }));
     } finally {
-      setDraftingId(null);
+      setDraftingIds(prev => {
+        const next = new Set(prev);
+        next.delete(row.id);
+        return next;
+      });
     }
-  }, [people]);
+  }, [people, draftingIds]);
 
   const sendReply = useCallback(async (row: MailRow) => {
     const text = (replyDrafts[row.id] || '').trim();
@@ -318,10 +324,10 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
                         <div className="text-xs font-medium text-gray-600 dark:text-dark-400">Reply</div>
                         <button
                           onClick={() => draftWithGrace(row)}
-                          disabled={draftingId === row.id || !!row.reply_sent_at}
+                          disabled={draftingIds.has(row.id) || !!row.reply_sent_at}
                           className="inline-flex items-center gap-1 px-2 py-1 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {draftingId === row.id ? <><Loader2 size={11} className="animate-spin" /> Drafting…</> : <><Sparkles size={11} /> Draft with Grace</>}
+                          {draftingIds.has(row.id) ? <><Loader2 size={11} className="animate-spin" /> Drafting…</> : <><Sparkles size={11} /> Draft with Grace</>}
                         </button>
                       </div>
                       <textarea
