@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Mail, AlertTriangle, CheckCircle2, Clock, Loader2, Inbox, Trash2 } from 'lucide-react';
+import { Mail, AlertTriangle, CheckCircle2, Clock, Loader2, Inbox, Trash2, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { validateAction, hydrateAction, type PendingAction } from '../lib/grace-actions';
 import { useGraceChat } from '../contexts/GraceChatContext';
+import { generateAIText } from '../lib/services/ai';
 import type { Person, Task, PrayerRequest } from '../types';
 
 interface MailRow {
@@ -49,6 +50,7 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [draftingId, setDraftingId] = useState<string | null>(null);
   const [sendError, setSendError] = useState<Record<string, string>>({});
   const chat = useGraceChat();
 
@@ -114,6 +116,34 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
     void chat.sendMessage(`Draft a reply to ${senderName}'s email: "${row.subject ?? ''}" — ${row.body_text ?? row.preview ?? ''}\n\nUse send_email with body filled — I'll thread it back automatically.`);
     chat.openPanel();
   }, [chat, people]);
+
+  const draftWithGrace = useCallback(async (row: MailRow) => {
+    const senderPerson = people.find(p => p.id === row.person_id);
+    const senderName = senderPerson ? `${senderPerson.firstName} ${senderPerson.lastName}` : row.from_email;
+    setDraftingId(row.id);
+    setSendError(prev => ({ ...prev, [row.id]: '' }));
+    try {
+      const prompt = `You're a pastor's assistant drafting a reply to a member's email. Be warm, brief (2-4 sentences), plainspoken. Do NOT make up specific facts (service times, addresses, schedules) — if the question requires church-specific info you weren't given, acknowledge the question and say the pastor will follow up with details. Sign as "Grace" only — no other signature line, no "Warmly,", no "Hi pastor", no quoted reply.
+
+From: ${senderName}
+Subject: ${row.subject ?? '(no subject)'}
+Body:
+${row.body_text ?? row.preview ?? ''}
+
+Draft the reply body only. No subject line. No greeting boilerplate beyond a single "Hi ${senderName.split(' ')[0]}," at the start.`;
+
+      const result = await generateAIText({ prompt, maxTokens: 500 });
+      if (!result.success || !result.text) {
+        setSendError(prev => ({ ...prev, [row.id]: result.error || 'Draft failed' }));
+        return;
+      }
+      setReplyDrafts(prev => ({ ...prev, [row.id]: result.text!.trim() }));
+    } catch (err) {
+      setSendError(prev => ({ ...prev, [row.id]: err instanceof Error ? err.message : 'Draft failed' }));
+    } finally {
+      setDraftingId(null);
+    }
+  }, [people]);
 
   const sendReply = useCallback(async (row: MailRow) => {
     const text = (replyDrafts[row.id] || '').trim();
@@ -284,12 +314,21 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                   )}
                   {row.source_inbox_id && (
                     <div className="space-y-2 pt-1">
-                      <div className="text-xs font-medium text-gray-600 dark:text-dark-400">Reply</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-medium text-gray-600 dark:text-dark-400">Reply</div>
+                        <button
+                          onClick={() => draftWithGrace(row)}
+                          disabled={draftingId === row.id || !!row.reply_sent_at}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {draftingId === row.id ? <><Loader2 size={11} className="animate-spin" /> Drafting…</> : <><Sparkles size={11} /> Draft with Grace</>}
+                        </button>
+                      </div>
                       <textarea
                         value={replyDrafts[row.id] ?? ''}
                         onChange={e => setReplyDrafts(prev => ({ ...prev, [row.id]: e.target.value }))}
-                        placeholder={`Reply to ${senderName}…`}
-                        rows={4}
+                        placeholder={`Reply to ${senderName}… or click "Draft with Grace"`}
+                        rows={5}
                         className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40"
                         disabled={sendingId === row.id || !!row.reply_sent_at}
                       />
