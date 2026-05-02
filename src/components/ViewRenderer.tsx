@@ -3,6 +3,7 @@ import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
 import { AskGraceChat, AvatarSkyPanel } from './AskGrace';
+import { MailInbox } from './MailInbox';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -277,6 +278,9 @@ export function ViewRenderer(props: ViewRendererProps) {
           </div>
         </div>
       );
+
+    case 'mail':
+      return <MailInbox people={people} tasks={tasks} prayers={prayers} />;
 
     case 'people':
       return (

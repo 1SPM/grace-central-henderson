@@ -63,6 +63,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   announcements: 'announcements',
   discipleship: 'discipleship',
   grace: 'grace',
+  mail: 'mail',
 };
 
 // Reverse map: path -> view
