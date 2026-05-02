@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
-import type { Person, Task, Interaction, MemberStatus, EventCategory } from '../types';
+import type { Person } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { smsService } from '../lib/services/sms';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { buildGreeting, loadStoredMessages, persistMessages } from '../lib/grace-chat/persistence';
+import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 
@@ -13,36 +13,9 @@ export type ActionInstance = ChatActionInstance;
 export type GraceMessage = ChatMessage;
 export type GraceData = ChatData;
 
-export interface GraceHandlers {
-  onAddTask?: (task: Omit<Task, 'id' | 'createdAt'>) => void | Promise<void>;
-  onAddPrayer?: (prayer: { personId: string; content: string; isPrivate: boolean }) => void | Promise<void>;
-  onAddInteraction?: (interaction: Omit<Interaction, 'id' | 'createdAt'>) => void | Promise<void>;
-  onAddPerson?: (person: Omit<Person, 'id'>) => void | Promise<void>;
-  onAddEvent?: (event: {
-    title: string;
-    description?: string;
-    startDate: string;
-    endDate?: string;
-    allDay: boolean;
-    location?: string;
-    category: EventCategory;
-  }) => void | Promise<unknown>;
-  onToggleTask?: (taskId: string) => void | Promise<unknown>;
-  onUpdateTask?: (taskId: string, updates: { title?: string; due_date?: string; priority?: 'low' | 'medium' | 'high' }) => void | Promise<unknown>;
-  onDeleteTask?: (taskId: string) => void | Promise<unknown>;
-  onDeletePerson?: (personId: string) => void | Promise<unknown>;
-  onDeletePrayer?: (prayerId: string) => void | Promise<unknown>;
-  onUpdatePersonStatus?: (personId: string, status: MemberStatus) => void | Promise<unknown>;
-  onMarkPrayerAnswered?: (prayerId: string, testimony?: string) => void | Promise<unknown>;
-}
+export type GraceHandlers = ChatHandlers;
 
-export interface ReplyContext {
-  inbox_message_row_id: string;
-  source_inbox_id: string;
-  source_message_id: string;
-  person_id: string | null;
-  sender_label: string;
-}
+export type ReplyContext = HandlerReplyContext;
 
 interface GraceChatContextValue {
   messages: GraceMessage[];
@@ -412,243 +385,27 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     const action = instance?.action;
     if (!action) return;
 
-    try {
-      if (action.type === 'add_person') {
-        if (!action.firstName?.trim()) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A new person needs a first name.' }]);
-          return;
-        }
-        if (onAddPerson) {
-          await onAddPerson({
-            firstName: action.firstName.trim(),
-            lastName: action.lastName?.trim() || '',
-            email: action.email?.trim() || '',
-            phone: action.phone?.trim() || '',
-            status: action.status || 'visitor',
-            tags: [],
-            smallGroups: [],
-          });
-        }
-      } else if (action.type === 'add_task' && onAddTask) {
-        await onAddTask({
-          title: action.title || 'Untitled task',
-          personId: action.personId,
-          priority: action.priority || 'medium',
-          dueDate: action.dueDate || new Date(Date.now() + 7 * 86400_000).toISOString().split('T')[0],
-          completed: false,
-          category: 'follow-up',
-        });
-      } else if (action.type === 'add_prayer' && onAddPrayer) {
-        if (!action.personId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A prayer request needs a matching person.' }]);
-          return;
-        }
-        await onAddPrayer({
-          personId: action.personId,
-          content: action.content || '',
-          isPrivate: false,
-        });
-      } else if (action.type === 'add_event' && onAddEvent) {
-        if (!action.title?.trim() || !action.startDate) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'An event needs a title and a date.' }]);
-          return;
-        }
-        const allDay = action.allDay ?? !action.startTime;
-        const startISO = allDay
-          ? action.startDate
-          : `${action.startDate}T${action.startTime ?? '09:00'}`;
-        const endISO = !allDay && action.endTime
-          ? `${action.startDate}T${action.endTime}`
-          : undefined;
-        await onAddEvent({
-          title: action.title.trim(),
-          startDate: startISO,
-          endDate: endISO,
-          allDay,
-          location: action.location?.trim() || undefined,
-          category: action.category || 'event',
-        });
-      } else if (action.type === 'add_note' && onAddInteraction) {
-        if (!action.personId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'A note needs a matching person.' }]);
-          return;
-        }
-        await onAddInteraction({
-          personId: action.personId,
-          type: 'note',
-          content: action.content || '',
-          createdBy: 'Grace',
-        });
-      } else if (action.type === 'mark_task_done' && onToggleTask) {
-        if (!action.taskId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an open task matching "${action.taskTitle ?? ''}". Try the exact title.` }]);
-          return;
-        }
-        await onToggleTask(action.taskId);
-        const task = data.tasks.find(t => t.id === action.taskId);
-        if (task?.personId && onAddInteraction) {
-          await onAddInteraction({
-            personId: task.personId,
-            type: 'note',
-            content: `Grace marked task complete: ${task.title}`,
-            createdBy: 'Grace',
-          });
-        }
-      } else if (action.type === 'update_person_status' && onUpdatePersonStatus) {
-        if (!action.personId || !action.status) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person and a status.' }]);
-          return;
-        }
-        await onUpdatePersonStatus(action.personId, action.status);
-        if (onAddInteraction) {
-          await onAddInteraction({
-            personId: action.personId,
-            type: 'note',
-            content: `Grace updated status to ${action.status}`,
-            createdBy: 'Grace',
-          });
-        }
-      } else if (action.type === 'update_task' && onUpdateTask) {
-        if (!action.taskId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an open task matching "${action.taskTitle ?? ''}".` }]);
-          return;
-        }
-        const updates: { title?: string; due_date?: string; priority?: 'low' | 'medium' | 'high' } = {};
-        if (action.title?.trim()) updates.title = action.title.trim();
-        if (action.dueDate) updates.due_date = action.dueDate;
-        if (action.priority) updates.priority = action.priority;
-        if (Object.keys(updates).length === 0) return;
-        await onUpdateTask(action.taskId, updates);
-        const task = data.tasks.find(t => t.id === action.taskId);
-        if (task?.personId && onAddInteraction) {
-          await onAddInteraction({
-            personId: task.personId,
-            type: 'note',
-            content: `Grace updated task: ${task.title}`,
-            createdBy: 'Grace',
-          });
-        }
-      } else if (action.type === 'delete_task' && onDeleteTask) {
-        if (!action.taskId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find a task matching "${action.taskTitle ?? ''}".` }]);
-          return;
-        }
-        await onDeleteTask(action.taskId);
-      } else if (action.type === 'delete_person' && onDeletePerson) {
-        if (!action.personId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find a matching person.` }]);
-          return;
-        }
-        await onDeletePerson(action.personId);
-      } else if (action.type === 'delete_prayer' && onDeletePrayer) {
-        if (!action.prayerId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `I couldn't find an active prayer for that person.` }]);
-          return;
-        }
-        await onDeletePrayer(action.prayerId);
-      } else if (action.type === 'send_email') {
-        const bodyText = action.body?.trim() || '';
-        if (!bodyText) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Email body is empty.' }]);
-          return;
-        }
+    const pushAssistantMessage = (content: string) => {
+      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content }]);
+    };
 
-        // If we're in a reply context (pastor opened an inbox row in Grace), thread the
-        // response back through AgentMail rather than sending a fresh outbound via Resend.
-        if (replyContext) {
-          const res = await fetch('/api/agentmail/reply', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              inbox_id: replyContext.source_inbox_id,
-              message_id: replyContext.source_message_id,
-              inbox_message_row_id: replyContext.inbox_message_row_id,
-              text: bodyText,
-            }),
-          });
-          const replyData = await res.json().catch(() => ({} as { error?: string }));
-          if (!res.ok) {
-            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Reply failed: ${replyData.error || `(${res.status})`}` }]);
-            return;
-          }
-          // Server-side already wrote the Interaction + flipped reply_sent_at
-          setReplyContext(null);
-        } else {
-          const person = data.people.find(p => p.id === action.personId);
-          if (!person) {
-            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to send to.' }]);
-            return;
-          }
-          if (!person.email) {
-            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have an email on file.` }]);
-            return;
-          }
-          const subject = action.subject?.trim() || '(no subject)';
-          // Route through AgentMail (askgrace@agentmail.to) — same channel as inbound, server-side
-          // logs the Interaction itself so we don't double-write here.
-          const res = await fetch('/api/agentmail/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ person_id: person.id, subject, text: bodyText }),
-          });
-          const sendData = await res.json().catch(() => ({} as { error?: string }));
-          if (!res.ok) {
-            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${sendData.error || `(${res.status})`}` }]);
-            return;
-          }
-        }
-      } else if (action.type === 'send_sms') {
-        const person = data.people.find(p => p.id === action.personId);
-        if (!person) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to text.' }]);
-          return;
-        }
-        if (!person.phone) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have a phone on file.` }]);
-          return;
-        }
-        const text = action.message?.trim() || '';
-        if (!text) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Text message is empty.' }]);
-          return;
-        }
-        const result = await smsService.send({ to: person.phone, message: text });
-        if (!result.success) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Text failed: ${result.error || 'unknown error'}` }]);
-          return;
-        }
-        if (onAddInteraction) {
-          await onAddInteraction({
-            personId: person.id,
-            type: 'text',
-            content: text,
-            createdBy: 'Grace',
-            sentVia: 'twilio',
-            messageId: result.messageId,
-          });
-        }
-      } else if (action.type === 'mark_prayer_answered' && onMarkPrayerAnswered) {
-        if (!action.prayerId) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I couldn\'t find an active prayer request for that person.' }]);
-          return;
-        }
-        await onMarkPrayerAnswered(action.prayerId, action.testimony);
-        if (action.personId && onAddInteraction) {
-          await onAddInteraction({
-            personId: action.personId,
-            type: 'prayer',
-            content: action.testimony
-              ? `Grace marked prayer answered: ${action.testimony}`
-              : 'Grace marked prayer answered',
-            createdBy: 'Grace',
-          });
-        }
-      }
-      markActionStatus(messageId, actionId, { executed: true });
+    try {
+      const ran = await runActionHandler({
+        action,
+        people: data.people,
+        tasks: data.tasks,
+        prayers: data.prayers,
+        handlers: { onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered },
+        replyContext,
+        setReplyContext,
+        pushAssistantMessage,
+      });
+      if (ran) markActionStatus(messageId, actionId, { executed: true });
     } catch {
-      setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
+      pushAssistantMessage('Couldn\'t save that — please try again.');
     }
-  }, [messages, data.tasks, data.people, replyContext, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, data.people, data.prayers, replyContext, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
+
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });
