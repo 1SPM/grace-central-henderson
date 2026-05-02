@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { buildChurchContext, buildPersonContext, type PersonContext } from '../_lib/grace-context.js';
+import { replyToThread } from '../_lib/agentmail-send.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -135,27 +136,9 @@ async function parseEmail(args: {
 
 async function sendAgentMailReply(inboxId: string, messageId: string, text: string): Promise<boolean> {
   if (!AGENTMAIL_API_KEY) return false;
-  try {
-    const response = await fetch(
-      `https://api.agentmail.to/v0/inboxes/${encodeURIComponent(inboxId)}/messages/${encodeURIComponent(messageId)}/reply`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${AGENTMAIL_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
-      },
-    );
-    if (!response.ok) {
-      console.warn('[agentmail-inbound] reply failed', response.status, await response.text().catch(() => ''));
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.warn('[agentmail-inbound] reply exception', err);
-    return false;
-  }
+  const result = await replyToThread({ apiKey: AGENTMAIL_API_KEY, inboxId, messageId, text });
+  if (!result.ok) console.warn('[agentmail-inbound] reply failed', result.status, result.error);
+  return result.ok;
 }
 
 interface AgentMailMessage {

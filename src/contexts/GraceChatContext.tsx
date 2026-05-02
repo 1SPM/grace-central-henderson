@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus, EventCategory } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { emailService } from '../lib/services/email';
 import { smsService } from '../lib/services/sms';
 import { parseActions, hydrateAction, validateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { supabase } from '../lib/supabase';
@@ -672,26 +671,17 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
             return;
           }
           const subject = action.subject?.trim() || '(no subject)';
-          const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;line-height:1.6;color:#1f2937">${bodyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>`;
-          const result = await emailService.send({
-            to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
-            subject,
-            html,
-            text: bodyText,
+          // Route through AgentMail (askgrace@agentmail.to) — same channel as inbound, server-side
+          // logs the Interaction itself so we don't double-write here.
+          const res = await fetch('/api/agentmail/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ person_id: person.id, subject, text: bodyText }),
           });
-          if (!result.success) {
-            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${result.error || 'unknown error'}` }]);
+          const sendData = await res.json().catch(() => ({} as { error?: string }));
+          if (!res.ok) {
+            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${sendData.error || `(${res.status})`}` }]);
             return;
-          }
-          if (onAddInteraction) {
-            await onAddInteraction({
-              personId: person.id,
-              type: 'email',
-              content: `${subject}\n\n${bodyText}`,
-              createdBy: 'Grace',
-              sentVia: 'resend',
-              messageId: result.messageId,
-            });
           }
         }
       } else if (action.type === 'send_sms') {

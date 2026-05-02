@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { replyToThread } from '../_lib/agentmail-send.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -38,37 +39,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'inbox_id or message_id mismatch' });
   }
 
-  let amResponse: Response;
-  try {
-    amResponse = await fetch(
-      `https://api.agentmail.to/v0/inboxes/${encodeURIComponent(inbox_id)}/messages/${encodeURIComponent(message_id)}/reply`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${AGENTMAIL_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: text.trim() }),
-      },
-    );
-  } catch (err) {
-    console.error('[agentmail-reply] fetch failed', err);
-    return res.status(502).json({ error: 'AgentMail unreachable' });
+  const result = await replyToThread({
+    apiKey: AGENTMAIL_API_KEY,
+    inboxId: inbox_id,
+    messageId: message_id,
+    text: text.trim(),
+  });
+
+  if (!result.ok) {
+    console.warn('[agentmail-reply] AgentMail returned', result.status, result.error);
+    return res.status(502).json({ error: 'AgentMail rejected the reply', detail: result.error });
   }
 
-  if (!amResponse.ok) {
-    const detail = await amResponse.text().catch(() => '');
-    console.warn('[agentmail-reply] AgentMail returned', amResponse.status, detail);
-    return res.status(502).json({ error: 'AgentMail rejected the reply', detail: detail.slice(0, 200) });
-  }
-
-  let agentMailMessageId: string | undefined;
-  try {
-    const data = await amResponse.json() as { message_id?: string };
-    agentMailMessageId = data.message_id;
-  } catch {
-    // ignore — reply succeeded even if response body parse failed
-  }
+  const agentMailMessageId = result.message_id;
 
   if (row.person_id) {
     await supabase.from('interactions').insert({
