@@ -328,21 +328,22 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                     </div>
                   )}
                   {row.source_inbox_id && (
-                    <div className="space-y-3 pt-1">
-                      <div className="text-xs font-medium text-gray-600 dark:text-dark-400">
-                        Reply
-                        {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-xs font-medium text-gray-600 dark:text-dark-400">
+                          Reply
+                          {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
+                        </div>
+                        <button
+                          onClick={() => draftWithGrace(row)}
+                          disabled={draftingIds.has(row.id)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-500/20 rounded-md disabled:opacity-60 disabled:cursor-wait transition-colors"
+                        >
+                          {draftingIds.has(row.id)
+                            ? <><Loader2 size={12} className="animate-spin" /> Drafting…</>
+                            : <><Sparkles size={12} /> Draft with Grace</>}
+                        </button>
                       </div>
-
-                      <button
-                        onClick={() => draftWithGrace(row)}
-                        disabled={draftingIds.has(row.id)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-500/20 rounded-lg disabled:opacity-60 disabled:cursor-wait transition-colors"
-                      >
-                        {draftingIds.has(row.id)
-                          ? <><Loader2 size={15} className="animate-spin" /> Grace is drafting…</>
-                          : <><Sparkles size={15} /> Draft with Grace</>}
-                      </button>
 
                       <textarea
                         value={replyDrafts[row.id] ?? ''}
