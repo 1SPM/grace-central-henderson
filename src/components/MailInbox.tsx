@@ -3,7 +3,6 @@ import { Mail, AlertTriangle, CheckCircle2, Clock, Loader2, Inbox, Trash2, Spark
 import { supabase } from '../lib/supabase';
 import { validateAction, hydrateAction, type PendingAction } from '../lib/grace-actions';
 import { useGraceChat } from '../contexts/GraceChatContext';
-import { generateAIText } from '../lib/services/ai';
 import type { Person, Task, PrayerRequest } from '../types';
 
 interface MailRow {
@@ -119,33 +118,28 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
 
   const draftWithGrace = useCallback(async (row: MailRow) => {
     if (draftingIds.has(row.id)) return;
-    const senderPerson = people.find(p => p.id === row.person_id);
-    const senderName = senderPerson ? `${senderPerson.firstName} ${senderPerson.lastName}` : row.from_email;
-    const firstName = senderName.split(' ')[0] || senderName;
     setDraftingIds(prev => new Set(prev).add(row.id));
     setSendError(prev => ({ ...prev, [row.id]: '' }));
 
-    const prompt = `You're a pastor's assistant drafting a reply to a member's email. Be warm, brief (2-4 sentences), plainspoken. Do NOT make up specific facts (service times, addresses, schedules) — if the question requires church-specific info you weren't given, acknowledge the question and say the pastor will follow up with details. Sign as "Grace" only — no other signature line, no "Warmly,", no "Hi pastor", no quoted reply.
-
-From: ${senderName}
-Subject: ${row.subject ?? '(no subject)'}
-Body:
-${row.body_text ?? row.preview ?? ''}
-
-Draft the reply body only. No subject line. No greeting boilerplate beyond a single "Hi ${firstName}," at the start.`;
-
-    const tryOnce = () => generateAIText({ prompt, maxTokens: 800 });
+    const callDraft = async () => {
+      const r = await fetch('/api/grace/draft-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inbox_message_row_id: row.id }),
+      });
+      const data = await r.json().catch(() => ({} as { text?: string; error?: string }));
+      return { ok: r.ok, status: r.status, ...data } as { ok: boolean; status: number; text?: string; error?: string };
+    };
 
     try {
-      let result = await tryOnce();
-      // One automatic retry on transient failure (rate-limit hiccup, MAX_TOKENS, empty response)
-      if (!result.success || !result.text || result.text.trim().length < 10) {
+      let result = await callDraft();
+      if (!result.ok || !result.text || result.text.trim().length < 10) {
         console.warn('[draft-grace] first attempt empty/failed, retrying', { error: result.error, len: result.text?.length });
         await new Promise(r => setTimeout(r, 800));
-        result = await tryOnce();
+        result = await callDraft();
       }
-      if (!result.success) {
-        setSendError(prev => ({ ...prev, [row.id]: result.error || 'Grace couldn\'t draft a reply — try again.' }));
+      if (!result.ok) {
+        setSendError(prev => ({ ...prev, [row.id]: result.error || `Draft failed (${result.status})` }));
         return;
       }
       const text = (result.text || '').trim();
@@ -164,7 +158,7 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
         return next;
       });
     }
-  }, [people, draftingIds]);
+  }, [draftingIds]);
 
   const sendReply = useCallback(async (row: MailRow) => {
     const text = (replyDrafts[row.id] || '').trim();
