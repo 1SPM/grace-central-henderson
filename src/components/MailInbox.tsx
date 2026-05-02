@@ -328,27 +328,29 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                     </div>
                   )}
                   {row.source_inbox_id && (
-                    <div className="space-y-2 pt-1">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs font-medium text-gray-600 dark:text-dark-400">
-                          Reply
-                          {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
-                        </div>
-                        <button
-                          onClick={() => draftWithGrace(row)}
-                          disabled={draftingIds.has(row.id)}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {draftingIds.has(row.id) ? <><Loader2 size={11} className="animate-spin" /> Drafting…</> : <><Sparkles size={11} /> Draft with Grace</>}
-                        </button>
+                    <div className="space-y-3 pt-1">
+                      <div className="text-xs font-medium text-gray-600 dark:text-dark-400">
+                        Reply
+                        {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
                       </div>
+
+                      <button
+                        onClick={() => draftWithGrace(row)}
+                        disabled={draftingIds.has(row.id)}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-500/20 rounded-lg disabled:opacity-60 disabled:cursor-wait transition-colors"
+                      >
+                        {draftingIds.has(row.id)
+                          ? <><Loader2 size={15} className="animate-spin" /> Grace is drafting…</>
+                          : <><Sparkles size={15} /> Draft with Grace</>}
+                      </button>
+
                       <textarea
                         value={replyDrafts[row.id] ?? ''}
                         onChange={e => setReplyDrafts(prev => ({ ...prev, [row.id]: e.target.value }))}
                         placeholder={draftingIds.has(row.id)
                           ? '✨ Grace is drafting…'
-                          : `Reply to ${senderName}… or click "Draft with Grace"`}
-                        rows={5}
+                          : `Reply to ${senderName}…`}
+                        rows={6}
                         className={`w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40 ${draftingIds.has(row.id)
                           ? 'border-amber-300 dark:border-amber-500/30 animate-pulse'
                           : 'border-stone-300 dark:border-dark-700'}`}
@@ -361,21 +363,21 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                         <button
                           onClick={() => sendReply(row)}
                           disabled={sendingId === row.id || !(replyDrafts[row.id] || '').trim()}
-                          className="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors inline-flex items-center gap-1.5"
+                          className="px-4 py-2 text-sm font-medium bg-slate-900 hover:bg-slate-950 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors inline-flex items-center gap-1.5"
                         >
-                          {sendingId === row.id ? <><Loader2 size={12} className="animate-spin" /> Sending…</> : (row.reply_sent_at ? 'Send again' : 'Send reply')}
+                          {sendingId === row.id ? <><Loader2 size={13} className="animate-spin" /> Sending…</> : (row.reply_sent_at ? 'Send again' : 'Send reply')}
                         </button>
                         <button
                           onClick={() => sendToGrace(row)}
-                          className="px-3 py-1.5 text-xs text-gray-700 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
+                          className="px-3 py-2 text-sm text-gray-700 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
                         >
                           Open in Grace
                         </button>
                         <button
                           onClick={() => dismiss(row.id)}
-                          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-xs text-gray-600 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
+                          className="ml-auto inline-flex items-center gap-1 px-2 py-2 text-sm text-gray-600 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
                         >
-                          <Trash2 size={12} /> Dismiss
+                          <Trash2 size={13} /> Dismiss
                         </button>
                       </div>
                     </div>
