@@ -57,6 +57,14 @@ export interface GraceHandlers {
   onMarkPrayerAnswered?: (prayerId: string, testimony?: string) => void | Promise<unknown>;
 }
 
+export interface ReplyContext {
+  inbox_message_row_id: string;
+  source_inbox_id: string;
+  source_message_id: string;
+  person_id: string | null;
+  sender_label: string;
+}
+
 interface GraceChatContextValue {
   messages: GraceMessage[];
   loading: boolean;
@@ -68,6 +76,8 @@ interface GraceChatContextValue {
   updateAction: (messageId: string, actionId: string, patch: Partial<PendingAction>) => void;
   executeAction: (messageId: string, actionId: string) => Promise<void>;
   dismissAction: (messageId: string, actionId: string) => void;
+  setReplyContext: (ctx: ReplyContext | null) => void;
+  replyContext: ReplyContext | null;
   people: Person[];
   suggestions: string[];
 }
@@ -278,6 +288,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
   const [brainEntries, setBrainEntries] = useState<GraceBrainEntry[]>(() => {
     if (typeof window === 'undefined') return [];
     return deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
@@ -335,6 +346,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
 
   const clearMessages = useCallback(() => {
     setMessages([buildGreeting(data)]);
+    setReplyContext(null);
   }, [data]);
 
   const sendMessage = useCallback(async (query: string) => {
@@ -623,41 +635,64 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
         }
         await onDeletePrayer(action.prayerId);
       } else if (action.type === 'send_email') {
-        const person = data.people.find(p => p.id === action.personId);
-        if (!person) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to send to.' }]);
-          return;
-        }
-        if (!person.email) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have an email on file.` }]);
-          return;
-        }
-        const subject = action.subject?.trim() || '(no subject)';
         const bodyText = action.body?.trim() || '';
         if (!bodyText) {
           setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Email body is empty.' }]);
           return;
         }
-        const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;line-height:1.6;color:#1f2937">${bodyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>`;
-        const result = await emailService.send({
-          to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
-          subject,
-          html,
-          text: bodyText,
-        });
-        if (!result.success) {
-          setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${result.error || 'unknown error'}` }]);
-          return;
-        }
-        if (onAddInteraction) {
-          await onAddInteraction({
-            personId: person.id,
-            type: 'email',
-            content: `${subject}\n\n${bodyText}`,
-            createdBy: 'Grace',
-            sentVia: 'resend',
-            messageId: result.messageId,
+
+        // If we're in a reply context (pastor opened an inbox row in Grace), thread the
+        // response back through AgentMail rather than sending a fresh outbound via Resend.
+        if (replyContext) {
+          const res = await fetch('/api/agentmail/reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              inbox_id: replyContext.source_inbox_id,
+              message_id: replyContext.source_message_id,
+              inbox_message_row_id: replyContext.inbox_message_row_id,
+              text: bodyText,
+            }),
           });
+          const replyData = await res.json().catch(() => ({} as { error?: string }));
+          if (!res.ok) {
+            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Reply failed: ${replyData.error || `(${res.status})`}` }]);
+            return;
+          }
+          // Server-side already wrote the Interaction + flipped reply_sent_at
+          setReplyContext(null);
+        } else {
+          const person = data.people.find(p => p.id === action.personId);
+          if (!person) {
+            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'I need a matching person to send to.' }]);
+            return;
+          }
+          if (!person.email) {
+            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `${person.firstName} ${person.lastName} doesn't have an email on file.` }]);
+            return;
+          }
+          const subject = action.subject?.trim() || '(no subject)';
+          const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;line-height:1.6;color:#1f2937">${bodyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>`;
+          const result = await emailService.send({
+            to: { email: person.email, name: `${person.firstName} ${person.lastName}` },
+            subject,
+            html,
+            text: bodyText,
+          });
+          if (!result.success) {
+            setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: `Email failed: ${result.error || 'unknown error'}` }]);
+            return;
+          }
+          if (onAddInteraction) {
+            await onAddInteraction({
+              personId: person.id,
+              type: 'email',
+              content: `${subject}\n\n${bodyText}`,
+              createdBy: 'Grace',
+              sentVia: 'resend',
+              messageId: result.messageId,
+            });
+          }
         }
       } else if (action.type === 'send_sms') {
         const person = data.people.find(p => p.id === action.personId);
@@ -710,7 +745,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } catch {
       setMessages(m => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Couldn\'t save that — please try again.' }]);
     }
-  }, [messages, data.tasks, data.people, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
+  }, [messages, data.tasks, data.people, replyContext, markActionStatus, onAddPerson, onAddTask, onAddPrayer, onAddInteraction, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered]);
 
   const dismissAction = useCallback((messageId: string, actionId: string) => {
     markActionStatus(messageId, actionId, { dismissed: true });
@@ -824,9 +859,11 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     updateAction,
     executeAction,
     dismissAction,
+    setReplyContext,
+    replyContext,
     people: data.people,
     suggestions,
-  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, data.people, suggestions]);
+  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, replyContext, data.people, suggestions]);
 
   return <GraceChatContext.Provider value={value}>{children}</GraceChatContext.Provider>;
 }

@@ -102,7 +102,16 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   const sendToGrace = useCallback((row: MailRow) => {
     const senderPerson = people.find(p => p.id === row.person_id);
     const senderName = senderPerson ? `${senderPerson.firstName} ${senderPerson.lastName}` : row.from_email;
-    void chat.sendMessage(`Help me reply to ${senderName}'s email: "${row.subject ?? ''}" — ${row.body_text ?? row.preview ?? ''}`);
+    if (row.source_inbox_id) {
+      chat.setReplyContext({
+        inbox_message_row_id: row.id,
+        source_inbox_id: row.source_inbox_id,
+        source_message_id: row.source_message_id,
+        person_id: row.person_id,
+        sender_label: senderName,
+      });
+    }
+    void chat.sendMessage(`Draft a reply to ${senderName}'s email: "${row.subject ?? ''}" — ${row.body_text ?? row.preview ?? ''}\n\nUse send_email with body filled — I'll thread it back automatically.`);
     chat.openPanel();
   }, [chat, people]);
 
