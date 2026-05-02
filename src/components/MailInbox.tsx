@@ -124,8 +124,8 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
     const firstName = senderName.split(' ')[0] || senderName;
     setDraftingIds(prev => new Set(prev).add(row.id));
     setSendError(prev => ({ ...prev, [row.id]: '' }));
-    try {
-      const prompt = `You're a pastor's assistant drafting a reply to a member's email. Be warm, brief (2-4 sentences), plainspoken. Do NOT make up specific facts (service times, addresses, schedules) — if the question requires church-specific info you weren't given, acknowledge the question and say the pastor will follow up with details. Sign as "Grace" only — no other signature line, no "Warmly,", no "Hi pastor", no quoted reply.
+
+    const prompt = `You're a pastor's assistant drafting a reply to a member's email. Be warm, brief (2-4 sentences), plainspoken. Do NOT make up specific facts (service times, addresses, schedules) — if the question requires church-specific info you weren't given, acknowledge the question and say the pastor will follow up with details. Sign as "Grace" only — no other signature line, no "Warmly,", no "Hi pastor", no quoted reply.
 
 From: ${senderName}
 Subject: ${row.subject ?? '(no subject)'}
@@ -134,13 +134,28 @@ ${row.body_text ?? row.preview ?? ''}
 
 Draft the reply body only. No subject line. No greeting boilerplate beyond a single "Hi ${firstName}," at the start.`;
 
-      const result = await generateAIText({ prompt, maxTokens: 500 });
-      if (!result.success || !result.text) {
-        setSendError(prev => ({ ...prev, [row.id]: result.error || 'Draft failed' }));
+    const tryOnce = () => generateAIText({ prompt, maxTokens: 800 });
+
+    try {
+      let result = await tryOnce();
+      // One automatic retry on transient failure (rate-limit hiccup, MAX_TOKENS, empty response)
+      if (!result.success || !result.text || result.text.trim().length < 10) {
+        console.warn('[draft-grace] first attempt empty/failed, retrying', { error: result.error, len: result.text?.length });
+        await new Promise(r => setTimeout(r, 800));
+        result = await tryOnce();
+      }
+      if (!result.success) {
+        setSendError(prev => ({ ...prev, [row.id]: result.error || 'Grace couldn\'t draft a reply — try again.' }));
         return;
       }
-      setReplyDrafts(prev => ({ ...prev, [row.id]: result.text!.trim() }));
+      const text = (result.text || '').trim();
+      if (!text) {
+        setSendError(prev => ({ ...prev, [row.id]: 'Grace returned an empty draft — try again or write it yourself.' }));
+        return;
+      }
+      setReplyDrafts(prev => ({ ...prev, [row.id]: text }));
     } catch (err) {
+      console.error('[draft-grace] threw', err);
       setSendError(prev => ({ ...prev, [row.id]: err instanceof Error ? err.message : 'Draft failed' }));
     } finally {
       setDraftingIds(prev => {
@@ -333,10 +348,14 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
                       <textarea
                         value={replyDrafts[row.id] ?? ''}
                         onChange={e => setReplyDrafts(prev => ({ ...prev, [row.id]: e.target.value }))}
-                        placeholder={`Reply to ${senderName}… or click "Draft with Grace"`}
+                        placeholder={draftingIds.has(row.id)
+                          ? '✨ Grace is drafting…'
+                          : `Reply to ${senderName}… or click "Draft with Grace"`}
                         rows={5}
-                        className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40"
-                        disabled={sendingId === row.id || !!row.reply_sent_at}
+                        className={`w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40 ${draftingIds.has(row.id)
+                          ? 'border-amber-300 dark:border-amber-500/30 animate-pulse'
+                          : 'border-stone-300 dark:border-dark-700'}`}
+                        disabled={sendingId === row.id || !!row.reply_sent_at || draftingIds.has(row.id)}
                       />
                       {sendError[row.id] && (
                         <div className="text-xs text-rose-600 dark:text-rose-400">{sendError[row.id]}</div>
