@@ -336,10 +336,13 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
                   {row.source_inbox_id && (
                     <div className="space-y-2 pt-1">
                       <div className="flex items-center justify-between">
-                        <div className="text-xs font-medium text-gray-600 dark:text-dark-400">Reply</div>
+                        <div className="text-xs font-medium text-gray-600 dark:text-dark-400">
+                          Reply
+                          {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
+                        </div>
                         <button
                           onClick={() => draftWithGrace(row)}
-                          disabled={draftingIds.has(row.id) || !!row.reply_sent_at}
+                          disabled={draftingIds.has(row.id)}
                           className="inline-flex items-center gap-1 px-2 py-1 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {draftingIds.has(row.id) ? <><Loader2 size={11} className="animate-spin" /> Drafting…</> : <><Sparkles size={11} /> Draft with Grace</>}
@@ -355,7 +358,7 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
                         className={`w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40 ${draftingIds.has(row.id)
                           ? 'border-amber-300 dark:border-amber-500/30 animate-pulse'
                           : 'border-stone-300 dark:border-dark-700'}`}
-                        disabled={sendingId === row.id || !!row.reply_sent_at || draftingIds.has(row.id)}
+                        disabled={sendingId === row.id || draftingIds.has(row.id)}
                       />
                       {sendError[row.id] && (
                         <div className="text-xs text-rose-600 dark:text-rose-400">{sendError[row.id]}</div>
@@ -363,10 +366,10 @@ Draft the reply body only. No subject line. No greeting boilerplate beyond a sin
                       <div className="flex gap-2">
                         <button
                           onClick={() => sendReply(row)}
-                          disabled={sendingId === row.id || !(replyDrafts[row.id] || '').trim() || !!row.reply_sent_at}
+                          disabled={sendingId === row.id || !(replyDrafts[row.id] || '').trim()}
                           className="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors inline-flex items-center gap-1.5"
                         >
-                          {sendingId === row.id ? <><Loader2 size={12} className="animate-spin" /> Sending…</> : 'Send reply'}
+                          {sendingId === row.id ? <><Loader2 size={12} className="animate-spin" /> Sending…</> : (row.reply_sent_at ? 'Send again' : 'Send reply')}
                         </button>
                         <button
                           onClick={() => sendToGrace(row)}
