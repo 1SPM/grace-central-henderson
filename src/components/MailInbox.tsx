@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { Mail, AlertTriangle, CheckCircle2, Clock, Loader2, Inbox, Trash2, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { validateAction, hydrateAction, type PendingAction } from '../lib/grace-actions';
@@ -49,7 +49,9 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [sendingId, setSendingId] = useState<string | null>(null);
-  const [draftingIds, setDraftingIds] = useState<Set<string>>(new Set());
+  const draftingIdsRef = useRef<Set<string>>(new Set());
+  const [, setDraftingTick] = useState(0);
+  const isDrafting = useCallback((id: string) => draftingIdsRef.current.has(id), []);
   const [sendError, setSendError] = useState<Record<string, string>>({});
   const chat = useGraceChat();
 
@@ -117,8 +119,10 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   }, [chat, people]);
 
   const draftWithGrace = useCallback(async (row: MailRow) => {
-    if (draftingIds.has(row.id)) return;
-    setDraftingIds(prev => new Set(prev).add(row.id));
+    console.log('[draft-grace] click', { rowId: row.id, alreadyDrafting: draftingIdsRef.current.has(row.id) });
+    if (draftingIdsRef.current.has(row.id)) return;
+    draftingIdsRef.current.add(row.id);
+    setDraftingTick(t => t + 1);
     setSendError(prev => ({ ...prev, [row.id]: '' }));
 
     const callDraft = async () => {
@@ -152,13 +156,10 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
       console.error('[draft-grace] threw', err);
       setSendError(prev => ({ ...prev, [row.id]: err instanceof Error ? err.message : 'Draft failed' }));
     } finally {
-      setDraftingIds(prev => {
-        const next = new Set(prev);
-        next.delete(row.id);
-        return next;
-      });
+      draftingIdsRef.current.delete(row.id);
+      setDraftingTick(t => t + 1);
     }
-  }, [draftingIds]);
+  }, []);
 
   const sendReply = useCallback(async (row: MailRow) => {
     const text = (replyDrafts[row.id] || '').trim();
@@ -335,11 +336,12 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                           {row.reply_sent_at && <span className="ml-2 text-emerald-700 dark:text-emerald-400">✓ Replied {formatRelativeTime(row.reply_sent_at)} — send another below</span>}
                         </div>
                         <button
-                          onClick={() => draftWithGrace(row)}
-                          disabled={draftingIds.has(row.id)}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); void draftWithGrace(row); }}
+                          disabled={isDrafting(row.id)}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-500/20 rounded-md disabled:opacity-60 disabled:cursor-wait transition-colors"
                         >
-                          {draftingIds.has(row.id)
+                          {isDrafting(row.id)
                             ? <><Loader2 size={12} className="animate-spin" /> Drafting…</>
                             : <><Sparkles size={12} /> Draft with Grace</>}
                         </button>
@@ -348,14 +350,14 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                       <textarea
                         value={replyDrafts[row.id] ?? ''}
                         onChange={e => setReplyDrafts(prev => ({ ...prev, [row.id]: e.target.value }))}
-                        placeholder={draftingIds.has(row.id)
+                        placeholder={isDrafting(row.id)
                           ? '✨ Grace is drafting…'
                           : `Reply to ${senderName}…`}
                         rows={6}
-                        className={`w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40 ${draftingIds.has(row.id)
+                        className={`w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40 ${isDrafting(row.id)
                           ? 'border-amber-300 dark:border-amber-500/30 animate-pulse'
                           : 'border-stone-300 dark:border-dark-700'}`}
-                        disabled={sendingId === row.id || draftingIds.has(row.id)}
+                        disabled={sendingId === row.id || isDrafting(row.id)}
                       />
                       {sendError[row.id] && (
                         <div className="text-xs text-rose-600 dark:text-rose-400">{sendError[row.id]}</div>
