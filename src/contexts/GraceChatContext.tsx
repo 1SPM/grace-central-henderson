@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance, Interaction, MemberStatus, EventCategory } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
 import { smsService } from '../lib/services/sms';
-import { parseActions, hydrateAction, validateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
-import { supabase } from '../lib/supabase';
+import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
+import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 
 export type { PendingAction } from '../lib/grace-actions';
@@ -756,87 +756,22 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // Poll grace_inbox_messages for unseen rows from the AgentMail webhook,
-  // inject as Grace messages with action cards already attached, mark seen.
-  const seenInboxIdsRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    const sb = supabase;
-    if (!sb) return;
-    let cancelled = false;
-
-    const fetchInbox = async () => {
-      const { data: rows, error } = await sb
-        .from('grace_inbox_messages')
-        .select('id, person_id, from_email, subject, preview, parsed_actions, created_at, flag, auto_summary, reply_sent_at')
-        .is('seen_at', null)
-        .order('created_at', { ascending: true })
-        .limit(20);
-      if (cancelled || error || !rows || rows.length === 0) return;
-
-      const fresh = rows.filter(r => !seenInboxIdsRef.current.has(r.id));
-      if (fresh.length === 0) return;
-
-      const newMessages: GraceMessage[] = fresh.map(row => {
-        const senderPerson = data.people.find(p => p.id === row.person_id);
-        const senderName = senderPerson
-          ? `${senderPerson.firstName} ${senderPerson.lastName}`.trim()
-          : row.from_email;
-        const subjectLine = row.subject || '(no subject)';
-
-        // Crisis: red banner, no action cards, urge personal response
-        if (row.flag === 'crisis') {
-          return {
-            id: `inbox-${row.id}`,
-            role: 'assistant',
-            content: `🚨 Flagged email from ${senderName}: "${subjectLine}"\n\n${row.preview || ''}\n\nThis matches sensitive language — Grace did NOT auto-handle anything. Please respond personally.`,
-          };
-        }
-
-        const rawActions = Array.isArray(row.parsed_actions) ? row.parsed_actions : [];
-        const validated = rawActions
-          .map((raw: unknown) => validateAction(raw))
-          .filter((a): a is PendingAction => a !== null)
-          .map(a => hydrateAction(a, { people: data.people, tasks: data.tasks, prayers: data.prayers }));
-
-        const lines: string[] = [`📧 New email from ${senderName}: "${subjectLine}"`];
-        if (row.preview) lines.push('', String(row.preview));
-        if (row.auto_summary) {
-          lines.push('', `✓ Grace already handled: ${row.auto_summary}`);
-        }
-        if (row.reply_sent_at) {
-          lines.push('✓ Auto-reply sent to sender');
-        }
-        if (validated.length > 0) {
-          lines.push('', `${validated.length} more action${validated.length === 1 ? '' : 's'} need your review:`);
-        } else if (!row.auto_summary) {
-          lines.push('', '(No actions detected — logged as an interaction.)');
-        }
-
-        return {
-          id: `inbox-${row.id}`,
-          role: 'assistant',
-          content: lines.join('\n'),
-          actions: validated.map((action, i) => ({
-            id: `inbox-act-${row.id}-${i}`,
-            action,
-          })),
-        };
-      });
-
-      setMessages(prev => [...prev, ...newMessages]);
-      fresh.forEach(r => seenInboxIdsRef.current.add(r.id));
-
-      const ids = fresh.map(r => r.id);
-      void sb
-        .from('grace_inbox_messages')
-        .update({ seen_at: new Date().toISOString() })
-        .in('id', ids);
-    };
-
-    void fetchInbox();
-    const interval = setInterval(fetchInbox, 60_000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, [data.people, data.tasks, data.prayers]);
+  useGraceInbox({
+    people: data.people,
+    tasks: data.tasks,
+    prayers: data.prayers,
+    onInject: (injections: InboxMessageInjection[]) => {
+      setMessages(prev => [
+        ...prev,
+        ...injections.map(inj => ({
+          id: inj.id,
+          role: 'assistant' as const,
+          content: inj.content,
+          actions: inj.actions,
+        })),
+      ]);
+    },
+  });
 
   const value = useMemo<GraceChatContextValue>(() => ({
     messages,
