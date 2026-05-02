@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { buildChurchContext, buildPersonContext, type PersonContext } from '../_lib/grace-context.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -26,15 +27,39 @@ interface ParseResult {
   suggested_reply?: string;
 }
 
-function buildParsePrompt(senderName: string, fromEmail: string, subject: string, body: string): string {
+function buildParsePrompt(args: {
+  churchName: string;
+  graceFacts: string;
+  person: PersonContext | null;
+  senderName: string;
+  fromEmail: string;
+  subject: string;
+  body: string;
+}): string {
   const today = new Date().toISOString().slice(0, 10);
-  return `You are reading an email a church member sent to their pastor's CRM. Today: ${today}. Sender: ${senderName} <${fromEmail}>.
+  const factsSection = args.graceFacts || '(No church facts on file. If the email asks for specific info, leave suggested_reply empty.)';
+  const personSection = args.person?.block || '(No record on file beyond their email address.)';
 
-Return ONE JSON object (no other text):
+  return `You're a pastor's assistant at ${args.churchName} reading a member's email. Decide what CRM actions it implies AND optionally draft a reply.
+
+== CHURCH FACTS (use to answer specific questions; cite times/addresses/policies when relevant) ==
+${factsSection}
+
+== ABOUT THIS SENDER ==
+${personSection}
+
+== EMAIL ==
+Date: ${today}
+From: ${args.senderName} <${args.fromEmail}>
+Subject: ${args.subject}
+Body:
+${args.body}
+
+== OUTPUT — one JSON object, no other text ==
 {
   "intent": "informational" | "request" | "pastoral" | "conversational",
   "actions": [{type, confidence:0..1, risk:"low"|"medium"|"high", ...fields}],
-  "suggested_reply": "" or short plain text
+  "suggested_reply": "" or short plain text reply (2-4 sentences)
 }
 
 Action shapes (personName defaults to the sender unless someone else is clearly named):
@@ -45,14 +70,11 @@ Action shapes (personName defaults to the sender unless someone else is clearly 
 
 Risk: low=note/log/info-reply. medium=task/event. high=other person's record / money / sensitive.
 
-CRITICAL — suggested_reply rules:
-- Only fill if you can answer using GENERAL truths or info clearly stated by the sender (acknowledging their message, restating what they said, simple yes/no based on their email).
-- DO NOT make up specific facts the sender asked about (service times, addresses, parking details, prices, schedules) — leave reply empty if the answer requires church-specific info you weren't given.
-- Empty string when in doubt. Pastor would rather see no reply than a fabricated one.
-
-Subject: ${subject}
-Body:
-${body}`.slice(0, 8000);
+suggested_reply rules:
+- Use the church facts above to ANSWER specific questions (service times, address, parking, kids' programs). Don't be vague when the answer is right above.
+- If the question requires info NOT in the facts, leave reply empty — pastor would rather see no reply than a fabricated one.
+- Warm, plainspoken, brief. Single greeting "Hi ${args.person?.firstName ?? 'there'}," at the start. Sign as "Grace" only.
+- Reference history naturally if relevant ("good to hear from you again" if they've been around).`.slice(0, 12_000);
 }
 
 function safeParseResult(text: string): ParseResult {
@@ -73,9 +95,17 @@ function safeParseResult(text: string): ParseResult {
   }
 }
 
-async function parseEmail(senderName: string, fromEmail: string, subject: string, body: string): Promise<ParseResult> {
+async function parseEmail(args: {
+  churchName: string;
+  graceFacts: string;
+  person: PersonContext | null;
+  senderName: string;
+  fromEmail: string;
+  subject: string;
+  body: string;
+}): Promise<ParseResult> {
   if (!GEMINI_API_KEY) return { actions: [], intent: 'unknown' };
-  const prompt = buildParsePrompt(senderName, fromEmail, subject, body);
+  const prompt = buildParsePrompt(args);
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -85,8 +115,8 @@ async function parseEmail(senderName: string, fromEmail: string, subject: string
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 1500,
-            temperature: 0.2,
+            maxOutputTokens: 2000,
+            temperature: 0.3,
             responseMimeType: 'application/json',
             thinkingConfig: { thinkingBudget: 0 },
           },
@@ -279,8 +309,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ ok: true, routed: 'escalate', person_id: person.id });
   }
 
-  // Parse with Gemini for confidence/risk + suggested reply
-  const parsed = await parseEmail(senderName, fromEmail, subject, bodyText);
+  // Build enriched context (church facts + sender history) once, then ask Gemini
+  // to extract actions AND suggest a reply against the same context.
+  const church = await buildChurchContext(supabase, person.church_id);
+  const senderContext = await buildPersonContext(supabase, person.id);
+
+  const parsed = await parseEmail({
+    churchName: church.name,
+    graceFacts: church.facts,
+    person: senderContext,
+    senderName,
+    fromEmail,
+    subject,
+    body: bodyText,
+  });
 
   // AUTO: conservative tier — only auto-execute add_note when confidence ≥ 0.85
   // and risk === 'low'. Send a confirmation reply for explicit info Q&A
