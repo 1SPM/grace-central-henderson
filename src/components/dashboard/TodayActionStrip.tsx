@@ -1,4 +1,4 @@
-import { AlertTriangle, UserCheck, UserMinus, Cake, CalendarDays, Heart, ArrowRight } from 'lucide-react';
+import { AlertTriangle, UserCheck, UserMinus, Cake, CalendarDays, Heart, ArrowRight, Mail } from 'lucide-react';
 import type { Person, Task, CalendarEvent, PrayerRequest } from '../../types';
 
 interface TodayActionStripProps {
@@ -6,6 +6,8 @@ interface TodayActionStripProps {
   tasks: Task[];
   events: CalendarEvent[];
   prayers: PrayerRequest[];
+  mailNeedsReview?: number;
+  mailFlagged?: number;
   onViewTasks: () => void;
   onViewVisitors?: () => void;
   onViewInactive?: () => void;
@@ -71,6 +73,8 @@ export function TodayActionStrip({
   tasks,
   events,
   prayers,
+  mailNeedsReview = 0,
+  mailFlagged = 0,
   onViewTasks,
   onViewVisitors,
   onViewInactive,
@@ -92,6 +96,24 @@ export function TodayActionStrip({
   const activePrayers = prayers.filter(p => !p.isAnswered).length;
 
   const cards: ActionCard[] = [
+    {
+      key: 'mail-flagged',
+      icon: AlertTriangle,
+      label: 'Flagged email',
+      count: mailFlagged,
+      hint: mailFlagged === 1 ? 'needs personal reply' : 'need personal reply',
+      tone: 'urgent',
+      onClick: () => onNavigate?.('mail'),
+    },
+    {
+      key: 'mail-review',
+      icon: Mail,
+      label: 'Email to review',
+      count: mailNeedsReview,
+      hint: mailNeedsReview === 1 ? 'awaiting your call' : 'awaiting your call',
+      tone: 'warm',
+      onClick: () => onNavigate?.('mail'),
+    },
     {
       key: 'overdue',
       icon: AlertTriangle,

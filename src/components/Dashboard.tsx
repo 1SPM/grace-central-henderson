@@ -19,6 +19,7 @@ import {
   BookOpen,
   BarChart3,
   DollarSign,
+  Mail,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
@@ -34,6 +35,7 @@ import { CalendarWidget } from './dashboard/CalendarWidget';
 import { VerifiedLeadersCard } from './dashboard/VerifiedLeadersCard';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { useGraceChat } from '../contexts/GraceChatContext';
+import { useMailInboxStats } from '../hooks/useMailInboxStats';
 
 interface DashboardProps {
   people: Person[];
@@ -68,6 +70,7 @@ type TaskViewMode = 'list' | 'kanban';
 export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
+  const mailStats = useMailInboxStats();
   const churchName = churchSettings?.profile?.name || 'Grace CRM';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
@@ -173,6 +176,20 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
               <ListTodo size={14} />
               Tasks
             </button>
+            <button
+              onClick={() => onNavigate?.('mail')}
+              className="relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white dark:bg-dark-700 hover:bg-stone-100 dark:hover:bg-dark-600 text-slate-800 dark:text-dark-100 border border-stone-300 dark:border-dark-600 rounded-lg transition-colors"
+            >
+              <Mail size={14} />
+              Mail
+              {(mailStats.needsReview + mailStats.flagged) > 0 && (
+                <span className={`ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full ${mailStats.flagged > 0
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-amber-500 text-white'}`}>
+                  {mailStats.needsReview + mailStats.flagged}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -231,6 +248,8 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           tasks={tasks}
           events={events}
           prayers={prayers}
+          mailNeedsReview={mailStats.needsReview}
+          mailFlagged={mailStats.flagged}
           onViewTasks={onViewTasks}
           onViewVisitors={onViewVisitors}
           onViewInactive={onViewInactive}
