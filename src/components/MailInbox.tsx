@@ -19,6 +19,8 @@ interface MailRow {
   seen_at: string | null;
   dismissed_at: string | null;
   created_at: string;
+  source_inbox_id: string | null;
+  source_message_id: string;
 }
 
 interface MailInboxProps {
@@ -45,13 +47,16 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
   const [openId, setOpenId] = useState<string | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<Record<string, string>>({});
   const chat = useGraceChat();
 
   const fetchRows = useCallback(async () => {
     if (!supabase) { setLoading(false); return; }
     const { data, error } = await supabase
       .from('grace_inbox_messages')
-      .select('id, person_id, from_email, subject, preview, body_text, parsed_actions, flag, auto_summary, reply_sent_at, seen_at, dismissed_at, created_at')
+      .select('id, person_id, from_email, subject, preview, body_text, parsed_actions, flag, auto_summary, reply_sent_at, seen_at, dismissed_at, created_at, source_inbox_id, source_message_id')
       .is('dismissed_at', null)
       .order('created_at', { ascending: false })
       .limit(200);
@@ -100,6 +105,40 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
     void chat.sendMessage(`Help me reply to ${senderName}'s email: "${row.subject ?? ''}" — ${row.body_text ?? row.preview ?? ''}`);
     chat.openPanel();
   }, [chat, people]);
+
+  const sendReply = useCallback(async (row: MailRow) => {
+    const text = (replyDrafts[row.id] || '').trim();
+    if (!text || !row.source_inbox_id) return;
+    setSendingId(row.id);
+    setSendError(prev => ({ ...prev, [row.id]: '' }));
+    try {
+      const res = await fetch('/api/agentmail/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inbox_id: row.source_inbox_id,
+          message_id: row.source_message_id,
+          inbox_message_row_id: row.id,
+          text,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSendError(prev => ({ ...prev, [row.id]: data.error || `Send failed (${res.status})` }));
+        return;
+      }
+      setRows(prev => prev.map(r => r.id === row.id ? { ...r, reply_sent_at: new Date().toISOString() } : r));
+      setReplyDrafts(prev => {
+        const next = { ...prev };
+        delete next[row.id];
+        return next;
+      });
+    } catch (err) {
+      setSendError(prev => ({ ...prev, [row.id]: err instanceof Error ? err.message : 'Send failed' }));
+    } finally {
+      setSendingId(null);
+    }
+  }, [replyDrafts]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -234,20 +273,43 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
                       <div className="text-[10px] text-gray-500 dark:text-dark-500">Open Ask Grace to execute these — actions appear there as cards.</div>
                     </div>
                   )}
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={() => sendToGrace(row)}
-                      className="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-md transition-colors"
-                    >
-                      Open in Grace
-                    </button>
-                    <button
-                      onClick={() => dismiss(row.id)}
-                      className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-xs text-gray-600 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
-                    >
-                      <Trash2 size={12} /> Dismiss
-                    </button>
-                  </div>
+                  {row.source_inbox_id && (
+                    <div className="space-y-2 pt-1">
+                      <div className="text-xs font-medium text-gray-600 dark:text-dark-400">Reply</div>
+                      <textarea
+                        value={replyDrafts[row.id] ?? ''}
+                        onChange={e => setReplyDrafts(prev => ({ ...prev, [row.id]: e.target.value }))}
+                        placeholder={`Reply to ${senderName}…`}
+                        rows={4}
+                        className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-lg outline-none focus:border-amber-400/60 dark:focus:border-amber-400/40"
+                        disabled={sendingId === row.id || !!row.reply_sent_at}
+                      />
+                      {sendError[row.id] && (
+                        <div className="text-xs text-rose-600 dark:text-rose-400">{sendError[row.id]}</div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => sendReply(row)}
+                          disabled={sendingId === row.id || !(replyDrafts[row.id] || '').trim() || !!row.reply_sent_at}
+                          className="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-950 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors inline-flex items-center gap-1.5"
+                        >
+                          {sendingId === row.id ? <><Loader2 size={12} className="animate-spin" /> Sending…</> : 'Send reply'}
+                        </button>
+                        <button
+                          onClick={() => sendToGrace(row)}
+                          className="px-3 py-1.5 text-xs text-gray-700 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
+                        >
+                          Open in Grace
+                        </button>
+                        <button
+                          onClick={() => dismiss(row.id)}
+                          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-xs text-gray-600 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-800 rounded-md"
+                        >
+                          <Trash2 size={12} /> Dismiss
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
