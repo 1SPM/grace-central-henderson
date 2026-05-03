@@ -393,72 +393,22 @@ class EmailService {
     });
   }
 
-  // Bulk send with rate limiting (via backend)
+  /**
+   * Bulk send: client-side loop over the single send endpoint with a delay
+   * between calls. The dedicated /api/email/send-bulk Vercel function was
+   * removed to stay under the Hobby-plan 12-function limit; same behavior,
+   * just orchestrated here instead of server-side.
+   */
   async sendBulk(
     emails: SendEmailParams[],
     delayMs: number = 100
   ): Promise<EmailResult[]> {
-    try {
-      // Prepare emails with templates applied
-      const preparedEmails = emails.map((params) => {
-        let html = params.html;
-        let subject = params.subject;
-
-        if (params.template && EMAIL_TEMPLATES[params.template]) {
-          const template = EMAIL_TEMPLATES[params.template];
-          html = this.replaceTemplateVariables(
-            template.htmlContent,
-            params.templateData || {}
-          );
-          subject = this.replaceTemplateVariables(
-            template.subject,
-            params.templateData || {}
-          );
-        } else if (params.templateData && html) {
-          html = this.replaceTemplateVariables(html, params.templateData);
-          subject = this.replaceTemplateVariables(subject, params.templateData);
-        }
-
-        const recipients = Array.isArray(params.to) ? params.to : [params.to];
-        const toEmails = recipients.map((r) =>
-          r.name ? `${r.name} <${r.email}>` : r.email
-        );
-
-        return {
-          from: `${this.fromName} <${this.fromEmail}>`,
-          to: toEmails,
-          subject,
-          html,
-          text: params.text,
-        };
-      });
-
-      // Send via backend bulk endpoint
-      const response = await fetch(`${this.apiBaseUrl}/send-bulk`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({ emails: preparedEmails, delayMs }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return emails.map(() => ({
-          success: false,
-          error: data.error || 'Failed to send emails',
-        }));
-      }
-
-      return data.results || emails.map(() => ({ success: true }));
-    } catch (error) {
-      return emails.map(() => ({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      }));
+    const results: EmailResult[] = [];
+    for (const params of emails) {
+      results.push(await this.send(params));
+      if (delayMs > 0) await new Promise(r => setTimeout(r, delayMs));
     }
+    return results;
   }
 }
 
