@@ -50,6 +50,17 @@ export type ActionHandler = (ctx: HandlerContext) => Promise<boolean>;
 
 const sevenDaysFromNow = () => new Date(Date.now() + 7 * 86400_000).toISOString().split('T')[0];
 
+/** Audit trail — logs an Interaction attributed to Grace on the affected person. No-op without a personId. */
+async function logGraceAction(
+  handlers: ChatHandlers,
+  personId: string | null | undefined,
+  type: Interaction['type'],
+  content: string,
+): Promise<void> {
+  if (!personId || !handlers.onAddInteraction) return;
+  await handlers.onAddInteraction({ personId, type, content, createdBy: 'Grace' });
+}
+
 const handlers: Record<ActionType, ActionHandler> = {
   add_person: async ({ action, handlers, pushAssistantMessage }) => {
     if (!action.firstName?.trim()) {
@@ -79,6 +90,7 @@ const handlers: Record<ActionType, ActionHandler> = {
       completed: false,
       category: 'follow-up',
     });
+    await logGraceAction(handlers, action.personId, 'note', `Grace added task: ${action.title || 'Untitled task'}`);
     return true;
   },
 
@@ -93,6 +105,7 @@ const handlers: Record<ActionType, ActionHandler> = {
       content: action.content || '',
       isPrivate: false,
     });
+    await logGraceAction(handlers, action.personId, 'note', 'Grace logged a prayer request');
     return true;
   },
 
@@ -143,14 +156,7 @@ const handlers: Record<ActionType, ActionHandler> = {
     }
     await handlers.onToggleTask(action.taskId);
     const task = tasks.find(t => t.id === action.taskId);
-    if (task?.personId && handlers.onAddInteraction) {
-      await handlers.onAddInteraction({
-        personId: task.personId,
-        type: 'note',
-        content: `Grace marked task complete: ${task.title}`,
-        createdBy: 'Grace',
-      });
-    }
+    await logGraceAction(handlers, task?.personId, 'note', `Grace marked task complete: ${task?.title ?? ''}`);
     return true;
   },
 
@@ -167,24 +173,19 @@ const handlers: Record<ActionType, ActionHandler> = {
     if (Object.keys(updates).length === 0) return false;
     await handlers.onUpdateTask(action.taskId, updates);
     const task = tasks.find(t => t.id === action.taskId);
-    if (task?.personId && handlers.onAddInteraction) {
-      await handlers.onAddInteraction({
-        personId: task.personId,
-        type: 'note',
-        content: `Grace updated task: ${task.title}`,
-        createdBy: 'Grace',
-      });
-    }
+    await logGraceAction(handlers, task?.personId, 'note', `Grace updated task: ${task?.title ?? ''}`);
     return true;
   },
 
-  delete_task: async ({ action, handlers, pushAssistantMessage }) => {
+  delete_task: async ({ action, tasks, handlers, pushAssistantMessage }) => {
     if (!handlers.onDeleteTask) return false;
     if (!action.taskId) {
       pushAssistantMessage(`I couldn't find a task matching "${action.taskTitle ?? ''}".`);
       return false;
     }
+    const task = tasks.find(t => t.id === action.taskId);
     await handlers.onDeleteTask(action.taskId);
+    await logGraceAction(handlers, task?.personId, 'note', `Grace deleted task: ${task?.title ?? ''}`);
     return true;
   },
 
@@ -198,13 +199,15 @@ const handlers: Record<ActionType, ActionHandler> = {
     return true;
   },
 
-  delete_prayer: async ({ action, handlers, pushAssistantMessage }) => {
+  delete_prayer: async ({ action, prayers, handlers, pushAssistantMessage }) => {
     if (!handlers.onDeletePrayer) return false;
     if (!action.prayerId) {
       pushAssistantMessage('I couldn\'t find an active prayer for that person.');
       return false;
     }
+    const prayer = prayers.find(p => p.id === action.prayerId);
     await handlers.onDeletePrayer(action.prayerId);
+    await logGraceAction(handlers, prayer?.personId, 'note', 'Grace deleted a prayer request');
     return true;
   },
 
@@ -215,14 +218,7 @@ const handlers: Record<ActionType, ActionHandler> = {
       return false;
     }
     await handlers.onUpdatePersonStatus(action.personId, action.status);
-    if (handlers.onAddInteraction) {
-      await handlers.onAddInteraction({
-        personId: action.personId,
-        type: 'note',
-        content: `Grace updated status to ${action.status}`,
-        createdBy: 'Grace',
-      });
-    }
+    await logGraceAction(handlers, action.personId, 'note', `Grace updated status to ${action.status}`);
     return true;
   },
 
@@ -233,20 +229,16 @@ const handlers: Record<ActionType, ActionHandler> = {
       return false;
     }
     await handlers.onMarkPrayerAnswered(action.prayerId, action.testimony);
-    if (action.personId && handlers.onAddInteraction) {
-      await handlers.onAddInteraction({
-        personId: action.personId,
-        type: 'prayer',
-        content: action.testimony
-          ? `Grace marked prayer answered: ${action.testimony}`
-          : 'Grace marked prayer answered',
-        createdBy: 'Grace',
-      });
-    }
+    await logGraceAction(
+      handlers,
+      action.personId,
+      'prayer',
+      action.testimony ? `Grace marked prayer answered: ${action.testimony}` : 'Grace marked prayer answered',
+    );
     return true;
   },
 
-  send_email: async ({ action, people, replyContext, setReplyContext, pushAssistantMessage }) => {
+  send_email: async ({ action, people, handlers, replyContext, setReplyContext, pushAssistantMessage }) => {
     const bodyText = action.body?.trim() || '';
     if (!bodyText) {
       pushAssistantMessage('Email body is empty.');
@@ -270,6 +262,7 @@ const handlers: Record<ActionType, ActionHandler> = {
         pushAssistantMessage(`Reply failed: ${replyData.error || `(${res.status})`}`);
         return false;
       }
+      await logGraceAction(handlers, replyContext.person_id, 'email', 'Grace replied via email');
       setReplyContext(null);
       return true;
     }
@@ -295,6 +288,7 @@ const handlers: Record<ActionType, ActionHandler> = {
       pushAssistantMessage(`Email failed: ${sendData.error || `(${res.status})`}`);
       return false;
     }
+    await logGraceAction(handlers, person.id, 'email', `Grace sent email: ${subject}`);
     return true;
   },
 
