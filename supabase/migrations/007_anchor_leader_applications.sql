@@ -49,11 +49,11 @@ DROP TRIGGER IF EXISTS trig_anchor_leader_applications_touch ON anchor_leader_ap
 CREATE TRIGGER trig_anchor_leader_applications_touch BEFORE UPDATE ON anchor_leader_applications
   FOR EACH ROW EXECUTE FUNCTION anchor_touch_updated_at();
 
--- RLS — service role only. Public submissions go through the /api/leader-apply
--- endpoint, which uses the service role key. No anon access.
+-- RLS enabled with NO policy => only the service role (which bypasses RLS)
+-- can read/write. Public submissions go through the /api/leader-apply endpoint,
+-- which uses the service role key. anon/authenticated get nothing — these rows
+-- hold applicant emails + phone numbers. (An always-true policy would have
+-- exposed them to anon, so it is intentionally omitted.)
 ALTER TABLE anchor_leader_applications ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Service role full access" ON anchor_leader_applications;
-CREATE POLICY "Service role full access" ON anchor_leader_applications
-  FOR ALL USING (true) WITH CHECK (true);
 
 COMMENT ON TABLE anchor_leader_applications IS 'Public intake funnel for the verified leader marketplace. Promoted into anchor_leaders on approval.';
