@@ -13,7 +13,9 @@ checkEnvironment();
 
 // Public routes that bypass auth entirely
 const isConnectRoute = window.location.pathname === '/connect';
+const isLeadersRoute = window.location.pathname === '/leaders';
 const ConnectCard = lazy(() => import('./components/ConnectCard').then(m => ({ default: m.ConnectCard })));
+const LeaderApply = lazy(() => import('./components/LeaderApply').then(m => ({ default: m.LeaderApply })));
 
 function PublicConnectPage() {
   const [churchName, setChurchName] = useState('Our Church');
@@ -57,7 +59,15 @@ function PublicConnectPage() {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      {isConnectRoute ? (
+      {isLeadersRoute ? (
+        <Suspense fallback={
+          <div className="h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          </div>
+        }>
+          <LeaderApply />
+        </Suspense>
+      ) : isConnectRoute ? (
         <PublicConnectPage />
       ) : (
         <AccessibilityProvider>
