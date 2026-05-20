@@ -14,8 +14,10 @@ checkEnvironment();
 // Public routes that bypass auth entirely
 const isConnectRoute = window.location.pathname === '/connect';
 const isLeadersRoute = window.location.pathname === '/leaders';
+const isMarketplaceRoute = window.location.pathname === '/marketplace';
 const ConnectCard = lazy(() => import('./components/ConnectCard').then(m => ({ default: m.ConnectCard })));
 const LeaderApply = lazy(() => import('./components/LeaderApply').then(m => ({ default: m.LeaderApply })));
+const LeaderMarketplace = lazy(() => import('./components/LeaderMarketplace').then(m => ({ default: m.LeaderMarketplace })));
 
 function PublicConnectPage() {
   const [churchName, setChurchName] = useState('Our Church');
@@ -66,6 +68,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </div>
         }>
           <LeaderApply />
+        </Suspense>
+      ) : isMarketplaceRoute ? (
+        <Suspense fallback={
+          <div className="h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          </div>
+        }>
+          <LeaderMarketplace />
         </Suspense>
       ) : isConnectRoute ? (
         <PublicConnectPage />
