@@ -5,7 +5,8 @@
  * Handles one-time and recurring donations/giving.
  */
 
-import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
+import type { Stripe, StripeElements } from '@stripe/stripe-js';
 
 export interface PaymentMethod {
   id: string;

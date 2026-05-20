@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
 import { createLogger } from '../utils/logger';
 
 const log = createLogger('stripe-checkout');
