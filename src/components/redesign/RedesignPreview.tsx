@@ -6,6 +6,7 @@ import { useState } from 'react';
 import '../../styles/redesign.css';
 import { Sidebar, Topbar, SHELL_TITLES } from './RedesignShell';
 import { Icon } from './Icon';
+import { RedesignDashboard } from './RedesignDashboard';
 
 type Palette = 'sanctuary' | 'chapel' | 'garden';
 type SidebarMode = 'full' | 'rail' | 'floating';
@@ -111,7 +112,7 @@ export function RedesignPreview() {
         <Sidebar active={screen} onNav={setScreen} />
         <div className="main">
           <Topbar title={SHELL_TITLES[screen] || screen} />
-          <FoundationBody screen={screen} />
+          {screen === 'dashboard' ? <RedesignDashboard /> : <FoundationBody screen={screen} />}
         </div>
       </div>
     </div>
