@@ -1,0 +1,318 @@
+/* ============================================================
+   GRACE redesign — design-system FOUNDATION (v2)
+   Ported from the standalone prototype. EVERYTHING is scoped
+   under `.grace-v2` so it cannot leak into the existing app.
+   Tokens, fonts, palettes, and the sidebar/topbar shell only.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap");
+
+.grace-v2 {
+  /* default palette: Vellum — cobalt + olive + bronze on pale neutral */
+  --bg: #f4f6fa;
+  --bg-2: #e8edf5;
+  --surface: #ffffff;
+  --surface-2: #f0f3f9;
+  --ink: #1a2240;
+  --ink-2: #2e3a64;
+  --muted: #6e7898;
+  --line: #dde3ee;
+  --line-2: #e8edf5;
+
+  --primary: #355396;
+  --primary-ink: #243d6e;
+  --primary-soft: #d9e5ff;
+  --primary-soft-2: #aac0eb;
+
+  --accent: #966d35;
+  --accent-soft: #f0e1c4;
+
+  --c-indigo: #355396;  --c-indigo-soft: #d9e5ff;  --c-indigo-ink: #243d6e;
+  --c-emerald: #968535; --c-emerald-soft: #efe7c2; --c-emerald-ink: #6b5f26;
+  --c-rose: #966d35;    --c-rose-soft: #f0e1c4;    --c-rose-ink: #6b4e26;
+  --c-amber: #968535;   --c-amber-soft: #efe7c2;   --c-amber-ink: #6b5f26;
+  --c-sky: #6b85c7;     --c-sky-soft: #d9e5ff;     --c-sky-ink: #2e4a85;
+  --c-violet: #355396;  --c-violet-soft: #d9e5ff;  --c-violet-ink: #243d6e;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  --shadow-sm: 0 1px 2px rgba(30, 24, 60, 0.04), 0 1px 1px rgba(30, 24, 60, 0.03);
+  --shadow: 0 6px 24px -10px rgba(30, 24, 60, 0.10), 0 2px 6px -2px rgba(30, 24, 60, 0.06);
+  --shadow-lg: 0 24px 60px -24px rgba(30, 24, 60, 0.18), 0 8px 20px -8px rgba(30, 24, 60, 0.08);
+
+  --font-display: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-ui: "Geist", "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* container paints its own surface so it never relies on body */
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background:
+    radial-gradient(900px 600px at 8% -10%,  color-mix(in oklab, var(--primary) 16%, transparent), transparent 60%),
+    radial-gradient(700px 500px at 100% 18%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 55%),
+    radial-gradient(650px 540px at 50% 95%,  color-mix(in oklab, var(--primary-soft) 80%, transparent), transparent 60%),
+    var(--bg);
+}
+
+/* paper-grain noise — confined to the container */
+.grace-v2::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.20  0 0 0 0 0.18  0 0 0 0 0.10  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ---- palettes ---- */
+.grace-v2[data-palette="sanctuary"] {
+  --bg: oklch(0.985 0.006 80);
+  --bg-2: oklch(0.96 0.012 75);
+  --surface: #ffffff;
+  --ink: oklch(0.22 0.02 268);
+  --ink-2: oklch(0.36 0.02 268);
+  --muted: oklch(0.55 0.015 268);
+  --line: oklch(0.91 0.008 80);
+  --line-2: oklch(0.94 0.006 80);
+  --primary: #6366f1;
+  --primary-ink: #4338ca;
+  --primary-soft: #eef0ff;
+}
+.grace-v2[data-palette="chapel"] {
+  --bg: #f5f3ff;
+  --bg-2: #ede9fe;
+  --surface: #ffffff;
+  --ink: #1e1b3a;
+  --ink-2: #2d2456;
+  --muted: #6c6499;
+  --line: #ddd6fe;
+  --line-2: #ede9fe;
+  --primary: #7c3aed;
+  --primary-ink: #5b21b6;
+  --primary-soft: #ede9fe;
+}
+.grace-v2[data-palette="garden"] {
+  --bg: #f0fdf4;
+  --bg-2: #dcfce7;
+  --surface: #ffffff;
+  --ink: #14271c;
+  --ink-2: #1d3a2a;
+  --muted: #5d7a68;
+  --line: #bbf7d0;
+  --line-2: #dcfce7;
+  --primary: #059669;
+  --primary-ink: #047857;
+  --primary-soft: #d1fae5;
+}
+
+/* ---- tone classes ---- */
+.grace-v2 .tone-indigo  { --tc: var(--c-indigo);  --tc-soft: var(--c-indigo-soft);  --tc-ink: var(--c-indigo-ink); }
+.grace-v2 .tone-emerald { --tc: var(--c-emerald); --tc-soft: var(--c-emerald-soft); --tc-ink: var(--c-emerald-ink); }
+.grace-v2 .tone-rose    { --tc: var(--c-rose);    --tc-soft: var(--c-rose-soft);    --tc-ink: var(--c-rose-ink); }
+.grace-v2 .tone-amber   { --tc: var(--c-amber);   --tc-soft: var(--c-amber-soft);   --tc-ink: var(--c-amber-ink); }
+.grace-v2 .tone-sky     { --tc: var(--c-sky);     --tc-soft: var(--c-sky-soft);     --tc-ink: var(--c-sky-ink); }
+.grace-v2 .tone-violet  { --tc: var(--c-violet);  --tc-soft: var(--c-violet-soft);  --tc-ink: var(--c-violet-ink); }
+.grace-v2 .tone-ai      { --tc: #a855f7;          --tc-soft: #faf5ff;               --tc-ink: #6b21a8; }
+
+/* ---- base (scoped) ---- */
+.grace-v2 * { box-sizing: border-box; }
+.grace-v2 button { font: inherit; color: inherit; cursor: pointer; }
+.grace-v2 input, .grace-v2 textarea, .grace-v2 select { font: inherit; color: inherit; }
+.grace-v2 a { color: inherit; text-decoration: none; }
+.grace-v2 .serif { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+.grace-v2 .mute { color: var(--muted); }
+.grace-v2 .row { display: flex; align-items: center; gap: 10px; }
+.grace-v2 .svg-icon { stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ============================================================
+   App shell
+   ============================================================ */
+.grace-v2 .app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--side-w, 240px) 1fr;
+  min-height: 100vh;
+  background: transparent;
+  transition: grid-template-columns 0.25s ease;
+}
+.grace-v2 .app[data-sidebar="rail"] { --side-w: 76px; }
+.grace-v2 .app[data-sidebar="floating"] { --side-w: 260px; padding: 14px 0 14px 14px; }
+
+.grace-v2 .sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 14px 14px;
+  border-right: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 75%, transparent);
+  backdrop-filter: blur(12px) saturate(120%);
+}
+.grace-v2 .app[data-sidebar="floating"] .sidebar {
+  top: 14px;
+  height: calc(100vh - 28px);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.grace-v2 .app[data-sidebar="rail"] .sidebar { padding: 22px 10px 12px; align-items: center; }
+
+.grace-v2 .brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 22px; }
+.grace-v2 .brand-mark {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(140deg, color-mix(in oklab, var(--primary) 70%, white) 0%, var(--primary) 100%);
+  display: grid; place-items: center;
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 14px -4px color-mix(in oklab, var(--primary) 50%, transparent);
+}
+.grace-v2 .brand-name { font-family: var(--font-ui); font-weight: 700; font-size: 17px; letter-spacing: 0.04em; color: var(--ink); }
+.grace-v2 .app[data-sidebar="rail"] .brand-name { display: none; }
+.grace-v2 .app[data-sidebar="rail"] .brand { padding: 4px 0 22px; justify-content: center; }
+
+.grace-v2 .nav-section { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; }
+.grace-v2 .nav-label { font-size: 10.5px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; padding: 16px 10px 8px; }
+.grace-v2 .app[data-sidebar="rail"] .nav-label { display: none; }
+
+.grace-v2 .nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 7px 10px 7px 7px;
+  border-radius: 9px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 120ms ease, color 120ms ease;
+  position: relative;
+}
+.grace-v2 .nav-item .nav-icon {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: var(--tc-soft, var(--bg-2));
+  color: var(--tc-ink, var(--ink-2));
+  display: grid; place-items: center;
+  flex: 0 0 28px;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.grace-v2 .nav-item:hover { background: var(--bg-2); color: var(--ink); }
+.grace-v2 .nav-item:hover .nav-icon { transform: scale(1.04); }
+.grace-v2 .nav-item.active { background: var(--tc-soft, var(--primary-soft)); color: var(--tc-ink, var(--primary-ink)); }
+.grace-v2 .nav-item.active .nav-icon { background: var(--tc, var(--primary)); color: white; }
+.grace-v2 .nav-item.active::before {
+  content: ''; position: absolute; left: -14px; top: 8px; bottom: 8px;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--tc, var(--primary));
+}
+.grace-v2 .app[data-sidebar="floating"] .nav-item.active::before { display: none; }
+.grace-v2 .nav-item .count {
+  margin-left: auto; font-size: 11px; color: var(--muted);
+  background: var(--bg-2); padding: 2px 7px; border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.grace-v2 .nav-item.active .count { background: white; color: var(--tc-ink, var(--primary-ink)); }
+.grace-v2 .app[data-sidebar="rail"] .nav-item { justify-content: center; padding: 6px; width: 48px; }
+.grace-v2 .app[data-sidebar="rail"] .nav-item .label,
+.grace-v2 .app[data-sidebar="rail"] .nav-item .count { display: none; }
+.grace-v2 .app[data-sidebar="rail"] .nav-item.active::before { display: none; }
+
+.grace-v2 .side-foot { margin-top: auto; padding: 10px 6px; border-top: 1px solid var(--line-2); }
+.grace-v2 .side-user { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 10px; }
+.grace-v2 .side-user:hover { background: var(--bg-2); }
+.grace-v2 .app[data-sidebar="rail"] .side-user .side-user-text { display: none; }
+.grace-v2 .app[data-sidebar="rail"] .side-user { justify-content: center; padding: 6px 0; }
+
+/* ---- main + topbar ---- */
+.grace-v2 .main { display: flex; flex-direction: column; min-width: 0; }
+.grace-v2 .topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 5;
+  backdrop-filter: blur(14px) saturate(140%);
+  background: color-mix(in oklab, var(--bg) 70%, transparent);
+}
+.grace-v2 .topbar h1 { font-family: var(--font-ui); font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.grace-v2 .search-box {
+  display: flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--muted);
+  font-size: 13px; width: 320px; cursor: pointer;
+  transition: border-color 120ms ease;
+}
+.grace-v2 .search-box:hover { border-color: var(--primary); }
+.grace-v2 .search-box kbd {
+  margin-left: auto; font-family: var(--font-mono); font-size: 10.5px;
+  padding: 2px 6px; border-radius: 5px; background: var(--bg-2);
+  color: var(--muted); border: 1px solid var(--line-2);
+}
+.grace-v2 .page { padding: 28px 28px 80px; max-width: 1280px; width: 100%; }
+
+/* ---- buttons ---- */
+.grace-v2 .btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  transition: background 120ms, border-color 120ms, transform 80ms;
+  white-space: nowrap;
+}
+.grace-v2 .btn:hover { background: var(--surface-2); border-color: var(--primary); }
+.grace-v2 .btn:active { transform: translateY(1px); }
+.grace-v2 .btn-primary {
+  background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 6px 18px -8px var(--primary);
+}
+.grace-v2 .btn-primary:hover { background: var(--primary-ink); border-color: var(--primary-ink); }
+.grace-v2 .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.grace-v2 .btn-ghost:hover { background: var(--surface-2); color: var(--ink); border-color: transparent; }
+.grace-v2 .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; border-radius: 7px; }
+.grace-v2 .btn-icon { padding: 0; width: 34px; justify-content: center; }
+.grace-v2 .btn-icon.btn-sm { width: 28px; }
+
+/* ---- avatar + icon chip ---- */
+.grace-v2 .avatar {
+  width: 32px; height: 32px; border-radius: 999px;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 600;
+  color: var(--primary-ink); background: var(--primary-soft);
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, white);
+  flex: 0 0 auto;
+}
+.grace-v2 .avatar.lg { width: 72px; height: 72px; font-size: 24px; border-width: 2px; }
+.grace-v2 .avatar.sm { width: 26px; height: 26px; font-size: 10px; }
+.grace-v2 .icon-chip {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--tc-soft, var(--primary-soft));
+  color: var(--tc-ink, var(--primary-ink));
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.grace-v2 .icon-chip.lg { width: 44px; height: 44px; border-radius: 12px; }
+
+/* ---- card (foundation primitive) ---- */
+.grace-v2 .card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 4px 20px -8px rgba(26, 34, 64, 0.12), 0 1px 3px rgba(26, 34, 64, 0.05);
+  border-radius: var(--radius-lg);
+}

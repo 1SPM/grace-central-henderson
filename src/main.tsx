@@ -15,9 +15,11 @@ checkEnvironment();
 const isConnectRoute = window.location.pathname === '/connect';
 const isLeadersRoute = window.location.pathname === '/leaders';
 const isMarketplaceRoute = window.location.pathname === '/verified-leaders' || window.location.pathname === '/marketplace';
+const isRedesignRoute = window.location.pathname === '/redesign';
 const ConnectCard = lazy(() => import('./components/ConnectCard').then(m => ({ default: m.ConnectCard })));
 const LeaderApply = lazy(() => import('./components/LeaderApply').then(m => ({ default: m.LeaderApply })));
 const VerifiedLeaders = lazy(() => import('./components/VerifiedLeaders').then(m => ({ default: m.VerifiedLeaders })));
+const RedesignPreview = lazy(() => import('./components/redesign/RedesignPreview').then(m => ({ default: m.RedesignPreview })));
 
 function PublicConnectPage() {
   const [churchName, setChurchName] = useState('Our Church');
@@ -76,6 +78,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </div>
         }>
           <VerifiedLeaders />
+        </Suspense>
+      ) : isRedesignRoute ? (
+        <Suspense fallback={
+          <div className="h-screen bg-slate-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+          </div>
+        }>
+          <RedesignPreview />
         </Suspense>
       ) : isConnectRoute ? (
         <PublicConnectPage />
