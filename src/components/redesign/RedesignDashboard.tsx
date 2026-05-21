@@ -55,8 +55,6 @@ function NeedsCare({ d }: { d: DashboardData }) {
 
 export function RedesignDashboard() {
   const { data: d, status } = useRedesignDashboard();
-  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
   if (status === 'loading') {
     return (
       <div className="page"><div style={{ display: 'grid', placeItems: 'center', minHeight: 320 }}>
@@ -67,7 +65,11 @@ export function RedesignDashboard() {
   if (status === 'error' || !d) {
     return <div className="page"><p className="mute">Couldn't load the dashboard. Check the connection and refresh.</p></div>;
   }
+  return <DashboardView d={d} />;
+}
 
+export function DashboardView({ d, onAddPerson }: { d: DashboardData; onAddPerson?: () => void }) {
+  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const maxWeek = Math.max(1, ...d.attendanceWeeks.map(w => w.count));
 
   return (
@@ -81,7 +83,7 @@ export function RedesignDashboard() {
         </div>
         <div className="row">
           <button className="btn"><Icon name="calendar" size={14} /> This week</button>
-          <button className="btn btn-primary"><Icon name="plus" size={14} /> Add member</button>
+          <button className="btn btn-primary" onClick={onAddPerson}><Icon name="plus" size={14} /> Add member</button>
         </div>
       </div>
 

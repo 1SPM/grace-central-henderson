@@ -33,6 +33,8 @@ import { usePastoralCare } from './hooks/usePastoralCare';
 import { useAnnouncements } from './hooks/useAnnouncements';
 import { useDiscipleship } from './hooks/useDiscipleship';
 import { useHashRouter } from './hooks/useHashRouter';
+import { RedesignApp } from './components/redesign/RedesignApp';
+import { graceDataFromApp } from './components/redesign/graceDataFromApp';
 import {
   toPersonLegacy,
   toTaskLegacy,
@@ -172,6 +174,14 @@ function App() {
     });
   }, [addTask, churchId]);
 
+  // Redesign landing (view === 'home') — real, church-scoped data adapted
+  // into the redesign's shape. Reads only; writes route into the classic app.
+  const redesignData = useMemo(() => graceDataFromApp({
+    people, interactions, groups, prayers, events, giving,
+    attendance: [...attendanceFromDb, ...attendanceRecords],
+    churchName: churchSettings?.profile?.name,
+  }), [people, interactions, groups, prayers, events, giving, attendanceFromDb, attendanceRecords, churchSettings]);
+
   // AI Agents hook
   const agents = useAgents({
     churchId,
@@ -290,6 +300,19 @@ function App() {
           />
           </div>
         </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  // Redesign landing at / (keeps the classic app fully reachable via "Classic view")
+  if (view === 'home') {
+    return (
+      <ErrorBoundary>
+        <RedesignApp
+          data={redesignData}
+          onAddPerson={() => { setView('people'); modals.openPersonForm(); }}
+          onOpenClassic={() => setView('dashboard')}
+        />
       </ErrorBoundary>
     );
   }

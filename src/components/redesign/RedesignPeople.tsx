@@ -83,7 +83,7 @@ function MemberDetail({ person, interactions, onBack }: { person: GPerson; inter
   );
 }
 
-export function RedesignPeople({ data }: { data: GraceData }) {
+export function RedesignPeople({ data, onAddPerson }: { data: GraceData; onAddPerson?: () => void }) {
   const [filter, setFilter] = useState('all');
   const [q, setQ] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -126,7 +126,7 @@ export function RedesignPeople({ data }: { data: GraceData }) {
             <Icon name="search" size={14} className="mute" />
             <input placeholder="Search people…" value={q} onChange={e => setQ(e.target.value)} />
           </div>
-          <button className="btn btn-primary"><Icon name="plus" size={14} /> Add person</button>
+          <button className="btn btn-primary" onClick={onAddPerson}><Icon name="plus" size={14} /> Add person</button>
         </div>
       </div>
 

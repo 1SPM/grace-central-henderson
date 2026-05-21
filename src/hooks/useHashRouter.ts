@@ -10,7 +10,8 @@ import type { View } from '../types';
 
 // Map views to URL-friendly path segments
 const VIEW_TO_PATH: Record<View, string> = {
-  dashboard: '',
+  home: '',
+  dashboard: 'dashboard',
   feed: 'actions',
   people: 'people',
   person: 'person',
@@ -77,7 +78,7 @@ for (const [view, path] of Object.entries(VIEW_TO_PATH)) {
 function parseHash(): { view: View; personId: string | null } {
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (!hash) {
-    return { view: 'dashboard', personId: null };
+    return { view: 'home', personId: null };
   }
 
   const parts = hash.split('/');
@@ -89,7 +90,7 @@ function parseHash(): { view: View; personId: string | null } {
   }
 
   const view = PATH_TO_VIEW[basePath];
-  return { view: view || 'dashboard', personId: null };
+  return { view: view || 'home', personId: null };
 }
 
 function buildHash(view: View, personId?: string | null): string {

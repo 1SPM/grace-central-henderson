@@ -45,25 +45,38 @@ interface LayoutProps {
   isDemo?: boolean;
 }
 
+type Tone = 'indigo' | 'violet' | 'sky' | 'rose' | 'amber' | 'emerald';
+
 interface NavSection {
   label?: string;
-  items: { view: View; label: string; icon: ReactNode }[];
+  items: { view: View; label: string; icon: ReactNode; tone: Tone }[];
 }
+
+// Soft tinted icon-chip styles (static strings so Tailwind keeps them)
+const TONE_CHIP: Record<Tone, string> = {
+  indigo: 'bg-indigo-50 text-indigo-600',
+  violet: 'bg-violet-50 text-violet-600',
+  sky: 'bg-sky-50 text-sky-600',
+  rose: 'bg-rose-50 text-rose-600',
+  amber: 'bg-amber-50 text-amber-600',
+  emerald: 'bg-emerald-50 text-emerald-600',
+};
 
 // Single flat list — daily-driver views only. Everything else lives behind "More…"
 const navSections: NavSection[] = [
   {
+    label: 'Main',
     items: [
-      { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
-      { view: 'grace', label: 'Ask Grace', icon: <Sparkles size={18} /> },
-      { view: 'mail', label: 'Mail', icon: <Mail size={18} /> },
-      { view: 'feed', label: 'Follow-ups', icon: <ListTodo size={18} /> },
-      { view: 'people', label: 'People', icon: <Users size={18} /> },
-      { view: 'groups', label: 'Groups', icon: <Users2 size={18} /> },
-      { view: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
-      { view: 'sunday-prep', label: 'Sunday', icon: <Church size={18} /> },
-      { view: 'giving', label: 'Giving', icon: <DollarSign size={18} /> },
-      { view: 'pastoral-care', label: 'Care', icon: <Heart size={18} /> },
+      { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={16} />, tone: 'indigo' },
+      { view: 'grace', label: 'Ask Grace', icon: <Sparkles size={16} />, tone: 'violet' },
+      { view: 'mail', label: 'Mail', icon: <Mail size={16} />, tone: 'sky' },
+      { view: 'feed', label: 'Follow-ups', icon: <ListTodo size={16} />, tone: 'rose' },
+      { view: 'people', label: 'People', icon: <Users size={16} />, tone: 'sky' },
+      { view: 'groups', label: 'Groups', icon: <Users2 size={16} />, tone: 'violet' },
+      { view: 'calendar', label: 'Calendar', icon: <Calendar size={16} />, tone: 'amber' },
+      { view: 'sunday-prep', label: 'Sunday', icon: <Church size={16} />, tone: 'emerald' },
+      { view: 'giving', label: 'Giving', icon: <DollarSign size={16} />, tone: 'emerald' },
+      { view: 'pastoral-care', label: 'Care', icon: <Heart size={16} />, tone: 'rose' },
     ],
   },
 ];
@@ -95,7 +108,8 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
 
 // View labels for breadcrumbs
 const viewLabels: Record<View, string> = {
-  dashboard: 'Home',
+  home: 'Home',
+  dashboard: 'Dashboard',
   feed: 'Actions',
   pipeline: 'Pipeline',
   people: 'People',
@@ -237,17 +251,17 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-50 dark:bg-dark-900 flex flex-col transform transition-all duration-200 ease-out border-r border-stone-300/70 dark:border-white/5 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
-        style={{ backgroundColor: 'var(--paper-sink)' }}
+        } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'} backdrop-blur-xl`}
+        style={{ backgroundColor: 'color-mix(in oklab, var(--paper-sink) 82%, transparent)' }}
       >
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-7 h-7 gold-gradient rounded-md flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-slate-900 font-bold text-[13px] tracking-tight">G</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: 'linear-gradient(150deg, #818cf8, #4f46e5)' }}>
+              <span className="serif text-white text-[17px] leading-none">G</span>
             </div>
-            <span className={`font-semibold text-gray-900 dark:text-gray-100 tracking-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-              Grace
+            <span className={`font-bold text-gray-900 dark:text-gray-100 tracking-[0.04em] ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              GRACE
             </span>
           </div>
           {/* Mobile close button */}
@@ -265,7 +279,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className={sectionIdx > 0 ? 'mt-4' : ''}>
               {section.label && !sidebarCollapsed && (
-                <p className="px-2.5 mb-1 text-[11px] font-medium text-gray-400 dark:text-dark-500 lg:block hidden">
+                <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-dark-500">
                   {section.label}
                 </p>
               )}
@@ -284,16 +298,18 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                     <button
                       key={item.view}
                       onClick={() => handleNavClick(item.view)}
-                      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors group relative ${
+                      className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-[13.5px] transition-colors group relative ${
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-white/70 dark:bg-slate-500/10 text-slate-900 dark:text-slate-200 font-medium border-l-2 border-amber-600 pl-[8px]'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-white/40 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-gray-200'
+                          ? 'bg-indigo-50/80 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium border-l-2 border-indigo-500 pl-[6px]'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-black/[0.03] dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
-                      <span className={isActive ? 'text-slate-600 dark:text-slate-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}>
+                      <span className={`flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 transition-colors ${
+                        isActive ? 'bg-indigo-500 text-white shadow-sm' : TONE_CHIP[item.tone]
+                      }`}>
                         {item.icon}
                       </span>
                       <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>

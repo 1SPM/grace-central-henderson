@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { IconName } from './Icon';
+import type { GraceData } from './useGraceData';
 
 export interface CarePerson { id: string; name: string; initials: string; reason: string; }
 export interface ActivityItem { id: string; icon: IconName; tone: string; text: string; when: string; }
@@ -47,6 +48,61 @@ function relativeTime(iso: string): string {
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
+}
+
+const VERB: Record<string, string> = { note: 'Note on', call: 'Called', email: 'Emailed', visit: 'Visited', text: 'Texted', prayer: 'Prayer with' };
+
+/* Derive the dashboard view-model from the shared GraceData (used by the
+   in-app, authed path; the anon hook below builds the same shape itself). */
+export function dashboardFromGraceData(data: GraceData): DashboardData {
+  const people = data.people;
+  const nameById = new Map(people.map(p => [p.id, p.name]));
+  const activeMembers = people.filter(p => p.status !== 'inactive').length;
+  const visitors = people.filter(p => p.status === 'visitor').length;
+  const inactive = people.filter(p => p.status === 'inactive');
+  const thirtyAgo = Date.now() - 30 * 86_400_000;
+  const newThisMonth = people.filter(p => { const d = p.joinDate || p.createdAt; return d ? new Date(d).getTime() >= thirtyAgo : false; }).length;
+
+  const needsCare: CarePerson[] = inactive.slice(0, 3).map(p => ({ id: p.id, name: p.name, initials: p.initials, reason: 'Inactive' }));
+
+  const recentActivity: ActivityItem[] = data.interactions.slice(0, 6).map(i => {
+    const meta = INTERACTION_ICON[i.type] ?? { icon: 'book' as IconName, tone: 'indigo' };
+    return { id: i.id, icon: meta.icon, tone: meta.tone, text: `${VERB[i.type] || 'Logged'} ${nameById.get(i.personId) || 'someone'}`, when: relativeTime(i.createdAt) };
+  });
+
+  const now = Date.now();
+  const upcoming: UpcomingEvent[] = data.events
+    .filter(e => new Date(e.startDate).getTime() >= now)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 5)
+    .map(e => { const d = new Date(e.startDate); return { id: e.id, title: e.title, day: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), date: String(d.getDate()), time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }), location: e.location || '' }; });
+
+  const weeks: WeekBar[] = [];
+  for (let w = 7; w >= 0; w--) {
+    const start = now - (w + 1) * 7 * 86_400_000;
+    const end = now - w * 7 * 86_400_000;
+    const count = data.attendance.filter(a => { const t = new Date(a.date).getTime(); return t >= start && t < end; }).length;
+    weeks.push({ label: w === 0 ? 'now' : `${w}w`, count });
+  }
+  const attendanceInWindow = weeks.reduce((s, w) => s + w.count, 0);
+
+  const attDates = data.attendance.map(a => new Date(a.date).getTime()).filter(n => !isNaN(n));
+  const lastAttendanceLabel = attDates.length ? new Date(Math.max(...attDates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : null;
+
+  let lastEventLabel: string | null = null;
+  if (upcoming.length === 0) {
+    const pastDates = data.events.map(e => new Date(e.startDate).getTime()).filter(t => t < now);
+    if (pastDates.length) lastEventLabel = new Date(Math.max(...pastDates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  }
+
+  return {
+    churchName: data.churchName,
+    activeMembers, totalMembers: people.length, visitors,
+    prayersOpen: data.prayersOpen, groups: data.groups.length, newThisMonth,
+    needsCare, needsCareTotal: inactive.length,
+    recentActivity, upcoming, attendanceWeeks: weeks, attendanceInWindow,
+    lastAttendanceLabel, lastEventLabel,
+  };
 }
 
 interface PersonRow { id: string; first_name: string; last_name: string; status: string; join_date: string | null; created_at: string | null; }
