@@ -1,12 +1,16 @@
-/* Foundation preview for the GRACE redesign. Standalone route (/redesign),
-   isolated under .grace-v2 — does not touch the existing app. Shows the
-   ported shell + design tokens with a palette / sidebar switcher.
-   No real screens yet (foundation pass). */
+/* Preview for the GRACE redesign at /redesign. Isolated under .grace-v2 —
+   does not touch the existing app. Full shell + all screens wired to live
+   Supabase data (read-only via the anon client), with a palette/sidebar switcher. */
 import { useState } from 'react';
 import '../../styles/redesign.css';
 import { Sidebar, Topbar, SHELL_TITLES } from './RedesignShell';
-import { Icon } from './Icon';
 import { RedesignDashboard } from './RedesignDashboard';
+import { useGraceData } from './useGraceData';
+import { RedesignPeople } from './RedesignPeople';
+import { RedesignAttendance, RedesignReports } from './RedesignAnalytics';
+import { RedesignEngagement } from './RedesignEngagement';
+import { RedesignAskGrace } from './RedesignAskGrace';
+import { RedesignGroups, RedesignEvents, RedesignGiving, RedesignPlaceholder } from './RedesignMisc';
 
 type Palette = 'sanctuary' | 'chapel' | 'garden';
 type SidebarMode = 'full' | 'rail' | 'floating';
@@ -14,63 +18,30 @@ type SidebarMode = 'full' | 'rail' | 'floating';
 const PALETTES: Palette[] = ['sanctuary', 'chapel', 'garden'];
 const SIDEBARS: SidebarMode[] = ['full', 'rail', 'floating'];
 
-function FoundationBody({ screen }: { screen: string }) {
-  return (
-    <div className="page">
-      <div style={{ marginBottom: 22 }}>
-        <p className="mute" style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
-          Foundation preview
-        </p>
-        <h2 className="serif" style={{ fontSize: 40, margin: '6px 0 0', color: 'var(--ink)' }}>
-          The design system is in place.
-        </h2>
-        <p className="mute" style={{ fontSize: 15, maxWidth: 560, marginTop: 8 }}>
-          Fonts (Instrument Serif + Geist), the three palettes, and the sidebar shell are ported and
-          isolated under <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>.grace-v2</code>.
-          The existing app is untouched. Screens get built on top of this next.
-        </p>
-      </div>
+function DataScreen({ screen }: { screen: string }) {
+  const { data, status } = useGraceData();
 
-      {/* token / primitive showcase so the foundation is visible */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--gap, 18px)' }}>
-        <div className="card" style={{ padding: 'var(--pad-card, 22px)' }}>
-          <div className="row" style={{ marginBottom: 12 }}>
-            <div className="icon-chip tone-indigo"><Icon name="users" size={18} /></div>
-            <strong>Buttons</strong>
-          </div>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-            <button className="btn btn-primary"><Icon name="plus" size={14} /> Primary</button>
-            <button className="btn">Secondary</button>
-            <button className="btn btn-ghost">Ghost</button>
-          </div>
-        </div>
+  if (status === 'loading') {
+    return <div className="page"><div style={{ display: 'grid', placeItems: 'center', minHeight: 320 }}>
+      <div style={{ width: 28, height: 28, borderRadius: 999, border: '2px solid var(--line)', borderBottomColor: 'var(--primary)', animation: 'gv2-spin 0.7s linear infinite' }} />
+    </div></div>;
+  }
+  if (status === 'error' || !data) {
+    return <div className="page"><p className="mute">Couldn't load data. Check the connection and refresh.</p></div>;
+  }
 
-        <div className="card" style={{ padding: 'var(--pad-card, 22px)' }}>
-          <div className="row" style={{ marginBottom: 12 }}>
-            <div className="icon-chip tone-rose"><Icon name="heart" size={18} /></div>
-            <strong>Tones</strong>
-          </div>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-            {(['indigo', 'sky', 'emerald', 'amber', 'rose', 'violet'] as const).map(t => (
-              <div key={t} className={`icon-chip tone-${t}`}><Icon name="star" size={16} /></div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: 'var(--pad-card, 22px)' }}>
-          <div className="row" style={{ marginBottom: 12 }}>
-            <div className="icon-chip tone-emerald"><Icon name="book" size={18} /></div>
-            <strong>Type</strong>
-          </div>
-          <p className="serif" style={{ fontSize: 26, margin: '0 0 4px' }}>Instrument Serif</p>
-          <p style={{ margin: 0, fontSize: 14 }}>Geist — the UI sans.</p>
-          <p className="mute" style={{ margin: '4px 0 0', fontFamily: 'var(--font-mono)', fontSize: 12 }}>Geist Mono 012345</p>
-        </div>
-      </div>
-
-      <p className="mute" style={{ fontSize: 13, marginTop: 24 }}>Active nav: <strong>{SHELL_TITLES[screen] || screen}</strong></p>
-    </div>
-  );
+  switch (screen) {
+    case 'members': return <RedesignPeople data={data} />;
+    case 'attendance': return <RedesignAttendance data={data} />;
+    case 'engagement': return <RedesignEngagement data={data} />;
+    case 'reports': return <RedesignReports data={data} />;
+    case 'ai': return <RedesignAskGrace data={data} />;
+    case 'groups': return <RedesignGroups data={data} />;
+    case 'events': return <RedesignEvents data={data} />;
+    case 'giving': return <RedesignGiving data={data} />;
+    case 'settings': return <RedesignPlaceholder title="Settings" icon="settings" />;
+    default: return <RedesignPlaceholder title={SHELL_TITLES[screen] || screen} icon="grid" />;
+  }
 }
 
 export function RedesignPreview() {
@@ -80,7 +51,6 @@ export function RedesignPreview() {
 
   return (
     <div className="grace-v2" data-palette={palette} data-card="soft">
-      {/* foundation switcher (preview-only chrome) */}
       <div style={{
         position: 'fixed', top: 12, right: 12, zIndex: 60,
         display: 'flex', gap: 12, alignItems: 'center',
@@ -91,19 +61,13 @@ export function RedesignPreview() {
         <div className="row" style={{ gap: 4 }}>
           <span className="mute">Palette</span>
           {PALETTES.map(p => (
-            <button key={p} onClick={() => setPalette(p)}
-              className={`btn btn-sm ${palette === p ? 'btn-primary' : ''}`} style={{ textTransform: 'capitalize' }}>
-              {p}
-            </button>
+            <button key={p} onClick={() => setPalette(p)} className={`btn btn-sm ${palette === p ? 'btn-primary' : ''}`} style={{ textTransform: 'capitalize' }}>{p}</button>
           ))}
         </div>
         <div className="row" style={{ gap: 4 }}>
           <span className="mute">Sidebar</span>
           {SIDEBARS.map(s => (
-            <button key={s} onClick={() => setSidebar(s)}
-              className={`btn btn-sm ${sidebar === s ? 'btn-primary' : ''}`} style={{ textTransform: 'capitalize' }}>
-              {s}
-            </button>
+            <button key={s} onClick={() => setSidebar(s)} className={`btn btn-sm ${sidebar === s ? 'btn-primary' : ''}`} style={{ textTransform: 'capitalize' }}>{s}</button>
           ))}
         </div>
       </div>
@@ -112,7 +76,7 @@ export function RedesignPreview() {
         <Sidebar active={screen} onNav={setScreen} />
         <div className="main">
           <Topbar title={SHELL_TITLES[screen] || screen} />
-          {screen === 'dashboard' ? <RedesignDashboard /> : <FoundationBody screen={screen} />}
+          {screen === 'dashboard' ? <RedesignDashboard /> : <DataScreen screen={screen} />}
         </div>
       </div>
     </div>
