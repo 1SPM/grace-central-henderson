@@ -623,3 +623,11 @@
 .grace-v2 .cc-agenda-item .mc-dot { background: var(--primary); flex: 0 0 auto; }
 .grace-v2 .cc-agenda-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .grace-v2 .cc-agenda-empty { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* ---- Ask Grace action cards (under the assistant bubble) ---- */
+.grace-v2 .ai-action-card { display: flex; align-items: center; gap: 12px; margin-left: 38px; padding: 10px 12px; background: var(--surface); border: 1px solid color-mix(in oklab, var(--ai-violet) 35%, var(--line-2)); border-radius: 12px; max-width: 80%; }
+.grace-v2 .ai-action-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--ai-grad-soft); color: var(--ai-ink); display: grid; place-items: center; flex: 0 0 28px; }
+.grace-v2 .ai-action-body { flex: 1; min-width: 0; }
+.grace-v2 .ai-action-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.grace-v2 .ai-action-line { font-size: 13px; color: var(--ink); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
+.grace-v2 .ai-action-err { font-size: 11.5px; color: var(--c-rose-ink); margin-top: 4px; }

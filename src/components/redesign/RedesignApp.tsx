@@ -31,7 +31,7 @@ export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
     case 'attendance': body = <RedesignAttendance data={data} actions={actions} />; break;
     case 'engagement': body = <RedesignEngagement data={data} actions={actions} />; break;
     case 'reports': body = <RedesignReports data={data} />; break;
-    case 'ai': body = <RedesignAskGrace data={data} />; break;
+    case 'ai': body = <RedesignAskGrace data={data} actions={actions} />; break;
     case 'groups': body = <RedesignGroups data={data} />; break;
     case 'events': body = <RedesignEvents data={data} actions={actions} />; break;
     case 'giving': body = <RedesignGiving data={data} />; break;

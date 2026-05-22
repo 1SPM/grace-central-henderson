@@ -36,7 +36,7 @@ function DataScreen({ screen }: { screen: string }) {
     case 'attendance': return <RedesignAttendance data={data} actions={PREVIEW_ACTIONS} />;
     case 'engagement': return <RedesignEngagement data={data} actions={PREVIEW_ACTIONS} />;
     case 'reports': return <RedesignReports data={data} />;
-    case 'ai': return <RedesignAskGrace data={data} />;
+    case 'ai': return <RedesignAskGrace data={data} actions={PREVIEW_ACTIONS} />;
     case 'groups': return <RedesignGroups data={data} />;
     case 'events': return <RedesignEvents data={data} actions={PREVIEW_ACTIONS} />;
     case 'giving': return <RedesignGiving data={data} />;
