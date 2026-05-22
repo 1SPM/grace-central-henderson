@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData } from './useGraceData';
 import type { RedesignActions, AttendanceEventType } from './actions';
+import { PersonAvatar } from './PersonAvatar';
 
 function Kpi({ label, val, delta, icon, tone }: { label: string; val: string | number; delta: string; icon: IconName; tone: string }) {
   return (
@@ -91,7 +92,7 @@ export function RedesignAttendance({ data, actions }: { data: GraceData; actions
                     border: '1px solid var(--line-2)', cursor: done ? 'default' : 'pointer',
                     background: done ? 'var(--c-emerald-soft)' : 'var(--surface)',
                   }}>
-                  <div className="avatar sm">{p.initials}</div>
+                  <PersonAvatar name={p.name} initials={p.initials} />
                   <span style={{ flex: 1, fontSize: 13, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                   {done ? <Icon name="check" size={15} className="" /> : <Icon name="plus" size={14} className="mute" />}
                 </button>
@@ -120,7 +121,7 @@ export function RedesignAttendance({ data, actions }: { data: GraceData; actions
                 const p = personById.get(a.personId);
                 return (
                   <tr key={a.id} style={{ cursor: 'default' }}>
-                    <td><div className="name"><div className="avatar sm">{p?.initials || '?'}</div><div>{p?.name || 'Unknown'}</div></div></td>
+                    <td><div className="name"><PersonAvatar name={p?.name || ''} initials={p?.initials || '?'} /><div>{p?.name || 'Unknown'}</div></div></td>
                     <td className="mute" style={{ fontSize: 12 }}>{EVENT_LABELS[a.eventType] || a.eventType}</td>
                     <td className="mute" style={{ fontSize: 12 }}>{new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   </tr>
@@ -182,7 +183,7 @@ export function RedesignReports({ data }: { data: GraceData }) {
               {topEngaged.map((x, i) => (
                 <div key={x.p.id} className="row" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)' }}>
                   <div className="serif" style={{ width: 24, color: 'var(--muted)', fontSize: 18 }}>{i + 1}</div>
-                  <div className="avatar sm">{x.p.initials}</div>
+                  <PersonAvatar name={x.p.name} initials={x.p.initials} />
                   <div style={{ flex: 1 }}><div style={{ fontSize: 13.5, fontWeight: 500 }}>{x.p.name}</div></div>
                   <div className="serif" style={{ fontSize: 18 }}>{x.n}</div>
                 </div>
@@ -198,7 +199,7 @@ export function RedesignReports({ data }: { data: GraceData }) {
           <div className="col" style={{ gap: 0 }}>
             {inactive.map(p => (
               <div key={p.id} className="row" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)' }}>
-                <div className="avatar sm">{p.initials}</div>
+                <PersonAvatar name={p.name} initials={p.initials} />
                 <div style={{ flex: 1 }}><div style={{ fontSize: 13.5, fontWeight: 500 }}>{p.name}</div><div className="mute" style={{ fontSize: 11.5 }}>{p.email || 'No email'}</div></div>
                 <button className="btn btn-sm"><Icon name="mail" size={12} /> Reach out</button>
               </div>

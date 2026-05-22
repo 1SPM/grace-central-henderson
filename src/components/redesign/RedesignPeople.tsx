@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData, GPerson } from './useGraceData';
 import type { RedesignActions, InteractionType } from './actions';
+import { PersonAvatar } from './PersonAvatar';
 
 const INTER_ICON: Record<string, IconName> = { note: 'book', call: 'phone', email: 'mail', visit: 'user', text: 'chat', prayer: 'pray' };
 
@@ -65,7 +66,7 @@ function MemberDetail({ person, interactions, actions, onBack }: { person: GPers
         <Icon name="arrow_left" size={14} /> Back to people
       </button>
       <div className="detail-head">
-        <div className="avatar xl">{person.initials}</div>
+        <PersonAvatar name={person.name} initials={person.initials} size="xl" />
         <div className="meta">
           <h2>{person.name}</h2>
           <div className="role">{person.email || 'No email on file'}</div>
@@ -183,7 +184,7 @@ export function RedesignPeople({ data, actions, onAddPerson }: { data: GraceData
           <tbody>
             {filtered.map(p => (
               <tr key={p.id} onClick={() => setSelectedId(p.id)}>
-                <td><div className="name"><div className="avatar sm">{p.initials}</div><div>{p.name}</div></div></td>
+                <td><div className="name"><PersonAvatar name={p.name} initials={p.initials} /><div>{p.name}</div></div></td>
                 <td><StatusBadge status={p.status} /></td>
                 <td className="mute" style={{ fontSize: 12 }}>{p.groups.slice(0, 2).join(', ')}{p.groups.length > 2 && ` +${p.groups.length - 2}`}</td>
                 <td className="mute" style={{ fontSize: 12 }}>{p.email || '—'}</td>

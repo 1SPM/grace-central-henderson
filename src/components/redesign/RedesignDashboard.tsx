@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { useRedesignDashboard, type DashboardData } from './useRedesignDashboard';
+import { PersonAvatar } from './PersonAvatar';
 
 const WALLPAPER_KEY = 'grace-hero-wallpaper';
 
@@ -292,7 +293,7 @@ function NeedsCare({ d }: { d: DashboardData }) {
       <div className="needs-care-people">
         {d.needsCare.map(p => (
           <div key={p.id} className="needs-care-chip">
-            <div className="avatar sm">{p.initials}</div>
+            <PersonAvatar name={p.name} initials={p.initials} />
             <div className="needs-care-chip-text">
               <div className="needs-care-chip-name">{p.name}</div>
               <div className="needs-care-chip-reason">{p.reason}</div>
