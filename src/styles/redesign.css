@@ -245,13 +245,29 @@
 .grace-v2 .main { display: flex; flex-direction: column; min-width: 0; }
 .grace-v2 .topbar {
   display: flex; align-items: center; gap: 14px;
-  padding: 14px 28px;
+  padding: 16px 40px;
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 5;
   backdrop-filter: blur(14px) saturate(140%);
   background: color-mix(in oklab, var(--bg) 70%, transparent);
 }
 .grace-v2 .topbar h1 { font-family: var(--font-ui); font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+
+/* live clock + date in the topbar */
+.grace-v2 .live-clock {
+  display: flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--ink-2);
+  font-size: 12.5px; white-space: nowrap;
+}
+.grace-v2 .live-clock .svg-icon { color: var(--muted); }
+.grace-v2 .live-clock .lc-date { font-weight: 500; }
+.grace-v2 .live-clock .lc-time {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: 12px; color: var(--muted);
+  padding-left: 7px; margin-left: 1px; border-left: 1px solid var(--line-2);
+}
 .grace-v2 .search-box {
   display: flex; align-items: center; gap: 8px;
   height: 36px; padding: 0 12px;
@@ -266,7 +282,8 @@
   padding: 2px 6px; border-radius: 5px; background: var(--bg-2);
   color: var(--muted); border: 1px solid var(--line-2);
 }
-.grace-v2 .page { padding: 28px 28px 80px; max-width: 1280px; width: 100%; }
+.grace-v2 .page { padding: 32px 40px 80px; width: 100%; }
+@media (max-width: 720px) { .grace-v2 .topbar { padding: 14px 18px; } .grace-v2 .page { padding: 22px 18px 80px; } .grace-v2 .live-clock .lc-date { display: none; } }
 
 /* ---- buttons ---- */
 .grace-v2 .btn {

@@ -1,6 +1,23 @@
-/* Ported sidebar + topbar shell from the redesign prototype.
-   Foundation only — nav is local state, no real routing/data yet. */
+/* Ported sidebar + topbar shell from the redesign prototype. */
+import { useEffect, useState } from 'react';
 import { Icon, type IconName } from './Icon';
+
+function LiveClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  const date = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return (
+    <div className="live-clock" title={now.toLocaleString()}>
+      <Icon name="calendar" size={13} />
+      <span className="lc-date">{date}</span>
+      <span className="lc-time">{time}</span>
+    </div>
+  );
+}
 
 type Tone = 'indigo' | 'ai' | 'sky' | 'emerald' | 'rose' | 'amber' | 'violet';
 interface NavItem { id: string; label: string; icon: IconName; tone: Tone; count?: number; }
@@ -75,6 +92,7 @@ export function Topbar({ title, action }: { title: string; action?: React.ReactN
     <div className="topbar">
       <h1>{title}</h1>
       <div style={{ marginLeft: 'auto' }} className="row">
+        <LiveClock />
         <div className="search-box">
           <Icon name="search" size={14} />
           <span>Search people, events, messages…</span>
