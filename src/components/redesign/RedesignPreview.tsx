@@ -34,7 +34,7 @@ function DataScreen({ screen }: { screen: string }) {
   switch (screen) {
     case 'members': return <RedesignPeople data={data} actions={PREVIEW_ACTIONS} />;
     case 'attendance': return <RedesignAttendance data={data} actions={PREVIEW_ACTIONS} />;
-    case 'engagement': return <RedesignEngagement data={data} />;
+    case 'engagement': return <RedesignEngagement data={data} actions={PREVIEW_ACTIONS} />;
     case 'reports': return <RedesignReports data={data} />;
     case 'ai': return <RedesignAskGrace data={data} />;
     case 'groups': return <RedesignGroups data={data} />;
@@ -52,6 +52,7 @@ const PREVIEW_ACTIONS: RedesignActions = {
   addInteraction: () => {},
   addPrayer: () => {},
   addEvent: () => {},
+  sendMessage: async () => ({ sent: 0, failed: 0, skipped: 0 }),
 };
 
 export function RedesignPreview() {

@@ -315,6 +315,31 @@ function App() {
             addInteraction: (i) => handlers.addInteraction(i),
             addPrayer: (p) => handlers.addPrayer(p),
             addEvent: (e) => handlers.addEvent({ ...e, allDay: e.allDay }),
+            sendMessage: async ({ channel, recipientIds, subject, body }) => {
+              let sent = 0, failed = 0, skipped = 0;
+              for (const id of recipientIds) {
+                const person = people.find(p => p.id === id);
+                try {
+                  if (channel === 'email') {
+                    if (!person?.email) { skipped++; continue; }
+                    const r = await fetch('/api/agentmail/send', {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ person_id: id, subject: subject || 'A note from your church', text: body }),
+                    });
+                    r.ok ? sent++ : failed++;
+                  } else {
+                    if (!person?.phone) { skipped++; continue; }
+                    const r = await fetch('/api/sms/send', {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ to: person.phone, message: body }),
+                    });
+                    r.ok ? sent++ : failed++;
+                  }
+                } catch { failed++; }
+                await new Promise(res => setTimeout(res, 150)); // gentle pacing
+              }
+              return { sent, failed, skipped };
+            },
           }}
           onAddPerson={() => { setView('people'); modals.openPersonForm(); }}
           onOpenClassic={() => setView('dashboard')}

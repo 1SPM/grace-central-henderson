@@ -5,9 +5,15 @@ export type InteractionType = 'note' | 'call' | 'email' | 'visit' | 'text' | 'pr
 export type AttendanceEventType = 'sunday' | 'wednesday' | 'small-group' | 'special';
 export type RedesignEventCategory = 'service' | 'meeting' | 'event' | 'small-group' | 'class' | 'outreach' | 'other';
 
+export type SendChannel = 'email' | 'sms';
+export interface SendResult { sent: number; failed: number; skipped: number; }
+
 export interface RedesignActions {
   checkIn: (personId: string, eventType: AttendanceEventType) => void | Promise<unknown>;
   addInteraction: (i: { personId: string; type: InteractionType; content: string; createdBy: string }) => void | Promise<unknown>;
   addPrayer: (p: { personId: string; content: string; isPrivate: boolean }) => void | Promise<unknown>;
   addEvent: (e: { title: string; startDate: string; allDay: boolean; location?: string; category: RedesignEventCategory; description?: string }) => void | Promise<unknown>;
+  /** Broadcast to a list of people via email or SMS. Loops the single-send
+      endpoints client-side; returns per-recipient outcome counts. */
+  sendMessage: (msg: { channel: SendChannel; recipientIds: string[]; subject?: string; body: string }) => Promise<SendResult>;
 }

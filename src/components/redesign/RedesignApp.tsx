@@ -29,7 +29,7 @@ export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
     case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} />; break;
     case 'members': body = <RedesignPeople data={data} actions={actions} onAddPerson={onAddPerson} />; break;
     case 'attendance': body = <RedesignAttendance data={data} actions={actions} />; break;
-    case 'engagement': body = <RedesignEngagement data={data} />; break;
+    case 'engagement': body = <RedesignEngagement data={data} actions={actions} />; break;
     case 'reports': body = <RedesignReports data={data} />; break;
     case 'ai': body = <RedesignAskGrace data={data} />; break;
     case 'groups': body = <RedesignGroups data={data} />; break;
