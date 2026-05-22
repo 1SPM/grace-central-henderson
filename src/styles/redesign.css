@@ -245,7 +245,9 @@
 .grace-v2 .main { display: flex; flex-direction: column; min-width: 0; }
 .grace-v2 .topbar {
   display: flex; align-items: center; gap: 14px;
-  padding: 14px 28px;
+  /* align content to the same centered 1280 column as .page (incl. its 28px
+     inner padding); border still spans full width */
+  padding: 14px max(28px, calc((100% - 1280px) / 2 + 28px));
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 5;
   backdrop-filter: blur(14px) saturate(140%);
@@ -282,7 +284,7 @@
   padding: 2px 6px; border-radius: 5px; background: var(--bg-2);
   color: var(--muted); border: 1px solid var(--line-2);
 }
-.grace-v2 .page { padding: 28px 28px 80px; max-width: 1280px; width: 100%; }
+.grace-v2 .page { padding: 28px 28px 80px; max-width: 1280px; width: 100%; margin: 0 auto; }
 @media (max-width: 1280px) {
   .grace-v2 .needs-care { grid-template-columns: auto 1fr auto; }
   .grace-v2 .needs-care-people { grid-column: 1 / -1; order: 4; }
