@@ -25,6 +25,7 @@ export interface DashboardData {
   lastAttendanceLabel: string | null;
   lastEventLabel: string | null;
   eventDays: string[]; // day keys (Y-M-D) that have at least one event
+  attendanceByDay: Record<string, number>; // day key (Y-M-D) -> check-in count
 }
 
 const INTERACTION_ICON: Record<string, { icon: IconName; tone: string }> = {
@@ -98,13 +99,21 @@ export function dashboardFromGraceData(data: GraceData): DashboardData {
 
   const eventDays = data.events.map(e => { const d = new Date(e.startDate); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean);
 
+  const attendanceByDay: Record<string, number> = {};
+  for (const a of data.attendance) {
+    const d = new Date(a.date);
+    if (isNaN(d.getTime())) continue;
+    const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    attendanceByDay[k] = (attendanceByDay[k] ?? 0) + 1;
+  }
+
   return {
     churchName: data.churchName,
     activeMembers, totalMembers: people.length, visitors,
     prayersOpen: data.prayersOpen, groups: data.groups.length, newThisMonth,
     needsCare, needsCareTotal: inactive.length,
     recentActivity, upcoming, attendanceWeeks: weeks, attendanceInWindow,
-    lastAttendanceLabel, lastEventLabel, eventDays,
+    lastAttendanceLabel, lastEventLabel, eventDays, attendanceByDay,
   };
 }
 
@@ -217,6 +226,7 @@ export function useRedesignDashboard(): { data: DashboardData | null; status: 'l
           lastAttendanceLabel,
           lastEventLabel,
           eventDays: (eventsRes.data ?? []).map((e: { start_date: string }) => { const d = new Date(e.start_date); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean),
+          attendanceByDay: ((attendanceRes.data ?? []) as { date: string }[]).reduce<Record<string, number>>((acc, a) => { const d = new Date(a.date); if (!isNaN(d.getTime())) { const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; acc[k] = (acc[k] ?? 0) + 1; } return acc; }, {}),
         });
         setStatus('ready');
       } catch {

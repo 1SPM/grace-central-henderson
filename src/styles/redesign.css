@@ -561,3 +561,44 @@
 .grace-v2 .mc-day.today > span { background: var(--ink); color: #fff; font-weight: 600; }
 .grace-v2 .mc-dot { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 999px; background: var(--primary); }
 .grace-v2 .mc-day.today .mc-dot { background: #fff; }
+
+/* ============================================================
+   Clock+calendar banner (top of dashboard) + analog clock
+   ============================================================ */
+.grace-v2 .clock-cal-banner { padding: 0; overflow: hidden; display: grid; grid-template-columns: 280px 1fr; }
+.grace-v2 .ccb-clock { padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 14%, var(--surface)) 0%, var(--surface) 100%); border-right: 1px solid var(--line-2); }
+.grace-v2 .ccb-digital { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 500; color: var(--ink); margin-top: 6px; line-height: 1; }
+.grace-v2 .ccb-date { font-family: var(--font-display); font-size: 15px; color: var(--ink-2); }
+.grace-v2 .ccb-cal { padding: 16px 18px; }
+
+.grace-v2 .analog-clock { display: block; }
+.grace-v2 .ac-face { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.grace-v2 .ac-tick { stroke: var(--muted); stroke-width: 1; }
+.grace-v2 .ac-tick-major { stroke: var(--ink-2); stroke-width: 2; }
+.grace-v2 .ac-hand { stroke-linecap: round; }
+.grace-v2 .ac-hour { stroke: var(--ink); stroke-width: 3.5; }
+.grace-v2 .ac-min { stroke: var(--ink); stroke-width: 2.5; }
+.grace-v2 .ac-sec { stroke: var(--primary); stroke-width: 1.2; }
+.grace-v2 .ac-pin { fill: var(--primary); }
+
+@media (max-width: 720px) {
+  .grace-v2 .clock-cal-banner { grid-template-columns: 1fr; }
+  .grace-v2 .ccb-clock { border-right: 0; border-bottom: 1px solid var(--line-2); }
+}
+
+/* ============================================================
+   Attendance heatmap (GitHub-contribution style)
+   ============================================================ */
+.grace-v2 .heatmap { display: grid; grid-template-columns: 30px 1fr; gap: 4px; font-size: 10.5px; color: var(--muted); }
+.grace-v2 .heatmap-days { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; padding-right: 4px; font-size: 10px; color: var(--muted); }
+.grace-v2 .heatmap-day { display: flex; align-items: center; height: 14px; }
+.grace-v2 .heatmap-grid { display: grid; grid-template-columns: repeat(26, 1fr); grid-template-rows: repeat(7, 14px); gap: 3px; }
+.grace-v2 .heatmap-cell { border-radius: 3px; background: color-mix(in oklab, var(--primary) 8%, transparent); border: 1px solid color-mix(in oklab, var(--primary) 12%, transparent); cursor: default; transition: transform 80ms ease; }
+.grace-v2 .heatmap-grid .heatmap-cell:hover { transform: scale(1.4); position: relative; z-index: 1; }
+.grace-v2 .heatmap-cell.l0 { background: color-mix(in oklab, var(--primary) 8%, transparent); border-color: color-mix(in oklab, var(--primary) 12%, transparent); }
+.grace-v2 .heatmap-cell.l1 { background: color-mix(in oklab, var(--primary) 28%, var(--surface)); border-color: transparent; }
+.grace-v2 .heatmap-cell.l2 { background: color-mix(in oklab, var(--primary) 50%, var(--surface)); border-color: transparent; }
+.grace-v2 .heatmap-cell.l3 { background: color-mix(in oklab, var(--primary) 75%, var(--surface)); border-color: transparent; }
+.grace-v2 .heatmap-cell.l4 { background: var(--primary); border-color: transparent; }
+.grace-v2 .heatmap-legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); justify-content: flex-end; margin-top: 12px; }
+.grace-v2 .heatmap-legend .sq { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }

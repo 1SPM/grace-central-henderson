@@ -28,6 +28,36 @@ function GreetingBlock({ prayersOpen, activeMembers }: { prayersOpen: number; ac
 
 const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
+function AnalogClock({ now }: { now: Date }) {
+  const s = now.getSeconds();
+  const m = now.getMinutes();
+  const h = now.getHours() % 12;
+  const secA = s * 6;                       // 360/60
+  const minA = m * 6 + s * 0.1;
+  const hrA = h * 30 + m * 0.5;             // 360/12
+  // hand endpoints from center (50,50)
+  const hand = (angle: number, len: number) => {
+    const rad = (angle - 90) * Math.PI / 180;
+    return { x2: 50 + len * Math.cos(rad), y2: 50 + len * Math.sin(rad) };
+  };
+  const hr = hand(hrA, 26), mn = hand(minA, 36), sc = hand(secA, 40);
+  return (
+    <svg viewBox="0 0 100 100" className="analog-clock" width="120" height="120" aria-label="Current time">
+      <circle cx="50" cy="50" r="47" className="ac-face" />
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i * 30 - 90) * Math.PI / 180;
+        const r1 = i % 3 === 0 ? 38 : 41, r2 = 45;
+        return <line key={i} x1={50 + r1 * Math.cos(a)} y1={50 + r1 * Math.sin(a)} x2={50 + r2 * Math.cos(a)} y2={50 + r2 * Math.sin(a)} className={i % 3 === 0 ? 'ac-tick ac-tick-major' : 'ac-tick'} />;
+      })}
+      <line x1="50" y1="50" x2={hr.x2} y2={hr.y2} className="ac-hand ac-hour" />
+      <line x1="50" y1="50" x2={mn.x2} y2={mn.y2} className="ac-hand ac-min" />
+      <line x1="50" y1="50" x2={sc.x2} y2={sc.y2} className="ac-hand ac-sec" />
+      <circle cx="50" cy="50" r="3" className="ac-pin" />
+    </svg>
+  );
+}
+
+/* Top-of-dashboard banner: analog clock + date on the left, mini month calendar on the right. */
 function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onOpenCalendar?: () => void }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -36,23 +66,21 @@ function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onO
   }, []);
 
   const eventSet = new Set(eventDays);
-  const year = now.getFullYear();
   const month = now.getMonth();
   const todayDate = now.getDate();
-  const first = new Date(year, month, 1);
+  const first = new Date(now.getFullYear(), month, 1);
   const start = new Date(first);
   start.setDate(1 - first.getDay());
   const cells = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
 
-  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-
   return (
-    <div className="card clock-cal">
-      <div className="cc-clock">
-        <div className="cc-time">{time}</div>
-        <div className="cc-date">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+    <div className="card clock-cal-banner">
+      <div className="ccb-clock">
+        <AnalogClock now={now} />
+        <div className="ccb-digital">{now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+        <div className="ccb-date">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
       </div>
-      <div className="cc-cal">
+      <div className="ccb-cal">
         <div className="cc-month">
           <span>{now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
           {onOpenCalendar && <button className="btn btn-ghost btn-sm" onClick={onOpenCalendar}>Calendar <Icon name="arrow_right" size={12} /></button>}
@@ -71,6 +99,60 @@ function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onO
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+const HEAT_DOW = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+/* GitHub-style attendance heatmap: 26 weeks x 7 days, colored by check-in count. */
+function AttendanceHeatmap({ byDay }: { byDay: Record<string, number> }) {
+  const WEEKS = 26;
+  const today = new Date();
+  // start = Sunday of the week (WEEKS-1) ago
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay() - (WEEKS - 1) * 7);
+  const counts: number[] = [];
+  const cols: { date: Date; count: number }[][] = [];
+  for (let w = 0; w < WEEKS; w++) {
+    const col: { date: Date; count: number }[] = [];
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + w * 7 + d);
+      const c = byDay[`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`] ?? 0;
+      col.push({ date, count: c });
+      if (c > 0) counts.push(c);
+    }
+    cols.push(col);
+  }
+  const max = Math.max(1, ...counts);
+  const level = (c: number) => c === 0 ? 0 : c >= max * 0.75 ? 4 : c >= max * 0.5 ? 3 : c >= max * 0.25 ? 2 : 1;
+  const total = counts.reduce((s, c) => s + c, 0);
+  const future = (d: Date) => d.getTime() > today.getTime();
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <div><h2>Attendance</h2><div className="sub">{total} check-ins across the last {WEEKS} weeks</div></div>
+      </div>
+      <div className="heatmap">
+        <div className="heatmap-days">{HEAT_DOW.map((d, i) => <div key={i} className="heatmap-day">{d}</div>)}</div>
+        <div className="heatmap-grid">
+          {cols.map((col, w) => col.map(({ date, count }, d) => (
+            <div
+              key={`${w}-${d}`}
+              className={`heatmap-cell l${future(date) ? 0 : level(count)}`}
+              style={{ gridColumn: w + 1, gridRow: d + 1, ...(future(date) ? { opacity: 0.35 } : {}) }}
+              title={future(date) ? '' : `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${count} check-in${count === 1 ? '' : 's'}`}
+            />
+          )))}
+        </div>
+      </div>
+      <div className="heatmap-legend">
+        <span>Less</span>
+        {[0, 1, 2, 3, 4].map(l => <span key={l} className={`sq heatmap-cell l${l}`} />)}
+        <span>More</span>
       </div>
     </div>
   );
@@ -137,8 +219,6 @@ export function RedesignDashboard() {
 }
 
 export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: DashboardData; onAddPerson?: () => void; onOpenCalendar?: () => void }) {
-  const maxWeek = Math.max(1, ...d.attendanceWeeks.map(w => w.count));
-
   return (
     <div className="page">
       <div className="greeting">
@@ -148,6 +228,8 @@ export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: Dashboard
           <button className="btn btn-primary" onClick={onAddPerson}><Icon name="plus" size={14} /> Add member</button>
         </div>
       </div>
+
+      <ClockCalendar eventDays={d.eventDays} onOpenCalendar={onOpenCalendar} />
 
       <div className="hero-card">
         <div className="hero-art" />
@@ -197,67 +279,34 @@ export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: Dashboard
           )}
         </div>
 
-        <div className="col" style={{ gap: 'var(--gap, 18px)' }}>
-          <ClockCalendar eventDays={d.eventDays} onOpenCalendar={onOpenCalendar} />
-          <div className="card">
-            <div className="card-head"><h2>Upcoming</h2></div>
-            {d.upcoming.length === 0 ? (
-              <div style={{ padding: '8px 0' }}>
-                <p className="mute" style={{ fontSize: 13, margin: 0 }}>Nothing on the calendar yet.</p>
-                {d.lastEventLabel && <p className="mute" style={{ fontSize: 12, marginTop: 6 }}>Last event was {d.lastEventLabel}.</p>}
-                <button className="btn btn-sm" style={{ marginTop: 12 }} onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
-              </div>
-            ) : (
-              <div className="col" style={{ gap: 0 }}>
-                {d.upcoming.map(e => (
-                  <div key={e.id} className="row tone-indigo" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)', gap: 14 }}>
-                    <div style={{ width: 48, height: 56, borderRadius: 10, background: 'var(--tc-soft)', color: 'var(--tc-ink)', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: '1px solid color-mix(in oklab, var(--tc) 25%, transparent)' }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{e.day}</div>
-                      <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>{e.date}</div>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
-                      <div className="mute" style={{ fontSize: 11.5 }}>{e.time}{e.location && ` · ${e.location}`}</div>
-                    </div>
+        <div className="card">
+          <div className="card-head"><h2>Upcoming</h2></div>
+          {d.upcoming.length === 0 ? (
+            <div style={{ padding: '8px 0' }}>
+              <p className="mute" style={{ fontSize: 13, margin: 0 }}>Nothing on the calendar yet.</p>
+              {d.lastEventLabel && <p className="mute" style={{ fontSize: 12, marginTop: 6 }}>Last event was {d.lastEventLabel}.</p>}
+              <button className="btn btn-sm" style={{ marginTop: 12 }} onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
+            </div>
+          ) : (
+            <div className="col" style={{ gap: 0 }}>
+              {d.upcoming.map(e => (
+                <div key={e.id} className="row tone-indigo" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)', gap: 14 }}>
+                  <div style={{ width: 48, height: 56, borderRadius: 10, background: 'var(--tc-soft)', color: 'var(--tc-ink)', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: '1px solid color-mix(in oklab, var(--tc) 25%, transparent)' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{e.day}</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>{e.date}</div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
+                    <div className="mute" style={{ fontSize: 11.5 }}>{e.time}{e.location && ` · ${e.location}`}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-head">
-          <div>
-            <h2>Attendance</h2>
-            <div className="sub">Check-ins over the last 8 weeks</div>
-          </div>
-        </div>
-        {d.attendanceInWindow === 0 ? (
-          <div style={{ padding: '8px 0' }}>
-            <p className="mute" style={{ fontSize: 13, margin: 0 }}>No check-ins recorded in the last 8 weeks.</p>
-            {d.lastAttendanceLabel && <p className="mute" style={{ fontSize: 12, marginTop: 6 }}>Last check-in was {d.lastAttendanceLabel}.</p>}
-            <button className="btn btn-sm" style={{ marginTop: 12 }}><Icon name="check" size={12} /> Take attendance</button>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 10, alignItems: 'end', height: 120 }}>
-            {d.attendanceWeeks.map(w => (
-              <div key={w.label} style={{ textAlign: 'center' }}>
-                <div style={{ height: 90, display: 'flex', alignItems: 'flex-end' }}>
-                  <div title={`${w.count} check-ins`} style={{
-                    width: '100%', borderRadius: '6px 6px 0 0',
-                    background: w.count > 0 ? 'var(--primary)' : 'var(--bg-2)',
-                    height: `${Math.max(4, (w.count / maxWeek) * 90)}px`,
-                  }} />
-                </div>
-                <div className="mute" style={{ fontSize: 11, marginTop: 6 }}>{w.count}</div>
-                <div className="mute" style={{ fontSize: 10 }}>{w.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <AttendanceHeatmap byDay={d.attendanceByDay} />
     </div>
   );
 }
