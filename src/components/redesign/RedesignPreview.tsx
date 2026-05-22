@@ -11,6 +11,7 @@ import { RedesignAttendance, RedesignReports } from './RedesignAnalytics';
 import { RedesignEngagement } from './RedesignEngagement';
 import { RedesignAskGrace } from './RedesignAskGrace';
 import { RedesignGroups, RedesignEvents, RedesignGiving, RedesignPlaceholder } from './RedesignMisc';
+import type { RedesignActions } from './actions';
 
 type Palette = 'sanctuary' | 'chapel' | 'garden';
 type SidebarMode = 'full' | 'rail' | 'floating';
@@ -31,18 +32,27 @@ function DataScreen({ screen }: { screen: string }) {
   }
 
   switch (screen) {
-    case 'members': return <RedesignPeople data={data} />;
-    case 'attendance': return <RedesignAttendance data={data} />;
+    case 'members': return <RedesignPeople data={data} actions={PREVIEW_ACTIONS} />;
+    case 'attendance': return <RedesignAttendance data={data} actions={PREVIEW_ACTIONS} />;
     case 'engagement': return <RedesignEngagement data={data} />;
     case 'reports': return <RedesignReports data={data} />;
     case 'ai': return <RedesignAskGrace data={data} />;
     case 'groups': return <RedesignGroups data={data} />;
-    case 'events': return <RedesignEvents data={data} />;
+    case 'events': return <RedesignEvents data={data} actions={PREVIEW_ACTIONS} />;
     case 'giving': return <RedesignGiving data={data} />;
     case 'settings': return <RedesignPlaceholder title="Settings" icon="settings" />;
     default: return <RedesignPlaceholder title={SHELL_TITLES[screen] || screen} icon="grid" />;
   }
 }
+
+/* Preview is unauthenticated & read-only — these no-ops let the write UI
+   render and be exercised without persisting (real writes run on the authed / path). */
+const PREVIEW_ACTIONS: RedesignActions = {
+  checkIn: () => {},
+  addInteraction: () => {},
+  addPrayer: () => {},
+  addEvent: () => {},
+};
 
 export function RedesignPreview() {
   const [palette, setPalette] = useState<Palette>('sanctuary');

@@ -310,6 +310,12 @@ function App() {
       <ErrorBoundary>
         <RedesignApp
           data={redesignData}
+          actions={{
+            checkIn: (personId, eventType) => handlers.checkIn(personId, eventType),
+            addInteraction: (i) => handlers.addInteraction(i),
+            addPrayer: (p) => handlers.addPrayer(p),
+            addEvent: (e) => handlers.addEvent({ ...e, allDay: e.allDay }),
+          }}
           onAddPerson={() => { setView('people'); modals.openPersonForm(); }}
           onOpenClassic={() => setView('dashboard')}
         />

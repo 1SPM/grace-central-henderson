@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData } from './useGraceData';
+import type { RedesignActions, RedesignEventCategory } from './actions';
 
 export function RedesignGroups({ data }: { data: GraceData }) {
   return (
@@ -32,7 +33,52 @@ export function RedesignGroups({ data }: { data: GraceData }) {
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
-export function RedesignEvents({ data }: { data: GraceData }) {
+const EVENT_CATEGORIES: RedesignEventCategory[] = ['service', 'meeting', 'event', 'small-group', 'class', 'outreach', 'other'];
+
+function NewEventModal({ defaultDate, onClose, onCreate }: { defaultDate?: Date; onClose: () => void; onCreate: RedesignActions['addEvent'] }) {
+  const initial = defaultDate ?? new Date();
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState(initial.toISOString().split('T')[0]);
+  const [time, setTime] = useState('09:00');
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState<RedesignEventCategory>('service');
+  const [saving, setSaving] = useState(false);
+
+  async function submit() {
+    if (!title.trim() || saving) return;
+    setSaving(true);
+    const startDate = new Date(`${date}T${time}`).toISOString();
+    await onCreate({ title: title.trim(), startDate, allDay: false, location: location.trim() || undefined, category });
+    onClose();
+  }
+
+  return (
+    <div className="modal-mask" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <h2>New event</h2>
+        <div className="sub">Add it to the calendar</div>
+        <div className="field"><label>Title</label><input className="input" placeholder="Sunday Service" value={title} onChange={e => setTitle(e.target.value)} /></div>
+        <div className="row" style={{ gap: 12 }}>
+          <div className="field" style={{ flex: 1 }}><label>Date</label><input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+          <div className="field" style={{ flex: 1 }}><label>Time</label><input className="input" type="time" value={time} onChange={e => setTime(e.target.value)} /></div>
+        </div>
+        <div className="field"><label>Location</label><input className="input" placeholder="Main Sanctuary" value={location} onChange={e => setLocation(e.target.value)} /></div>
+        <div className="field"><label>Category</label>
+          <select className="select" value={category} onChange={e => setCategory(e.target.value as RedesignEventCategory)}>
+            {EVENT_CATEGORIES.map(c => <option key={c} value={c}>{c[0].toUpperCase() + c.slice(1)}</option>)}
+          </select>
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={submit} disabled={!title.trim() || saving}>{saving ? 'Saving…' : 'Create event'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function RedesignEvents({ data, actions }: { data: GraceData; actions?: RedesignActions }) {
+  const [showNew, setShowNew] = useState(false);
   // events grouped by local day
   const eventsByDay = useMemo(() => {
     const m = new Map<string, GraceData['events']>();
@@ -85,9 +131,17 @@ export function RedesignEvents({ data }: { data: GraceData }) {
           <button className="btn btn-sm btn-icon" onClick={() => shiftMonth(-1)} title="Previous month"><Icon name="arrow_left" size={14} /></button>
           <button className="btn btn-sm" onClick={() => { setMonth(new Date(today.getFullYear(), today.getMonth(), 1)); setSelectedKey(null); }}>Today</button>
           <button className="btn btn-sm btn-icon" onClick={() => shiftMonth(1)} title="Next month"><Icon name="arrow_right" size={14} /></button>
-          <button className="btn btn-primary"><Icon name="plus" size={14} /> New event</button>
+          {actions && <button className="btn btn-primary" onClick={() => setShowNew(true)}><Icon name="plus" size={14} /> New event</button>}
         </div>
       </div>
+
+      {showNew && actions && (
+        <NewEventModal
+          defaultDate={selectedDate ?? undefined}
+          onClose={() => setShowNew(false)}
+          onCreate={actions.addEvent}
+        />
+      )}
 
       <div className="card">
         <div className="card-head">

@@ -9,14 +9,16 @@ import { Icon } from './Icon';
 import { DashboardView } from './RedesignDashboard';
 import { dashboardFromGraceData } from './useRedesignDashboard';
 import type { GraceData } from './useGraceData';
+import type { RedesignActions } from './actions';
 import { RedesignPeople } from './RedesignPeople';
 import { RedesignAttendance, RedesignReports } from './RedesignAnalytics';
 import { RedesignEngagement } from './RedesignEngagement';
 import { RedesignAskGrace } from './RedesignAskGrace';
 import { RedesignGroups, RedesignEvents, RedesignGiving, RedesignPlaceholder } from './RedesignMisc';
 
-export function RedesignApp({ data, onAddPerson, onOpenClassic }: {
+export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
   data: GraceData;
+  actions: RedesignActions;
   onAddPerson: () => void;
   onOpenClassic: () => void;
 }) {
@@ -25,13 +27,13 @@ export function RedesignApp({ data, onAddPerson, onOpenClassic }: {
   let body: React.ReactNode;
   switch (screen) {
     case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} />; break;
-    case 'members': body = <RedesignPeople data={data} onAddPerson={onAddPerson} />; break;
-    case 'attendance': body = <RedesignAttendance data={data} />; break;
+    case 'members': body = <RedesignPeople data={data} actions={actions} onAddPerson={onAddPerson} />; break;
+    case 'attendance': body = <RedesignAttendance data={data} actions={actions} />; break;
     case 'engagement': body = <RedesignEngagement data={data} />; break;
     case 'reports': body = <RedesignReports data={data} />; break;
     case 'ai': body = <RedesignAskGrace data={data} />; break;
     case 'groups': body = <RedesignGroups data={data} />; break;
-    case 'events': body = <RedesignEvents data={data} />; break;
+    case 'events': body = <RedesignEvents data={data} actions={actions} />; break;
     case 'giving': body = <RedesignGiving data={data} />; break;
     default: body = <RedesignPlaceholder title={SHELL_TITLES[screen] || screen} icon="settings" />;
   }

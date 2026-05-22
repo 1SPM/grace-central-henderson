@@ -1,8 +1,53 @@
 import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData, GPerson } from './useGraceData';
+import type { RedesignActions, InteractionType } from './actions';
 
 const INTER_ICON: Record<string, IconName> = { note: 'book', call: 'phone', email: 'mail', visit: 'user', text: 'chat', prayer: 'pray' };
+
+const LOG_TYPES: { id: InteractionType; label: string }[] = [
+  { id: 'note', label: 'Note' },
+  { id: 'call', label: 'Call' },
+  { id: 'email', label: 'Email' },
+  { id: 'text', label: 'Text' },
+  { id: 'visit', label: 'Visit' },
+];
+
+function LogComposer({ person, actions }: { person: GPerson; actions: RedesignActions }) {
+  const [type, setType] = useState<InteractionType>('note');
+  const [content, setContent] = useState('');
+  const [isPrayer, setIsPrayer] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function save() {
+    if (!content.trim() || saving) return;
+    setSaving(true);
+    if (isPrayer) {
+      await actions.addPrayer({ personId: person.id, content: content.trim(), isPrivate: false });
+    } else {
+      await actions.addInteraction({ personId: person.id, type, content: content.trim(), createdBy: 'Pastor' });
+    }
+    setContent(''); setSaving(false); setDone(true);
+    setTimeout(() => setDone(false), 2500);
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 'var(--gap, 18px)' }}>
+      <div className="card-head"><h2>Log an interaction</h2>{done && <span className="badge badge-success dot">Saved</span>}</div>
+      <div className="row" style={{ gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+        {LOG_TYPES.map(t => (
+          <button key={t.id} className={`chip ${!isPrayer && type === t.id ? 'active' : ''}`} onClick={() => { setIsPrayer(false); setType(t.id); }}>{t.label}</button>
+        ))}
+        <button className={`chip ${isPrayer ? 'active' : ''}`} onClick={() => setIsPrayer(true)}><Icon name="pray" size={12} /> Prayer</button>
+      </div>
+      <textarea className="textarea" placeholder={isPrayer ? `Prayer request for ${person.firstName}…` : `What happened with ${person.firstName}?`} value={content} onChange={e => setContent(e.target.value)} style={{ width: '100%', marginBottom: 10 }} />
+      <div className="row" style={{ justifyContent: 'flex-end' }}>
+        <button className="btn btn-primary" onClick={save} disabled={!content.trim() || saving}>{saving ? 'Saving…' : isPrayer ? 'Log prayer' : 'Log interaction'}</button>
+      </div>
+    </div>
+  );
+}
 
 function StatusBadge({ status }: { status: string }) {
   if (status === 'inactive') return <span className="badge badge-muted dot">Inactive</span>;
@@ -11,7 +56,7 @@ function StatusBadge({ status }: { status: string }) {
   return <span className="badge badge-success dot">{status === 'regular' ? 'Regular' : 'Member'}</span>;
 }
 
-function MemberDetail({ person, interactions, onBack }: { person: GPerson; interactions: GraceData['interactions']; onBack: () => void }) {
+function MemberDetail({ person, interactions, actions, onBack }: { person: GPerson; interactions: GraceData['interactions']; actions?: RedesignActions; onBack: () => void }) {
   const [tab, setTab] = useState<'overview' | 'groups' | 'contact'>('overview');
   const history = interactions.filter(i => i.personId === person.id).slice(0, 8);
   return (
@@ -40,6 +85,8 @@ function MemberDetail({ person, interactions, onBack }: { person: GPerson; inter
           <div key={t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</div>
         ))}
       </div>
+
+      {tab === 'overview' && actions && <LogComposer person={person} actions={actions} />}
 
       {tab === 'overview' && (
         <div className="card">
@@ -83,7 +130,7 @@ function MemberDetail({ person, interactions, onBack }: { person: GPerson; inter
   );
 }
 
-export function RedesignPeople({ data, onAddPerson }: { data: GraceData; onAddPerson?: () => void }) {
+export function RedesignPeople({ data, actions, onAddPerson }: { data: GraceData; actions?: RedesignActions; onAddPerson?: () => void }) {
   const [filter, setFilter] = useState('all');
   const [q, setQ] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -108,7 +155,7 @@ export function RedesignPeople({ data, onAddPerson }: { data: GraceData; onAddPe
 
   if (selectedId) {
     const person = data.people.find(p => p.id === selectedId);
-    if (person) return <MemberDetail person={person} interactions={data.interactions} onBack={() => setSelectedId(null)} />;
+    if (person) return <MemberDetail person={person} interactions={data.interactions} actions={actions} onBack={() => setSelectedId(null)} />;
   }
 
   return (

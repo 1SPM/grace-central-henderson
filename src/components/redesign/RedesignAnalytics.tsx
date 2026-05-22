@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData } from './useGraceData';
+import type { RedesignActions, AttendanceEventType } from './actions';
 
 function Kpi({ label, val, delta, icon, tone }: { label: string; val: string | number; delta: string; icon: IconName; tone: string }) {
   return (
@@ -24,7 +25,14 @@ function BarRow({ label, val, max }: { label: string; val: number; max: number }
 
 const EVENT_LABELS: Record<string, string> = { sunday: 'Sunday', wednesday: 'Wednesday', 'small-group': 'Small group', special: 'Special' };
 
-export function RedesignAttendance({ data }: { data: GraceData }) {
+const SERVICES: { id: AttendanceEventType; label: string }[] = [
+  { id: 'sunday', label: 'Sunday' },
+  { id: 'wednesday', label: 'Wednesday' },
+  { id: 'small-group', label: 'Small group' },
+  { id: 'special', label: 'Special' },
+];
+
+export function RedesignAttendance({ data, actions }: { data: GraceData; actions?: RedesignActions }) {
   const personById = useMemo(() => new Map(data.people.map(p => [p.id, p])), [data.people]);
   const byType = useMemo(() => {
     const m = new Map<string, number>();
@@ -35,14 +43,64 @@ export function RedesignAttendance({ data }: { data: GraceData }) {
   const lastDate = data.attendance[0]?.date;
   const maxType = Math.max(1, ...byType.map(t => t[1]));
 
+  // interactive check-in (optimistic local state; persists via actions.checkIn)
+  const [service, setService] = useState<AttendanceEventType>('sunday');
+  const [checkedIn, setCheckedIn] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+  const roster = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return data.people.filter(p => p.status !== 'inactive' && (!q || p.name.toLowerCase().includes(q)));
+  }, [data.people, search]);
+
+  function toggleCheckIn(personId: string) {
+    if (checkedIn.has(personId)) return;
+    setCheckedIn(prev => new Set(prev).add(personId));
+    void actions?.checkIn(personId, service);
+  }
+
   return (
     <div className="page">
       <div className="grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-        <Kpi label="Total check-ins" val={data.attendance.length} delta="all recorded" icon="check" tone="emerald" />
+        <Kpi label="Total check-ins" val={data.attendance.length + checkedIn.size} delta={checkedIn.size ? `+${checkedIn.size} just now` : 'all recorded'} icon="check" tone="emerald" />
         <Kpi label="People attended" val={distinct} delta="distinct members" icon="users" tone="indigo" />
         <Kpi label="Service types" val={byType.length} delta="tracked" icon="calendar" tone="sky" />
         <Kpi label="Last check-in" val={lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'} delta="most recent" icon="bell" tone="amber" />
       </div>
+
+      {actions && (
+        <div className="card" style={{ marginBottom: 'var(--gap, 18px)' }}>
+          <div className="card-head">
+            <div><h2>Take attendance</h2><div className="sub">Tap a name to check them into today's service</div></div>
+            <div className="chips">
+              {SERVICES.map(s => (
+                <button key={s.id} className={`chip ${service === s.id ? 'active' : ''}`} onClick={() => setService(s.id)}>{s.label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="list-search" style={{ marginBottom: 12, width: 260 }}>
+            <Icon name="search" size={14} className="mute" />
+            <input placeholder="Find a member…" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8, maxHeight: 320, overflowY: 'auto' }}>
+            {roster.map(p => {
+              const done = checkedIn.has(p.id);
+              return (
+                <button key={p.id} onClick={() => toggleCheckIn(p.id)} disabled={done}
+                  className="row" style={{
+                    gap: 10, padding: '8px 10px', borderRadius: 10, textAlign: 'left',
+                    border: '1px solid var(--line-2)', cursor: done ? 'default' : 'pointer',
+                    background: done ? 'var(--c-emerald-soft)' : 'var(--surface)',
+                  }}>
+                  <div className="avatar sm">{p.initials}</div>
+                  <span style={{ flex: 1, fontSize: 13, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                  {done ? <Icon name="check" size={15} className="" /> : <Icon name="plus" size={14} className="mute" />}
+                </button>
+              );
+            })}
+          </div>
+          {checkedIn.size > 0 && <p className="mute" style={{ fontSize: 12, marginTop: 12 }}>{checkedIn.size} checked in to {SERVICES.find(s => s.id === service)?.label} service.</p>}
+        </div>
+      )}
 
       <div className="grid-2">
         <div className="card">
