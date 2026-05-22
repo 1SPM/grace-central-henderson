@@ -83,6 +83,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const config = {
       maxOutputTokens: Math.min(maxTokens || 1024, 4096),
       temperature: 0.7,
+      // gemini-2.5-flash enables "thinking" by default, and thinking tokens
+      // count against maxOutputTokens — which truncated chat replies to a few
+      // words. Disable it for this conversational endpoint.
+      thinkingConfig: { thinkingBudget: 0 },
     };
 
     if (shouldStream) {
