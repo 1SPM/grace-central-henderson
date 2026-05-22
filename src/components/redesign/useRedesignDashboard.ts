@@ -25,6 +25,7 @@ export interface DashboardData {
   lastAttendanceLabel: string | null;
   lastEventLabel: string | null;
   eventDays: string[]; // day keys (Y-M-D) that have at least one event
+  eventsByDay: Record<string, { title: string; time: string }[]>; // day key -> events
   attendanceByDay: Record<string, number>; // day key (Y-M-D) -> check-in count
 }
 
@@ -99,6 +100,14 @@ export function dashboardFromGraceData(data: GraceData): DashboardData {
 
   const eventDays = data.events.map(e => { const d = new Date(e.startDate); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean);
 
+  const eventsByDay: DashboardData['eventsByDay'] = {};
+  for (const e of data.events) {
+    const d = new Date(e.startDate);
+    if (isNaN(d.getTime())) continue;
+    const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    (eventsByDay[k] ??= []).push({ title: e.title, time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) });
+  }
+
   const attendanceByDay: Record<string, number> = {};
   for (const a of data.attendance) {
     const d = new Date(a.date);
@@ -113,7 +122,7 @@ export function dashboardFromGraceData(data: GraceData): DashboardData {
     prayersOpen: data.prayersOpen, groups: data.groups.length, newThisMonth,
     needsCare, needsCareTotal: inactive.length,
     recentActivity, upcoming, attendanceWeeks: weeks, attendanceInWindow,
-    lastAttendanceLabel, lastEventLabel, eventDays, attendanceByDay,
+    lastAttendanceLabel, lastEventLabel, eventDays, eventsByDay, attendanceByDay,
   };
 }
 
@@ -226,6 +235,7 @@ export function useRedesignDashboard(): { data: DashboardData | null; status: 'l
           lastAttendanceLabel,
           lastEventLabel,
           eventDays: (eventsRes.data ?? []).map((e: { start_date: string }) => { const d = new Date(e.start_date); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean),
+          eventsByDay: ((eventsRes.data ?? []) as { title: string; start_date: string }[]).reduce<DashboardData['eventsByDay']>((acc, e) => { const d = new Date(e.start_date); if (!isNaN(d.getTime())) { const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; (acc[k] ??= []).push({ title: e.title, time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) }); } return acc; }, {}),
           attendanceByDay: ((attendanceRes.data ?? []) as { date: string }[]).reduce<Record<string, number>>((acc, a) => { const d = new Date(a.date); if (!isNaN(d.getTime())) { const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; acc[k] = (acc[k] ?? 0) + 1; } return acc; }, {}),
         });
         setStatus('ready');

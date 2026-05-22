@@ -1,6 +1,66 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { useRedesignDashboard, type DashboardData } from './useRedesignDashboard';
+
+const WALLPAPER_KEY = 'grace-hero-wallpaper';
+
+function downscaleImage(file: File, maxW = 1400): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('no ctx'));
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function HeroArt() {
+  const [src, setSrc] = useState<string | null>(() => { try { return localStorage.getItem(WALLPAPER_KEY); } catch { return null; } });
+  const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setBusy(true);
+    try {
+      const dataUrl = await downscaleImage(file);
+      try { localStorage.setItem(WALLPAPER_KEY, dataUrl); } catch { /* quota — keep in-memory only */ }
+      setSrc(dataUrl);
+    } finally {
+      setBusy(false);
+    }
+  }
+  function remove() { try { localStorage.removeItem(WALLPAPER_KEY); } catch { /* ignore */ } setSrc(null); }
+
+  return (
+    <div className="hero-art" style={src ? { background: `url(${src}) center/cover no-repeat` } : undefined}>
+      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFile} />
+      {!src ? (
+        <button className="hero-art-add" onClick={() => inputRef.current?.click()} disabled={busy}>
+          <Icon name="plus" size={18} />
+          {busy ? 'Uploading…' : 'Add a photo of your church'}
+        </button>
+      ) : (
+        <div className="hero-art-tools">
+          <button className="btn btn-sm" onClick={() => inputRef.current?.click()} disabled={busy}>Change</button>
+          <button className="btn btn-sm" onClick={remove}>Remove</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function greetingWord(h: number): string {
   if (h < 12) return 'Good morning';
@@ -57,21 +117,36 @@ function AnalogClock({ now }: { now: Date }) {
   );
 }
 
-/* Top-of-dashboard banner: analog clock + date on the left, mini month calendar on the right. */
-function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onOpenCalendar?: () => void }) {
+const keyOf = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+/* Top-of-dashboard banner: analog clock (left) + interactive mini calendar with a
+   selected-day agenda (right). Click any day to see what's on / what to do. */
+function ClockCalendar({ eventDays, eventsByDay, onOpenCalendar }: {
+  eventDays: string[];
+  eventsByDay: DashboardData['eventsByDay'];
+  onOpenCalendar?: () => void;
+}) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
+  const today = new Date();
+  const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selected, setSelected] = useState<Date>(() => new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+
   const eventSet = new Set(eventDays);
-  const month = now.getMonth();
-  const todayDate = now.getDate();
-  const first = new Date(now.getFullYear(), month, 1);
+  const month = viewMonth.getMonth();
+  const first = new Date(viewMonth.getFullYear(), month, 1);
   const start = new Date(first);
   start.setDate(1 - first.getDay());
   const cells = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+
+  const shiftMonth = (delta: number) => setViewMonth(m => new Date(m.getFullYear(), m.getMonth() + delta, 1));
+  const selKey = keyOf(selected);
+  const agenda = eventsByDay[selKey] ?? [];
+  const isToday = (d: Date) => keyOf(d) === keyOf(today);
 
   return (
     <div className="card clock-cal-banner">
@@ -82,22 +157,52 @@ function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onO
       </div>
       <div className="ccb-cal">
         <div className="cc-month">
-          <span>{now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-          {onOpenCalendar && <button className="btn btn-ghost btn-sm" onClick={onOpenCalendar}>Calendar <Icon name="arrow_right" size={12} /></button>}
+          <span>{viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+          <div className="row" style={{ gap: 4 }}>
+            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => shiftMonth(-1)} title="Previous month"><Icon name="arrow_left" size={13} /></button>
+            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => shiftMonth(1)} title="Next month"><Icon name="arrow_right" size={13} /></button>
+          </div>
         </div>
         <div className="mc-grid">
           {MC_DOW.map((d, i) => <div key={i} className="mc-dow">{d}</div>)}
           {cells.map((d, i) => {
             const inMonth = d.getMonth() === month;
-            const isToday = inMonth && d.getDate() === todayDate;
-            const hasEvent = eventSet.has(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+            const hasEvent = eventSet.has(keyOf(d));
+            const sel = keyOf(d) === selKey;
             return (
-              <div key={i} className={`mc-day${inMonth ? '' : ' other'}${isToday ? ' today' : ''}`}>
+              <button
+                key={i}
+                className={`mc-day${inMonth ? '' : ' other'}${isToday(d) ? ' today' : ''}${sel ? ' sel' : ''}`}
+                onClick={() => setSelected(new Date(d.getFullYear(), d.getMonth(), d.getDate()))}
+              >
                 <span>{d.getDate()}</span>
                 {hasEvent && <i className="mc-dot" />}
-              </div>
+              </button>
             );
           })}
+        </div>
+
+        <div className="cc-agenda">
+          <div className="cc-agenda-head">
+            {isToday(selected) ? 'Today' : selected.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+          </div>
+          {agenda.length > 0 ? (
+            <div className="col" style={{ gap: 6 }}>
+              {agenda.map((e, i) => (
+                <div key={i} className="cc-agenda-item">
+                  <i className="mc-dot" style={{ position: 'static' }} />
+                  <span className="cc-agenda-title">{e.title}</span>
+                  <span className="mute" style={{ fontSize: 11.5 }}>{e.time}</span>
+                </div>
+              ))}
+              {onOpenCalendar && <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} onClick={onOpenCalendar}>Open calendar <Icon name="arrow_right" size={12} /></button>}
+            </div>
+          ) : (
+            <div className="cc-agenda-empty">
+              <span className="mute" style={{ fontSize: 12.5 }}>Nothing scheduled.</span>
+              <button className="btn btn-sm btn-primary" onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -229,10 +334,10 @@ export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: Dashboard
         </div>
       </div>
 
-      <ClockCalendar eventDays={d.eventDays} onOpenCalendar={onOpenCalendar} />
+      <ClockCalendar eventDays={d.eventDays} eventsByDay={d.eventsByDay} onOpenCalendar={onOpenCalendar} />
 
       <div className="hero-card">
-        <div className="hero-art" />
+        <HeroArt />
         <div className="hero-meta">
           <div>
             <div className="eyebrow">{d.churchName}</div>

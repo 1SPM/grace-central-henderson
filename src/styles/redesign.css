@@ -602,3 +602,23 @@
 .grace-v2 .heatmap-cell.l4 { background: var(--primary); border-color: transparent; }
 .grace-v2 .heatmap-legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); justify-content: flex-end; margin-top: 12px; }
 .grace-v2 .heatmap-legend .sq { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* ---- hero wallpaper upload ---- */
+.grace-v2 .hero-art { position: relative; }
+.grace-v2 .hero-art-add { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 0; color: var(--primary-ink); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 120ms; }
+.grace-v2 .hero-art-add:hover { background: color-mix(in oklab, var(--primary) 10%, transparent); }
+.grace-v2 .hero-art-add .svg-icon { opacity: 0.7; }
+.grace-v2 .hero-art-tools { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 6px; opacity: 0; transition: opacity 120ms; }
+.grace-v2 .hero-card:hover .hero-art-tools { opacity: 1; }
+
+/* ---- interactive mini-calendar: selected day + agenda ---- */
+.grace-v2 .mc-day { border: 0; background: transparent; cursor: pointer; padding: 0; }
+.grace-v2 .mc-day:hover > span { background: var(--bg-2); }
+.grace-v2 .mc-day.sel > span { box-shadow: 0 0 0 1.5px var(--primary); }
+.grace-v2 .mc-day.today.sel > span { box-shadow: none; }
+.grace-v2 .cc-agenda { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-2); }
+.grace-v2 .cc-agenda-head { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.grace-v2 .cc-agenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.grace-v2 .cc-agenda-item .mc-dot { background: var(--primary); flex: 0 0 auto; }
+.grace-v2 .cc-agenda-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.grace-v2 .cc-agenda-empty { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
