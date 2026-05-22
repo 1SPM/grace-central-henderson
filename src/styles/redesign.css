@@ -47,6 +47,11 @@
   --font-ui: "Geist", "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
 
+  /* layout rhythm (from the design) */
+  --pad-card: 22px;
+  --gap: 18px;
+  --row-h: 56px;
+
   /* container paints its own surface so it never relies on body */
   position: relative;
   isolation: isolate;
@@ -339,6 +344,7 @@
   border: 1px solid var(--line);
   box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 4px 20px -8px rgba(26, 34, 64, 0.12), 0 1px 3px rgba(26, 34, 64, 0.05);
   border-radius: var(--radius-lg);
+  padding: var(--pad-card, 22px);
 }
 
 /* ============================================================
