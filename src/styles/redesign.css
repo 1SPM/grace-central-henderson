@@ -552,11 +552,11 @@
 .grace-v2 .cc-time { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); line-height: 1; }
 .grace-v2 .cc-date { font-family: var(--font-display); font-size: 16px; color: var(--ink-2); margin-top: 6px; }
 .grace-v2 .cc-cal { padding: 14px 16px 16px; }
-.grace-v2 .cc-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
-.grace-v2 .mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-.grace-v2 .mc-dow { text-align: center; font-size: 10px; font-weight: 600; color: var(--muted); padding-bottom: 4px; }
-.grace-v2 .mc-day { position: relative; height: 32px; display: grid; place-items: center; font-size: 12px; color: var(--ink); }
-.grace-v2 .mc-day > span { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 999px; line-height: 1; }
+.grace-v2 .cc-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
+.grace-v2 .mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+.grace-v2 .mc-dow { text-align: center; font-size: 9px; font-weight: 600; color: var(--muted); padding-bottom: 2px; }
+.grace-v2 .mc-day { position: relative; height: 26px; display: grid; place-items: center; font-size: 11px; color: var(--ink); }
+.grace-v2 .mc-day > span { width: 21px; height: 21px; display: grid; place-items: center; border-radius: 999px; line-height: 1; }
 .grace-v2 .mc-day.other > span { color: color-mix(in oklab, var(--muted) 55%, transparent); }
 .grace-v2 .mc-day.today > span { background: var(--ink); color: #fff; font-weight: 600; }
 .grace-v2 .mc-dot { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 999px; background: var(--primary); }
@@ -565,11 +565,12 @@
 /* ============================================================
    Clock+calendar banner (top of dashboard) + analog clock
    ============================================================ */
-.grace-v2 .clock-cal-banner { padding: 0; overflow: hidden; display: grid; grid-template-columns: 280px 1fr; }
-.grace-v2 .ccb-clock { padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 14%, var(--surface)) 0%, var(--surface) 100%); border-right: 1px solid var(--line-2); }
-.grace-v2 .ccb-digital { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 500; color: var(--ink); margin-top: 6px; line-height: 1; }
-.grace-v2 .ccb-date { font-family: var(--font-display); font-size: 15px; color: var(--ink-2); }
-.grace-v2 .ccb-cal { padding: 16px 18px; }
+.grace-v2 .clock-cal-banner { padding: 0; overflow: hidden; display: grid; grid-template-columns: 170px minmax(280px, 320px) 1fr; }
+.grace-v2 .ccb-agenda { padding: 16px 18px; border-left: 1px solid var(--line-2); }
+.grace-v2 .ccb-clock { padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: color-mix(in oklab, var(--primary) 4%, var(--surface)); border-right: 1px solid var(--line-2); }
+.grace-v2 .ccb-digital { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 500; color: var(--ink); margin-top: 4px; line-height: 1; }
+.grace-v2 .ccb-date { font-family: var(--font-display); font-size: 12.5px; color: var(--muted); }
+.grace-v2 .ccb-cal { padding: 14px 16px; }
 
 .grace-v2 .analog-clock { display: block; }
 .grace-v2 .ac-face { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
@@ -584,6 +585,7 @@
 @media (max-width: 720px) {
   .grace-v2 .clock-cal-banner { grid-template-columns: 1fr; }
   .grace-v2 .ccb-clock { border-right: 0; border-bottom: 1px solid var(--line-2); }
+  .grace-v2 .ccb-agenda { border-left: 0; border-top: 1px solid var(--line-2); }
 }
 
 /* ============================================================
@@ -616,8 +618,7 @@
 .grace-v2 .mc-day:hover > span { background: var(--bg-2); }
 .grace-v2 .mc-day.sel > span { box-shadow: 0 0 0 1.5px var(--primary); }
 .grace-v2 .mc-day.today.sel > span { box-shadow: none; }
-.grace-v2 .cc-agenda { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-2); }
-.grace-v2 .cc-agenda-head { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.grace-v2 .cc-agenda-head { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .grace-v2 .cc-agenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .grace-v2 .cc-agenda-item .mc-dot { background: var(--primary); flex: 0 0 auto; }
 .grace-v2 .cc-agenda-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }

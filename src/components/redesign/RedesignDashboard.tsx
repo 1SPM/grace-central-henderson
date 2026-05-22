@@ -102,7 +102,7 @@ function AnalogClock({ now }: { now: Date }) {
   };
   const hr = hand(hrA, 26), mn = hand(minA, 36), sc = hand(secA, 40);
   return (
-    <svg viewBox="0 0 100 100" className="analog-clock" width="120" height="120" aria-label="Current time">
+    <svg viewBox="0 0 100 100" className="analog-clock" width="80" height="80" aria-label="Current time">
       <circle cx="50" cy="50" r="47" className="ac-face" />
       {Array.from({ length: 12 }, (_, i) => {
         const a = (i * 30 - 90) * Math.PI / 180;
@@ -181,29 +181,29 @@ function ClockCalendar({ eventDays, eventsByDay, onOpenCalendar }: {
             );
           })}
         </div>
+      </div>
 
-        <div className="cc-agenda">
-          <div className="cc-agenda-head">
-            {isToday(selected) ? 'Today' : selected.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-          </div>
-          {agenda.length > 0 ? (
-            <div className="col" style={{ gap: 6 }}>
-              {agenda.map((e, i) => (
-                <div key={i} className="cc-agenda-item">
-                  <i className="mc-dot" style={{ position: 'static' }} />
-                  <span className="cc-agenda-title">{e.title}</span>
-                  <span className="mute" style={{ fontSize: 11.5 }}>{e.time}</span>
-                </div>
-              ))}
-              {onOpenCalendar && <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} onClick={onOpenCalendar}>Open calendar <Icon name="arrow_right" size={12} /></button>}
-            </div>
-          ) : (
-            <div className="cc-agenda-empty">
-              <span className="mute" style={{ fontSize: 12.5 }}>Nothing scheduled.</span>
-              <button className="btn btn-sm btn-primary" onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
-            </div>
-          )}
+      <div className="ccb-agenda">
+        <div className="cc-agenda-head">
+          {isToday(selected) ? 'Today' : selected.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
         </div>
+        {agenda.length > 0 ? (
+          <div className="col" style={{ gap: 8 }}>
+            {agenda.map((e, i) => (
+              <div key={i} className="cc-agenda-item">
+                <i className="mc-dot" style={{ position: 'static' }} />
+                <span className="cc-agenda-title">{e.title}</span>
+                <span className="mute" style={{ fontSize: 11.5 }}>{e.time}</span>
+              </div>
+            ))}
+            {onOpenCalendar && <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', marginTop: 2 }} onClick={onOpenCalendar}>Open calendar <Icon name="arrow_right" size={12} /></button>}
+          </div>
+        ) : (
+          <div className="col" style={{ gap: 10, alignItems: 'flex-start' }}>
+            <span className="mute" style={{ fontSize: 12.5 }}>Nothing scheduled for this day.</span>
+            <button className="btn btn-sm btn-primary" onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
+          </div>
+        )}
       </div>
     </div>
   );
