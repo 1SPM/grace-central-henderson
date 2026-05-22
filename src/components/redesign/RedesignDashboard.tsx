@@ -102,7 +102,7 @@ function AnalogClock({ now }: { now: Date }) {
   };
   const hr = hand(hrA, 26), mn = hand(minA, 36), sc = hand(secA, 40);
   return (
-    <svg viewBox="0 0 100 100" className="analog-clock" width="80" height="80" aria-label="Current time">
+    <svg viewBox="0 0 100 100" className="analog-clock" width="64" height="64" aria-label="Current time">
       <circle cx="50" cy="50" r="47" className="ac-face" />
       {Array.from({ length: 12 }, (_, i) => {
         const a = (i * 30 - 90) * Math.PI / 180;

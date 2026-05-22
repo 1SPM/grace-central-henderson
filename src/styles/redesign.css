@@ -552,11 +552,11 @@
 .grace-v2 .cc-time { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); line-height: 1; }
 .grace-v2 .cc-date { font-family: var(--font-display); font-size: 16px; color: var(--ink-2); margin-top: 6px; }
 .grace-v2 .cc-cal { padding: 14px 16px 16px; }
-.grace-v2 .cc-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
+.grace-v2 .cc-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; font-size: 11px; font-weight: 600; color: var(--ink-2); }
 .grace-v2 .mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
-.grace-v2 .mc-dow { text-align: center; font-size: 9px; font-weight: 600; color: var(--muted); padding-bottom: 2px; }
-.grace-v2 .mc-day { position: relative; height: 26px; display: grid; place-items: center; font-size: 11px; color: var(--ink); }
-.grace-v2 .mc-day > span { width: 21px; height: 21px; display: grid; place-items: center; border-radius: 999px; line-height: 1; }
+.grace-v2 .mc-dow { text-align: center; font-size: 8.5px; font-weight: 600; color: var(--muted); padding-bottom: 1px; }
+.grace-v2 .mc-day { position: relative; height: 22px; display: grid; place-items: center; font-size: 10.5px; color: var(--ink); }
+.grace-v2 .mc-day > span { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 999px; line-height: 1; }
 .grace-v2 .mc-day.other > span { color: color-mix(in oklab, var(--muted) 55%, transparent); }
 .grace-v2 .mc-day.today > span { background: var(--ink); color: #fff; font-weight: 600; }
 .grace-v2 .mc-dot { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 999px; background: var(--primary); }
@@ -565,9 +565,9 @@
 /* ============================================================
    Clock+calendar banner (top of dashboard) + analog clock
    ============================================================ */
-.grace-v2 .clock-cal-banner { padding: 0; overflow: hidden; display: grid; grid-template-columns: 170px minmax(280px, 320px) 1fr; }
-.grace-v2 .ccb-agenda { padding: 16px 18px; border-left: 1px solid var(--line-2); }
-.grace-v2 .ccb-clock { padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: color-mix(in oklab, var(--primary) 4%, var(--surface)); border-right: 1px solid var(--line-2); }
+.grace-v2 .clock-cal-banner { padding: 0; overflow: hidden; display: grid; grid-template-columns: 150px minmax(230px, 260px) 1fr; }
+.grace-v2 .ccb-agenda { padding: 14px 16px; border-left: 1px solid var(--line-2); }
+.grace-v2 .ccb-clock { padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: color-mix(in oklab, var(--primary) 4%, var(--surface)); border-right: 1px solid var(--line-2); }
 .grace-v2 .ccb-digital { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 500; color: var(--ink); margin-top: 4px; line-height: 1; }
 .grace-v2 .ccb-date { font-family: var(--font-display); font-size: 12.5px; color: var(--muted); }
 .grace-v2 .ccb-cal { padding: 14px 16px; }
