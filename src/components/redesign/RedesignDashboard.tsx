@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { useRedesignDashboard, type DashboardData } from './useRedesignDashboard';
 
@@ -6,6 +7,56 @@ function greetingWord(): string {
   if (h < 12) return 'Good morning';
   if (h < 18) return 'Good afternoon';
   return 'Good evening';
+}
+
+const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+function ClockCalendar({ eventDays, onOpenCalendar }: { eventDays: string[]; onOpenCalendar?: () => void }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const eventSet = new Set(eventDays);
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const todayDate = now.getDate();
+  const first = new Date(year, month, 1);
+  const start = new Date(first);
+  start.setDate(1 - first.getDay());
+  const cells = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+
+  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+
+  return (
+    <div className="card clock-cal">
+      <div className="cc-clock">
+        <div className="cc-time">{time}</div>
+        <div className="cc-date">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+      </div>
+      <div className="cc-cal">
+        <div className="cc-month">
+          <span>{now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+          {onOpenCalendar && <button className="btn btn-ghost btn-sm" onClick={onOpenCalendar}>Calendar <Icon name="arrow_right" size={12} /></button>}
+        </div>
+        <div className="mc-grid">
+          {MC_DOW.map((d, i) => <div key={i} className="mc-dow">{d}</div>)}
+          {cells.map((d, i) => {
+            const inMonth = d.getMonth() === month;
+            const isToday = inMonth && d.getDate() === todayDate;
+            const hasEvent = eventSet.has(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+            return (
+              <div key={i} className={`mc-day${inMonth ? '' : ' other'}${isToday ? ' today' : ''}`}>
+                <span>{d.getDate()}</span>
+                {hasEvent && <i className="mc-dot" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function KPI({ label, val, delta, icon, tone }: { label: string; val: string; delta: string; icon: IconName; tone: string }) {
@@ -68,7 +119,7 @@ export function RedesignDashboard() {
   return <DashboardView d={d} />;
 }
 
-export function DashboardView({ d, onAddPerson }: { d: DashboardData; onAddPerson?: () => void }) {
+export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: DashboardData; onAddPerson?: () => void; onOpenCalendar?: () => void }) {
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const maxWeek = Math.max(1, ...d.attendanceWeeks.map(w => w.count));
 
@@ -135,30 +186,33 @@ export function DashboardView({ d, onAddPerson }: { d: DashboardData; onAddPerso
           )}
         </div>
 
-        <div className="card">
-          <div className="card-head"><h2>Upcoming</h2></div>
-          {d.upcoming.length === 0 ? (
-            <div style={{ padding: '8px 0' }}>
-              <p className="mute" style={{ fontSize: 13, margin: 0 }}>Nothing on the calendar yet.</p>
-              {d.lastEventLabel && <p className="mute" style={{ fontSize: 12, marginTop: 6 }}>Last event was {d.lastEventLabel}.</p>}
-              <button className="btn btn-sm" style={{ marginTop: 12 }}><Icon name="plus" size={12} /> Schedule an event</button>
-            </div>
-          ) : (
-            <div className="col" style={{ gap: 0 }}>
-              {d.upcoming.map(e => (
-                <div key={e.id} className="row tone-indigo" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)', gap: 14 }}>
-                  <div style={{ width: 48, height: 56, borderRadius: 10, background: 'var(--tc-soft)', color: 'var(--tc-ink)', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: '1px solid color-mix(in oklab, var(--tc) 25%, transparent)' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{e.day}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>{e.date}</div>
+        <div className="col" style={{ gap: 'var(--gap, 18px)' }}>
+          <ClockCalendar eventDays={d.eventDays} onOpenCalendar={onOpenCalendar} />
+          <div className="card">
+            <div className="card-head"><h2>Upcoming</h2></div>
+            {d.upcoming.length === 0 ? (
+              <div style={{ padding: '8px 0' }}>
+                <p className="mute" style={{ fontSize: 13, margin: 0 }}>Nothing on the calendar yet.</p>
+                {d.lastEventLabel && <p className="mute" style={{ fontSize: 12, marginTop: 6 }}>Last event was {d.lastEventLabel}.</p>}
+                <button className="btn btn-sm" style={{ marginTop: 12 }} onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
+              </div>
+            ) : (
+              <div className="col" style={{ gap: 0 }}>
+                {d.upcoming.map(e => (
+                  <div key={e.id} className="row tone-indigo" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)', gap: 14 }}>
+                    <div style={{ width: 48, height: 56, borderRadius: 10, background: 'var(--tc-soft)', color: 'var(--tc-ink)', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: '1px solid color-mix(in oklab, var(--tc) 25%, transparent)' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em' }}>{e.day}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>{e.date}</div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
+                      <div className="mute" style={{ fontSize: 11.5 }}>{e.time}{e.location && ` · ${e.location}`}</div>
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
-                    <div className="mute" style={{ fontSize: 11.5 }}>{e.time}{e.location && ` · ${e.location}`}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -26,7 +26,7 @@ export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
 
   let body: React.ReactNode;
   switch (screen) {
-    case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} />; break;
+    case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} onOpenCalendar={() => setScreen('events')} />; break;
     case 'members': body = <RedesignPeople data={data} actions={actions} onAddPerson={onAddPerson} />; break;
     case 'attendance': body = <RedesignAttendance data={data} actions={actions} />; break;
     case 'engagement': body = <RedesignEngagement data={data} actions={actions} />; break;

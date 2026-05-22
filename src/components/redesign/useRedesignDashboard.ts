@@ -24,6 +24,7 @@ export interface DashboardData {
   attendanceInWindow: number;
   lastAttendanceLabel: string | null;
   lastEventLabel: string | null;
+  eventDays: string[]; // day keys (Y-M-D) that have at least one event
 }
 
 const INTERACTION_ICON: Record<string, { icon: IconName; tone: string }> = {
@@ -95,13 +96,15 @@ export function dashboardFromGraceData(data: GraceData): DashboardData {
     if (pastDates.length) lastEventLabel = new Date(Math.max(...pastDates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
   }
 
+  const eventDays = data.events.map(e => { const d = new Date(e.startDate); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean);
+
   return {
     churchName: data.churchName,
     activeMembers, totalMembers: people.length, visitors,
     prayersOpen: data.prayersOpen, groups: data.groups.length, newThisMonth,
     needsCare, needsCareTotal: inactive.length,
     recentActivity, upcoming, attendanceWeeks: weeks, attendanceInWindow,
-    lastAttendanceLabel, lastEventLabel,
+    lastAttendanceLabel, lastEventLabel, eventDays,
   };
 }
 
@@ -213,6 +216,7 @@ export function useRedesignDashboard(): { data: DashboardData | null; status: 'l
           attendanceInWindow,
           lastAttendanceLabel,
           lastEventLabel,
+          eventDays: (eventsRes.data ?? []).map((e: { start_date: string }) => { const d = new Date(e.start_date); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }).filter(Boolean),
         });
         setStatus('ready');
       } catch {
