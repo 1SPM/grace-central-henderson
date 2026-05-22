@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { GraceData } from './useGraceData';
 
@@ -28,42 +29,113 @@ export function RedesignGroups({ data }: { data: GraceData }) {
   );
 }
 
+const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
 export function RedesignEvents({ data }: { data: GraceData }) {
-  const now = Date.now();
-  const upcoming = data.events.filter(e => new Date(e.startDate).getTime() >= now);
-  const past = data.events.filter(e => new Date(e.startDate).getTime() < now);
-  const list = upcoming.length > 0 ? upcoming : past;
+  // events grouped by local day
+  const eventsByDay = useMemo(() => {
+    const m = new Map<string, GraceData['events']>();
+    for (const e of data.events) {
+      const d = new Date(e.startDate);
+      if (isNaN(d.getTime())) continue;
+      const k = dayKey(d);
+      m.set(k, [...(m.get(k) ?? []), e]);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => +new Date(a.startDate) - +new Date(b.startDate));
+    return m;
+  }, [data.events]);
+
+  // start on the month of the most recent event (so a real grid shows up even though all events are past)
+  const initialMonth = useMemo(() => {
+    const times = data.events.map(e => +new Date(e.startDate)).filter(t => !isNaN(t));
+    const ref = times.length ? new Date(Math.max(...times)) : new Date();
+    return new Date(ref.getFullYear(), ref.getMonth(), 1);
+  }, [data.events]);
+
+  const [month, setMonth] = useState(initialMonth);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const today = new Date();
+  const todayKey = dayKey(today);
+
+  // build 6-week grid starting Sunday
+  const cells = useMemo(() => {
+    const first = new Date(month.getFullYear(), month.getMonth(), 1);
+    const start = new Date(first);
+    start.setDate(1 - first.getDay());
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
+  }, [month]);
+
+  const selectedEvents = selectedKey ? (eventsByDay.get(selectedKey) ?? []) : [];
+  const selectedDate = selectedKey ? (() => { const [y, mo, da] = selectedKey.split('-').map(Number); return new Date(y, mo, da); })() : null;
+  const monthCount = data.events.filter(e => { const d = new Date(e.startDate); return d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth(); }).length;
+
+  const shiftMonth = (delta: number) => { setMonth(m => new Date(m.getFullYear(), m.getMonth() + delta, 1)); setSelectedKey(null); };
+
   return (
     <div className="page">
       <div className="row" style={{ marginBottom: 18 }}>
-        <h2 className="serif" style={{ fontSize: 26, margin: 0 }}>Events</h2>
-        <button className="btn btn-primary" style={{ marginLeft: 'auto' }}><Icon name="plus" size={14} /> New event</button>
-      </div>
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="card-head" style={{ padding: '16px 20px', marginBottom: 0, borderBottom: '1px solid var(--line-2)' }}>
-          <h2>{upcoming.length > 0 ? 'Upcoming' : 'Recent events'}</h2>
-          <span className="mute" style={{ fontSize: 12 }}>{list.length} {list.length === 1 ? 'event' : 'events'}</span>
+        <h2 className="serif" style={{ fontSize: 26, margin: 0 }}>Calendar</h2>
+        <div className="row" style={{ marginLeft: 'auto', gap: 8 }}>
+          <button className="btn btn-sm btn-icon" onClick={() => shiftMonth(-1)} title="Previous month"><Icon name="arrow_left" size={14} /></button>
+          <button className="btn btn-sm" onClick={() => { setMonth(new Date(today.getFullYear(), today.getMonth(), 1)); setSelectedKey(null); }}>Today</button>
+          <button className="btn btn-sm btn-icon" onClick={() => shiftMonth(1)} title="Next month"><Icon name="arrow_right" size={14} /></button>
+          <button className="btn btn-primary"><Icon name="plus" size={14} /> New event</button>
         </div>
-        {list.length === 0 ? <p className="mute" style={{ fontSize: 13, padding: 20 }}>No events on the calendar.</p> : (
-          <div style={{ padding: '4px 20px 12px' }}>
-            {list.slice(0, 12).map(e => {
-              const d = new Date(e.startDate);
-              return (
-                <div key={e.id} className="row" style={{ padding: '12px 0', borderBottom: '1px solid var(--line-2)', gap: 14 }}>
-                  <div className="tone-indigo" style={{ width: 48, height: 56, borderRadius: 10, background: 'var(--tc-soft)', color: 'var(--tc-ink)', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: '1px solid color-mix(in oklab, var(--tc) 25%, transparent)' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700 }}>{d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1 }}>{d.getDate()}</div>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
-                    <div className="mute" style={{ fontSize: 11.5 }}>{d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}{e.location && ` · ${e.location}`}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
+
+      <div className="card">
+        <div className="card-head">
+          <h2>{month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
+          <span className="mute" style={{ fontSize: 12 }}>{monthCount} {monthCount === 1 ? 'event' : 'events'} this month</span>
+        </div>
+        <div className="cal-grid">
+          {DOW.map(d => <div key={d} className="cal-dow">{d}</div>)}
+          {cells.map((d, i) => {
+            const k = dayKey(d);
+            const inMonth = d.getMonth() === month.getMonth();
+            const dayEvents = eventsByDay.get(k) ?? [];
+            return (
+              <div
+                key={i}
+                className={`cal-cell${inMonth ? '' : ' other'}${k === todayKey ? ' today' : ''}${k === selectedKey ? ' selected' : ''}`}
+                onClick={() => setSelectedKey(k === selectedKey ? null : k)}
+              >
+                <div className="cal-num">{d.getDate()}</div>
+                {dayEvents.slice(0, 2).map(e => <div key={e.id} className="cal-ev tone-violet" title={e.title}>{e.title}</div>)}
+                {dayEvents.length > 2 && <div className="cal-more">+{dayEvents.length - 2} more</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {selectedKey && selectedDate && (
+        <div className="card" style={{ marginTop: 'var(--gap, 18px)' }}>
+          <div className="card-head"><h2>{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2></div>
+          {selectedEvents.length === 0 ? <p className="mute" style={{ fontSize: 13 }}>Nothing scheduled this day.</p> : (
+            <div className="col" style={{ gap: 0 }}>
+              {selectedEvents.map(e => {
+                const d = new Date(e.startDate);
+                return (
+                  <div key={e.id} className="row" style={{ padding: '10px 0', borderBottom: '1px solid var(--line-2)', gap: 12 }}>
+                    <div className="icon-chip tone-violet"><Icon name="calendar" size={15} /></div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 500, fontSize: 13.5 }}>{e.title}</div>
+                      <div className="mute" style={{ fontSize: 11.5 }}>{d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}{e.location && ` · ${e.location}`}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
