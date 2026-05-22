@@ -2,11 +2,28 @@ import { useEffect, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { useRedesignDashboard, type DashboardData } from './useRedesignDashboard';
 
-function greetingWord(): string {
-  const h = new Date().getHours();
+function greetingWord(h: number): string {
   if (h < 12) return 'Good morning';
   if (h < 18) return 'Good afternoon';
   return 'Good evening';
+}
+
+function GreetingBlock({ prayersOpen, activeMembers }: { prayersOpen: number; activeMembers: number }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  return (
+    <div>
+      <h2 className="hello">{greetingWord(now.getHours())}, <em>Pastor</em></h2>
+      <div className="date">
+        {dateStr} · <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{time}</span> · <span style={{ color: 'var(--c-rose-ink)' }}>●</span> {prayersOpen} prayer {prayersOpen === 1 ? 'request' : 'requests'} open · {activeMembers} active members
+      </div>
+    </div>
+  );
 }
 
 const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -120,18 +137,12 @@ export function RedesignDashboard() {
 }
 
 export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: DashboardData; onAddPerson?: () => void; onOpenCalendar?: () => void }) {
-  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const maxWeek = Math.max(1, ...d.attendanceWeeks.map(w => w.count));
 
   return (
     <div className="page">
       <div className="greeting">
-        <div>
-          <h2 className="hello">{greetingWord()}, <em>Pastor</em></h2>
-          <div className="date">
-            {dateStr} · <span style={{ color: 'var(--c-rose-ink)' }}>●</span> {d.prayersOpen} prayer {d.prayersOpen === 1 ? 'request' : 'requests'} open · {d.activeMembers} active members
-          </div>
-        </div>
+        <GreetingBlock prayersOpen={d.prayersOpen} activeMembers={d.activeMembers} />
         <div className="row">
           <button className="btn"><Icon name="calendar" size={14} /> This week</button>
           <button className="btn btn-primary" onClick={onAddPerson}><Icon name="plus" size={14} /> Add member</button>
