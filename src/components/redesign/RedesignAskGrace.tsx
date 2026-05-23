@@ -93,30 +93,36 @@ async function runAction(a: ActionInstance, actions: RedesignActions, people: GP
 }
 
 /* ============ Component ============ */
-const HISTORY_KEY = 'grace-ai-history-v1';
-const HISTORY_CAP = 80;
+/* Persist a rolling SUMMARY of past chats (not the line-by-line transcript).
+   The summary is fed into Grace's prompt as continuity context and shown as
+   a small "Earlier:" note. Current session messages stay in memory only. */
+const MEMORY_KEY = 'grace-ai-memory-v1';
+const loadMemory = () => { try { return localStorage.getItem(MEMORY_KEY) ?? ''; } catch { return ''; } };
+const saveMemory = (s: string) => { try { localStorage.setItem(MEMORY_KEY, s); } catch { /* quota */ } };
 
-function loadHistory(): Msg[] {
+async function summarize(memory: string, msgs: Msg[]): Promise<string | null> {
+  if (msgs.length === 0) return memory || null;
+  const transcript = msgs.map(m => `${m.role === 'user' ? 'Pastor' : 'Grace'}: ${m.content}`).join('\n');
+  const prompt =
+    `Update a rolling summary of pastoral chats so the assistant has long-term context. Keep it to 2-4 sentences. Preserve concrete details: people mentioned, prayer concerns, commitments, scheduled events, and any unresolved follow-ups. Drop pleasantries and one-off questions.\n\n` +
+    `Prior summary (may be empty):\n${memory || '(none)'}\n\n` +
+    `New conversation since:\n${transcript}\n\n` +
+    `Output ONLY the new combined summary, no preamble.`;
   try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.slice(-HISTORY_CAP) : [];
-  } catch { return []; }
-}
-function saveHistory(msgs: Msg[]) {
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(msgs.slice(-HISTORY_CAP))); } catch { /* quota */ }
+    const res = await fetch('/api/ai/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, maxTokens: 250 }) });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || typeof body.text !== 'string') return memory || null;
+    return body.text.trim() || memory || null;
+  } catch { return memory || null; }
 }
 
 export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?: RedesignActions }) {
-  const [messages, setMessages] = useState<Msg[]>(() => loadHistory());
+  const [messages, setMessages] = useState<Msg[]>([]);   // current session only
+  const [memory, setMemory] = useState<string>(() => loadMemory());
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
-
-  // persist on every message change
-  useEffect(() => { saveHistory(messages); }, [messages]);
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, pending]);
 
@@ -129,7 +135,8 @@ export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?:
     `You are Grace AI, the in-app assistant for ${data.churchName} on the GRACE Church CRM. ` +
     `Warm but concise; sound like a thoughtful staff member, not a chatbot. ` +
     `Live context: ${data.people.length} people (${active} active, ${data.people.filter(p => p.status === 'visitor').length} visitors), ` +
-    `${data.groups.length} small groups, ${data.prayersOpen} open prayer requests. Today is ${todayIso}.\n\n` +
+    `${data.groups.length} small groups, ${data.prayersOpen} open prayer requests. Today is ${todayIso}.\n` +
+    (memory ? `Earlier-conversation memory (use to stay continuous; don't recite it back):\n${memory}\n\n` : '\n') +
     `=== TOOL USE ===\n` +
     `When the pastor asks you to DO something (create an event, log an interaction, add a prayer, mark someone present), emit a single-line action tag — the user will see a confirm card and approve it before anything saves. Do NOT claim you've done it; say what you'd like to do.\n\n` +
     `Available actions (one per line, self-closing):\n` +
@@ -190,9 +197,14 @@ export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?:
             <div className="ai-avatar"><Icon name="sparkle" size={16} /></div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <h3>Ask Grace</h3>
-              <div className="sub">Online · can act on your church data with your approval</div>
+              <div className="sub">Online · {memory ? 'remembers past conversations' : 'can act on your church data with your approval'}</div>
             </div>
-            {hasMessages && <button className="btn btn-ghost btn-sm" onClick={() => { setMessages([]); try { localStorage.removeItem(HISTORY_KEY); } catch { /* ignore */ } }}><Icon name="plus" size={13} /> New chat</button>}
+            {hasMessages && <button className="btn btn-ghost btn-sm" disabled={pending} onClick={async () => {
+              setPending(true);
+              const merged = await summarize(memory, messages);
+              if (merged) { setMemory(merged); saveMemory(merged); }
+              setMessages([]); setPending(false);
+            }}><Icon name="plus" size={13} /> New chat</button>}
           </div>
 
           <div className="ai-body" ref={scrollRef}>
@@ -202,6 +214,15 @@ export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?:
                   <div className="ai-greet">How can I help,<br />Pastor?</div>
                   <div className="ai-sub">I can schedule events, log notes, add prayers, and take attendance — with your approval.</div>
                 </div>
+                {memory && (
+                  <div className="ai-memory">
+                    <div className="ai-memory-head">
+                      <span>EARLIER</span>
+                      <button className="btn btn-ghost btn-sm" onClick={() => { setMemory(''); saveMemory(''); }}>Forget</button>
+                    </div>
+                    <p>{memory}</p>
+                  </div>
+                )}
                 <div className="ai-suggestions">
                   {SUGGESTIONS.map(s => (
                     <button key={s.title} className="ai-suggestion" onClick={() => ask(s.prompt)}>

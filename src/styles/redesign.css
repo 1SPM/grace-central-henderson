@@ -631,3 +631,8 @@
 .grace-v2 .ai-action-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .grace-v2 .ai-action-line { font-size: 13px; color: var(--ink); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
 .grace-v2 .ai-action-err { font-size: 11.5px; color: var(--c-rose-ink); margin-top: 4px; }
+
+/* ---- Ask Grace memory note (rolling summary of past chats) ---- */
+.grace-v2 .ai-memory { margin: 16px 0 12px; padding: 12px 14px; background: var(--ai-grad-soft); border: 1px solid color-mix(in oklab, var(--ai-violet) 25%, var(--line-2)); border-radius: 12px; }
+.grace-v2 .ai-memory-head { display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--ai-ink); margin-bottom: 4px; }
+.grace-v2 .ai-memory p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
