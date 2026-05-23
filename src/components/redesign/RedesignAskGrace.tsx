@@ -93,12 +93,30 @@ async function runAction(a: ActionInstance, actions: RedesignActions, people: GP
 }
 
 /* ============ Component ============ */
+const HISTORY_KEY = 'grace-ai-history-v1';
+const HISTORY_CAP = 80;
+
+function loadHistory(): Msg[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(-HISTORY_CAP) : [];
+  } catch { return []; }
+}
+function saveHistory(msgs: Msg[]) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(msgs.slice(-HISTORY_CAP))); } catch { /* quota */ }
+}
+
 export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?: RedesignActions }) {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => loadHistory());
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  // persist on every message change
+  useEffect(() => { saveHistory(messages); }, [messages]);
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, pending]);
 
@@ -174,7 +192,7 @@ export function RedesignAskGrace({ data, actions }: { data: GraceData; actions?:
               <h3>Ask Grace</h3>
               <div className="sub">Online · can act on your church data with your approval</div>
             </div>
-            {hasMessages && <button className="btn btn-ghost btn-sm" onClick={() => setMessages([])}><Icon name="plus" size={13} /> New</button>}
+            {hasMessages && <button className="btn btn-ghost btn-sm" onClick={() => { setMessages([]); try { localStorage.removeItem(HISTORY_KEY); } catch { /* ignore */ } }}><Icon name="plus" size={13} /> New chat</button>}
           </div>
 
           <div className="ai-body" ref={scrollRef}>
