@@ -60,9 +60,12 @@ function PublicConnectPage() {
   );
 }
 
+import { UpdatePrompt } from './components/UpdatePrompt';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
+      <UpdatePrompt />
       {isLeadersRoute ? (
         <Suspense fallback={
           <div className="h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
