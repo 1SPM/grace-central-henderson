@@ -185,6 +185,26 @@
 ### TD-030 — Divinity mobile app
 - **Re-entry trigger:** post-funding.
 
+### TD-031 — Lint and test failures pre-existing on this branch
+- **Severity:** P3 (does not block; CI on `main` is currently green because these errors do not exist on `main`)
+- **Discovered:** Sprint 0, Day 2 — surfaced when adding Sentry/PostHog and running `npm run lint` + `npm run test:run`.
+- **Failures:**
+  - `src/lib/grace-chat/useGraceInbox.ts:48-51` — `react-hooks/refs` errors (4 instances). Refs are assigned during render; should move into `useEffect`.
+  - `src/App.tsx:329,336` — `@typescript-eslint/no-unused-expressions` (2 instances).
+  - `src/hooks/useChurchSettings.ts:156,192` — unused `_` variable (2 instances).
+  - `src/components/ViewToggle.test.tsx` — 2 tests assert `bg-white` class but the component renders `bg-stone-100`. Either the test or the component drifted.
+  - `src/contexts/GraceChatContext.tsx:218,223` — `react-hooks/exhaustive-deps` warnings (2 instances).
+- **Risk:** before any PR can merge to `main` with CI green, these need fixing. Sentry/PostHog work was verified not to introduce any of them (stashed-vs-applied diff).
+- **Re-entry trigger:** Sprint 0 Day 3, alongside CI hardening.
+- **Resolution path:** small dedicated PR. Move ref assignments inside an effect; fix `bg-white` vs `bg-stone-100` mismatch (likely a tailwind theme drift after the gold-accent change in commit `eccb4e3`).
+
+### TD-032 — npm audit reports 31 vulnerabilities (1 low, 10 mod, 17 high, 3 critical)
+- **Severity:** P2
+- **Discovered:** Sprint 0, Day 2 — output of `npm install`.
+- **Cause:** transitive deps; needs detail-level audit. Likely mostly false-positive level CVEs in dev tooling.
+- **Re-entry trigger:** Sprint 0, Day 3 (TD-019 — CI dependency scanning).
+- **Resolution path:** triage with `npm audit --json`; resolve high/critical, document the rest as accepted risk.
+
 ---
 
 ## Process

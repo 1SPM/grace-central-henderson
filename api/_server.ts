@@ -21,6 +21,10 @@
  * - PORT: Server port (default 3001)
  */
 
+// Sentry must initialize BEFORE other imports that hook into Node runtime.
+import { initSentryServer, Sentry } from './_lib/sentry';
+const sentryEnabled = initSentryServer();
+
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import Stripe from 'stripe';
@@ -111,6 +115,12 @@ app.get('/health', (_req: Request, res: Response) => {
 // ============================================
 // ERROR HANDLING
 // ============================================
+
+// Sentry's Express error handler must come BEFORE our handler so it
+// captures the exception with full request context.
+if (sentryEnabled) {
+  Sentry.setupExpressErrorHandler(app);
+}
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Server error:', err);

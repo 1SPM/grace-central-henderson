@@ -156,6 +156,22 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     syncUser();
   }, [clerkLoaded, clerkSignedIn, clerkUser]);
 
+  // Identify the user to observability tools when auth state changes.
+  // No PII is sent — just opaque IDs and the church tag for filtering.
+  useEffect(() => {
+    void (async () => {
+      const { setSentryUser } = await import('../lib/observability/sentry');
+      const { identifyUser, resetUser } = await import('../lib/observability/posthog');
+      if (user) {
+        setSentryUser(user.id, user.churchId);
+        identifyUser(user.id, user.churchId);
+      } else {
+        setSentryUser(undefined, undefined);
+        resetUser();
+      }
+    })();
+  }, [user]);
+
   const signOut = useCallback(async () => {
     await clerkSignOut();
     setUser(null);

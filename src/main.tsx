@@ -6,7 +6,13 @@ import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
 import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
+import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import './index.css';
+
+// Init Sentry first so anything thrown during setup is captured.
+initSentry();
+// PostHog is lazy and no-ops without a key — safe to fire-and-forget.
+void initPosthog();
 
 // Surface missing config early instead of failing silently
 checkEnvironment();
@@ -64,6 +70,7 @@ import { UpdatePrompt } from './components/UpdatePrompt';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <SentryErrorBoundary fallback={<div style={{ padding: 24 }}>Something went wrong. The team has been notified.</div>}>
     <ThemeProvider>
       <UpdatePrompt />
       {isLeadersRoute ? (
@@ -104,5 +111,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </AccessibilityProvider>
       )}
     </ThemeProvider>
+    </SentryErrorBoundary>
   </React.StrictMode>
 );

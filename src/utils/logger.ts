@@ -66,6 +66,15 @@ class Logger {
         break;
       case 'error':
         console.error(formatted, data !== undefined ? data : '');
+        // Fire-and-forget Sentry report. Dynamic import avoids a
+        // circular dependency with the observability module and keeps
+        // Sentry out of the synchronous import graph.
+        if (typeof window !== 'undefined') {
+          void import('../lib/observability/sentry').then(({ captureError }) => {
+            const err = data instanceof Error ? data : new Error(message);
+            captureError(err, { context: this.context, message, data: data instanceof Error ? undefined : data });
+          }).catch(() => { /* Sentry off — already logged locally */ });
+        }
         break;
     }
   }
