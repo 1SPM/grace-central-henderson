@@ -24,6 +24,7 @@ const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
 const PricingPage = lazy(() => import('./components/marketing/PricingPage').then(m => ({ default: m.PricingPage })));
 const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
+const CsvImportWizard = lazy(() => import('./components/import/CsvImportWizard').then(m => ({ default: m.CsvImportWizard })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -255,6 +256,7 @@ function App() {
   const path = window.location.pathname;
   const isPricingRoute = path === '/pricing';
   const isSignUpRoute = path === '/signup' || path.startsWith('/signup/');
+  const isImportRoute = path === '/import' || path === '/import/people';
 
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
@@ -292,6 +294,14 @@ function App() {
     return (
       <Suspense fallback={<MarketingLoading label="Loading sign-up…" />}>
         <SignUpFlow initialPlan={initialPlan} />
+      </Suspense>
+    );
+  }
+
+  if (isImportRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading import…" />}>
+        <CsvImportWizard />
       </Suspense>
     );
   }

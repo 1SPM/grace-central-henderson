@@ -1,0 +1,339 @@
+/**
+ * Tiny CSV parser. No external dependency — same reason as
+ * api/_lib/validation.ts: we have a fragile lockfile and adding a
+ * package right before demo is high-risk.
+ *
+ * Handles the common cases that 95% of church-CRM CSV exports use:
+ *   - Comma-separated, with optional double-quoting
+ *   - Escaped quotes inside quoted fields (RFC 4180: "" → ")
+ *   - \r\n or \n line endings
+ *   - Empty trailing fields
+ *   - BOM at file start (Excel saves with UTF-8 BOM)
+ *
+ * Does NOT handle:
+ *   - Other delimiters (tab, semicolon) — would need an option arg
+ *   - Multi-line quoted fields with embedded newlines — rare, would
+ *     require a more complex parser
+ *
+ * If you ever hit a CSV this can't parse, the right call is to add
+ * `papaparse` as a dependency.
+ */
+
+export interface CsvParseResult {
+  headers: string[];
+  rows: Record<string, string>[];
+  warnings: string[];
+}
+
+export function parseCsv(input: string): CsvParseResult {
+  const warnings: string[] = [];
+
+  let text = input;
+  // Strip UTF-8 BOM if present
+  if (text.charCodeAt(0) === 0xfeff) {
+    text = text.slice(1);
+  }
+
+  const lines = splitCsvLines(text);
+  if (lines.length === 0) {
+    return { headers: [], rows: [], warnings: ['CSV is empty'] };
+  }
+
+  const headers = parseCsvRow(lines[0]).map((h) => h.trim());
+  if (headers.length === 0) {
+    return { headers: [], rows: [], warnings: ['CSV header row is empty'] };
+  }
+  if (headers.some((h) => h === '')) {
+    warnings.push(`CSV has ${headers.filter((h) => h === '').length} blank header(s) — those columns will be ignored.`);
+  }
+  if (new Set(headers).size !== headers.length) {
+    warnings.push('CSV has duplicate column headers — only the rightmost value will be kept per row.');
+  }
+
+  const rows: Record<string, string>[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === '') continue;
+    const cells = parseCsvRow(line);
+    const row: Record<string, string> = {};
+    for (let j = 0; j < headers.length; j++) {
+      const key = headers[j];
+      if (key === '') continue;
+      row[key] = (cells[j] ?? '').trim();
+    }
+    rows.push(row);
+  }
+
+  return { headers: headers.filter((h) => h !== ''), rows, warnings };
+}
+
+function splitCsvLines(text: string): string[] {
+  return text.split(/\r\n|\n|\r/);
+}
+
+function parseCsvRow(line: string): string[] {
+  const cells: string[] = [];
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] === '"') {
+      // Quoted field
+      i++;
+      let value = '';
+      while (i < line.length) {
+        if (line[i] === '"') {
+          if (line[i + 1] === '"') {
+            value += '"';
+            i += 2;
+          } else {
+            i++;
+            break;
+          }
+        } else {
+          value += line[i];
+          i++;
+        }
+      }
+      cells.push(value);
+      if (line[i] === ',') i++;
+    } else {
+      // Unquoted field — read until comma
+      let value = '';
+      while (i < line.length && line[i] !== ',') {
+        value += line[i];
+        i++;
+      }
+      cells.push(value);
+      if (line[i] === ',') i++;
+    }
+  }
+  return cells;
+}
+
+// ---- Field auto-detection ---------------------------------------------
+
+/**
+ * Common header aliases by canonical field. Lowercase, punctuation-
+ * collapsed match — so "First Name", "FirstName", "first_name" all
+ * resolve to 'first_name'.
+ */
+export type PeopleField =
+  | 'first_name'
+  | 'last_name'
+  | 'email'
+  | 'phone'
+  | 'birth_date'
+  | 'address'
+  | 'city'
+  | 'state'
+  | 'zip'
+  | 'status'
+  | 'join_date'
+  | 'notes';
+
+const PEOPLE_ALIASES: Record<PeopleField, string[]> = {
+  first_name: ['first name', 'firstname', 'first', 'given name', 'givenname'],
+  last_name:  ['last name', 'lastname', 'last', 'surname', 'family name', 'familyname'],
+  email:      ['email', 'email address', 'emailaddress', 'primary email', 'e mail', 'e-mail'],
+  phone:      ['phone', 'phone number', 'phonenumber', 'mobile', 'cell', 'cell phone', 'mobile phone'],
+  birth_date: ['birthday', 'birth date', 'birthdate', 'date of birth', 'dob'],
+  address:    ['address', 'street', 'street address', 'address line 1', 'address1'],
+  city:       ['city'],
+  state:      ['state', 'province', 'state province'],
+  zip:        ['zip', 'zip code', 'zipcode', 'postal code', 'postalcode', 'postcode'],
+  status:     ['status', 'member status', 'member type', 'membership status'],
+  join_date:  ['join date', 'joindate', 'member since', 'joined', 'date joined', 'membership date'],
+  notes:      ['notes', 'comments', 'note', 'memo'],
+};
+
+/**
+ * Returns a mapping from canonical field name to the CSV header that
+ * best matches it. Unmatched fields are absent from the map (UI shows
+ * them as "Skip" by default).
+ */
+export function autoDetectPeopleMapping(headers: string[]): Partial<Record<PeopleField, string>> {
+  const mapping: Partial<Record<PeopleField, string>> = {};
+  const normalized = headers.map((h) => normalizeHeader(h));
+  for (const field of Object.keys(PEOPLE_ALIASES) as PeopleField[]) {
+    const aliases = PEOPLE_ALIASES[field];
+    for (let i = 0; i < normalized.length; i++) {
+      if (aliases.includes(normalized[i])) {
+        mapping[field] = headers[i];
+        break;
+      }
+    }
+  }
+  return mapping;
+}
+
+function normalizeHeader(h: string): string {
+  return h.toLowerCase().replace(/[_\-.]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// ---- Row validation ---------------------------------------------------
+
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const PHONE_DIGITS_RE = /^[0-9+()\-.\s]*$/;
+/** Accepts YYYY-MM-DD, MM/DD/YYYY, M/D/YY, etc. — we normalize at insert. */
+const DATE_PARSEABLE_RE = /^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}$/;
+
+export interface RowValidationError {
+  rowIndex: number;
+  field: PeopleField;
+  message: string;
+}
+
+export interface ValidatedRow {
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  birth_date: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  status: string | null;
+  join_date: string | null;
+  notes: string | null;
+}
+
+export interface ValidationResult {
+  valid: ValidatedRow[];
+  errors: RowValidationError[];
+  duplicateEmails: string[];
+}
+
+export function validatePeopleRows(
+  rows: Record<string, string>[],
+  mapping: Partial<Record<PeopleField, string>>,
+): ValidationResult {
+  const valid: ValidatedRow[] = [];
+  const errors: RowValidationError[] = [];
+  const seenEmails = new Set<string>();
+  const duplicateEmails = new Set<string>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const get = (field: PeopleField): string => {
+      const header = mapping[field];
+      if (!header) return '';
+      return (row[header] ?? '').trim();
+    };
+
+    const firstName = get('first_name');
+    const lastName = get('last_name');
+    if (!firstName && !lastName) {
+      errors.push({ rowIndex: i, field: 'first_name', message: 'Row has no name (both first and last empty) — skipped.' });
+      continue;
+    }
+    if (firstName.length > 100) {
+      errors.push({ rowIndex: i, field: 'first_name', message: `Name too long (${firstName.length} chars, max 100).` });
+      continue;
+    }
+    if (lastName.length > 100) {
+      errors.push({ rowIndex: i, field: 'last_name', message: `Last name too long (${lastName.length} chars, max 100).` });
+      continue;
+    }
+
+    const email = get('email');
+    let normalizedEmail: string | null = null;
+    if (email) {
+      if (!EMAIL_RE.test(email)) {
+        errors.push({ rowIndex: i, field: 'email', message: `"${email}" is not a valid email.` });
+        continue;
+      }
+      normalizedEmail = email.toLowerCase();
+      if (seenEmails.has(normalizedEmail)) {
+        duplicateEmails.add(normalizedEmail);
+      }
+      seenEmails.add(normalizedEmail);
+    }
+
+    const phone = get('phone');
+    if (phone && !PHONE_DIGITS_RE.test(phone)) {
+      errors.push({ rowIndex: i, field: 'phone', message: `"${phone}" has invalid characters.` });
+      continue;
+    }
+
+    const birthDateRaw = get('birth_date');
+    let birthDate: string | null = null;
+    if (birthDateRaw) {
+      const parsed = parseLooseDate(birthDateRaw);
+      if (!parsed) {
+        errors.push({ rowIndex: i, field: 'birth_date', message: `"${birthDateRaw}" could not be parsed as a date.` });
+        continue;
+      }
+      birthDate = parsed;
+    }
+
+    const joinDateRaw = get('join_date');
+    let joinDate: string | null = null;
+    if (joinDateRaw) {
+      const parsed = parseLooseDate(joinDateRaw);
+      if (!parsed) {
+        errors.push({ rowIndex: i, field: 'join_date', message: `"${joinDateRaw}" could not be parsed as a date.` });
+        continue;
+      }
+      joinDate = parsed;
+    }
+
+    valid.push({
+      first_name: firstName || '',
+      last_name: lastName || '',
+      email: normalizedEmail,
+      phone: phone || null,
+      birth_date: birthDate,
+      address: (get('address') || '').slice(0, 500) || null,
+      city: (get('city') || '').slice(0, 100) || null,
+      state: (get('state') || '').slice(0, 50) || null,
+      zip: (get('zip') || '').slice(0, 20) || null,
+      status: normalizeStatus(get('status')),
+      join_date: joinDate,
+      notes: (get('notes') || '').slice(0, 2000) || null,
+    });
+  }
+
+  return { valid, errors, duplicateEmails: Array.from(duplicateEmails) };
+}
+
+function parseLooseDate(s: string): string | null {
+  // Returns ISO YYYY-MM-DD string, or null if unparseable.
+  if (!DATE_PARSEABLE_RE.test(s)) return null;
+  const parts = s.split(/[-/.]/).map((p) => p.trim());
+  if (parts.length !== 3) return null;
+  let year: number, month: number, day: number;
+  if (parts[0].length === 4) {
+    // YYYY-MM-DD
+    year = parseInt(parts[0], 10);
+    month = parseInt(parts[1], 10);
+    day = parseInt(parts[2], 10);
+  } else {
+    // MM/DD/YYYY or M/D/YY (US convention — most church CRMs use this)
+    month = parseInt(parts[0], 10);
+    day = parseInt(parts[1], 10);
+    year = parseInt(parts[2], 10);
+    if (year < 100) year += year >= 30 ? 1900 : 2000;
+  }
+  if (!isValidDate(year, month, day)) return null;
+  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
+function isValidDate(year: number, month: number, day: number): boolean {
+  if (year < 1900 || year > 2100) return false;
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  const d = new Date(year, month - 1, day);
+  return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
+}
+
+function normalizeStatus(raw: string): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase().trim();
+  if (['member', 'active member', 'active'].includes(s)) return 'member';
+  if (['visitor', 'guest', 'first time visitor'].includes(s)) return 'visitor';
+  if (['regular', 'attender', 'regular attender'].includes(s)) return 'regular';
+  if (['leader', 'volunteer leader'].includes(s)) return 'leader';
+  if (['inactive', 'lapsed', 'left'].includes(s)) return 'inactive';
+  // Unknown status — preserve raw value so the operator can fix later
+  return raw.slice(0, 50);
+}
