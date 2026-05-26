@@ -30,6 +30,7 @@ import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 import { IntegrationCard, ConfigModal, PasswordInput } from './settings/SettingsUI';
 import { SettingsDataExport } from './settings/SettingsDataExport';
 import { SettingsBilling } from './settings/SettingsBilling';
+import { SettingsImport } from './settings/SettingsImport';
 import type { Person, Task, CalendarEvent, Giving, SmallGroup, PrayerRequest } from '../types';
 
 const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
@@ -820,6 +821,10 @@ export function Settings({
           prayers={prayers}
           onNavigate={onNavigate}
         />
+      </div>
+
+      <div className="mt-8">
+        <SettingsImport />
       </div>
 
       <div className="mt-8">
