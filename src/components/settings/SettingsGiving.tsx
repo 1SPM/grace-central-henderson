@@ -25,6 +25,7 @@ interface ConnectStatus {
   currently_due: string[];
   disabled_reason: string | null;
   details_submitted?: boolean;
+  church_slug: string | null;
 }
 
 const PLATFORM_FEE_PERCENT = 2.5;   // VWS platform fee on donations. Match the number in api/giving/* when wired.
@@ -126,6 +127,7 @@ export function SettingsGiving() {
           accountId={status.account_id!}
           payoutsEnabled={status.payouts_enabled}
           platformFee={PLATFORM_FEE_PERCENT}
+          churchSlug={status.church_slug}
           onRefresh={refresh}
         />
       )}
@@ -175,13 +177,32 @@ function ActiveState({
   accountId,
   payoutsEnabled,
   platformFee,
+  churchSlug,
   onRefresh,
 }: {
   accountId: string;
   payoutsEnabled: boolean;
   platformFee: number;
+  churchSlug: string | null;
   onRefresh: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+  const donateUrl = churchSlug && typeof window !== 'undefined'
+    ? `${window.location.origin}/give/${churchSlug}`
+    : null;
+
+  const copyDonateUrl = async () => {
+    if (!donateUrl) return;
+    try {
+      await navigator.clipboard.writeText(donateUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API can fail on insecure contexts — fall through silently;
+      // the user can still select + copy the URL manually.
+    }
+  };
+
   return (
     <>
       <div className="rounded-lg bg-green-50 border border-green-200 p-3 flex items-start gap-2">
@@ -195,6 +216,39 @@ function ActiveState({
           </div>
         </div>
       </div>
+
+      {donateUrl && (
+        <div className="rounded-lg bg-gray-50 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 p-4">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2">
+            Your church's public donate page
+          </h3>
+          <p className="text-xs text-gray-600 dark:text-dark-300 mb-3">
+            Share this link in your bulletin, email signature, social posts, and on your website's
+            "Give" button. Members can donate one-time or set up recurring gifts (weekly, monthly,
+            or yearly) directly from this page.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="flex-1 min-w-[200px] px-3 py-2 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-800 dark:text-dark-100 break-all">
+              {donateUrl}
+            </code>
+            <button
+              onClick={copyDonateUrl}
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 text-sm inline-flex items-center gap-2"
+            >
+              {copied ? 'Copied ✓' : 'Copy link'}
+            </button>
+            <a
+              href={donateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-dark-600 text-sm inline-flex items-center gap-2"
+            >
+              Preview <ExternalLink size={14} />
+            </a>
+          </div>
+        </div>
+      )}
+
       <div className="text-sm text-gray-700 dark:text-dark-200">
         VWS takes a <strong>{platformFee}%</strong> platform fee on each donation. Stripe takes
         their standard processing fee (2.9% + 30¢). The remainder goes to your account on Stripe's

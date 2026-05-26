@@ -35,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const { data: church } = await supabase
     .from('churches')
-    .select('id, stripe_connect_account_id, stripe_connect_charges_enabled, stripe_connect_payouts_enabled, stripe_connect_details')
+    .select('id, slug, stripe_connect_account_id, stripe_connect_charges_enabled, stripe_connect_payouts_enabled, stripe_connect_details')
     .eq('id', auth.churchId)
     .single();
   if (!church) return res.status(404).json({ error: 'church_not_found' });
@@ -49,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       payouts_enabled: false,
       currently_due: [],
       disabled_reason: null,
+      church_slug: church.slug,
     });
   }
 
@@ -99,5 +100,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     currently_due: currentlyDue,
     disabled_reason: disabledReason,
     details_submitted: !!account.details_submitted,
+    church_slug: church.slug,
   });
 }
