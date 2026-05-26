@@ -18,6 +18,7 @@
 import type Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { appendLedgerEntry, centsToMicroUsd, type LedgerEntryInput } from '../ledger';
+import { planSlugForPriceId, type PlanSlug } from '../billing/plans';
 
 export interface StripeHandlerContext {
   supabase: SupabaseClient;
@@ -258,15 +259,119 @@ async function handleSubscriptionLifecycle(
 }
 
 // ============================================
+// customer.subscription.* — SaaS plan
+// ============================================
+// Same Stripe event type as the recurring-giving handler above. We
+// discriminate on metadata.purpose:
+//   purpose='saas'  → this handler — SaaS plan tier update for the church
+//   (otherwise)     → handleSubscriptionLifecycle — member recurring gift
+async function handleSaasSubscriptionLifecycle(
+  event: Stripe.Event,
+  ctx: StripeHandlerContext,
+): Promise<HandlerResult> {
+  const subscription = event.data.object as Stripe.Subscription;
+  const churchId = subscription.metadata?.church_id;
+  if (!churchId) {
+    return { status: 'skipped', reason: 'saas subscription missing metadata.church_id' };
+  }
+
+  const priceId = subscription.items.data[0]?.price?.id;
+  if (!priceId) {
+    return { status: 'skipped', reason: 'subscription has no price id' };
+  }
+
+  const planSlug: PlanSlug | null = planSlugForPriceId(priceId);
+  if (!planSlug) {
+    return {
+      status: 'skipped',
+      reason: `price ${priceId} is not in plan catalog — likely a stale env or wrong product`,
+    };
+  }
+
+  const periodStart = new Date(subscription.current_period_start * 1000).toISOString();
+  const periodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+  const trialStart = subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null;
+  const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null;
+  const canceledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null;
+
+  // Upsert by stripe_subscription_id (UNIQUE constraint in migration 016).
+  // Same event arriving twice (or re-replayed via DLQ) lands the same row.
+  const { error: subErr } = await ctx.supabase
+    .from('church_subscriptions')
+    .upsert(
+      {
+        church_id: churchId,
+        stripe_subscription_id: subscription.id,
+        stripe_customer_id: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
+        stripe_price_id: priceId,
+        plan_slug: planSlug,
+        status: subscription.status,
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        canceled_at: canceledAt,
+        trial_start: trialStart,
+        trial_end: trialEnd,
+        metadata: { stripe_status: subscription.status, items: subscription.items.data.length },
+      },
+      { onConflict: 'stripe_subscription_id' },
+    );
+  if (subErr) throw new Error(`church_subscriptions upsert failed: ${subErr.message}`);
+
+  // Mirror the subscription state onto churches for fast entitlement checks
+  // (the rest of the app reads churches.subscription_plan / .subscription_status
+  // without joining; the source of truth stays in church_subscriptions).
+  const churchUpdate: {
+    subscription_status: string;
+    subscription_plan: PlanSlug;
+    trial_ends_at: string | null;
+    stripe_customer_id?: string;
+  } = {
+    subscription_status: subscription.status === 'trialing' ? 'trial' : subscription.status,
+    subscription_plan: planSlug,
+    trial_ends_at: trialEnd,
+  };
+  if (typeof subscription.customer === 'string') {
+    churchUpdate.stripe_customer_id = subscription.customer;
+  }
+
+  const { error: chErr } = await ctx.supabase
+    .from('churches')
+    .update(churchUpdate)
+    .eq('id', churchId);
+  if (chErr) throw new Error(`church entitlement mirror failed: ${chErr.message}`);
+
+  return { status: 'processed', ledgerWritten: false };
+}
+
+/**
+ * Discriminator. Stripe sends the same `customer.subscription.*` event
+ * for both SaaS plans and member recurring gifts. We route based on
+ * metadata.purpose set at Checkout Session creation.
+ */
+async function routeSubscriptionEvent(
+  event: Stripe.Event,
+  ctx: StripeHandlerContext,
+): Promise<HandlerResult> {
+  const subscription = event.data.object as Stripe.Subscription;
+  const purpose = subscription.metadata?.purpose;
+  if (purpose === 'saas') {
+    return handleSaasSubscriptionLifecycle(event, ctx);
+  }
+  // Default (no purpose, or purpose='giving') → existing recurring giving handler.
+  return handleSubscriptionLifecycle(event, ctx);
+}
+
+// ============================================
 // REGISTRY
 // ============================================
 export const STRIPE_HANDLERS: Record<string, StripeEventHandler> = {
   'payment_intent.succeeded': handlePaymentIntentSucceeded,
   'charge.refunded': handleChargeRefunded,
   'invoice.paid': handleInvoicePaid,
-  'customer.subscription.created': handleSubscriptionLifecycle,
-  'customer.subscription.updated': handleSubscriptionLifecycle,
-  'customer.subscription.deleted': handleSubscriptionLifecycle,
+  'customer.subscription.created': routeSubscriptionEvent,
+  'customer.subscription.updated': routeSubscriptionEvent,
+  'customer.subscription.deleted': routeSubscriptionEvent,
 };
 
 export function getStripeHandler(eventType: string): StripeEventHandler | null {

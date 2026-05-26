@@ -22,6 +22,8 @@ import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
 // Lazy load MemberPortal for standalone access
 const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
+const PricingPage = lazy(() => import('./components/marketing/PricingPage').then(m => ({ default: m.PricingPage })));
+const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -57,6 +59,17 @@ function TutorialPickerAutoOpen({ show, onShown }: { show: boolean; onShown: () 
     }
   }, [show, openPicker, onShown]);
   return null;
+}
+
+function MarketingLoading({ label }: { label: string }) {
+  return (
+    <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-600 mx-auto mb-4"></div>
+        <p className="text-gray-600 text-sm">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 function App() {
@@ -236,6 +249,13 @@ function App() {
   // Check if we're accessing the standalone member portal
   const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
 
+  // Public marketing routes — flagged early; rendered after all hooks
+  // run (below) to satisfy rules-of-hooks. The marketing pages don't
+  // depend on church data so the hook outputs are simply discarded.
+  const path = window.location.pathname;
+  const isPricingRoute = path === '/pricing';
+  const isSignUpRoute = path === '/signup' || path.startsWith('/signup/');
+
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
   // useEffect(() => {
@@ -255,6 +275,26 @@ function App() {
       setShowTutorialPicker(true);
     }
   }, [settingsLoading, isPortalRoute, churchSettings, showWizard]);
+
+  if (isPricingRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading pricing…" />}>
+        <PricingPage />
+      </Suspense>
+    );
+  }
+
+  if (isSignUpRoute) {
+    const params = new URLSearchParams(window.location.search);
+    const planParam = params.get('plan');
+    const initialPlan: 'starter' | 'pro' | 'enterprise' =
+      planParam === 'starter' || planParam === 'pro' || planParam === 'enterprise' ? planParam : 'pro';
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading sign-up…" />}>
+        <SignUpFlow initialPlan={initialPlan} />
+      </Suspense>
+    );
+  }
 
   if (isLoading) {
     return (
