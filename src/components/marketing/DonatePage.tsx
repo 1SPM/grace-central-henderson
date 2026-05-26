@@ -142,6 +142,14 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
           <p className="text-sm text-gray-600">
             Secured by Stripe · 100% goes to the church (minus standard processing fees)
           </p>
+          {step === 'pick' && (
+            <p className="text-xs text-gray-500 mt-3">
+              Already have a recurring gift here?{' '}
+              <a href={`/give/${churchSlug}/manage`} className="text-amber-700 hover:text-amber-900 underline">
+                Manage it
+              </a>
+            </p>
+          )}
         </header>
 
         {step === 'pick' && (
@@ -187,7 +195,7 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
         )}
 
         {step === 'done' && (
-          <DoneStep amountCents={effectiveAmountCents} fund={fund} email={email} frequency={frequency} />
+          <DoneStep amountCents={effectiveAmountCents} fund={fund} email={email} frequency={frequency} churchSlug={churchSlug} />
         )}
       </div>
     </div>
@@ -471,7 +479,7 @@ function PayStep({
   );
 }
 
-function DoneStep({ amountCents, fund, email, frequency }: { amountCents: number; fund: string; email: string; frequency: Frequency }) {
+function DoneStep({ amountCents, fund, email, frequency, churchSlug }: { amountCents: number; fund: string; email: string; frequency: Frequency; churchSlug: string }) {
   const isRecurring = frequency !== 'one-time';
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 text-center space-y-4">
@@ -489,8 +497,10 @@ function DoneStep({ amountCents, fund, email, frequency }: { amountCents: number
       </p>
       {isRecurring && (
         <p className="text-sm text-gray-600">
-          Your card will be charged automatically each {frequency.replace('ly', '')}.
-          To pause or cancel, reply to your receipt email or contact the church directly.
+          Your card will be charged automatically each {frequency.replace('ly', '')}.{' '}
+          <a href={`/give/${churchSlug}/manage`} className="text-amber-700 hover:text-amber-900 underline">
+            Pause or cancel anytime
+          </a>.
         </p>
       )}
       {email && (

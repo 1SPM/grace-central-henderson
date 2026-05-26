@@ -30,6 +30,7 @@ const LandingPage = lazy(() => import('./components/marketing/LandingPage').then
 const TermsPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.PrivacyPage })));
 const DonatePage = lazy(() => import('./components/marketing/DonatePage').then(m => ({ default: m.DonatePage })));
+const DonorPortalRequestPage = lazy(() => import('./components/marketing/DonorPortalRequestPage').then(m => ({ default: m.DonorPortalRequestPage })));
 const WelcomePage = lazy(() => import('./components/marketing/WelcomePage').then(m => ({ default: m.WelcomePage })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
@@ -274,6 +275,10 @@ function App() {
   const donateSlugMatch = path.match(/^\/give\/([a-z0-9-]+)\/?$/);
   const isDonateRoute = !!donateSlugMatch;
   const donateSlug = donateSlugMatch?.[1] ?? null;
+  // /give/<slug>/manage — donor magic-link request page
+  const manageSlugMatch = path.match(/^\/give\/([a-z0-9-]+)\/manage\/?$/);
+  const isManageRoute = !!manageSlugMatch;
+  const manageSlug = manageSlugMatch?.[1] ?? null;
 
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
@@ -367,6 +372,14 @@ function App() {
     return (
       <Suspense fallback={<MarketingLoading label="Loading donation page…" />}>
         <DonatePage churchSlug={donateSlug} />
+      </Suspense>
+    );
+  }
+
+  if (isManageRoute && manageSlug) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading…" />}>
+        <DonorPortalRequestPage churchSlug={manageSlug} />
       </Suspense>
     );
   }
