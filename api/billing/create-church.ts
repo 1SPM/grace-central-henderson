@@ -22,6 +22,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createClerkClient, verifyToken } from '@clerk/backend';
 import { readBody, str } from '../_lib/validation.js';
+import { queueEmail } from '../_lib/email/queue.js';
+import { renderWelcomeEmail } from '../_lib/email/templates/welcome.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -129,6 +131,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       role: 'admin',
     },
   });
+
+  // Queue the welcome email. Idempotent by (church_id), so the second
+  // call to this endpoint (e.g. user abandoned then re-signed-up) won't
+  // double-send. Best-effort — failures are logged but don't fail the
+  // sign-up flow.
+  if (userEmail) {
+    try {
+      await queueEmail({
+        supabase,
+        churchId: church.id,
+        toAddr: userEmail,
+        subject: '',   // overwritten by template
+        templateId: 'welcome.v1',
+        idempotencyKey: `welcome:${church.id}`,
+        sendNow: true,
+        metadata: { admin_full_name: admin_full_name, clerk_user_id: clerkUserId },
+        ...(() => {
+          const { subject, html } = renderWelcomeEmail({
+            adminFullName: admin_full_name!,
+            churchName: church.name,
+            churchSlug: church.slug,
+          });
+          return { subject, html };
+        })(),
+      });
+    } catch (err) {
+      console.error('[create-church] welcome email queue failed (non-fatal)', err);
+    }
+  }
 
   return res.status(201).json({
     church_id: church.id,
