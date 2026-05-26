@@ -3,7 +3,10 @@ import {
   parseCsv,
   autoDetectPeopleMapping,
   validatePeopleRows,
+  autoDetectGivingMapping,
+  validateGivingRows,
   type PeopleField,
+  type GivingField,
 } from './csv';
 
 describe('parseCsv', () => {
@@ -201,5 +204,136 @@ describe('validatePeopleRows', () => {
       mapping,
     );
     expect(result.errors[0].field).toBe('phone');
+  });
+});
+
+describe('autoDetectGivingMapping', () => {
+  it('matches common giving CSV headers', () => {
+    const m = autoDetectGivingMapping([
+      'Email', 'Donor Name', 'Amount', 'Date', 'Fund', 'Payment Method', 'Memo',
+    ]);
+    expect(m.donor_email).toBe('Email');
+    expect(m.donor_name).toBe('Donor Name');
+    expect(m.amount).toBe('Amount');
+    expect(m.date).toBe('Date');
+    expect(m.fund).toBe('Fund');
+    expect(m.method).toBe('Payment Method');
+    expect(m.note).toBe('Memo');
+  });
+
+  it('handles Planning Center / Breeze variants', () => {
+    const m = autoDetectGivingMapping([
+      'Donor Email Address', 'Giver Name', 'Gift Amount', 'Donation Date', 'Designation', 'Check Number',
+    ]);
+    expect(m.donor_email).toBe('Donor Email Address');
+    expect(m.donor_name).toBe('Giver Name');
+    expect(m.amount).toBe('Gift Amount');
+    expect(m.date).toBe('Donation Date');
+    expect(m.fund).toBe('Designation');
+    expect(m.check_number).toBe('Check Number');
+  });
+});
+
+describe('validateGivingRows', () => {
+  const mapping: Partial<Record<GivingField, string>> = {
+    donor_email: 'Email',
+    donor_name: 'Name',
+    amount: 'Amount',
+    date: 'Date',
+    fund: 'Fund',
+    method: 'Method',
+  };
+
+  it('parses dollars, cents, $sign, commas, parens-negative', () => {
+    const result = validateGivingRows(
+      [
+        { Email: 'a@x.com', Name: 'A', Amount: '$1,234.56', Date: '2025-01-15' },
+        { Email: 'b@x.com', Name: 'B', Amount: '500', Date: '2025-01-15' },
+        { Email: 'c@x.com', Name: 'C', Amount: '(50)', Date: '2025-01-15' },  // refund
+      ],
+      mapping,
+    );
+    expect(result.valid).toHaveLength(3);
+    expect(result.valid[0].amount_cents).toBe(123456);
+    expect(result.valid[1].amount_cents).toBe(50000);
+    expect(result.valid[2].amount_cents).toBe(-5000);   // negative for refund
+  });
+
+  it('requires amount and date', () => {
+    const result = validateGivingRows(
+      [
+        { Email: 'a@x.com', Name: 'A', Amount: '', Date: '2025-01-15' },
+        { Email: 'b@x.com', Name: 'B', Amount: '100', Date: '' },
+      ],
+      mapping,
+    );
+    expect(result.valid).toHaveLength(0);
+    expect(result.errors).toHaveLength(2);
+    expect(result.errors[0].field).toBe('amount');
+    expect(result.errors[1].field).toBe('date');
+  });
+
+  it('rejects zero amount', () => {
+    const result = validateGivingRows(
+      [{ Email: 'a@x.com', Name: 'A', Amount: '0', Date: '2025-01-15' }],
+      mapping,
+    );
+    expect(result.valid).toHaveLength(0);
+    expect(result.errors[0].message).toMatch(/zero/);
+  });
+
+  it('imports unmatched-by-email rows with warning', () => {
+    const result = validateGivingRows(
+      [{ Email: 'not-an-email', Name: 'A', Amount: '100', Date: '2025-01-15' }],
+      mapping,
+    );
+    expect(result.valid).toHaveLength(1);
+    expect(result.valid[0].donor_email).toBeNull();
+    expect(result.errors.find((e) => e.field === 'donor_email')).toBeDefined();
+  });
+
+  it('imports anonymous donations (no email + no name)', () => {
+    const result = validateGivingRows(
+      [{ Email: '', Name: '', Amount: '50', Date: '2025-01-15' }],
+      mapping,
+    );
+    expect(result.valid).toHaveLength(1);
+    expect(result.errors.find((e) => e.message.includes('anonymous'))).toBeDefined();
+  });
+
+  it('normalizes common payment methods', () => {
+    const result = validateGivingRows(
+      [
+        { Email: 'a@x.com', Amount: '10', Date: '2025-01-01', Method: 'Cash' },
+        { Email: 'b@x.com', Amount: '10', Date: '2025-01-01', Method: 'Check' },
+        { Email: 'c@x.com', Amount: '10', Date: '2025-01-01', Method: 'Credit Card' },
+        { Email: 'd@x.com', Amount: '10', Date: '2025-01-01', Method: 'ACH' },
+      ],
+      mapping,
+    );
+    expect(result.valid[0].method).toBe('cash');
+    expect(result.valid[1].method).toBe('check');
+    expect(result.valid[2].method).toBe('credit_card');
+    expect(result.valid[3].method).toBe('ach');
+  });
+
+  it('defaults fund to "general" when missing', () => {
+    const result = validateGivingRows(
+      [{ Email: 'a@x.com', Amount: '100', Date: '2025-01-15' }],
+      mapping,
+    );
+    expect(result.valid[0].fund).toBe('general');
+  });
+
+  it('returns distinct donor emails for pre-fetch', () => {
+    const result = validateGivingRows(
+      [
+        { Email: 'a@x.com', Amount: '10', Date: '2025-01-01' },
+        { Email: 'b@x.com', Amount: '20', Date: '2025-01-02' },
+        { Email: 'a@x.com', Amount: '30', Date: '2025-01-03' },  // dup
+      ],
+      mapping,
+    );
+    expect(result.donorEmails.sort()).toEqual(['a@x.com', 'b@x.com']);
   });
 });

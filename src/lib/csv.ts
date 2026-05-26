@@ -337,3 +337,198 @@ function normalizeStatus(raw: string): string | null {
   // Unknown status — preserve raw value so the operator can fix later
   return raw.slice(0, 50);
 }
+
+// ============================================================================
+// GIVING IMPORT
+// ============================================================================
+
+export type GivingField =
+  | 'donor_email'      // primary person match
+  | 'donor_name'       // secondary match (when email missing)
+  | 'amount'
+  | 'date'
+  | 'fund'
+  | 'method'
+  | 'note'
+  | 'check_number';
+
+const GIVING_ALIASES: Record<GivingField, string[]> = {
+  donor_email: ['email', 'donor email', 'email address', 'primary email', 'e mail', 'e-mail', 'donor email address'],
+  donor_name:  ['donor', 'donor name', 'name', 'full name', 'fullname', 'giver', 'giver name'],
+  amount:      ['amount', 'donation amount', 'gift amount', 'contribution amount', 'total', 'value', 'paid'],
+  date:        ['date', 'donation date', 'gift date', 'contribution date', 'received', 'transaction date', 'paid date'],
+  fund:        ['fund', 'designation', 'category', 'campaign', 'purpose', 'fund name'],
+  method:      ['method', 'payment method', 'type', 'source', 'gift type'],
+  note:        ['note', 'notes', 'memo', 'comment', 'comments', 'description'],
+  check_number:['check number', 'checkno', 'check #', 'check', 'reference'],
+};
+
+export function autoDetectGivingMapping(headers: string[]): Partial<Record<GivingField, string>> {
+  const mapping: Partial<Record<GivingField, string>> = {};
+  const normalized = headers.map((h) => normalizeHeader(h));
+  for (const field of Object.keys(GIVING_ALIASES) as GivingField[]) {
+    const aliases = GIVING_ALIASES[field];
+    for (let i = 0; i < normalized.length; i++) {
+      if (aliases.includes(normalized[i])) {
+        mapping[field] = headers[i];
+        break;
+      }
+    }
+  }
+  return mapping;
+}
+
+export interface GivingRowError {
+  rowIndex: number;
+  field: GivingField | 'row';
+  message: string;
+}
+
+export interface ValidatedGivingRow {
+  donor_email: string | null;
+  donor_name: string | null;
+  amount_cents: number;
+  date: string;                // YYYY-MM-DD
+  fund: string | null;
+  method: string | null;
+  note: string | null;
+  check_number: string | null;
+}
+
+export interface GivingValidationResult {
+  valid: ValidatedGivingRow[];
+  errors: GivingRowError[];
+  /** Distinct donor emails in the file — used to pre-fetch matching people in one query. */
+  donorEmails: string[];
+}
+
+/**
+ * Parse amount with broad tolerance:
+ *   "$1,234.56"  → 123456 cents
+ *   "1234.56"    → 123456
+ *   "1234"       → 123400 (treated as whole dollars)
+ *   "($50)"      → -5000 (parens = negative, accounting convention)
+ *   "1,234"      → 123400
+ * Returns null if unparseable.
+ */
+function parseAmountToCents(raw: string): number | null {
+  if (!raw) return null;
+  let s = raw.trim();
+  let negative = false;
+  if (s.startsWith('(') && s.endsWith(')')) {
+    negative = true;
+    s = s.slice(1, -1).trim();
+  }
+  if (s.startsWith('-')) {
+    negative = true;
+    s = s.slice(1).trim();
+  }
+  // Strip currency symbols + thousand separators
+  s = s.replace(/[$£€¥]/g, '').replace(/,/g, '').trim();
+  if (s === '') return null;
+  const n = Number(s);
+  if (!Number.isFinite(n)) return null;
+  const cents = Math.round(n * 100);
+  return negative ? -cents : cents;
+}
+
+const NORMALIZED_METHODS: Record<string, string> = {
+  cash: 'cash',
+  check: 'check',
+  cheque: 'check',
+  credit: 'credit_card',
+  'credit card': 'credit_card',
+  card: 'credit_card',
+  debit: 'debit_card',
+  'debit card': 'debit_card',
+  ach: 'ach',
+  bank: 'ach',
+  'bank transfer': 'ach',
+  online: 'online',
+  stripe: 'online',
+  paypal: 'online',
+  text: 'text_to_give',
+  'text to give': 'text_to_give',
+  recurring: 'recurring',
+};
+
+function normalizeMethod(raw: string): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase().trim();
+  return NORMALIZED_METHODS[s] ?? raw.slice(0, 50);
+}
+
+export function validateGivingRows(
+  rows: Record<string, string>[],
+  mapping: Partial<Record<GivingField, string>>,
+): GivingValidationResult {
+  const valid: ValidatedGivingRow[] = [];
+  const errors: GivingRowError[] = [];
+  const emailSet = new Set<string>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const get = (field: GivingField): string => {
+      const header = mapping[field];
+      if (!header) return '';
+      return (row[header] ?? '').trim();
+    };
+
+    const amountRaw = get('amount');
+    if (!amountRaw) {
+      errors.push({ rowIndex: i, field: 'amount', message: 'Amount is required.' });
+      continue;
+    }
+    const amountCents = parseAmountToCents(amountRaw);
+    if (amountCents === null) {
+      errors.push({ rowIndex: i, field: 'amount', message: `"${amountRaw}" is not a valid amount.` });
+      continue;
+    }
+    if (amountCents === 0) {
+      errors.push({ rowIndex: i, field: 'amount', message: 'Amount cannot be zero.' });
+      continue;
+    }
+
+    const dateRaw = get('date');
+    if (!dateRaw) {
+      errors.push({ rowIndex: i, field: 'date', message: 'Date is required.' });
+      continue;
+    }
+    const date = parseLooseDate(dateRaw);
+    if (!date) {
+      errors.push({ rowIndex: i, field: 'date', message: `"${dateRaw}" could not be parsed as a date.` });
+      continue;
+    }
+
+    const emailRaw = get('donor_email');
+    let donorEmail: string | null = null;
+    if (emailRaw) {
+      if (!EMAIL_RE.test(emailRaw)) {
+        errors.push({ rowIndex: i, field: 'donor_email', message: `"${emailRaw}" is not a valid email — gift will be unmatched.` });
+        // Don't `continue` — still import as unmatched
+      } else {
+        donorEmail = emailRaw.toLowerCase();
+        emailSet.add(donorEmail);
+      }
+    }
+
+    const donorName = get('donor_name') || null;
+    if (!donorEmail && !donorName) {
+      errors.push({ rowIndex: i, field: 'row', message: 'Row has no donor email or name — gift will be anonymous.' });
+      // Still import — anonymous donations are real (cash in plate, etc.)
+    }
+
+    valid.push({
+      donor_email: donorEmail,
+      donor_name: donorName ? donorName.slice(0, 200) : null,
+      amount_cents: amountCents,
+      date,
+      fund: (get('fund') || 'general').slice(0, 100),
+      method: normalizeMethod(get('method')),
+      note: (get('note') || '').slice(0, 1000) || null,
+      check_number: (get('check_number') || '').slice(0, 50) || null,
+    });
+  }
+
+  return { valid, errors, donorEmails: Array.from(emailSet) };
+}
