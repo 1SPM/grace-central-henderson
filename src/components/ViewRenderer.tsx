@@ -36,6 +36,7 @@ const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ defaul
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
 const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
+const FinancialHub = lazy(() => import('./FinancialHub').then(m => ({ default: m.FinancialHub })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
@@ -488,6 +489,9 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'reports':
         return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
+
+      case 'financial-hub':
+        return <FinancialHub onBack={() => setView('dashboard')} />;
 
       case 'birthdays':
         return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;

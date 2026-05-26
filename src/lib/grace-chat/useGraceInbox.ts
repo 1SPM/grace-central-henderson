@@ -44,11 +44,14 @@ export function useGraceInbox(args: {
   const onInjectRef = useRef(onInject);
 
   // Keep refs current so the polling closure always reads the latest data
-  // without forcing the interval to reset.
-  peopleRef.current = people;
-  tasksRef.current = tasks;
-  prayersRef.current = prayers;
-  onInjectRef.current = onInject;
+  // without forcing the interval to reset. Done in an effect (not during
+  // render) per react-hooks/refs.
+  useEffect(() => {
+    peopleRef.current = people;
+    tasksRef.current = tasks;
+    prayersRef.current = prayers;
+    onInjectRef.current = onInject;
+  });
 
   useEffect(() => {
     const sb = supabase;

@@ -140,6 +140,25 @@
   1. Trigger the route manually with the cron header.
   2. If platform issue: switch the job to Inngest as a temporary fallback.
 
+### RB-011 — Sprint 1 RLS rollout (planned procedure, not an incident)
+
+- **Severity:** N/A — scheduled work
+- **Purpose:** Switch from permissive RLS (migration 005) to church-scoped RLS (migration 011) without breaking client reads.
+- **Prerequisite check** (no go without all green):
+  1. `tools/lint-rls.ts` clean against all migrations (CI gate `rls-lint`).
+  2. Clerk Dashboard → JWT Templates: a template named `supabase` exists and its claims include `app_metadata.church_id`.
+  3. Supabase Dashboard → Authentication → Third-Party Auth: Clerk provider configured with the matching Frontend API URL.
+  4. Staging Supabase project exists with two test tenants (A, B) and two real Clerk-issued tokens.
+  5. `.env.local` (staging) has `SUPABASE_TEST_URL / _ANON_KEY / _TENANT_A_TOKEN / _TENANT_B_TOKEN / _TENANT_A_ID / _TENANT_B_ID` populated.
+- **Procedure:**
+  1. Apply migration `011_rls_church_scoped.sql` to **staging only**.
+  2. Run `npx vitest run tools/cross-tenant-smoke.test.ts` against staging — every assertion must pass.
+  3. Spot-check the staging app as a real signed-in user. Pages MUST load with rows visible (not empty); pulling another tenant's data via a known UUID MUST return zero rows.
+  4. Verify `audit_logs` is recording mutations from the staging session.
+  5. Roll forward to production: apply migration 011 to prod. Watch Sentry for a spike in `403`s or empty-result errors over the next 30 minutes.
+  6. If empty results spike (signs of broken JWT delivery): toggle PostHog flag `read-only-mode` to true, post in-app banner, investigate `auth.jwt()` payload via a server-side debug endpoint.
+- **Rollback:** Run an inverse migration that re-creates the `USING (true)` policies. The rollback migration is part of the same PR and committed alongside 011 for atomic deploys.
+
 ### RB-010 — Outbound email / SMS bounced or undelivered
 
 - **Severity:** SEV-3

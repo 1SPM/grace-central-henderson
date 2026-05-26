@@ -1,0 +1,41 @@
+# gitleaks configuration — extends the default ruleset with project-
+# specific allowlists. Default rules detect AWS keys, Stripe keys,
+# Slack tokens, GitHub tokens, generic high-entropy strings, etc.
+# See https://github.com/gitleaks/gitleaks#configuration
+
+title = "grace-crm gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project-wide allowlist"
+
+# Files that intentionally contain key-shaped strings (examples, fixtures,
+# test data). Real secrets must never live in these files; the format
+# alone (sk_test_xxx, pk_test_xxx) tells humans + tools "this is a stub."
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.example\.local$''',
+  '''^docs/.*$''',
+  '''^.*\.md$''',
+  '''^supabase/seed\.sql$''',
+  '''^supabase/reset_and_seed\.sql$''',
+]
+
+# Common false-positive value patterns:
+# - Placeholder/example strings users will recognize
+# - Public Supabase anon keys are intentionally public by design
+regexes = [
+  '''sk_test_xxx''',
+  '''pk_test_xxx''',
+  '''whsec_xxx''',
+  '''re_xxx''',
+  '''ACxxx''',
+  '''your-.*-here''',
+  '''your-.*-key''',
+  '''YOUR_USERNAME''',
+]
+
+# Commits we have already triaged and confirmed clean.
+commits = []

@@ -214,12 +214,16 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length]);
 
-  // Memoize context so we're not rebuilding this on every keystroke
+  // Memoize context so we're not rebuilding this on every keystroke.
+  // Depend on the specific fields we read so re-computation tracks the
+  // actual inputs, not every new wrapper object identity.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataContext = useMemo(() => buildDataContext(data), [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const suggestions = useMemo(() => buildSuggestions(data), [
     data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);

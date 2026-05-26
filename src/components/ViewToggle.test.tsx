@@ -14,14 +14,14 @@ describe('ViewToggle', () => {
     render(<ViewToggle view="card" onViewChange={() => {}} />);
 
     const cardButton = screen.getByTitle('Card view');
-    expect(cardButton).toHaveClass('bg-white');
+    expect(cardButton).toHaveClass('bg-stone-100');
   });
 
   it('highlights table view button when view is table', () => {
     render(<ViewToggle view="table" onViewChange={() => {}} />);
 
     const tableButton = screen.getByTitle('Table view');
-    expect(tableButton).toHaveClass('bg-white');
+    expect(tableButton).toHaveClass('bg-stone-100');
   });
 
   it('calls onViewChange with "card" when card button is clicked', () => {

@@ -87,6 +87,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
   { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
+  { view: 'financial-hub', label: 'Financial Hub', icon: <DollarSign size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
@@ -163,6 +164,7 @@ const viewLabels: Record<View, string> = {
   discipleship: 'Discipleship',
   grace: 'Grace',
   mail: 'Mail',
+  'financial-hub': 'Financial Hub',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {

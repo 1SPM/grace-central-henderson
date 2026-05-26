@@ -56,12 +56,37 @@ export function useAuthContext() {
 
 // Inner provider that uses Clerk hooks
 function AuthProviderInner({ children }: { children: React.ReactNode }) {
-  const { isLoaded: clerkLoaded, isSignedIn: clerkSignedIn } = useAuth();
+  const { isLoaded: clerkLoaded, isSignedIn: clerkSignedIn, getToken } = useAuth();
   const { user: clerkUser } = useUser();
   const { signOut: clerkSignOut } = useClerk();
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Register a Clerk-token provider with the Supabase client so every
+  // Supabase request rides on the Clerk session JWT (enabling church-scoped
+  // RLS once Supabase third-party auth is configured — see src/lib/supabase.ts).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { setClerkTokenProvider } = await import('../lib/supabase');
+      if (cancelled) return;
+      if (clerkSignedIn) {
+        // Use template if your Clerk dashboard has a "supabase" template;
+        // otherwise the default session token works for native third-party.
+        setClerkTokenProvider(async () => {
+          try {
+            return await getToken({ template: 'supabase' }) ?? await getToken();
+          } catch {
+            return await getToken();
+          }
+        });
+      } else {
+        setClerkTokenProvider(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [clerkSignedIn, getToken]);
 
   // Sync Clerk user with our database
   useEffect(() => {

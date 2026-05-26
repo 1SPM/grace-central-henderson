@@ -18,7 +18,12 @@
 - **Location:** `supabase/migrations/005_row_level_security.sql:147-173`
 - **Risk:** A bug in any application query that omits `church_id` filtering leaks data across tenants.
 - **Re-entry trigger:** before *any* production tenant is invited beyond the operator's own organization.
-- **Resolution path:** Sprint 1 ships migration `010_rls_church_scoped.sql` that replaces every `USING (true)` policy with `USING (church_id = public.get_church_id())`. CI gains `tools/lint-rls.ts` and a cross-tenant smoke test (Tenant A JWT → SELECT people → 0 rows).
+- **Status:** Largely in place; two pieces remaining are operator-side, not code.
+  - **CI lint deployed** Sprint 0 Day 3 (`tools/lint-rls.ts` + `npm run lint:rls`) — catches new tables created without RLS.
+  - **Scoped-policy migration written** Sprint 1 (`supabase/migrations/011_rls_church_scoped.sql`) — replaces every `USING (true)` with `USING (church_id = public.get_church_id())` across 24 direct-FK tables and 4 FK-derived tables. Anchor and audit_logs tables are deliberately not touched (already locked down).
+  - **Clerk-aware Supabase client** deployed Sprint 1 (`src/lib/supabase.ts` clerk-aware fetch + `AuthContext` token-provider wiring). Every Supabase request now rides on the Clerk session JWT when signed in.
+  - **Cross-tenant smoke test written** (`tools/cross-tenant-smoke.test.ts`) — skips when env vars absent; runs against staging once configured.
+  - **REMAINING (operator):** (1) Configure Clerk JWT template `supabase` with `app_metadata.church_id` claim. (2) Configure Supabase third-party auth to trust Clerk. (3) Apply migration 011 to staging → run smoke test → apply to prod. Full procedure in `RUNBOOK.md` RB-011.
 
 ### TD-002 — Cross-tenant CI smoke test does not exist
 - **Owner:** Sprint 1
@@ -26,11 +31,10 @@
 - **Re-entry trigger:** same as TD-001.
 - **Resolution path:** seed two tenants in test DB, sign JWTs for both, assert each can read only its own rows across `people`, `giving`, `prayer_requests`, `audit_logs`.
 
-### TD-003 — No `audit_logs` table
+### TD-003 — `audit_logs` table and middleware
 - **Owner:** Sprint 1
-- **Risk:** Cannot answer "who changed this record" — SOC 2, regulatory, and customer-trust blocker.
-- **Re-entry trigger:** before SOC 2 evidence collection starts (Sprint 0 ideally).
-- **Resolution path:** new table `audit_logs (id, church_id, actor_user_id, action, entity_type, entity_id, before_jsonb, after_jsonb, created_at)`. Express middleware on every state-changing route writes one row. RLS denies UPDATE and DELETE.
+- **Status:** **Resolved.** Migration `010_audit_logs.sql` ships the table with append-only enforcement (RLS + trigger). `api/_middleware/audit.ts` writes one row on every successful 2xx mutation, fire-and-forget on `res.finish` so user latency is unaffected. The explicit `audit(req, res, supabase, details)` helper exists for handlers that want before/after diffs (e.g., webhooks writing to the ledger). 13 unit tests pin the row-construction + status-code gating.
+- **Remaining:** Per-route `audit()` calls for high-value mutations (Stripe webhooks → ledger writes, user role changes, leader publication) — landing as part of Sprint 3 (ledger) and Sprint 1 part 3 (auth IDOR fixes).
 
 ### TD-004 — No webhook idempotency or DLQ
 - **Owner:** Sprint 3
@@ -57,9 +61,19 @@
 
 ### TD-007 — No `token_usage` ledger or per-tenant AI budget cap
 - **Owner:** Sprint 2
-- **Risk:** A misconfigured loop bills $10k to our credit card overnight. Has happened to predecessors of this codebase.
-- **Re-entry trigger:** Sprint 2.
-- **Resolution path:** see ADR-009.
+- **Status:** **Largely resolved.** Migration `012_token_usage.sql` ships the append-only usage ledger + `church_ai_budgets` cap table (default $50/mo, 1.10× hard-cut multiplier). `api/_lib/ai/gateway.ts` enforces the cap before every inference. `api/_lib/ai/pricing.ts` has per-provider rates as of 2026-05-25. 67 unit tests including the **synthetic burn test** that satisfies the Sprint 2 exit gate ("triggers cutoff at $0.01 over budget").
+- **Routes wired (Sprint 2 Part 2):** `api/grace/draft-reply.ts` now calls every Gemini inference through the gateway with `feature='draft-reply'`, plus opt-in input + output moderation.
+- **Moderation pipeline (Sprint 2 Part 3):** `api/_lib/ai/moderation.ts` wraps OpenAI's free `omni-moderation-latest`. Gateway runs INPUT moderation pre-call (flagged → refuse before tokens), OUTPUT moderation post-call (flagged → redact + flip success to false). No-op without `OPENAI_API_KEY`, fails OPEN on moderation outage.
+- **Multi-provider adapters (Sprint 2 Part 3):** `api/_lib/ai/adapters/{gemini,claude,openai}.ts` each return `ProviderCallResult` and never throw. Claude + OpenAI require their respective API keys; they return a clean failure (`claude_no_key` / `openai_no_key`) when missing.
+- **Anomaly cron (Sprint 2 Part 3):** `api/cron/ai-anomaly.ts` runs hourly per `vercel.json` `crons` config. Compares last-hour spend per tenant to trailing 7-day hourly average; fires a Sentry warning when ratio ≥ 5× AND last-hour spend ≥ $0.10. Auth via `x-vercel-cron` header or `CRON_SECRET` bearer. `detectAnomaly` math extracted as a pure function with 9 unit tests.
+- **Remaining:** `api/ai/generate.ts` (Ask Grace entry) still calls Gemini directly because it has no auth and therefore no church_id resolution. Tracked as TD-033 below.
+
+### TD-033 — `api/ai/generate.ts` has no auth / no per-tenant metering
+- **Severity:** P1
+- **Location:** `api/ai/generate.ts`
+- **Risk:** This route is the Ask Grace entry point and currently has only IP-based rate limiting (120 req/min). Without a verified Clerk JWT we can't resolve `church_id`, which means we can't bill the call to a tenant's budget — every call against this route is uncapped. A misconfigured client loop could burn unlimited budget on our card before the IP rate limit slows it (still 120 calls/min ≈ ~$10/hr at Gemini Flash rates).
+- **Re-entry trigger:** before this PR's gateway can claim full coverage of AI cost control; before any external customer hits this route.
+- **Resolution path:** Add Clerk JWT verification (mirror the pattern in `api/_middleware/auth.ts`) at the top of `api/ai/generate.ts`, extract `church_id` from `app_metadata` (requires the Clerk JWT template — see TD-001 + RB-011), then wire through `generate()` with `feature='ask-grace'`. Estimated 30 min once the JWT template is configured.
 
 ### TD-008 — No moderation pipeline on AI inputs/outputs
 - **Owner:** Sprint 2
@@ -69,9 +83,16 @@
 
 ### TD-009 — Unified `ledger_entries` table does not exist
 - **Owner:** Sprint 3
-- **Risk:** Stripe + i2c reconciliation becomes manual; CFO dashboard cannot be trusted.
-- **Re-entry trigger:** before Stripe goes live in production.
-- **Resolution path:** see ADR-005.
+- **Status:** **Resolved.** Migration `013_ledger_and_webhooks.sql` ships `ledger_entries` per ADR-005 (append-only via RLS + trigger; UNIQUE(source, source_event_id) at the journal level). `api/_lib/ledger.ts` is the single write surface; corrections enforced (kind='correction' requires metadata.corrects_entry_id). Same migration adds `webhook_events` (idempotency) + `webhook_dlq` (failure replay). Stripe handler refactored into `api/_lib/webhooks/{stripe-handlers,stripe-dispatch}.ts` with a new Vercel route at `api/webhooks/stripe.ts` and the legacy Express route delegating to the same dispatcher.
+- **Coverage:** payment_intent.succeeded, invoice.paid (recurring), charge.refunded, customer.subscription.{created,updated,deleted}. Each handler writes the operational row (giving / recurring_giving via upsert on the Stripe id) AND the ledger entry. Duplicate webhook delivery is a no-op past the dedup check. 65 unit tests including full dispatch coverage of happy path + duplicate + handler-skip + DLQ failure + replay flow.
+- **Reconciliation:** `api/cron/reconcile-stripe.ts` runs daily 06:00 UTC (vercel.json). Detects volume_spike (≥5× trailing 7-day avg + $1 floor), volume_drop (symmetric), fee_without_credit, no_history_spike. Fires Sentry warning per anomaly. **Stripe Balance API comparison is TD-034** — needs per-tenant Stripe account_id (Connect) before it can compare ledger to actual payouts.
+
+### TD-034 — Reconciliation cron does not yet compare ledger to Stripe Balance API
+- **Severity:** P2
+- **Location:** `api/cron/reconcile-stripe.ts` + `api/_lib/webhooks/reconcile.ts`
+- **Status:** Substrate is in place. The cron currently detects ledger-internal anomalies (volume spike/drop, fees without credits). True reconciliation — "sum of ledger credits for source=stripe yesterday == Stripe payout amount" — needs per-tenant Stripe account_id mapping (we'll get this when Stripe Connect is wired) and an authenticated Stripe Balance API call.
+- **Re-entry trigger:** before Stripe Connect goes live in production / before the CFO dashboard ships.
+- **Resolution path:** add a `churches.stripe_account_id` column. Extend the cron to call `stripe.balance.list({ created: { gte: yesterday, lt: today } })` per tenant. Compare sum to ledger total. Fire Sentry on >$1 drift.
 
 ### TD-010 — CSRF middleware not applied to all auth routes
 - **Owner:** Backend Platform (post-Sprint 1)
@@ -134,10 +155,12 @@
 - **Risk:** Known-vulnerable transitive dep ships to prod silently.
 - **Resolution path:** Dependabot (free), Snyk free tier, `npm audit --audit-level=high` gate in CI.
 
-### TD-020 — No `gitleaks` pre-commit hook
-- **Owner:** Sprint 0, Day 3
+### TD-020 — `gitleaks` pre-commit hook (CI gate landed; local hook deferred)
+- **Owner:** Sprint 0, Day 3 (CI) / follow-up (local hook)
 - **Risk:** Accidental secret commit. We've already had one client-side-key audit finding.
-- **Resolution path:** Husky + gitleaks; same scan as a CI job.
+- **Status:** CI gate landed Sprint 0 D3 — `gitleaks/gitleaks-action@v2` runs on every push and PR with `.gitleaks.toml` for project-specific allowlists. **Local pre-commit hook deferred** to keep dev-environment setup friction low; Husky + a hook that runs `gitleaks protect --staged` is the standard path.
+- **Re-entry trigger:** when a second developer joins the project, or after the first close call where a secret almost lands.
+- **Resolution path:** `npm i -D husky` + `npx husky init` + `.husky/pre-commit` running `gitleaks protect --staged --redact -v`. Document the gitleaks-binary install step in `CONTRIBUTING.md`.
 
 ### TD-021 — No load-test baseline
 - **Owner:** Sprint 7
@@ -198,12 +221,15 @@
 - **Re-entry trigger:** Sprint 0 Day 3, alongside CI hardening.
 - **Resolution path:** small dedicated PR. Move ref assignments inside an effect; fix `bg-white` vs `bg-stone-100` mismatch (likely a tailwind theme drift after the gold-accent change in commit `eccb4e3`).
 
-### TD-032 — npm audit reports 31 vulnerabilities (1 low, 10 mod, 17 high, 3 critical)
+### TD-032 — npm audit findings (partial — see status)
 - **Severity:** P2
-- **Discovered:** Sprint 0, Day 2 — output of `npm install`.
-- **Cause:** transitive deps; needs detail-level audit. Likely mostly false-positive level CVEs in dev tooling.
-- **Re-entry trigger:** Sprint 0, Day 3 (TD-019 — CI dependency scanning).
-- **Resolution path:** triage with `npm audit --json`; resolve high/critical, document the rest as accepted risk.
+- **Discovered:** Sprint 0, Day 2 — output of `npm install` after adding Sentry/PostHog.
+- **Original state:** 31 vulnerabilities (1 low, 10 mod, 17 high, 3 critical).
+- **Sprint 0 Day 3 action:** `npm audit fix` (no breaking changes) cleared the 3 criticals plus 17 of the lower-severity issues. Production-only dependencies are now **clean** (`npm audit --omit=dev --audit-level=high` → 0 vulns).
+- **Current state:** 11 vulns remaining (5 mod + 6 high), **all in dev dependencies** (`@vercel/node` and its transitives — `path-to-regexp`, `minimatch`, `undici`, `esbuild` via Vite, `ajv`, `smol-toml`). Fixes require major-version upgrades (`@vercel/node@4`, `vite@8`) that ship with breaking changes.
+- **Mitigation in place:** CI gate `npm audit --omit=dev --audit-level=high` (added Sprint 0 D3) prevents new vulns from landing in production deps. Dependabot configured (`.github/dependabot.yml`) to surface major-version upgrades as individual PRs for controlled evaluation.
+- **Re-entry trigger:** when Dependabot opens the `@vercel/node@4` and `vite@8` upgrade PRs — evaluate each on its own merits.
+- **Resolution path:** triage each major upgrade individually; do not auto-merge.
 
 ---
 

@@ -1,0 +1,64 @@
+version: 2
+updates:
+  # npm dependencies — root package.json
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Toronto
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - npm
+    groups:
+      # Group all minor + patch bumps into one PR per week to reduce
+      # review fatigue. Major bumps still get individual PRs so each
+      # breaking change is evaluated on its own.
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+      # Group all security fixes (any severity) into a separate PR so
+      # they can be prioritized.
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore(deps)
+      include: scope
+
+  # npm dependencies — api/package.json (legacy; see DECISIONS notes)
+  - package-ecosystem: npm
+    directory: /api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Toronto
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - npm
+      - api
+    commit-message:
+      prefix: chore(api-deps)
+      include: scope
+
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Toronto
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: chore(ci-deps)
+      include: scope

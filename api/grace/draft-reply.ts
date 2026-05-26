@@ -1,10 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { buildChurchContext, buildPersonContext, buildReplyPrompt } from '../_lib/grace-context.js';
+import { generate } from '../_lib/ai/gateway.js';
+import { microUsdToUsd } from '../_lib/ai/pricing.js';
+import { callGemini } from '../_lib/ai/adapters/gemini.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const PROVIDER = 'gemini';
+const MODEL = 'gemini-2.5-flash';
+const FEATURE = 'draft-reply';
 
 interface DraftReplyBody {
   inbox_message_row_id?: string;
@@ -42,32 +49,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     },
   });
 
-  try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            maxOutputTokens: 1500,
-            temperature: 0.6,
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-      },
-    );
-    if (!r.ok) {
-      const detail = await r.text().catch(() => '');
-      return res.status(502).json({ error: 'Gemini error', detail: detail.slice(0, 200) });
+  const requestId = (req.headers['x-request-id'] as string | undefined) ?? null;
+
+  // Every Gemini call goes through the gateway: budget → moderation → call → record.
+  // Moderation is opt-in: input moderation runs on the inbound email body (the
+  // user-controlled portion of the prompt), output moderation runs on the
+  // drafted reply before we surface it. Both are no-ops without OPENAI_API_KEY.
+  const result = await generate(
+    {
+      supabase,
+      churchId: row.church_id,
+      feature: FEATURE,
+      provider: PROVIDER,
+      model: MODEL,
+      requestId,
+      moderateInput: row.body_text ?? row.preview ?? '',
+      moderateOutput: true,
+    },
+    () => callGemini({ apiKey: GEMINI_API_KEY!, model: MODEL, prompt }),
+  );
+
+  if (!result.allowed) {
+    if (result.reason === 'moderation_input') {
+      return res.status(422).json({
+        error: 'input_moderation_block',
+        flagged_categories: result.moderation.flaggedCategories,
+      });
     }
-    const data = await r.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-    const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-    if (!text) return res.status(500).json({ error: 'Empty draft' });
-    return res.status(200).json({ success: true, text });
-  } catch (err) {
-    console.error('[draft-reply]', err);
-    return res.status(500).json({ error: 'Draft failed' });
+    // Budget refusal — 402 Payment Required. Body carries enough detail
+    // for the client to render a useful "you've hit your AI cap" message.
+    return res.status(402).json({
+      error: 'ai_budget_exceeded',
+      reason: result.reason,
+      spent_usd: microUsdToUsd(result.budget.spentMicroUsd),
+      cap_usd: microUsdToUsd(result.budget.capMicroUsd),
+      hard_cut_usd: microUsdToUsd(result.budget.hardCutMicroUsd),
+      month_start: result.budget.monthStartIso,
+    });
   }
+
+  if (!result.provider.success) {
+    if (result.provider.errorCode === 'moderation_output') {
+      return res.status(422).json({
+        error: 'output_moderation_block',
+        flagged_categories: result.moderation?.output?.flaggedCategories ?? [],
+      });
+    }
+    return res.status(502).json({
+      error: 'ai_provider_error',
+      detail: (result.provider.error ?? '').slice(0, 200),
+      error_code: result.provider.errorCode,
+    });
+  }
+
+  return res.status(200).json({ success: true, text: result.provider.text });
 }

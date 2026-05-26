@@ -59,12 +59,18 @@ Format:
 
 **Context.** Today, tenant scoping is enforced in application code (every query manually filters by `church_id`). RLS policies exist but are permissive (`USING (true)`). A bug in any query risks cross-tenant data leak. Banking data is incoming.
 
-**Decision.** Sprint 1 replaces permissive RLS with policies that read `auth.jwt() -> 'app_metadata' ->> 'church_id'` (helper already defined as `public.get_church_id()`). Every new table must enable RLS and ship at least one tenant-scoping policy in the same migration. A CI lint (`tools/lint-rls.ts`) fails the build if a `CREATE TABLE` is committed without a corresponding `ENABLE ROW LEVEL SECURITY` and policy.
+**Decision.** Sprint 1 replaces permissive RLS with policies that read `auth.jwt() -> 'app_metadata' ->> 'church_id'` (helper already defined as `public.get_church_id()`). **Every new table must enable RLS in the migration that creates it** — that is the structural invariant. Whether a table also needs a `CREATE POLICY` is a per-table design decision:
+
+- **User-facing tables** (queried by anon/authenticated via the client) MUST have a tenant-scoped policy (`USING (church_id = public.get_church_id())` or similar) — otherwise reads return empty.
+- **Service-role-only tables** (sensitive intake, AI personas, private chats, payment ledger) SHOULD have no policy. Postgres defaults to deny when RLS is enabled with no policies — that is the most restrictive state. Migrations 007 and 008 use this pattern intentionally and document each table's reasoning inline.
+
+A CI lint (`tools/lint-rls.ts`, deployed Sprint 0 Day 3) fails the build if a `CREATE TABLE` lands without a corresponding `ALTER TABLE … ENABLE ROW LEVEL SECURITY`. The "must have a policy" requirement is not lintable — it is a design call. The lint catches the one fatal bug (RLS off) without false-positiving the legitimate service-role-only pattern.
 
 **Consequences.**
 - Service-role queries (cron, server-to-server) must explicitly bypass RLS via the service role key; we cannot rely on it accidentally.
 - Misconfigured Clerk metadata = empty result sets, not data leaks. Fail-closed.
-- We need a cross-tenant smoke test that runs in CI on every PR.
+- We need a cross-tenant smoke test that runs in CI on every PR (Sprint 1).
+- Reviewers must check policy presence on a per-PR basis for user-facing tables.
 
 **Alternatives considered.**
 - *Trust middleware* — single point of failure; one missed `church_id` filter and the whole thing leaks.

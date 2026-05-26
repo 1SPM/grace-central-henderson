@@ -326,14 +326,14 @@ function App() {
                       method: 'POST', headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ person_id: id, subject: subject || 'A note from your church', text: body }),
                     });
-                    r.ok ? sent++ : failed++;
+                    if (r.ok) sent++; else failed++;
                   } else {
                     if (!person?.phone) { skipped++; continue; }
                     const r = await fetch('/api/sms/send', {
                       method: 'POST', headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ to: person.phone, message: body }),
                     });
-                    r.ok ? sent++ : failed++;
+                    if (r.ok) sent++; else failed++;
                   }
                 } catch { failed++; }
                 await new Promise(res => setTimeout(res, 150)); // gentle pacing

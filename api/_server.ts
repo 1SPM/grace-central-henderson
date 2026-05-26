@@ -21,9 +21,9 @@
  * - PORT: Server port (default 3001)
  */
 
-// Sentry must initialize BEFORE other imports that hook into Node runtime.
-import { initSentryServer, Sentry } from './_lib/sentry';
-const sentryEnabled = initSentryServer();
+// MUST be the first side-effect import — runs Sentry.init() at module
+// top level, before Express or http are evaluated. See api/instrument.ts.
+import { Sentry, sentryEnabled } from './instrument';
 
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -42,6 +42,7 @@ import { initWebhookRoutes } from './_routes/webhooks';
 import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
 import { csrfCookie, csrfProtection } from './_middleware/csrf';
 import { rateLimit } from './_middleware/rateLimit';
+import { auditMutations } from './_middleware/audit';
 
 // Initialize Express
 const app = express();
@@ -76,6 +77,10 @@ app.use(express.json());
 
 // Issue CSRF cookie for browser clients
 app.use(csrfCookie);
+
+// Append-only audit trail for every successful mutation. Fires on
+// res.finish so it never delays the user response; failures go to Sentry.
+app.use(auditMutations(supabase));
 
 // ============================================
 // ROUTES

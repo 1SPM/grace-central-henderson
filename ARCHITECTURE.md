@@ -134,11 +134,11 @@ All tables created in `supabase/migrations/001_initial_schema.sql` through `008_
 
 **Tables that DO NOT exist yet but Sprint 1+ require:**
 - `tenants` / `tenant_members` — currently `churches` / `users` serve this role
-- `audit_logs`
-- `token_usage`
+- ~~`audit_logs`~~ — landed in migration 010 (Sprint 1)
+- ~~`token_usage`, `church_ai_budgets`~~ — landed in migration 012 (Sprint 2)
 - `ledger_entries`
 - `kyc_verifications`
-- `webhook_dlq`
+- `webhook_dlq`, `webhook_events`
 
 ---
 
@@ -193,15 +193,17 @@ From `SECURITY_AUDIT_REPORT.md` and `SECURITY_FINDINGS_STATUS.md`:
 | Security headers | Low | Resolved (`vercel.json` + dev CSP in `vite.config.ts`) |
 | Verbose logging | Low | `maskSensitiveData()` introduced |
 
-### Headers shipped (vercel.json)
+### Headers shipped (vercel.json — production)
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 - `Referrer-Policy: strict-origin-when-cross-origin`
+- `X-XSS-Protection: 1; mode=block`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)`
+- `Content-Security-Policy` — `frame-ancestors 'none'`, explicit allowlist for Supabase, Clerk, Stripe, Resend, Twilio, Sentry ingest, PostHog
 - CORS configured for `Content-Type, Authorization, X-CSRF-Token`
 
 ### Dev CSP (vite.config.ts)
-- `frame-ancestors 'none'`
-- Allowlists Supabase, Clerk, Stripe, Resend, Twilio explicitly
+- Mirrors the production CSP from `vercel.json` so dev surfaces violations early
 
 ---
 
@@ -280,8 +282,8 @@ Deploys via Vercel on merge to `main`.
 - **Frontend + API**: Vercel
 - **Database**: Supabase (region TBD — must confirm Canada Central before any banking data; see `DECISIONS.md`)
 - **Secrets**: Vercel Environment Variables (not yet migrated to AWS Secrets Manager)
-- **Logging**: `console.*` (no Sentry yet)
-- **Analytics / feature flags**: none (PostHog not yet wired)
+- **Error monitoring**: Sentry wired on client (`src/lib/observability/sentry.ts`) and server (`api/instrument.ts`). PII redaction via shared `src/lib/observability/scrub.ts`. No-op when DSN unset.
+- **Analytics / feature flags**: PostHog wired (`src/lib/observability/posthog.ts`, lazy-loaded). Typed flag registry in `src/lib/observability/featureFlags.ts`: `READ_ONLY_MODE` (incident kill switch), `FINANCIAL_HUB` (Sprint 4), `I2C_LIVE` (Sprint 6). No-op when key unset.
 
 ---
 
