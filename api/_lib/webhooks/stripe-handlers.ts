@@ -19,6 +19,8 @@ import type Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { appendLedgerEntry, centsToMicroUsd, type LedgerEntryInput } from '../ledger';
 import { planSlugForPriceId, type PlanSlug } from '../billing/plans';
+import { queueEmail } from '../email/queue';
+import { renderDonationReceiptEmail } from '../email/templates/donation-receipt';
 
 export interface StripeHandlerContext {
   supabase: SupabaseClient;
@@ -97,6 +99,54 @@ async function handlePaymentIntentSucceeded(
     },
   };
   const ledger = await appendLedgerEntry(ctx.supabase, entry);
+
+  // Queue the donor receipt. Idempotent by payment_intent_id so
+  // re-delivered webhooks don't double-send. Best-effort — failures
+  // log but don't block the webhook from being marked processed.
+  // Only fires when we have a donor email in the PI metadata; Stripe's
+  // own receipt covers the no-email case.
+  const donorEmail = pi.metadata?.donor_email;
+  if (donorEmail) {
+    try {
+      const { data: church } = await ctx.supabase
+        .from('churches')
+        .select('name, slug, tax_ein')
+        .eq('id', churchId)
+        .single();
+      if (church) {
+        const { subject, html } = renderDonationReceiptEmail({
+          donorName: pi.metadata?.donor_name || null,
+          donorEmail,
+          churchName: church.name,
+          churchSlug: church.slug,
+          churchEin: (church as { tax_ein?: string | null }).tax_ein ?? null,
+          amountCents: pi.amount,
+          fund,
+          occurredAt: new Date(event.created * 1000),
+          isRecurring: pi.metadata?.is_recurring === 'true' || !!pi.invoice,
+          frequency: pi.metadata?.frequency?.replace('ly', ''),
+        });
+        await queueEmail({
+          supabase: ctx.supabase,
+          churchId,
+          toAddr: donorEmail,
+          subject,
+          templateId: 'donation_receipt.v1',
+          html,
+          idempotencyKey: `receipt:${pi.id}`,
+          sendNow: true,
+          metadata: {
+            payment_intent_id: pi.id,
+            amount_cents: pi.amount,
+            fund,
+          },
+        });
+      }
+    } catch (err) {
+      console.error('[stripe-handlers] receipt email queue failed (non-fatal)', err);
+    }
+  }
+
   return {
     status: 'processed',
     ledgerWritten: ledger.inserted,
