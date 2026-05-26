@@ -1,0 +1,48 @@
+name: Load test (k6)
+
+# Manual trigger only. Runs against staging or any URL you pass in.
+# Resolves TD-021 (k6 load-test baseline).
+#
+# To run from the GitHub UI:
+#   Actions tab → "Load test (k6)" → Run workflow → enter the target URL.
+#
+# To run locally instead:
+#   docker run --rm -i grafana/k6 run --env BASE_URL=http://localhost:3000 - < tests/load/baseline.k6.js
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target base URL (e.g. https://staging.grace-crm.app)'
+        required: true
+        type: string
+      church_id:
+        description: 'church_id to use for connect-card submissions (default = Grace Community Church demo tenant)'
+        required: false
+        type: string
+        default: '11111111-1111-1111-1111-111111111111'
+
+jobs:
+  baseline:
+    name: Baseline (50 VU x 3.5 min)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run k6 baseline scenario
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/load/baseline.k6.js
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          CHURCH_ID: ${{ inputs.church_id }}
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-summary
+          path: |
+            summary.html
+            summary.json
+          if-no-files-found: ignore

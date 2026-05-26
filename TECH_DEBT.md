@@ -103,9 +103,24 @@
 
 ### TD-011 — Server-side input validation incomplete
 - **Owner:** Sprint 1 (people/tasks/prayer write paths)
-- **Risk:** Malformed payloads land in DB; potential XSS on render despite frontend sanitization.
-- **Re-entry trigger:** every new write endpoint.
-- **Resolution path:** Zod schemas per route; reject with 400 + structured error before any DB call.
+- **Status:** **Partial resolution (Sprint 7).** Added `api/_lib/validation.ts` — a tiny hand-rolled validator (no external dep, avoiding the lockfile fragility from Sprint 0 D3's npm-audit-fix). 25 tests cover str/email/uuid/bool/int/arrayOfStr + the aggregator. Wired into the two public-internet routes: `api/connect-card.ts` and `api/leader-apply.ts`. These had only `if (!firstName)` checks; now they enforce UUID format on `churchId`, email format, phone format pattern, per-field size caps (firstName ≤ 100, bio ≤ 5000, prayerRequest ≤ 2000), and arrayOfStr caps on tag arrays.
+- **Remaining:** the legacy authenticated Express routes (`/api/payments`, `/api/email`, `/api/sms`, `/api/agents`) still validate by hand inside each route. Lower priority than connect-card/leader-apply because those go through `requireAuth` first (Bearer-token-only callers, not anonymous internet). Apply the same validator pattern when each route is next touched.
+- **Risk (residual):** internal API routes still accept malformed payloads. Catches: type errors at the DB layer for blatantly wrong types; XSS via rendered fields not blocked.
+
+### TD-021 — No load-test baseline
+- **Status:** **Resolved (Sprint 7).** `tests/load/baseline.k6.js` + `.github/workflows/load-test.yml`. Single scenario: 50 VU over 3.5 min, mix of dashboard reads (65%) / financial-hub summary (15%) / connect-card POSTs (15%) / Ask Grace AI (5%). SLO targets asserted via k6 `thresholds`: p95 < 500ms for read endpoints, p95 < 2500ms for AI endpoint, error rate < 1%. Workflow is manual-trigger (`workflow_dispatch`) until a staging URL is pinned.
+- **Re-entry trigger:** when staging is up — wire to a weekly schedule and gate nightly merges on it.
+
+### TD-037 — `calendar_events` has no leader assignment column
+- **Severity:** P3
+- **Location:** schema mismatch with Sprint 5's operations agent
+- **Status:** Discovered during Sprint 7 pre-flight against prod. The operations agent's `event_no_leader` signal needs a leader-id column on the events table; `calendar_events` doesn't have one. The runner currently passes `leader_id: null` for every event, which makes the agent flag EVERY upcoming event as no-leader — too noisy to be useful.
+- **Mitigation:** the agent still works; the noise is bounded by the 7-day horizon + the dedup window. The other observation kinds (overdue tasks, member care, stewardship) are unaffected.
+- **Resolution path:** either (a) add `leader_id` to calendar_events, OR (b) join calendar_events → volunteer_scheduling (if it exists) and treat assigned > 0 as "has leader", OR (c) suppress this observation kind entirely until volunteer assignments land. Pick after Sprint 5 demo feedback.
+
+### TD-022 — Runbook coverage incomplete
+- **Status:** **Largely resolved (Sprint 7).** RB-002 (AI spend spike) and RB-003 (Stripe webhook failures) rewritten with the actual queries against `token_usage` / `webhook_dlq` (no longer "table arrives in Sprint X"). Five new entries: RB-012 (AI moderation flagged), RB-013 (DLQ growing), RB-014 (ledger reconciliation anomaly), RB-015 (agent run failed), RB-016 (KYC stuck). All entries have concrete First check SQL + Mitigation steps + Root-cause fix pointers.
+- **Remaining:** as new incidents happen, capture them as new RB entries. The skeleton is no longer skeleton-shaped.
 
 ### TD-012 — No session timeout
 - **Owner:** Auth Platform

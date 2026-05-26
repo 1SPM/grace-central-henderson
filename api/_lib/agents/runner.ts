@@ -87,9 +87,15 @@ async function fetchPeople(supabase: SupabaseClient, churchId: string): Promise<
   // people + a derived last_interaction_at via a window function would be
   // ideal, but we ship the simple path: pull people then pull interactions
   // separately and join client-side. Performance check at first tenant > 5k people.
+  // Schema mapping for the existing grace-crm prod DB:
+  //   - There's no `full_name` column → we synthesize "first last".
+  //   - The column is `birth_date` not `birthday`.
+  //   - The column is `join_date` not `joined_at` (and there's a
+  //     separate `first_visit` we ignore here — first-visit goes
+  //     through the recent-visitor follow-up path).
   const { data: people, error } = await supabase
     .from('people')
-    .select('id, full_name, first_name, last_name, status, birthday, joined_at')
+    .select('id, first_name, last_name, status, birth_date, join_date')
     .eq('church_id', churchId)
     .limit(10_000);
   if (error || !people) return [];
@@ -106,9 +112,22 @@ async function fetchPeople(supabase: SupabaseClient, churchId: string): Promise<
     if (!lastByPerson.has(r.person_id)) lastByPerson.set(r.person_id, r.created_at);
   }
 
-  return (people as AgentPersonSnapshot[]).map((p) => ({
-    ...p,
-    last_interaction_at: lastByPerson.get(p.id) ?? p.last_interaction_at ?? null,
+  return (people as Array<{
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    status: string | null;
+    birth_date: string | null;
+    join_date: string | null;
+  }>).map((p): AgentPersonSnapshot => ({
+    id: p.id,
+    first_name: p.first_name,
+    last_name: p.last_name,
+    full_name: [p.first_name, p.last_name].filter(Boolean).join(' ').trim() || null,
+    status: p.status,
+    birthday: p.birth_date,
+    joined_at: p.join_date,
+    last_interaction_at: lastByPerson.get(p.id) ?? null,
   }));
 }
 
@@ -133,27 +152,47 @@ async function fetchRecentGiving(
 }
 
 async function fetchEvents(supabase: SupabaseClient, churchId: string): Promise<AgentEventSnapshot[]> {
+  // Schema mapping: the table is `calendar_events` not `events`, and the
+  // start column is `start_date` not `starts_at`. There's no leader
+  // assignment column on this table — the operations agent's
+  // "event_no_leader" signal will skip for every row until we add
+  // volunteer assignments to calendar events (TD-037). Until then,
+  // pass leader_id: null and the agent will flag every upcoming event.
+  // Cap the horizon to limit noise.
   const horizon = new Date(Date.now() + 60 * 86_400_000).toISOString();
   const { data, error } = await supabase
-    .from('events')
-    .select('id, title, starts_at, leader_id')
+    .from('calendar_events')
+    .select('id, title, start_date')
     .eq('church_id', churchId)
-    .gte('starts_at', new Date().toISOString())
-    .lte('starts_at', horizon)
+    .gte('start_date', new Date().toISOString().slice(0, 10))
+    .lte('start_date', horizon.slice(0, 10))
     .limit(500);
   if (error || !data) return [];
-  return data as AgentEventSnapshot[];
+  return (data as Array<{ id: string; title: string; start_date: string }>).map((e): AgentEventSnapshot => ({
+    id: e.id,
+    title: e.title,
+    starts_at: e.start_date.includes('T') ? e.start_date : `${e.start_date}T09:00:00Z`,
+    leader_id: null,
+  }));
 }
 
 async function fetchTasks(supabase: SupabaseClient, churchId: string): Promise<AgentTaskSnapshot[]> {
+  // Schema mapping: the prod tasks table uses `completed` (boolean) not
+  // `status`. We surface non-completed tasks as status='pending' so the
+  // overdue-task agent sees them.
   const { data, error } = await supabase
     .from('tasks')
-    .select('id, title, due_date, status')
+    .select('id, title, due_date, completed')
     .eq('church_id', churchId)
-    .in('status', ['pending', 'in_progress'])
+    .eq('completed', false)
     .limit(2000);
   if (error || !data) return [];
-  return data as AgentTaskSnapshot[];
+  return (data as Array<{ id: string; title: string; due_date: string | null; completed: boolean }>).map((t): AgentTaskSnapshot => ({
+    id: t.id,
+    title: t.title,
+    due_date: t.due_date,
+    status: t.completed ? 'done' : 'pending',
+  }));
 }
 
 async function loadRecentDedupKeys(
@@ -183,24 +222,30 @@ async function persistObservation(
 ): Promise<'written' | 'skipped' | 'failed'> {
   try {
     if (obs.outputSink === 'task') {
+      // Schema mapping: prod tasks table uses `completed` (boolean) +
+      // `category` text; no `status`, `source`, or `metadata` columns.
+      // We embed observation kind into category prefix so the existing
+      // task UI can filter by category. Dedup key still lives in
+      // agent_logs.metadata so dedup works regardless.
       const { error } = await supabase.from('tasks').insert({
         church_id: churchId,
         title: obs.title,
         description: obs.detail,
         priority: obs.severity === 'urgent' ? 'high' : obs.severity === 'attention' ? 'medium' : 'low',
-        status: 'pending',
+        category: `agent:${obs.agentId}`,
+        completed: false,
         person_id: obs.personId ?? null,
-        source: `agent:${obs.agentId}`,
-        metadata: { observation: obs.kind, dedup_key: obs.dedupKey, ...obs.metadata },
       });
       if (error) throw new Error(`tasks insert: ${error.message}`);
     } else if (obs.outputSink === 'interaction') {
+      // Schema mapping: prod interactions uses `content` not `notes`,
+      // no `metadata` column. Embed the full context into content.
       const { error } = await supabase.from('interactions').insert({
         church_id: churchId,
         person_id: obs.personId ?? null,
-        type: 'note',
-        notes: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
-        metadata: { observation: obs.kind, dedup_key: obs.dedupKey, ...obs.metadata },
+        type: 'agent_observation',
+        content: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
+        created_by_name: `agent:${obs.agentId}`,
       });
       if (error) throw new Error(`interactions insert: ${error.message}`);
     }

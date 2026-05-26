@@ -1,8 +1,23 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { readBody, str, email_, uuid_, arrayOfStr } from './_lib/validation.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+// Hardened input schema. This route is PUBLIC and accepts traffic from
+// the open internet, so we cap field sizes + UUID-validate churchId +
+// constrain interest tags to an allowlist.
+const SCHEMA = {
+  churchId:      uuid_({ required: true }),
+  firstName:     str({ required: true, max: 100 }),
+  lastName:      str({ required: true, max: 100 }),
+  email:         email_({ max: 320 }),
+  phone:         str({ max: 50, pattern: /^[0-9+()\-.\s]*$/ }),
+  howDidYouHear: str({ max: 200 }),
+  prayerRequest: str({ max: 2000 }),
+  interestedIn:  arrayOfStr({ maxLength: 20, maxItem: 80 }),
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
@@ -18,34 +33,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Structured 400 on any malformed input — sets the response and returns null.
+  const body = readBody(req, res, SCHEMA);
+  if (!body) return;
+  const { churchId, firstName, lastName, email, phone, howDidYouHear, prayerRequest, interestedIn } = body;
+
   try {
-    const {
-      churchId,
-      firstName,
-      lastName,
-      email,
-      phone,
-      howDidYouHear,
-      prayerRequest,
-      interestedIn,
-    } = req.body;
-
-    // Validate required fields
-    if (!firstName || !lastName) {
-      return res.status(400).json({ error: 'First name and last name are required' });
-    }
-
-    if (!churchId) {
-      return res.status(400).json({ error: 'Church ID is required' });
-    }
-
     // Build tags from interests and source
     const tags: string[] = ['connect-card'];
     if (howDidYouHear) {
       tags.push(`source:${howDidYouHear}`);
     }
-    if (interestedIn && Array.isArray(interestedIn)) {
-      interestedIn.forEach((interest: string) => {
+    if (interestedIn && interestedIn.length > 0) {
+      interestedIn.forEach((interest) => {
         tags.push(`interest:${interest}`);
       });
     }
