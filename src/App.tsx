@@ -29,6 +29,7 @@ const GivingImportWizard = lazy(() => import('./components/import/GivingImportWi
 const LandingPage = lazy(() => import('./components/marketing/LandingPage').then(m => ({ default: m.LandingPage })));
 const TermsPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.PrivacyPage })));
+const DonatePage = lazy(() => import('./components/marketing/DonatePage').then(m => ({ default: m.DonatePage })));
 const WelcomePage = lazy(() => import('./components/marketing/WelcomePage').then(m => ({ default: m.WelcomePage })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
@@ -269,6 +270,10 @@ function App() {
   // Treat the root as a public landing for unauthenticated visitors only.
   // Signed-in users hitting `/` get the existing app dashboard.
   const isLandingRoute = path === '/' && !isSignedIn;
+  // /give/<church-slug> is a public donation page — no auth.
+  const donateSlugMatch = path.match(/^\/give\/([a-z0-9-]+)\/?$/);
+  const isDonateRoute = !!donateSlugMatch;
+  const donateSlug = donateSlugMatch?.[1] ?? null;
 
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
@@ -354,6 +359,14 @@ function App() {
     return (
       <Suspense fallback={<MarketingLoading label="Loading…" />}>
         <LandingPage />
+      </Suspense>
+    );
+  }
+
+  if (isDonateRoute && donateSlug) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading donation page…" />}>
+        <DonatePage churchSlug={donateSlug} />
       </Suspense>
     );
   }
