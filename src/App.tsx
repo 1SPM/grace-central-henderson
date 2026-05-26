@@ -25,6 +25,7 @@ const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then
 const PricingPage = lazy(() => import('./components/marketing/PricingPage').then(m => ({ default: m.PricingPage })));
 const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
 const CsvImportWizard = lazy(() => import('./components/import/CsvImportWizard').then(m => ({ default: m.CsvImportWizard })));
+const WelcomePage = lazy(() => import('./components/marketing/WelcomePage').then(m => ({ default: m.WelcomePage })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
 import { useCharityBaskets } from './hooks/useCharityBaskets';
@@ -257,6 +258,7 @@ function App() {
   const isPricingRoute = path === '/pricing';
   const isSignUpRoute = path === '/signup' || path.startsWith('/signup/');
   const isImportRoute = path === '/import' || path === '/import/people';
+  const isWelcomeRoute = path === '/welcome';
 
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
@@ -302,6 +304,14 @@ function App() {
     return (
       <Suspense fallback={<MarketingLoading label="Loading import…" />}>
         <CsvImportWizard />
+      </Suspense>
+    );
+  }
+
+  if (isWelcomeRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Welcome to GRACE…" />}>
+        <WelcomePage />
       </Suspense>
     );
   }

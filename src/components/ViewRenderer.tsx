@@ -12,6 +12,7 @@ import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
+import { useChurchPlan } from '../hooks/useChurchPlan';
 import { useTutorial } from '../contexts/TutorialContext';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory, Announcement, AnnouncementCategory, DiscipleshipMilestone, MilestoneType } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
@@ -37,6 +38,7 @@ const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m =>
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
 const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
 const FinancialHub = lazy(() => import('./FinancialHub').then(m => ({ default: m.FinancialHub })));
+const UpgradeRequired = lazy(() => import('./marketing/UpgradeRequired').then(m => ({ default: m.UpgradeRequired })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
@@ -221,6 +223,7 @@ export function ViewRenderer(props: ViewRendererProps) {
   const churchName = settings?.profile?.name || 'Grace Church';
   const { getBlockedMessage } = useRouteGuard();
   const { openPicker: openTutorialPicker } = useTutorial();
+  const { plan: currentPlan } = useChurchPlan();
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -491,6 +494,16 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
 
       case 'financial-hub':
+        if (!currentPlan.gates.financialHub) {
+          return (
+            <UpgradeRequired
+              featureName="Financial Hub"
+              requiredPlan="pro"
+              description="A real-time CFO dashboard with KPI cards, fund breakdown, top givers, and daily timeline — built on the same ledger your auditor uses."
+              onBack={() => setView('dashboard')}
+            />
+          );
+        }
         return <FinancialHub onBack={() => setView('dashboard')} />;
 
       case 'birthdays':
