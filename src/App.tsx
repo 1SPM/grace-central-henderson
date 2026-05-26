@@ -26,6 +26,9 @@ const PricingPage = lazy(() => import('./components/marketing/PricingPage').then
 const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
 const CsvImportWizard = lazy(() => import('./components/import/CsvImportWizard').then(m => ({ default: m.CsvImportWizard })));
 const GivingImportWizard = lazy(() => import('./components/import/GivingImportWizard').then(m => ({ default: m.GivingImportWizard })));
+const LandingPage = lazy(() => import('./components/marketing/LandingPage').then(m => ({ default: m.LandingPage })));
+const TermsPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = lazy(() => import('./components/marketing/LegalPages').then(m => ({ default: m.PrivacyPage })));
 const WelcomePage = lazy(() => import('./components/marketing/WelcomePage').then(m => ({ default: m.WelcomePage })));
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { useCollectionManagement } from './hooks/useCollectionManagement';
@@ -76,7 +79,7 @@ function MarketingLoading({ label }: { label: string }) {
 }
 
 function App() {
-  const { churchId } = useAuthContext();
+  const { churchId, isSignedIn } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
@@ -261,6 +264,11 @@ function App() {
   const isImportRoute = path === '/import' || path === '/import/people';
   const isGivingImportRoute = path === '/import/giving';
   const isWelcomeRoute = path === '/welcome';
+  const isTermsRoute = path === '/terms' || path === '/terms-of-service';
+  const isPrivacyRoute = path === '/privacy' || path === '/privacy-policy';
+  // Treat the root as a public landing for unauthenticated visitors only.
+  // Signed-in users hitting `/` get the existing app dashboard.
+  const isLandingRoute = path === '/' && !isSignedIn;
 
   // Show onboarding wizard for first-time users
   // Auto-open onboarding wizard is disabled — still reachable via Settings → Run Setup Wizard
@@ -322,6 +330,30 @@ function App() {
     return (
       <Suspense fallback={<MarketingLoading label="Welcome to GRACE…" />}>
         <WelcomePage />
+      </Suspense>
+    );
+  }
+
+  if (isTermsRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading terms…" />}>
+        <TermsPage />
+      </Suspense>
+    );
+  }
+
+  if (isPrivacyRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading privacy policy…" />}>
+        <PrivacyPage />
+      </Suspense>
+    );
+  }
+
+  if (isLandingRoute) {
+    return (
+      <Suspense fallback={<MarketingLoading label="Loading…" />}>
+        <LandingPage />
       </Suspense>
     );
   }
