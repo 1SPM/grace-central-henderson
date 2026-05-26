@@ -17,6 +17,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { requirePlanGate } from '../_lib/billing/gates.js';
 import { runAgentsForChurch } from '../_lib/agents/runner.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -32,6 +33,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+  const gate = await requirePlanGate(auth.churchId, 'serverAgents', supabase);
+  if (!gate.ok) {
+    return res.status(gate.status).json({
+      error: gate.error,
+      detail: gate.detail,
+      required_gate: gate.required_gate,
+      required_plan: gate.required_plan,
+      current_plan: gate.current_plan,
+      current_status: gate.current_status,
+    });
+  }
 
   try {
     const result = await runAgentsForChurch(supabase, auth.churchId, new Date());

@@ -18,6 +18,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { requirePlanGate } from '../_lib/billing/gates.js';
 import {
   summarize,
   dailyTimeline,
@@ -96,12 +97,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const auth = await requireClerkAuth(req);
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+  // Plan gate: Financial Hub is Pro+. Starter callers get 402 with a
+  // structured body so the client can prompt for upgrade.
+  const gate = await requirePlanGate(auth.churchId, 'financialHub', supabase);
+  if (!gate.ok) {
+    return res.status(gate.status).json({
+      error: gate.error,
+      detail: gate.detail,
+      required_gate: gate.required_gate,
+      required_plan: gate.required_plan,
+      current_plan: gate.current_plan,
+      current_status: gate.current_status,
+    });
+  }
+
   const range = parseDateRange(req);
   if ('error' in range) return res.status(400).json({ error: range.error });
 
   const compareWithPrior = req.query.compare === 'prior_period';
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
 
   const fromIso = `${range.from}T00:00:00.000Z`;
   const toIso = `${range.to}T23:59:59.999Z`;

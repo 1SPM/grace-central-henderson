@@ -29,6 +29,7 @@ import { useTheme } from '../ThemeContext';
 import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 import { IntegrationCard, ConfigModal, PasswordInput } from './settings/SettingsUI';
 import { SettingsDataExport } from './settings/SettingsDataExport';
+import { SettingsBilling } from './settings/SettingsBilling';
 import type { Person, Task, CalendarEvent, Giving, SmallGroup, PrayerRequest } from '../types';
 
 const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
@@ -819,6 +820,10 @@ export function Settings({
           prayers={prayers}
           onNavigate={onNavigate}
         />
+      </div>
+
+      <div className="mt-8">
+        <SettingsBilling />
       </div>
 
       <div className="mt-8 p-6 bg-gradient-to-r from-indigo-500 to-slate-600 rounded-2xl text-white">

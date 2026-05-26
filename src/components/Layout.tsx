@@ -36,6 +36,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { View } from '../types';
+import { TrialBanner } from './TrialBanner';
 
 interface LayoutProps {
   currentView: View;
@@ -476,6 +477,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           )}
         </header>
 
+        <TrialBanner />
         <main className="flex-1 overflow-auto">
           {children}
         </main>
