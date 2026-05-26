@@ -363,6 +363,55 @@ async function routeSubscriptionEvent(
 }
 
 // ============================================
+// account.updated — Connect Express account state change
+// ============================================
+// Fires when a connected church account changes — onboarding
+// progress, requirements updates, charges/payouts enablement, capability
+// state. We mirror the relevant fields onto churches so the rest of the
+// app can gate "accept giving" on charges_enabled without a round-trip.
+async function handleConnectAccountUpdated(
+  event: Stripe.Event,
+  ctx: StripeHandlerContext,
+): Promise<HandlerResult> {
+  const account = event.data.object as Stripe.Account;
+  const churchId = account.metadata?.church_id;
+  if (!churchId) {
+    return { status: 'skipped', reason: 'account.updated missing metadata.church_id' };
+  }
+
+  // Look up the prior state so we can record onboarded_at on the
+  // first-ever transition to charges_enabled.
+  const { data: prior } = await ctx.supabase
+    .from('churches')
+    .select('stripe_connect_charges_enabled, stripe_connect_onboarded_at')
+    .eq('id', churchId)
+    .single();
+
+  const chargesEnabled = !!account.charges_enabled;
+  const payoutsEnabled = !!account.payouts_enabled;
+  const details = {
+    business_type: account.business_type,
+    currently_due: account.requirements?.currently_due ?? [],
+    disabled_reason: account.requirements?.disabled_reason ?? null,
+    details_submitted: account.details_submitted,
+  };
+
+  const updatePayload: Record<string, unknown> = {
+    stripe_connect_charges_enabled: chargesEnabled,
+    stripe_connect_payouts_enabled: payoutsEnabled,
+    stripe_connect_details: details,
+  };
+  if (chargesEnabled && !prior?.stripe_connect_onboarded_at) {
+    updatePayload.stripe_connect_onboarded_at = new Date().toISOString();
+  }
+
+  const { error } = await ctx.supabase.from('churches').update(updatePayload).eq('id', churchId);
+  if (error) throw new Error(`church connect mirror failed: ${error.message}`);
+
+  return { status: 'processed', ledgerWritten: false };
+}
+
+// ============================================
 // REGISTRY
 // ============================================
 export const STRIPE_HANDLERS: Record<string, StripeEventHandler> = {
@@ -372,6 +421,7 @@ export const STRIPE_HANDLERS: Record<string, StripeEventHandler> = {
   'customer.subscription.created': routeSubscriptionEvent,
   'customer.subscription.updated': routeSubscriptionEvent,
   'customer.subscription.deleted': routeSubscriptionEvent,
+  'account.updated': handleConnectAccountUpdated,
 };
 
 export function getStripeHandler(eventType: string): StripeEventHandler | null {
