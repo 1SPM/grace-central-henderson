@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@clerk/clerk-react';
 import { useChurchPlan } from '../../hooks/useChurchPlan';
 
 interface FirstStep {
@@ -48,7 +49,38 @@ const FIRST_STEPS: FirstStep[] = [
 
 export function WelcomePage() {
   const { plan, status, trialDaysRemaining, loading } = useChurchPlan();
+  const { getToken } = useAuth();
   const [showFallback, setShowFallback] = useState(false);
+  const [seedBusy, setSeedBusy] = useState(false);
+  const [seedResult, setSeedResult] = useState<null | { ok: boolean; people: number; giving: number; events: number; skipped?: string; error?: string }>(null);
+
+  const handleSeedDemo = async () => {
+    setSeedBusy(true);
+    setSeedResult(null);
+    try {
+      const token = await getToken();
+      const res = await fetch('/api/admin/seed-demo-data', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setSeedResult({ ok: false, people: 0, giving: 0, events: 0, error: body.detail || body.error });
+      } else {
+        setSeedResult({
+          ok: true,
+          people: body.people_inserted ?? 0,
+          giving: body.giving_inserted ?? 0,
+          events: body.events_inserted ?? 0,
+          skipped: body.skipped_reason,
+        });
+      }
+    } catch (err) {
+      setSeedResult({ ok: false, people: 0, giving: 0, events: 0, error: err instanceof Error ? err.message : 'Network error' });
+    } finally {
+      setSeedBusy(false);
+    }
+  };
 
   // If the webhook hasn't landed yet (Stripe → us is usually <2s but can be longer),
   // show a small "we're confirming" state for the first 5s.
@@ -112,6 +144,39 @@ export function WelcomePage() {
               </li>
             ))}
           </ol>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
+          <h3 className="text-sm font-medium text-gray-900 mb-1">Want to see GRACE with sample data?</h3>
+          <p className="text-sm text-gray-600 mb-3">
+            We can populate your account with 20 sample members, 30 sample gifts, and 10 upcoming
+            events so the dashboard isn't empty while you decide. Each sample row is tagged
+            "sample-data" — you can bulk-delete them anytime, and they're hidden once you import 5+
+            real members.
+          </p>
+          {seedResult && seedResult.ok && !seedResult.skipped && (
+            <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800 mb-3">
+              Seeded {seedResult.people} people, {seedResult.giving} gifts, {seedResult.events} events.
+              Refresh the dashboard to see them.
+            </div>
+          )}
+          {seedResult && seedResult.skipped === 'already_populated' && (
+            <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-sm text-gray-700 mb-3">
+              Your church already has data — sample seeding skipped to avoid mixing demo + real records.
+            </div>
+          )}
+          {seedResult && !seedResult.ok && (
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700 mb-3">
+              {seedResult.error}
+            </div>
+          )}
+          <button
+            onClick={handleSeedDemo}
+            disabled={seedBusy || (seedResult?.ok && !seedResult.skipped)}
+            className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50 text-sm"
+          >
+            {seedBusy ? 'Seeding…' : seedResult?.ok && !seedResult.skipped ? 'Sample data added ✓' : 'Add sample data'}
+          </button>
         </div>
 
         <div className="bg-amber-50 rounded-2xl border border-amber-200 p-6">
