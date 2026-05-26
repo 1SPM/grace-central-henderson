@@ -23,6 +23,7 @@ const PRESET_AMOUNTS = [25, 50, 100, 250, 500, 1000];
 const FUND_OPTIONS = ['General', 'Building', 'Missions', 'Youth', 'Benevolence'];
 
 type Step = 'pick' | 'pay' | 'done';
+type Frequency = 'one-time' | 'weekly' | 'monthly' | 'yearly';
 
 interface DonatePageProps {
   /** From the URL path /give/<slug> */
@@ -33,6 +34,7 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
   const [step, setStep] = useState<Step>('pick');
   const [amountUsd, setAmountUsd] = useState(50);
   const [customAmount, setCustomAmount] = useState('');
+  const [frequency, setFrequency] = useState<Frequency>('one-time');
   const [fund, setFund] = useState('General');
   const [email, setEmail] = useState('');
   const [donorName, setDonorName] = useState('');
@@ -69,17 +71,26 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
     setError(null);
     setBusy(true);
     try {
-      const res = await fetch('/api/giving/create-payment-intent', {
+      // Recurring gifts go through the subscription endpoint, one-time
+      // gifts through payment-intent. Both return a client_secret the
+      // PaymentElement can confirm against.
+      const isRecurring = frequency !== 'one-time';
+      const endpoint = isRecurring ? '/api/giving/create-subscription' : '/api/giving/create-payment-intent';
+      const reqBody: Record<string, unknown> = {
+        church_slug: churchSlug,
+        amount_cents: effectiveAmountCents,
+        fund,
+        email: email.trim() || undefined,
+        donor_name: donorName.trim() || undefined,
+        note: note.trim() || undefined,
+      };
+      if (isRecurring) {
+        reqBody.frequency = frequency;
+      }
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          church_slug: churchSlug,
-          amount_cents: effectiveAmountCents,
-          fund,
-          email: email.trim() || undefined,
-          donor_name: donorName.trim() || undefined,
-          note: note.trim() || undefined,
-        }),
+        body: JSON.stringify(reqBody),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -94,7 +105,12 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
       }
       setClientSecret(body.client_secret);
       setChurchName(body.church_name);
-      setPlatformFeeCents(body.platform_fee_cents);
+      // Subscription endpoint returns platform_fee_percent rather than _cents;
+      // compute the fee for display so the PayStep matches what one-time shows.
+      const platformFeeFromBody = typeof body.platform_fee_cents === 'number'
+        ? body.platform_fee_cents
+        : Math.floor((effectiveAmountCents * 250) / 10_000);   // 2.5% fallback
+      setPlatformFeeCents(platformFeeFromBody);
       setStep('pay');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error.');
@@ -134,6 +150,8 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
             setAmountUsd={(v) => { setAmountUsd(v); setCustomAmount(''); }}
             customAmount={customAmount}
             setCustomAmount={(v) => { setCustomAmount(v); }}
+            frequency={frequency}
+            setFrequency={setFrequency}
             fund={fund}
             setFund={setFund}
             email={email}
@@ -161,6 +179,7 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
               amountCents={effectiveAmountCents}
               platformFeeCents={platformFeeCents}
               fund={fund}
+              frequency={frequency}
               onBack={() => setStep('pick')}
               onSuccess={() => setStep('done')}
             />
@@ -168,7 +187,7 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
         )}
 
         {step === 'done' && (
-          <DoneStep amountCents={effectiveAmountCents} fund={fund} email={email} />
+          <DoneStep amountCents={effectiveAmountCents} fund={fund} email={email} frequency={frequency} />
         )}
       </div>
     </div>
@@ -182,6 +201,8 @@ function PickStep({
   setAmountUsd,
   customAmount,
   setCustomAmount,
+  frequency,
+  setFrequency,
   fund,
   setFund,
   email,
@@ -199,6 +220,8 @@ function PickStep({
   setAmountUsd: (v: number) => void;
   customAmount: string;
   setCustomAmount: (v: string) => void;
+  frequency: Frequency;
+  setFrequency: (v: Frequency) => void;
   fund: string;
   setFund: (v: string) => void;
   email: string;
@@ -212,8 +235,41 @@ function PickStep({
   onContinue: () => void;
   effectiveAmountCents: number;
 }) {
+  const FREQUENCIES: { value: Frequency; label: string }[] = [
+    { value: 'one-time', label: 'One-time' },
+    { value: 'weekly',   label: 'Weekly' },
+    { value: 'monthly',  label: 'Monthly' },
+    { value: 'yearly',   label: 'Yearly' },
+  ];
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
+        <div className="grid grid-cols-4 gap-2">
+          {FREQUENCIES.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFrequency(opt.value)}
+              className={[
+                'py-2 rounded-lg text-sm font-medium border',
+                frequency === opt.value
+                  ? 'bg-amber-600 text-white border-amber-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-amber-400',
+              ].join(' ')}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {frequency !== 'one-time' && (
+          <p className="text-xs text-gray-500 mt-2">
+            You'll be charged automatically each {frequency.replace('ly', '').replace('year', 'year').replace('month', 'month').replace('week', 'week')}. Cancel anytime from the receipt email or by contacting the church.
+          </p>
+        )}
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
         <div className="grid grid-cols-3 gap-2 mb-2">
@@ -306,7 +362,11 @@ function PickStep({
         disabled={busy || effectiveAmountCents < 100}
         className="w-full py-3 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {busy ? 'Preparing payment…' : `Continue to give ${effectiveAmountCents >= 100 ? `$${(effectiveAmountCents / 100).toFixed(2)}` : ''}`}
+        {busy
+          ? 'Preparing payment…'
+          : effectiveAmountCents >= 100
+            ? `Continue to give $${(effectiveAmountCents / 100).toFixed(2)}${frequency !== 'one-time' ? `/${frequency.replace('ly', '')}` : ''}`
+            : 'Continue to give'}
       </button>
 
       <p className="text-xs text-gray-500 text-center">
@@ -321,12 +381,14 @@ function PayStep({
   amountCents,
   platformFeeCents,
   fund,
+  frequency,
   onBack,
   onSuccess,
 }: {
   amountCents: number;
   platformFeeCents: number;
   fund: string;
+  frequency: Frequency;
   onBack: () => void;
   onSuccess: () => void;
 }) {
@@ -362,7 +424,12 @@ function PayStep({
       <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900">
         <div className="flex justify-between mb-1">
           <span>Amount</span>
-          <strong>${(amountCents / 100).toFixed(2)}</strong>
+          <strong>
+            ${(amountCents / 100).toFixed(2)}
+            {frequency !== 'one-time' && (
+              <span className="text-xs font-normal text-amber-700"> / {frequency.replace('ly', '')}</span>
+            )}
+          </strong>
         </div>
         <div className="flex justify-between text-amber-700 text-xs">
           <span>Fund</span>
@@ -372,6 +439,11 @@ function PayStep({
           <span>Platform fee (already included)</span>
           <span>${(platformFeeCents / 100).toFixed(2)}</span>
         </div>
+        {frequency !== 'one-time' && (
+          <div className="text-xs text-amber-700 mt-2">
+            Your card will be charged ${(amountCents / 100).toFixed(2)} each {frequency.replace('ly', '')} until cancelled.
+          </div>
+        )}
       </div>
 
       <PaymentElement />
@@ -399,7 +471,8 @@ function PayStep({
   );
 }
 
-function DoneStep({ amountCents, fund, email }: { amountCents: number; fund: string; email: string }) {
+function DoneStep({ amountCents, fund, email, frequency }: { amountCents: number; fund: string; email: string; frequency: Frequency }) {
+  const isRecurring = frequency !== 'one-time';
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 text-center space-y-4">
       <div className="w-14 h-14 mx-auto rounded-full bg-green-100 flex items-center justify-center">
@@ -407,11 +480,19 @@ function DoneStep({ amountCents, fund, email }: { amountCents: number; fund: str
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h2 className="text-xl font-medium text-gray-900">Thank you for your gift</h2>
+      <h2 className="text-xl font-medium text-gray-900">
+        {isRecurring ? 'Recurring gift set up' : 'Thank you for your gift'}
+      </h2>
       <p className="text-sm text-gray-700">
-        Your <strong>${(amountCents / 100).toFixed(2)}</strong> donation to the <strong>{fund}</strong> fund
-        is being processed.
+        Your <strong>${(amountCents / 100).toFixed(2)}{isRecurring ? `/${frequency.replace('ly', '')}` : ''}</strong> donation
+        {' '}to the <strong>{fund}</strong> fund is being processed.
       </p>
+      {isRecurring && (
+        <p className="text-sm text-gray-600">
+          Your card will be charged automatically each {frequency.replace('ly', '')}.
+          To pause or cancel, reply to your receipt email or contact the church directly.
+        </p>
+      )}
       {email && (
         <p className="text-sm text-gray-600">
           A receipt will land in <strong>{email}</strong> within a few minutes.
