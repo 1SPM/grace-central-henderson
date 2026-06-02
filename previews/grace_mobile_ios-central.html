@@ -6,18 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="GRACE">
-<title>GRACE — Faithful Church</title>
-<link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,600,700|playfair-display:700&display=swap">
-<link rel="preload" href="assets/fonts/inter-400.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="assets/fonts/playfair-700.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="grace-typography.css?v=4">
+<link rel="stylesheet" href="grace-central-theme.css">
+<title>GRACE — Central Henderson</title>
 <style>
-/* GRACE typography — inlined so paths always resolve from this HTML file */
-@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/inter-400.ttf') format('truetype'),url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-400-normal.woff2') format('woff2')}
-@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('assets/fonts/inter-600.ttf') format('truetype'),url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-600-normal.woff2') format('woff2')}
-@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/inter-700.ttf') format('truetype'),url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-700-normal.woff2') format('woff2')}
-@font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/playfair-700.ttf') format('truetype'),url('https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@5.2.8/latin-700-normal.woff2') format('woff2')}
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --ios-bg:#F2F2F7;
@@ -36,10 +27,10 @@
   --ios-safe-bot:34px;
   --ios-tab-h:49px;
   --nav-h:44px;
-  --brand-navy:#1B2A4A;
-  --brand-gold:#C9973A;
-  --brand-gold-light:#fef3e2;
-  --brand-gold-muted:rgba(201,151,58,.15);
+  --brand-navy:#000000;
+  --brand-gold:#EE2B37;
+  --brand-gold-light:#FFF0F1;
+  --brand-gold-muted:rgba(238,43,55,.15);
   --brand-cream:#f5f0e8;
   --ic-tile-bg:#eef2f8;
   font-size:17px;
@@ -144,7 +135,7 @@ body{display:flex;flex-direction:column}
 /* ── HERO CARD ── */
 .hero-card{
   margin:0 16px 20px;border-radius:20px;overflow:hidden;
-  background:linear-gradient(160deg,var(--brand-navy) 0%,#243660 100%);
+  background:linear-gradient(160deg,var(--brand-navy) 0%,#1a1a1a 100%);
   position:relative;
 }
 .hero-card-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1544427920-c49cc3071b01?w=800&q=60') center/cover;opacity:.12}
@@ -248,7 +239,7 @@ body{display:flex;flex-direction:column}
 /* ── GIVE / WALLET ── */
 .grace-card{
   margin:16px 16px 0;border-radius:20px;
-  background:linear-gradient(135deg,var(--brand-navy) 0%,#243660 100%);
+  background:linear-gradient(135deg,var(--brand-navy) 0%,#1a1a1a 100%);
   padding:22px 20px 18px;position:relative;overflow:hidden;
 }
 .grace-card-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1544427920-c49cc3071b01?w=400&q=40') center/cover;opacity:.07}
@@ -289,7 +280,7 @@ body{display:flex;flex-direction:column}
 .post-actions{display:flex;gap:16px;padding-top:10px;border-top:.5px solid var(--ios-separator)}
 .post-action{font-size:13px;font-weight:500;color:var(--ios-tertiary);cursor:pointer;display:flex;align-items:center;gap:4px}
 .post-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:8px;display:inline-block}
-.pb-blessing{background:var(--brand-gold-light);color:#7a4f1a}
+.pb-blessing{background:var(--brand-gold-light);color:#C41E2A}
 .pb-prayer{background:#ede9fe;color:#5b21b6}
 
 /* ── PROFILE ── */
@@ -309,7 +300,7 @@ body{display:flex;flex-direction:column}
 .badge-grid{display:flex;gap:10px;padding:14px 16px;overflow-x:auto;flex-wrap:nowrap}
 .badge-grid::-webkit-scrollbar{display:none}
 .badge-item{flex-shrink:0;width:70px;display:flex;flex-direction:column;align-items:center;gap:6px}
-.badge-ico{width:52px;height:52px;border-radius:16px;background:var(--ic-tile-bg);display:flex;align-items:center;justify-content:center;font-size:0;border:2px solid rgba(201,151,58,.3)}
+.badge-ico{width:52px;height:52px;border-radius:16px;background:var(--ic-tile-bg);display:flex;align-items:center;justify-content:center;font-size:0;border:2px solid rgba(238,43,55,.3)}
 .badge-ico.locked{opacity:.45;background:var(--ios-fill);border-color:var(--ios-separator)}
 .badge-lbl{font-size:10px;font-weight:500;color:var(--ios-secondary);text-align:center;line-height:1.3}
 .grace-inline{display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
@@ -332,7 +323,7 @@ body{display:flex;flex-direction:column}
 .prof-spirit-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--ios-separator);cursor:pointer}
 .prof-spirit-card:last-child{border-bottom:none}
 .prof-spirit-card:active{background:var(--ios-fill)}
-.prof-mini-hero{background:linear-gradient(135deg,var(--brand-navy),#243660);border-radius:14px;padding:16px;margin:12px 16px 0;color:#fff}
+.prof-mini-hero{background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:14px;padding:16px;margin:12px 16px 0;color:#fff}
 .prof-mini-hero h3{font-size:17px;font-weight:700;margin:0 0 4px}
 .prof-mini-hero p{font-size:12px;color:rgba(255,255,255,.55);margin:0;line-height:1.4}
 .prof-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 16px 0}
@@ -377,16 +368,16 @@ body{display:flex;flex-direction:column}
 .care-name{font-size:15px;font-weight:600;color:var(--ios-label)}
 .care-desc{font-size:13px;color:var(--ios-tertiary);margin-top:2px}
 .care-chevron{color:var(--ios-tertiary);font-size:12px;margin-left:auto;opacity:.55}
-.assigned-card{margin:16px;border-radius:16px;background:linear-gradient(135deg,#fef7ed,#fdecd3);border:1px solid rgba(201,151,58,.3);padding:16px}
+.assigned-card{margin:16px;border-radius:16px;background:linear-gradient(135deg,#fef7ed,#fdecd3);border:1px solid rgba(238,43,55,.3);padding:16px}
 .assigned-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .assigned-av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-gold)}
-.assigned-name{font-size:15px;font-weight:700;color:#7a4f1a}
+.assigned-name{font-size:15px;font-weight:700;color:#C41E2A}
 .assigned-role{font-size:12px;color:#b45309;margin-top:2px}
-.assigned-msg{font-size:13px;color:#7a4f1a;font-style:italic;line-height:1.5;margin-bottom:12px}
+.assigned-msg{font-size:13px;color:#C41E2A;font-style:italic;line-height:1.5;margin-bottom:12px}
 .assigned-btns{display:flex;gap:8px}
 .assigned-btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
 .assigned-btn-navy{background:var(--brand-navy);color:#fff}
-.assigned-btn-outline{background:rgba(201,151,58,.15);color:#7a4f1a;border:1px solid rgba(201,151,58,.3)}
+.assigned-btn-outline{background:rgba(238,43,55,.15);color:#C41E2A;border:1px solid rgba(238,43,55,.3)}
 
 /* ── SEGMENTED CONTROL ── */
 .seg-ctrl{display:flex;background:#E9E9EB;border-radius:9px;padding:2px;margin:12px 16px 0}
@@ -416,11 +407,11 @@ body{display:flex;flex-direction:column}
 .care-icon{font-size:0}
 .home-pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .home-pillar{background:#fff;border:1px solid var(--ios-separator);border-radius:12px;padding:12px;cursor:pointer;text-align:center}
-.home-pillar-letter{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--brand-navy),#243660);color:var(--brand-gold);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.home-pillar-letter{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);color:var(--brand-gold);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
 .home-pillar-name{font-size:13px;font-weight:700;color:var(--ios-label)}
 .home-pillar-sub{font-size:10px;color:var(--ios-tertiary);margin-top:3px;line-height:1.35}
-.home-pillar-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:var(--brand-gold-light);color:#7a4f1a;margin-top:6px}
-.home-grace-card{margin:0 16px;border-radius:18px;background:linear-gradient(135deg,var(--brand-navy),#243660);padding:18px 16px;position:relative;overflow:hidden;cursor:pointer;perspective:1000px}
+.home-pillar-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:var(--brand-gold-light);color:#C41E2A;margin-top:6px}
+.home-grace-card{margin:0 16px;border-radius:18px;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);padding:18px 16px;position:relative;overflow:hidden;cursor:pointer;perspective:1000px}
 .home-grace-card.flipped .home-card-inner{transform:rotateY(180deg)}
 .home-card-inner{position:relative;transition:transform .5s;transform-style:preserve-3d}
 .home-card-face{backface-visibility:hidden}
@@ -441,7 +432,7 @@ body{display:flex;flex-direction:column}
 .home-stat-val{font-size:18px;font-weight:700;color:var(--ios-label);margin:4px 0 2px}
 .home-stat-sub{font-size:10px;color:var(--ios-tertiary)}
 .home-stat-delta{color:#15803d;font-weight:600}
-.home-outreach-banner{background:linear-gradient(135deg,var(--brand-navy),#243660);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.home-outreach-banner{background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .home-leader-scroll{display:flex;gap:10px;overflow-x:auto;padding:0 0 4px}
 .home-leader-scroll::-webkit-scrollbar{display:none}
 .home-leader-chip{flex-shrink:0;width:72px;text-align:center;cursor:pointer}
@@ -462,7 +453,7 @@ body{display:flex;flex-direction:column}
 .home-event-date-day{font-size:15px;font-weight:800;color:#fff;line-height:1}
 .home-event-date-mon{font-size:7px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase}
 .home-watch{margin:0 16px 12px;border-radius:16px;overflow:hidden;background:#0d0d0d;border:1px solid rgba(0,0,0,.12);box-shadow:0 4px 20px rgba(27,42,74,.12)}
-.home-watch-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:linear-gradient(180deg,#1B2A4A,#0d0d0d)}
+.home-watch-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:linear-gradient(180deg,#000000,#0d0d0d)}
 .home-watch-live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(220,38,38,.35);color:#fecaca;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1px solid rgba(220,38,38,.45)}
 .home-watch-live-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:livePulse 1.4s ease-in-out infinite;flex-shrink:0}
 .home-watch-player{position:relative;aspect-ratio:16/9;background:#111;cursor:pointer;overflow:hidden}
@@ -485,12 +476,12 @@ body{display:flex;flex-direction:column}
 .home-wave span:nth-child(2),.home-wave span:nth-child(4),.home-wave span:nth-child(6){animation:wv .8s ease-in-out infinite}
 
 /* ── GIVE / CAUSES ── */
-.give-hero-strip{margin:0 16px 12px;padding:14px 16px;background:linear-gradient(135deg,var(--brand-navy),#243660);border-radius:14px;color:#fff}
+.give-hero-strip{margin:0 16px 12px;padding:14px 16px;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:14px;color:#fff}
 .give-hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
 .give-hero-stat{background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center}
 .give-hero-stat strong{display:block;font-size:16px;font-weight:700;color:#fff}
 .give-hero-stat span{font-size:10px;color:rgba(255,255,255,.55)}
-.give-route-pill{margin-top:10px;font-size:11px;color:rgba(255,255,255,.75);padding:8px 12px;background:rgba(201,151,58,.2);border-radius:10px;border:1px solid rgba(201,151,58,.35)}
+.give-route-pill{margin-top:10px;font-size:11px;color:rgba(255,255,255,.75);padding:8px 12px;background:rgba(238,43,55,.2);border-radius:10px;border:1px solid rgba(238,43,55,.35)}
 .give-route-pill strong{color:var(--brand-gold)}
 .give-cause-ftabs{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .give-cause-ftabs::-webkit-scrollbar{display:none}
@@ -526,11 +517,11 @@ body{display:flex;flex-direction:column}
 .mob-cause-actions{display:flex;gap:8px;margin-top:12px}
 .mob-cause-btn-give{flex:1;padding:11px;border:none;border-radius:10px;background:var(--brand-navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
 .mob-cause-btn-give.emergency{background:#dc2626}
-.mob-cause-btn-route{flex:1;padding:11px;border-radius:10px;border:1px solid #e0c89a;background:#fef3e2;color:#7a4f1a;font-size:13px;font-weight:600;cursor:pointer}
+.mob-cause-btn-route{flex:1;padding:11px;border-radius:10px;border:1px solid #e0c89a;background:#FFF0F1;color:#C41E2A;font-size:13px;font-weight:600;cursor:pointer}
 .mob-cause-btn-route.active{background:var(--brand-gold);color:var(--brand-navy);border-color:var(--brand-gold)}
 .give-fund-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
 .give-fund-chip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:16px;border:1px solid var(--ios-separator);background:#fff;color:var(--ios-secondary);cursor:pointer}
-.give-fund-chip.active{background:var(--brand-gold-light);border-color:var(--brand-gold);color:#7a4f1a}
+.give-fund-chip.active{background:var(--brand-gold-light);border-color:var(--brand-gold);color:#C41E2A}
 .give-toggle-row{display:flex;gap:10px;padding:0 16px 12px}
 .give-toggle-opt{flex:1;background:#fff;border-radius:12px;padding:12px;border:1px solid var(--ios-separator);display:flex;align-items:center;justify-content:space-between}
 .give-mini-toggle{width:44px;height:26px;border-radius:13px;background:#E9E9EB;position:relative;cursor:pointer;transition:background .2s}
@@ -541,7 +532,7 @@ body{display:flex;flex-direction:column}
 /* ── COMMUNITY / EVENTS ── */
 .comm-summary{margin:12px 16px 0;padding:12px 14px;background:#fff;border-radius:12px;border:1px solid var(--ios-separator);display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:var(--ios-secondary)}
 .comm-summary strong{color:var(--ios-label)}
-.comm-events-hero{margin:12px 16px 0;padding:16px;background:linear-gradient(135deg,var(--brand-navy),#243660);border-radius:14px;color:#fff}
+.comm-events-hero{margin:12px 16px 0;padding:16px;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:14px;color:#fff}
 .comm-events-hero-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .comm-events-hero-title{font-size:17px;font-weight:700;margin-bottom:4px}
 .comm-events-hero-sub{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:12px}
@@ -551,7 +542,7 @@ body{display:flex;flex-direction:column}
 .comm-featured-img{height:100px;background-size:cover;background-position:center;position:relative}
 .comm-featured-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.65) 100%)}
 .comm-featured-tag{position:absolute;top:8px;left:8px;font-size:9px;font-weight:700;padding:4px 8px;border-radius:8px;z-index:1;text-transform:uppercase;letter-spacing:.3px}
-.comm-tag-holiday{background:rgba(201,151,58,.95);color:var(--brand-navy)}
+.comm-tag-holiday{background:rgba(238,43,55,.95);color:var(--brand-navy)}
 .comm-tag-prayer{background:rgba(124,58,237,.9);color:#fff}
 .comm-tag-special{background:#dc2626;color:#fff}
 .comm-featured-body{padding:12px 14px}
@@ -576,11 +567,38 @@ body{display:flex;flex-direction:column}
 .mob-ev-badge-service{background:#dbeafe;color:#1e40af}
 .mob-ev-badge-group{background:#f5e8f0;color:#7a3a6a}
 .mob-ev-badge-special{background:#fee2e2;color:#991b1b}
-.mob-ev-badge-holiday{background:var(--brand-gold-light);color:#7a4f1a}
+.mob-ev-badge-holiday{background:var(--brand-gold-light);color:#C41E2A}
 .mob-ev-badge-prayer{background:#ede9fe;color:#5b21b6}
 .mob-event-rsvp{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--ios-separator);background:#fff;color:var(--ios-secondary);flex-shrink:0;cursor:pointer}
 .mob-event-rsvp.going{background:#dcfce7;color:#15803d;border-color:#86efac}
 .seg-ctrl.scrollable .seg-btn{flex:1;min-width:0;padding:7px 8px;font-size:12px}
+
+/* Central GRACE Card (mobile) */
+.mob-gc-front{display:flex;flex-direction:column;min-height:168px}
+.mob-gc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.mob-gc-chip{width:36px;height:26px;border-radius:5px;background:linear-gradient(145deg,#f5e6a8,#b8860b);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.mob-gc-wordmark{height:28px;width:auto;max-width:120px;object-fit:contain;mix-blend-mode:lighten}
+.mob-gc-mid{flex:1;display:flex;align-items:center;justify-content:flex-end;padding:4px 0}
+.mob-gc-cmark{width:56px;height:56px;object-fit:contain;opacity:.95}
+.mob-gc-num{font-size:14px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:1.5px;margin:6px 0}
+.mob-gc-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto}
+.mob-gc-back{display:flex;flex-direction:column;padding:4px 0}
+.mob-gc-wordmark-back{height:22px;width:auto;max-width:140px;object-fit:contain;opacity:.9;margin-bottom:8px;mix-blend-mode:lighten}
+.home-grace-card{background:linear-gradient(145deg,#000,#1a1a1a)!important;padding:14px!important}
+/* D-ID Studio (mobile) */
+.mob-did-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:400;display:none;align-items:flex-end;justify-content:center}
+.mob-did-overlay.open{display:flex}
+.mob-did-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92%;display:flex;flex-direction:column;overflow:hidden}
+.mob-did-close{align-self:flex-end;margin:10px 14px 0;width:32px;height:32px;border-radius:50%;border:none;background:#f4f4f4;font-size:18px;cursor:pointer}
+.mob-did-media{position:relative;height:200px;background:#000;overflow:hidden;flex-shrink:0}
+.mob-did-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:1}
+.mob-did-media-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(238,43,55,.2),rgba(0,0,0,.6));z-index:0}
+.mob-did-chat-head{padding:12px 16px;font-size:14px;font-weight:600;border-bottom:.5px solid var(--ios-separator);display:flex;justify-content:space-between;align-items:center}
+.mob-did-msgs{flex:1;overflow-y:auto;padding:12px 16px;min-height:120px;max-height:200px;background:var(--ios-bg)}
+.mob-did-inputbar{display:flex;gap:8px;padding:10px 12px;border-top:.5px solid var(--ios-separator);background:#fff}
+.mob-did-input{flex:1;padding:10px 12px;border-radius:20px;border:1px solid var(--ios-separator);font-size:15px}
+.mob-did-send{width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer}
+.ai-hero-chatrow-mob input::placeholder{color:rgba(255,255,255,.45)}
 
 </style>
 </head>
@@ -610,8 +628,8 @@ body{display:flex;flex-direction:column}
   <div class="screen active" id="screen-home">
 
     <div class="nav-bar">
-      <span class="ic-slot" data-grace-church-logo style="width:28px;height:28px"></span>
-      <span class="nav-title">Faithful Church</span>
+      <img src="assets/central-henderson-logo.png" alt="Central Henderson" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
+      <span class="nav-title">Central Henderson</span>
       <div class="nav-action nav-action-bell" onclick="showNotif()"></div>
     </div>
 
@@ -620,18 +638,18 @@ body{display:flex;flex-direction:column}
 
         <!-- Greeting + hero KPIs -->
         <div class="home-greeting-block" style="padding:0 16px 12px">
-          <div class="home-date-line">Mon, Jun 1 · Faithful Church</div>
+          <div class="home-date-line">Mon, Jun 1 · Central Henderson</div>
           <h1 class="home-greeting">Good morning, Maya</h1>
         </div>
 
         <div class="hero-card" style="margin-bottom:12px">
           <div class="hero-card-bg"></div>
           <div class="hero-card-inner">
-            <div class="hero-date">⭐ Devotee · Green Ring 6% · 248 pts</div>
+            <div class="hero-date" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><img src="assets/membership-ring.png" alt="" style="width:20px;height:20px;object-fit:contain" aria-hidden="true"><span>Central Commitment · Partner · 6%</span><span style="opacity:.85">· Pulse <strong>248</strong></span></div>
             <div class="home-hero-kpis" style="margin-top:14px">
               <div class="home-kpi"><div class="home-kpi-val">7</div><div class="home-kpi-key">Prayer streak</div></div>
               <div class="home-kpi" onclick="openCommunityCare()"><div class="home-kpi-val">2</div><div class="home-kpi-key">Care alerts</div></div>
-              <div class="home-kpi" onclick="showTab('give')"><div class="home-kpi-val">248</div><div class="home-kpi-key">Formation pts</div></div>
+              <div class="home-kpi" onclick="showTab('give')"><div class="home-kpi-val">248</div><div class="home-kpi-key">Central Pulse</div></div>
             </div>
           </div>
         </div>
@@ -645,7 +663,7 @@ body{display:flex;flex-direction:column}
             </div>
           </div>
           <div class="home-watch-player" onclick="mobWatchPlay()" role="button" aria-label="Watch Sunday service live">
-            <img class="home-watch-poster" src="https://picsum.photos/seed/faithful-service/800/450" alt="Sunday worship service at Faithful Church" onerror="this.onerror=null;this.src='https://picsum.photos/seed/church-worship/800/450'">
+            <img class="home-watch-poster" src="https://picsum.photos/seed/central-service/800/450" alt="Sunday worship service at Central Henderson" onerror="this.onerror=null;this.src='https://picsum.photos/seed/church-worship/800/450'">
             <div class="home-watch-overlay"></div>
             <div class="home-watch-badge-live"><span></span> LIVE · 9:45 AM</div>
             <div class="home-watch-viewers" data-grace-icon="eye" data-grace-size="14" data-grace-variant="inverse">342 watching</div>
@@ -677,7 +695,7 @@ body{display:flex;flex-direction:column}
           <div class="daily-item" onclick="openProfileTab('journal')">
             <div class="daily-time" data-grace-icon="moon" data-grace-size="12">Evening</div>
             <div class="daily-action">Journal · reflect &amp; keep streak</div>
-            <div class="daily-status">Write today · +10 pts</div>
+            <div class="daily-status">Write today · +8 Pulse</div>
           </div>
         </div>
 
@@ -693,22 +711,26 @@ body{display:flex;flex-direction:column}
               </div>
               <div style="flex:1;min-width:0">
                 <div class="ai-card-name" id="home-ai-name">Pastor James Wilson <span class="ai-card-badge" style="margin-left:4px">AI Companion</span></div>
-                <div class="ai-card-role" id="home-ai-role">Senior Pastor · Faithful Church</div>
+                <div class="ai-card-role" id="home-ai-role">Senior Pastor · Central Henderson</div>
               </div>
             </div>
             <div class="ai-card-greeting" id="home-ai-greeting" style="margin-bottom:10px">"Good morning Maya — what's on your heart today?"</div>
             <div class="ai-card-actions">
               <button class="ai-card-btn ai-card-btn-primary" onclick="homeGoLeadership()">Chat with me</button>
-              <button class="ai-card-btn ai-card-btn-outline" onclick="ldTabSwitch('leaders');showTab('leadership')">Switch Leader</button>
+              <button class="ai-card-btn ai-card-btn-outline" onclick="openDidStudio()">Begin a Conversation</button>
+            </div>
+            <div class="ai-hero-chatrow-mob" style="display:flex;gap:8px;margin-top:10px;align-items:center">
+              <input type="text" class="ai-hero-input-mob" id="home-chat-input" placeholder="Ask Pastor James anything…" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:13px" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
+              <button type="button" onclick="sendHomeChat()" style="width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer">→</button>
             </div>
           </div>
         </div>
 
         <!-- Quick actions -->
         <div class="home-quick-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px">
-          <button type="button" onclick="showTab('give')" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer">💛 Give</button>
-          <button type="button" onclick="showTab('community')" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer">◉ Community</button>
-          <button type="button" onclick="openCommunityCare()" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer">🙏 Care</button>
+          <button type="button" onclick="showTab('give')" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px"><span data-grace-icon="give" data-grace-size="20"></span>Give</button>
+          <button type="button" onclick="showTab('community')" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px"><span data-grace-icon="groups" data-grace-size="20"></span>Community</button>
+          <button type="button" onclick="openCommunityCare()" style="padding:14px 8px;border-radius:12px;border:1px solid var(--ios-separator);background:#fff;font-size:12px;font-weight:600;color:var(--ios-label);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px"><span data-grace-icon="prayer" data-grace-size="20"></span>Care</button>
         </div>
 
       </div>
@@ -734,9 +756,9 @@ body{display:flex;flex-direction:column}
         <div style="display:flex;align-items:flex-end;justify-content:space-between">
           <div>
             <div id="mob-leader-name" style="font-size:17px;font-weight:700;color:#fff;margin-bottom:2px">Pastor James Wilson
-              <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(124,58,237,.45);color:#c4b5fd;border:1px solid rgba(124,58,237,.4);margin-left:5px;vertical-align:middle">AI</span>
+              <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">AI</span>
             </div>
-            <div id="mob-leader-role" style="font-size:11px;color:rgba(255,255,255,.55)">Senior Pastor · Faithful Church</div>
+            <div id="mob-leader-role" style="font-size:11px;color:rgba(255,255,255,.55)">Senior Pastor · Central Henderson</div>
           </div>
           <div style="display:flex;align-items:center;gap:5px;background:rgba(52,199,89,.18);border:1px solid rgba(52,199,89,.4);border-radius:12px;padding:4px 10px" id="mob-online-badge">
             <div style="width:6px;height:6px;border-radius:50%;background:#34C759"></div>
@@ -771,12 +793,12 @@ body{display:flex;flex-direction:column}
     <div id="ld-pane-chat" style="flex:1;display:flex;flex-direction:column;min-height:0;background:var(--ios-bg)">
       <!-- Quick commands -->
       <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#fff;border-bottom:.5px solid var(--ios-separator);flex-shrink:0">
-        <div onclick="mobSend('I want to give my tithe')" style="background:#fef3e2;color:#7a4f1a;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">💛 Give now</div>
+        <div onclick="mobSend('I want to give my tithe')" style="background:#FFF0F1;color:#C41E2A;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">💛 Give now</div>
         <div onclick="mobSend('I need prayer support')" style="background:#ede9fe;color:#5b21b6;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🙏 Submit a prayer</div>
         <div onclick="mobSend('Show me this week\'s sermon')" style="background:#dbeafe;color:#1e40af;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">▶ Watch service</div>
         <div onclick="mobSend('Find me a small group')" style="background:#dcfce7;color:#15803d;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">◈ Find a group</div>
         <div onclick="mobSend('What events are coming up?')" style="background:#f3f0eb;color:#374151;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">📅 Events</div>
-        <div onclick="mobSend('I decided to follow Jesus')" style="background:#fef3e2;color:#92400e;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">✝️ I followed Jesus</div>
+        <div onclick="mobSend('I decided to follow Jesus')" style="background:#FFF0F1;color:#92400e;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">✝️ I followed Jesus</div>
         <div onclick="mobSend('I need crisis support')" style="background:#fee2e2;color:#991b1b;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🚨 I need help now</div>
         <div onclick="mobSend('Study the Bible with me')" style="background:#f3f0eb;color:#374151;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">📖 Bible study</div>
       </div>
@@ -793,7 +815,7 @@ body{display:flex;flex-direction:column}
       <!-- Input -->
       <div class="chat-input-bar">
         <button style="background:none;border:none;font-size:20px;cursor:pointer;padding:0 4px" onclick="mobSend('I need prayer support')">🎤</button>
-        <input class="chat-input" id="mob-chat-input" placeholder="Ask Grace — trained on Faithful Church values…" onkeydown="if(event.key==='Enter')mobSendFromInput()">
+        <input class="chat-input" id="mob-chat-input" placeholder="Ask Grace — trained on Central Henderson values…" onkeydown="if(event.key==='Enter')mobSendFromInput()">
         <button class="chat-send" onclick="mobSendFromInput()">↑</button>
       </div>
       <div style="padding:6px 14px 8px;font-size:10px;color:var(--ios-tertiary);line-height:1.4;text-align:center;background:#fff;flex-shrink:0">Grace AI is a pastoral companion — not a clinician. Crisis requests route to a live leader immediately.</div>
@@ -805,6 +827,10 @@ body{display:flex;flex-direction:column}
         <div style="font-size:15px;font-weight:700;color:var(--ios-label)">Verified leaders</div>
         <div style="font-size:13px;color:var(--ios-tertiary)">18 verified · 12 online</div>
       </div>
+      
+      <a href="#" onclick="mobSend('I need crisis support');return false" style="display:block;margin:12px 16px;border-radius:12px;overflow:hidden" aria-label="Crisis help 24-7">
+        <img src="assets/crisis-mode-ad.png" alt="Are you in crisis? Get help now — Central Church 24-7" style="width:100%;display:block">
+      </a>
       <div id="mob-leader-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;margin:0 0 0"></div>
     </div>
 
@@ -867,37 +893,41 @@ body{display:flex;flex-direction:column}
 
       <!-- Hero summary -->
       <div class="give-hero-strip" style="margin-top:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--brand-gold);letter-spacing:.5px;text-transform:uppercase">Faithful Church · Give</div>
+        <div style="font-size:11px;font-weight:700;color:var(--brand-gold);letter-spacing:.5px;text-transform:uppercase">Central Henderson · Give</div>
         <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:6px;line-height:1.45">Tithes, GRACE Card, and campaign gifts.</div>
         <div class="give-hero-stats">
           <div class="give-hero-stat"><strong>$3,240</strong><span>Wallet available</span></div>
           <div class="give-hero-stat"><strong>$230</strong><span>Given this month</span></div>
         </div>
-        <div class="give-route-pill">⭐ Card rewards routing to <strong id="mob-route-label">Food Pantry</strong> · <span style="text-decoration:underline;cursor:pointer" onclick="mobScrollToCauses()">Change routing</span></div>
+        <div class="give-route-pill">Partner · Card rewards routing to <strong id="mob-route-label">Food Pantry</strong> · <span style="text-decoration:underline;cursor:pointer" onclick="mobScrollToCauses()">Change routing</span></div>
       </div>
 
       <!-- GRACE Card (flippable) -->
       <div class="home-mod" style="margin-top:12px">
         <div class="home-mod-head">
-          <div class="home-mod-title">Faithful Church · GRACE Card</div>
+          <div class="home-mod-title">Central Henderson · GRACE Card</div>
           <span style="font-size:10px;font-weight:600;background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:8px">Active</span>
         </div>
         <div class="home-mod-body" style="padding-top:8px">
           <div class="home-grace-card" id="give-grace-card" onclick="mobFlipGiveCard()" style="margin:0">
             <div class="home-card-inner">
-              <div class="home-card-face">
-                <div data-grace-spark data-grace-icon="spark" data-grace-size="12" data-grace-variant="inverse" style="font-size:11px;font-weight:800;color:var(--brand-gold);letter-spacing:1px;display:inline-flex;align-items:center;gap:4px">GRACE</div>
-                <div style="font-size:10px;color:rgba(255,255,255,.5);margin:8px 0 4px">Member rewards card</div>
-                <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,.75);letter-spacing:2px;margin-bottom:12px">5244 •••• •••• 1834</div>
-                <div style="display:flex;justify-content:space-between;align-items:flex-end">
-                  <div><div style="font-size:13px;font-weight:600;color:#fff">Maya Thompson</div><div style="font-size:10px;color:rgba(255,255,255,.5)">Valid thru 12/28 · Green Ring 6%</div></div>
-                  <div style="display:flex"><div style="width:24px;height:24px;border-radius:50%;background:#EB001B"></div><div style="width:24px;height:24px;border-radius:50%;background:#F79E1B;margin-left:-10px"></div></div>
+              <div class="home-card-face mob-gc-front">
+                <div class="mob-gc-top">
+                  <div class="mob-gc-chip"><div class="mob-gc-chip-ico"></div></div>
+                  <img class="mob-gc-wordmark" src="assets/central-church-wordmark.png" alt="Central Church">
+                </div>
+                <div class="mob-gc-mid"><img class="mob-gc-cmark" src="assets/central-c-mark.png" alt="" aria-hidden="true"></div>
+                <div class="mob-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834</div>
+                <div class="mob-gc-foot">
+                  <div><div style="font-size:13px;font-weight:600;color:#fff">Maya Thompson</div><div style="font-size:10px;color:rgba(255,255,255,.5)">Partner · 6%</div></div>
+                  <div style="display:flex"><div style="width:22px;height:22px;border-radius:50%;background:#EB001B"></div><div style="width:22px;height:22px;border-radius:50%;background:#F79E1B;margin-left:-8px"></div></div>
                 </div>
               </div>
-              <div class="home-card-face home-card-back">
+              <div class="home-card-face home-card-back mob-gc-back">
+                <img class="mob-gc-wordmark-back" src="assets/central-church-wordmark.png" alt="Central Church">
                 <div class="home-card-back-stripe"></div>
                 <div class="home-card-back-cvv" id="give-cvv">•••</div>
-                <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.4">Every purchase supports church causes automatically</div>
+                <div style="font-size:9px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.4">Issued by Central Henderson · Powered by GRACE<br>Every purchase supports church causes automatically</div>
               </div>
             </div>
           </div>
@@ -963,7 +993,7 @@ body{display:flex;flex-direction:column}
       </div>
 
       <button type="button" class="give-btn" id="mob-give-submit-btn" onclick="submitGive()">Give $50.00</button>
-      <div style="text-align:center;font-size:11px;color:var(--ios-tertiary);margin:8px 16px 16px">Secure · Faithful Church Wallet · Earn +50 pts</div>
+      <div style="text-align:center;font-size:11px;color:var(--ios-tertiary);margin:8px 16px 16px">Secure · Central Henderson Wallet · Earn +8 Pulse</div>
 
       <!-- 2026 giving goal -->
       <div class="home-mod" style="margin-bottom:12px">
@@ -975,21 +1005,21 @@ body{display:flex;flex-direction:column}
         </div>
       </div>
 
-      <!-- Formation rewards -->
+      <!-- Central Pulse -->
       <div class="home-mod" style="margin-bottom:12px">
         <div class="home-mod-head">
-          <div class="home-mod-title">Formation rewards</div>
+          <div class="home-mod-title">Central Pulse</div>
           <span style="font-size:14px;font-weight:700;color:var(--brand-gold)">248 pts</span>
         </div>
         <div class="home-mod-body">
-          <div style="font-size:11px;color:var(--ios-tertiary);margin-bottom:6px">Progress to Enlightened tier</div>
+          <div style="font-size:11px;color:var(--ios-tertiary);margin-bottom:6px">Live participation score</div>
           <div style="background:var(--ios-fill);border-radius:4px;height:6px;margin-bottom:6px"><div style="width:62%;height:100%;background:linear-gradient(90deg,var(--brand-gold),#e8b84b);border-radius:4px"></div></div>
-          <div style="font-size:11px;color:var(--brand-gold)">152 pts to go · +50 pts per gift</div>
+          <div style="font-size:11px;color:var(--brand-gold)">152 to next milestone · +8 Pulse per gift</div>
         </div>
       </div>
-      <div style="margin:0 16px 16px;padding:16px;background:linear-gradient(135deg,#fef7ed,#fdecd3);border:1px solid rgba(201,151,58,.35);border-radius:14px">
-        <div style="font-size:14px;font-weight:700;color:#7a4f1a;margin-bottom:4px">Unlock Crown Ring</div>
-        <div style="font-size:12px;color:#92400e;line-height:1.45;margin-bottom:12px">Give 8%+ of income for 3× merchant multipliers on GRACE Card spend.</div>
+      <div style="margin:0 16px 16px;padding:16px;background:linear-gradient(135deg,#FFF0F1,#fce4e6);border:1px solid rgba(238,43,55,.35);border-radius:14px">
+        <div style="font-size:14px;font-weight:700;color:#C41E2A;margin-bottom:4px">Reach Champion commitment</div>
+        <div style="font-size:12px;color:#92400e;line-height:1.45;margin-bottom:12px">Give 8%+ of income to unlock Champion commitment and stronger card routing.</div>
         <button type="button" onclick="mobScrollToGiveForm()" style="width:100%;padding:11px;border:none;border-radius:10px;background:var(--brand-navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Start giving →</button>
       </div>
 
@@ -1020,7 +1050,7 @@ body{display:flex;flex-direction:column}
               <span class="mob-cause-meter-live">Live funding</span>
               <span class="mob-cause-meter-pct">71%</span>
             </div>
-            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:71%;background:linear-gradient(90deg,#1B2A4A,#243660)"></div></div>
+            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:71%;background:linear-gradient(90deg,#000000,#1a1a1a)"></div></div>
             <div class="mob-cause-meter-sub">$284k raised of $400k goal</div>
             <div class="mob-cause-actions">
               <button type="button" class="mob-cause-btn-give" onclick="mobQuickGive('New Sanctuary Build')">Give</button>
@@ -1077,7 +1107,7 @@ body{display:flex;flex-direction:column}
               <span class="mob-cause-meter-live open">Always open</span>
               <span class="mob-cause-meter-pct" style="color:var(--brand-gold)">●</span>
             </div>
-            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:100%;background:linear-gradient(90deg,#b45309,#C9973A)"></div></div>
+            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:100%;background:linear-gradient(90deg,#b45309,#EE2B37)"></div></div>
             <div class="mob-cause-meter-sub">Crisis support · accepting requests now</div>
             <div class="mob-cause-actions">
               <button type="button" class="mob-cause-btn-give" onclick="mobQuickGive('Benevolence Fund')">Give</button>
@@ -1155,8 +1185,8 @@ body{display:flex;flex-direction:column}
         </div>
       </div>
       <div class="home-stat-grid" style="margin-bottom:16px">
-        <div class="home-stat" onclick="mobToast('Green Ring 6%')"><div class="home-stat-lbl">Grace Ring</div><div class="home-stat-val">6%</div><div class="home-stat-sub"><span class="home-stat-delta">↑ +0.4%</span></div></div>
-        <div class="home-stat" onclick="mobToast('$1.67/day to Crown')"><div class="home-stat-lbl">To Crown Ring</div><div class="home-stat-val">$1.67<span style="font-size:11px">/d</span></div></div>
+        <div class="home-stat" onclick="mobToast('Partner 6%')"><div class="home-stat-lbl">Central Commitment</div><div class="home-stat-val">6%</div><div class="home-stat-sub"><span class="home-stat-delta">↑ +0.4%</span></div></div>
+        <div class="home-stat" onclick="mobToast('$1.67/day to Champion')"><div class="home-stat-lbl">To Champion</div><div class="home-stat-val">$1.67<span style="font-size:11px">/d</span></div></div>
         <div class="home-stat"><div class="home-stat-lbl">Transactions</div><div class="home-stat-val">133</div></div>
         <div class="home-stat"><div class="home-stat-lbl">Month to date</div><div class="home-stat-val">$230</div></div>
       </div>
@@ -1165,7 +1195,7 @@ body{display:flex;flex-direction:column}
       <div class="sect-hdr sm">Recent activity</div>
       <div class="ios-card" style="margin-bottom:8px">
         <div class="ios-row">
-          <div class="ios-row-icon" style="background:#fef3e2;font-size:18px">🛒</div>
+          <div class="ios-row-icon" style="background:#FFF0F1;font-size:18px">🛒</div>
           <div style="flex:1"><div class="ios-row-label" style="font-size:14px">Walmart Grocery</div><div style="font-size:12px;color:var(--ios-tertiary)">May 28 · GRACE Card → Food Pantry</div></div>
           <div style="text-align:right"><div style="font-size:14px;font-weight:600">-$120.00</div><div style="font-size:11px;color:#15803d;font-weight:600">+$2.40</div></div>
         </div>
@@ -1252,7 +1282,7 @@ body{display:flex;flex-direction:column}
           <div class="feed-post" style="margin-top:1px">
             <div class="post-head">
               <img class="post-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="">
-              <div><div class="post-name">Maya Thompson</div><div class="post-sub">Devotee · Green Ring</div></div>
+              <div><div class="post-name">Maya Thompson</div><div class="post-sub">Partner · 6%</div></div>
               <div class="post-time">5h</div>
             </div>
             <div class="post-badge pb-prayer" data-grace-icon="prayer" data-grace-size="12">Prayer Request</div>
@@ -1281,7 +1311,7 @@ body{display:flex;flex-direction:column}
               <div><div class="post-name">Pastor Lisa Alvarez</div><div class="post-sub">Children's Ministry</div></div>
               <div class="post-time">1d</div>
             </div>
-            <div class="post-badge" style="background:var(--brand-gold-light);color:#7a4f1a" data-grace-icon="party" data-grace-size="12">Holiday</div>
+            <div class="post-badge" style="background:var(--brand-gold-light);color:#C41E2A" data-grace-icon="party" data-grace-size="12">Holiday</div>
             <div class="post-body">Reminder: <strong>Pentecost Sunday</strong> is June 7 — wear red or white. Special kids ministry at 9:45 &amp; 11:15. All-church lunch after second service!</div>
             <div class="post-actions">
               <div class="post-action" onclick="setCommunityTab('events',document.querySelector('#screen-community .seg-btn:nth-child(2)'))">📅 RSVP</div>
@@ -1330,7 +1360,7 @@ body{display:flex;flex-direction:column}
             </div>
             <div class="comm-featured-body">
               <div class="comm-featured-name">National Day of Prayer</div>
-              <div class="comm-featured-meta">Jun 5 · 6:00 AM · City Hall steps · Faithful Church hosting</div>
+              <div class="comm-featured-meta">Jun 5 · 6:00 AM · City Hall steps · Central Henderson hosting</div>
             </div>
           </div>
           <div class="comm-featured-card" onclick="mobToast('Summer BBQ Fellowship')">
@@ -1356,7 +1386,7 @@ body{display:flex;flex-direction:column}
         <div class="ios-card" style="margin:0 16px 16px;overflow:hidden" id="mob-event-list">
 
           <div class="mob-event-row" data-evcat="service">
-            <div class="mob-event-date" style="background:linear-gradient(135deg,var(--brand-navy),#243660);color:#fff">
+            <div class="mob-event-date" style="background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);color:#fff">
               <div class="mob-event-date-day">1</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1404,7 +1434,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row featured" data-evcat="holiday">
-            <div class="mob-event-date" style="background:var(--brand-gold-light);color:#7a4f1a">
+            <div class="mob-event-date" style="background:var(--brand-gold-light);color:#C41E2A">
               <div class="mob-event-date-day">7</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1440,7 +1470,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row featured" data-evcat="holiday">
-            <div class="mob-event-date" style="background:var(--brand-gold-light);color:#7a4f1a">
+            <div class="mob-event-date" style="background:var(--brand-gold-light);color:#C41E2A">
               <div class="mob-event-date-day">21</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1464,7 +1494,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row" data-evcat="special">
-            <div class="mob-event-date" style="background:linear-gradient(135deg,var(--brand-navy),#243660);color:var(--brand-gold)">
+            <div class="mob-event-date" style="background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);color:var(--brand-gold)">
               <div class="mob-event-date-day">28</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1507,7 +1537,7 @@ body{display:flex;flex-direction:column}
         </div>
         <div class="sect-hdr sm">Discover groups</div>
         <div class="ios-card" style="margin-bottom:12px">
-          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#fef3e2">💍</div><div style="flex:1"><div class="ios-row-label">Marriage Matters</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 6:30 PM · 14 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
+          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#FFF0F1">💍</div><div style="flex:1"><div class="ios-row-label">Marriage Matters</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 6:30 PM · 14 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
           <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#e8f5ed">📖</div><div style="flex:1"><div class="ios-row-label">Women's Bible Study</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 10 AM · 13 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
           <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#e8eef5">🙏</div><div style="flex:1"><div class="ios-row-label">Prayer Warriors</div><div style="font-size:13px;color:var(--ios-tertiary)">Sat 8 AM · 11 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
         </div>
@@ -1539,10 +1569,10 @@ body{display:flex;flex-direction:column}
               <div style="font-size:11px;color:var(--ios-tertiary);margin-top:8px;display:flex;gap:14px"><span>5h ago</span><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" onclick="mobToast('Praying')">🙏 Pray</span></div>
             </div>
           </div>
-          <div class="ios-row" style="align-items:flex-start;padding:14px 16px;background:#fef7ed">
-            <div style="width:40px;height:40px;border-radius:50%;background:#fdecd3;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✨</div>
+          <div class="ios-row" style="align-items:flex-start;padding:14px 16px;background:#FFF0F1">
+            <div style="width:40px;height:40px;border-radius:50%;background:#FFF0F1;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✨</div>
             <div style="flex:1">
-              <div style="font-size:14px;font-weight:600;color:#7a4f1a">Church-wide · Prayer Vigil</div>
+              <div style="font-size:14px;font-weight:600;color:#C41E2A">Church-wide · Prayer Vigil</div>
               <div style="font-size:13px;color:#92400e;line-height:1.45;margin-top:4px">Join us Jun 14–15 for 24 hours of prayer. Sign up for your hour on Events.</div>
               <div style="font-size:11px;margin-top:8px"><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" onclick="setCommunityTab('events',document.querySelector('#screen-community .seg-btn:nth-child(2)'))">📅 View vigil →</span></div>
             </div>
@@ -1585,7 +1615,7 @@ body{display:flex;flex-direction:column}
             <div class="care-chevron" style="color:#FF3B30">›</div>
           </div>
           <div class="care-option" onclick="mobToast('Counselling request sent')">
-            <div class="care-icon" style="background:#fef3e2">💬</div>
+            <div class="care-icon" style="background:#FFF0F1">💬</div>
             <div><div class="care-name">Counselling Request</div><div class="care-desc">Book with Dr. Rachel Kim</div></div>
             <div class="care-chevron">›</div>
           </div>
@@ -1624,14 +1654,14 @@ body{display:flex;flex-direction:column}
           <img class="profile-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya" style="width:64px;height:64px;margin:0;flex-shrink:0">
           <div style="flex:1;min-width:0">
             <div class="profile-name" style="font-size:18px;text-align:left">Maya Thompson</div>
-            <div class="profile-sub" style="text-align:left;font-size:12px">Faithful Church · Member since 2022</div>
-            <div class="profile-tier-badge" style="margin-top:8px">⭐ Devotee · 248 pts earned</div>
+            <div class="profile-sub" style="text-align:left;font-size:12px">Central Henderson · Member since 2022</div>
+            <div class="profile-tier-badge" style="margin-top:8px">⭐ Partner · Pulse 248</div>
           </div>
         </div>
         <div class="prof-tier-progress">
-          <div class="prof-tier-progress-lbl">Next tier: <strong style="color:rgba(255,255,255,.85)">Enlightened</strong> · 152 pts to go</div>
+          <div class="prof-tier-progress-lbl">Central Pulse · <strong style="color:rgba(255,255,255,.85)">248</strong> live score</div>
           <div class="prof-tier-bar"><div class="prof-tier-bar-fill" style="width:62%"></div></div>
-          <div class="prof-tier-pts">Green Ring 6% · Crown Ring at 8%</div>
+          <div class="prof-tier-pts">Partner 6% · Champion at 8%</div>
         </div>
       </div>
 
@@ -1657,19 +1687,19 @@ body{display:flex;flex-direction:column}
           <div class="stat-cell"><div class="stat-val">$1,240</div><div class="stat-key">Given 2026</div></div>
           <div class="stat-cell"><div class="stat-val">22</div><div class="stat-key">Gifts</div></div>
           <div class="stat-cell"><div class="stat-val">7</div><div class="stat-key">Day streak</div></div>
-          <div class="stat-cell"><div class="stat-val">248</div><div class="stat-key">Points</div></div>
+          <div class="stat-cell"><div class="stat-val">248</div><div class="stat-key">Pulse</div></div>
         </div>
 
-        <div class="prof-ring-card" onclick="mobToast('Green Ring 6% — give $1.67/day more for Crown Ring (8%)','🌿')">
+        <div class="prof-ring-card" onclick="mobToast('Partner 6% — give $1.67/day more for Champion (8%)','🌿')">
           <div class="prof-ring-row">
             <div>
-              <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px">Your Grace Ring</div>
-              <div style="font-size:13px;margin-top:2px">Devotee · Green Ring</div>
+              <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px">Your Central Commitment</div>
+              <div style="font-size:13px;margin-top:2px">Partner · 6%</div>
             </div>
             <div class="prof-ring-pct">6%</div>
           </div>
           <div class="prof-tier-bar" style="margin-bottom:8px"><div class="prof-tier-bar-fill" style="width:75%;background:#86efac"></div></div>
-          <div class="prof-ring-next">$1.67/day to Crown Ring · 8% giving goal</div>
+          <div class="prof-ring-next">$1.67/day to Champion · 8% giving goal</div>
         </div>
 
         <div class="ios-card" style="margin:12px 16px 0">
@@ -1694,7 +1724,7 @@ body{display:flex;flex-direction:column}
             <div class="badge-item"><div class="badge-ico" data-grace-icon="give" data-grace-size="24"></div><div class="badge-lbl">First Gift</div><div class="badge-lbl-sub">Earned</div></div>
             <div class="badge-item"><div class="badge-ico" data-grace-icon="fire" data-grace-size="24"></div><div class="badge-lbl">7-Day Streak</div><div class="badge-lbl-sub">Earned</div></div>
             <div class="badge-item"><div class="badge-ico" data-grace-icon="groups" data-grace-size="24"></div><div class="badge-lbl">Joined Group</div><div class="badge-lbl-sub">Earned</div></div>
-            <div class="badge-item"><div class="badge-ico locked" data-grace-icon="crown" data-grace-size="24"></div><div class="badge-lbl">Crown Ring</div><div class="badge-lbl-sub">Locked</div></div>
+            <div class="badge-item"><div class="badge-ico locked" data-grace-icon="crown" data-grace-size="24"></div><div class="badge-lbl">Champion</div><div class="badge-lbl-sub">Locked</div></div>
             <div class="badge-item"><div class="badge-ico locked" data-grace-icon="journal" data-grace-size="24"></div><div class="badge-lbl">30-Day Journal</div><div class="badge-lbl-sub">Locked</div></div>
           </div>
         </div>
@@ -1708,7 +1738,7 @@ body{display:flex;flex-direction:column}
           </div>
           <div class="prof-spirit-card" onclick="profileTab('journal')">
             <div data-grace-icon="journal" data-grace-size="22"></div>
-            <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--ios-label)">Prayer Journal</div><div style="font-size:12px;color:var(--ios-tertiary);margin-top:2px">Write today · +10 pts per entry</div></div>
+            <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--ios-label)">Prayer Journal</div><div style="font-size:12px;color:var(--ios-tertiary);margin-top:2px">Write today · +8 Pulse per entry</div></div>
             <span style="font-size:13px;color:var(--brand-gold);font-weight:600">Write →</span>
           </div>
           <div class="prof-spirit-card" onclick="profileTab('goals')">
@@ -1756,7 +1786,7 @@ body{display:flex;flex-direction:column}
             <div class="ios-row-chevron">›</div>
           </div>
           <div class="ios-row" style="cursor:pointer" onclick="profileTab('goals')">
-            <div class="ios-row-icon" style="background:#fef3e2">🎯</div>
+            <div class="ios-row-icon" style="background:#FFF0F1">🎯</div>
             <div class="ios-row-label">Faith goals</div>
             <div class="ios-row-chevron">›</div>
           </div>
@@ -1890,7 +1920,7 @@ body{display:flex;flex-direction:column}
             <div class="ios-row-chevron">›</div>
           </div>
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Payment methods')">
-            <div class="ios-row-icon" style="background:#fef3e2">💳</div>
+            <div class="ios-row-icon" style="background:#FFF0F1">💳</div>
             <div class="ios-row-label">Payment methods</div>
             <div class="ios-row-chevron">›</div>
           </div>
@@ -1918,7 +1948,25 @@ body{display:flex;flex-direction:column}
 
 
   <!-- ═══ TAB BAR ═══ -->
-  <div class="tab-bar">
+  
+  <!-- D-ID Studio sheet -->
+  <div class="mob-did-overlay" id="mob-did-overlay" onclick="if(event.target===this)closeDidStudio()">
+    <div class="mob-did-sheet" onclick="event.stopPropagation()">
+      <button type="button" class="mob-did-close" onclick="closeDidStudio()" aria-label="Close">×</button>
+      <div class="mob-did-media">
+        <div class="mob-did-media-bg" aria-hidden="true"></div>
+        <img class="mob-did-avatar" id="mob-did-studio-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+      </div>
+      <div class="mob-did-chat-head" id="mob-did-studio-title">Chat · Pastor James <span style="font-size:10px;color:#16a34a;font-weight:600"><span class="pulse-live-dot" style="width:6px;height:6px"></span> Live</span></div>
+      <div class="mob-did-msgs" id="mob-did-msgs"></div>
+      <div class="mob-did-inputbar">
+        <input class="mob-did-input" id="mob-did-input" placeholder="Type your message…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendDidMessage()}">
+        <button type="button" class="mob-did-send" onclick="sendDidMessage()">↑</button>
+      </div>
+    </div>
+  </div>
+
+<div class="tab-bar">
     <div class="tab active" id="tab-home" onclick="showTab('home')">
       <div class="tab-ico"></div>
       <div class="tab-lbl">Home</div>
@@ -1946,7 +1994,7 @@ body{display:flex;flex-direction:column}
 <style>
 @keyframes wv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(2)}}
 @keyframes shimmer{0%,100%{opacity:1}50%{opacity:.7}}
-body{background:linear-gradient(160deg,#e8e0d4 0%,#d5c9bc 100%);align-items:center;justify-content:center}
+body{background:#f4f4f4;align-items:center;justify-content:center;font-family:var(--font-body,'Poppins',sans-serif)}
 @media (max-height:870px){
   .device-wrap{width:min(393px,100vw);height:100vh;border-radius:0;box-shadow:none}
   .dynamic-island{display:none}
@@ -1955,9 +2003,10 @@ body{background:linear-gradient(160deg,#e8e0d4 0%,#d5c9bc 100%);align-items:cent
 
 <script src="grace-duotone-icons.js"></script>
 <script>
+const CHURCH_NAME = 'Central Henderson';
 // ── LEADER DATA (full — matches desktop) ──
 const mobLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',topic:'Prayer · Scripture · Guidance',img:'https://randomuser.me/api/portraits/men/32.jpg',didImg:'https://randomuser.me/api/portraits/men/32.jpg',greeting:"Good morning Maya 🙏 I'm Pastor James — your Grace AI companion. What's on your heart today?",online:true,bio:"Pastor James leads Faithful Church with a heart for expository preaching and pastoral care. His AI companion is trained on 4 years of sermons, weekly blessings, and approved pastoral responses.",exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',topic:'Prayer · Scripture · Guidance',img:'https://randomuser.me/api/portraits/men/32.jpg',didImg:'https://randomuser.me/api/portraits/men/32.jpg',greeting:"Good morning Maya 🙏 I'm Pastor James — your Grace AI companion. What's on your heart today?",online:true,bio:"Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His AI companion is trained on 4 years of sermons, weekly blessings, and approved pastoral responses.",exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',didImg:'https://randomuser.me/api/portraits/women/44.jpg',greeting:"Hello Maya. I'm Sandra — here for care, comfort, and support. What are you walking through today?",online:true,bio:"Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.",exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',didImg:'https://randomuser.me/api/portraits/men/54.jpg',greeting:"What's good Maya! It's Pastor Derek. Talk to me — what's going on? Faith, life, whatever you've got.",online:true,bio:"Pastor Derek serves middle school through college-age students and their parents. His AI voice is energetic, scripture-grounded, and real about everyday struggles.",exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
   {name:'Sis. Priya Nair',title:"Women's Ministry Lead",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',didImg:'https://randomuser.me/api/portraits/women/28.jpg',greeting:"Hi Maya 🌸 I'm Sis. Priya. This is a safe space — what's on your mind today, sis?",online:false,bio:"Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.",exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
@@ -2253,8 +2302,8 @@ function mobSwitchLeader(idx) {
     heroAv.alt = l.name;
   }
   document.getElementById('mob-leader-name').innerHTML = l.name +
-    ' <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(124,58,237,.45);color:#c4b5fd;border:1px solid rgba(124,58,237,.4);margin-left:5px;vertical-align:middle">AI</span>';
-  document.getElementById('mob-leader-role').textContent = l.title + ' · Faithful Church';
+    ' <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">AI</span>';
+  document.getElementById('mob-leader-role').textContent = l.title + ' · ' + CHURCH_NAME;
   document.getElementById('mob-chat-av').src = l.img;
   // Online badge
   const badge = document.getElementById('mob-online-badge');
@@ -2266,7 +2315,7 @@ function mobSwitchLeader(idx) {
   // Update home card
   document.getElementById('home-ai-av').src = l.img;
   document.getElementById('home-ai-name').textContent = l.name;
-  document.getElementById('home-ai-role').textContent = l.title + ' · Faithful Church';
+  document.getElementById('home-ai-role').textContent = l.title + ' · ' + CHURCH_NAME;
   const greetShort = l.greeting.replace(/^"|"$/g,'');
   document.getElementById('home-ai-greeting').textContent = '"' + greetShort + '"';
   syncHomeAssignedLeader(l);
@@ -2276,6 +2325,10 @@ function mobSwitchLeader(idx) {
     msgs.innerHTML = `<div class="chat-msg"><img class="chat-msg-av" src="${l.img}" alt=""><div><div class="chat-bubble">${l.greeting}</div><div class="chat-time">Just now</div></div></div>`;
   }
   renderMobLeaderList();
+  const didAv=document.getElementById('mob-did-studio-av');
+  if(didAv){didAv.src=l.img;didAv.alt=l.name;}
+  const didMsgs=document.getElementById('mob-did-msgs');
+  if(didMsgs)didMsgs.dataset.seeded='';
   renderHomeLeaderPreview();
   ldTabSwitch('chat');
 }
@@ -2375,7 +2428,7 @@ function openLdrProfile(idx) {
   const l = mobLeaders[idx];
   document.getElementById('lps-av').src = l.img;
   document.getElementById('lps-name').textContent = l.name;
-  document.getElementById('lps-title').textContent = l.title + ' · Faithful Church';
+  document.getElementById('lps-title').textContent = l.title + ' · ' + CHURCH_NAME;
   document.getElementById('lps-dot').style.background = l.online ? '#34C759' : '#8E8E93';
   document.getElementById('lps-online').textContent = l.online ? 'Online now' : 'Away';
   document.getElementById('lps-online').style.color = l.online ? '#15803d' : 'var(--ios-tertiary)';
@@ -2385,7 +2438,7 @@ function openLdrProfile(idx) {
   document.getElementById('lps-exp').textContent = l.exp;
   document.getElementById('lps-hours').textContent = l.hours;
   document.getElementById('lps-specialties').innerHTML = l.specialties.map(s =>
-    `<span style="background:var(--brand-gold-light);color:#7a4f1a;border-radius:12px;padding:5px 12px;font-size:12px;font-weight:600">${s}</span>`).join('');
+    `<span style="background:var(--brand-gold-light);color:#C41E2A;border-radius:12px;padding:5px 12px;font-size:12px;font-weight:600">${s}</span>`).join('');
   document.getElementById('lps-languages').innerHTML = l.languages.map(lang =>
     `<span style="background:#dbeafe;color:#1e40af;border-radius:12px;padding:5px 12px;font-size:12px;font-weight:600">${lang}</span>`).join('');
   const switchBtn = document.getElementById('lps-switch-btn');
@@ -2403,9 +2456,9 @@ function closeLdrProfile() {
 const mobFaq = [
   { icon:'brain', q:'How do the AI companions work?', a:'Each verified leader has an AI companion trained on their sermons, teachings, and approved pastoral responses — not a generic chatbot. You get 24/7 guidance in their voice while real leaders remain available for live care.' },
   { icon:'people', q:'Is this the same as talking to the real leader?', a:'The AI reflects each leader\'s pastoral style and knowledge, but it is not a live person. You can always request a real leader — crisis keywords and "I need help now" route immediately to on-call pastoral care.' },
-  { icon:'shield', q:'What is a Verified Leader?', a:'Verified Leaders are Faithful Church pastors and ministers whose identity, role, and AI training have been confirmed by the church. You will see a verified badge on their profile and in the Leaders directory.' },
+  { icon:'shield', q:'What is a Verified Leader?', a:'Verified Leaders are Central Henderson pastors and ministers whose identity, role, and AI training have been confirmed by the church. You will see a verified badge on their profile and in the Leaders directory.' },
   { icon:'dollar', q:'How much does it cost?', a:'AI companion access is included for members at no extra charge. Giving, GRACE Wallet, and optional formation rewards follow your church\'s normal stewardship policies.' },
-  { icon:'chat', q:'Are conversations private?', a:'Sessions are confidential within Faithful Church. Crisis keywords (self-harm, abuse, suicidal thoughts) automatically alert a live pastor — you will never be left alone in those moments.' },
+  { icon:'chat', q:'Are conversations private?', a:'Sessions are confidential within Central Henderson. Crisis keywords (self-harm, abuse, suicidal thoughts) automatically alert a live pastor — you will never be left alone in those moments.' },
   { icon:'shield', q:'How do I switch leaders?', a:'Open the Leaders tab and tap Switch beside any leader. Your chat resets with a greeting from the new leader\'s companion.' },
 ];
 let faqOpen = -1;
@@ -2453,7 +2506,7 @@ function initGraceCareAndRows() {
   if(typeof graceIcon !== 'function') return;
   const careMap = [
     ['prayer','#ede9fe'], ['crisis','#fee2e2'], ['prayer','#ede9fe'],
-    ['hospital','#dcfce7'], ['crisis','#fee2e2'], ['chat','#fef3e2']
+    ['hospital','#dcfce7'], ['crisis','#fee2e2'], ['chat','#FFF0F1']
   ];
   document.querySelectorAll('.care-icon').forEach((el, i) => {
     const m = careMap[i];
@@ -2463,11 +2516,11 @@ function initGraceCareAndRows() {
     el.innerHTML = graceIcon(m[0], { size: 22 });
   });
   const rowIcons = [
-    ['merchant','#fef3e2'], ['gas','#e8f0e8'], ['give','#ede9fe'], ['globe','#dbeafe'],
+    ['merchant','#FFF0F1'], ['gas','#e8f0e8'], ['give','#ede9fe'], ['globe','#dbeafe'],
     ['groups','#f5e8f0'], ['fire','#ede8f5'],
-    ['counsel','#fef3e2'], ['bible','#e8f5ed'], ['prayer','#e8eef5'],
+    ['counsel','#FFF0F1'], ['bible','#e8f5ed'], ['prayer','#e8eef5'],
     ['card','#dbeafe'], ['impact','#dcfce7'], ['journal','#ede9fe'],
-    ['goals','#fef3e2'], ['settings','#f3f0eb'], ['signout','#fee2e2']
+    ['goals','#FFF0F1'], ['settings','#f3f0eb'], ['signout','#fee2e2']
   ];
   document.querySelectorAll('.ios-row-icon').forEach((el, i) => {
     const m = rowIcons[i];
@@ -2479,8 +2532,6 @@ function initGraceCareAndRows() {
   });
   const bell = document.querySelector('.nav-action-bell');
   if(bell) bell.innerHTML = graceIcon('bell', { size: 18 });
-  const churchHdr = document.querySelector('[data-grace-church-logo]');
-  if(churchHdr) churchHdr.innerHTML = graceIcon('church', { size: 22 });
   const bibleLbl = document.getElementById('ld-scripture-label');
   if(bibleLbl) bibleLbl.innerHTML = graceIcon('bible', { size: 14, variant: 'inverse' }) + '<span>Today\'s Scripture</span>';
 }
@@ -2532,7 +2583,7 @@ function renderHomeLeaderPreview() {
       <img src="${l.img}" alt="${l.name}">
       <div class="home-leader-chip-name">${l.name.split(' ').slice(-1)[0]}</div>
     </div>`).join('') + `
-    <div class="home-leader-chip" onclick="ldTabSwitch('leaders');showTab('leadership')" style="width:72px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--brand-navy),#243660);border-radius:12px;min-height:72px">
+    <div class="home-leader-chip" onclick="ldTabSwitch('leaders');showTab('leadership')" style="width:72px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:12px;min-height:72px">
       <div style="font-size:10px;font-weight:700;color:var(--brand-gold);text-align:center;line-height:1.3">+${mobLeaders.length - 5}<br><span style="color:rgba(255,255,255,.5);font-weight:500">more</span></div>
     </div>`;
 }
@@ -2540,6 +2591,64 @@ function renderHomeLeaderPreview() {
 // ── NOTIF ──
 function showNotif() {
   alert('2 new notifications:\n• Pastor James sent today\'s blessing\n• Angela Wright replied to your prayer request');
+}
+
+
+function sendHomeChat(){
+  const input=document.getElementById('home-chat-input');
+  if(!input||!input.value.trim()){openDidStudio();return;}
+  openDidStudio(input.value.trim());
+  input.value='';
+}
+function syncDidStudioLeader(){
+  const l=mobLeaders[currentMobLeader];
+  if(!l)return;
+  const img=document.getElementById('mob-did-studio-av');
+  if(img){img.src=l.img;img.alt=l.name;}
+  const t=document.getElementById('mob-did-studio-title');
+  if(t)t.innerHTML='Chat · '+l.name+' <span style="font-size:10px;color:#16a34a;font-weight:600"><span class="pulse-live-dot" style="width:6px;height:6px"></span> Live</span>';
+}
+function seedDidChat(){
+  const box=document.getElementById('mob-did-msgs');
+  if(!box||box.dataset.seeded)return;
+  const l=mobLeaders[currentMobLeader];
+  const g=l.greeting.replace(/^"|"$/g,'');
+  box.innerHTML='<div class="chat-msg"><img class="chat-msg-av" src="'+l.img+'"><div><div class="chat-bubble">'+g+'</div><div class="chat-time">Just now</div></div></div>';
+  box.dataset.seeded='1';
+}
+function openDidStudio(prefill){
+  syncDidStudioLeader();
+  seedDidChat();
+  const o=document.getElementById('mob-did-overlay');
+  if(o)o.classList.add('open');
+  const inp=document.getElementById('mob-did-input');
+  if(inp&&prefill){inp.value=prefill;setTimeout(()=>sendDidMessage(),150);}
+  else if(inp)setTimeout(()=>inp.focus(),120);
+}
+function closeDidStudio(){
+  document.getElementById('mob-did-overlay')?.classList.remove('open');
+}
+function sendDidMessage(){
+  const inp=document.getElementById('mob-did-input');
+  if(!inp||!inp.value.trim())return;
+  const text=inp.value.trim();
+  inp.value='';
+  const box=document.getElementById('mob-did-msgs');
+  const l=mobLeaders[currentMobLeader];
+  if(box){
+    const d=document.createElement('div');
+    d.className='chat-msg me';
+    d.innerHTML='<div><div class="chat-bubble">'+text+'</div></div>';
+    box.appendChild(d);
+    setTimeout(()=>{
+      const r=document.createElement('div');
+      r.className='chat-msg';
+      r.innerHTML='<img class="chat-msg-av" src="'+l.img+'"><div><div class="chat-bubble">Thank you, Maya. I hear you — let me help with that.</div></div>';
+      box.appendChild(r);
+      box.scrollTop=box.scrollHeight;
+    },600);
+    box.scrollTop=box.scrollHeight;
+  }
 }
 
 // ── INIT ──

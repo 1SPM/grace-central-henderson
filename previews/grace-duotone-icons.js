@@ -226,7 +226,7 @@
     });
   }
 
-  global.GRACE_BRAND = { navy: NAVY, gold: GOLD, cream: '#f5f0e8', tileBg: '#eef2f8' };
+  global.GRACE_BRAND = { navy: ACCENT, gold: LIGHT, cream: '#F4F4F4', tileBg: '#FFF0F1' };
   global.graceIcon = graceIcon;
   global.graceIconTile = graceIconTile;
   global.graceIconRow = graceIconRow;
