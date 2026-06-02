@@ -92,13 +92,15 @@
     '\u{1F465}': 'groups', '\u{1F441}': 'eye', '\u{1F6D2}': 'merchant', '\u26FD': 'gas', '\u{1F4E6}': 'package',
     '\u{1F30D}': 'globe', '\u{1F338}': 'groups', '\u26A1': 'fire', '\u{1F534}': 'live', '\u{1F4E1}': 'resources',
     '\u{1F4EC}': 'chat', '\u{1F3A4}': 'mic', '\u{1F64C}': 'amen', '\u{1F4AC}': 'chat', '\u2764\uFE0F': 'heart',
-    '\u2764': 'heart', '\u{1F389}': 'party', '\u{1F451}': 'crown', '\u{1F3C5}': 'star', '\u2600': 'sun',
-    '\u263E': 'moon', '\u25CE': 'ring', '\u2713': 'check', '\u{1FA99}': 'token', '\u{1F512}': 'lock',
-    '\u{1F33F}': 'ring', '\u{1F354}': 'dining', '\u2708\uFE0F': 'travel', '\u2708': 'travel', '\u{1F4DD}': 'journal',
-    '\u{1F3AF}': 'goals', '\u{1F4B3}': 'card', '\u{1F4CA}': 'impact', '\u2699': 'settings', '\u{1F519}': 'signout',
-    '\u270F\uFE0F': 'edit', '\u270F': 'edit', '\u{1F514}': 'bell', '\u2665\uFE0F': 'heart', '\u{1F6D2}': 'merchant',
-    '\u{1F3AC}': 'watch', '\u{1F4E4}': 'share', '\u2728': 'spark',
-    '\u2197': 'send', '\u2199': 'receive', '+': 'topup', '\uFF0B': 'topup'
+    '\u2764': 'heart', '\u2665\uFE0F': 'heart', '\u2665': 'heart', '\u{1F389}': 'party', '\u{1F451}': 'crown',
+    '\u{1F3C5}': 'star', '\u2600': 'sun', '\u263E': 'moon', '\u25CE': 'ring', '\u2713': 'check', '\u{1FA99}': 'token',
+    '\u{1F512}': 'lock', '\u{1F33F}': 'ring', '\u{1F354}': 'dining', '\u2708\uFE0F': 'travel', '\u2708': 'travel',
+    '\u{1F4DD}': 'journal', '\u{1F4D3}': 'journal', '\u{1F3AF}': 'goals', '\u{1F4B3}': 'card', '\u{1F4CA}': 'impact',
+    '\u2699': 'settings', '\u{1F519}': 'signout', '\u270F\uFE0F': 'edit', '\u270F': 'edit', '\u{1F514}': 'bell',
+    '\u{1F3AC}': 'watch', '\u{1F4E4}': 'share', '\u2728': 'spark', '\u{1F48D}': 'ring', '\u{1F3E5}': 'hospital',
+    '\u{1F464}': 'profile', '\u{1F550}': 'calendar', '\u{1F60A}': 'star', '\u{1F60C}': 'ring', '\u{1F914}': 'brain',
+    '\u{1F614}': 'crisis', '\u{1F4E5}': 'chat',
+    '\u2197': 'send', '\u2199': 'receive', '+': 'topup', '\uFF0B': 'topup', '\u2192': 'send'
   };
 
   function graceIcon(name, opts) {
@@ -189,7 +191,8 @@
       '[data-grace-icon]', '#ld-pane-chat div[onclick*="mobSend"]',
       '.prof-spirit-card > div:first-child', '.goal-idea', '.mob-event-badge',
       '.home-pillar-badge', '.post-type-inline', '.grace-btn-icon',
-      '.mob-event-rsvp', '.comm-dispatch-ico', '[data-grace-spark]'
+      '.mob-event-rsvp', '.comm-dispatch-ico', '[data-grace-spark]',
+      '.prayer-pray-link', '.goal-idea > div:first-child'
     ].join(',');
 
     root.querySelectorAll(selectors).forEach(function (el) {
@@ -201,11 +204,22 @@
       const moodIcons = { Joyful: 'star', Peaceful: 'ring', Grateful: 'prayer', Thoughtful: 'brain', Struggling: 'crisis', Hopeful: 'fire' };
       const label = chip.querySelector('div:last-child');
       const ico = chip.querySelector('div:first-child');
-      if (!label || !ico) return;
-      const n = moodIcons[label.textContent.trim()];
+      if (!label || !ico || ico.dataset.graceDone === '1') return;
+      const n = moodIcons[label.textContent.trim()] || emojiToIcon((ico.textContent || '').trim());
       if (!n) return;
+      ico.dataset.graceDone = '1';
       ico.style.fontSize = '0';
+      ico.style.display = 'flex';
+      ico.style.alignItems = 'center';
+      ico.style.justifyContent = 'center';
       ico.innerHTML = graceIcon(n, { size: 22 });
+    });
+
+    root.querySelectorAll('.home-chat-send, [data-grace-send]').forEach(function (btn) {
+      btn.innerHTML = graceIcon('send', { size: 16, variant: 'inverse' });
+      btn.style.display = 'flex';
+      btn.style.alignItems = 'center';
+      btn.style.justifyContent = 'center';
     });
 
     root.querySelectorAll('.home-watch-btn-primary').forEach(function (btn) {
