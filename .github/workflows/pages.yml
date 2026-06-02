@@ -31,6 +31,18 @@ jobs:
           test -f previews/grace-central-theme.css
           test -f previews/assets/central-henderson-logo.png
 
+      - name: Validate mobile inline JavaScript syntax
+        run: |
+          set -euo pipefail
+          node -e "
+          const fs=require('fs');
+          const html=fs.readFileSync('previews/grace_mobile_ios-central.html','utf8');
+          const m=html.match(/<script src=\"grace-duotone-icons.js\"><\\/script>\\s*<script>([\\s\\S]*?)<\\/script>/);
+          if(!m) throw new Error('inline script block not found');
+          new Function(m[1]);
+          console.log('mobile inline script syntax OK');
+          "
+
       - name: Serve locally and check key routes
         run: |
           set -euo pipefail

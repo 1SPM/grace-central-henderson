@@ -182,14 +182,14 @@
 
     const skip = '.chat-bubble, .post-body, .assigned-msg, .prof-j-text, textarea, input, script, style';
     const selectors = [
-      '.home-qcmd', '.post-action', '.post-badge', '.assigned-btn', '.home-watch-btn',
+      '.home-qcmd', '.post-action', '.post-badge', '.home-watch-btn',
       '.home-watch-play', '.home-watch-viewers', '.daily-time', '.daily-status',
       '.notif-ico', '.badge-ico', '.wact-ico', '.ios-row-icon', '.care-icon',
       '.home-impact-row > span:first-child', '.home-mod-title', '.home-ticker-item',
       '.nav-action', '.mchip-ico', '.act-ico', '.lf-ico', '.m-pact', '.m-comp-btn',
       '.mpc-pray-btn', '.qcmd-m', '.tile-ico', '.bc-btn', '.token-pill',
       '[data-grace-icon]', '#ld-pane-chat div[onclick*="mobSend"]',
-      '.prof-spirit-card > div:first-child', '.goal-idea', '.mob-event-badge',
+      '.prof-spirit-card > div:first-child', '.mob-event-badge',
       '.home-pillar-badge', '.post-type-inline', '.grace-btn-icon',
       '.mob-event-rsvp', '.comm-dispatch-ico', '[data-grace-spark]',
       '.prayer-pray-link', '.goal-idea > div:first-child'
