@@ -7,7 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="GRACE">
 <link rel="stylesheet" href="grace-central-theme.css">
-<title>GRACE — Central Henderson</title>
+    <title>GRACE — Central Henderson</title>
+    <meta name="grace-build" content="leaders-roster-v3">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -102,7 +103,6 @@ body{display:flex;flex-direction:column}
   background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:0.5px solid var(--ios-separator);
   display:flex;align-items:flex-start;padding-top:6px;flex-shrink:0;
-  position:relative;z-index:200;
 }
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:0 2px;min-height:44px;justify-content:flex-start}
 .tab-ico{width:28px;height:28px;display:flex;align-items:center;justify-content:center}
@@ -182,6 +182,24 @@ body{display:flex;flex-direction:column}
 .ai-card-btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
 .ai-card-btn-primary{background:var(--brand-gold);color:#fff}
 .ai-card-btn-outline{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+/* Leader roster (Leaders tab) */
+.lg-item{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:.5px solid #f7f5f2;background:#fff}
+.lg-item:last-child{border-bottom:none}
+.lg-item.active-leader{background:#FFF0F1}
+.lg-item-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
+.lg-av-wrap{position:relative;flex-shrink:0}
+.lg-av{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:top center;display:block}
+.lg-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:#16a34a;border:2px solid #fff}
+.lg-dot-away{background:#d1d5db}
+.lg-name{font-size:14px;font-weight:600;color:var(--ios-label)}
+.lg-topic{font-size:11px;color:var(--ios-tertiary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg-profile-btn{font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid #e8e0d5;background:#fff;color:var(--brand-navy);cursor:pointer;flex-shrink:0}
+.lg-switch{font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;border:1px solid #e8e0d5;background:#fff;cursor:pointer;color:#555;flex-shrink:0}
+.lg-item.active-leader .lg-switch{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold)}
+#screen-leadership{min-height:0}
+#ld-pane-leaders{flex:1 1 0;min-height:0;overflow:hidden}
+#mob-leader-list{flex:1 1 0;height:0;min-height:120px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff}
 
 /* ── DAILY LOOP ── */
 .daily-loop{display:flex;gap:10px;padding:0 16px;margin-bottom:20px;overflow-x:auto}
@@ -277,12 +295,12 @@ body{display:flex;flex-direction:column}
 .post-sub{font-size:13px;color:var(--ios-tertiary)}
 .post-time{font-size:12px;color:var(--ios-tertiary);margin-left:auto}
 .post-body{font-size:15px;color:var(--ios-secondary);line-height:1.55;margin-bottom:12px}
-.post-quote{border-left:3px solid var(--brand-gold);padding:10px 14px;background:var(--brand-gold-light);border-radius:0 8px 8px 0;font-style:italic;font-size:14px;color:#991b1b;margin-bottom:10px;line-height:1.5}
+.post-quote{border-left:3px solid var(--brand-gold);padding:10px 14px;background:var(--brand-gold-light);border-radius:0 8px 8px 0;font-style:italic;font-size:14px;color:#78350f;margin-bottom:10px;line-height:1.5}
 .post-actions{display:flex;gap:16px;padding-top:10px;border-top:.5px solid var(--ios-separator)}
 .post-action{font-size:13px;font-weight:500;color:var(--ios-tertiary);cursor:pointer;display:flex;align-items:center;gap:4px}
 .post-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:8px;display:inline-block}
 .pb-blessing{background:var(--brand-gold-light);color:#C41E2A}
-.pb-prayer{background:#FFF0F1;color:#C41E2A}
+.pb-prayer{background:#ede9fe;color:#5b21b6}
 
 /* ── PROFILE ── */
 .profile-hero{background:var(--brand-navy);padding:24px 20px 28px;text-align:center;position:relative}
@@ -373,7 +391,7 @@ body{display:flex;flex-direction:column}
 .assigned-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .assigned-av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-gold)}
 .assigned-name{font-size:15px;font-weight:700;color:#C41E2A}
-.assigned-role{font-size:12px;color:#C41E2A;margin-top:2px}
+.assigned-role{font-size:12px;color:#b45309;margin-top:2px}
 .assigned-msg{font-size:13px;color:#C41E2A;font-style:italic;line-height:1.5;margin-bottom:12px}
 .assigned-btns{display:flex;gap:8px}
 .assigned-btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
@@ -478,10 +496,10 @@ body{display:flex;flex-direction:column}
 
 /* ── GIVE / CAUSES ── */
 .give-hero-strip{margin:0 16px 12px;padding:14px 16px;background:linear-gradient(135deg,var(--brand-navy),#1a1a1a);border-radius:14px;color:#fff}
-.give-hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.give-hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
 .give-hero-stat{background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center}
 .give-hero-stat strong{display:block;font-size:16px;font-weight:700;color:#fff}
-.give-hero-stat span{font-size:9px;color:rgba(255,255,255,.55)}
+.give-hero-stat span{font-size:10px;color:rgba(255,255,255,.55)}
 .give-route-pill{margin-top:10px;font-size:11px;color:rgba(255,255,255,.75);padding:8px 12px;background:rgba(238,43,55,.2);border-radius:10px;border:1px solid rgba(238,43,55,.35)}
 .give-route-pill strong{color:var(--brand-gold)}
 .give-cause-ftabs{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -557,7 +575,7 @@ body{display:flex;flex-direction:column}
 .mob-event-row:last-child{border-bottom:none}
 .mob-event-row.hidden{display:none}
 .mob-event-row.featured{background:linear-gradient(90deg,#fef7ed 0%,#fff 40%)}
-.mob-event-row.prayer-event{background:linear-gradient(90deg,#FFF0F1 0%,#fff 45%)}
+.mob-event-row.prayer-event{background:linear-gradient(90deg,#ede9fe 0%,#fff 45%)}
 .mob-event-date{width:44px;height:44px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
 .mob-event-date-day{font-size:16px;font-weight:800;line-height:1}
 .mob-event-date-mon{font-size:8px;font-weight:600;text-transform:uppercase;margin-top:2px;opacity:.75}
@@ -566,10 +584,10 @@ body{display:flex;flex-direction:column}
 .mob-event-time{font-size:12px;color:var(--ios-tertiary);margin-top:2px}
 .mob-event-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:4px;display:inline-block}
 .mob-ev-badge-service{background:#dbeafe;color:#1e40af}
-.mob-ev-badge-group{background:#FFF0F1;color:#C41E2A}
+.mob-ev-badge-group{background:#f5e8f0;color:#7a3a6a}
 .mob-ev-badge-special{background:#fee2e2;color:#991b1b}
 .mob-ev-badge-holiday{background:var(--brand-gold-light);color:#C41E2A}
-.mob-ev-badge-prayer{background:#FFF0F1;color:#C41E2A}
+.mob-ev-badge-prayer{background:#ede9fe;color:#5b21b6}
 .mob-event-rsvp{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--ios-separator);background:#fff;color:var(--ios-secondary);flex-shrink:0;cursor:pointer}
 .mob-event-rsvp.going{background:#dcfce7;color:#15803d;border-color:#86efac}
 .seg-ctrl.scrollable .seg-btn{flex:1;min-width:0;padding:7px 8px;font-size:12px}
@@ -600,7 +618,6 @@ body{display:flex;flex-direction:column}
 .mob-did-input{flex:1;padding:10px 12px;border-radius:20px;border:1px solid var(--ios-separator);font-size:15px}
 .mob-did-send{width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer}
 .ai-hero-chatrow-mob input::placeholder{color:rgba(255,255,255,.45)}
-.qcmd-m{border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 
 </style>
 </head>
@@ -701,22 +718,6 @@ body{display:flex;flex-direction:column}
           </div>
         </div>
 
-
-        <div class="home-mod pulse-card" id="home-pulse-card" style="margin:0 16px 12px">
-          <div class="home-mod-head">
-            <div class="home-mod-title">Central Pulse</div>
-            <span style="font-size:9px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:4px"><span class="pulse-live-dot"></span>Live</span>
-          </div>
-          <div class="home-mod-body" style="padding-top:4px">
-            <div class="pulse-score">248</div>
-            <div class="pulse-sub">Real-time participation · church 24/7 + community</div>
-            <div class="pulse-activity" style="margin-top:10px">
-              <div class="pulse-act"><span data-grace-icon="watch" data-grace-size="14" style="flex-shrink:0"></span><span><strong>Live service</strong> — 342 watching<span class="pulse-act-time">Today · +15 Pulse</span></span></div>
-              <div class="pulse-act"><span data-grace-icon="prayer" data-grace-size="14" style="flex-shrink:0"></span><span><strong>Care dispatch</strong> — prayer routed<span class="pulse-act-time">2 hr ago · +8 Pulse</span></span></div>
-            </div>
-          </div>
-        </div>
-
         <!-- AI Companion -->
         <div class="sect-hdr sm">Your leader</div>
         <div class="ai-card" id="home-ai-card" style="margin-bottom:12px">
@@ -739,7 +740,7 @@ body{display:flex;flex-direction:column}
             </div>
             <div class="ai-hero-chatrow-mob" style="display:flex;gap:8px;margin-top:10px;align-items:center">
               <input type="text" class="ai-hero-input-mob" id="home-chat-input" placeholder="Ask Pastor James anything…" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:13px" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
-              <button type="button" class="home-chat-send" onclick="sendHomeChat()" style="width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;cursor:pointer" aria-label="Send">→</button>
+              <button type="button" onclick="sendHomeChat()" style="width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer">→</button>
             </div>
           </div>
         </div>
@@ -768,7 +769,6 @@ body{display:flex;flex-direction:column}
     <!-- D-ID Avatar header -->
     <div style="position:relative;height:220px;background:#0a0a0a;flex-shrink:0;overflow:hidden">
       <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(238,43,55,.18),rgba(0,0,0,.35));z-index:0"></div>
-      <button type="button" onclick="openDidStudio()" style="position:absolute;inset:0;z-index:4;cursor:pointer;border:none;background:transparent" aria-label="Begin a conversation"></button>
       <img id="mob-did-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Pastor James Wilson" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:1">
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.72) 100%);z-index:2"></div>
       <div style="position:absolute;bottom:0;left:0;right:0;z-index:3;padding:12px 14px">
@@ -811,15 +811,15 @@ body{display:flex;flex-direction:column}
     <!-- ── CHAT TAB ── -->
     <div id="ld-pane-chat" style="flex:1;display:flex;flex-direction:column;min-height:0;background:var(--ios-bg)">
       <!-- Quick commands -->
-      <div class="mob-qcmd-row" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#fff;border-bottom:.5px solid var(--ios-separator);flex-shrink:0">
-        <div class="qcmd-m" onclick="mobSend('I want to give my tithe')" style="background:#FFF0F1;color:#C41E2A">💛 Give now</div>
-        <div class="qcmd-m" onclick="mobSend('I need prayer support')" style="background:#FFF0F1;color:#C41E2A">🙏 Submit a prayer</div>
-        <div class="qcmd-m" onclick="mobSend('Show me this week\'s sermon')" style="background:#f4f4f4;color:#000">▶ Watch service</div>
-        <div class="qcmd-m" onclick="mobSend('Find me a small group')" style="background:#f4f4f4;color:#000">◈ Find a group</div>
-        <div class="qcmd-m" onclick="mobSend('What events are coming up?')" style="background:#f4f4f4;color:#000">📅 Events</div>
-        <div class="qcmd-m" onclick="mobSend('I decided to follow Jesus')" style="background:#FFF0F1;color:#C41E2A">✝️ I followed Jesus</div>
-        <div class="qcmd-m" onclick="mobSend('I need crisis support')" style="background:#fee2e2;color:#991b1b">🚨 I need help now</div>
-        <div class="qcmd-m" onclick="mobSend('Study the Bible with me')" style="background:#f4f4f4;color:#000">📖 Bible study</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#fff;border-bottom:.5px solid var(--ios-separator);flex-shrink:0">
+        <div onclick="mobSend('I want to give my tithe')" style="background:#FFF0F1;color:#C41E2A;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">💛 Give now</div>
+        <div onclick="mobSend('I need prayer support')" style="background:#ede9fe;color:#5b21b6;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🙏 Submit a prayer</div>
+        <div onclick="mobSend('Show me this week\'s sermon')" style="background:#dbeafe;color:#1e40af;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">▶ Watch service</div>
+        <div onclick="mobSend('Find me a small group')" style="background:#dcfce7;color:#15803d;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">◈ Find a group</div>
+        <div onclick="mobSend('What events are coming up?')" style="background:#f3f0eb;color:#374151;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">📅 Events</div>
+        <div onclick="mobSend('I decided to follow Jesus')" style="background:#FFF0F1;color:#92400e;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">✝️ I followed Jesus</div>
+        <div onclick="mobSend('I need crisis support')" style="background:#fee2e2;color:#991b1b;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🚨 I need help now</div>
+        <div onclick="mobSend('Study the Bible with me')" style="background:#f3f0eb;color:#374151;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">📖 Bible study</div>
       </div>
       <!-- Messages -->
       <div class="chat-area" id="mob-chat-messages" style="background:var(--ios-bg)">
@@ -841,16 +841,265 @@ body{display:flex;flex-direction:column}
     </div>
 
     <!-- ── LEADERS TAB ── -->
-    <div id="ld-pane-leaders" style="display:none;flex:1;flex-direction:column;min-height:0;background:var(--ios-bg)">
-      <div style="padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div id="ld-pane-leaders" style="display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden;background:var(--ios-bg)">
+      <div style="padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--ios-bg)">
         <div style="font-size:15px;font-weight:700;color:var(--ios-label)">Verified leaders</div>
-        <div style="font-size:13px;color:var(--ios-tertiary)">18 verified · 12 online</div>
+        <div style="font-size:13px;color:var(--ios-tertiary)" id="mob-leader-count">18 verified · 12 online</div>
       </div>
-      
-      <a href="#" onclick="mobSend('I need crisis support');return false" style="display:block;margin:12px 16px;border-radius:12px;overflow:hidden" aria-label="Crisis help 24-7">
-        <img src="assets/crisis-mode-ad.png" alt="Are you in crisis? Get help now — Central Church 24-7" style="width:100%;display:block">
-      </a>
-      <div id="mob-leader-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;margin:0 0 0"></div>
+      <div id="mob-leader-list">
+    <div class="lg-item active-leader" data-leader-idx="0">
+      <div class="lg-item-main" onclick="mobSwitchLeader(0)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Pastor James Wilson</div>
+          <div class="lg-topic">Prayer · Scripture · Guidance</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(0)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(0)">Active</button>
+    </div>
+    <div class="lg-item" data-leader-idx="1">
+      <div class="lg-item-main" onclick="mobSwitchLeader(1)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Rev. Sandra Mitchell</div>
+          <div class="lg-topic">Care · Grief · Hospital</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(1)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(1)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="2">
+      <div class="lg-item-main" onclick="mobSwitchLeader(2)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/54.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Pastor Derek Osei</div>
+          <div class="lg-topic">Youth · Identity · Faith</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(2)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(2)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="3">
+      <div class="lg-item-main" onclick="mobSwitchLeader(3)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
+          <span class="lg-dot lg-dot-away"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Sis. Priya Nair</div>
+          <div class="lg-topic">Women · Mentorship · Calling</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(3)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(3)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="4">
+      <div class="lg-item-main" onclick="mobSwitchLeader(4)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/45.jpg" alt="">
+          <span class="lg-dot lg-dot-away"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Min. Grace Okafor</div>
+          <div class="lg-topic">Marriage · Family · Counselling</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(4)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(4)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="5">
+      <div class="lg-item-main" onclick="mobSwitchLeader(5)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/68.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Deacon Robert Hayes</div>
+          <div class="lg-topic">Intercession · Prayer · Warfare</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(5)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(5)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="6">
+      <div class="lg-item-main" onclick="mobSwitchLeader(6)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/22.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Elder Marcus Chen</div>
+          <div class="lg-topic">Missions · Global · Short-term trips</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(6)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(6)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="7">
+      <div class="lg-item-main" onclick="mobSwitchLeader(7)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Pastor Lisa Alvarez</div>
+          <div class="lg-topic">Kids · Parents · Sunday School</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(7)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(7)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="8">
+      <div class="lg-item-main" onclick="mobSwitchLeader(8)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/89.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Dr. Rachel Kim</div>
+          <div class="lg-topic">Mental health · Anxiety · Referrals</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(8)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(8)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="9">
+      <div class="lg-item-main" onclick="mobSwitchLeader(9)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/41.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Min. David Torres</div>
+          <div class="lg-topic">Men · Accountability · Brotherhood</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(9)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(9)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="10">
+      <div class="lg-item-main" onclick="mobSwitchLeader(10)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/17.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Sis. Angela Wright</div>
+          <div class="lg-topic">Singles · Dating · Community</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(10)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(10)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="11">
+      <div class="lg-item-main" onclick="mobSwitchLeader(11)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/61.jpg" alt="">
+          <span class="lg-dot lg-dot-away"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Pastor Michael Brooks</div>
+          <div class="lg-topic">Evangelism · Local outreach · Serve days</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(11)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(11)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="12">
+      <div class="lg-item-main" onclick="mobSwitchLeader(12)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/33.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Rev. Patricia Doyle</div>
+          <div class="lg-topic">Seniors · Visits · Legacy</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(12)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(12)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="13">
+      <div class="lg-item-main" onclick="mobSwitchLeader(13)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/86.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Bro. Kevin Nwosu</div>
+          <div class="lg-topic">Media · Tech · Livestream</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(13)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(13)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="14">
+      <div class="lg-item-main" onclick="mobSwitchLeader(14)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/50.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Sis. Hannah Levy</div>
+          <div class="lg-topic">New here · Membership · Next steps</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(14)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(14)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="15">
+      <div class="lg-item-main" onclick="mobSwitchLeader(15)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/67.jpg" alt="">
+          <span class="lg-dot lg-dot-away"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Pastor Thomas Grant</div>
+          <div class="lg-topic">Funerals · Bereavement · End of life</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(15)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(15)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="16">
+      <div class="lg-item-main" onclick="mobSwitchLeader(16)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/women/81.jpg" alt="">
+          <span class="lg-dot"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Min. Olivia Santos</div>
+          <div class="lg-topic">Español · Familia · Comunidad</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(16)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(16)">Switch</button>
+    </div>
+    <div class="lg-item" data-leader-idx="17">
+      <div class="lg-item-main" onclick="mobSwitchLeader(17)">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="https://randomuser.me/api/portraits/men/76.jpg" alt="">
+          <span class="lg-dot lg-dot-away"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">Bro. Samuel Okonkwo</div>
+          <div class="lg-topic">Worship · Music · Creative arts</div>
+        </div>
+      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(17)">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(17)">Switch</button>
+    </div>
+      </div>
     </div>
 
     <!-- ══ LEADER PROFILE BOTTOM SHEET ══ -->
@@ -917,7 +1166,6 @@ body{display:flex;flex-direction:column}
         <div class="give-hero-stats">
           <div class="give-hero-stat"><strong>$3,240</strong><span>Wallet available</span></div>
           <div class="give-hero-stat"><strong>$230</strong><span>Given this month</span></div>
-          <div class="give-hero-stat"><strong>6%</strong><span>Partner commitment</span></div>
         </div>
         <div class="give-route-pill">Partner · Card rewards routing to <strong id="mob-route-label">Food Pantry</strong> · <span style="text-decoration:underline;cursor:pointer" onclick="mobScrollToCauses()">Change routing</span></div>
       </div>
@@ -955,10 +1203,10 @@ body{display:flex;flex-direction:column}
           <div style="margin-top:12px;font-size:28px;font-weight:700;color:var(--ios-label)">$3,240<span style="font-size:16px">.00</span></div>
           <div style="font-size:12px;color:#15803d;font-weight:600;margin-top:4px">↑ +$18.42 rewards this month</div>
           <div class="wallet-actions" style="margin:12px 0 0">
-            <div class="wact" onclick="mobToast('Send funds')"><div class="wact-ico" data-grace-icon="send" data-grace-size="20"></div><div class="wact-lbl">Send</div></div>
-            <div class="wact" onclick="mobToast('Receive QR')"><div class="wact-ico" data-grace-icon="receive" data-grace-size="20"></div><div class="wact-lbl">Receive</div></div>
-            <div class="wact" onclick="mobScrollToGiveForm()"><div class="wact-ico" data-grace-icon="give" data-grace-size="20"></div><div class="wact-lbl">Give</div></div>
-            <div class="wact" onclick="mobToast('Top-up wallet')"><div class="wact-ico" data-grace-icon="topup" data-grace-size="20"></div><div class="wact-lbl">Top-up</div></div>
+            <div class="wact" onclick="mobToast('Send funds')"><div class="wact-ico">↗</div><div class="wact-lbl">Send</div></div>
+            <div class="wact" onclick="mobToast('Receive QR')"><div class="wact-ico">↙</div><div class="wact-lbl">Receive</div></div>
+            <div class="wact" onclick="mobScrollToGiveForm()"><div class="wact-ico">💛</div><div class="wact-lbl">Give</div></div>
+            <div class="wact" onclick="mobToast('Top-up wallet')"><div class="wact-ico">+</div><div class="wact-lbl">Top-up</div></div>
           </div>
         </div>
       </div>
@@ -1021,28 +1269,25 @@ body{display:flex;flex-direction:column}
         <div class="home-mod-body">
           <div style="font-size:26px;font-weight:800;color:var(--brand-navy)">52%</div>
           <div style="font-size:12px;color:var(--ios-tertiary);margin:4px 0 10px">$1,240 of $2,400 annual goal</div>
-          <div style="background:var(--ios-fill);border-radius:4px;height:8px"><div style="width:52%;height:100%;background:linear-gradient(90deg,var(--brand-gold),#f87171);border-radius:4px"></div></div>
+          <div style="background:var(--ios-fill);border-radius:4px;height:8px"><div style="width:52%;height:100%;background:linear-gradient(90deg,var(--brand-gold),#e8b84b);border-radius:4px"></div></div>
         </div>
       </div>
 
       <!-- Central Pulse -->
-      <div class="home-mod pulse-card" style="margin-bottom:12px">
+      <div class="home-mod" style="margin-bottom:12px">
         <div class="home-mod-head">
           <div class="home-mod-title">Central Pulse</div>
-          <span style="font-size:9px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:4px"><span class="pulse-live-dot"></span>Live</span>
+          <span style="font-size:14px;font-weight:700;color:var(--brand-gold)">248 pts</span>
         </div>
         <div class="home-mod-body">
-          <div class="pulse-score">248</div>
-          <div class="pulse-sub">Participation from giving, care, and live worship</div>
-          <div class="pulse-activity" style="margin-top:10px">
-            <div class="pulse-act"><span data-grace-icon="give" data-grace-size="14" style="flex-shrink:0"></span><span><strong>Gift recorded</strong> — $50 tithe<span class="pulse-act-time">Today · +8 Pulse</span></span></div>
-            <div class="pulse-act"><span data-grace-icon="card" data-grace-size="14" style="flex-shrink:0"></span><span><strong>GRACE Card</strong> — $2.40 routed<span class="pulse-act-time">May 28 · +4 Pulse</span></span></div>
-          </div>
+          <div style="font-size:11px;color:var(--ios-tertiary);margin-bottom:6px">Live participation score</div>
+          <div style="background:var(--ios-fill);border-radius:4px;height:6px;margin-bottom:6px"><div style="width:62%;height:100%;background:linear-gradient(90deg,var(--brand-gold),#e8b84b);border-radius:4px"></div></div>
+          <div style="font-size:11px;color:var(--brand-gold)">152 to next milestone · +8 Pulse per gift</div>
         </div>
       </div>
       <div style="margin:0 16px 16px;padding:16px;background:linear-gradient(135deg,#FFF0F1,#fce4e6);border:1px solid rgba(238,43,55,.35);border-radius:14px">
         <div style="font-size:14px;font-weight:700;color:#C41E2A;margin-bottom:4px">Reach Champion commitment</div>
-        <div style="font-size:12px;color:#6b1c1c;line-height:1.45;margin-bottom:12px">Give 8%+ of income to unlock Champion commitment and stronger card routing.</div>
+        <div style="font-size:12px;color:#92400e;line-height:1.45;margin-bottom:12px">Give 8%+ of income to unlock Champion commitment and stronger card routing.</div>
         <button type="button" onclick="mobScrollToGiveForm()" style="width:100%;padding:11px;border:none;border-radius:10px;background:var(--brand-navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Start giving →</button>
       </div>
 
@@ -1092,7 +1337,7 @@ body{display:flex;flex-direction:column}
               <span class="mob-cause-meter-live">Live funding</span>
               <span class="mob-cause-meter-pct">57%</span>
             </div>
-            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:57%;background:linear-gradient(90deg,#EE2B37,#f87171)"></div></div>
+            <div class="mob-cause-meter-track"><div class="mob-cause-meter-fill" style="width:57%;background:linear-gradient(90deg,#6d28d9,#8b5cf6)"></div></div>
             <div class="mob-cause-meter-sub">80 youth registered · 140 spots total</div>
             <div class="mob-cause-actions">
               <button type="button" class="mob-cause-btn-give" onclick="mobQuickGive('Youth Summer Camp')">Give</button>
@@ -1228,9 +1473,9 @@ body{display:flex;flex-direction:column}
           <div style="text-align:right"><div style="font-size:14px;font-weight:600">-$58.75</div><div style="font-size:11px;color:#15803d;font-weight:600">+$0.88</div></div>
         </div>
         <div class="ios-row">
-          <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="give" data-grace-size="18"></div>
+          <div class="ios-row-icon" style="background:#ede9fe;font-size:18px">💛</div>
           <div style="flex:1"><div class="ios-row-label" style="font-size:14px">Tithe — General Fund</div><div style="font-size:12px;color:var(--ios-tertiary)">May 25 · Recurring</div></div>
-          <div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand-navy)">-$230.00</div><div style="font-size:11px;color:#EE2B37;font-weight:600">+8 Pulse</div></div>
+          <div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--brand-navy)">-$230.00</div><div style="font-size:11px;color:#7c3aed;font-weight:600">+50 pts</div></div>
         </div>
         <div class="ios-row">
           <div class="ios-row-icon" style="background:#dbeafe;font-size:18px">🌍</div>
@@ -1300,20 +1545,6 @@ body{display:flex;flex-direction:column}
               <div class="post-action">🙏 247 Pray</div>
               <div class="post-action">🙌 89 Amen</div>
               <div class="post-action">💬 24</div>
-            </div>
-          </div>
-          
-          <div class="feed-post" style="margin-top:1px">
-            <div class="post-head">
-              <img class="post-av" src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
-              <div><div class="post-name">Sarah Johnson</div><div class="post-sub">Champion · Women of Grace</div></div>
-              <div class="post-time">3h</div>
-            </div>
-            <div class="post-badge" style="background:#dcfce7;color:#15803d" data-grace-icon="crown" data-grace-size="12">Milestone</div>
-            <div class="post-body">Just reached <strong>Champion commitment</strong>! So grateful for this community. God is faithful!</div>
-            <div class="post-actions">
-              <div class="post-action">🙌 89 Celebrate</div>
-              <div class="post-action">💬 12</div>
             </div>
           </div>
           <div class="feed-post" style="margin-top:1px">
@@ -1435,7 +1666,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row" data-evcat="group">
-            <div class="mob-event-date" style="background:#FFF0F1;color:#C41E2A">
+            <div class="mob-event-date" style="background:#f5e8f0;color:#7a3a6a">
               <div class="mob-event-date-day">2</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1447,7 +1678,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row prayer-event" data-evcat="prayer">
-            <div class="mob-event-date" style="background:#FFF0F1;color:#C41E2A">
+            <div class="mob-event-date" style="background:#ede9fe;color:#5b21b6">
               <div class="mob-event-date-day">4</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1459,7 +1690,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row prayer-event" data-evcat="prayer">
-            <div class="mob-event-date" style="background:#FFF0F1;color:#C41E2A">
+            <div class="mob-event-date" style="background:#ede9fe;color:#5b21b6">
               <div class="mob-event-date-day">5</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1483,7 +1714,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row prayer-event" data-evcat="prayer">
-            <div class="mob-event-date" style="background:#EE2B37;color:#fff">
+            <div class="mob-event-date" style="background:#5b21b6;color:#fff">
               <div class="mob-event-date-day">14</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1519,7 +1750,7 @@ body{display:flex;flex-direction:column}
           </div>
 
           <div class="mob-event-row prayer-event" data-evcat="prayer">
-            <div class="mob-event-date" style="background:#FFF0F1;color:#C41E2A">
+            <div class="mob-event-date" style="background:#ede9fe;color:#5b21b6">
               <div class="mob-event-date-day">22</div><div class="mob-event-date-mon">Jun</div>
             </div>
             <div class="mob-event-info">
@@ -1562,31 +1793,31 @@ body{display:flex;flex-direction:column}
         <div class="sect-hdr sm" style="margin-top:12px">My groups</div>
         <div class="ios-card">
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Women of Grace group chat')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="groups" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#f5e8f0;font-size:18px">🌸</div>
             <div style="flex:1"><div class="ios-row-label" style="font-size:15px">Women of Grace</div><div style="font-size:13px;color:var(--ios-tertiary)">Thu 6 PM · Room 204 · 24 members</div></div>
             <div class="ios-row-chevron">›</div>
           </div>
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Young Adults group')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="fire" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#ede8f5;font-size:18px">⚡</div>
             <div style="flex:1"><div class="ios-row-label" style="font-size:15px">Young Adults</div><div style="font-size:13px;color:var(--ios-tertiary)">Sun 3 PM · 38 members</div></div>
             <div class="ios-row-chevron">›</div>
           </div>
         </div>
         <div class="sect-hdr sm">Discover groups</div>
         <div class="ios-card" style="margin-bottom:12px">
-          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="ring" data-grace-size="18"></div><div style="flex:1"><div class="ios-row-label">Marriage Matters</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 6:30 PM · 14 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
-          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="bible" data-grace-size="18"></div><div style="flex:1"><div class="ios-row-label">Women's Bible Study</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 10 AM · 13 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
-          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="prayer" data-grace-size="18"></div><div style="flex:1"><div class="ios-row-label">Prayer Warriors</div><div style="font-size:13px;color:var(--ios-tertiary)">Sat 8 AM · 11 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
+          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#FFF0F1">💍</div><div style="flex:1"><div class="ios-row-label">Marriage Matters</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 6:30 PM · 14 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
+          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#e8f5ed">📖</div><div style="flex:1"><div class="ios-row-label">Women's Bible Study</div><div style="font-size:13px;color:var(--ios-tertiary)">Tue 10 AM · 13 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
+          <div class="ios-row" style="cursor:pointer"><div class="ios-row-icon" style="background:#e8eef5">🙏</div><div style="flex:1"><div class="ios-row-label">Prayer Warriors</div><div style="font-size:13px;color:var(--ios-tertiary)">Sat 8 AM · 11 members</div></div><span style="font-size:12px;font-weight:600;color:var(--ios-blue)">Join</span></div>
         </div>
         <div style="text-align:center;padding:0 16px 8px"><span class="home-mod-link" onclick="setCommunityTab('events',document.querySelector('#screen-community .seg-btn:nth-child(2)'))">View full events calendar →</span></div>
       </div>
 
       <!-- ── PRAYER WALL ── -->
       <div class="pane" id="pane-prayer">
-        <div style="margin:12px 16px 0;padding:14px;background:linear-gradient(135deg,#FFF0F1,#fce4e6);border-radius:14px;border:1px solid rgba(238,43,55,.2)">
-          <div style="font-size:14px;font-weight:700;color:#C41E2A;margin-bottom:4px;display:flex;align-items:center;gap:6px" data-grace-icon="prayer" data-grace-size="16">Prayer Wall</div>
-          <div style="font-size:12px;color:#6b1c1c;line-height:1.45">Submit requests · pray for others · join special prayer events on the Events tab.</div>
-          <button type="button" style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;background:#EE2B37;color:#fff;font-size:13px;font-weight:600;cursor:pointer" onclick="setCommunityTab('care',document.querySelector('#screen-community .seg-btn:nth-child(5)'))">Submit a care request</button>
+        <div style="margin:12px 16px 0;padding:14px;background:linear-gradient(135deg,#ede9fe,#f5f3ff);border-radius:14px;border:1px solid rgba(124,58,237,.2)">
+          <div style="font-size:14px;font-weight:700;color:#5b21b6;margin-bottom:4px">🙏 Prayer Wall</div>
+          <div style="font-size:12px;color:#6b21a8;line-height:1.45">Submit requests · pray for others · join special prayer events on the Events tab.</div>
+          <button type="button" style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;background:#5b21b6;color:#fff;font-size:13px;font-weight:600;cursor:pointer" onclick="setCommunityTab('care',document.querySelector('#screen-community .seg-btn:nth-child(5)'))">Submit a care request</button>
         </div>
         <div class="sect-hdr sm">Active requests</div>
         <div class="ios-card" style="margin-bottom:16px">
@@ -1595,22 +1826,22 @@ body{display:flex;flex-direction:column}
             <div style="flex:1">
               <div style="font-size:14px;font-weight:600">Aisha Roberts</div>
               <div style="font-size:13px;color:var(--ios-secondary);line-height:1.45;margin-top:4px">Please pray for my mother recovering from surgery.</div>
-              <div style="font-size:11px;color:var(--ios-tertiary);margin-top:8px;display:flex;gap:14px"><span>4h ago</span><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" class="prayer-pray-link" onclick="mobToast('Praying for Aisha')">🙏 Pray</span></div>
+              <div style="font-size:11px;color:var(--ios-tertiary);margin-top:8px;display:flex;gap:14px"><span>4h ago</span><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" onclick="mobToast('Praying for Aisha')">🙏 Pray</span></div>
             </div>
           </div>
           <div class="ios-row" style="align-items:flex-start;padding:14px 16px">
-            <div class="ios-row-icon" style="width:40px;height:40px;border-radius:50%;background:#FFF0F1;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-grace-icon="prayer" data-grace-size="20"></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🙏</div>
             <div style="flex:1">
               <div style="font-size:14px;font-weight:600">Anonymous</div>
               <div style="font-size:13px;color:var(--ios-secondary);line-height:1.45;margin-top:4px">Struggling financially. Believing God will provide.</div>
-              <div style="font-size:11px;color:var(--ios-tertiary);margin-top:8px;display:flex;gap:14px"><span>5h ago</span><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" class="prayer-pray-link" onclick="mobToast('Praying')">🙏 Pray</span></div>
+              <div style="font-size:11px;color:var(--ios-tertiary);margin-top:8px;display:flex;gap:14px"><span>5h ago</span><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" onclick="mobToast('Praying')">🙏 Pray</span></div>
             </div>
           </div>
           <div class="ios-row" style="align-items:flex-start;padding:14px 16px;background:#FFF0F1">
-            <div style="width:40px;height:40px;border-radius:50%;background:#FFF0F1;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0" data-grace-icon="spark" data-grace-size="20"></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:#FFF0F1;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✨</div>
             <div style="flex:1">
               <div style="font-size:14px;font-weight:600;color:#C41E2A">Church-wide · Prayer Vigil</div>
-              <div style="font-size:13px;color:#6b1c1c;line-height:1.45;margin-top:4px">Join us Jun 14–15 for 24 hours of prayer. Sign up for your hour on Events.</div>
+              <div style="font-size:13px;color:#92400e;line-height:1.45;margin-top:4px">Join us Jun 14–15 for 24 hours of prayer. Sign up for your hour on Events.</div>
               <div style="font-size:11px;margin-top:8px"><span style="color:var(--ios-blue);font-weight:600;cursor:pointer" onclick="setCommunityTab('events',document.querySelector('#screen-community .seg-btn:nth-child(2)'))">📅 View vigil →</span></div>
             </div>
           </div>
@@ -1623,7 +1854,7 @@ body{display:flex;flex-direction:column}
           <div class="assigned-head">
             <img class="assigned-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
             <div>
-              <div style="font-size:10px;font-weight:700;color:#C41E2A;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Your assigned leader</div>
+              <div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Your assigned leader</div>
               <div class="assigned-name">Pastor James Wilson</div>
               <div class="assigned-role">Senior Pastor · AI Companion available now</div>
             </div>
@@ -1631,28 +1862,28 @@ body{display:flex;flex-direction:column}
           <div class="assigned-msg">"Good morning Maya. I'm here whenever you're ready — for prayer, scripture, or just a conversation."</div>
           <div class="assigned-btns">
             <button class="assigned-btn assigned-btn-navy" onclick="showTab('leadership')">Launch AI Session</button>
-            <button class="assigned-btn assigned-btn-outline" onclick="mobToast('Message sent to care team')" data-grace-icon="chat" data-grace-size="14"> Message</button>
+            <button class="assigned-btn assigned-btn-outline" onclick="mobToast('Message sent to care team')">📬 Message</button>
           </div>
         </div>
         <div class="sect-hdr sm">Submit a care request</div>
         <div class="ios-card" style="margin:0 16px">
           <div class="care-option" onclick="mobToast('Prayer request submitted')">
-            <div class="care-icon" style="background:#FFF0F1" data-grace-icon="prayer" data-grace-size="20"></div>
+            <div class="care-icon" style="background:#ede9fe">🙏</div>
             <div><div class="care-name">Prayer Request</div><div class="care-desc">Leader &amp; community prayer</div></div>
             <div class="care-chevron">›</div>
           </div>
           <div class="care-option" onclick="mobToast('Hospital visit requested')">
-            <div class="care-icon" style="background:#FFF0F1" data-grace-icon="hospital" data-grace-size="20"></div>
+            <div class="care-icon" style="background:#dcfce7">🏥</div>
             <div><div class="care-name">Hospital Visit</div><div class="care-desc">Request a pastoral visit</div></div>
             <div class="care-chevron">›</div>
           </div>
           <div class="care-option" style="background:#fff8f8" onclick="homeGoLeadership('I need crisis support')">
-            <div class="care-icon" style="background:#fee2e2" data-grace-icon="crisis" data-grace-size="20"></div>
+            <div class="care-icon" style="background:#fee2e2">🚨</div>
             <div><div class="care-name">Crisis Support</div><div class="care-desc">Immediate escalation to live leader</div></div>
             <div class="care-chevron" style="color:#FF3B30">›</div>
           </div>
           <div class="care-option" onclick="mobToast('Counselling request sent')">
-            <div class="care-icon" style="background:#FFF0F1" data-grace-icon="chat" data-grace-size="20"></div>
+            <div class="care-icon" style="background:#FFF0F1">💬</div>
             <div><div class="care-name">Counselling Request</div><div class="care-desc">Book with Dr. Rachel Kim</div></div>
             <div class="care-chevron">›</div>
           </div>
@@ -1692,7 +1923,7 @@ body{display:flex;flex-direction:column}
           <div style="flex:1;min-width:0">
             <div class="profile-name" style="font-size:18px;text-align:left">Maya Thompson</div>
             <div class="profile-sub" style="text-align:left;font-size:12px">Central Henderson · Member since 2022</div>
-            <div class="profile-tier-badge" style="margin-top:8px">Partner · Pulse 248</div>
+            <div class="profile-tier-badge" style="margin-top:8px">⭐ Partner · Pulse 248</div>
           </div>
         </div>
         <div class="prof-tier-progress">
@@ -1727,18 +1958,7 @@ body{display:flex;flex-direction:column}
           <div class="stat-cell"><div class="stat-val">248</div><div class="stat-key">Pulse</div></div>
         </div>
 
-
-        <div class="ios-card pulse-card prof-pulse-card" style="margin:12px 16px 0">
-          <div class="ios-card-head">
-            <div class="ios-card-title">Central Pulse</div>
-            <span style="font-size:9px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:4px"><span class="pulse-live-dot"></span>Live</span>
-          </div>
-          <div style="padding:14px 16px">
-            <div class="pulse-score">248</div>
-            <div class="pulse-sub">Service · care · community activity</div>
-          </div>
-        </div>
-        <div class="prof-ring-card" onclick="mobToast('Partner 6% — give $1.67/day more for Champion (8%)')">
+        <div class="prof-ring-card" onclick="mobToast('Partner 6% — give $1.67/day more for Champion (8%)','🌿')">
           <div class="prof-ring-row">
             <div>
               <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px">Your Central Commitment</div>
@@ -1746,7 +1966,7 @@ body{display:flex;flex-direction:column}
             </div>
             <div class="prof-ring-pct">6%</div>
           </div>
-          <div class="prof-tier-bar" style="margin-bottom:8px"><div class="prof-tier-bar-fill" style="width:75%;background:linear-gradient(90deg,#EE2B37,#f87171)"></div></div>
+          <div class="prof-tier-bar" style="margin-bottom:8px"><div class="prof-tier-bar-fill" style="width:75%;background:#86efac"></div></div>
           <div class="prof-ring-next">$1.67/day to Champion · 8% giving goal</div>
         </div>
 
@@ -1816,7 +2036,7 @@ body{display:flex;flex-direction:column}
         <div class="ios-card" style="margin:12px 16px 0">
           <div class="ios-card-head"><div class="ios-card-title">Where your path is calling you</div></div>
           <div style="padding:14px 16px">
-            <div class="prof-grow-item"><span class="prof-grow-dot">●</span> Build prayer consistency</div>
+            <div class="prof-grow-item"><span class="prof-grow-dot">●</span> Build devotion consistency</div>
             <div class="prof-grow-item"><span class="prof-grow-dot">●</span> Engage more with community</div>
             <div class="prof-grow-item"><span class="prof-grow-dot">●</span> Start journaling regularly</div>
             <div class="prof-grow-item"><span class="prof-grow-dot">●</span> Set spiritual goals</div>
@@ -1829,12 +2049,12 @@ body{display:flex;flex-direction:column}
         <div class="sect-hdr sm" style="margin-top:8px">Journal &amp; goals</div>
         <div class="ios-card" style="margin:12px 16px 24px">
           <div class="ios-row" style="cursor:pointer" onclick="profileTab('journal')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="journal" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#ede9fe">📓</div>
             <div class="ios-row-label">Prayer journal</div>
             <div class="ios-row-chevron">›</div>
           </div>
           <div class="ios-row" style="cursor:pointer" onclick="profileTab('goals')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="goals" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#FFF0F1">🎯</div>
             <div class="ios-row-label">Faith goals</div>
             <div class="ios-row-chevron">›</div>
           </div>
@@ -1847,8 +2067,8 @@ body{display:flex;flex-direction:column}
           <h3>Prayer Journal</h3>
           <p>Reflect, give thanks, and track what God is doing</p>
           <div class="seg-ctrl" style="margin:12px 0 0;background:rgba(255,255,255,.12)">
-            <button type="button" class="seg-btn active" id="prof-j-tab-write" onclick="setProfJournalTab('write',this)" style="color:#fff" data-grace-icon="edit" data-grace-size="14"> Write</button>
-            <button type="button" class="seg-btn" id="prof-j-tab-hist" onclick="setProfJournalTab('history',this)" style="color:rgba(255,255,255,.7)" data-grace-icon="calendar" data-grace-size="14"> History</button>
+            <button type="button" class="seg-btn active" id="prof-j-tab-write" onclick="setProfJournalTab('write',this)" style="color:#fff">✏️ Write</button>
+            <button type="button" class="seg-btn" id="prof-j-tab-hist" onclick="setProfJournalTab('history',this)" style="color:rgba(255,255,255,.7)">🕐 History</button>
           </div>
         </div>
 
@@ -1878,7 +2098,7 @@ body{display:flex;flex-direction:column}
             </div>
             <div style="padding:14px 16px">
               <textarea id="prof-j-textarea" class="prof-j-text" placeholder="Write your reflection…" oninput="document.getElementById('prof-j-chars').textContent=this.value.length+'/1500'"></textarea>
-              <button type="button" onclick="saveMobJournal()" style="width:100%;margin-top:12px;background:var(--brand-navy);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer">Save entry · +8 Pulse</button>
+              <button type="button" onclick="saveMobJournal()" style="width:100%;margin-top:12px;background:var(--brand-navy);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer">Save entry · +10 pts</button>
             </div>
           </div>
           <div class="ios-card" style="margin:12px 16px 24px">
@@ -1909,7 +2129,7 @@ body{display:flex;flex-direction:column}
             <h3>Faith Goals</h3>
             <p>Track prayer, scripture, giving, and group habits</p>
           </div>
-          <button type="button" onclick="mobToast('Goal creator opening…')" style="background:var(--brand-gold);border:none;color:var(--brand-navy);border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0">+ New</button>
+          <button type="button" onclick="mobToast('Goal creator opening…','🎯')" style="background:var(--brand-gold);border:none;color:var(--brand-navy);border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0">+ New</button>
         </div>
         <div class="prof-stat-row" style="grid-template-columns:repeat(3,1fr)">
           <div class="prof-stat-box"><div class="ps-val">0</div><div class="ps-key">Active</div></div>
@@ -1918,10 +2138,10 @@ body{display:flex;flex-direction:column}
         </div>
         <div class="ios-card" style="margin:12px 16px 0">
           <div style="padding:32px 20px;text-align:center">
-            <div style="width:64px;height:64px;background:var(--brand-gold-light);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px" data-grace-icon="goals" data-grace-size="32"></div>
+            <div style="width:64px;height:64px;background:var(--brand-gold-light);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px">🎯</div>
             <div style="font-size:18px;font-weight:800;color:var(--ios-label);margin-bottom:8px">No goals yet</div>
             <div style="font-size:14px;color:var(--ios-tertiary);line-height:1.55;margin-bottom:16px">Set your first spiritual goal to build streaks and celebrate progress.</div>
-            <button type="button" onclick="mobToast('Goal creator opening…')" style="background:var(--brand-navy);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer">Create your first goal</button>
+            <button type="button" onclick="mobToast('Goal creator opening…','🎯')" style="background:var(--brand-navy);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer">Create your first goal</button>
           </div>
         </div>
         <div class="sect-hdr sm" style="padding-top:8px">Goal ideas</div>
@@ -1950,12 +2170,12 @@ body{display:flex;flex-direction:column}
         <div class="sect-hdr sm" style="margin-top:12px">Profile</div>
         <div class="ios-list rounded" style="margin:0 16px 12px">
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Edit profile')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="profile" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#dbeafe">👤</div>
             <div class="ios-row-label">Edit profile</div>
             <div class="ios-row-chevron">›</div>
           </div>
           <div class="ios-row" style="cursor:pointer" onclick="showTab('give')">
-            <div class="ios-row-icon" style="background:#FFF0F1" data-grace-icon="card" data-grace-size="18"></div>
+            <div class="ios-row-icon" style="background:#dcfce7">💳</div>
             <div class="ios-row-label">GRACE Card &amp; giving</div>
             <div class="ios-row-chevron">›</div>
           </div>
@@ -1963,7 +2183,7 @@ body{display:flex;flex-direction:column}
         <div class="sect-hdr sm">Preferences</div>
         <div class="ios-list rounded" style="margin:0 16px 12px">
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Notification settings')">
-            <div class="ios-row-icon" style="background:#FFF0F1">🔔</div>
+            <div class="ios-row-icon" style="background:#ede9fe">🔔</div>
             <div class="ios-row-label">Notifications</div>
             <div class="ios-row-chevron">›</div>
           </div>
@@ -2057,7 +2277,7 @@ const mobLeaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',topic:'Prayer · Scripture · Guidance',img:'https://randomuser.me/api/portraits/men/32.jpg',didImg:'https://randomuser.me/api/portraits/men/32.jpg',greeting:"Good morning Maya 🙏 I'm Pastor James — your Grace AI companion. What's on your heart today?",online:true,bio:"Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His AI companion is trained on 4 years of sermons, weekly blessings, and approved pastoral responses.",exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',didImg:'https://randomuser.me/api/portraits/women/44.jpg',greeting:"Hello Maya. I'm Sandra — here for care, comfort, and support. What are you walking through today?",online:true,bio:"Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.",exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',didImg:'https://randomuser.me/api/portraits/men/54.jpg',greeting:"What's good Maya! It's Pastor Derek. Talk to me — what's going on? Faith, life, whatever you've got.",online:true,bio:"Pastor Derek serves middle school through college-age students and their parents. His AI voice is energetic, scripture-grounded, and real about everyday struggles.",exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',didImg:'https://randomuser.me/api/portraits/women/28.jpg',greeting:"Hi Maya 🌸 I'm Sis. Priya. This is a safe space — what's on your mind today, sis?",online:false,bio:"Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual growth for women at every life stage.",exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',didImg:'https://randomuser.me/api/portraits/women/28.jpg',greeting:"Hi Maya 🌸 I'm Sis. Priya. This is a safe space — what's on your mind today, sis?",online:false,bio:"Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.",exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
   {name:'Min. Grace Okafor',title:'Family Counselling Minister',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',didImg:'https://randomuser.me/api/portraits/men/45.jpg',greeting:"Hey Maya. I'm Minister Grace. Whether it's family, relationships, or just questions — I'm here.",online:false,bio:"Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. AI sessions complement — never replace — live pastoral meetings.",exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
   {name:'Deacon Robert Hayes',title:'Prayer & Intercession Lead',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',didImg:'https://randomuser.me/api/portraits/women/68.jpg',greeting:"Good morning Maya. Deacon Hayes here — let's pray, intercede, and seek the Lord together.",online:true,bio:"Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.",exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
   {name:'Elder Marcus Chen',title:'Missions Elder',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',didImg:'https://randomuser.me/api/portraits/men/22.jpg',greeting:"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations?",online:true,bio:"Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His AI companion answers giving-route and trip questions with field-tested wisdom.",exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
@@ -2068,9 +2288,9 @@ const mobLeaders = [
   {name:'Pastor Michael Brooks',title:'Outreach Pastor',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',didImg:'https://randomuser.me/api/portraits/men/61.jpg',greeting:"Maya — Michael here. Ready to serve our city or share your faith story? I'd love to help.",online:false,bio:"Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.",exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
   {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',didImg:'https://randomuser.me/api/portraits/women/33.jpg',greeting:"Good afternoon dear — Patricia here. Whether it's prayer, a visit, or legacy giving, I'm honored to walk with you.",online:true,bio:"Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.",exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
   {name:'Bro. Kevin Nwosu',title:'Media Director',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',didImg:'https://randomuser.me/api/portraits/men/86.jpg',greeting:"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?",online:true,bio:"Bro. Kevin runs broadcast, social content, and the member app experience. His AI companion troubleshoots watch-live, notifications, and serving on the media team.",exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
-  {name:'Sis. Hannah Levy',title:'New Members Pastor',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',didImg:'https://randomuser.me/api/portraits/women/50.jpg',greeting:"Welcome Maya! Hannah here — whether you're brand new or ready for membership class, I'm so glad you're here.",online:true,bio:"Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers what's next questions and connects guests to groups and serving.",exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
+  {name:'Sis. Hannah Levy',title:'New Members Pastor',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',didImg:'https://randomuser.me/api/portraits/women/50.jpg',greeting:"Welcome Maya! Hannah here — whether you're brand new or ready for membership class, I'm so glad you're here.",online:true,bio:"Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers 'what's next' questions and connects guests to groups and serving.",exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
   {name:'Pastor Thomas Grant',title:'Associate Pastor',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',didImg:'https://randomuser.me/api/portraits/men/67.jpg',greeting:"Maya — Thomas here. If you're walking loss or preparing for a service, I'm here with you in Christ's peace.",online:false,bio:"Pastor Grant officiates funerals and long-term bereavement care. His AI companion offers liturgy, grief scriptures, and coordination with care dispatch for families.",exp:'31 yrs ministry',hours:"24/7 AI · On-call pastoral",languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
-  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',didImg:'https://randomuser.me/api/portraits/women/81.jpg',greeting:"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?",online:true,bio:"Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English discipleship content.",exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
+  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',didImg:'https://randomuser.me/api/portraits/women/81.jpg',greeting:"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?",online:true,bio:"Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.",exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
   {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',didImg:'https://randomuser.me/api/portraits/men/76.jpg',greeting:"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we're singing this Sunday?",online:false,bio:"Bro. Samuel leads the worship band, choir, and creative arts collective. His AI companion shares set lists, chord chart info, and theology of worship resources.",exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
 ];
 
@@ -2109,7 +2329,13 @@ function ldTabSwitch(tab) {
     btn.style.fontWeight = isActive ? '600' : '500';
     btn.style.borderBottom = isActive ? '2px solid var(--brand-gold)' : '2px solid transparent';
   });
-  if(tab === 'leaders') renderMobLeaderList();
+  if(tab === 'leaders') {
+    renderMobLeaderList();
+    requestAnimationFrame(() => {
+      const list = document.getElementById('mob-leader-list');
+      if(list) list.scrollTop = 0;
+    });
+  }
 }
 
 // ── COMMUNITY TABS ──
@@ -2251,7 +2477,7 @@ function saveMobJournal() {
   if(ta) { ta.value = ''; document.getElementById('prof-j-chars').textContent = '0/1500'; }
   document.querySelectorAll('#prof-pane-journal .mood-chip').forEach(c => c.classList.remove('selected'));
   mobSelectedMood = '';
-  mobToast('Journal saved · +8 Pulse','✨');
+  mobToast('Journal saved · +10 formation pts','✨');
   setProfJournalTab('history', document.getElementById('prof-j-tab-hist'));
 }
 
@@ -2449,24 +2675,23 @@ function mobRespond(text) {
 function renderMobLeaderList() {
   const list = document.getElementById('mob-leader-list');
   if(!list) return;
+  const onlineCount = mobLeaders.filter(l => l.online).length;
+  const countEl = document.getElementById('mob-leader-count');
+  if(countEl) countEl.textContent = mobLeaders.length + ' verified · ' + onlineCount + ' online';
   list.innerHTML = mobLeaders.map((l,i) => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;${i===currentMobLeader?'background:var(--brand-gold-light)':''};${i<mobLeaders.length-1?'border-bottom:.5px solid var(--ios-separator)':''}">
-      <div style="position:relative;flex-shrink:0" onclick="openLdrProfile(${i})">
-        <img src="${l.img}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid ${i===currentMobLeader?'var(--brand-gold)':'var(--ios-separator)'}">
-        <div style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:${l.online?'#34C759':'#8E8E93'};border:2px solid #fff"></div>
+    <div class="lg-item ${i===currentMobLeader?'active-leader':''}">
+      <div class="lg-item-main" onclick="mobSwitchLeader(${i})">
+        <div class="lg-av-wrap">
+          <img class="lg-av" src="${l.img}" alt="">
+          <span class="lg-dot ${l.online?'':'lg-dot-away'}"></span>
+        </div>
+        <div style="min-width:0">
+          <div class="lg-name">${l.name}</div>
+          <div class="lg-topic">${l.topic}</div>
+        </div>
       </div>
-      <div style="flex:1;min-width:0" onclick="openLdrProfile(${i})">
-        <div style="font-size:15px;font-weight:600;color:var(--ios-label)">${l.name}</div>
-        <div style="font-size:12px;color:var(--ios-tertiary);margin-top:2px">${l.topic}</div>
-        <div style="font-size:11px;color:${l.online?'#15803d':'var(--ios-tertiary)'};margin-top:2px;font-weight:${l.online?600:400}">${l.online?'● Online now':'○ Away'} · ${l.rating} · ${l.sessions} sessions</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
-        <div onclick="openLdrProfile(${i})" style="font-size:12px;font-weight:600;color:var(--ios-blue);cursor:pointer;text-align:center;padding:4px 8px;border:1px solid var(--ios-blue);border-radius:8px">Profile</div>
-        ${i===currentMobLeader
-          ? '<div style="font-size:12px;font-weight:700;padding:4px 8px;background:var(--brand-gold);color:var(--brand-navy);border-radius:8px;text-align:center">Active</div>'
-          : `<div onclick="mobSwitchLeader(${i})" style="font-size:12px;font-weight:600;color:var(--brand-navy);cursor:pointer;text-align:center;padding:4px 8px;border:1px solid var(--brand-navy);border-radius:8px">Switch</div>`
-        }
-      </div>
+      <button type="button" class="lg-profile-btn" onclick="event.stopPropagation();openLdrProfile(${i})">Profile</button>
+      <button type="button" class="lg-switch" onclick="event.stopPropagation();mobSwitchLeader(${i})">${i===currentMobLeader?'Active':'Switch'}</button>
     </div>`).join('');
 }
 
@@ -2505,7 +2730,7 @@ const mobFaq = [
   { icon:'brain', q:'How do the AI companions work?', a:'Each verified leader has an AI companion trained on their sermons, teachings, and approved pastoral responses — not a generic chatbot. You get 24/7 guidance in their voice while real leaders remain available for live care.' },
   { icon:'people', q:'Is this the same as talking to the real leader?', a:'The AI reflects each leader\'s pastoral style and knowledge, but it is not a live person. You can always request a real leader — crisis keywords and "I need help now" route immediately to on-call pastoral care.' },
   { icon:'shield', q:'What is a Verified Leader?', a:'Verified Leaders are Central Henderson pastors and ministers whose identity, role, and AI training have been confirmed by the church. You will see a verified badge on their profile and in the Leaders directory.' },
-  { icon:'dollar', q:'How much does it cost?', a:'AI companion access is included for members at no extra charge. Giving, GRACE Wallet, and Central Pulse activity follows your church\'s normal stewardship policies.' },
+  { icon:'dollar', q:'How much does it cost?', a:'AI companion access is included for members at no extra charge. Giving, GRACE Wallet, and optional formation rewards follow your church\'s normal stewardship policies.' },
   { icon:'chat', q:'Are conversations private?', a:'Sessions are confidential within Central Henderson. Crisis keywords (self-harm, abuse, suicidal thoughts) automatically alert a live pastor — you will never be left alone in those moments.' },
   { icon:'shield', q:'How do I switch leaders?', a:'Open the Leaders tab and tap Switch beside any leader. Your chat resets with a greeting from the new leader\'s companion.' },
 ];
@@ -2553,7 +2778,7 @@ function initGraceTabIcons() {
 function initGraceCareAndRows() {
   if(typeof graceIcon !== 'function') return;
   const careMap = [
-    ['prayer','#FFF0F1'], ['crisis','#fee2e2'], ['prayer','#FFF0F1'],
+    ['prayer','#ede9fe'], ['crisis','#fee2e2'], ['prayer','#ede9fe'],
     ['hospital','#dcfce7'], ['crisis','#fee2e2'], ['chat','#FFF0F1']
   ];
   document.querySelectorAll('.care-icon').forEach((el, i) => {
@@ -2564,14 +2789,13 @@ function initGraceCareAndRows() {
     el.innerHTML = graceIcon(m[0], { size: 22 });
   });
   const rowIcons = [
-    ['merchant','#FFF0F1'], ['gas','#e8f0e8'], ['give','#FFF0F1'], ['globe','#dbeafe'],
+    ['merchant','#FFF0F1'], ['gas','#e8f0e8'], ['give','#ede9fe'], ['globe','#dbeafe'],
     ['groups','#f5e8f0'], ['fire','#ede8f5'],
     ['counsel','#FFF0F1'], ['bible','#e8f5ed'], ['prayer','#e8eef5'],
-    ['card','#dbeafe'], ['impact','#dcfce7'], ['journal','#FFF0F1'],
+    ['card','#dbeafe'], ['impact','#dcfce7'], ['journal','#ede9fe'],
     ['goals','#FFF0F1'], ['settings','#f3f0eb'], ['signout','#fee2e2']
   ];
   document.querySelectorAll('.ios-row-icon').forEach((el, i) => {
-    if(el.getAttribute('data-grace-icon')) return;
     const m = rowIcons[i];
     if(!m) return;
     el.dataset.graceDone = '';
@@ -2700,39 +2924,20 @@ function sendDidMessage(){
   }
 }
 
-
-function initMobExtraIcons() {
-  if(typeof applyGraceIconEl !== 'function') return;
-  ['.post-action', '.home-impact-row > span:first-child', '.qcmd-m', '.prayer-pray-link', '.goal-idea > div:first-child', '.ios-row-icon[data-grace-icon]'].forEach(function(sel) {
-    document.querySelectorAll(sel).forEach(function(el) {
-      el.dataset.graceDone = '';
-      applyGraceIconEl(el, { size: el.classList.contains('ios-row-icon') ? 18 : 14 });
-    });
-  });
-  document.querySelectorAll('.wact-ico[data-grace-icon]').forEach(function(el) {
-    el.dataset.graceDone = '';
-    applyGraceIconEl(el, { size: 20 });
-  });
-}
-
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   initGraceTabIcons();
   initGraceCareAndRows();
-  try {
-    if(typeof initGraceAllIcons === 'function') initGraceAllIcons();
-    initMobExtraIcons();
-  } catch (err) {
-    console.error('GRACE icon init:', err);
-  }
+  if(typeof initGraceAllIcons === 'function') initGraceAllIcons();
   renderMobLeaderList();
   renderMobFaq();
   const faqHero = document.getElementById('mob-faq-hero-icon');
   if(faqHero && typeof graceIconTile === 'function') faqHero.innerHTML = graceIconTile('chat', false);
   if(document.fonts && document.fonts.load) {
     Promise.all([
-      document.fonts.load('700 24px "Montserrat"'),
-      document.fonts.load('600 14px "Poppins"')
+      document.fonts.load('700 30px "Playfair Display"'),
+      document.fonts.load('700 28px Inter'),
+      document.fonts.load('600 10px Inter')
     ]).then(function(){ document.documentElement.classList.add('fonts-ready'); }).catch(function(){});
   }
   renderHomeLeaderPreview();
