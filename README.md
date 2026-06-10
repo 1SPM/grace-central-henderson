@@ -11,8 +11,10 @@ After GitHub Pages is enabled, share this link:
 | Preview | Path |
 |--------|------|
 | **Prototype hub** | `/index.html` |
+| **iOS Members Card app (canonical)** | `/grace_central_henderson_members_card_ios_app.html` |
 | **Desktop member portal** | `/previews/grace_member_portal_central.html` |
 | **Mobile member app** | `/previews/grace_mobile_ios-central.html` |
+| **Members Card companion preview (compare only)** | `/previews/grace_central_henderson_members_card_ios_app.companion-preview.html` |
 
 ## Local preview
 
@@ -66,6 +68,8 @@ Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal
 
 | Path | Description |
 |------|-------------|
+| `grace_central_henderson_members_card_ios_app.html` | Canonical iOS Members Card app (root URL) |
+| `previews/grace_central_henderson_members_card_ios_app.companion-preview.html` | Legacy companion-integrated build for side-by-side comparison |
 | `previews/grace_member_portal_central.html` | Desktop member portal — Home, Leadership, Give, Community, Profile |
 | `previews/grace_mobile_ios-central.html` | Mobile app prototype |
 | `previews/grace-central-theme.css` | Central brand theme (Poppins, Montserrat, `#EE2B37`) |

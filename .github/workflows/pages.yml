@@ -26,6 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f index.html
+          test -f grace_central_henderson_members_card_ios_app.html
           test -f previews/grace_member_portal_central.html
           test -f previews/grace_mobile_ios-central.html
           test -f previews/grace-central-theme.css
@@ -39,6 +40,7 @@ jobs:
           trap 'kill $SERVER_PID' EXIT
           sleep 2
           curl -fsS http://127.0.0.1:8080/index.html >/dev/null
+          curl -fsS http://127.0.0.1:8080/grace_central_henderson_members_card_ios_app.html >/dev/null
           curl -fsS http://127.0.0.1:8080/previews/grace_member_portal_central.html >/dev/null
           curl -fsS http://127.0.0.1:8080/previews/grace_mobile_ios-central.html >/dev/null
 

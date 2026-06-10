@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/previews/grace_central_henderson_members_card_ios_app.html",
+      "destination": "/grace_central_henderson_members_card_ios_app.html",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

@@ -36,6 +36,7 @@ previews/grace_*_render.png
 previews/grace_*_give.png
 previews/grace_home_dashboard.png
 grace_*.html
+!grace_central_henderson_members_card_ios_app.html
 !previews/grace_*.html
 previews/grace_member_portal.html
 previews/grace_mobile_ios.html
