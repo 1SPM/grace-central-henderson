@@ -3151,6 +3151,13 @@ GRACE_COMPANION.mount({
     return true;
   },
   onCrisis: () => showToast('Care dispatch notified — a leader will follow up'),
+  currentPage: () => {
+    const push = document.querySelector('.push-screen.active');
+    const screen = push || document.querySelector('.screen.active');
+    const key = screen ? screen.id.replace(/^screen-/, '') : 'home';
+    return ({ leaders: 'ai', give: 'wallet', community: 'groups', profile: 'study' })[key] || key;
+  },
+  onUnknown: (entry) => console.info('GRACE admin inbox (card):', entry),
   getState: () => ({
     goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
     goalTarget: window.GRACE_METRICS?.givingGoal?.target ?? 2400,

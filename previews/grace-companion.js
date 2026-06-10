@@ -19,6 +19,8 @@
  *     openLeader: fn(),              // hand off to Verified Leader avatar
  *     toast: fn(msg),
  *     getState: fn() -> {goalPct, goalTarget, groupCount, viewers, ...}
+ *     currentPage: fn() -> 'home'|'wallet'|'watch'|...,  // for page briefings
+ *     onUnknown: fn(entry),           // unknown question flagged for admin
  *     voiceProvider: 'elevenlabs' | 'browser',
  *     ttsUrl: '/api/grace-tts',
  *     autoDetectVoice: true
@@ -90,6 +92,24 @@
       this.data = null;
       this.load();
       this.save();
+    }
+  };
+
+  /* ══ ADMIN INBOX — unknown questions recorded for the Central team ══ */
+  const AdminInbox = {
+    key: 'grace.admin.inbox.central-henderson',
+    list() {
+      try { return JSON.parse(localStorage.getItem(this.key)) || []; } catch (e) { return []; }
+    },
+    record(entry) {
+      const items = this.list();
+      items.push(entry);
+      const capped = items.slice(-50);
+      try { localStorage.setItem(this.key, JSON.stringify(capped)); } catch (e) {}
+      return entry;
+    },
+    clear() {
+      try { localStorage.removeItem(this.key); } catch (e) {}
     }
   };
 
@@ -311,9 +331,36 @@
     goals: /\bgoal|streak|progress\b/i,
     rsvp: /rsvp|sign me up|count me in|i('| a)ll be there|reserve/i,
     checkin: /check ?in/i,
-    leaders: /leader|pastor|deacon|elder|avatar|minister/i,
-    schedule: /tonight|today|this week|schedule|what.?s (on|happening)|when is|what time/i
+    leaders: /leader|pastor|deacon|elder|avatar|minister\b/i,
+    schedule: /tonight|today|this week|schedule|what.?s (on|happening)|when is|what time/i,
+    leaderByNeed: /who (can|should) (i )?(talk to|help|speak|see)|who can help|find (me )?a leader|which leader|someone to talk to about/i,
+    cardFreeze: /freeze|unfreeze|lock my card|unlock my card|pause my card/i,
+    sendMoney: /send (money|\$|cash)|pay (someone|.+ back)|transfer (money|funds)/i,
+    receiveMoney: /receive money|request money|someone (owes|send me)|get paid/i,
+    statements: /statement|transaction|history of (spending|giving)|recent (purchases|charges)/i,
+    notifications: /notification|\bmy inbox\b|\balerts?\b|unread message/i,
+    membership: /\bnew here\b|\bmember(ship)?\b|become a member|\bjoin the church\b|bapti[sz]|first (time|visit)/i,
+    ministries: /kids|children|childcare|nursery|worship team|music|choir|\bband\b|men.?s ministry|women.?s ministry|women of grace|espanol|espa\u00f1ol|spanish/i,
+    techHelp: /(app|stream|livestream|video|page|site|screen|audio|sound|button|link)[^.!?]*\b(not working|broken|won.?t|crash|frozen|glitch|slow|down|blank)|(not working|broken|won.?t (load|play|open)|crash|frozen|glitch)[^.!?]*\b(app|stream|livestream|video|page|site|screen)|can.?t (log ?in|sign in)|tech(nical)? (help|issue|problem)/i,
+    adminInbox: /admin inbox|flagged questions?|what questions have you (flagged|recorded|saved|noted)|show (me )?(the )?admin inbox/i,
+    adminClear: /clear (the )?admin inbox/i
   };
+
+  /* ══ CAPABILITIES — single source of truth for what GRACE can do ══ */
+  const CAPABILITIES = [
+    { key: 'give', label: 'give \u2014 tithe, offerings, recurring gifts', sample: 'I\u2019d like to give' },
+    { key: 'wallet', label: 'run your GRACE Card \u2014 freeze it, send or receive money, statements', sample: 'Freeze my card' },
+    { key: 'watch', label: 'take you to the live service or a past message', sample: 'Take me to the live service' },
+    { key: 'groups', label: 'find groups, ministries, and serve teams', sample: 'Show me my groups' },
+    { key: 'events', label: 'browse events and RSVP you', sample: 'RSVP me for Sunday' },
+    { key: 'care', label: 'route prayer, visits, and urgent care', sample: 'I\u2019d like to request prayer' },
+    { key: 'study', label: 'open Bible study, journaling, and goals', sample: 'Open Bible study' },
+    { key: 'impact', label: 'show where your giving and card impact go', sample: 'Show my impact' },
+    { key: 'leaders', label: 'match you with the right verified leader', sample: 'Who can help with marriage?' },
+    { key: 'membership', label: 'walk you toward membership or baptism', sample: 'How do I become a member?' },
+    { key: 'notifications', label: 'check your notifications and inbox', sample: 'Any notifications?' },
+    { key: 'tech', label: 'troubleshoot the app or livestream', sample: 'The livestream isn\u2019t working' }
+  ];
 
   function S() { return (A && A.getState) ? (A.getState() || {}) : {}; }
   function name() { return (A && A.memberName) || 'friend'; }
@@ -338,6 +385,40 @@
     })[key] || key;
   }
 
+  /* ══ PAGE BRIEFS — first-person, fed live state ══ */
+  const PAGE_ALIASES = {
+    outreach: 'care', net: 'groups', connect: 'groups', journey: 'study',
+    journal: 'study', goals: 'study', card: 'wallet', leadership: 'ai'
+  };
+  const PAGE_BRIEFS = {
+    home: () => 'You\u2019re on Home \u2014 today\u2019s rhythm, your quick actions, and my getting-started guide all live here. I can take you anywhere in the app from this page.',
+    wallet: (st) => 'You\u2019re on your GRACE Card \u2014 direct gifts are at $' + (st.givenMtd ?? 230) + ' this month and your card has routed $' + (st.cardImpact ?? 18.42) + '. I can give, freeze your card, send money, or review impact from here.',
+    give: (st) => 'You\u2019re on Give \u2014 your 2026 goal is at ' + (st.goalPct ?? 52) + '% of $' + Number(st.goalTarget ?? 2400).toLocaleString() + '. I can set up a tithe, a one-time gift, or recurring giving.',
+    watch: (st) => 'You\u2019re on Watch \u2014 the 9:45 AM service has ' + (st.viewers ?? 342) + ' watching right now. I can open the live stream or find a past message for you.',
+    groups: (st) => 'You\u2019re on Connect \u2014 you\u2019re in ' + (st.groupCount ?? 2) + ' groups. I can find you a new group, a serve team, or the ministry that fits you.',
+    events: () => {
+      const ev = (know().events || [])[0];
+      return 'You\u2019re on Events' + (ev ? ' \u2014 next up: ' + ev : '') + '. I can RSVP you with a word.';
+    },
+    care: () => 'You\u2019re in Care \u2014 I can route a prayer request, a visit, or urgent help straight to the team at ' + M.churchName + '.',
+    study: (st) => 'You\u2019re on your Journey \u2014 your reflection streak is ' + (st.reflectionDays ?? 7) + ' days. I can open Bible study, journaling, or your goals.',
+    impact: (st) => 'You\u2019re on Impact \u2014 your card routed $' + (st.cardImpact ?? 18.42) + ' this month toward ' + (st.route || 'Food Pantry') + '. I can review or redirect it with you.',
+    ai: () => 'You\u2019re with your leadership team \u2014 every avatar here is verified, siloed, and confidential. I step back in this space; what\u2019s personal stays between you and them.'
+  };
+  let lastBriefedPage = null;
+
+  function currentPageKey() {
+    try {
+      const k = A && A.currentPage ? A.currentPage() : null;
+      if (!k) return null;
+      return PAGE_BRIEFS[k] ? k : (PAGE_ALIASES[k] || k);
+    } catch (e) { return null; }
+  }
+  function pageBrief(key) {
+    const fn = key && PAGE_BRIEFS[key];
+    return fn ? fn(S()) : null;
+  }
+
   /** Core router. Returns {text, nav, navLabel, intent, handoff, care} */
   function think(text) {
     const t = (text || '').trim();
@@ -349,6 +430,24 @@
       return {
         intent: 'care', care: true, nav: 'outreach', navLabel: 'Open Care now',
         text: 'I hear you, ' + name() + ', and I\u2019m taking this seriously. I\u2019m routing you to live pastoral care right now \u2014 a real person at ' + M.churchName + ' will be with you. If you are in immediate danger, please call or text 988. You are not alone.'
+      };
+    }
+    if (RX.leaderByNeed.test(lower)) {
+      let area = null;
+      if (/grie[fv]|loss|passed away/i.test(lower)) area = 'grief and loss';
+      else if (/marriage|family|spouse|divorce/i.test(lower)) area = 'marriage and family';
+      else if (/youth|teen|young/i.test(lower)) area = 'youth';
+      else if (/finance|money|debt/i.test(lower)) area = 'financial stewardship';
+      return {
+        intent: 'care', handoff: true, nav: 'ai', navLabel: 'Meet your leaders',
+        text: 'I can match you with the right person' + (area ? ' for ' + area : '') + '. Pastor James leads the house, and Sis. Hannah Levy walks closely with members \u2014 each verified leader has a private, siloed avatar I never see into, with human follow-up available. Shall I take you to them?'
+      };
+    }
+    if (RX.techHelp.test(lower)) {
+      const stream = /stream|video|watch|service|audio|sound/i.test(lower);
+      return {
+        intent: 'tech', nav: stream ? 'watch' : 'home', navLabel: stream ? 'Reopen Watch' : 'Back to Home',
+        text: 'I\u2019m sorry it\u2019s misbehaving \u2014 let me help. First, try ' + (stream ? 'reopening the stream; if it stays down, refresh the app and check your connection' : 'refreshing the app and checking your connection') + '. If it\u2019s still stuck, I\u2019ve let the ' + M.churchName + ' media team know patterns like this come up \u2014 they can follow up with you directly through Care.'
       };
     }
     if (RX.personal.test(lower)) {
@@ -390,9 +489,11 @@
       };
     }
     if (RX.capabilities.test(lower)) {
+      const caps = CAPABILITIES.map((c) => c.label);
+      const last = caps.pop();
       return {
         intent: 'about', nav: 'give', navLabel: 'Try one \u2014 open Give',
-        text: 'Quite a lot! I can open giving and your GRACE Card, take you to the live service, find groups and events, RSVP you, route prayer and care requests, open Bible study, journaling and goals, show your impact, and connect you with your leaders. Just ask in your own words \u2014 I\u2019m listening and learning.'
+        text: 'Anything you need on this platform, ' + name() + '. I can ' + caps.join('; ') + '; and ' + last + '. Just ask in your own words \u2014 and if you ask something I haven\u2019t learned yet, I record it for the ' + M.churchName + ' team so I keep growing.'
       };
     }
     if (RX.greeting.test(lower)) {
@@ -466,27 +567,115 @@
       };
     }
 
+    if (RX.adminClear.test(lower)) {
+      AdminInbox.clear();
+      return { intent: 'admin', text: 'Done \u2014 I\u2019ve cleared the admin inbox on this device. I\u2019ll keep flagging anything new I can\u2019t answer.' };
+    }
+    if (RX.adminInbox.test(lower)) {
+      const items = AdminInbox.list();
+      if (!items.length) {
+        return { intent: 'admin', text: 'My admin inbox is empty right now \u2014 every question so far has been one I could handle. When someone asks me something new, I record it here for the ' + M.churchName + ' team.' };
+      }
+      const lines = items.slice(-5).reverse().map((it, i) => (i + 1) + '. \u201c' + it.question + '\u201d (' + (it.page || 'app') + ')').join(' ');
+      return {
+        intent: 'admin',
+        text: 'I\u2019ve flagged ' + items.length + (items.length === 1 ? ' question' : ' questions') + ' for the ' + M.churchName + ' team. Most recent: ' + lines + ' Say \u201cclear admin inbox\u201d to reset it.'
+      };
+    }
+    if (RX.cardFreeze.test(lower)) {
+      const unfreeze = /unfreeze|unlock|unpause/i.test(lower);
+      if (A.toast) A.toast(unfreeze ? 'GRACE Card active again' : 'GRACE Card frozen');
+      return {
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
+        text: unfreeze
+          ? 'Done \u2014 your GRACE Card is active again and ready to route impact. Want me to open it so you can double-check?'
+          : 'Done \u2014 I\u2019ve frozen your GRACE Card, so no new charges can go through until you say the word. Tell me \u201cunfreeze my card\u201d anytime, or I can open the card screen now.'
+      };
+    }
+    if (RX.sendMoney.test(lower)) {
+      return {
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
+        text: 'I can help you send money from your GRACE Card \u2014 to a friend, a group, or as a gift. I\u2019ll open your card so you can choose the recipient and amount.'
+      };
+    }
+    if (RX.receiveMoney.test(lower)) {
+      return {
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
+        text: 'Easy \u2014 your GRACE Card can receive money too. I\u2019ll open it so you can share your request link or card details safely.'
+      };
+    }
+    if (RX.statements.test(lower)) {
+      const impact = st.cardImpact != null ? '$' + st.cardImpact : '$18.42';
+      return {
+        intent: 'wallet', nav: 'wallet', navLabel: 'View transactions',
+        text: 'I\u2019ll pull up your statements and recent transactions \u2014 this month your card has routed ' + impact + ' of everyday impact alongside your purchases.'
+      };
+    }
+    if (RX.notifications.test(lower)) {
+      if (A.toast) A.toast('You\u2019re all caught up');
+      return {
+        intent: 'home', nav: 'home', navLabel: 'Back to Home',
+        text: 'You\u2019re all caught up, ' + name() + ' \u2014 nothing urgent in your notifications. Anything new from your groups, events, or leaders will surface on Home, and I\u2019ll mention it when we talk.'
+      };
+    }
+    if (RX.membership.test(lower)) {
+      return {
+        intent: 'care', handoff: true, nav: 'ai', navLabel: 'Meet Sis. Hannah Levy',
+        text: 'I\u2019d love to help you take that step. Sis. Hannah Levy walks with everyone exploring membership and baptism at ' + M.churchName + ' \u2014 her avatar can answer your questions privately, and a real person follows up. Shall I introduce you?'
+      };
+    }
+    if (RX.ministries.test(lower)) {
+      let line;
+      if (/kids|children|childcare|nursery/i.test(lower)) line = 'Our kids ministry serves every age on Sundays, with check-in at the door \u2014 I can show you the groups and this week\u2019s schedule.';
+      else if (/worship|music|choir|\bband\b/i.test(lower)) line = 'Our worship and music teams rehearse weekly and always welcome new voices \u2014 I can connect you with the worship lead or show you the team page.';
+      else if (/men.?s ministry/i.test(lower)) line = 'The men\u2019s ministry gathers regularly for study and brotherhood \u2014 I can show you their group and upcoming meetups.';
+      else if (/women/i.test(lower)) line = 'Women of Grace meets Tuesday evenings \u2014 I can show you the group and RSVP you for the next gathering.';
+      else line = 'S\u00ed \u2014 ' + M.churchName + ' has a Spanish-speaking ministry family. I can show you their group and connect you with their leader.';
+      return { intent: 'groups', nav: 'groups', navLabel: 'Open Groups', text: line };
+    }
+
     // Fall through to the shared consensus brain (give / watch / groups / events / care / study / faith)
     const base = global.GRACE_MESSAGING.buildAiResponseText(null, t, 'system', M);
+    if (base.text === M.system.defaultResponse && t.replace(/[^a-z0-9]/gi, '').length > 2) {
+      // Unknown question — consider it, record it, and let admin know
+      const entry = AdminInbox.record({ question: t, page: currentPageKey() || 'app', time: new Date().toISOString() });
+      console.info('GRACE admin inbox \u2014 new question flagged:', entry);
+      if (A.toast) A.toast('GRACE flagged a new question for admin review');
+      if (A.onUnknown) { try { A.onUnknown(entry); } catch (e) {} }
+      return {
+        intent: 'unknown',
+        text: 'That\u2019s a thoughtful question I haven\u2019t been taught yet, ' + name() + '. I\u2019ve considered it and recorded it for the ' + M.churchName + ' team so I can learn it. Meanwhile \u2014 I can give, open your card, take you to the live service, find groups and events, route care, or open your study tools. What would you like?'
+      };
+    }
     const navIntent = base.nav === 'outreach' ? 'care' : base.nav;
     return { intent: navIntent || 'general', text: base.text, nav: base.nav, navLabel: base.navLabel && base.navLabel.replace(/^[^\w]+\s*/, '') };
   }
 
   /* ══ GREETING — learned routine + church rhythm ══ */
-  function buildGreeting() {
+  function buildGreeting(page) {
     const d = Memory.data;
     const rhythm = todayRhythmLine();
+    const nextEvent = (know().events || [])[0];
     let text;
     if (d.visits <= 1) {
-      text = 'Hi ' + name() + ' \u2014 I\u2019m GRACE, your companion here at ' + M.churchName + '. I can take you anywhere in the app, act for you, and I\u2019ll quietly learn your rhythm as we go (only on this device, and you can clear it anytime). ' + (rhythm ? rhythm + ' ' : '') + 'What would you like to do first?';
+      text = 'Hi ' + name() + ' \u2014 I\u2019m GRACE, your companion here at ' + M.churchName + '. I can take you anywhere in the app, act for you, and I\u2019ll quietly learn your rhythm as we go (only on this device, and you can clear it anytime). ' + (rhythm ? rhythm + ' ' : '');
     } else {
       const fav = Memory.favouriteHourLabel();
       const tops = Memory.topIntents(1);
       text = 'Good ' + timeOfDay() + ', ' + name() + ' \u2014 welcome back.';
       if (rhythm) text += ' ' + rhythm;
+      if (nextEvent && page !== 'events') text += ' Next up: ' + nextEvent + '.';
       if (tops.length) text += ' Lately you\u2019ve been asking most about ' + intentLabel(tops[0]) + ' \u2014 want to pick up there?';
       else if (fav) text += ' I\u2019ve noticed we usually talk in the ' + fav + ' \u2014 I\u2019m learning your rhythm.';
-      else text += ' How can I help today?';
+    }
+    // Page brief — where you are right now and what I can do here
+    const brief = pageBrief(page);
+    if (brief) {
+      text += (text.endsWith(' ') ? '' : ' ') + brief;
+    } else if (d.visits <= 1) {
+      text += 'What would you like to do first?';
+    } else if (!Memory.topIntents(1).length && !Memory.favouriteHourLabel()) {
+      text += ' How can I help today?';
     }
     return text;
   }
@@ -735,14 +924,28 @@
       if (!root) return;
       root.classList.add('open');
       isOpen = true;
+      const page = currentPageKey();
       if (!greeted) {
+        // First open this session: full day overview + learned rhythm + page brief
         greeted = true;
-        const greeting = buildGreeting();
+        lastBriefedPage = page;
+        const greeting = buildGreeting(page);
         showTyping();
         setTimeout(() => {
           removeTyping();
           appendGrace(greeting);
         }, 500);
+      } else if (page && page !== lastBriefedPage) {
+        // Reopened on a different page — brief the new context
+        lastBriefedPage = page;
+        const brief = pageBrief(page);
+        if (brief) {
+          showTyping();
+          setTimeout(() => {
+            removeTyping();
+            appendGrace(brief);
+          }, 450);
+        }
       }
       setTimeout(() => q('#gcp-input')?.focus(), 250);
       if (prefill) setTimeout(() => api.ask(prefill), greeted ? 900 : 1300);

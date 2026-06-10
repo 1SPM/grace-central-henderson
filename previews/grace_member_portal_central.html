@@ -1839,7 +1839,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <span class="grace-tutorial-reopen-orb" id="grace-tutorial-reopen-orb" aria-hidden="true"></span>
           <span class="grace-tutorial-reopen-copy">
             <span class="grace-tutorial-reopen-title" id="grace-tutorial-reopen-title">Show GRACE guide</span>
-            <span class="grace-tutorial-reopen-sub">New here or need a refresher? Reopen the orientation — GRACE is always in the sidebar orb.</span>
+            <span class="grace-tutorial-reopen-sub">New here or need a refresher? Reopen the orientation — I'm always in the sidebar orb.</span>
           </span>
         </button>
       </div>
@@ -6794,6 +6794,14 @@ GRACE_COMPANION.mount({
     prependLeaderActivity({ icon: 'prayer', title: 'Care dispatch', detail: 'urgent request routed live', time: 'Just now' });
     showPortalToast('Care dispatch notified — a leader will follow up', '🙏');
     syncLeaderKpis();
+  },
+  currentPage: () => {
+    const sec = document.querySelector('.sec.active');
+    const key = sec ? sec.id.replace(/^sec-/, '') : 'home';
+    return ({ network: 'groups', outreach: 'care', profile: 'study' })[key] || key;
+  },
+  onUnknown: (entry) => {
+    prependLeaderActivity({ icon: 'chat', title: 'GRACE inbox', detail: 'new member question flagged for review', time: 'Just now' });
   },
   getState: () => ({
     goalPct: WALLET_STATE.givingGoalPct,

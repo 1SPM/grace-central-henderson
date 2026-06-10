@@ -3027,6 +3027,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     },
     onCrisis: () => mobToast('Care dispatch notified — a leader will follow up'),
+    currentPage: () => {
+      const screen = document.querySelector('.screen.active');
+      const key = screen ? screen.id.replace(/^screen-/, '') : 'home';
+      return ({ leadership: 'ai', give: 'give', community: 'groups', profile: 'study' })[key] || key;
+    },
+    onUnknown: (entry) => console.info('GRACE admin inbox (mobile):', entry),
     getState: () => ({
       goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
       goalTarget: window.GRACE_METRICS?.givingGoal?.target ?? 2400,

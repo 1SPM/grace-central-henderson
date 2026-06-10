@@ -50,18 +50,18 @@
           badge: 'Getting started',
           status: 'New here? A quick orientation to your church home.',
           intro:
-            'GRACE is your companion for everyday church life at ' +
+            'I\'m GRACE — your companion for everyday church life at ' +
             church +
-            ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; she can take you anywhere in the app.',
+            ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; I can take you anywhere in the app.',
           steps: [
             { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Card, Connect, and Journey.' },
-            { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — she learns your rhythm on this device.' },
+            { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — I learn your rhythm on this device.' },
             { icon: 'leadership', label: 'Go deeper', detail: 'Personal conversation stays with your verified leader avatar — siloed from GRACE.' },
             { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at Central for giving, care, groups, and watch.' },
           ],
           tryLabel: 'Try it — ask GRACE anything',
           dismissCta: 'Got it — I\'m settled',
-          dismissNote: 'Dismiss anytime — GRACE stays one orb-tap away in the sidebar.',
+          dismissNote: 'Dismiss anytime — I\'m always one orb-tap away in the sidebar.',
           reopenLabel: 'Show GRACE guide',
         },
         disclaimer:
@@ -71,7 +71,7 @@
         defaultResponse:
           'I can help you give, watch, find a group, browse events, or connect you with a leader avatar. What would you like to explore?',
         tellMeAboutResponse:
-          'GRACE can share how this leader serves at ' +
+          'I can share how this leader serves at ' +
           church +
           ' and open their avatar — or guide you to groups and resources.',
       },
@@ -229,7 +229,7 @@
       return isSystem
         ? {
             text:
-              'GRACE can take you to Give right now — tithe, one-time offering, or recurring gifts. Your 2026 goal is at ' +
+              'I can take you to Give right now — tithe, one-time offering, or recurring gifts. Your 2026 goal is at ' +
               goalPct +
               '% ($' +
               Number(goalTarget).toLocaleString() +
@@ -250,7 +250,7 @@
       return isSystem
         ? {
             text:
-              'GRACE is routing your request to Care Dispatch — prayer, visits, or urgent help. A verified leader can follow up right away.',
+              'I\'m routing your request to Care Dispatch — prayer, visits, or urgent help. A verified leader can follow up right away.',
             nav: 'outreach',
             navLabel: '🙏 Open Care',
           }
@@ -268,7 +268,7 @@
             text:
               'The 9:45 AM Sunday service is live with ' +
               viewers +
-              ' watching. GRACE can take you there or find a previous message.',
+              ' watching. I can take you there or find a previous message.',
             nav: 'watch',
             navLabel: '▶ Watch Live',
           }
@@ -287,7 +287,7 @@
             text:
               "You're in " +
               groupCount +
-              ' groups. GRACE can find a new group, show your schedule, or connect you with a group leader.',
+              ' groups. I can find you a new group, show your schedule, or connect you with a group leader.',
             nav: 'groups',
             navLabel: '◈ Groups & Events',
           }
@@ -303,7 +303,7 @@
     if (navHint === 'events' || lower.includes('event') || lower.includes('sunday') || lower.includes('rsvp') || lower.includes('coming')) {
       return isSystem
         ? {
-            text: 'Coming up: Sunday Service June 1, Women of Grace June 2, Prayer Night June 4. GRACE can RSVP you to any of them.',
+            text: 'Coming up: Sunday Service June 1, Women of Grace June 2, Prayer Night June 4. I can RSVP you to any of them.',
             nav: 'events',
             navLabel: '📅 Groups & Events',
           }
@@ -317,7 +317,7 @@
       return isSystem
         ? {
             text:
-              'That is the most important decision — GRACE will connect you with Pastor James and the team to celebrate and support you. 🙏',
+              'That is the most important decision — I\'ll connect you with Pastor James and the team to celebrate and support you. 🙏',
             nav: 'outreach',
             navLabel: '✝️ Connect with a Leader',
           }
@@ -339,7 +339,7 @@
       return isSystem
         ? {
             text:
-              'GRACE can open a guided Bible study path — Receive → Learn → Reflect → Apply → Connect — starting with ' +
+              'I can open a guided Bible study path — Receive → Learn → Reflect → Apply → Connect — starting with ' +
               ref +
               '.',
             nav: 'study',
