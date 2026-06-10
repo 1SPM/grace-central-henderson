@@ -26,6 +26,42 @@ Then open http://127.0.0.1:8765/index.html
 
 Hard-refresh (**Cmd+Shift+R**) after pulling changes so fonts and CSS update.
 
+## GRACE neural voice (ElevenLabs + Vercel)
+
+GRACE can speak with **ElevenLabs** neural TTS via a serverless proxy — the API key never ships to the browser.
+
+| Deploy target | Voice |
+|---------------|-------|
+| **GitHub Pages** | Browser `speechSynthesis` (automatic fallback) |
+| **Vercel** | ElevenLabs Rachel voice when `ELEVENLABS_API_KEY` is set |
+
+### Local dev with voice
+
+```bash
+cp .env.example .env.local
+# Add your ElevenLabs API key to .env.local
+
+npx vercel dev
+```
+
+Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal_central.html), click the GRACE orb, and ask a question — she should reply with neural voice. The panel header shows **Neural voice** when ElevenLabs is active.
+
+### Vercel production
+
+1. Import this repo in [Vercel](https://vercel.com)
+2. Add environment variables (see [`.env.example`](.env.example)):
+   - `ELEVENLABS_API_KEY` (required)
+   - `ELEVENLABS_VOICE_ID` (optional, default Rachel)
+   - `ELEVENLABS_MODEL_ID` (optional, default `eleven_flash_v2_5`)
+3. Deploy — static previews and `/api/grace-tts` share the same origin
+
+### API routes
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/grace-tts` | POST | `{ "text": "..." }` → `audio/mpeg` |
+| `/api/grace-tts/health` | GET | Health probe for client auto-detect |
+
 ## Key files
 
 | Path | Description |
@@ -34,7 +70,9 @@ Hard-refresh (**Cmd+Shift+R**) after pulling changes so fonts and CSS update.
 | `previews/grace_mobile_ios-central.html` | Mobile app prototype |
 | `previews/grace-central-theme.css` | Central brand theme (Poppins, Montserrat, `#EE2B37`) |
 | `previews/grace-messaging.js` | Canonical GRACE vs leader avatar messaging |
+| `previews/grace-companion.js` | Floating GRACE chat, memory, voice (ElevenLabs + browser fallback) |
 | `previews/grace-duotone-icons.js` | Red/pink duotone icon system |
+| `api/grace-tts.js` | Vercel serverless ElevenLabs TTS proxy |
 | `previews/assets/central-henderson-logo.png` | Central Henderson logo |
 
 ## AI model

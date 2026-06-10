@@ -17,6 +17,27 @@
     const church = churchName || DEFAULT_CHURCH;
     return {
       churchName: church,
+      // Institution knowledge pack — GRACE Companion's grounding for this campus.
+      knowledge: {
+        serviceTimes: 'Sundays \u00b7 9:45 AM & 11:30 AM',
+        weekly: {
+          0: 'Sunday Service \u00b7 9:45 AM & 11:30 AM',
+          2: 'Women of Grace \u00b7 7:00 PM',
+          3: 'Youth Mentors \u00b7 6:30 PM',
+          4: 'Prayer Night \u00b7 7:00 PM',
+          6: 'Food Pantry serve team \u00b7 9:00 AM',
+        },
+        events: [
+          'Sunday Service \u00b7 June 1',
+          'Women of Grace \u00b7 June 2',
+          'Prayer Night \u00b7 June 4',
+        ],
+        serving: [
+          'Food Pantry \u00b7 Saturdays',
+          'Greeting Team \u00b7 Sundays',
+          'Youth Mentors \u00b7 Wednesdays',
+        ],
+      },
       system: {
         name: 'GRACE',
         acronymExpansion: GRACE_ACRONYM,
@@ -25,6 +46,24 @@
         homeGreeting:
           'Start here when you want to give, watch a service, join a group, or see what\'s coming up. When you\'d like someone to walk with you, your verified leader avatar is just a tap away.',
         homePlaceholder: 'Ask GRACE — give, watch, groups, events…',
+        tutorial: {
+          badge: 'Getting started',
+          status: 'New here? A quick orientation to your church home.',
+          intro:
+            'GRACE is your companion for everyday church life at ' +
+            church +
+            ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; she can take you anywhere in the app.',
+          steps: [
+            { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Card, Connect, and Journey.' },
+            { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — she learns your rhythm on this device.' },
+            { icon: 'leadership', label: 'Go deeper', detail: 'Personal conversation stays with your verified leader avatar — siloed from GRACE.' },
+            { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at Central for giving, care, groups, and watch.' },
+          ],
+          tryLabel: 'Try it — ask GRACE anything',
+          dismissCta: 'Got it — I\'m settled',
+          dismissNote: 'Dismiss anytime — GRACE stays one orb-tap away in the sidebar.',
+          reopenLabel: 'Show GRACE guide',
+        },
         disclaimer:
           'GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.',
         safetyNote: 'GRACE does not replace pastors, counselors, or emergency support.',
@@ -389,7 +428,8 @@
   }
 
   function renderGraceOrb(size) {
-    const s = size === 'sm' || size === 'md' || size === 'lg' ? size : 'lg';
+    const s =
+      size === 'sm' || size === 'md' || size === 'lg' || size === 'sb' ? size : 'lg';
     return (
       '<div class="grace-orb grace-orb--' +
       s +
@@ -431,6 +471,41 @@
     setText('home-ai-status', m.system.homeStatus);
     setText('home-ai-greeting', m.system.homeGreeting);
     setText('home-ai-disclaimer', m.system.disclaimer);
+    const tut = m.system.tutorial;
+    if (tut) {
+      setText('grace-tutorial-badge', tut.badge);
+      setText('home-ai-status', tut.status);
+      setText('home-ai-greeting', tut.intro);
+      setText('grace-tutorial-try', tut.tryLabel);
+      setText('grace-tutorial-dismiss-note', tut.dismissNote);
+      const dismissBtn = document.getElementById('grace-tutorial-dismiss-btn');
+      if (dismissBtn) dismissBtn.textContent = tut.dismissCta;
+      const reopenBtn = document.getElementById('grace-tutorial-reopen');
+      if (reopenBtn) reopenBtn.textContent = tut.reopenLabel;
+      const stepsEl = document.getElementById('grace-tutorial-steps');
+      if (stepsEl && Array.isArray(tut.steps)) {
+        stepsEl.innerHTML = tut.steps
+          .map(function (step) {
+            const icon =
+              typeof graceIcon === 'function'
+                ? graceIcon(step.icon, { size: 16, variant: 'inverse' })
+                : '';
+            return (
+              '<div class="grace-tutorial-step">' +
+              '<span class="grace-tutorial-step-ico">' +
+              icon +
+              '</span>' +
+              '<div><div class="grace-tutorial-step-label">' +
+              step.label +
+              '</div><div class="grace-tutorial-step-detail">' +
+              step.detail +
+              '</div></div></div>'
+            );
+          })
+          .join('');
+        if (typeof hydrateGraceIcons === 'function') hydrateGraceIcons(stepsEl);
+      }
+    }
     setText('tb-subtitle', m.system.topbarSub);
     setText('home-leader-strip-sub', m.leaderAvatar.homeStripSub);
     setText('home-leader-strip-label', m.leaderAvatar.homeStripLabel);
@@ -451,6 +526,7 @@
     if (desktopFaqTitle) desktopFaqTitle.textContent = m.faq.title;
     const desktopFaqSubtitle = document.getElementById('desktop-faq-subtitle');
     if (desktopFaqSubtitle) desktopFaqSubtitle.textContent = m.faq.subtitle;
+    const mobFaqTitle = document.getElementById('mob-faq-title');
     if (mobFaqTitle) mobFaqTitle.textContent = m.faq.title;
     const mobFaqSubtitle = document.getElementById('mob-faq-subtitle');
     if (mobFaqSubtitle) mobFaqSubtitle.textContent = m.faq.subtitle;

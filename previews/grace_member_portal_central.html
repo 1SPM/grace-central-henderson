@@ -6,20 +6,24 @@
 <title>My GRACE Members Card — Central Henderson</title>
 <link rel="stylesheet" href="grace-central-theme.css">
 <link rel="stylesheet" href="grace-orb.css">
+<link rel="stylesheet" href="grace-companion.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px}
 
 /* ── SIDEBAR ── */
 .sb{width:200px;background:#fff;border-right:1px solid #ece8e1;display:flex;flex-direction:column;flex-shrink:0;height:100vh}
-.sb-top{padding:16px 16px 14px;border-bottom:1px solid #ece8e1;display:flex;flex-direction:column;align-items:center;text-align:center}
-.sb-church-logo{width:100%;max-width:148px;height:auto;margin-bottom:10px;object-fit:contain}
+.sb-top{padding:16px 16px 14px;border-bottom:1px solid #ece8e1;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:visible}
 .sb-church{font-size:11px;font-weight:700;color:#000000;margin-bottom:10px;letter-spacing:.2px}
 .sb-av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:3px solid #EE2B37;margin-bottom:6px}
 .sb-name{font-size:14px;font-weight:700;color:#1a1a1a}
 .sb-tier{display:inline-flex;align-items:center;gap:5px;margin-top:4px;background:#FFF0F1;color:#C41E2A;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px}
 .sb-tier-dot{width:6px;height:6px;border-radius:50%;background:#EE2B37}
-.sb-scroll{flex:1;overflow-y:auto;padding:10px 0}
+.sb-scroll{flex:1;overflow-y:auto;padding:10px 0;display:flex;flex-direction:column}
+.sb-member{
+  margin:8px 8px 4px;padding:14px 10px 10px;border-top:1px solid #ece8e1;
+  display:flex;flex-direction:column;align-items:center;text-align:center
+}
 .nb{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;transition:background .12s}
 .nb:hover{background:#f7f3ed}
 .nb.active{background:#F4F4F4}
@@ -1410,6 +1414,66 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-mini-stat{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f7f5f2;font-size:12px}
 .dash-mini-stat:last-child{border-bottom:none}
 .dash-ai-companion{margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
+.grace-home-tutorial{position:relative}
+.grace-tutorial-badge{
+  position:absolute;top:14px;left:20px;z-index:2;
+  font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:#dbeafe;background:rgba(59,130,246,.22);border:1px solid rgba(96,165,250,.45);
+  padding:4px 10px;border-radius:20px
+}
+.grace-tutorial-dismiss{
+  position:absolute;top:10px;right:12px;z-index:3;
+  width:30px;height:30px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+  font-size:18px;line-height:1;cursor:pointer;font-family:inherit;
+  display:grid;place-items:center;transition:background .15s ease,color .15s ease
+}
+.grace-tutorial-dismiss:hover{background:rgba(255,255,255,.2);color:#fff}
+.grace-tutorial-steps{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  position:relative;z-index:1;margin-top:4px
+}
+.grace-tutorial-step{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;padding:10px 12px
+}
+.grace-tutorial-step-ico{
+  flex-shrink:0;width:28px;height:28px;border-radius:8px;
+  background:rgba(59,130,246,.25);display:grid;place-items:center
+}
+.grace-tutorial-step-label{font-size:11px;font-weight:800;color:#fff;margin-bottom:2px}
+.grace-tutorial-step-detail{font-size:10px;color:rgba(255,255,255,.58);line-height:1.45}
+.grace-tutorial-try{
+  font-size:10px;font-weight:700;color:rgba(255,255,255,.55);
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;position:relative;z-index:1
+}
+.grace-tutorial-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;position:relative;z-index:1;margin-top:2px;padding-top:4px
+}
+.grace-tutorial-dismiss-btn{
+  border:none;border-radius:10px;padding:9px 16px;
+  background:rgba(255,255,255,.14);color:#fff;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;border:1px solid rgba(255,255,255,.2);
+  transition:background .15s ease
+}
+.grace-tutorial-dismiss-btn:hover{background:rgba(255,255,255,.22)}
+.grace-tutorial-dismiss-note{font-size:10px;color:rgba(255,255,255,.45);line-height:1.4;flex:1;min-width:180px}
+.grace-tutorial-reopen{
+  display:none;align-items:center;gap:10px;width:100%;
+  padding:12px 16px;border-radius:14px;border:1px dashed rgba(124,92,237,.35);
+  background:linear-gradient(135deg,#faf9ff,#f4f2fc);cursor:pointer;font-family:inherit;
+  text-align:left;transition:border-color .15s ease,background .15s ease
+}
+.grace-tutorial-reopen:hover{border-color:rgba(124,92,237,.55);background:#f0ecff}
+.grace-tutorial-reopen-orb{flex-shrink:0}
+.grace-tutorial-reopen-copy{flex:1;min-width:0}
+.grace-tutorial-reopen-title{font-size:12px;font-weight:800;color:#4c3f8f}
+.grace-tutorial-reopen-sub{font-size:10px;color:#8b7ec8;margin-top:2px;line-height:1.4}
+.dash-ai-companion.is-dismissed .grace-home-tutorial{display:none}
+.dash-ai-companion.is-dismissed .grace-tutorial-reopen{display:flex}
+@media (max-width:720px){.grace-tutorial-steps{grid-template-columns:1fr}}
 .home-leader-strip-copy{flex:1;min-width:0}
 .home-leader-strip-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.04em}
 .home-leader-strip-name{font-size:14px;font-weight:700;color:#1a1a1a;margin-top:2px}
@@ -1603,19 +1667,20 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <!-- ══ SIDEBAR ══ -->
 <div class="sb">
   <div class="sb-top">
-    <img class="sb-church-logo" src="assets/central-henderson-logo.png" alt="Central Henderson">
-    <div class="sb-church">Central Henderson</div>
-    <div style="font-size:10px;font-weight:600;color:#C41E2A;margin-bottom:6px">My GRACE Members Card</div>
-    <img class="sb-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya Thompson">
-    <div class="sb-name">Maya Thompson</div>
-    <div class="sb-tier sb-commitment"><span class="sb-tier-dot"></span>Current rhythm · Partner</div>
-    <div class="sb-pulse-block">
-      <div class="token-row" style="margin-bottom:4px">
-        <span class="token-label" style="display:flex;align-items:center;gap:5px">Card impact · May</span>
-        <span class="token-val pulse-score" style="font-size:14px">$18.42</span>
+    <div class="sb-grace-orb">
+      <div class="grace-orb grace-orb--sb" role="img" aria-label="GRACE">
+        <div class="grace-orb__halo grace-orb__halo--outer"></div>
+        <div class="grace-orb__halo"></div>
+        <div class="grace-orb__core">
+          <div class="grace-orb__mist"></div>
+          <div class="grace-orb__wave" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
       </div>
-      <div style="font-size:9px;color:#aaa;line-height:1.35;text-align:center">Card-generated · routed this month</div>
     </div>
+    <div class="sb-church">Central Henderson</div>
+    <div style="font-size:10px;font-weight:600;color:#C41E2A">My GRACE Members Portal</div>
   </div>
   <div class="sb-scroll">
     <div class="nb active" id="nav-home" onclick="goSection('home')">
@@ -1633,6 +1698,18 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     </div>
     <div class="nb" id="nav-profile" onclick="openProfileTab('overview')">
       <span class="nb-ico" data-grace-icon="profile" data-grace-size="20"></span><span class="nb-label">My Journey</span>
+    </div>
+    <div class="sb-member">
+      <img class="sb-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya Thompson">
+      <div class="sb-name">Maya Thompson</div>
+      <div class="sb-tier sb-commitment"><span class="sb-tier-dot"></span>Current rhythm · Partner</div>
+      <div class="sb-pulse-block">
+        <div class="token-row" style="margin-bottom:4px">
+          <span class="token-label" style="display:flex;align-items:center;gap:5px">Card impact · May</span>
+          <span class="token-val pulse-score" style="font-size:14px">$18.42</span>
+        </div>
+        <div style="font-size:9px;color:#aaa;line-height:1.35;text-align:center">Card-generated · routed this month</div>
+      </div>
     </div>
   </div>
   <div class="sb-foot">
@@ -1717,10 +1794,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
 
-      <!-- GRACE navigator -->
-      <div class="dash-ai-companion">
-        <div class="ai-hero ai-hero--home">
-          <div class="ai-hero-row">
+      <!-- GRACE onboarding tutorial — dismiss when settled; orb stays in sidebar -->
+      <div class="dash-ai-companion" id="grace-home-tutorial-wrap">
+        <div class="ai-hero ai-hero--home grace-home-tutorial" id="grace-home-tutorial-panel" role="region" aria-label="GRACE getting started guide">
+          <span class="grace-tutorial-badge" id="grace-tutorial-badge">Getting started</span>
+          <button type="button" class="grace-tutorial-dismiss" onclick="dismissGraceHomeTutorial()" aria-label="Dismiss GRACE guide">×</button>
+          <div class="ai-hero-row" style="padding-top:22px">
             <div class="av-ring-wrap av-ring-wrap--grace">
               <div class="grace-orb grace-orb--lg" role="img" aria-label="GRACE">
                 <div class="grace-orb__halo grace-orb__halo--outer"></div>
@@ -1740,16 +1819,29 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <span id="home-ai-status"></span>
               </div>
               <div class="ai-greeting" id="home-ai-greeting"></div>
-              <div style="font-size:10px;color:#aaa;line-height:1.45;margin-top:6px" id="home-ai-disclaimer"></div>
+              <div style="font-size:10px;color:rgba(255,255,255,.45);line-height:1.45;margin-top:6px" id="home-ai-disclaimer"></div>
             </div>
           </div>
+          <div class="grace-tutorial-steps" id="grace-tutorial-steps"></div>
           <div class="ai-hero-chatrow">
+            <div class="grace-tutorial-try" id="grace-tutorial-try">Try it — ask GRACE anything</div>
             <div class="ai-hero-chatwrap">
               <input type="text" class="ai-hero-input" id="home-chat-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
               <button type="button" class="ai-hero-send" onclick="sendHomeChat()" aria-label="Send message">→</button>
             </div>
           </div>
+          <div class="grace-tutorial-foot">
+            <button type="button" class="grace-tutorial-dismiss-btn" id="grace-tutorial-dismiss-btn" onclick="dismissGraceHomeTutorial()">Got it — I'm settled</button>
+            <span class="grace-tutorial-dismiss-note" id="grace-tutorial-dismiss-note">Dismiss anytime — GRACE stays one orb-tap away in the sidebar.</span>
+          </div>
         </div>
+        <button type="button" class="grace-tutorial-reopen" id="grace-tutorial-reopen" onclick="showGraceHomeTutorial()" aria-label="Show GRACE guide again">
+          <span class="grace-tutorial-reopen-orb" id="grace-tutorial-reopen-orb" aria-hidden="true"></span>
+          <span class="grace-tutorial-reopen-copy">
+            <span class="grace-tutorial-reopen-title" id="grace-tutorial-reopen-title">Show GRACE guide</span>
+            <span class="grace-tutorial-reopen-sub">New here or need a refresher? Reopen the orientation — GRACE is always in the sidebar orb.</span>
+          </span>
+        </button>
       </div>
 
       <div class="dash-mod">
@@ -3818,6 +3910,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 </div>
 
 <script src="grace-messaging.js"></script>
+<script src="grace-companion.js"></script>
 <script src="grace-duotone-icons.js"></script>
 <script>
 /* D-ID Studio — set agentId + clientKey from studio.d-id.com Agents share panel when ready */
@@ -4102,14 +4195,38 @@ function toggleGraceFaq(i){
   });
   graceFaqOpen=isOpen?-1:i;
 }
+const GRACE_HOME_TUTORIAL_KEY='grace.home.tutorial.dismissed.central-henderson';
+function dismissGraceHomeTutorial(){
+  const wrap=document.getElementById('grace-home-tutorial-wrap');
+  if(wrap)wrap.classList.add('is-dismissed');
+  try{localStorage.setItem(GRACE_HOME_TUTORIAL_KEY,'1');}catch(e){}
+}
+function showGraceHomeTutorial(){
+  const wrap=document.getElementById('grace-home-tutorial-wrap');
+  if(wrap)wrap.classList.remove('is-dismissed');
+  try{localStorage.removeItem(GRACE_HOME_TUTORIAL_KEY);}catch(e){}
+  document.getElementById('grace-home-tutorial-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function initGraceHomeTutorial(){
+  const wrap=document.getElementById('grace-home-tutorial-wrap');
+  if(!wrap)return;
+  const reopenOrb=document.getElementById('grace-tutorial-reopen-orb');
+  if(reopenOrb&&typeof GRACE_MESSAGING.renderGraceOrb==='function'){
+    reopenOrb.innerHTML=GRACE_MESSAGING.renderGraceOrb('sm');
+  }
+  try{
+    if(localStorage.getItem(GRACE_HOME_TUTORIAL_KEY)==='1')wrap.classList.add('is-dismissed');
+  }catch(e){}
+}
 function sendHomeChat(){
   const input=document.getElementById('home-chat-input');
-  if(!input||!input.value.trim()){goSection('ai');return;}
-  const text=input.value.trim();
-  input.value='';
-  sendHomeCmd(text,null);
+  const text=input&&input.value.trim();
+  if(input)input.value='';
+  if(!text){GRACE_COMPANION.open();return;}
+  GRACE_COMPANION.open(text);
 }
 function sendHomeCmd(text,nav){
+  if(typeof GRACE_COMPANION!=='undefined'){GRACE_COMPANION.open(text);return;}
   processInputWithContext(text,nav,'system');
 }
 function syncHomeLeaderStrip(){
@@ -6641,9 +6758,54 @@ initLeaderHero();
 initResHeroSlider();
 GRACE_MESSAGING.renderFaqHtml(GRACE_MSG.faq, 'desktop-faq-list', 'toggleGraceFaq');
 GRACE_MESSAGING.initGraceMessagingDom(GRACE_MSG);
+initGraceHomeTutorial();
 if (typeof hydrateGraceIcons === 'function') hydrateGraceIcons(document);
 if (typeof initGracePortalIcons === 'function') initGracePortalIcons(document);
 syncHomeLeaderStrip();
+
+/* ── GRACE Companion — orb-launched floating chat with agency over the portal ── */
+GRACE_COMPANION.mount({
+  mode: 'float',
+  container: document.body,
+  zIndex: 8800,
+  voiceProvider: 'elevenlabs',
+  autoDetectVoice: true,
+  ttsUrl: '/api/grace-tts',
+  messaging: GRACE_MSG,
+  memberName: HOME_STATE.memberName || 'Maya',
+  orbs: ['.sb-grace-orb', '.av-ring-wrap--grace'],
+  toast: (m) => showPortalToast(m, '◈'),
+  openLeader: () => goSection('ai'),
+  navigate: (key) => {
+    const map = {
+      give: 'give', wallet: 'wallet', impact: 'impact', rewards: 'impact',
+      watch: 'watch', groups: 'groups', events: 'events',
+      outreach: 'outreach', care: 'outreach', serve: 'groups',
+      study: 'study', journal: 'journal', goals: 'goals',
+      ai: 'ai', home: 'home', profile: 'profile'
+    };
+    const target = map[key];
+    if (!target) return false;
+    goSection(target);
+    return true;
+  },
+  onCrisis: () => {
+    LEADER_STATE.pendingFollowUps++;
+    prependLeaderActivity({ icon: 'prayer', title: 'Care dispatch', detail: 'urgent request routed live', time: 'Just now' });
+    showPortalToast('Care dispatch notified — a leader will follow up', '🙏');
+    syncLeaderKpis();
+  },
+  getState: () => ({
+    goalPct: WALLET_STATE.givingGoalPct,
+    goalTarget: WALLET_STATE.givingGoalTarget,
+    givenMtd: 230,
+    cardImpact: WALLET_STATE.cardImpactMonth,
+    lives: WALLET_STATE.livesImpacted,
+    route: WALLET_STATE.impactRoute,
+    groupCount: typeof NET_STATE !== 'undefined' ? NET_STATE.groups : 2,
+    reflectionDays: typeof JOURNEY_STATE !== 'undefined' ? JOURNEY_STATE.reflectionDays : 7
+  })
+});
 </script>
 <script src="grace-impact-metrics.js"></script>
 <script>if(typeof hydrateImpactAllocation==='function')hydrateImpactAllocation();if(typeof hydrateLeader==='function')hydrateLeader();if(typeof hydrateHome==='function')hydrateHome();if(typeof hydrateWatch==='function')hydrateWatch();if(typeof hydrateJourney==='function')hydrateJourney();</script>

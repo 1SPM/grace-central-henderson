@@ -1,6 +1,6 @@
 /**
  * GRACE system identity — ethereal orb with oscillating waveform.
- * Used on Home GRACE cards only (not church C mark / leader avatars).
+ * Used on Home GRACE cards and sidebar identity (not church C mark / leader avatars).
  */
 
 @keyframes graceOrbPulse {
@@ -34,6 +34,7 @@
 }
 
 .grace-orb--lg { width: 112px; height: 112px; }
+.grace-orb--sb { width: 64px; height: 64px; min-width: 64px; }
 .grace-orb--md { width: 52px; height: 52px; min-width: 52px; }
 .grace-orb--sm { width: 44px; height: 44px; min-width: 44px; }
 
@@ -55,6 +56,8 @@
 
 .grace-orb--md .grace-orb__halo { inset: -4px; }
 .grace-orb--md .grace-orb__halo--outer { inset: -8px; }
+.grace-orb--sb .grace-orb__halo { inset: -5px; }
+.grace-orb--sb .grace-orb__halo--outer { inset: -10px; }
 .grace-orb--sm .grace-orb__halo { inset: -3px; }
 .grace-orb--sm .grace-orb__halo--outer { inset: -6px; }
 
@@ -137,6 +140,7 @@
 
 .grace-orb--lg .grace-orb__wave { gap: 4px; }
 .grace-orb--lg .grace-orb__wave span { width: 4px; border-radius: 2px; }
+.grace-orb--sb .grace-orb__wave span { width: 2.5px; }
 .grace-orb--md .grace-orb__wave span { width: 2.5px; gap: 2px; }
 .grace-orb--sm .grace-orb__wave span { width: 2px; gap: 1.5px; }
 
@@ -155,6 +159,14 @@
 .grace-orb--md .grace-orb__wave span:nth-child(5) { height: 9px; animation-delay: 0.15s; }
 .grace-orb--md .grace-orb__wave span:nth-child(6) { height: 11px; animation-delay: 0.25s; }
 .grace-orb--md .grace-orb__wave span:nth-child(7) { height: 5px; animation-delay: 0.35s; }
+
+.grace-orb--sb .grace-orb__wave span:nth-child(1) { height: 7px; animation-delay: 0s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(4) { height: 18px; animation-delay: 0.3s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(5) { height: 11px; animation-delay: 0.15s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(6) { height: 13px; animation-delay: 0.25s; }
+.grace-orb--sb .grace-orb__wave span:nth-child(7) { height: 6px; animation-delay: 0.35s; }
 
 .grace-orb--sm .grace-orb__wave span:nth-child(1) { height: 5px; animation-delay: 0s; }
 .grace-orb--sm .grace-orb__wave span:nth-child(2) { height: 10px; animation-delay: 0.1s; }
@@ -177,4 +189,21 @@
 
 .grace-strip-orb {
   flex-shrink: 0;
+}
+
+.sb-grace-orb {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 6px 0;
+  overflow: visible;
+}
+
+.sb-top {
+  overflow: visible;
+}
+
+.sb-grace-orb .grace-orb {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.35))
+    drop-shadow(0 0 18px rgba(168, 85, 247, 0.18));
 }

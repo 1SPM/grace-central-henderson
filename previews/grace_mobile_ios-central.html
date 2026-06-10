@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="GRACE">
 <link rel="stylesheet" href="grace-central-theme.css">
 <link rel="stylesheet" href="grace-orb.css">
+<link rel="stylesheet" href="grace-companion.css">
     <title>GRACE — Central Henderson</title>
     <meta name="grace-build" content="leaders-roster-v3">
 <style>
@@ -2325,6 +2326,7 @@ body{background:#f4f4f4;align-items:center;justify-content:center;font-family:va
 </style>
 
 <script src="grace-messaging.js"></script>
+<script src="grace-companion.js"></script>
 <script src="grace-duotone-icons.js"></script>
 <script>
 const CHURCH_NAME = 'Central Henderson';
@@ -2913,15 +2915,10 @@ function showNotif() {
 
 function mobGraceSend() {
   const inp = document.getElementById('mob-grace-input');
-  if (!inp || !inp.value.trim()) return;
-  const text = inp.value.trim();
-  inp.value = '';
-  const resp = GRACE_MESSAGING.buildAiResponseText(null, text, 'system', MOB_MSG);
-  mobToast(resp.text);
-  if (resp.nav) {
-    const tab = resp.nav === 'study' ? 'profile' : (resp.nav === 'outreach' ? 'community' : resp.nav);
-    if (['home', 'leadership', 'give', 'community', 'profile'].includes(tab)) showTab(tab);
-  }
+  const text = inp && inp.value.trim();
+  if (inp) inp.value = '';
+  if (!text) { GRACE_COMPANION.open(); return; }
+  GRACE_COMPANION.open(text);
 }
 
 function sendHomeChat(){
@@ -3002,6 +2999,45 @@ document.addEventListener('DOMContentLoaded', () => {
   syncHomeAssignedLeader(mobLeaders[currentMobLeader]);
   hydrateGraceIcons();
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLdrProfile(); });
+
+  /* ── GRACE Companion — orb-launched chat sheet with agency over the app ── */
+  GRACE_COMPANION.mount({
+    mode: 'sheet',
+    container: document.querySelector('.device-wrap') || document.body,
+    zIndex: 420,
+    voiceProvider: 'elevenlabs',
+    autoDetectVoice: true,
+    ttsUrl: '/api/grace-tts',
+    messaging: MOB_MSG,
+    memberName: 'Maya',
+    orbs: ['.grace-strip-orb'],
+    toast: (m) => mobToast(m),
+    openLeader: () => showTab('leadership'),
+    navigate: (key) => {
+      if (key === 'watch') { mobWatchPlay(); return true; }
+      const map = {
+        give: 'give', wallet: 'give', impact: 'give', rewards: 'give',
+        groups: 'community', events: 'community', outreach: 'community', care: 'community', serve: 'community',
+        study: 'profile', journal: 'profile', goals: 'profile', profile: 'profile',
+        ai: 'leadership', home: 'home'
+      };
+      const tab = map[key];
+      if (!tab) return false;
+      showTab(tab);
+      return true;
+    },
+    onCrisis: () => mobToast('Care dispatch notified — a leader will follow up'),
+    getState: () => ({
+      goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
+      goalTarget: window.GRACE_METRICS?.givingGoal?.target ?? 2400,
+      givenMtd: 230,
+      cardImpact: window.GRACE_METRICS?.graceImpact?.month ?? 18.42,
+      lives: 23,
+      route: 'Food Pantry',
+      groupCount: 2,
+      reflectionDays: 7
+    })
+  });
 });
 </script>
 
