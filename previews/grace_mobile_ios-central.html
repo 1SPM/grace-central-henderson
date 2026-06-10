@@ -7,10 +7,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="GRACE">
 <link rel="stylesheet" href="grace-central-theme.css">
+<link rel="stylesheet" href="grace-orb.css">
     <title>GRACE — Central Henderson</title>
     <meta name="grace-build" content="leaders-roster-v3">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+.grace-acronym-tag{font-size:7px;font-weight:600;white-space:normal;max-width:100%;line-height:1.25;display:block;margin-top:4px;padding:4px 6px;border-radius:6px;background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.2)}
 :root{
   --ios-bg:#F2F2F7;
   --ios-card:#FFFFFF;
@@ -378,7 +379,19 @@ body{display:flex;flex-direction:column}
 .ic-row.sm{width:30px;height:30px;border-radius:8px}
 .ic-slot{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .grace-ic{display:block}
-/* FAQ typography → grace-typography.css */
+/* FAQ */
+.faq-block{margin:12px 16px 24px}
+.faq-eyebrow{font-size:10px;font-weight:600;color:var(--brand-gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.faq-subtitle{font-size:13px;color:var(--ios-tertiary);line-height:1.5}
+.faq-list{display:flex;flex-direction:column;gap:10px}
+.faq-card{background:#fff;border:1px solid #e8e4dc;border-radius:16px;overflow:hidden}
+.faq-card.open{border-color:var(--brand-gold);box-shadow:0 2px 12px rgba(238,43,55,.08)}
+.faq-card-head{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer}
+.faq-card-q{flex:1;font-size:14px;font-weight:700;color:var(--ios-label);line-height:1.35}
+.faq-toggle{width:28px;height:28px;border-radius:50%;background:#f7f5f2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.faq-card.open .faq-toggle{background:var(--brand-navy)}
+.faq-answer{display:none;padding:0 16px 16px 56px;font-size:13px;color:var(--ios-tertiary);line-height:1.65}
+.faq-card.open .faq-answer{display:block}
 
 /* ── RESOURCES CARE ── */
 .care-option{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:#fff;border-bottom:.5px solid var(--ios-separator)}
@@ -664,7 +677,14 @@ body{display:flex;flex-direction:column}
         <div class="hero-card" style="margin-bottom:12px">
           <div class="hero-card-bg"></div>
           <div class="hero-card-inner">
-            <div class="hero-date" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><img src="assets/membership-ring.png" alt="" style="width:20px;height:20px;object-fit:contain" aria-hidden="true"><span>Central Commitment · Partner · 6%</span><span style="opacity:.85">· Pulse <strong>248</strong></span></div>
+            <div class="hero-date" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))">
+                <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.35)" stroke-width="2.5"/>
+                <circle cx="12" cy="12" r="9" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3.4 53.1" transform="rotate(-90 12 12)"/>
+                <circle cx="12" cy="12" r="5.5" fill="rgba(134,239,172,.35)" stroke="#bbf7d0" stroke-width="1"/>
+              </svg>
+              <span style="color:#86efac">Commitment™ · Partner · 6%</span><span style="opacity:.85">· Pulse™ <strong>248</strong></span>
+            </div>
             <div class="home-hero-kpis" style="margin-top:14px">
               <div class="home-kpi"><div class="home-kpi-val">7</div><div class="home-kpi-key">Prayer streak</div></div>
               <div class="home-kpi" onclick="openCommunityCare()"><div class="home-kpi-val">2</div><div class="home-kpi-key">Care alerts</div></div>
@@ -718,8 +738,35 @@ body{display:flex;flex-direction:column}
           </div>
         </div>
 
-        <!-- AI Companion -->
-        <div class="sect-hdr sm">Your leader</div>
+        <!-- GRACE navigator -->
+        <div class="sect-hdr sm"><span id="mob-grace-section-label">GRACE</span> <span style="font-weight:500;color:var(--ios-tertiary);font-size:11px;margin-left:6px">Your guide</span></div>
+        <div class="ios-card" style="margin:0 16px 12px;padding:14px">
+          <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+            <div class="grace-strip-orb">
+              <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
+                <div class="grace-orb__halo grace-orb__halo--outer"></div>
+                <div class="grace-orb__halo"></div>
+                <div class="grace-orb__core">
+                  <div class="grace-orb__mist"></div>
+                  <div class="grace-orb__wave" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--ios-label)" id="mob-grace-title">GRACE</div>
+              <div style="font-size:11px;color:var(--ios-tertiary);line-height:1.4;margin-top:2px" id="mob-grace-sub"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" id="mob-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--ios-separator);font-size:13px" onkeydown="if(event.key==='Enter'){event.preventDefault();mobGraceSend()}">
+            <button type="button" onclick="mobGraceSend()" style="width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer">→</button>
+          </div>
+        </div>
+
+        <!-- Your leader avatar -->
+        <div class="sect-hdr sm">Your leader <span id="mob-leader-strip-sub" style="font-weight:500;color:var(--ios-tertiary);font-size:11px;display:block;margin-top:2px">Verified avatar · not GRACE</span></div>
         <div class="ai-card" id="home-ai-card" style="margin-bottom:12px">
           <div class="ai-card-glow"></div>
           <div class="ai-card-inner">
@@ -729,8 +776,8 @@ body{display:flex;flex-direction:column}
                 <div class="ai-av-live"></div>
               </div>
               <div style="flex:1;min-width:0">
-                <div class="ai-card-name" id="home-ai-name">Pastor James Wilson <span class="ai-card-badge" style="margin-left:4px">AI Companion</span></div>
-                <div class="ai-card-role" id="home-ai-role">Senior Pastor · Central Henderson</div>
+                <div class="ai-card-name" id="home-ai-name">Pastor James Wilson <span class="ai-card-badge" style="margin-left:4px">Verified Avatar</span></div>
+                <div class="ai-card-role" id="home-ai-role">Senior Pastor · Central Henderson · Verified Avatar</div>
               </div>
             </div>
             <div class="ai-card-greeting" id="home-ai-greeting" style="margin-bottom:10px">"Good morning Maya — what's on your heart today?"</div>
@@ -739,7 +786,7 @@ body{display:flex;flex-direction:column}
               <button class="ai-card-btn ai-card-btn-outline" onclick="openDidStudio()">Begin a Conversation</button>
             </div>
             <div class="ai-hero-chatrow-mob" style="display:flex;gap:8px;margin-top:10px;align-items:center">
-              <input type="text" class="ai-hero-input-mob" id="home-chat-input" placeholder="Ask Pastor James anything…" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:13px" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
+              <input type="text" class="ai-hero-input-mob" id="home-chat-input" placeholder="Share with James…" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:13px" onkeydown="if(event.key==='Enter'){event.preventDefault();var v=this.value.trim();this.value='';if(v)homeGoLeadership(v);else homeGoLeadership();}">
               <button type="button" onclick="sendHomeChat()" style="width:36px;height:36px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-weight:700;cursor:pointer">→</button>
             </div>
           </div>
@@ -775,9 +822,9 @@ body{display:flex;flex-direction:column}
         <div style="display:flex;align-items:flex-end;justify-content:space-between">
           <div>
             <div id="mob-leader-name" style="font-size:17px;font-weight:700;color:#fff;margin-bottom:2px">Pastor James Wilson
-              <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">AI</span>
+              <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">Avatar</span>
             </div>
-            <div id="mob-leader-role" style="font-size:11px;color:rgba(255,255,255,.55)">Senior Pastor · Central Henderson</div>
+            <div id="mob-leader-role" style="font-size:11px;color:rgba(255,255,255,.55)">Senior Pastor · Verified Avatar · Central Henderson</div>
           </div>
           <div style="display:flex;align-items:center;gap:5px;background:rgba(52,199,89,.18);border:1px solid rgba(52,199,89,.4);border-radius:12px;padding:4px 10px" id="mob-online-badge">
             <div style="width:6px;height:6px;border-radius:50%;background:#34C759"></div>
@@ -826,7 +873,7 @@ body{display:flex;flex-direction:column}
         <div class="chat-msg">
           <img class="chat-msg-av" id="mob-chat-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
           <div>
-            <div class="chat-bubble">Good morning Maya — I'm Pastor James, your Grace AI companion.<br><br>I can help you:<br>• Give — set up tithing or a one-time gift<br>• Prayer — submit a request or pray with me<br>• Watch — today's service is live<br>• Study — open the Bible together<br>• Crisis — someone is always available</div>
+            <div class="chat-bubble">Good morning Maya — I'm Pastor James. What's on your heart today?<br><br>We can talk about:<br>• Prayer — share what's on your heart<br>• Scripture — study and reflect together<br>• Guidance — next steps in faith and life<br>• Crisis — human follow-up immediately<br><br>For giving, watch, and events, ask GRACE on Home.</div>
             <div class="chat-time">Just now</div>
           </div>
         </div>
@@ -834,10 +881,10 @@ body{display:flex;flex-direction:column}
       <!-- Input -->
       <div class="chat-input-bar">
         <button style="background:none;border:none;font-size:20px;cursor:pointer;padding:0 4px" onclick="mobSend('I need prayer support')">🎤</button>
-        <input class="chat-input" id="mob-chat-input" placeholder="Ask Grace — trained on Central Henderson values…" onkeydown="if(event.key==='Enter')mobSendFromInput()">
+        <input class="chat-input" id="mob-chat-input" placeholder="Share with Pastor James…" onkeydown="if(event.key==='Enter')mobSendFromInput()">
         <button class="chat-send" onclick="mobSendFromInput()">↑</button>
       </div>
-      <div style="padding:6px 14px 8px;font-size:10px;color:var(--ios-tertiary);line-height:1.4;text-align:center;background:#fff;flex-shrink:0">Grace AI is a pastoral companion — not a clinician. Crisis requests route to a live leader immediately.</div>
+      <div style="padding:6px 14px 8px;font-size:10px;color:var(--ios-tertiary);line-height:1.4;text-align:center;background:#fff;flex-shrink:0" id="mob-chat-disclaimer">Isolated avatar — conversation siloed to this leader and kept confidential if saved at all, not shared with GRACE. Crisis requests route to a live leader immediately.</div>
     </div>
 
     <!-- ── LEADERS TAB ── -->
@@ -1856,12 +1903,12 @@ body{display:flex;flex-direction:column}
             <div>
               <div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Your assigned leader</div>
               <div class="assigned-name">Pastor James Wilson</div>
-              <div class="assigned-role">Senior Pastor · AI Companion available now</div>
+              <div class="assigned-role">Senior Pastor · Verified Avatar available now</div>
             </div>
           </div>
           <div class="assigned-msg">"Good morning Maya. I'm here whenever you're ready — for prayer, scripture, or just a conversation."</div>
           <div class="assigned-btns">
-            <button class="assigned-btn assigned-btn-navy" onclick="showTab('leadership')">Launch AI Session</button>
+            <button class="assigned-btn assigned-btn-navy" onclick="showTab('leadership')">Open leader avatar</button>
             <button class="assigned-btn assigned-btn-outline" onclick="mobToast('Message sent to care team')">📬 Message</button>
           </div>
         </div>
@@ -2203,6 +2250,14 @@ body{display:flex;flex-direction:column}
             <div class="ios-row-chevron">›</div>
           </div>
         </div>
+        <div class="sect-hdr sm">Help</div>
+        <div class="faq-block" style="margin:0 16px 24px">
+          <div class="faq-hero" style="padding:8px 0 14px;text-align:left">
+            <div class="faq-eyebrow" style="text-align:left" id="mob-faq-title">About GRACE &amp; Leader Avatars</div>
+            <p class="faq-subtitle" style="text-align:left;margin:0" id="mob-faq-subtitle">GRACE guides your journey · Leader avatars are where you confide</p>
+          </div>
+          <div class="faq-list" id="mob-faq-list"></div>
+        </div>
         <div class="ios-list rounded" style="margin:0 16px 32px">
           <div class="ios-row" style="cursor:pointer" onclick="mobToast('Signed out','↩️')">
             <div class="ios-row-icon" style="background:#fee2e2">↩️</div>
@@ -2269,9 +2324,11 @@ body{background:#f4f4f4;align-items:center;justify-content:center;font-family:va
 }
 </style>
 
+<script src="grace-messaging.js"></script>
 <script src="grace-duotone-icons.js"></script>
 <script>
 const CHURCH_NAME = 'Central Henderson';
+const MOB_MSG = GRACE_MESSAGING.getMessaging(CHURCH_NAME);
 // ── LEADER DATA (full — matches desktop) ──
 const mobLeaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',topic:'Prayer · Scripture · Guidance',img:'https://randomuser.me/api/portraits/men/32.jpg',didImg:'https://randomuser.me/api/portraits/men/32.jpg',greeting:"Good morning Maya 🙏 I'm Pastor James — your Grace AI companion. What's on your heart today?",online:true,bio:"Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His AI companion is trained on 4 years of sermons, weekly blessings, and approved pastoral responses.",exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
@@ -2293,6 +2350,7 @@ const mobLeaders = [
   {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',didImg:'https://randomuser.me/api/portraits/women/81.jpg',greeting:"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?",online:true,bio:"Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.",exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
   {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',didImg:'https://randomuser.me/api/portraits/men/76.jpg',greeting:"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we're singing this Sunday?",online:false,bio:"Bro. Samuel leads the worship band, choir, and creative arts collective. His AI companion shares set lists, chord chart info, and theology of worship resources.",exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
 ];
+GRACE_MESSAGING.normalizeLeadersArray(mobLeaders, CHURCH_NAME);
 
 let currentMobLeader = 0;
 let profileOpenIdx = -1;
@@ -2576,8 +2634,8 @@ function mobSwitchLeader(idx) {
     heroAv.alt = l.name;
   }
   document.getElementById('mob-leader-name').innerHTML = l.name +
-    ' <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">AI</span>';
-  document.getElementById('mob-leader-role').textContent = l.title + ' · ' + CHURCH_NAME;
+    ' <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(238,43,55,.45);color:#fecaca;border:1px solid rgba(238,43,55,.4);margin-left:5px;vertical-align:middle">Avatar</span>';
+  document.getElementById('mob-leader-role').textContent = (l.role || l.title + ' · ' + CHURCH_NAME);
   document.getElementById('mob-chat-av').src = l.img;
   // Online badge
   const badge = document.getElementById('mob-online-badge');
@@ -2588,8 +2646,12 @@ function mobSwitchLeader(idx) {
   }
   // Update home card
   document.getElementById('home-ai-av').src = l.img;
-  document.getElementById('home-ai-name').textContent = l.name;
-  document.getElementById('home-ai-role').textContent = l.title + ' · ' + CHURCH_NAME;
+  document.getElementById('home-ai-name').innerHTML = l.name + ' <span class="ai-card-badge" style="margin-left:4px">Verified Avatar</span>';
+  document.getElementById('home-ai-role').textContent = l.role || l.title + ' · ' + CHURCH_NAME;
+  const homeChat = document.getElementById('home-chat-input');
+  if (homeChat) homeChat.placeholder = MOB_MSG.leaderAvatar.chatPlaceholder(l.name);
+  const mobChat = document.getElementById('mob-chat-input');
+  if (mobChat) mobChat.placeholder = MOB_MSG.leaderAvatar.chatPlaceholder(l.name);
   const greetShort = l.greeting.replace(/^"|"$/g,'');
   document.getElementById('home-ai-greeting').textContent = '"' + greetShort + '"';
   syncHomeAssignedLeader(l);
@@ -2615,10 +2677,10 @@ function mobSwitchFromProfile() {
 
 // ── CHAT ──
 const mobResponses = {
-  give:"I'll take you to the giving section right now. You can set up a tithe or one-time offering.",
+  give:"I can open giving for you — tithe, one-time offering, or recurring gifts. Your church wallet is ready when you are.",
   prayer:"You've been heard. I'm connecting you to Care Dispatch — submit a request or I can alert a leader now.",
-  watch:"The Sunday service is live right now with 342 watching! Let me take you there.",
-  default:"I hear you. As your AI companion I can help you give, pray, find community, or connect with a live leader. What would you like to do?"
+  watch:"The Sunday service is live right now with 342 watching! I can take you there from GRACE on Home, or we can reflect on the message together.",
+  default: MOB_MSG.leaderAvatar.defaultResponse
 };
 let mobTyping = false;
 
@@ -2726,37 +2788,19 @@ function closeLdrProfile() {
 }
 
 // ── FAQ DATA & RENDER ──
-const mobFaq = [
-  { icon:'brain', q:'How do the AI companions work?', a:'Each verified leader has an AI companion trained on their sermons, teachings, and approved pastoral responses — not a generic chatbot. You get 24/7 guidance in their voice while real leaders remain available for live care.' },
-  { icon:'people', q:'Is this the same as talking to the real leader?', a:'The AI reflects each leader\'s pastoral style and knowledge, but it is not a live person. You can always request a real leader — crisis keywords and "I need help now" route immediately to on-call pastoral care.' },
-  { icon:'shield', q:'What is a Verified Leader?', a:'Verified Leaders are Central Henderson pastors and ministers whose identity, role, and AI training have been confirmed by the church. You will see a verified badge on their profile and in the Leaders directory.' },
-  { icon:'dollar', q:'How much does it cost?', a:'AI companion access is included for members at no extra charge. Giving, GRACE Wallet, and optional formation rewards follow your church\'s normal stewardship policies.' },
-  { icon:'chat', q:'Are conversations private?', a:'Sessions are confidential within Central Henderson. Crisis keywords (self-harm, abuse, suicidal thoughts) automatically alert a live pastor — you will never be left alone in those moments.' },
-  { icon:'shield', q:'How do I switch leaders?', a:'Open the Leaders tab and tap Switch beside any leader. Your chat resets with a greeting from the new leader\'s companion.' },
-];
+const mobFaq = MOB_MSG.faq.items;
 let faqOpen = -1;
 function renderMobFaq() {
-  const el = document.getElementById('mob-faq-list');
-  if(!el || el.dataset.rendered) return;
-  el.dataset.rendered = '1';
-  el.innerHTML = mobFaq.map((f, i) => `
-    <div class="faq-card${i === 0 ? ' open' : ''}" id="mob-faq-card-${i}">
-      <div class="faq-card-head" onclick="toggleMobFaq(${i})">
-        <span id="mob-faq-tile-${i}">${typeof graceIconTile === 'function' ? graceIconTile(f.icon, i === 0) : ''}</span>
-        <div class="faq-card-q">${f.q}</div>
-        <span class="faq-toggle" id="mob-faq-toggle-${i}">${typeof graceIcon === 'function' ? graceIcon(i === 0 ? 'chevronUp' : 'chevronDown', { size: 14, variant: i === 0 ? 'inverse' : 'default' }) : ''}</span>
-      </div>
-      <div class="faq-answer" id="mob-faq-body-${i}"${i === 0 ? '' : ' style="display:none"'}>${f.a}</div>
-    </div>`).join('');
+  GRACE_MESSAGING.renderFaqHtml(MOB_MSG.faq, 'mob-faq-list', 'toggleMobFaq');
   faqOpen = 0;
 }
 function toggleMobFaq(i) {
   const isOpen = faqOpen === i;
   mobFaq.forEach((f, j) => {
-    const card = document.getElementById('mob-faq-card-' + j);
-    const body = document.getElementById('mob-faq-body-' + j);
-    const tile = document.getElementById('mob-faq-tile-' + j);
-    const toggle = document.getElementById('mob-faq-toggle-' + j);
+    const card = document.getElementById('grace-faq-card-' + j);
+    const body = document.getElementById('grace-faq-body-' + j);
+    const tile = document.getElementById('grace-faq-tile-' + j);
+    const toggle = document.getElementById('grace-faq-toggle-' + j);
     const open = !isOpen && j === i;
     if(card) card.classList.toggle('open', open);
     if(body) body.style.display = open ? 'block' : 'none';
@@ -2867,6 +2911,19 @@ function showNotif() {
 }
 
 
+function mobGraceSend() {
+  const inp = document.getElementById('mob-grace-input');
+  if (!inp || !inp.value.trim()) return;
+  const text = inp.value.trim();
+  inp.value = '';
+  const resp = GRACE_MESSAGING.buildAiResponseText(null, text, 'system', MOB_MSG);
+  mobToast(resp.text);
+  if (resp.nav) {
+    const tab = resp.nav === 'study' ? 'profile' : (resp.nav === 'outreach' ? 'community' : resp.nav);
+    if (['home', 'leadership', 'give', 'community', 'profile'].includes(tab)) showTab(tab);
+  }
+}
+
 function sendHomeChat(){
   const input=document.getElementById('home-chat-input');
   if(!input||!input.value.trim()){openDidStudio();return;}
@@ -2929,6 +2986,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGraceTabIcons();
   initGraceCareAndRows();
   if(typeof initGraceAllIcons === 'function') initGraceAllIcons();
+  GRACE_MESSAGING.initGraceMessagingDom(MOB_MSG);
   renderMobLeaderList();
   renderMobFaq();
   const faqHero = document.getElementById('mob-faq-hero-icon');

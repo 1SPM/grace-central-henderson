@@ -33,8 +33,20 @@ Hard-refresh (**Cmd+Shift+R**) after pulling changes so fonts and CSS update.
 | `previews/grace_member_portal_central.html` | Desktop member portal — Home, Leadership, Give, Community, Profile |
 | `previews/grace_mobile_ios-central.html` | Mobile app prototype |
 | `previews/grace-central-theme.css` | Central brand theme (Poppins, Montserrat, `#EE2B37`) |
+| `previews/grace-messaging.js` | Canonical GRACE vs leader avatar messaging |
 | `previews/grace-duotone-icons.js` | Red/pink duotone icon system |
 | `previews/assets/central-henderson-logo.png` | Central Henderson logo |
+
+## AI model
+
+GRACE uses a **two-tier** approach documented in [`previews/grace-messaging.js`](previews/grace-messaging.js):
+
+- **GRACE** (Growth · Resource · Assistance · Community · Engagement) — Guides app navigation: giving, watch, groups, events, and care routing. For deeper conversation, connect with a leader avatar.
+- **Leader avatars (independent agents)** — Each verified leader has an isolated, grounded avatar profile (their pastoral essence captured per the church avatar program). Members confide with leader avatars, not GRACE. Conversations are siloed per leader and kept confidential if saved at all.
+
+All member preview HTML files load `grace-messaging.js` for shared copy.
+
+**GRACE** system identity on Home cards uses the animated **grace orb** ([`previews/grace-orb.css`](previews/grace-orb.css)) — not the church C mark. Leader avatars and GRACE Card wallet branding still use church marks and photos.
 
 ## Design notes
 

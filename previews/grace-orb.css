@@ -1,0 +1,180 @@
+/**
+ * GRACE system identity — ethereal orb with oscillating waveform.
+ * Used on Home GRACE cards only (not church C mark / leader avatars).
+ */
+
+@keyframes graceOrbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 0.35; }
+}
+
+@keyframes graceOrbMist {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.55; }
+  50% { transform: rotate(12deg) scale(1.06); opacity: 0.75; }
+}
+
+@keyframes graceOrbSpeckle {
+  0%, 100% { transform: translate(0, 0); opacity: 0.35; }
+  50% { transform: translate(2px, -3px); opacity: 0.6; }
+}
+
+@keyframes graceOrbWave {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.85); }
+}
+
+.grace-orb {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.45))
+    drop-shadow(0 0 28px rgba(168, 85, 247, 0.25));
+}
+
+.grace-orb--lg { width: 112px; height: 112px; }
+.grace-orb--md { width: 52px; height: 52px; min-width: 52px; }
+.grace-orb--sm { width: 44px; height: 44px; min-width: 44px; }
+
+.grace-orb__halo {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(96, 165, 250, 0.55);
+  animation: graceOrbPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.grace-orb__halo--outer {
+  inset: -14px;
+  border-width: 1.5px;
+  border-color: rgba(168, 85, 247, 0.28);
+  animation-delay: 0.5s;
+}
+
+.grace-orb--md .grace-orb__halo { inset: -4px; }
+.grace-orb--md .grace-orb__halo--outer { inset: -8px; }
+.grace-orb--sm .grace-orb__halo { inset: -3px; }
+.grace-orb--sm .grace-orb__halo--outer { inset: -6px; }
+
+.grace-orb__core {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(147, 197, 253, 0.95) 0%,
+    #3b82f6 28%,
+    #7c3aed 58%,
+    #d946ef 85%,
+    rgba(88, 28, 135, 0.9) 100%
+  );
+  box-shadow:
+    inset 0 0 24px rgba(255, 255, 255, 0.25),
+    inset 0 -8px 20px rgba(30, 58, 95, 0.35);
+}
+
+.grace-orb__mist {
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.35) 0%, transparent 45%),
+    radial-gradient(circle at 25% 75%, rgba(59, 130, 246, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 55% 55%, rgba(217, 70, 239, 0.25) 0%, transparent 55%);
+  animation: graceOrbMist 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.grace-orb__mist::before,
+.grace-orb__mist::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: graceOrbSpeckle 3s ease-in-out infinite;
+}
+
+.grace-orb__mist::before {
+  width: 28%;
+  height: 28%;
+  top: 18%;
+  left: 22%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+}
+
+.grace-orb__mist::after {
+  width: 22%;
+  height: 22%;
+  bottom: 20%;
+  right: 18%;
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.45) 0%, transparent 70%);
+  animation-delay: 1.2s;
+}
+
+.grace-orb__wave {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  z-index: 2;
+}
+
+.grace-orb__wave span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.65);
+  animation: graceOrbWave 0.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.grace-orb--lg .grace-orb__wave { gap: 4px; }
+.grace-orb--lg .grace-orb__wave span { width: 4px; border-radius: 2px; }
+.grace-orb--md .grace-orb__wave span { width: 2.5px; gap: 2px; }
+.grace-orb--sm .grace-orb__wave span { width: 2px; gap: 1.5px; }
+
+.grace-orb--lg .grace-orb__wave span:nth-child(1) { height: 14px; animation-delay: 0s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(2) { height: 28px; animation-delay: 0.1s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(4) { height: 34px; animation-delay: 0.3s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(5) { height: 22px; animation-delay: 0.15s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(6) { height: 30px; animation-delay: 0.25s; }
+.grace-orb--lg .grace-orb__wave span:nth-child(7) { height: 12px; animation-delay: 0.35s; }
+
+.grace-orb--md .grace-orb__wave span:nth-child(1) { height: 6px; animation-delay: 0s; }
+.grace-orb--md .grace-orb__wave span:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+.grace-orb--md .grace-orb__wave span:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+.grace-orb--md .grace-orb__wave span:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+.grace-orb--md .grace-orb__wave span:nth-child(5) { height: 9px; animation-delay: 0.15s; }
+.grace-orb--md .grace-orb__wave span:nth-child(6) { height: 11px; animation-delay: 0.25s; }
+.grace-orb--md .grace-orb__wave span:nth-child(7) { height: 5px; animation-delay: 0.35s; }
+
+.grace-orb--sm .grace-orb__wave span:nth-child(1) { height: 5px; animation-delay: 0s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(3) { height: 7px; animation-delay: 0.2s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(5) { height: 8px; animation-delay: 0.15s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(6) { height: 9px; animation-delay: 0.25s; }
+.grace-orb--sm .grace-orb__wave span:nth-child(7) { height: 4px; animation-delay: 0.35s; }
+
+/* Desktop home: larger ring wrap for GRACE system orb */
+.av-ring-wrap--grace .av-ring,
+.av-ring-wrap--grace .av-ring.grace-orb--lg {
+  width: 112px;
+  height: 112px;
+}
+
+.av-ring-wrap--grace {
+  margin-right: 4px;
+}
+
+.grace-strip-orb {
+  flex-shrink: 0;
+}
