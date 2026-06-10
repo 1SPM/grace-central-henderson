@@ -39,3 +39,4 @@ grace_*.html
 !previews/grace_*.html
 previews/grace_member_portal.html
 previews/grace_mobile_ios.html
+.vercel
