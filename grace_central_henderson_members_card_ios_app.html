@@ -9,6 +9,7 @@
 <title>GRACE Central Henderson Members Card</title>
 <link rel="stylesheet" href="previews/grace-central-theme.css">
 <link rel="stylesheet" href="previews/grace-typography.css">
+<link rel="stylesheet" href="previews/grace-orb.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -128,11 +129,18 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .home-hero-tagline{
   font-size:12px;line-height:1.4;color:rgba(255,255,255,.82);margin-top:6px;max-width:260px;font-weight:500
 }
-.home-hero-tier{
-  display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:#86efac;font-weight:600
+.home-hero-leader{
+  display:flex;align-items:center;gap:10px;margin:10px 0 12px;padding:9px 12px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:14px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer
 }
-.home-commitment-ring{display:inline-flex;width:28px;height:28px;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
-.home-commitment-ring svg{width:28px;height:28px;display:block}
+.home-hero-leader:active{background:rgba(255,255,255,.22)}
+.home-hero-leader img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;flex-shrink:0;border:2px solid rgba(255,255,255,.35)}
+.home-leader-chip-copy{flex:1;min-width:0}
+.home-leader-chip-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.04em}
+.home-leader-chip-name{font-size:13px;font-weight:700;color:#fff;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-leader-chip-sub{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px}
+.home-leader-chip-cta{font-size:11px;font-weight:700;color:#fecaca;flex-shrink:0}
 .home-live-pill{
   display:inline-flex;align-items:center;gap:7px;background:#EE2B37;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:10px 14px;
   font-size:10px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;
@@ -194,14 +202,32 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   flex-shrink:0;padding:8px 12px;border-radius:10px;border:none;background:#fff;color:#1e3a5f;
   font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap
 }
-.home-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.home-action{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 6px;
-  border:1px solid #ece8e1;background:#fff;border-radius:12px;cursor:pointer;font-family:inherit;
-  font-size:10px;font-weight:700;color:#1a1a1a;line-height:1.2
+.home-grace-card{
+  background:linear-gradient(140deg,#0f2744 0%,#1B2A4A 55%,#16213c 100%);
+  border:1px solid rgba(96,165,250,.25);border-radius:16px;padding:14px;margin-bottom:12px;
+  box-shadow:0 10px 26px rgba(15,39,68,.28)
 }
-.home-action span[data-grace-icon]{display:inline-flex}
-.home-action-dots{font-size:16px;font-weight:800;line-height:1;letter-spacing:1px;color:#1a1a1a}
+.home-grace-row{display:flex;align-items:flex-start;gap:12px}
+.home-grace-card .grace-orb{flex-shrink:0;margin-top:2px}
+.home-grace-body{flex:1;min-width:0}
+.home-grace-title{font-size:14px;font-weight:800;color:#fff;letter-spacing:.02em;line-height:1.3}
+.home-grace-title .grace-acronym-tag{
+  display:block;font-size:8px;font-weight:600;color:#bfdbfe;background:rgba(59,130,246,.3);
+  border:1px solid rgba(96,165,250,.45);border-radius:6px;padding:3px 8px;margin-top:4px;
+  line-height:1.25;max-width:230px;letter-spacing:0
+}
+.home-grace-status{font-size:11px;font-weight:600;color:rgba(255,255,255,.85);margin-top:7px}
+.home-grace-note{font-size:10px;color:rgba(255,255,255,.5);line-height:1.45;margin-top:4px}
+.home-grace-inputrow{
+  display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 10px
+}
+.home-grace-input{flex:1;border:none;background:transparent;color:#fff;font-size:12px;outline:none;min-width:0;font-family:inherit}
+.home-grace-input::placeholder{color:rgba(255,255,255,.45)}
+.home-grace-send{
+  width:28px;height:28px;border:none;border-radius:9px;background:#3b82f6;color:#fff;
+  font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;display:grid;place-items:center
+}
 .home-more-item{
   display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:none;border-bottom:1px solid var(--ios-line);
   background:#fff;text-align:left;font-family:inherit;cursor:pointer;font-size:14px;font-weight:600;color:#111
@@ -1943,16 +1969,27 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 /* === Desktop parity (Central iOS) === */
 .home-hero-metrics{grid-template-columns:repeat(2,1fr)}
 .dash-mod{background:#fff;border:1px solid #ece8e1;border-radius:14px;margin-bottom:12px;overflow:hidden}
-.dash-mod-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid #f3f0eb}
+.dash-mod-head{padding:12px 14px 8px;border-bottom:1px solid #f3f0eb;margin-bottom:12px}
 .dash-mod-title{font-size:13px;font-weight:700;color:#1a1a1a}
-.dash-mod-sub{font-size:10px;color:#aaa}
+.dash-mod-sub{font-size:9px;color:#aaa;margin-top:2px;line-height:1.4}
 .dash-pillars{display:flex;gap:10px;padding:0 14px 14px;overflow-x:auto;scrollbar-width:none}
 .dash-pillars::-webkit-scrollbar{display:none}
-.dash-pillar{flex:0 0 118px;background:#faf8f5;border:1px solid #ece8e1;border-radius:12px;padding:12px 10px;text-align:center;cursor:pointer}
-.dash-pillar-letter{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#000,#111);color:#EE2B37;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
-.dash-pillar-name{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
-.dash-pillar-sub{font-size:9px;color:#888;line-height:1.35}
-.dash-pillar-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px;margin-top:6px;display:inline-block;background:#FFF0F1;color:#000}
+.dash-pillar{
+  flex:0 0 118px;background:#faf8f5;border:1px solid #ece8e1;border-radius:12px;padding:12px 10px 11px;
+  text-align:left;cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:112px
+}
+.dash-pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pillar-accent,#EE2B37);opacity:.85}
+.dash-pillar:active{border-color:var(--pillar-accent,#EE2B37);background:#fff}
+.dash-pillar-top{margin-bottom:7px}
+.dash-pillar-step{font-size:17px;font-weight:800;color:var(--pillar-accent,#EE2B37);letter-spacing:-.02em;line-height:1;display:block}
+.dash-pillar-name{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:3px;line-height:1.2}
+.dash-pillar-sub{font-size:9px;color:#888;line-height:1.35;flex:1}
+.dash-pillar-badge{font-size:8px;font-weight:700;padding:3px 6px;border-radius:8px;margin-top:7px;display:inline-block;background:#fff;color:#555;border:1px solid #ece8e1;align-self:flex-start}
+.dash-pillar--growth{--pillar-accent:#6366f1}
+.dash-pillar--resource{--pillar-accent:#d97706}
+.dash-pillar--assistance{--pillar-accent:#e11d48}
+.dash-pillar--community{--pillar-accent:#059669}
+.dash-pillar--engagement{--pillar-accent:#EE2B37}
 .home-wallet-card{margin-bottom:12px}
 .home-wallet-bal{font-size:26px;font-weight:800;color:#1a1a1a;line-height:1.1}
 .home-wallet-lbl{font-size:10px;color:#888;margin-bottom:4px}
@@ -2165,19 +2202,18 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             <div class="home-hero-left">
               <div class="home-hero-date" id="home-hero-date">Sat, May 30 · Central Henderson</div>
               <h1 class="home-hero-name">Good morning, Maya</h1>
-              <p class="home-hero-tagline">Your daily companion for giving, care, and connection at Central.</p>
-              <div class="home-hero-tier">
-                <span class="home-commitment-ring" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.35)" stroke-width="2.5"/>
-                    <circle cx="12" cy="12" r="9" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3.4 53.1" transform="rotate(-90 12 12)"/>
-                    <circle cx="12" cy="12" r="5.5" fill="rgba(134,239,172,.35)" stroke="#bbf7d0" stroke-width="1"/>
-                  </svg>
-                </span>
-                <span id="home-commit-line">Current rhythm · Partner</span>
-              </div>
+              <p class="home-hero-tagline">Your guide to growth, resources, and community at Central Henderson.</p>
             </div>
             <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+          </div>
+          <div class="home-hero-leader" id="home-leader-chip" onclick="showScreen('leaders')" role="button" tabindex="0" aria-label="Open your leader avatar">
+            <img id="home-leader-chip-av" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="">
+            <div class="home-leader-chip-copy">
+              <div class="home-leader-chip-label">Your leader</div>
+              <div class="home-leader-chip-name" id="home-leader-chip-name">Pastor James Wilson</div>
+              <div class="home-leader-chip-sub">Verified avatar · not GRACE</div>
+            </div>
+            <div class="home-leader-chip-cta">Open avatar →</div>
           </div>
           <div class="home-hero-metrics">
             <div class="home-metric"><strong id="hero-impact">$18.42</strong><span>Card impact · routed this month</span></div>
@@ -2214,49 +2250,66 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <button type="button" class="pilot-next-btn" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review</button>
         </div>
 
-        <div class="home-actions">
-          <button type="button" class="home-action" onclick="homeQuickCmd('give')"><span data-grace-icon="give" data-grace-size="18"></span>Give</button>
-          <button type="button" class="home-action" onclick="homeQuickCmd('prayer')"><span data-grace-icon="prayer" data-grace-size="18"></span>Prayer</button>
-          <button type="button" class="home-action" onclick="homeQuickCmd('watch')"><span data-grace-icon="watch" data-grace-size="18"></span>Watch</button>
-          <button type="button" class="home-action" onclick="openHomeMoreSheet()"><span class="home-action-dots" aria-hidden="true">···</span>More</button>
+        <div class="home-grace-card" id="home-grace-card">
+          <div class="home-grace-row">
+            <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
+              <div class="grace-orb__halo grace-orb__halo--outer"></div>
+              <div class="grace-orb__halo"></div>
+              <div class="grace-orb__core">
+                <div class="grace-orb__mist"></div>
+                <div class="grace-orb__wave" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+            <div class="home-grace-body">
+              <div class="home-grace-title">GRACE <span class="grace-acronym-tag" id="home-grace-acronym">Growth · Resource · Assistance · Community · Engagement</span></div>
+              <div class="home-grace-status" id="home-grace-status">Let&apos;s find your next step, Maya…</div>
+              <div class="home-grace-note" id="home-grace-note">GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.</div>
+            </div>
+          </div>
+          <div class="home-grace-inputrow">
+            <input type="text" class="home-grace-input" id="home-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendGraceHome()}">
+            <button type="button" class="home-grace-send" onclick="sendGraceHome()" aria-label="Send message to GRACE">→</button>
+          </div>
         </div>
 
 
         <div class="dash-mod">
           <div class="dash-mod-head">
             <div class="dash-mod-title">GRACE at Central</div>
-            <span class="dash-mod-sub">Journey · Impact · Care</span>
+            <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
           </div>
           <div class="dash-pillars">
-            <div class="dash-pillar" onclick="showScreen('profile')">
-              <div class="dash-pillar-letter"><span data-grace-icon="profile" data-grace-size="16" data-grace-variant="inverse"></span></div>
+            <div class="dash-pillar dash-pillar--growth" onclick="showScreen('profile')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
               <div class="dash-pillar-name">Journey</div>
-              <div class="dash-pillar-sub">Journal · goals</div>
+              <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
               <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
             </div>
-            <div class="dash-pillar" onclick="showScreen('give');walletTabGive('impact')">
-              <div class="dash-pillar-letter"><span data-grace-icon="impact" data-grace-size="16" data-grace-variant="inverse"></span></div>
+            <div class="dash-pillar dash-pillar--resource" onclick="showScreen('give');walletTabGive('impact')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
               <div class="dash-pillar-name">Impact</div>
-              <div class="dash-pillar-sub">Card impact · routing</div>
+              <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
               <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
             </div>
-            <div class="dash-pillar" onclick="showScreen('care')">
-              <div class="dash-pillar-letter"><span data-grace-icon="prayer" data-grace-size="16" data-grace-variant="inverse"></span></div>
+            <div class="dash-pillar dash-pillar--assistance" onclick="showScreen('care')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
               <div class="dash-pillar-name">Care</div>
-              <div class="dash-pillar-sub">Leadership · support</div>
+              <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
               <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
             </div>
-            <div class="dash-pillar" onclick="showScreen('give')">
-              <div class="dash-pillar-letter"><span data-grace-icon="give" data-grace-size="16" data-grace-variant="inverse"></span></div>
-              <div class="dash-pillar-name">Giving</div>
-              <div class="dash-pillar-sub">Give · tithe</div>
-              <span class="dash-pillar-badge" id="dash-pillar-giving-badge">$230 · May</span>
-            </div>
-            <div class="dash-pillar" onclick="showScreen('community')">
-              <div class="dash-pillar-letter"><span data-grace-icon="people" data-grace-size="16" data-grace-variant="inverse"></span></div>
+            <div class="dash-pillar dash-pillar--community" onclick="showScreen('community')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
               <div class="dash-pillar-name">Connect</div>
-              <div class="dash-pillar-sub">Groups · events</div>
+              <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
               <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
+            </div>
+            <div class="dash-pillar dash-pillar--engagement" onclick="showScreen('give')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
+              <div class="dash-pillar-name">Giving</div>
+              <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
+              <span class="dash-pillar-badge" id="dash-pillar-giving-badge">$230 · May</span>
             </div>
           </div>
         </div>
@@ -2268,16 +2321,16 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="home-ai-live"></div>
             </div>
             <div class="home-ai-teaser-body">
-              <div class="home-ai-teaser-top"><span id="home-ai-name">Pastor James Wilson</span> <span id="home-ai-status">· Grace AI</span></div>
+              <div class="home-ai-teaser-top"><span id="home-ai-name">Pastor James Wilson</span> <span id="home-ai-status">· Verified Avatar</span></div>
               <div class="home-ai-greeting" id="home-ai-greeting">What's on your heart?</div>
               <div class="home-ai-teaser-inputrow" onclick="event.stopPropagation()">
-                <input type="text" class="home-ai-input" id="home-chat-input" placeholder="Ask Grace for prayer, giving, or next steps…" aria-label="Message to AI companion" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
+                <input type="text" class="home-ai-input" id="home-chat-input" placeholder="Share with James…" aria-label="Message to your leader avatar" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
                 <button type="button" class="home-ai-send" onclick="sendHomeChat()" aria-label="Send message">→</button>
               </div>
             </div>
             <button type="button" class="home-ai-teaser-cta" onclick="event.stopPropagation();showScreen('leaders')">Message →</button>
           </div>
-          <span id="home-ai-role" hidden>Senior Pastor · Central Henderson · AI Companion</span>
+          <span id="home-ai-role" hidden>Senior Pastor · Central Henderson · Verified Avatar</span>
         </div>
 
         <div class="card card--teaser">
@@ -4431,6 +4484,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 <script src="previews/grace-impact-metrics.js"></script>
 <script src="previews/grace-duotone-icons.js"></script>
 <script src="previews/grace-verified-leaders-faq.js"></script>
+<script src="previews/grace-messaging.js"></script>
 <script>
 const leaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'previews/assets/Pastor-James-Wilson-profile.jpg',profileFrame:'previews/assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
@@ -6047,15 +6101,18 @@ function renderHomeAi() {
   const firstName = leaderFirstName(leader.name);
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   set('home-ai-name', leader.name);
-  set('home-ai-role', leader.role);
+  set('home-ai-role', leader.role.replace(/AI Companion/g, 'Verified Avatar'));
   var greet = (leader.greeting || '').replace(/^"|"$/g, '');
   if (greet.length > 72) greet = greet.slice(0, 69) + '…';
   set('home-ai-greeting', greet || 'What\'s on your heart?');
-  set('home-ai-status', leader.online !== false ? '· Grace AI · leader live' : '· Grace AI');
+  set('home-ai-status', leader.online !== false ? '· Verified Avatar · leader live' : '· Verified Avatar');
   const av = document.getElementById('home-ai-av');
   if (av) av.src = leader.img;
   const input = document.getElementById('home-chat-input');
-  if (input) input.placeholder = 'Ask Grace for prayer, giving, or next steps…';
+  if (input) input.placeholder = 'Share with ' + firstName + '…';
+  const chipAv = document.getElementById('home-leader-chip-av');
+  if (chipAv) chipAv.src = leader.img;
+  set('home-leader-chip-name', leader.name);
 }
 
 function renderLeaderRoster() {
@@ -6262,6 +6319,19 @@ function sendHomeChat() {
   }
 }
 
+function sendGraceHome() {
+  const input = document.getElementById('home-grace-input');
+  const text = input ? input.value.trim().toLowerCase() : '';
+  if (input) input.value = '';
+  if (/give|tithe|offer|donat/.test(text)) { showScreen('give'); showToast('GRACE — opening Give'); return; }
+  if (/watch|sermon|service|live/.test(text)) { openPush('watch'); return; }
+  if (/group|connect|communit/.test(text)) { showScreen('community'); showToast('GRACE — opening Connect'); return; }
+  if (/event|calendar|rsvp|sunday/.test(text)) { showScreen('community'); showToast('GRACE — opening events'); return; }
+  if (/prayer|pray|care|help|visit/.test(text)) { showScreen('care'); showToast('GRACE — opening Care'); return; }
+  showScreen('leaders');
+  showToast('GRACE — connecting you with a leader avatar');
+}
+
 function homeQuickCmd(action) {
   if (action === 'crisis') { openCrisisSupport(); return; }
   leaderQuickCmd(action === 'jesus' ? 'prayer' : action);
@@ -6381,7 +6451,6 @@ function hydrateMetrics() {
   const ldLiveCount = document.getElementById('ld-pulse-live-count');
   if (ldLiveCount) ldLiveCount.textContent = liveCount + ' live church signal' + (liveCount === 1 ? '' : 's');
   renderPulseChurchLive('ld-pulse-live');
-  setMetric('home-commit-line', 'Current rhythm · ' + m.commitment.level);
   setMetric('hero-lives', String(m.livesImpacted.month));
   setMetric('home-route-label', m.impactRouteLabel);
   setMetric('give-impact', formatMoney(m.graceImpact.month));
@@ -6768,6 +6837,15 @@ wireGiveFlow();
 initResHeroSlider();
 renderHomeImpactSummary();
 syncHomePillars();
+if (typeof GRACE_MESSAGING !== 'undefined') {
+  const graceMsg = GRACE_MESSAGING.getMessaging('Central Henderson');
+  const setGrace = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  setGrace('home-grace-acronym', graceMsg.system.acronymExpansion);
+  setGrace('home-grace-status', graceMsg.system.homeStatus);
+  setGrace('home-grace-note', graceMsg.system.disclaimer);
+  const graceInput = document.getElementById('home-grace-input');
+  if (graceInput) graceInput.placeholder = graceMsg.system.homePlaceholder;
+}
 </script>
 </body>
 </html>
