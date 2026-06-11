@@ -2311,25 +2311,6 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         </div>
 
 
-        <div class="home-ai-wrap">
-          <div class="home-ai-teaser" onclick="showScreen('leaders')">
-            <div class="home-ai-teaser-av">
-              <img id="home-ai-av" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
-              <div class="home-ai-live"></div>
-            </div>
-            <div class="home-ai-teaser-body">
-              <div class="home-ai-teaser-top"><span id="home-ai-name">Pastor James Wilson</span> <span id="home-ai-status">· Verified Avatar</span></div>
-              <div class="home-ai-greeting" id="home-ai-greeting">What's on your heart?</div>
-              <div class="home-ai-teaser-inputrow" onclick="event.stopPropagation()">
-                <input type="text" class="home-ai-input" id="home-chat-input" placeholder="Share with James…" aria-label="Message to your leader avatar" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
-                <button type="button" class="home-ai-send" onclick="sendHomeChat()" aria-label="Send message">→</button>
-              </div>
-            </div>
-            <button type="button" class="home-ai-teaser-cta" onclick="event.stopPropagation();showScreen('leaders')">Message →</button>
-          </div>
-          <span id="home-ai-role" hidden>Senior Pastor · Central Henderson · Verified Avatar</span>
-        </div>
-
         <div class="card card--teaser">
           <div class="section-head">
             <div>
@@ -4046,19 +4027,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <button type="button" class="drawer-link" onclick="drawerMenuAction('volunteer')"><span class="drawer-item-icon" data-drawer-icon="people"></span><span>Volunteer</span></button>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('find-event')"><span class="drawer-item-icon" data-drawer-icon="calendar"></span><span>Find an Event</span></button>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('join-group')"><span class="drawer-item-icon" data-drawer-icon="groups"></span><span>Join a Group</span></button>
-        <div class="drawer-visit">
-          <div class="drawer-visit-title">Weekend Experience Location</div>
-          <div class="drawer-visit-addr">1001 New Beginnings Dr.<br>Henderson, NV 89011</div>
-          <div class="drawer-times">
-            <strong>Sat</strong> 5:00 PM (PST)<br>
-            <strong>Sun</strong> 9:45 AM · 11:30 AM · 1:00 PM · 5:00 PM (PST)<br>
-            <strong>Sun 5:00 PM</strong> · Spanish
-          </div>
-          <button type="button" class="drawer-directions-btn" onclick="drawerMenuAction('directions')">Get Directions</button>
-        </div>
         <div class="drawer-section-label">Quick Links</div>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('mission')"><span class="drawer-item-icon" data-drawer-icon="help"></span><span>Our Mission</span></button>
-        <button type="button" class="drawer-link" onclick="drawerMenuAction('spirit-guides')"><span class="drawer-item-icon" data-drawer-icon="people"></span><span>Spirit Guides</span></button>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('safety')"><span class="drawer-item-icon" data-drawer-icon="shield"></span><span>Safety</span></button>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('privacy')"><span class="drawer-item-icon" data-drawer-icon="lock"></span><span>Privacy</span></button>
         <button type="button" class="drawer-link" onclick="drawerMenuAction('terms')"><span class="drawer-item-icon" data-drawer-icon="shield"></span><span>Terms</span></button>
@@ -5233,10 +5203,6 @@ function drawerMenuAction(action) {
       break;
     case 'mission':
       showToast('Central Henderson — helping people find and follow Jesus in community.');
-      break;
-    case 'spirit-guides':
-      showScreen('leaders');
-      syncDrawerNav('leaders');
       break;
     case 'safety':
       openCrisisSupport();
