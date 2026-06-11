@@ -313,9 +313,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 #ld-hero-centered .ld-av-lg .home-ai-pulse{inset:-5px;border-radius:50%}
 #ld-hero-centered .ld-av-lg .home-ai-pulse2{inset:-10px;border-radius:50%}
 #screen-leaders .leader-kpi-bar{display:none}
-.ld-profile-hero.ld-hero-centered .ld-av-lg img{
-  object-fit:contain;object-position:center center;background:rgba(255,255,255,.06)
-}
+.ld-profile-hero.ld-hero-centered .ld-av-lg img,
+#lpm-av{width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:center 38%;background:transparent;display:block}
 .ld-gallery-head-actions{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .ld-gallery-head-actions span{font-size:11px;font-weight:600;color:var(--ios-muted)}
 .ld-profile-hero.ld-hero-centered{
@@ -326,7 +325,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   background:radial-gradient(circle,rgba(59,130,246,.28),transparent 70%);z-index:0
 }
 .ld-profile-hero.ld-hero-centered>*{position:relative;z-index:1}
-.ld-av-lg{width:88px;height:88px;border-radius:50%;position:relative;flex-shrink:0}
+.ld-av-lg{width:88px;height:88px;border-radius:50%;position:relative;flex-shrink:0;overflow:hidden}
 .ld-av-lg img{width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:top;position:relative;z-index:2}
 .ld-av-lg .home-ai-pulse{inset:-6px}
 .ld-av-lg .home-ai-pulse2{inset:-12px}
@@ -2061,6 +2060,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .home-gi-alloc-fill{height:100%;border-radius:4px}
 .home-gi-cta{width:100%;margin-top:10px;padding:9px;border-radius:10px;background:#f7f5f2;border:1px solid #e8e0d5;font-size:10px;font-weight:700;color:#EE2B37;cursor:pointer;font-family:inherit}
 .cr-hero{background:linear-gradient(135deg,#000,#111);border-radius:16px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+.cr-hero-body{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.cr-hero-copy{flex:1;min-width:0;padding-right:4px}
+.cr-hero-face{position:relative;flex-shrink:0;width:72px;height:72px}
+.cr-hero-face img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center 38%;display:block;border:2px solid rgba(255,255,255,.18);box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.cr-hero-face-live{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#16a34a;border:2px solid #111;z-index:1}
 .cr-hero-live{font-size:9px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px;margin-bottom:6px}
 .cr-hero-live i{width:6px;height:6px;border-radius:50%;background:#16a34a;display:block}
 .cr-hero h2{font-size:18px;font-weight:800;color:#fff;margin:0}
@@ -3018,10 +3022,18 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
       </div>
       <div class="scroll">
         <div class="cr-hero">
-          <div class="cr-hero-live"><i></i> Available 24/7</div>
-          <h2>Pastoral care &amp; resources</h2>
-          <p>Connect with a leader · Submit care · Human follow-up available</p>
-          <div class="cr-hero-leader">Your assigned leader<strong>Pastor James Wilson</strong><span style="color:#16a34a;font-weight:600">● Online now</span></div>
+          <div class="cr-hero-body">
+            <div class="cr-hero-copy">
+              <div class="cr-hero-live"><i></i> Available 24/7</div>
+              <h2>Pastoral care &amp; resources</h2>
+              <p>Connect with a leader · Submit care · Human follow-up available</p>
+            </div>
+            <div class="cr-hero-face">
+              <img id="cr-hero-leader-img" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
+              <span class="cr-hero-face-live" id="cr-hero-leader-live" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="cr-hero-leader">Your assigned leader<strong id="cr-hero-leader-name">Pastor James Wilson</strong><span id="cr-hero-leader-status" style="color:#16a34a;font-weight:600">● Online now</span></div>
         </div>
         <div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">
           <div class="section-head" style="padding:14px 14px 0;margin-bottom:0">
@@ -6155,6 +6167,21 @@ function syncLeaderHeroReachable(leader) {
   }
   syncHeroLiveDot('ld-hero-live-dot', leader);
 }
+function syncCareHeroLeader(leader) {
+  if (!leader) return;
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  const setSrc = (id, value) => { const el = document.getElementById(id); if (el) el.src = value; };
+  set('cr-hero-leader-name', leader.name);
+  setSrc('cr-hero-leader-img', leader.img);
+  const reachable = getLeaderReachable(leader);
+  const status = document.getElementById('cr-hero-leader-status');
+  const live = document.getElementById('cr-hero-leader-live');
+  if (status) {
+    status.textContent = reachable ? '● Online now' : '● Avatar available';
+    status.style.color = reachable ? '#16a34a' : 'rgba(255,255,255,.55)';
+  }
+  if (live) live.style.display = reachable ? 'block' : 'none';
+}
 function syncLeaderKpis() {
   const leader = leaders[currentLeader] || leaders[0];
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = String(value); };
@@ -6181,7 +6208,9 @@ function renderLeader() {
     set('ld-leader-role', leader.role || 'Central Henderson · Verified Avatar · Human follow-up available');
   }
   setSrc('ld-leader-img', leader.img);
+  setSrc('cr-hero-leader-img', leader.img);
   syncLeaderHeroReachable(leader);
+  syncCareHeroLeader(leader);
   syncLeaderKpis();
   var greet = (leader.greeting || '').replace(/^"|"$/g, '');
   set('ld-leader-greeting', greet || 'What\'s on your heart?');
