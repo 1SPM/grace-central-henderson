@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="previews/grace-central-theme.css">
 <link rel="stylesheet" href="previews/grace-typography.css">
 <link rel="stylesheet" href="previews/grace-orb.css">
+<link rel="stylesheet" href="previews/grace-companion.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1928,6 +1929,20 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .drawer-crisis{
   background:rgba(255,255,255,.06);border:1px solid rgba(238,43,55,.55);border-radius:14px;padding:14px;margin-bottom:14px
 }
+.drawer-grace{
+  display:flex;align-items:center;gap:14px;background:rgba(59,130,246,.12);
+  border:1px solid rgba(96,165,250,.4);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer
+}
+.drawer-grace:active{background:rgba(59,130,246,.22)}
+.drawer-grace .grace-orb{flex-shrink:0}
+.drawer-grace-copy{flex:1;min-width:0}
+.drawer-grace-title{font-size:14px;font-weight:800;letter-spacing:.02em;line-height:1.2}
+.drawer-grace-tag{
+  font-size:7.5px;font-weight:600;color:#bfdbfe;background:rgba(59,130,246,.3);
+  border:1px solid rgba(96,165,250,.45);border-radius:6px;padding:2px 6px;margin-top:4px;
+  display:inline-block;line-height:1.3
+}
+.drawer-grace-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:5px;line-height:1.35}
 .drawer-crisis-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
 .drawer-crisis-ico{
   width:36px;height:36px;border-radius:50%;background:#EE2B37;display:grid;place-items:center;flex-shrink:0;font-size:16px
@@ -3981,17 +3996,22 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <span class="drawer-head-title">Menu</span>
       </div>
       <div class="drawer-scroll">
-        <div class="drawer-crisis">
-          <div class="drawer-crisis-head">
-            <span class="drawer-crisis-ico" aria-hidden="true">♥</span>
-            <div>
-              <div class="drawer-crisis-title">Need Help?</div>
-              <div class="drawer-crisis-sub">If you're in crisis or need urgent support</div>
+        <div class="drawer-grace" id="drawer-grace" role="button" tabindex="0" aria-label="Talk with GRACE" onclick="openGraceFromDrawer()">
+          <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
+            <div class="grace-orb__halo grace-orb__halo--outer"></div>
+            <div class="grace-orb__halo"></div>
+            <div class="grace-orb__core">
+              <div class="grace-orb__mist"></div>
+              <div class="grace-orb__wave" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
             </div>
           </div>
-          <p class="drawer-crisis-body">Access free, confidential resources and helplines.</p>
-          <button type="button" class="drawer-crisis-btn" onclick="openCrisisSupport()"><span aria-hidden="true">♥</span> Access Crisis Support</button>
-          <div class="drawer-crisis-foot">Available worldwide · Free · Confidential</div>
+          <div class="drawer-grace-copy">
+            <div class="drawer-grace-title">GRACE</div>
+            <div class="drawer-grace-tag">Growth · Resource · Assistance · Community · Engagement</div>
+            <div class="drawer-grace-sub">Ask me — give, watch, groups, events…</div>
+          </div>
         </div>
         <div class="drawer-section-label">Main</div>
         <nav class="drawer-nav">
@@ -4044,6 +4064,19 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <button type="button" class="drawer-link" onclick="drawerMenuAction('terms')"><span class="drawer-item-icon" data-drawer-icon="shield"></span><span>Terms</span></button>
         <div class="drawer-divider"></div>
         <button type="button" class="drawer-link drawer-signout" onclick="drawerMenuAction('signout')"><span class="drawer-item-icon" data-drawer-icon="signout"></span><span>Sign Out</span></button>
+        <div class="drawer-divider"></div>
+        <div class="drawer-crisis">
+          <div class="drawer-crisis-head">
+            <span class="drawer-crisis-ico" aria-hidden="true">♥</span>
+            <div>
+              <div class="drawer-crisis-title">Need Help?</div>
+              <div class="drawer-crisis-sub">If you're in crisis or need urgent support</div>
+            </div>
+          </div>
+          <p class="drawer-crisis-body">Access free, confidential resources and helplines.</p>
+          <button type="button" class="drawer-crisis-btn" onclick="openCrisisSupport()"><span aria-hidden="true">♥</span> Access Crisis Support</button>
+          <div class="drawer-crisis-foot">Available worldwide · Free · Confidential</div>
+        </div>
       </div>
     </aside>
 
@@ -4467,6 +4500,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 <script src="previews/grace-duotone-icons.js"></script>
 <script src="previews/grace-verified-leaders-faq.js"></script>
 <script src="previews/grace-messaging.js"></script>
+<script src="previews/grace-companion.js"></script>
 <script>
 const leaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'previews/assets/Pastor-James-Wilson-profile.jpg',profileFrame:'previews/assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
@@ -6303,8 +6337,13 @@ function sendHomeChat() {
 
 function sendGraceHome() {
   const input = document.getElementById('home-grace-input');
-  const text = input ? input.value.trim().toLowerCase() : '';
+  const raw = input ? input.value.trim() : '';
   if (input) input.value = '';
+  if (typeof GRACE_COMPANION !== 'undefined') {
+    GRACE_COMPANION.open(raw || undefined);
+    return;
+  }
+  const text = raw.toLowerCase();
   if (/give|tithe|offer|donat/.test(text)) { showScreen('give'); showToast('GRACE — opening Give'); return; }
   if (/watch|sermon|service|live/.test(text)) { openPush('watch'); return; }
   if (/group|connect|communit/.test(text)) { showScreen('community'); showToast('GRACE — opening Connect'); return; }
@@ -6827,6 +6866,61 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
   setGrace('home-grace-note', graceMsg.system.disclaimer);
   const graceInput = document.getElementById('home-grace-input');
   if (graceInput) graceInput.placeholder = graceMsg.system.homePlaceholder;
+
+  /* ── GRACE Companion — orb-launched chat sheet with agency over the app ── */
+  if (typeof GRACE_COMPANION !== 'undefined') {
+    GRACE_COMPANION.mount({
+      mode: 'sheet',
+      container: document.querySelector('.device') || document.body,
+      zIndex: 480,
+      voiceProvider: 'elevenlabs',
+      autoDetectVoice: true,
+      ttsUrl: '/api/grace-tts',
+      messaging: graceMsg,
+      memberName: 'Maya',
+      orbs: ['.drawer-grace .grace-orb', '.home-grace-card .grace-orb'],
+      toast: (m) => showToast(m),
+      openLeader: () => showScreen('leaders'),
+      navigate: (key) => {
+        if (key === 'watch') { openPush('watch'); return true; }
+        const map = {
+          give: 'give', wallet: 'give', impact: 'give', rewards: 'give',
+          groups: 'community', events: 'community', serve: 'community',
+          outreach: 'care', care: 'care',
+          study: 'profile', journal: 'profile', goals: 'profile', profile: 'profile',
+          ai: 'leaders', home: 'home'
+        };
+        const screen = map[key];
+        if (!screen) return false;
+        showScreen(screen);
+        return true;
+      },
+      onCrisis: () => openCrisisSupport(),
+      currentPage: () => {
+        const screen = document.querySelector('.screen.active');
+        const key = screen ? screen.id.replace(/^screen-/, '') : 'home';
+        return ({ leaders: 'ai', give: 'give', community: 'groups', profile: 'study', care: 'outreach' })[key] || key;
+      },
+      onUnknown: (entry) => console.info('GRACE admin inbox (members card):', entry),
+      getState: () => ({
+        goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
+        goalTarget: window.GRACE_METRICS?.givingGoal?.target ?? 2400,
+        givenMtd: window.GRACE_METRICS?.givenMonth ?? 230,
+        cardImpact: window.GRACE_METRICS?.graceImpact?.month ?? 18.42,
+        lives: window.GRACE_METRICS?.livesImpacted?.month ?? 23,
+        route: 'Food Pantry',
+        groupCount: 2,
+        reflectionDays: typeof reflectionDaysCount !== 'undefined' ? reflectionDaysCount : 7
+      })
+    });
+  }
+}
+
+function openGraceFromDrawer() {
+  closeAppMenu();
+  if (typeof GRACE_COMPANION !== 'undefined') {
+    setTimeout(() => GRACE_COMPANION.open(), 220);
+  }
 }
 </script>
 </body>
