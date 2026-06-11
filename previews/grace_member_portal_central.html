@@ -276,6 +276,47 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .ai-switch-btn:hover{background:rgba(255,255,255,.14)}
 .av-live-dot.av-live-dot--hidden{display:none}
 
+/* Divinity avatar session (intro video → live D-ID agent) */
+.divinity-overlay{position:fixed;inset:0;background:#0f172a;z-index:9600;display:none;flex-direction:column;color:#fff}
+.divinity-overlay.open{display:flex}
+.divinity-session{flex:1;min-height:0;display:flex;flex-direction:column}
+.divinity-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px 12px;flex-shrink:0;
+  background:rgba(15,23,42,.92);border-bottom:1px solid rgba(255,255,255,.08)
+}
+.divinity-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.divinity-live-dot{width:9px;height:9px;border-radius:50%;background:#EE2B37;flex-shrink:0;box-shadow:0 0 0 4px rgba(238,43,55,.25)}
+.divinity-head-title{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.divinity-head-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.divinity-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);font-size:11px;font-weight:700;color:#fff
+}
+.divinity-pill.connected{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.45)}
+.divinity-pill.connected::before{content:"✓";font-size:10px}
+.divinity-timer{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.divinity-close{
+  width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(201,151,58,.65);background:rgba(15,23,42,.6);
+  color:#fff;font-size:17px;line-height:1;cursor:pointer;font-family:inherit;flex-shrink:0;display:grid;place-items:center
+}
+.divinity-close:hover{background:rgba(201,151,58,.25)}
+.divinity-body{flex:1;min-height:0;position:relative;overflow:hidden}
+#divinity-agent-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;display:block}
+.divinity-video-overlay{
+  position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(10,15,30,.94);padding:56px 24px 24px;opacity:1;
+  transition:opacity .4s ease;pointer-events:auto
+}
+.divinity-video-overlay.is-closing{opacity:0;pointer-events:none}
+.divinity-video-overlay.is-hidden{display:none!important;opacity:0}
+.divinity-video-close{
+  position:absolute;top:16px;right:20px;width:34px;height:34px;border-radius:50%;
+  border:1.5px solid rgba(201,151,58,.65);background:rgba(15,23,42,.6);color:#fff;font-size:17px;
+  line-height:1;cursor:pointer;font-family:inherit;display:grid;place-items:center;z-index:6
+}
+.divinity-video-close:hover{background:rgba(201,151,58,.25)}
+#divinity-intro-video{width:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;background:#000}
+
 /* D-ID Studio modal */
 .did-studio-overlay{position:fixed;inset:0;background:rgba(10,22,40,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .did-studio-overlay.open{display:flex}
@@ -1690,7 +1731,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <span class="nb-ico" data-grace-icon="leadership" data-grace-size="20"></span><span class="nb-label">My Leadership</span>
     </div>
     <div class="nb" id="nav-give" onclick="openWalletTab('give')">
-      <span class="nb-ico" data-grace-icon="give" data-grace-size="20"></span><span class="nb-label">My GRACE Card</span>
+      <span class="nb-ico" data-grace-icon="give" data-grace-size="20"></span><span class="nb-label">My GRACE Impact Card</span>
     </div>
     <div class="nb" id="nav-community" onclick="openNetworkTab('community')">
       <span class="nb-ico" data-grace-icon="people" data-grace-size="20"></span><span class="nb-label">Connect</span>
@@ -1884,11 +1925,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </button>
       </div>
 
-      <!-- Wallet (GRACE Card + Balance) -->
+      <!-- Wallet (GRACE Impact Card + Balance) -->
       <div class="dash-wallet">
         <div class="card">
           <div class="card-head">
-            <div class="card-title">Your GRACE Card</div>
+            <div class="card-title">Your GRACE Impact Card</div>
             <span class="card-link" onclick="openWalletGive()">Open Give</span>
           </div>
           <div style="padding:6px 8px 0">
@@ -1924,7 +1965,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="card-head">
             <div>
               <div class="card-title">Account</div>
-              <div class="wallet-acct-meta">GRACE Card ···· 1834</div>
+              <div class="wallet-acct-meta">GRACE Impact Card ···· 1834</div>
             </div>
             <span class="card-link" onclick="openWalletTab('wallet')">Manage →</span>
           </div>
@@ -2044,7 +2085,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                     <div class="av-ring av-ring--lg">
                       <div class="av-pulse"></div>
                       <div class="av-pulse2"></div>
-                      <img id="ai-leader-img" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Pastor James Wilson">
+                      <img id="ai-leader-img" src="assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
                       <div class="av-live-dot" id="ai-live-dot"></div>
                     </div>
                   </div>
@@ -2063,7 +2104,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div class="ai-hero-leader-row ai-hero-leader-row--actions ai-hero-leader-actions">
                 <button type="button" class="ai-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
-                <button type="button" class="ai-hero-begin" onclick="openDidStudio()">Begin a Conversation</button>
+                <button type="button" class="ai-hero-begin" onclick="openDivinityAvatar(currentLeader)">Begin a Conversation</button>
                 <button type="button" class="ai-switch-btn ai-switch-btn--ghost" onclick="document.getElementById('leader-gallery-wrap').scrollIntoView({behavior:'smooth'})">Switch Leader ↓</button>
               </div>
             </div>
@@ -2776,7 +2817,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="res-hero-content">
             <div class="res-hero-top">
               <h2>Give &amp; Impact</h2>
-              <p>Give directly, or route your GRACE Card impact to a ministry. Qualified purchases can create impact for Central.</p>
+              <p>Give directly, or route impact from your GRACE Impact Card to a ministry. Qualified purchases can create impact for Central.</p>
             </div>
             <div class="wlt-kpi-grid wlt-kpi-grid--3" role="group" aria-label="Wallet summary">
               <div class="wlt-kpi">
@@ -2810,7 +2851,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="give-unified" id="wallet-give-anchor">
           <div class="give-unified-body">
             <div class="res-section-label">Make a gift</div>
-            <p class="give-sub">Give directly, or route your GRACE Card impact to a ministry.</p>
+            <p class="give-sub">Give directly, or route impact from your GRACE Impact Card to a ministry.</p>
             <div class="give-layout give-layout--single">
               <div>
                 <div class="give-step">
@@ -2890,7 +2931,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="wlt-banking-grid" id="wallet-card-anchor">
           <div class="card">
             <div class="card-head">
-              <span class="card-title">Your GRACE Card</span>
+              <span class="card-title">Your GRACE Impact Card</span>
               <span id="wallet-card-status" style="font-size:10px;font-weight:600;background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:8px">Active</span>
             </div>
             <div style="padding:6px 8px 0">
@@ -2927,7 +2968,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="card-head">
               <div>
                 <div class="card-title">Account</div>
-                <div class="wallet-acct-meta">GRACE Card ···· 1834</div>
+                <div class="wallet-acct-meta">GRACE Impact Card ···· 1834</div>
               </div>
               <span class="card-link" onclick="toggleWalletManage()">Manage →</span>
             </div>
@@ -2991,7 +3032,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   <span>Instantly block new purchases &amp; transfers</span>
                 </div>
                 <label class="wallet-toggle" title="Freeze account">
-                  <input type="checkbox" id="wallet-freeze-toggle" aria-label="Freeze GRACE Card account" onchange="toggleWalletFreeze(this)">
+                  <input type="checkbox" id="wallet-freeze-toggle" aria-label="Freeze GRACE Impact Card account" onchange="toggleWalletFreeze(this)">
                   <span class="wallet-toggle-slider"></span>
                 </label>
               </div>
@@ -3882,7 +3923,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="ai-did-media">
         <div class="ai-did-media-bg" aria-hidden="true"></div>
         <div class="ai-did-agent-host" id="did-agent-host"></div>
-        <img class="ai-did-avatar" id="did-avatar-img" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+        <img class="ai-did-avatar" id="did-avatar-img" src="assets/Pastor-James-Wilson-profile.jpg" alt="">
         <div class="ai-did-prompts">
           <button type="button" class="ai-did-prompt" onclick="sendDidPrompt('I need help with a problem I\'m facing')">I need help with a problem I'm facing</button>
           <button type="button" class="ai-did-prompt" onclick="sendDidPrompt('I am confused on a Bible passage')">I am confused on a Bible passage</button>
@@ -3906,12 +3947,38 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   </div>
 </div>
 
+<!-- Divinity avatar session (intro video → live D-ID agent) -->
+<div class="divinity-overlay" id="divinity-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Avatar conversation">
+  <div class="divinity-session" id="divinity-session">
+    <div class="divinity-head">
+      <div class="divinity-head-left">
+        <span class="divinity-live-dot" aria-hidden="true"></span>
+        <span class="divinity-head-title">Conversing with <span id="divinity-session-name">James</span></span>
+      </div>
+      <div class="divinity-head-meta">
+        <span class="divinity-pill connected">Connected</span>
+        <span class="divinity-pill divinity-timer" id="divinity-timer">0:00:00</span>
+      </div>
+      <button type="button" class="divinity-close" onclick="closeDivinitySession()" aria-label="Close">×</button>
+    </div>
+    <div class="divinity-body">
+      <iframe id="divinity-agent-frame" title="Divinity AI companion" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
+      <div class="divinity-video-overlay is-hidden" id="divinity-video-overlay">
+        <button type="button" class="divinity-video-close" onclick="closeDivinityVideo()" aria-label="Close video">×</button>
+        <video id="divinity-intro-video" autoplay playsinline></video>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="grace-messaging.js"></script>
 <script src="grace-companion.js"></script>
 <script src="grace-duotone-icons.js"></script>
 <script>
 /* D-ID Studio — set agentId + clientKey from studio.d-id.com Agents share panel when ready */
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
+/* Divinity avatar sessions — per-leader didAvatarUrl overrides this fallback */
+const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
 const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey"};
 const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
 let watchLiveTimers=[];
@@ -4284,6 +4351,177 @@ function closeDidStudio(){
   document.body.style.overflow='';
 }
 function sendDidPrompt(text){openDidStudio(text);}
+
+/* ===== Divinity avatar session (intro video → live D-ID agent) ===== */
+let divinitySessionLeader=null;
+let divinityTimerId=null;
+let divinityTimerStart=0;
+let divinityAgentLoadedUrl=null;
+let divinityVideoStallTimer=null;
+
+function divinityFirstName(name){
+  return (name||'').replace(/^(Pastor|Rev\.|Min\.|Deacon|Elder|Bro\.|Sis\.|Dr\.)\s+/i,'').split(' ')[0];
+}
+function leaderDivinityUrl(l){
+  if(!l)return DIVINITY_AVATAR_URL;
+  return l.didAvatarUrl||DIVINITY_AVATAR_URL;
+}
+function formatDivinityTimer(ms){
+  const totalSec=Math.floor(ms/1000);
+  const h=Math.floor(totalSec/3600);
+  const m=Math.floor((totalSec%3600)/60);
+  const s=totalSec%60;
+  return h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function stopDivinityTimer(){
+  if(divinityTimerId){clearInterval(divinityTimerId);divinityTimerId=null;}
+}
+function startDivinityTimer(){
+  stopDivinityTimer();
+  divinityTimerStart=Date.now();
+  const timerEl=document.getElementById('divinity-timer');
+  if(timerEl)timerEl.textContent='0:00:00';
+  divinityTimerId=setInterval(()=>{
+    const el=document.getElementById('divinity-timer');
+    if(el)el.textContent=formatDivinityTimer(Date.now()-divinityTimerStart);
+  },1000);
+}
+function clearDivinityVideoTimers(){
+  if(divinityVideoStallTimer){clearTimeout(divinityVideoStallTimer);divinityVideoStallTimer=null;}
+}
+function loadDivinityAgent(){
+  const l=aiLeaders[divinitySessionLeader];
+  if(!l)return;
+  const frame=document.getElementById('divinity-agent-frame');
+  if(!frame)return;
+  const url=leaderDivinityUrl(l);
+  if(divinityAgentLoadedUrl===url)return;
+  frame.src=url;
+  divinityAgentLoadedUrl=url;
+}
+function hideDivinityVideoOverlay(){
+  const overlay=document.getElementById('divinity-video-overlay');
+  if(!overlay||overlay.classList.contains('is-hidden'))return;
+  let done=false;
+  function finishHide(e){
+    if(done)return;
+    if(e&&e.propertyName&&e.propertyName!=='opacity')return;
+    done=true;
+    overlay.removeEventListener('transitionend',finishHide);
+    overlay.classList.remove('is-closing');
+    overlay.classList.add('is-hidden');
+  }
+  overlay.classList.add('is-closing');
+  overlay.addEventListener('transitionend',finishHide);
+  setTimeout(finishHide,450);
+}
+function revealDivinityAgent(){
+  clearDivinityVideoTimers();
+  const video=document.getElementById('divinity-intro-video');
+  if(video){video.pause();video.currentTime=0;}
+  loadDivinityAgent();
+  hideDivinityVideoOverlay();
+}
+function resetDivinitySession(){
+  clearDivinityVideoTimers();
+  divinityAgentLoadedUrl=null;
+  const frame=document.getElementById('divinity-agent-frame');
+  if(frame)frame.src='about:blank';
+  const overlay=document.getElementById('divinity-video-overlay');
+  const video=document.getElementById('divinity-intro-video');
+  if(overlay){
+    overlay.classList.remove('is-closing');
+    overlay.classList.add('is-hidden');
+  }
+  if(video){
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+  }
+}
+function showDivinityIntroVideo(url){
+  const overlay=document.getElementById('divinity-video-overlay');
+  const video=document.getElementById('divinity-intro-video');
+  if(!overlay||!video||!url){revealDivinityAgent();return;}
+  clearDivinityVideoTimers();
+  overlay.classList.remove('is-hidden','is-closing');
+  video.muted=false;
+  video.src=url;
+  video.load();
+
+  let introDone=false;
+  function finishIntro(){
+    if(introDone)return;
+    introDone=true;
+    video.removeEventListener('ended',finishIntro);
+    video.removeEventListener('error',finishIntro);
+    revealDivinityAgent();
+  }
+  video.addEventListener('ended',finishIntro);
+  video.addEventListener('error',finishIntro);
+
+  video.addEventListener('playing',function clearStall(){
+    clearDivinityVideoTimers();
+    video.removeEventListener('playing',clearStall);
+  });
+
+  divinityVideoStallTimer=setTimeout(()=>{
+    if(!overlay.classList.contains('is-hidden')&&(video.paused||video.readyState<2)){
+      finishIntro();
+    }
+  },8000);
+
+  const playPromise=video.play();
+  if(playPromise&&playPromise.catch){
+    playPromise.catch(()=>{
+      video.muted=true;
+      video.play().catch(()=>{finishIntro();});
+    });
+  }
+}
+function closeDivinityVideo(){
+  revealDivinityAgent();
+}
+function openDivinityAvatar(idx){
+  const i=(idx!==null&&idx!==undefined)?idx:currentLeader;
+  const l=aiLeaders[i];
+  if(!l)return;
+  closeLeaderProfile();
+  closeDidStudio();
+  divinitySessionLeader=i;
+  const sessionNameEl=document.getElementById('divinity-session-name');
+  if(sessionNameEl)sessionNameEl.textContent=divinityFirstName(l.name);
+  resetDivinitySession();
+  stopDivinityTimer();
+  startDivinityTimer();
+  const overlay=document.getElementById('divinity-overlay');
+  if(overlay){
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden','false');
+  }
+  document.body.style.overflow='hidden';
+  loadDivinityAgent();
+  if(l.introVideoUrl){
+    showDivinityIntroVideo(l.introVideoUrl);
+  }
+}
+function closeDivinitySession(silent){
+  stopDivinityTimer();
+  resetDivinitySession();
+  const overlay=document.getElementById('divinity-overlay');
+  if(overlay){
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+  }
+  document.body.style.overflow='';
+  divinitySessionLeader=null;
+  if(!silent&&typeof showPortalToast==='function')showPortalToast('Returned to portal','◈');
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'&&document.getElementById('divinity-overlay')?.classList.contains('open')){
+    closeDivinitySession(true);
+  }
+});
 function sendDidMessage(){
   const input=document.getElementById('did-chat-input');
   if(!input||!input.value.trim())return;
@@ -4469,7 +4707,7 @@ function pfSimPurchase(){
   const inp=document.getElementById('pf-calc-input');
   const amt=parseFloat(inp?.value)||120;
   const contrib=parseFloat((amt*pfActiveMerchant.pct/100).toFixed(2));
-  pfAddTx({iconName:'merchant',bg:'#FFF0F1',name:pfActiveMerchant.store,meta:'Just now · GRACE Card',tag:`→ ${pfActiveMerchant.cause} +$${contrib.toFixed(2)}`,spend:`−$${amt.toFixed(2)}`,contrib:`+$${contrib.toFixed(2)} to ${pfActiveMerchant.cause}`});
+  pfAddTx({iconName:'merchant',bg:'#FFF0F1',name:pfActiveMerchant.store,meta:'Just now · GRACE Impact Card',tag:`→ ${pfActiveMerchant.cause} +$${contrib.toFixed(2)}`,spend:`−$${amt.toFixed(2)}`,contrib:`+$${contrib.toFixed(2)} to ${pfActiveMerchant.cause}`});
   prependLiveImpactItem({type:'purchase',icon:'merchant',bg:'#FFF0F1',merchant:pfActiveMerchant.store,date:'Today',spend:amt,impact:contrib,cause:pfActiveMerchant.cause,time:'Now'});
   monthImpactTotal=Number((monthImpactTotal+contrib).toFixed(2));
   updateImpactKpis();
@@ -4711,11 +4949,11 @@ const liveImpactDemoQueue=[
   {type:'purchase',icon:'gas',bg:'#e8f0e8',merchant:'Chevron Fuel',date:'Today',spend:42.25,impact:0.63,cause:'Missions',time:'Now'}
 ];
 const activityFeedRecent=[
-  {ico:'🛒',bg:'#FFF0F1',name:'Walmart Grocery',meta:'May 28 · GRACE Card',tag:'→ Food Pantry +$2.40',spend:'−$120.00',contrib:'+$2.40 to Food Pantry'},
-  {ico:'⛽',bg:'#e8f0e8',name:'Shell Gas Station',meta:'May 27 · GRACE Card',tag:'→ Missions +$0.88',spend:'−$58.75',contrib:'+$0.88 to Missions'},
+  {ico:'🛒',bg:'#FFF0F1',name:'Walmart Grocery',meta:'May 28 · GRACE Impact Card',tag:'→ Food Pantry +$2.40',spend:'−$120.00',contrib:'+$2.40 to Food Pantry'},
+  {ico:'⛽',bg:'#e8f0e8',name:'Shell Gas Station',meta:'May 27 · GRACE Impact Card',tag:'→ Missions +$0.88',spend:'−$58.75',contrib:'+$0.88 to Missions'},
   {ico:'💛',bg:'#FFF0F1',name:'Sunday Tithe — Direct',meta:'May 25 · Recurring giving',spend:'−$120.00',contrib:'→ General Tithe'},
-  {ico:'📦',bg:'#e8edf8',name:'Amazon Purchase',meta:'May 24 · GRACE Card',tag:'→ Building +$3.60',spend:'−$360.00',contrib:'+$3.60 to Building'},
-  {ico:'🍔',bg:'#f5ece8',name:'Chick-fil-A',meta:'May 23 · GRACE Card',tag:'→ Youth +$0.54',spend:'−$27.00',contrib:'+$0.54 to Youth'}
+  {ico:'📦',bg:'#e8edf8',name:'Amazon Purchase',meta:'May 24 · GRACE Impact Card',tag:'→ Building +$3.60',spend:'−$360.00',contrib:'+$3.60 to Building'},
+  {ico:'🍔',bg:'#f5ece8',name:'Chick-fil-A',meta:'May 23 · GRACE Impact Card',tag:'→ Youth +$0.54',spend:'−$27.00',contrib:'+$0.54 to Youth'}
 ];
 const activityFeedMonthly=[
   {month:'May 2026',rows:activityFeedRecent}
@@ -4755,8 +4993,8 @@ function prependLiveImpactItem(item){
     monthImpactTotal=Number((monthImpactTotal+item.impact).toFixed(2));
     WALLET_STATE.cardImpactMonth=monthImpactTotal;
     updateImpactKpis();
-    pfAddTx({iconName:item.icon,bg:item.bg,name:item.merchant,meta:`${item.date} · GRACE Card`,tag:`→ ${item.cause} +${formatMoney(item.impact)}`,spend:`−${formatMoney(item.spend)}`,contrib:`+${formatMoney(item.impact)} to ${item.cause}`});
-    activityFeedRecent.unshift({ico:'💳',bg:item.bg,name:item.merchant,meta:`${item.date} · GRACE Card`,tag:`→ ${item.cause} +${formatMoney(item.impact)}`,spend:`−${formatMoney(item.spend)}`,contrib:`+${formatMoney(item.impact)} to ${item.cause}`});
+    pfAddTx({iconName:item.icon,bg:item.bg,name:item.merchant,meta:`${item.date} · GRACE Impact Card`,tag:`→ ${item.cause} +${formatMoney(item.impact)}`,spend:`−${formatMoney(item.spend)}`,contrib:`+${formatMoney(item.impact)} to ${item.cause}`});
+    activityFeedRecent.unshift({ico:'💳',bg:item.bg,name:item.merchant,meta:`${item.date} · GRACE Impact Card`,tag:`→ ${item.cause} +${formatMoney(item.impact)}`,spend:`−${formatMoney(item.spend)}`,contrib:`+${formatMoney(item.impact)} to ${item.cause}`});
     if(activityFeedRecent.length>10)activityFeedRecent.pop();
   }
 }
@@ -4815,7 +5053,7 @@ function hydrateWallet(){
 function initWalletHero(){
   hydrateWallet();
   hydrateImpactAllocation({animate:true});
-  setTimeout(()=>pfToast('GRACE Card: Walmart purchase added $2.40 to Food Pantry','🛒','success'),800);
+  setTimeout(()=>pfToast('GRACE Impact Card: Walmart purchase added $2.40 to Food Pantry','🛒','success'),800);
 }
 function renderRecentGifts(){
   const wrap=document.getElementById('wlt-recent-gifts');
@@ -5373,24 +5611,24 @@ setInterval(()=>{
 
 /* ── AI HUB LOGIC ── */
 const aiLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Grace AI with human follow-up',topic:'Prayer · Scripture · Guidance',img:'https://randomuser.me/api/portraits/men/32.jpg',greeting:'"Grace is here for prayer, guidance, and next steps. A real leader can follow up when care is needed."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. Grace AI is trained on approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Grace AI · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
-  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Grace AI with human follow-up',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
-  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Grace AI with human follow-up',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His AI voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Grace AI with human follow-up",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
-  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · Grace AI with human follow-up',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
-  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · Grace AI with human follow-up',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
-  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · Grace AI with human follow-up',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His AI companion answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
-  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · Grace AI with human follow-up",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
-  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · Grace AI with human follow-up',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His AI companion shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
-  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · Grace AI with human follow-up',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding the right next step of care."',online:true,bio:'Licensed clinician and ordained minister bridging faith and mental health. AI provides pastoral support; clinical care is referred to licensed partners.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
-  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · Grace AI with human follow-up",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer? I\'ve got you."',online:true,bio:'Minister Torres runs Iron Men groups, workplace ministry, and fatherhood workshops. His companion speaks plainly about integrity, work, and spiritual leadership at home.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
-  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · Grace AI with human follow-up',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her AI companion is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
-  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · Grace AI with human follow-up',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story? I\'d love to help you take a next step."',online:false,bio:'Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
-  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · Grace AI with human follow-up',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or questions about legacy giving, I\'m honored to walk with you."',online:true,bio:'Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
-  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · Grace AI with human follow-up',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His AI companion troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
-  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · Grace AI with human follow-up',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m so glad you\'re exploring Central Henderson."',online:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers “what’s next” questions and connects guests to groups and serving.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
-  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · Grace AI with human follow-up',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His AI companion offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
-  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · Grace AI with human follow-up',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,bio:'Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
+  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His AI voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
+  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
+  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His AI companion answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
+  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
+  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His AI companion shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
+  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding the right next step of care."',online:true,bio:'Licensed clinician and ordained minister bridging faith and mental health. AI provides pastoral support; clinical care is referred to licensed partners.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
+  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer? I\'ve got you."',online:true,bio:'Minister Torres runs Iron Men groups, workplace ministry, and fatherhood workshops. His companion speaks plainly about integrity, work, and spiritual leadership at home.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
+  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her AI companion is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
+  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · Verified Avatar · Human follow-up available',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story? I\'d love to help you take a next step."',online:false,bio:'Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
+  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or questions about legacy giving, I\'m honored to walk with you."',online:true,bio:'Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
+  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · Verified Avatar · Human follow-up available',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His AI companion troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
+  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · Verified Avatar · Human follow-up available',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m so glad you\'re exploring Central Henderson."',online:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers “what’s next” questions and connects guests to groups and serving.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
+  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · Verified Avatar · Human follow-up available',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His AI companion offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
+  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,bio:'Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
 ];
 GRACE_MESSAGING.normalizeLeadersArray(aiLeaders, 'Central Henderson');
 aiLeaders.forEach(l=>{if(l.humanLive===undefined)l.humanLive=!!l.online;});
@@ -5588,8 +5826,9 @@ function startLeaderDirectMessage(idx){
   setTimeout(()=>document.getElementById('chat-input')?.focus(),120);
 }
 function profileBeginConversation(){
+  const i=(typeof profileLeaderIdx==='number')?profileLeaderIdx:currentLeader;
   closeLeaderProfile();
-  openDidStudio();
+  openDivinityAvatar(i);
 }
 
 function addMsg(text, isUser, nav, navLabel) {
@@ -5937,8 +6176,8 @@ function walletTab(tab){
 function openWalletTab(tab){
   goSection('wallet');
   setActiveNav('nav-give');
-  const labels={give:'My GRACE Card',wallet:'My GRACE Card',impact:'My GRACE Card · Impact'};
-  document.getElementById('tb-title').textContent=labels[tab]||'My GRACE Card';
+  const labels={give:'My GRACE Impact Card',wallet:'My GRACE Impact Card',impact:'My GRACE Impact Card · Impact'};
+  document.getElementById('tb-title').textContent=labels[tab]||'My GRACE Impact Card';
   setTimeout(()=>{
     walletTab(tab==='impact'?'impact':'give');
     if(tab==='wallet'){
@@ -5950,7 +6189,7 @@ function openWalletTab(tab){
 function openWalletGive(){
   goSection('wallet');
   setActiveNav('nav-give');
-  document.getElementById('tb-title').textContent='My GRACE Card';
+  document.getElementById('tb-title').textContent='My GRACE Impact Card';
   setTimeout(()=>{
     walletTab('give');
     const el=document.getElementById('wallet-give-anchor');
@@ -6020,7 +6259,7 @@ function submitWalletTransfer(mode){
     const to=document.getElementById('wallet-send-to');
     const dest=to&&to.selectedOptions[0]?to.selectedOptions[0].text:'recipient';
     WALLET_STATE.available=Math.max(0,WALLET_STATE.available-val);
-    const tx={ico:'↗',bg:'#e8eef5',name:'Transfer to '+dest,meta:'Just now · GRACE Card',spend:'−$'+val.toFixed(2),contrib:'Sent'};
+    const tx={ico:'↗',bg:'#e8eef5',name:'Transfer to '+dest,meta:'Just now · GRACE Impact Card',spend:'−$'+val.toFixed(2),contrib:'Sent'};
     pfAddTx(tx);
     activityFeedRecent.unshift(tx);
     if(activityFeedRecent.length>10)activityFeedRecent.pop();

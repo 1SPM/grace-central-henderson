@@ -652,7 +652,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .item strong{display:block;font-size:14px;font-weight:700}
 .item p{font-size:12px;color:var(--ios-muted);line-height:1.45;margin-top:4px}
 .item-note{font-size:12px;font-weight:700;color:#C41E2A;white-space:nowrap}
-/* Give / My GRACE Card */
+/* Give / My GRACE Impact Card */
 .gv-tabs{
   display:flex;gap:6px;padding:0 14px 10px;background:#fff;border-bottom:1px solid var(--ios-line);flex-shrink:0
 }
@@ -2314,7 +2314,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="card card--teaser">
           <div class="section-head">
             <div>
-              <h3>Your GRACE Card</h3>
+              <h3>Your GRACE Impact Card</h3>
             </div>
             <div class="linkish" onclick="showScreen('give')">Open Give</div>
           </div>
@@ -2366,7 +2366,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 
         <div class="card home-wallet-card">
           <div class="section-head">
-            <div><h3>Account</h3><span style="font-size:10px;color:var(--ios-muted)">GRACE Card ···· 1834</span></div>
+            <div><h3>Account</h3><span style="font-size:10px;color:var(--ios-muted)">GRACE Impact Card ···· 1834</span></div>
             <div class="linkish" onclick="openGiveWalletSheet()">Manage →</div>
           </div>
           <div style="padding:0 14px 14px">
@@ -2515,9 +2515,9 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           </div>
           <div class="ld-hero-compact-body">
             <div class="ld-leader-name" id="ld-leader-name">Pastor James Wilson</div>
-            <div class="home-ai-mode" style="margin:4px 0 0;display:inline-flex">Grace AI · Human care available</div>
-            <div class="ld-leader-role" id="ld-leader-role">Central Henderson · Grace AI with human follow-up</div>
-            <p class="ld-trust-line" style="color:rgba(255,255,255,.55);font-size:10px;line-height:1.45;margin:6px 0 0">Grace does not replace pastors, counselors, or emergency support.</p>
+            <div class="home-ai-mode" style="margin:4px 0 0;display:inline-flex">Verified Avatar · Human care available</div>
+            <div class="ld-leader-role" id="ld-leader-role">Central Henderson · Verified Avatar · Human follow-up available</div>
+            <p class="ld-trust-line" style="color:rgba(255,255,255,.55);font-size:10px;line-height:1.45;margin:6px 0 0">Avatars do not replace pastors, counselors, or emergency support.</p>
             <div class="ld-hero-compact-actions">
               <button type="button" class="ld-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
               <button type="button" class="ld-begin" onclick="openDivinityAvatar(currentLeader)">Begin a Conversation</button>
@@ -2556,14 +2556,14 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="ld-chat" id="ld-chat">
           <div class="ld-dm-banner" id="ld-dm-banner" role="status">
             <span id="ld-dm-banner-text">Direct message</span>
-            <button type="button" onclick="exitLeaderDmMode()">Back to AI companion</button>
+            <button type="button" onclick="exitLeaderDmMode()">Back to avatar chat</button>
           </div>
           <div class="ld-chat-messages" id="ld-chat-messages"></div>
           <div class="ld-input-bar">
-            <input type="text" class="ld-input" id="ld-chat-input" placeholder="Ask Grace or request human follow-up…" onkeydown="if(event.key==='Enter')sendLeaderMessage()">
+            <input type="text" class="ld-input" id="ld-chat-input" placeholder="Share with James…" onkeydown="if(event.key==='Enter')sendLeaderMessage()">
             <button type="button" class="ld-send" onclick="sendLeaderMessage()" aria-label="Send">→</button>
           </div>
-          <div class="ld-disclaimer">Grace AI can help with prayer, guidance, and next steps. A human leader can follow up when care is needed. For crisis support, tap Help now for 988, national helplines, and pastoral care.</div>
+          <div class="ld-disclaimer">Avatar reflects approved teachings — not a live person. Human follow-up available. For crisis support, tap Help now for 988, national helplines, and pastoral care.</div>
         </div>
 
         <div class="bible-card">
@@ -2626,7 +2626,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             </div>
             <div id="lpm-human-live" aria-live="polite"></div>
             <div class="ld-leader-name" id="lpm-name"></div>
-            <div class="home-ai-mode" style="margin:4px auto 0;display:inline-flex">AI Companion</div>
+            <div class="home-ai-mode" style="margin:4px auto 0;display:inline-flex">Verified Avatar</div>
             <div class="ld-leader-role" id="lpm-title"></div>
             <div class="home-ai-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
             <p class="home-ai-greeting" id="lpm-greeting" style="color:rgba(255,255,255,.82);font-size:12px;line-height:1.55;max-width:300px"></p>
@@ -2670,7 +2670,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="gv-panel active" id="gv-panel-assets">
           <div class="res-hero" id="res-hero">
             <div class="res-hero-slides" aria-hidden="true">
-              <div class="res-hero-slide active" data-caption="Card impact · GRACE Card" style="background-image:url('previews/assets/wallet-hero/smiling-shopping.jpg')"></div>
+              <div class="res-hero-slide active" data-caption="Card impact · GRACE Impact Card" style="background-image:url('previews/assets/wallet-hero/smiling-shopping.jpg')"></div>
               <div class="res-hero-slide" data-caption="Serving together · local impact" style="background-image:url('previews/assets/wallet-hero/smiling-community.jpg')"></div>
               <div class="res-hero-slide" data-caption="Joy in community · Central Henderson" style="background-image:url('previews/assets/wallet-hero/smiling-volunteers.jpg')"></div>
             </div>
@@ -2679,7 +2679,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="gv-hero-brand" style="margin-bottom:8px">
                 <img class="gv-hero-logo" src="previews/assets/CCC_Central_Church-invert.png" alt="Central Church iBanc" onerror="this.style.display='none'" style="height:28px">
               </div>
-              <p style="font-size:11px;color:rgba(255,255,255,.65);margin:0 0 12px;line-height:1.45">Give directly, or route your GRACE Card impact. Qualified purchases can create impact for Central.</p>
+              <p style="font-size:11px;color:rgba(255,255,255,.65);margin:0 0 12px;line-height:1.45">Give directly, or route impact from your GRACE Impact Card. Qualified purchases can create impact for Central.</p>
               <div class="gv-kpi-grid gv-kpi-grid--3">
                 <div class="gv-kpi"><strong id="gv-wallet" style="color:#fff">$3,240</strong><span style="color:rgba(255,255,255,.6)">Wallet available</span></div>
                 <div class="gv-kpi"><strong id="give-impact" style="color:#fff">$18.42</strong><span style="color:rgba(255,255,255,.6)">Card impact · May</span></div>
@@ -2690,7 +2690,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
                 <button type="button" onclick="walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Change routing</button>
               </div>
             </div>
-            <span class="res-hero-caption" id="res-hero-caption">Card impact · GRACE Card</span>
+            <span class="res-hero-caption" id="res-hero-caption">Card impact · GRACE Impact Card</span>
             <div class="res-hero-dots" id="res-hero-dots" role="tablist" aria-label="Hero slides">
               <button type="button" class="res-hero-dot active" aria-label="Slide 1" onclick="resHeroGo(0)"></button>
               <button type="button" class="res-hero-dot" aria-label="Slide 2" onclick="resHeroGo(1)"></button>
@@ -2700,7 +2700,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 
           <div class="gv-card-block" id="gv-give-form">
             <div class="gv-section-lbl">Make a gift</div>
-            <p style="font-size:11px;color:var(--ios-muted);margin:-4px 0 10px;line-height:1.45">Give directly, or route your GRACE Card impact to a ministry.</p>
+            <p style="font-size:11px;color:var(--ios-muted);margin:-4px 0 10px;line-height:1.45">Give directly, or route impact from your GRACE Impact Card to a ministry.</p>
             <div class="gv-step">
               <div class="gv-step-lbl">1 · Amount</div>
               <div class="gv-amount-grid">
@@ -2741,11 +2741,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 
           <div class="gv-card-block gv-card-teaser" id="gv-grace-card-block">
             <div class="gv-card-head">
-              <strong>Central Henderson · GRACE Card</strong>
+              <strong>Central Henderson · GRACE Impact Card</strong>
               <span class="gv-status">Active</span>
             </div>
             <div class="members-card-showcase" style="margin:0">
-              <div class="mc-flip" onclick="flipGraceCard(this)" role="button" aria-label="Flip GRACE Card">
+              <div class="mc-flip" onclick="flipGraceCard(this)" role="button" aria-label="Flip GRACE Impact Card">
                 <div class="mc-flip-inner">
                   <div class="mc-face mc-front">
                     <div class="members-card-shell">
@@ -2756,7 +2756,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
                       <div class="members-card-mid">
                         <img class="members-card-mark" src="previews/assets/central-c-mark.png" alt="" aria-hidden="true">
                       </div>
-                      <div class="members-card-label">Central Henderson GRACE Card</div>
+                      <div class="members-card-label">Central Henderson GRACE Impact Card</div>
                       <div class="members-card-number">5244 •••• •••• 1834</div>
                       <div class="members-card-bottom">
                         <div class="members-card-holder">Maya Thompson<span>Valid thru 12/28</span></div>
@@ -2904,7 +2904,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="gv-feed-item"><div class="gv-feed-ico">◈</div><div><strong>Sarah</strong> generated <strong>$4.20</strong> for Youth Ministry</div></div>
               <div class="gv-feed-item"><div class="gv-feed-ico">🌿</div><div><strong>David</strong> updated their giving goal</div></div>
               <div class="gv-feed-item"><div class="gv-feed-ico">🍽</div><div>Food Pantry at <strong>85%</strong> · <strong>127 meals</strong> this week</div></div>
-              <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>GRACE Card (Walmart) → <strong>+$2.40</strong> Food Pantry</div></div>
+              <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>GRACE Impact Card (Walmart) → <strong>+$2.40</strong> Food Pantry</div></div>
             </div>
             <div class="impact-notify-total">
               This month from everyday spending:
@@ -2920,11 +2920,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             </div>
             <div class="gv-activity-pane active" id="gv-activity-recent">
               <div class="gv-tx-impact">Card-generated impact from spending this month: <strong id="gv-tx-impact-total">+$18.42</strong></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f0e8">⛽</div><div class="gv-tx-body"><div class="gv-tx-name">Shell Gas Station</div><div class="gv-tx-meta">May 27 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$58.75</div><div class="gv-tx-contrib">+$0.88 Missions</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f0e8">⛽</div><div class="gv-tx-body"><div class="gv-tx-name">Shell Gas Station</div><div class="gv-tx-meta">May 27 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$58.75</div><div class="gv-tx-contrib">+$0.88 Missions</div></div></div>
               <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">💛</div><div class="gv-tx-body"><div class="gv-tx-name">Sunday Tithe — Direct</div><div class="gv-tx-meta">May 25 · Recurring</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">General Tithe</div></div></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8edf8">📦</div><div class="gv-tx-body"><div class="gv-tx-name">Amazon Purchase</div><div class="gv-tx-meta">May 24 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$360.00</div><div class="gv-tx-contrib">+$3.60 Building</div></div></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#f5ece8">🍔</div><div class="gv-tx-body"><div class="gv-tx-name">Chick-fil-A</div><div class="gv-tx-meta">May 23 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$27.00</div><div class="gv-tx-contrib">+$0.54 Youth</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8edf8">📦</div><div class="gv-tx-body"><div class="gv-tx-name">Amazon Purchase</div><div class="gv-tx-meta">May 24 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$360.00</div><div class="gv-tx-contrib">+$3.60 Building</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#f5ece8">🍔</div><div class="gv-tx-body"><div class="gv-tx-name">Chick-fil-A</div><div class="gv-tx-meta">May 23 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$27.00</div><div class="gv-tx-contrib">+$0.54 Youth</div></div></div>
             </div>
             <div class="gv-activity-pane" id="gv-activity-monthly" style="padding:14px">
               <div class="gv-chart-bars">
@@ -3008,7 +3008,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="cr-blessing">
           <div class="cr-blessing-head">
             <img class="cr-blessing-av" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
-            <div><div class="cr-blessing-who">Pastor James Wilson</div><div class="cr-blessing-role">Your assigned leader · Grace AI with human follow-up</div></div>
+            <div><div class="cr-blessing-who">Pastor James Wilson</div><div class="cr-blessing-role">Your assigned leader · Verified Avatar · Human follow-up available</div></div>
             <span class="cr-blessing-live">● Live</span>
           </div>
           <div class="cr-blessing-text">Grace is here for prayer, guidance, and next steps. A real leader can follow up when care is needed.</div>
@@ -4737,7 +4737,7 @@ function renderLeaderProfileLive(l) {
     if (getLeaderReachable(l)) {
       liveEl.innerHTML = '<span class="ld-profile-human-live" aria-label="Leader is reachable"><i></i> Reachable now · real person available</span>';
     } else {
-      liveEl.innerHTML = '<span class="ld-profile-human-away">Not live · AI companion still available 24/7</span>';
+      liveEl.innerHTML = '<span class="ld-profile-human-away">Not live · avatar still available 24/7</span>';
     }
   }
   if (aiH) aiH.textContent = leaderAiHoursLine(l.hours);
@@ -4756,13 +4756,14 @@ function updateLeaderDmUi() {
     const l = leaders[dmLeaderIdx];
     const fn = leaderFirstName(l.name);
     if (banner) banner.classList.add('open');
-    if (bannerText) bannerText.textContent = 'Direct message to ' + l.name + ' — pastoral inbox, not AI';
+    if (bannerText) bannerText.textContent = 'Direct message to ' + l.name + ' — goes to their inbox, not the avatar chat';
     if (input) input.placeholder = 'Message ' + fn + ' directly…';
-    if (disclaimer) disclaimer.textContent = 'This is a human leader inbox, not the AI companion. For crisis support, tap Help now for 988, national helplines, and pastoral care.';
+    if (disclaimer) disclaimer.textContent = 'This is a human leader inbox, not the avatar. For crisis support, tap Help now for 988, national helplines, and pastoral care.';
   } else {
     if (banner) banner.classList.remove('open');
-    if (input) input.placeholder = 'Ask Grace or request human follow-up…';
-    if (disclaimer) disclaimer.textContent = 'Grace AI can help with prayer, guidance, and next steps. A human leader can follow up when care is needed. For crisis support, tap Help now for 988, national helplines, and pastoral care.';
+    const dmLeader = leaders[currentLeader];
+    if (input) input.placeholder = 'Share with ' + (dmLeader ? leaderFirstName(dmLeader.name) : 'your leader') + '…';
+    if (disclaimer) disclaimer.textContent = 'Avatar reflects approved teachings — not a live person. Human follow-up available. For crisis support, tap Help now for 988, national helplines, and pastoral care.';
   }
 }
 
@@ -4774,7 +4775,7 @@ function exitLeaderDmMode() {
   if (box) delete box.dataset.seeded;
   leaderChatSeeded = false;
   seedLeaderChat();
-  showToast('Back to AI companion');
+  showToast('Back to avatar chat');
 }
 
 function seedLeaderDmChat(idx) {
@@ -4786,7 +4787,7 @@ function seedLeaderDmChat(idx) {
   delete box.dataset.seeded;
   leaderChatSeeded = false;
   const fn = leaderFirstName(l.name);
-  let intro = 'You\'re messaging <strong>' + l.name + '</strong> directly. This goes to their pastoral inbox, not the AI companion.';
+  let intro = 'You\'re messaging <strong>' + l.name + '</strong> directly. This goes to their pastoral inbox, not the avatar.';
   if (getLeaderReachable(l)) intro += '<br><br><strong>' + fn + ' is reachable now</strong> — you may hear back shortly.';
   else intro += '<br><br>Typical human reply within 24 hours.';
   addLeaderMsg(intro, false);
@@ -4830,7 +4831,7 @@ function addLeaderDmDelivery(l) {
 }
 
 const leaderAiResponses = {
-  give: { text: "I'll take you to Give — tithe, one-time offering, or your GRACE Card impact.", action: 'give', label: 'Give now' },
+  give: { text: "I'll take you to Give — tithe, one-time offering, or impact from your GRACE Impact Card.", action: 'give', label: 'Give now' },
   prayer: { text: "You've been heard. I can open a prayer request or connect you with care dispatch right away.", action: 'prayer', label: 'Submit prayer' },
   watch: { text: 'Sunday service is live with 342 watching. Want me to open the stream?', action: 'watch', label: 'Watch live' },
   groups: { text: "You're in Women of Grace and Young Adults. I can find a new group or connect you with a leader.", action: 'groups', label: 'Find a group' },
@@ -5477,7 +5478,7 @@ function renderImpactNotification(item, isNew) {
     '<div class="impact-notify-icon" style="background:' + item.bg + '" data-grace-icon="' + item.icon + '" data-grace-size="18"></div>' +
     '<div class="impact-notify-body">' +
       '<strong>' + item.merchant + '</strong>' +
-      '<span class="impact-notify-meta">' + item.date + ' · GRACE Card · −' + formatMoney(item.spend) + '</span>' +
+      '<span class="impact-notify-meta">' + item.date + ' · GRACE Impact Card · −' + formatMoney(item.spend) + '</span>' +
       '<div class="impact-notify-route">+' + formatMoney(item.impact) + ' routed to ' + item.cause + '</div>' +
     '</div>' +
     '<div class="impact-notify-time">' + item.time + '</div>' +
@@ -6068,12 +6069,12 @@ function renderLeader() {
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   const setSrc = (id, value) => { const el = document.getElementById(id); if (el) el.src = value; };
   set('ld-leader-name', leader.name);
-  set('ld-leader-role', 'Central Henderson · Grace AI with human follow-up');
+  set('ld-leader-role', 'Central Henderson · Verified Avatar · Human follow-up available');
   setSrc('ld-leader-img', leader.img);
   syncHeroLiveDot('ld-hero-live-dot', leader);
   syncLeaderKpis();
   const ldInput = document.getElementById('ld-chat-input');
-  if (ldInput) ldInput.placeholder = 'Ask Grace or request human follow-up…';
+  if (ldInput) ldInput.placeholder = 'Share with ' + leaderFirstName(leader.name) + '…';
   renderHomeAi();
   renderLeaderRoster();
 }
@@ -6122,7 +6123,7 @@ function openLeaderProfile(idx) {
   profileLeaderIdx = idx;
   document.getElementById('lpm-av').src = l.img;
   document.getElementById('lpm-name').textContent = l.name;
-  document.getElementById('lpm-title').textContent = l.role || (l.title + ' · Central Henderson · AI Companion');
+  document.getElementById('lpm-title').textContent = (l.role || (l.title + ' · Central Henderson · AI Companion')).replace(/AI Companion/g, 'Verified Avatar');
   const greetEl = document.getElementById('lpm-greeting');
   if (greetEl) greetEl.textContent = (l.greeting || '').replace(/^"|"$/g, '');
   document.getElementById('lpm-bio').textContent = l.bio || '';

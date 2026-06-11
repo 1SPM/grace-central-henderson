@@ -13,13 +13,13 @@
     },
     {
       icon: 'brain',
-      title: 'Leader-controlled AI',
-      text: 'Each companion is built only from a leader\'s approved teachings, tone, and boundaries — not a generic chatbot. Nothing goes live without their review.',
+      title: 'Leader-controlled avatars',
+      text: 'Each avatar is built only from a leader\'s approved teachings, tone, and boundaries — not a generic chatbot. Nothing goes live without their review.',
     },
     {
       icon: 'people',
       title: 'Human follow-up',
-      text: 'Grace AI helps with first steps; real leaders follow up for pastoral care. Grace does not replace counselors or emergency support (988 / crisis routing).',
+      text: 'Verified avatars help with first steps; real leaders follow up for pastoral care. Avatars do not replace counselors or emergency support (988 / crisis routing).',
     },
   ];
 
@@ -29,32 +29,32 @@
       {
         icon: 'shield',
         q: 'What is a Verified Leader?',
-        a: `Verified Leaders are ${church} pastors and ministers whose identity, role, and AI training have been confirmed before they appear in the directory. You will see a verified badge on their profile and in the Leaders roster.`,
+        a: `Verified Leaders are ${church} pastors and ministers whose identity, role, and avatar training have been confirmed before they appear in the directory. You will see a verified badge on their profile and in the Leaders roster.`,
       },
       {
         icon: 'brain',
-        q: 'How does Grace AI work?',
-        a: 'Each leader has an AI companion trained on their approved sermons, teachings, and pastoral responses — not a generic chatbot. It reflects their voice and is available when they cannot be present, including late-night moments of doubt. Conversations are asynchronous; a real leader can follow up on their own schedule.',
+        q: 'How do leader avatars work?',
+        a: 'Each leader has a verified avatar grounded in their approved sermons, teachings, and pastoral responses — not a generic chatbot. It reflects their voice and is available when they cannot be present, including late-night moments of doubt. Conversations are asynchronous; a real leader can follow up on their own schedule.',
       },
       {
         icon: 'people',
         q: 'Is this the same as talking to my pastor?',
-        a: 'The AI reflects each leader\'s pastoral style and knowledge, but it is not a live person. You can always request human follow-up. Crisis keywords and "I need help now" route immediately to on-call pastoral care.',
+        a: 'The avatar reflects each leader\'s pastoral style and knowledge, but it is not a live person. You can always request human follow-up. Crisis keywords and "I need help now" route immediately to on-call pastoral care.',
       },
       {
         icon: 'shield',
         q: 'How do you keep this safe and respectful?',
-        a: 'Leaders define what their companion helps with, avoids, and redirects. Sensitive topics are handled within those boundaries. Interactions are logged so leaders can review and respond when care is needed.',
+        a: 'Leaders define what their avatar helps with, avoids, and redirects. Sensitive topics are handled within those boundaries. Interactions are logged so leaders can review and respond when care is needed.',
       },
       {
         icon: 'chat',
-        q: 'What can Grace help me with?',
+        q: 'What can a leader avatar help me with?',
         a: 'Prayer, guidance, giving, groups, scripture, and next steps — within each leader\'s defined scope. Quick commands in the chat surface the most common paths.',
       },
       {
         icon: 'people',
         q: 'When does a real person get involved?',
-        a: 'When you request human follow-up, send a direct message, use crisis language, or when pastoral care is clearly needed. Grace is designed for first steps; your church\'s leaders provide follow-up.',
+        a: 'When you request human follow-up, send a direct message, use crisis language, or when pastoral care is clearly needed. Avatars are designed for first steps; your church\'s leaders provide follow-up.',
       },
       {
         icon: 'shield',
@@ -122,7 +122,7 @@
           <div class="faq-hero vl-faq-hero">
             <div class="faq-hero-icon" id="vl-faq-hero-icon"></div>
             <div class="faq-eyebrow">Verified Leaders</div>
-            <h2 class="faq-title" id="vl-faq-title">How Grace AI works with your leaders</h2>
+            <h2 class="faq-title" id="vl-faq-title">How verified avatars work with your leaders</h2>
             <p class="faq-subtitle" id="vl-faq-subtitle">Trusted guidance, leader-controlled companions, and human follow-up when care is needed.</p>
           </div>
           <div class="vl-trust-grid" id="vl-faq-pillars"></div>
@@ -145,7 +145,7 @@
     const subtitle = document.getElementById('vl-faq-subtitle');
     const heroIcon = document.getElementById('vl-faq-hero-icon');
     if (subtitle) {
-      subtitle.textContent = `How ${config.churchName} extends trusted pastoral care with Grace AI — and when a real leader steps in.`;
+      subtitle.textContent = `How ${config.churchName} extends trusted pastoral care with verified leader avatars — and when a real leader steps in.`;
     }
     if (pillars) pillars.innerHTML = renderTrustPillars();
     if (list) {
