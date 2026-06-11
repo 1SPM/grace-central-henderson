@@ -225,6 +225,8 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .av-ring-wrap--lg{margin-bottom:4px}
 .av-ring--lg{width:120px;height:120px}
 .av-ring--lg img{width:120px;height:120px}
+.av-ring--lg img,
+#ai-leader-img{object-fit:contain;object-position:center center;background:rgba(255,255,255,.06)}
 .av-ring--lg .av-pulse{inset:-8px}
 .av-ring--lg .av-pulse2{inset:-16px}
 .av-ring--lg .av-live-dot{width:16px;height:16px;bottom:6px;right:6px}
@@ -447,7 +449,7 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .lpm-reachable--live::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e}
 .lpm-reachable--away{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.12)}
 .lpm-av-wrap{position:relative;display:inline-block;margin-bottom:10px}
-.lpm-av{width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:top;position:relative;z-index:2}
+.lpm-av{width:88px;height:88px;border-radius:50%;object-fit:contain;object-position:center center;background:rgba(15,23,42,.15);position:relative;z-index:2}
 .lpm-av-pulse{position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(59,130,246,.55);animation:avpulse 2s ease-in-out infinite;z-index:1}
 .lpm-av-pulse2{position:absolute;inset:-16px;border-radius:50%;border:1.5px solid rgba(59,130,246,.28);animation:avpulse 2s ease-in-out infinite .5s;z-index:0}
 .lpm-live-dot{position:absolute;bottom:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#16a34a;border:2.5px solid #0f2744;z-index:3}
