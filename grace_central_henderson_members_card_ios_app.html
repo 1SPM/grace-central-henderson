@@ -505,6 +505,16 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .lg-item{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #f7f5f2;background:#fff}
 .lg-item:last-child{border-bottom:none}
 .lg-item.active-leader{background:#fafafa}
+.grace-faq-block{margin-top:12px}
+.grace-faq-list{display:flex;flex-direction:column;gap:10px}
+.grace-faq-block .faq-card{background:#fff;border:1px solid #e8e4dc;border-radius:14px;overflow:hidden}
+.grace-faq-block .faq-card.open{border-color:#EE2B37;box-shadow:0 2px 12px rgba(238,43,55,.08)}
+.grace-faq-block .faq-card-head{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer}
+.grace-faq-block .faq-card-q{flex:1;font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.35}
+.grace-faq-block .faq-toggle{width:26px;height:26px;border-radius:50%;background:#f7f5f2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.grace-faq-block .faq-card.open .faq-toggle{background:#000}
+.grace-faq-block .faq-answer{display:none;padding:0 14px 14px 50px;font-size:11px;color:#888;line-height:1.6}
+.grace-faq-block .faq-card.open .faq-answer{display:block}
 .lg-item-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
 .lg-av-wrap{position:relative;flex-shrink:0}
 .lg-av{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:top;display:block}
@@ -2617,6 +2627,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <p class="drawer-crisis-body">Access free, confidential resources and helplines.</p>
           <button type="button" class="drawer-crisis-btn" onclick="openCrisisSupport()"><span aria-hidden="true">♥</span> Access Crisis Support</button>
           <div class="drawer-crisis-foot">Available worldwide · Free · Confidential</div>
+        </div>
+
+        <div class="card grace-faq-block">
+          <div class="section-head" style="margin-bottom:10px"><div><h3 id="ios-faq-title">About GRACE &amp; Leader Avatars</h3><span id="ios-faq-subtitle">GRACE guides your journey · Leader avatars are where you confide</span></div></div>
+          <div class="grace-faq-list" id="ios-faq-list"></div>
         </div>
       </div>
 
@@ -6955,6 +6970,19 @@ function startJyStudyFromInput() {
 if (typeof hydrateGraceIcons === 'function') hydrateGraceIcons(document);
 if (typeof initGraceAllIcons === 'function') initGraceAllIcons(document);
 if (typeof graceVerifiedFaq !== 'undefined') graceVerifiedFaq.init({ churchName: 'Central Henderson', variant: 'sheet' });
+var GRACE_MSG = GRACE_MESSAGING.getMessaging('Central Henderson');
+var graceFaqOpen = 0;
+function toggleGraceFaq(i) {
+  var isOpen = graceFaqOpen === i;
+  GRACE_MSG.faq.items.forEach(function(f, j) {
+    var card = document.getElementById('grace-faq-card-' + j);
+    var body = document.getElementById('grace-faq-body-' + j);
+    if (card) card.classList.toggle('open', !isOpen && j === i);
+    if (body) body.style.display = (!isOpen && j === i) ? 'block' : 'none';
+  });
+  graceFaqOpen = isOpen ? -1 : i;
+}
+GRACE_MESSAGING.renderFaqHtml(GRACE_MSG.faq, 'ios-faq-list', 'toggleGraceFaq');
 initDrawerMenuIcons();
 renderLeader();
 seedLeaderChat();
