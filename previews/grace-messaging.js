@@ -54,7 +54,7 @@
             church +
             ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; I can take you anywhere in the app.',
           steps: [
-            { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Card, Connect, and Journey.' },
+            { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Impact Card, Connect, and Journey.' },
             { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — I learn your rhythm on this device.' },
             { icon: 'leadership', label: 'Go deeper', detail: 'Personal conversation stays with your verified leader avatar — siloed from GRACE.' },
             { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at Central for giving, care, groups, and watch.' },

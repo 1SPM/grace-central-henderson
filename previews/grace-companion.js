@@ -349,7 +349,7 @@
   /* ══ CAPABILITIES — single source of truth for what GRACE can do ══ */
   const CAPABILITIES = [
     { key: 'give', label: 'give \u2014 tithe, offerings, recurring gifts', sample: 'I\u2019d like to give' },
-    { key: 'wallet', label: 'run your GRACE Card \u2014 freeze it, send or receive money, statements', sample: 'Freeze my card' },
+    { key: 'wallet', label: 'run your GRACE Impact Card \u2014 freeze it, send or receive money, statements', sample: 'Freeze my card' },
     { key: 'watch', label: 'take you to the live service or a past message', sample: 'Take me to the live service' },
     { key: 'groups', label: 'find groups, ministries, and serve teams', sample: 'Show me my groups' },
     { key: 'events', label: 'browse events and RSVP you', sample: 'RSVP me for Sunday' },
@@ -392,7 +392,7 @@
   };
   const PAGE_BRIEFS = {
     home: () => 'You\u2019re on Home \u2014 today\u2019s rhythm, your quick actions, and my getting-started guide all live here. I can take you anywhere in the app from this page.',
-    wallet: (st) => 'You\u2019re on your GRACE Card \u2014 direct gifts are at $' + (st.givenMtd ?? 230) + ' this month and your card has routed $' + (st.cardImpact ?? 18.42) + '. I can give, freeze your card, send money, or review impact from here.',
+    wallet: (st) => 'You\u2019re on your GRACE Impact Card \u2014 direct gifts are at $' + (st.givenMtd ?? 230) + ' this month and your card has routed $' + (st.cardImpact ?? 18.42) + '. I can give, freeze your card, send money, or review impact from here.',
     give: (st) => 'You\u2019re on Give \u2014 your 2026 goal is at ' + (st.goalPct ?? 52) + '% of $' + Number(st.goalTarget ?? 2400).toLocaleString() + '. I can set up a tithe, a one-time gift, or recurring giving.',
     watch: (st) => 'You\u2019re on Watch \u2014 the 9:45 AM service has ' + (st.viewers ?? 342) + ' watching right now. I can open the live stream or find a past message for you.',
     groups: (st) => 'You\u2019re on Connect \u2014 you\u2019re in ' + (st.groupCount ?? 2) + ' groups. I can find you a new group, a serve team, or the ministry that fits you.',
@@ -510,7 +510,7 @@
       const given = st.givenMtd != null ? '$' + st.givenMtd : '$230';
       const impact = st.cardImpact != null ? '$' + st.cardImpact : '$18.42';
       return {
-        intent: 'give', nav: 'wallet', navLabel: 'Open My GRACE Card',
+        intent: 'give', nav: 'wallet', navLabel: 'Open My GRACE Impact Card',
         text: 'Here\u2019s your snapshot: direct gifts this month ' + given + ', and your card has routed ' + impact + ' of everyday impact. Your giving goal is at ' + (st.goalPct ?? 52) + '%. Want me to open your card?'
       };
     }
@@ -584,24 +584,24 @@
     }
     if (RX.cardFreeze.test(lower)) {
       const unfreeze = /unfreeze|unlock|unpause/i.test(lower);
-      if (A.toast) A.toast(unfreeze ? 'GRACE Card active again' : 'GRACE Card frozen');
+      if (A.toast) A.toast(unfreeze ? 'GRACE Impact Card active again' : 'GRACE Impact Card frozen');
       return {
-        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Impact Card',
         text: unfreeze
-          ? 'Done \u2014 your GRACE Card is active again and ready to route impact. Want me to open it so you can double-check?'
-          : 'Done \u2014 I\u2019ve frozen your GRACE Card, so no new charges can go through until you say the word. Tell me \u201cunfreeze my card\u201d anytime, or I can open the card screen now.'
+          ? 'Done \u2014 your GRACE Impact Card is active again and ready to route impact. Want me to open it so you can double-check?'
+          : 'Done \u2014 I\u2019ve frozen your GRACE Impact Card, so no new charges can go through until you say the word. Tell me \u201cunfreeze my card\u201d anytime, or I can open the card screen now.'
       };
     }
     if (RX.sendMoney.test(lower)) {
       return {
-        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
-        text: 'I can help you send money from your GRACE Card \u2014 to a friend, a group, or as a gift. I\u2019ll open your card so you can choose the recipient and amount.'
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Impact Card',
+        text: 'I can help you send money from your GRACE Impact Card \u2014 to a friend, a group, or as a gift. I\u2019ll open your card so you can choose the recipient and amount.'
       };
     }
     if (RX.receiveMoney.test(lower)) {
       return {
-        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Card',
-        text: 'Easy \u2014 your GRACE Card can receive money too. I\u2019ll open it so you can share your request link or card details safely.'
+        intent: 'wallet', nav: 'wallet', navLabel: 'Open My GRACE Impact Card',
+        text: 'Easy \u2014 your GRACE Impact Card can receive money too. I\u2019ll open it so you can share your request link or card details safely.'
       };
     }
     if (RX.statements.test(lower)) {

@@ -419,7 +419,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .item strong{display:block;font-size:14px;font-weight:700}
 .item p{font-size:12px;color:var(--ios-muted);line-height:1.45;margin-top:4px}
 .item-note{font-size:12px;font-weight:700;color:#C41E2A;white-space:nowrap}
-/* Give / My GRACE Card */
+/* Give / My GRACE Impact Card */
 .gv-tabs{
   display:flex;gap:6px;padding:0 14px 10px;background:#fff;border-bottom:1px solid var(--ios-line);flex-shrink:0
 }
@@ -1102,7 +1102,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           </div>
           <div class="daily-item" onclick="showScreen('give')">
             <div class="daily-time">◎ Day</div>
-            <div class="daily-action">Use GRACE Card · auto-support causes</div>
+            <div class="daily-action">Use GRACE Impact Card · auto-support causes</div>
             <div class="daily-status pending" id="daily-impact-status">+$18.42 routed this month</div>
           </div>
           <div class="daily-item" onclick="showScreen('profile')">
@@ -1190,7 +1190,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="pillar-card" onclick="showScreen('give')">
                 <div class="pillar-letter">R</div>
                 <div class="pillar-name">Resource</div>
-                <div class="pillar-sub">Give · GRACE Card · impact</div>
+                <div class="pillar-sub">Give · GRACE Impact Card · impact</div>
                 <span class="pillar-badge">$3,240 wallet</span>
               </div>
               <div class="pillar-card" onclick="showScreen('community')">
@@ -1387,8 +1387,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
     <section class="screen" id="screen-give">
       <div class="nav">
         <div class="nav-side"><span data-grace-icon="give" data-grace-size="14"></span></div>
-        <div class="nav-title">My GRACE Card</div>
-        <div class="nav-btn" onclick="showToast('GRACE Card active')"><span class="gv-status">Active</span></div>
+        <div class="nav-title">My GRACE Impact Card</div>
+        <div class="nav-btn" onclick="showToast('GRACE Impact Card active')"><span class="gv-status">Active</span></div>
       </div>
       <div class="gv-tabs">
         <button type="button" class="gv-tab active" data-gv="assets" onclick="walletTabGive('assets')">Assets &amp; Care Center</button>
@@ -1399,7 +1399,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <div class="gv-hero">
             <div class="gv-hero-overlay">
               <h2>Assets &amp; Care Center</h2>
-              <p>Give, spend with your GRACE Card, and route everyday purchases to ministry causes — automatically.</p>
+              <p>Give, spend with your GRACE Impact Card, and route everyday purchases to ministry causes — automatically.</p>
               <div class="gv-kpi-grid">
                 <div class="gv-kpi"><strong id="gv-wallet">$3,240</strong><span>Wallet available</span></div>
                 <div class="gv-kpi"><strong id="gv-given-ytd">$1,240</strong><span>Given · YTD</span><em id="gv-given-month">$230 this month</em></div>
@@ -1415,11 +1415,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 
           <div class="gv-card-block" id="gv-grace-card-block">
             <div class="gv-card-head">
-              <strong>Central Henderson · GRACE Card</strong>
+              <strong>Central Henderson · GRACE Impact Card</strong>
               <span class="gv-status">Active</span>
             </div>
             <div class="members-card-showcase" style="margin:0">
-              <div class="mc-flip" onclick="flipGraceCard(this)" role="button" aria-label="Flip GRACE Card">
+              <div class="mc-flip" onclick="flipGraceCard(this)" role="button" aria-label="Flip GRACE Impact Card">
                 <div class="mc-flip-inner">
                   <div class="mc-face mc-front">
                     <div class="members-card-shell">
@@ -1430,7 +1430,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
                       <div class="members-card-mid">
                         <img class="members-card-mark" src="assets/central-c-mark.png" alt="" aria-hidden="true">
                       </div>
-                      <div class="members-card-label">Central Henderson GRACE Card</div>
+                      <div class="members-card-label">Central Henderson GRACE Impact Card</div>
                       <div class="members-card-number">5244 •••• •••• 1834</div>
                       <div class="members-card-bottom">
                         <div class="members-card-holder">Maya Thompson<span>Valid thru 12/28</span></div>
@@ -1607,7 +1607,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             <div class="gv-feed-item"><div class="gv-feed-ico">◈</div><div><strong>Sarah</strong> generated <strong>$4.20</strong> for Youth Ministry</div></div>
             <div class="gv-feed-item"><div class="gv-feed-ico">🌿</div><div><strong>David</strong> increased Commitment to <strong>Champion</strong></div></div>
             <div class="gv-feed-item"><div class="gv-feed-ico">🍽</div><div>Food Pantry at <strong>85%</strong> · <strong>127 meals</strong> this week</div></div>
-            <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>GRACE Card (Walmart) → <strong>+$2.40</strong> Food Pantry</div></div>
+            <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>GRACE Impact Card (Walmart) → <strong>+$2.40</strong> Food Pantry</div></div>
           </div>
 
           <div class="gv-stat-grid">
@@ -1670,11 +1670,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <div class="gv-card-block" id="gv-tx-card" style="padding:0;overflow:hidden">
             <div class="gv-card-head" style="padding:14px 14px 0"><strong>Live Transactions</strong><span class="pulse-live"><i></i> Real-time</span></div>
             <div class="gv-tx-impact">Grace Impact™ from spending this month: <strong id="gv-tx-impact-total">+$18.42</strong></div>
-            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
-            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f0e8">⛽</div><div class="gv-tx-body"><div class="gv-tx-name">Shell Gas Station</div><div class="gv-tx-meta">May 27 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$58.75</div><div class="gv-tx-contrib">+$0.88 Missions</div></div></div>
+            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
+            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f0e8">⛽</div><div class="gv-tx-body"><div class="gv-tx-name">Shell Gas Station</div><div class="gv-tx-meta">May 27 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$58.75</div><div class="gv-tx-contrib">+$0.88 Missions</div></div></div>
             <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">💛</div><div class="gv-tx-body"><div class="gv-tx-name">Sunday Tithe — Direct</div><div class="gv-tx-meta">May 25 · Recurring</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">General Tithe</div></div></div>
-            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8edf8">📦</div><div class="gv-tx-body"><div class="gv-tx-name">Amazon Purchase</div><div class="gv-tx-meta">May 24 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$360.00</div><div class="gv-tx-contrib">+$3.60 Building</div></div></div>
-            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#f5ece8">🍔</div><div class="gv-tx-body"><div class="gv-tx-name">Chick-fil-A</div><div class="gv-tx-meta">May 23 · GRACE Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$27.00</div><div class="gv-tx-contrib">+$0.54 Youth</div></div></div>
+            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8edf8">📦</div><div class="gv-tx-body"><div class="gv-tx-name">Amazon Purchase</div><div class="gv-tx-meta">May 24 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$360.00</div><div class="gv-tx-contrib">+$3.60 Building</div></div></div>
+            <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#f5ece8">🍔</div><div class="gv-tx-body"><div class="gv-tx-name">Chick-fil-A</div><div class="gv-tx-meta">May 23 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$27.00</div><div class="gv-tx-contrib">+$0.54 Youth</div></div></div>
           </div>
 
           <div class="gv-card-block">
@@ -1693,12 +1693,12 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             <div class="impact-notify-head section-head" style="margin-bottom:8px">
               <div>
                 <h3>Purchase impact notifications</h3>
-                <span>Each GRACE Card purchase routes impact automatically.</span>
+                <span>Each GRACE Impact Card purchase routes impact automatically.</span>
               </div>
               <div class="impact-live"><i></i> Live</div>
             </div>
             <div class="impact-notify-tagline">
-              Every eligible purchase with your <strong>Central Henderson GRACE Card</strong> sends a notification showing spend and routed impact.
+              Every eligible purchase with your <strong>Central Henderson GRACE Impact Card</strong> sends a notification showing spend and routed impact.
             </div>
             <div class="impact-notify-list" id="impact-notify-list"></div>
             <div class="impact-notify-total">
@@ -2397,7 +2397,7 @@ let leaderChatSeeded = false;
 let leaderIsTyping = false;
 
 const leaderAiResponses = {
-  give: { text: "I'll take you to Give — tithe, one-time offering, or your GRACE Card impact.", action: 'give', label: 'Give now' },
+  give: { text: "I'll take you to Give — tithe, one-time offering, or impact from your GRACE Impact Card.", action: 'give', label: 'Give now' },
   prayer: { text: "You've been heard. I can open a prayer request or connect you with care dispatch right away.", action: 'prayer', label: 'Submit prayer' },
   watch: { text: 'Sunday service is live with 342 watching. Want me to open the stream?', action: 'watch', label: 'Watch live' },
   groups: { text: "You're in Women of Grace and Young Adults. I can find a new group or connect you with a leader.", action: 'groups', label: 'Find a group' },
@@ -2457,7 +2457,7 @@ function renderImpactNotification(item, isNew) {
     '<div class="impact-notify-icon" style="background:' + item.bg + '" data-grace-icon="' + item.icon + '" data-grace-size="18"></div>' +
     '<div class="impact-notify-body">' +
       '<strong>' + item.merchant + '</strong>' +
-      '<span class="impact-notify-meta">' + item.date + ' · GRACE Card · −' + formatMoney(item.spend) + '</span>' +
+      '<span class="impact-notify-meta">' + item.date + ' · GRACE Impact Card · −' + formatMoney(item.spend) + '</span>' +
       '<div class="impact-notify-route">+' + formatMoney(item.impact) + ' routed to ' + item.cause + '</div>' +
     '</div>' +
     '<div class="impact-notify-time">' + item.time + '</div>' +

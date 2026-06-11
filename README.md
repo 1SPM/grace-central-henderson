@@ -88,7 +88,7 @@ GRACE uses a **two-tier** approach documented in [`previews/grace-messaging.js`]
 
 All member preview HTML files load `grace-messaging.js` for shared copy.
 
-**GRACE** system identity on Home cards uses the animated **grace orb** ([`previews/grace-orb.css`](previews/grace-orb.css)) — not the church C mark. Leader avatars and GRACE Card wallet branding still use church marks and photos.
+**GRACE** system identity on Home cards uses the animated **grace orb** ([`previews/grace-orb.css`](previews/grace-orb.css)) — not the church C mark. Leader avatars and GRACE Impact Card wallet branding still use church marks and photos.
 
 ## Design notes
 
