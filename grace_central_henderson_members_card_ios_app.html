@@ -249,6 +249,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;
   vertical-align:middle;background:rgba(59,130,246,.3);color:#bfdbfe;border:1px solid rgba(96,165,250,.45)
 }
+.ai-mode-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;vertical-align:middle}
+.ai-mode-tag.ai{background:rgba(59,130,246,.3);color:#bfdbfe;border:1px solid rgba(96,165,250,.45)}
 .home-ai-wave{display:flex;align-items:center;gap:2px;height:14px}
 .home-ai-wave span{width:3px;background:#60a5fa;border-radius:2px;animation:wave 0.8s ease-in-out infinite}
 .home-ai-wave span:nth-child(1){animation-delay:0s;height:5px}
@@ -290,31 +292,27 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   background:radial-gradient(circle,rgba(59,130,246,.28),transparent 70%)
 }
 #ld-hero-centered.ld-hero-centered>*{position:relative;z-index:1}
-#ld-hero-centered.ld-hero-compact{
-  flex-direction:row;text-align:left;align-items:flex-start;padding:14px 16px;gap:12px
-}
-#ld-hero-centered.ld-hero-compact .ld-av-lg{align-self:flex-start;flex-shrink:0}
-#ld-hero-centered.ld-hero-compact .ld-hero-compact-body{flex:1;min-width:0}
-#ld-hero-centered.ld-hero-compact .ld-hero-compact-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-#ld-hero-centered.ld-hero-compact .ld-begin{width:auto;max-width:none;padding:8px 12px;font-size:11px;flex:1;min-width:120px}
-#ld-hero-centered.ld-hero-compact .ld-hero-dm{padding:8px 12px;font-size:11px;flex:1;min-width:88px}
-#ld-hero-centered.ld-hero-compact .ld-switch-ghost{padding:8px 10px;font-size:10px}
-#ld-hero-centered.ld-hero-compact .ld-profile-brand{display:none}
-#ld-hero-centered.ld-hero-compact .home-ai-wave{display:none}
-#ld-hero-centered.ld-hero-compact .home-ai-greeting{display:none}
-#ld-hero-centered.ld-hero-compact .ld-kpi-strip{display:none}
-#ld-hero-centered.ld-hero-compact .ld-av-lg{width:58px;height:76px;border-radius:14px}
-#ld-hero-centered.ld-hero-compact .ld-av-lg img{
-  width:58px;height:76px;border-radius:14px;object-fit:cover;object-position:center 18%
-}
-#ld-hero-centered.ld-hero-compact .ld-av-lg .home-ai-pulse{inset:-4px;border-radius:16px}
-#ld-hero-centered.ld-hero-compact .ld-av-lg .home-ai-pulse2{inset:-8px;border-radius:18px}
-#ld-hero-centered .ld-av-lg{width:72px;height:72px}
-#ld-hero-centered .ld-av-lg img{
-  width:72px;height:72px;object-fit:cover;object-position:center 22%
-}
-#ld-hero-centered .ld-av-lg .home-ai-pulse{inset:-5px}
-#ld-hero-centered .ld-av-lg .home-ai-pulse2{inset:-10px}
+.ld-hero-top{display:flex;justify-content:center;width:100%}
+.ld-reachable{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px}
+.ld-reachable--live{background:rgba(22,163,74,.2);color:#86efac;border:1px solid rgba(22,163,74,.35)}
+.ld-reachable--live::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.ld-reachable--away{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.12)}
+.ld-hero-body{display:flex;flex-direction:column;gap:12px;width:100%;align-items:center}
+.ld-hero-profile{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.ld-hero-identity{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:320px;text-align:center}
+.ld-hero-status{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:rgba(255,255,255,.7)}
+#ld-hero-centered .ld-leader-name{font-size:18px;font-weight:800;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;line-height:1.25;margin:0}
+#ld-hero-centered .ld-leader-role{font-size:11px;color:rgba(255,255,255,.55);line-height:1.45;margin:0}
+#ld-hero-centered .home-ai-greeting{font-size:12px;color:rgba(255,255,255,.78);font-style:italic;line-height:1.55;max-width:300px;margin:0 auto;text-align:center}
+.ld-hero-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%;justify-content:center}
+.ld-hero-actions .ld-hero-dm{flex:1;min-width:100px;max-width:170px;padding:10px 14px;font-size:11px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-weight:700;cursor:pointer;font-family:inherit}
+.ld-hero-actions .ld-begin{flex:1;min-width:120px;max-width:200px;padding:10px 14px;font-size:11px;width:auto;max-width:200px}
+.ld-hero-actions .ld-switch-ghost{flex:1;min-width:100px;max-width:170px;padding:8px 12px;font-size:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12)}
+#ld-hero-centered .ld-av-lg{width:72px;height:72px;border-radius:50%}
+#ld-hero-centered .ld-av-lg img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center 38%}
+#ld-hero-centered .ld-av-lg .home-ai-pulse{inset:-5px;border-radius:50%}
+#ld-hero-centered .ld-av-lg .home-ai-pulse2{inset:-10px;border-radius:50%}
+#screen-leaders .leader-kpi-bar{display:none}
 .ld-profile-hero.ld-hero-centered .ld-av-lg img{
   object-fit:contain;object-position:center center;background:rgba(255,255,255,.06)
 }
@@ -2129,10 +2127,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .give-wallet-panel-actions{display:flex;gap:8px;margin-bottom:8px}
 .give-wallet-panel-actions button{flex:1;padding:9px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid #ece8e1;background:#faf8f5}
 .give-wallet-panel-actions button.primary{background:#000;color:#fff;border-color:#000}
-.ld-kpi-strip{display:flex;gap:8px;justify-content:center;margin:10px 0 4px;flex-wrap:wrap}
-.ld-kpi-item{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:8px 12px;text-align:center;min-width:88px}
-.ld-kpi-item strong{display:block;font-size:12px;font-weight:800;color:#fff}
-.ld-kpi-item span{font-size:8px;color:rgba(255,255,255,.6);margin-top:2px;display:block}
+.ld-kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin:0}
+.ld-kpi-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 8px;text-align:center;min-width:0}
+.ld-kpi-item strong{display:block;font-size:14px;font-weight:800;color:#fff;line-height:1.1}
+.ld-kpi-item span{font-size:8px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;display:block}
+.ld-hero-disclaimer{font-size:10px;color:rgba(255,255,255,.42);line-height:1.45;text-align:center;width:100%;padding:0 4px;margin:0}
 .ld-hero-dm-row{display:flex;gap:8px;width:100%;max-width:300px;margin-top:8px}
 .ld-hero-dm{flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .cn-post-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
@@ -2533,39 +2532,40 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="nav-btn" onclick="showToast('Video call with your leader')"><span data-grace-icon="watch" data-grace-size="14"></span></div>
       </div>
       <div class="scroll">
-        <div class="ld-hero-centered ld-hero-compact" id="ld-hero-centered">
-          <div class="ld-profile-brand">
-            <img class="ld-profile-logo" src="previews/assets/CCC_Central_Church-invert.png" alt="Central Church iBanc" onerror="this.style.display='none'">
+        <div class="ld-hero-centered" id="ld-hero-centered">
+          <div class="ld-hero-top">
+            <div class="ld-reachable ld-reachable--live" id="ld-reachable-badge">Reachable now · real person available</div>
           </div>
-          <div class="ld-av-lg">
-            <span class="home-ai-pulse"></span>
-            <span class="home-ai-pulse2"></span>
-            <img id="ld-leader-img" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="">
-            <span class="home-ai-live" id="ld-hero-live-dot"></span>
-          </div>
-          <div class="ld-hero-compact-body">
-            <div class="ld-leader-name" id="ld-leader-name">Pastor James Wilson</div>
-            <div class="home-ai-mode" style="margin:4px 0 0;display:inline-flex">Verified Avatar · Human care available</div>
-            <div class="ld-leader-role" id="ld-leader-role">Central Henderson · Verified Avatar · Human follow-up available</div>
-            <p class="ld-trust-line" style="color:rgba(255,255,255,.55);font-size:10px;line-height:1.45;margin:6px 0 0">Avatars do not replace pastors, counselors, or emergency support.</p>
-            <div class="ld-hero-compact-actions">
+          <div class="ld-hero-body">
+            <div class="ld-hero-profile">
+              <div class="ld-av-lg">
+                <span class="home-ai-pulse"></span>
+                <span class="home-ai-pulse2"></span>
+                <img id="ld-leader-img" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="">
+                <span class="home-ai-live" id="ld-hero-live-dot"></span>
+              </div>
+              <div class="ld-hero-identity">
+                <div class="ld-leader-name" id="ld-leader-name">Pastor James Wilson</div>
+                <div class="ld-leader-role" id="ld-leader-role">Senior Pastor · Central Henderson · Verified Avatar · Human follow-up available</div>
+                <div class="ld-hero-status">
+                  <div class="home-ai-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+                  <span id="ld-leader-status">Listening for you, Maya...</span>
+                </div>
+              </div>
+            </div>
+            <p class="home-ai-greeting" id="ld-leader-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? This is a safe space to share.</p>
+            <div class="ld-hero-actions">
               <button type="button" class="ld-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
               <button type="button" class="ld-begin" onclick="openDivinityAvatar(currentLeader)">Begin a Conversation</button>
-              <button type="button" class="ld-switch-ghost" onclick="scrollToLeaderRoster()">Switch Leader ›</button>
+              <button type="button" class="ld-switch-ghost" onclick="scrollToLeaderRoster()">Switch Leader ↓</button>
             </div>
           </div>
-          <p class="home-ai-greeting" id="ld-leader-greeting" hidden>Grace is here for prayer, guidance, and next steps.</p>
-          <div class="ld-kpi-strip" role="group" aria-label="Leadership summary" hidden>
+          <div class="ld-kpi-strip" role="group" aria-label="Leadership summary">
             <div class="ld-kpi-item"><strong id="leader-kpi-active">Pastor James</strong><span>Active leader</span></div>
             <div class="ld-kpi-item"><strong id="leader-kpi-verified">18</strong><span>Verified leaders</span></div>
             <div class="ld-kpi-item"><strong id="leader-kpi-participation">4</strong><span>Participation · week</span></div>
           </div>
-        </div>
-
-        <div class="leader-kpi-bar" role="group" aria-label="Leadership summary">
-          <div class="leader-kpi-chip"><strong id="leader-kpi-active-bar">Pastor James</strong><span>Active leader</span></div>
-          <div class="leader-kpi-chip"><strong id="leader-kpi-verified-bar">18</strong><span>Verified leaders</span></div>
-          <div class="leader-kpi-chip"><strong id="leader-kpi-participation-bar">4</strong><span>Participation · week</span></div>
+          <div class="ld-hero-disclaimer" id="ld-leader-disclaimer"></div>
         </div>
 
         <div style="margin:0 0 10px;text-align:right">
@@ -6145,35 +6145,54 @@ function leaderShortName(l) {
   const parts = l.name.split(' ');
   return parts.length > 2 ? parts.slice(0, 2).join(' ') : l.name;
 }
+function syncLeaderHeroReachable(leader) {
+  var reachable = getLeaderReachable(leader);
+  var badge = document.getElementById('ld-reachable-badge');
+  var liveDot = document.getElementById('ld-hero-live-dot');
+  if (badge && typeof GRACE_MSG !== 'undefined') {
+    badge.textContent = reachable ? GRACE_MSG.leaderAvatar.reachableLive : GRACE_MSG.leaderAvatar.reachableAway;
+    badge.className = 'ld-reachable ' + (reachable ? 'ld-reachable--live' : 'ld-reachable--away');
+  }
+  syncHeroLiveDot('ld-hero-live-dot', leader);
+}
 function syncLeaderKpis() {
   const leader = leaders[currentLeader] || leaders[0];
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = String(value); };
   if (leader) {
     const short = leaderShortName(leader);
     set('leader-kpi-active', short);
-    set('leader-kpi-active-bar', short);
   }
   const verified = leaders.length;
   set('leader-kpi-verified', verified);
-  set('leader-kpi-verified-bar', verified);
   set('leader-kpi-participation', 4);
-  set('leader-kpi-participation-bar', 4);
   const count = document.getElementById('leader-roster-count');
   if (count) count.textContent = verified + ' verified';
 }
 function renderLeader() {
   const leader = leaders[currentLeader];
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  const setHtml = (id, value) => { const el = document.getElementById(id); if (el) el.innerHTML = value; };
   const setSrc = (id, value) => { const el = document.getElementById(id); if (el) el.src = value; };
-  set('ld-leader-name', leader.name);
-  set('ld-leader-role', 'Central Henderson · Verified Avatar · Human follow-up available');
+  if (typeof GRACE_MESSAGING !== 'undefined') {
+    setHtml('ld-leader-name', GRACE_MESSAGING.leaderNameHtml(leader.name, GRACE_MSG));
+    set('ld-leader-role', GRACE_MESSAGING.leaderFollowUpLine(leader, GRACE_MSG));
+  } else {
+    set('ld-leader-name', leader.name);
+    set('ld-leader-role', leader.role || 'Central Henderson · Verified Avatar · Human follow-up available');
+  }
   setSrc('ld-leader-img', leader.img);
-  syncHeroLiveDot('ld-hero-live-dot', leader);
+  syncLeaderHeroReachable(leader);
   syncLeaderKpis();
+  var greet = (leader.greeting || '').replace(/^"|"$/g, '');
+  set('ld-leader-greeting', greet || 'What\'s on your heart?');
+  set('ld-leader-status', 'Listening for you, Maya...');
+  var disclaimer = document.getElementById('ld-leader-disclaimer');
+  if (disclaimer && typeof GRACE_MSG !== 'undefined') disclaimer.textContent = GRACE_MSG.leaderAvatar.disclaimer;
   const ldInput = document.getElementById('ld-chat-input');
   if (ldInput) ldInput.placeholder = 'Share with ' + leaderFirstName(leader.name) + '…';
   renderHomeAi();
   renderLeaderRoster();
+  if (typeof hydrateGraceIcons === 'function') hydrateGraceIcons(document.getElementById('ld-hero-centered'));
 }
 
 function renderHomeAi() {

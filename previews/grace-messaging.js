@@ -545,6 +545,8 @@
     }
     const aiLeaderDisclaimer = document.getElementById('ai-leader-disclaimer');
     if (aiLeaderDisclaimer) aiLeaderDisclaimer.textContent = m.leaderAvatar.disclaimer;
+    const ldLeaderDisclaimer = document.getElementById('ld-leader-disclaimer');
+    if (ldLeaderDisclaimer) ldLeaderDisclaimer.textContent = m.leaderAvatar.disclaimer;
   }
 
   global.GRACE_MESSAGING = {

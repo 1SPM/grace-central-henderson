@@ -404,9 +404,13 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .ai-send{width:36px;height:36px;border-radius:50%;background:#000000;border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* Quick commands */
-.quick-cmds{display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
-.qcmd{font-size:11px;font-weight:500;padding:7px 14px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;color:#555;cursor:pointer;transition:all .15s;white-space:nowrap}
-.qcmd:hover{background:#000000;color:#fff;border-color:#000000}
+.quick-cmds{display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;margin-bottom:12px}
+.quick-cmd{
+  display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:6px 10px;
+  border:1px solid #000;background:#fff;color:#000;border-radius:4px;cursor:pointer;white-space:nowrap;
+  font-family:inherit;line-height:1.2
+}
+.quick-cmd span{display:inline-flex;align-items:center;flex-shrink:0}
 
 /* Right panel — full-height leader roster */
 .ai-right{display:flex;flex-direction:column;min-height:0;height:100%;min-width:0}
@@ -2144,14 +2148,14 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
           <!-- Quick commands -->
           <div class="quick-cmds">
-            <div class="qcmd" onclick="sendCmd('I want to give my tithe','give')">💛 Give now</div>
-            <div class="qcmd" onclick="sendCmd('I need prayer','care')">🙏 Submit a prayer</div>
-            <div class="qcmd" onclick="sendCmd('Show me this week\'s sermon','watch')">▶ Watch service</div>
-            <div class="qcmd" onclick="sendCmd('Find me a small group','groups')">◈ Find a group</div>
-            <div class="qcmd" onclick="sendCmd('What events are coming up?','events')">📅 Upcoming events</div>
-            <div class="qcmd" onclick="sendCmd('I decided to follow Jesus',null)">✝️ I followed Jesus</div>
-            <div class="qcmd" onclick="openCrisisSupport()">🚨 I need help now</div>
-            <div class="qcmd" onclick="openProfileStudy('grace')">📖 Bible study</div>
+            <button type="button" class="quick-cmd" onclick="sendCmd('I want to give my tithe','give')"><span data-grace-icon="give" data-grace-size="14"></span>Give now</button>
+            <button type="button" class="quick-cmd" onclick="sendCmd('I need prayer','care')"><span data-grace-icon="prayer" data-grace-size="14"></span>Prayer</button>
+            <button type="button" class="quick-cmd" onclick="sendCmd('Show me this week\'s sermon','watch')"><span data-grace-icon="watch" data-grace-size="14"></span>Watch</button>
+            <button type="button" class="quick-cmd" onclick="sendCmd('Find me a small group','groups')"><span data-grace-icon="groups" data-grace-size="14"></span>Groups</button>
+            <button type="button" class="quick-cmd" onclick="sendCmd('What events are coming up?','events')"><span data-grace-icon="events" data-grace-size="14"></span>Events</button>
+            <button type="button" class="quick-cmd" onclick="sendCmd('Tell me about children\'s ministry',null);showPortalToast('Children\'s ministry resources opening','◈')"><span data-grace-icon="kids" data-grace-size="14"></span>Children</button>
+            <button type="button" class="quick-cmd" onclick="openCrisisSupport()"><span data-grace-icon="crisis" data-grace-size="14"></span>Help now</button>
+            <button type="button" class="quick-cmd" onclick="openProfileStudy('grace')"><span data-grace-icon="resources" data-grace-size="14"></span>Bible study</button>
           </div>
 
           <!-- Chat window -->
