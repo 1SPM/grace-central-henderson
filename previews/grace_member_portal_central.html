@@ -317,6 +317,32 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .divinity-video-close:hover{background:rgba(201,151,58,.25)}
 #divinity-intro-video{width:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;background:#000}
 
+/* Crisis support overlay */
+.crisis-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9700;display:none;align-items:center;justify-content:center;padding:24px}
+.crisis-overlay.open{display:flex}
+.crisis-modal{width:100%;max-width:540px;max-height:86vh;background:#fff;border-radius:18px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden}
+.crisis-head{padding:16px 20px 12px;border-bottom:1px solid #f3f0eb;flex-shrink:0}
+.crisis-head h3{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.crisis-head-sub{font-size:12px;color:#888;margin-top:4px}
+.crisis-support-list{flex:1;overflow:auto}
+.crisis-section-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;padding:14px 20px 6px}
+.crisis-section-label:first-child{padding-top:10px}
+.crisis-hotline{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:start;width:100%;padding:12px 20px;border:none;border-bottom:1px solid #f3f0eb;background:#fff;text-align:left;font-family:inherit;cursor:pointer;text-decoration:none;color:inherit}
+.crisis-hotline:hover{background:#faf9f7}
+.crisis-hotline:last-child{border-bottom:none}
+.crisis-hotline--urgent{background:linear-gradient(90deg,#fff5f5 0%,#fff 72%)}
+.crisis-hotline-title{font-size:14px;font-weight:700;line-height:1.3;grid-column:1}
+.crisis-hotline-desc{font-size:11px;color:#888;margin-top:3px;line-height:1.4;grid-column:1}
+.crisis-hotline-action{font-size:15px;font-weight:800;color:#C41E2A;white-space:nowrap;padding-top:1px;grid-column:2;grid-row:1/span 2;align-self:center}
+.crisis-hotline--chat .crisis-hotline-action{color:#1e3a5f;font-size:12px;font-weight:700}
+.crisis-pastoral-wrap{padding:8px 20px 4px}
+.crisis-pastoral-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:14px;border:1px solid rgba(238,43,55,.35);background:#fff7f8;color:#111;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.crisis-pastoral-btn:hover{background:#ffeef0}
+.crisis-support-note{padding:10px 20px 16px;font-size:10px;color:#888;line-height:1.5}
+.crisis-support-note a{color:#1e3a5f;font-weight:600}
+.crisis-foot{padding:12px 20px 14px;border-top:1px solid #f3f0eb;flex-shrink:0}
+.crisis-foot-close{width:100%;padding:12px;border-radius:14px;border:1px solid #e7e2da;background:#fafafa;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#111}
+
 /* D-ID Studio modal */
 .did-studio-overlay{position:fixed;inset:0;background:rgba(10,22,40,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .did-studio-overlay.open{display:flex}
@@ -2124,7 +2150,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="qcmd" onclick="sendCmd('Find me a small group','groups')">◈ Find a group</div>
             <div class="qcmd" onclick="sendCmd('What events are coming up?','events')">📅 Upcoming events</div>
             <div class="qcmd" onclick="sendCmd('I decided to follow Jesus',null)">✝️ I followed Jesus</div>
-            <div class="qcmd" onclick="sendCmd('I need crisis support','care')">🚨 I need help now</div>
+            <div class="qcmd" onclick="openCrisisSupport()">🚨 I need help now</div>
             <div class="qcmd" onclick="openProfileStudy('grace')">📖 Bible study</div>
           </div>
 
@@ -2175,7 +2201,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <span class="lg-count" id="leader-roster-count">18 verified</span>
             </div>
             <div class="leader-roster-scroll" id="leader-roster-list"></div>
-            <a class="leader-crisis-ad" href="#" onclick="sendCmd('I need crisis support','care');return false" aria-label="Are you in crisis? Get help now — Central 24-7">
+            <a class="leader-crisis-ad" href="#" onclick="openCrisisSupport();return false" aria-label="Are you in crisis? Get help now — Central 24-7">
               <img src="assets/crisis-mode-ad.png" alt="Are you in crisis mode? Click for help — Central Church 24-7">
             </a>
           </div>
@@ -3462,7 +3488,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
             </div>
             <div style="padding:4px 0">
-              <div class="care-option" onclick="showPortalToast('Prayer request submitted — AI connecting now','🙏')">
+              <div class="care-option" onclick="showPortalToast('Prayer request submitted — your leader\'s avatar is ready, human follow-up available','🙏')">
                 <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" fill="#000000" opacity=".2"/><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" stroke="#000000" stroke-width="1.2"/><path d="M6.5 11h5M9 8.7V11" stroke="#EE2B37" stroke-width="1" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Prayer &amp; Guidance</div><div class="co-sub">Personal prayer, scripture, spiritual guidance</div></div>
                 <div class="co-arrow">›</div>
@@ -3487,9 +3513,9 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div><div class="co-name">Pre-Marital / Counselling</div><div class="co-sub">Book a session with Minister Grace Okafor</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" style="background:#fff8f8" onclick="showPortalToast('🚨 Crisis team alerted — a leader will contact you immediately','🚨')">
+              <div class="care-option" style="background:#fff8f8" onclick="openCrisisSupport()">
                 <div class="co-ico" style="background:#fee2e2"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2L16 15H2L9 2z" fill="#dc2626" opacity=".2"/><path d="M9 2L16 15H2L9 2z" stroke="#dc2626" stroke-width="1.3" stroke-linejoin="round"/><path d="M9 8v3" stroke="#dc2626" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="13" r=".8" fill="#dc2626"/></svg></div>
-                <div><div class="co-name" style="color:#b91c1c">Crisis Support</div><div class="co-sub" style="color:#dc2626">Immediate help — connects directly to a leader</div></div>
+                <div><div class="co-name" style="color:#b91c1c">Crisis Support</div><div class="co-sub" style="color:#dc2626">988, hotlines &amp; on-call pastoral care</div></div>
                 <div class="co-arrow" style="color:#dc2626">›</div>
               </div>
             </div>
@@ -3498,7 +3524,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Recent requests -->
           <div class="card">
             <div class="card-head"><div class="card-title">My recent requests</div></div>
-            <div class="tx-row"><div class="tx-ico" style="background:#e8edf8"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" fill="#000000" opacity=".2"/><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" stroke="#000000" stroke-width="1"/><path d="M5.5 9.5h5M8 7v2.5" stroke="#EE2B37" stroke-width=".9" stroke-linecap="round"/></svg></div><div><div class="tx-name">Prayer — Anxiety &amp; faith</div><div class="tx-sub">May 26 · Resolved by AI</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Resolved</div></div>
+            <div class="tx-row"><div class="tx-ico" style="background:#e8edf8"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" fill="#000000" opacity=".2"/><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" stroke="#000000" stroke-width="1"/><path d="M5.5 9.5h5M8 7v2.5" stroke="#EE2B37" stroke-width=".9" stroke-linecap="round"/></svg></div><div><div class="tx-name">Prayer — Anxiety &amp; faith</div><div class="tx-sub">May 26 · Resolved · human follow-up offered</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Resolved</div></div>
             <div class="tx-row"><div class="tx-ico" style="background:#e8f5ed"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="#16a34a" opacity=".12"/><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#16a34a" stroke-width="1.1"/><path d="M8 6v4M6 8h4" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/></svg></div><div><div class="tx-name">Hospital visit — Rm 214</div><div class="tx-sub">May 14 · Visit by Rev. Mitchell</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Complete</div></div>
           </div>
         </div>
@@ -3508,7 +3534,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Assigned leader AI card -->
           <div class="blessing-card" style="margin-bottom:14px">
             <div class="blessing-from">
-              <img class="blessing-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Pastor James Wilson">
+              <img class="blessing-av" src="assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
               <div>
                 <div class="blessing-who">Pastor James Wilson — Your assigned leader</div>
                 <div class="blessing-role">Central Henderson · Verified Avatar · Human follow-up available</div>
@@ -3517,8 +3543,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             </div>
             <div class="blessing-text">Grace is here for prayer, guidance, and next steps. A real leader can follow up when care is needed.</div>
             <div class="blessing-actions">
-              <button class="ba-btn ba-primary">Begin a conversation</button>
-              <button class="ba-btn ba-outline">📬 Direct Message</button>
+              <button class="ba-btn ba-primary" onclick="openDivinityAvatar(0)">Begin a conversation</button>
+              <button class="ba-btn ba-outline" onclick="startLeaderDirectMessage(0)">📬 Direct Message</button>
             </div>
           </div>
 
@@ -3526,29 +3552,29 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="card">
             <div class="card-head"><div class="card-title">Verified leaders</div><span class="card-meta" style="font-size:11px;color:#aaa">5 active · CentralHenderson</span></div>
             <div class="leader-card">
-              <div style="position:relative"><img class="lc-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt=""><div class="lc-live"></div></div>
+              <div style="position:relative"><img class="lc-av" src="assets/Pastor-James-Wilson-profile.jpg" alt=""><div class="lc-live"></div></div>
               <div><div class="lc-name">Pastor James Wilson</div><div class="lc-role">Senior Pastor</div><div class="lc-topic">Prayer · Scripture · Guidance</div></div>
-              <div class="lc-actions"><button class="lc-btn lc-btn-ai">Launch AI</button><button class="lc-btn">Message</button></div>
+              <div class="lc-actions"><button class="lc-btn lc-btn-ai" onclick="openDivinityAvatar(0)">Open avatar</button><button class="lc-btn" onclick="startLeaderDirectMessage(0)">Message</button></div>
             </div>
             <div class="leader-card">
               <div style="position:relative"><img class="lc-av" src="https://randomuser.me/api/portraits/women/44.jpg" alt=""><div class="lc-live"></div></div>
               <div><div class="lc-name">Rev. Sandra Mitchell</div><div class="lc-role">Pastoral Care Director</div><div class="lc-topic">Grief · Hospital · Emotional care</div></div>
-              <div class="lc-actions"><button class="lc-btn lc-btn-ai">Launch AI</button><button class="lc-btn">Message</button></div>
+              <div class="lc-actions"><button class="lc-btn lc-btn-ai" onclick="openDivinityAvatar(1)">Open avatar</button><button class="lc-btn" onclick="startLeaderDirectMessage(1)">Message</button></div>
             </div>
             <div class="leader-card">
               <div style="position:relative"><img class="lc-av" src="https://randomuser.me/api/portraits/men/54.jpg" alt=""><div class="lc-live"></div></div>
               <div><div class="lc-name">Pastor Derek Osei</div><div class="lc-role">Youth &amp; Family Pastor</div><div class="lc-topic">Identity · Youth · Mentorship</div></div>
-              <div class="lc-actions"><button class="lc-btn lc-btn-ai">Launch AI</button><button class="lc-btn">Message</button></div>
+              <div class="lc-actions"><button class="lc-btn lc-btn-ai" onclick="openDivinityAvatar(2)">Open avatar</button><button class="lc-btn" onclick="startLeaderDirectMessage(2)">Message</button></div>
             </div>
             <div class="leader-card">
               <div style="position:relative"><img class="lc-av" src="https://randomuser.me/api/portraits/women/28.jpg" alt=""><div class="lc-live" style="background:#d1d5db"></div></div>
               <div><div class="lc-name">Sis. Priya Nair</div><div class="lc-role">Women's Ministry</div><div class="lc-topic">Identity · Women's care · Mentorship</div></div>
-              <div class="lc-actions"><button class="lc-btn lc-btn-ai">Launch AI</button><button class="lc-btn">Message</button></div>
+              <div class="lc-actions"><button class="lc-btn lc-btn-ai" onclick="openDivinityAvatar(3)">Open avatar</button><button class="lc-btn" onclick="startLeaderDirectMessage(3)">Message</button></div>
             </div>
             <div class="leader-card">
               <div style="position:relative"><img class="lc-av" src="https://randomuser.me/api/portraits/men/45.jpg" alt=""><div class="lc-live" style="background:#d1d5db"></div></div>
               <div><div class="lc-name">Min. Grace Okafor</div><div class="lc-role">Family &amp; Counselling</div><div class="lc-topic">Marriage · Pre-marital · Parenting</div></div>
-              <div class="lc-actions"><button class="lc-btn lc-btn-ai">Launch AI</button><button class="lc-btn">Message</button></div>
+              <div class="lc-actions"><button class="lc-btn lc-btn-ai" onclick="openDivinityAvatar(4)">Open avatar</button><button class="lc-btn" onclick="startLeaderDirectMessage(4)">Message</button></div>
             </div>
           </div>
         </div>
@@ -3560,7 +3586,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="card-head">
           <div class="card-title">Care Dispatch — 24-hour service routing</div>
           <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#15803d;background:#dcfce7;padding:3px 10px;border-radius:10px">
-            <div style="width:6px;height:6px;border-radius:50%;background:#16a34a;animation:ldot 1.4s infinite"></div>System live
+            <div style="width:6px;height:6px;border-radius:50%;background:#16a34a;animation:ldot 1.4s infinite"></div>GRACE dispatch · live
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid #f3f0eb">
@@ -3666,12 +3692,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="card" style="margin-bottom:14px">
                 <div class="card-head"><div class="card-title">Today&apos;s prompt</div><span style="font-size:11px;color:#EE2B37;font-weight:600">Gratitude</span></div>
                 <div style="padding:14px 18px;font-size:14px;color:#374151;line-height:1.6">What are three things I&apos;m grateful for today?</div>
-                <div style="padding:0 18px 14px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+                <div style="padding:0 18px 14px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="sun" data-grace-size="22"></span><span class="mood-chip-lbl">Joyful</span></div>
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="moon" data-grace-size="22"></span><span class="mood-chip-lbl">Peaceful</span></div>
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="heart" data-grace-size="22"></span><span class="mood-chip-lbl">Grateful</span></div>
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="help" data-grace-size="22"></span><span class="mood-chip-lbl">Thoughtful</span></div>
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="crisis" data-grace-size="22"></span><span class="mood-chip-lbl">Struggling</span></div>
+                  <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="star" data-grace-size="22"></span><span class="mood-chip-lbl">Hopeful</span></div>
                 </div>
               </div>
               <div class="card">
@@ -3947,6 +3974,94 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   </div>
 </div>
 
+<!-- Crisis support overlay -->
+<div class="crisis-overlay" id="crisis-support-overlay" onclick="if(event.target===this)closeCrisisSupport()" aria-hidden="true">
+  <div class="crisis-modal" role="dialog" aria-modal="true" aria-labelledby="crisis-support-title">
+    <div class="crisis-head">
+      <h3 id="crisis-support-title">Crisis support</h3>
+      <div class="crisis-head-sub">Free, confidential help — call, text, or chat anytime</div>
+    </div>
+    <div class="crisis-support-list">
+      <div class="crisis-section-label">Immediate emergency</div>
+      <a class="crisis-hotline crisis-hotline--urgent" href="tel:911">
+        <span class="crisis-hotline-title">Emergency services</span>
+        <span class="crisis-hotline-desc">If you or someone else is in immediate danger</span>
+        <span class="crisis-hotline-action">Call 911</span>
+      </a>
+      <div class="crisis-section-label">24/7 crisis &amp; mental health</div>
+      <a class="crisis-hotline" href="tel:988">
+        <span class="crisis-hotline-title">988 Suicide &amp; Crisis Lifeline</span>
+        <span class="crisis-hotline-desc">Call or text 988 · Nevada statewide · English &amp; Spanish</span>
+        <span class="crisis-hotline-action">988</span>
+      </a>
+      <a class="crisis-hotline crisis-hotline--chat" href="https://988lifeline.org/chat" target="_blank" rel="noopener noreferrer">
+        <span class="crisis-hotline-title">988 Lifeline Chat</span>
+        <span class="crisis-hotline-desc">Private online chat with a trained counselor</span>
+        <span class="crisis-hotline-action">Open chat</span>
+      </a>
+      <a class="crisis-hotline" href="sms:741741&amp;body=HOME">
+        <span class="crisis-hotline-title">Crisis Text Line</span>
+        <span class="crisis-hotline-desc">Text HOME to 741741 · 24/7 support by text</span>
+        <span class="crisis-hotline-action">Text</span>
+      </a>
+      <a class="crisis-hotline" href="tel:988">
+        <span class="crisis-hotline-title">Veterans Crisis Line</span>
+        <span class="crisis-hotline-desc">Call 988, then press 1 · Text 838255</span>
+        <span class="crisis-hotline-action">988 · 1</span>
+      </a>
+      <div class="crisis-section-label">Specialized support networks</div>
+      <a class="crisis-hotline" href="tel:18007997233">
+        <span class="crisis-hotline-title">National Domestic Violence Hotline</span>
+        <span class="crisis-hotline-desc">Support for abuse, control, or unsafe relationships</span>
+        <span class="crisis-hotline-action">1-800-799-7233</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18006564673">
+        <span class="crisis-hotline-title">RAINN · Sexual assault support</span>
+        <span class="crisis-hotline-desc">National Sexual Assault Hotline · 24/7</span>
+        <span class="crisis-hotline-action">1-800-656-4673</span>
+      </a>
+      <a class="crisis-hotline" href="sms:22522&amp;body=LOVEIS">
+        <span class="crisis-hotline-title">love is respect</span>
+        <span class="crisis-hotline-desc">Dating abuse support · Text LOVEIS to 22522</span>
+        <span class="crisis-hotline-action">Text</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18006624357">
+        <span class="crisis-hotline-title">SAMHSA National Helpline</span>
+        <span class="crisis-hotline-desc">Substance use &amp; mental health treatment referrals</span>
+        <span class="crisis-hotline-action">1-800-662-4357</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18009506264">
+        <span class="crisis-hotline-title">NAMI Helpline</span>
+        <span class="crisis-hotline-desc">Mental health information &amp; resource navigation</span>
+        <span class="crisis-hotline-action">1-800-950-6264</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18775658860">
+        <span class="crisis-hotline-title">Trans Lifeline</span>
+        <span class="crisis-hotline-desc">Peer support for trans &amp; questioning callers</span>
+        <span class="crisis-hotline-action">1-877-565-8860</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18888434564">
+        <span class="crisis-hotline-title">LGBT National Hotline</span>
+        <span class="crisis-hotline-desc">Confidential peer support · Mon–Sat</span>
+        <span class="crisis-hotline-action">1-888-843-4564</span>
+      </a>
+      <a class="crisis-hotline" href="tel:18008668368">
+        <span class="crisis-hotline-title">Teen Line</span>
+        <span class="crisis-hotline-desc">Teens helping teens · Evenings PT</span>
+        <span class="crisis-hotline-action">1-800-866-8336</span>
+      </a>
+      <div class="crisis-section-label">Central Henderson pastoral care</div>
+      <div class="crisis-pastoral-wrap">
+        <button type="button" class="crisis-pastoral-btn" onclick="alertPastoralCare()"><span aria-hidden="true">♥</span> Alert on-call pastoral care</button>
+      </div>
+      <p class="crisis-support-note">For life-threatening emergencies, call <strong>911</strong> first. National lines are free and confidential. Outside the U.S.? Visit <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">findahelpline.com</a>.</p>
+    </div>
+    <div class="crisis-foot">
+      <button type="button" class="crisis-foot-close" onclick="closeCrisisSupport()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Divinity avatar session (intro video → live D-ID agent) -->
 <div class="divinity-overlay" id="divinity-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Avatar conversation">
   <div class="divinity-session" id="divinity-session">
@@ -3962,7 +4077,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <button type="button" class="divinity-close" onclick="closeDivinitySession()" aria-label="Close">×</button>
     </div>
     <div class="divinity-body">
-      <iframe id="divinity-agent-frame" title="Divinity AI companion" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
+      <iframe id="divinity-agent-frame" title="Divinity avatar session" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
       <div class="divinity-video-overlay is-hidden" id="divinity-video-overlay">
         <button type="button" class="divinity-video-close" onclick="closeDivinityVideo()" aria-label="Close video">×</button>
         <video id="divinity-intro-video" autoplay playsinline></video>
@@ -4351,6 +4466,24 @@ function closeDidStudio(){
   document.body.style.overflow='';
 }
 function sendDidPrompt(text){openDidStudio(text);}
+
+/* ===== Crisis support overlay ===== */
+function openCrisisSupport(){
+  document.getElementById('crisis-support-overlay')?.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCrisisSupport(){
+  document.getElementById('crisis-support-overlay')?.classList.remove('open');
+  document.body.style.overflow='';
+}
+function alertPastoralCare(){
+  closeCrisisSupport();
+  LEADER_STATE.pendingFollowUps++;
+  prependLeaderActivity({icon:'prayer',title:'Care dispatch',detail:'urgent request routed live',time:'Just now'});
+  syncLeaderKpis();
+  sendCmd('I need pastoral care support','care');
+  showPortalToast('On-call pastoral care alerted — a leader will respond','🙏');
+}
 
 /* ===== Divinity avatar session (intro video → live D-ID agent) ===== */
 let divinitySessionLeader=null;
@@ -5613,21 +5746,21 @@ setInterval(()=>{
 const aiLeaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
-  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His AI voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
+  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
   {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
   {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
   {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
-  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His AI companion answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
+  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His avatar answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
   {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
-  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His AI companion shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
+  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His avatar shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
   {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding the right next step of care."',online:true,bio:'Licensed clinician and ordained minister bridging faith and mental health. AI provides pastoral support; clinical care is referred to licensed partners.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
   {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer? I\'ve got you."',online:true,bio:'Minister Torres runs Iron Men groups, workplace ministry, and fatherhood workshops. His companion speaks plainly about integrity, work, and spiritual leadership at home.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
-  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her AI companion is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
+  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her avatar is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
   {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · Verified Avatar · Human follow-up available',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story? I\'d love to help you take a next step."',online:false,bio:'Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
   {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or questions about legacy giving, I\'m honored to walk with you."',online:true,bio:'Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
-  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · Verified Avatar · Human follow-up available',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His AI companion troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
+  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · Verified Avatar · Human follow-up available',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His avatar troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
   {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · Verified Avatar · Human follow-up available',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m so glad you\'re exploring Central Henderson."',online:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers “what’s next” questions and connects guests to groups and serving.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
-  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · Verified Avatar · Human follow-up available',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His AI companion offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
+  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · Verified Avatar · Human follow-up available',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His avatar offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
   {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,bio:'Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
 ];
 GRACE_MESSAGING.normalizeLeadersArray(aiLeaders, 'Central Henderson');
@@ -7030,6 +7163,7 @@ GRACE_COMPANION.mount({
     prependLeaderActivity({ icon: 'prayer', title: 'Care dispatch', detail: 'urgent request routed live', time: 'Just now' });
     showPortalToast('Care dispatch notified — a leader will follow up', '🙏');
     syncLeaderKpis();
+    openCrisisSupport();
   },
   currentPage: () => {
     const sec = document.querySelector('.sec.active');

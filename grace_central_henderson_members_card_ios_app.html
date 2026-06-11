@@ -1002,6 +1002,16 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cn-post-verse{font-size:10px;color:#EE2B37;font-weight:700;margin-top:4px}
 .cn-post-body{font-size:12px;line-height:1.55;color:#374151}
 .cn-post-actions{display:flex;border-top:1px solid #f3f0eb;margin-top:10px;padding-top:8px}
+.cn-event-card{display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid var(--ios-line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.cn-event-date{width:42px;flex-shrink:0;text-align:center;background:#fff;border:1px solid var(--ios-line);border-radius:10px;padding:6px 0}
+.cn-event-day{font-size:16px;font-weight:800;line-height:1.1}
+.cn-event-mon{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ios-muted)}
+.cn-event-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cn-event-detail{font-size:11px;color:var(--ios-muted);margin-top:2px}
+.cn-rsvp-count{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--ios-muted);font-weight:600}
+.cn-rsvp-stack{display:flex}
+.cn-rsvp-stack img{width:20px;height:20px;border-radius:50%;border:2px solid #fff;object-fit:cover}
+.cn-rsvp-stack img+img{margin-left:-6px}
 .cn-pact{flex:1;padding:8px 4px;border:none;background:transparent;font-size:11px;font-weight:600;color:#6b7280;cursor:pointer;font-family:inherit;border-radius:8px}
 .cn-pact.prayed{color:#EE2B37;background:#fef9f0}
 .cn-pact.amened{color:#7c3aed;background:#f5f3ff}
@@ -2638,7 +2648,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <p class="ld-profile-bio" id="lpm-bio"></p>
               <div class="ld-profile-grid">
                 <div class="ld-profile-stat"><span>Experience</span><strong id="lpm-exp"></strong></div>
-                <div class="ld-profile-stat"><span>AI companion</span><strong id="lpm-ai-hours"></strong></div>
+                <div class="ld-profile-stat"><span>Avatar</span><strong id="lpm-ai-hours"></strong></div>
                 <div class="ld-profile-stat"><span>Human</span><strong id="lpm-human-hours"></strong></div>
                 <div class="ld-profile-stat"><span>Rating</span><strong id="lpm-rating"></strong></div>
                 <div class="ld-profile-stat"><span>Sessions</span><strong id="lpm-sessions"></strong></div>
@@ -3018,7 +3028,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           </div>
         </div>
         <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-          <div class="section-head" style="padding:14px 14px 0"><div><h3>Care Dispatch</h3><span style="font-size:10px;color:var(--ios-muted)">24-hour service routing</span></div><span style="font-size:9px;font-weight:700;background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:8px">System live</span></div>
+          <div class="section-head" style="padding:14px 14px 0"><div><h3>Care Dispatch</h3><span style="font-size:10px;color:var(--ios-muted)">24-hour service routing</span></div><span style="font-size:9px;font-weight:700;background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:8px">GRACE dispatch · live</span></div>
           <div class="cr-dispatch-grid">
             <div class="cr-dispatch-cell"><div class="cr-dispatch-title">Prayer &amp; Guidance</div><div class="cr-dispatch-sub">Routes to Pastor Wilson when needed</div><span class="cr-dispatch-badge">Live</span></div>
             <div class="cr-dispatch-cell"><div class="cr-dispatch-title">Hospital Visitations</div><div class="cr-dispatch-sub">Rev. Sandra Mitchell</div><span class="cr-dispatch-badge">Live</span></div>
@@ -3059,7 +3069,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="cn-kpi"><strong>2</strong><span>Groups</span></div>
               <div class="cn-kpi"><strong>6</strong><span>Events this month</span></div>
               <div class="cn-kpi"><strong>24</strong><span>Connections</span></div>
-              <div class="cn-kpi cn-kpi-hot"><strong id="cn-kpi-requests">0</strong><span>New requests</span></div>
+              <div class="cn-kpi cn-kpi-hot"><strong id="cn-kpi-requests">2</strong><span>New requests</span></div>
             </div>
           </div>
         </div>
@@ -3113,10 +3123,10 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
                 <button type="button" class="cn-pact" id="cn-pray-1" onclick="cnTogglePray('cn-pray-1','cn-count-1')">🙏 <span id="cn-count-1">247</span> Pray</button>
                 <button type="button" class="cn-pact" id="cn-amen-1" onclick="cnToggleAmen('cn-amen-1','cn-acount-1')">🙌 <span id="cn-acount-1">89</span> Amen</button>
                 <button type="button" class="cn-pact" onclick="cnToggleComment('cn-cm-1')">💬 24 Comment</button>
+              </div>
               <div class="cn-comment-area" id="cn-cm-1">
                 <div class="cn-comment-item"><img class="cn-comment-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><div><strong>Sarah J.</strong> Praying with you! 🙏</div></div>
                 <div class="cn-comment-row"><img class="cn-comment-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt=""><input class="cn-comment-input" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')cnAddComment(this,'cn-cm-1')"></div>
-              </div>
               </div>
             </article>
 
@@ -3149,8 +3159,42 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               <div class="cn-post-badge cn-pb-prayer">🙏 Prayer Request</div>
               <div class="cn-post-body">Please pray for our youth retreat this weekend — safety, open hearts, and that God moves powerfully in every student. 🙏</div>
               <div class="cn-post-actions">
-                <button type="button" class="cn-pact" id="cn-pray-3" onclick="cnTogglePray('cn-pray-3','cn-count-3')">🙏 <span id="cn-count-3">18</span> Pray</button>
+                <button type="button" class="cn-pact" id="cn-pray-3" onclick="cnTogglePray('cn-pray-3','cn-count-3')">🙏 <span id="cn-count-3">78</span> Pray</button>
                 <button type="button" class="cn-pact" onclick="showToast('Encouragement sent')">💬 Encourage</button>
+              </div>
+            </article>
+
+            <article class="cn-post" data-type="events">
+              <div class="cn-post-head">
+                <img class="cn-post-av" src="https://randomuser.me/api/portraits/men/33.jpg" alt="">
+                <div style="flex:1;min-width:0">
+                  <div class="cn-post-name">David Kim</div>
+                  <div class="cn-post-role">Member · Young Adults</div>
+                </div>
+                <div class="cn-post-time">1 d</div>
+              </div>
+              <div class="cn-post-badge cn-pb-event">📅 Event RSVP</div>
+              <div class="cn-post-body">is attending an upcoming event</div>
+              <div class="cn-event-card">
+                <div class="cn-event-date"><div class="cn-event-day">28</div><div class="cn-event-mon">Jun</div></div>
+                <div style="min-width:0">
+                  <div class="cn-event-name">Summer BBQ Fellowship</div>
+                  <div class="cn-event-detail">2:00 PM · Church Grounds · All welcome</div>
+                </div>
+              </div>
+              <div class="cn-rsvp-count">
+                <div class="cn-rsvp-stack">
+                  <img src="https://randomuser.me/api/portraits/women/29.jpg" alt="">
+                  <img src="https://randomuser.me/api/portraits/men/47.jpg" alt="">
+                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+                  <img src="https://randomuser.me/api/portraits/women/42.jpg" alt="">
+                </div>
+                <span>47 people going</span>
+              </div>
+              <div class="cn-post-actions">
+                <button type="button" class="cn-pact" id="cn-pray-6" onclick="cnTogglePray('cn-pray-6','cn-count-6')">🙏 <span id="cn-count-6">14</span> Pray</button>
+                <button type="button" class="cn-pact" id="cn-going-6" onclick="cnToggleAmen('cn-going-6','cn-gcount-6');this.innerHTML='📅 Going!'">📅 <span id="cn-gcount-6">47</span> Going</button>
+                <button type="button" class="cn-pact" onclick="communityTab('groups-events')">📅 View events</button>
               </div>
             </article>
 
@@ -3193,7 +3237,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               </div>
               <div class="cn-req-btns">
                 <button type="button" class="cn-req-accept" onclick="cnAcceptReq(this)">Accept</button>
-                <button type="button" class="cn-req-decline" onclick="this.closest('.cn-req-row').remove()">✕</button>
+                <button type="button" class="cn-req-decline" onclick="this.closest('.cn-req-row').remove();syncSocialRequestKpi()">✕</button>
               </div>
             </div>
             <div class="cn-req-row">
@@ -3204,7 +3248,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               </div>
               <div class="cn-req-btns">
                 <button type="button" class="cn-req-accept" onclick="cnAcceptReq(this)">Accept</button>
-                <button type="button" class="cn-req-decline" onclick="this.closest('.cn-req-row').remove()">✕</button>
+                <button type="button" class="cn-req-decline" onclick="this.closest('.cn-req-row').remove();syncSocialRequestKpi()">✕</button>
               </div>
             </div>
           </div>
@@ -3583,7 +3627,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         <div class="home-nav-brand">
           <button type="button" class="menu-btn" onclick="toggleAppMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="app-drawer"><span class="menu-btn-bars" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
-        <div class="home-nav-title">Profile</div>
+        <div class="home-nav-title">My Journey</div>
         <div class="home-nav-actions">
           <div class="home-nav-bell nav-btn" onclick="openProfileGoalsSheet(true)" title="Goals &amp; settings"><span data-grace-icon="help" data-grace-size="16"></span></div>
         </div>
@@ -3605,7 +3649,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             <div class="jy-hero-metric"><strong>Beginning</strong><span>Journey stage</span></div>
             <div class="jy-hero-metric"><strong id="jy-journal-count">0</strong><span>Journal entries</span></div>
             <div class="jy-hero-metric"><strong id="jy-reflection-days">7</strong><span>Reflection days</span></div>
-            <div class="jy-hero-metric"><strong id="jy-studies-count">2</strong><span>Studies completed</span></div>
+            <div class="jy-hero-metric"><strong id="jy-studies-count">1</strong><span>Studies completed</span></div>
           </div>
         </div>
 
@@ -3671,6 +3715,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
               </div>
               <textarea id="journal-entry" class="jy-j-text" placeholder="Write your reflection…" oninput="document.getElementById('jy-j-chars').textContent=this.value.length+'/1500'"></textarea>
               <button type="button" class="btn dark" style="width:100%;margin-top:10px" onclick="saveJournal()">Save reflection</button>
+              <button type="button" id="jy-journal-study-cta" style="display:none;width:100%;margin-top:8px;background:none;border:1px dashed #e4dcce;border-radius:10px;padding:10px;font-size:12px;font-weight:700;color:#EE2B37;cursor:pointer;font-family:inherit" onclick="jyStudyFromJournal()">Turn this into a study path →</button>
               <div class="jy-streak-inline">
                 <strong id="jy-write-streak">0</strong> days · <em>Write today to start</em>
               </div>
@@ -3698,9 +3743,19 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             </div>
           </div>
           <div class="jy-card">
+            <div style="border:1px solid #f7f5f2;border-radius:12px;overflow:hidden;margin-bottom:12px">
+              <div class="jy-pill-row">
+                <div class="jy-pill"><div class="jy-pill-val" id="jy-stat-stillness">0 min</div><div class="jy-pill-key">Time in stillness</div></div>
+                <div class="jy-pill"><div class="jy-pill-val" id="jy-stat-reflections">0</div><div class="jy-pill-key">Reflections</div></div>
+              </div>
+              <div class="jy-pill-row">
+                <div class="jy-pill"><div class="jy-pill-val" id="jy-stat-milestones">4</div><div class="jy-pill-key">Milestones</div></div>
+                <div class="jy-pill"><div class="jy-pill-val">4</div><div class="jy-pill-key">Areas to grow</div></div>
+              </div>
+            </div>
             <div class="jy-growth-bar-wrap" style="margin-bottom:12px">
-              <div class="jy-growth-bar-lbl"><span>Giving goal progress</span><strong>8% complete</strong></div>
-              <div class="jy-growth-bar"><div class="jy-growth-fill" style="width:8%"></div></div>
+              <div class="jy-growth-bar-lbl"><span>Giving goal progress</span><strong>6% complete</strong></div>
+              <div class="jy-growth-bar"><div class="jy-growth-fill" style="width:6%"></div></div>
             </div>
             <div class="jy-card-head">Where your path is calling you</div>
             <ul class="jy-grow-list">
@@ -3731,7 +3786,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             </div>
           </div>
           <div class="jy-card" style="padding:0;overflow:hidden">
-            <div class="jy-card-head" style="padding:14px 14px 0">Giving &amp; streaks</div>
+            <div class="jy-card-head" style="padding:14px 14px 0">Giving &amp; reflection</div>
             <div class="jy-pill-row">
               <div class="jy-pill"><div class="jy-pill-val">$1,240</div><div class="jy-pill-key">Given 2026</div></div>
               <div class="jy-pill"><div class="jy-pill-val">7</div><div class="jy-pill-key">Reflection days</div></div>
@@ -3742,7 +3797,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             <div class="jy-badge-scroll">
               <div class="jy-badge-item"><div class="jy-badge-circle"><span data-grace-icon="prayer" data-grace-size="20"></span></div><div class="jy-badge-name">First Prayer</div><div class="jy-badge-sub">Prayer rhythm</div></div>
               <div class="jy-badge-item"><div class="jy-badge-circle"><span data-grace-icon="give" data-grace-size="20"></span></div><div class="jy-badge-name">First Gift</div><div class="jy-badge-sub">Giving rhythm</div></div>
-              <div class="jy-badge-item"><div class="jy-badge-circle"><span data-grace-icon="fire" data-grace-size="20"></span></div><div class="jy-badge-name">7-Day Streak</div><div class="jy-badge-sub">Live week</div></div>
+              <div class="jy-badge-item"><div class="jy-badge-circle"><span data-grace-icon="fire" data-grace-size="20"></span></div><div class="jy-badge-name">7-Day Reflection</div><div class="jy-badge-sub">Last week</div></div>
               <div class="jy-badge-item"><div class="jy-badge-circle"><span data-grace-icon="party" data-grace-size="20"></span></div><div class="jy-badge-name">Watch Party</div><div class="jy-badge-sub">Community rhythm</div></div>
             </div>
           </div>
@@ -3792,24 +3847,39 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
                   <p>Track prayer, scripture, giving, and group habits with simple milestones you can revisit.</p>
                 </div>
               </div>
-              <button type="button" class="jy-goal-new" onclick="showToast('Goal creator opening…')">+ New goal</button>
+              <button type="button" class="jy-goal-new" onclick="jyToggleGoalForm()">+ New goal</button>
             </div>
           </div>
-          <div class="jy-card">
+          <div class="jy-card" id="jy-goal-form" style="display:none">
+            <div class="jy-card-head">New goal</div>
+            <input type="text" id="jy-goal-name" placeholder="e.g. Pray 10 minutes daily" style="width:100%;border:1px solid #e8e0d5;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;margin-bottom:8px">
+            <div style="display:flex;gap:8px">
+              <select id="jy-goal-cadence" style="flex:1;border:1px solid #e8e0d5;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;background:#fff">
+                <option>Daily</option>
+                <option>Weekly</option>
+              </select>
+              <button type="button" class="btn dark" onclick="jyAddGoal()">Add goal</button>
+            </div>
+          </div>
+          <div class="jy-card" id="jy-goals-list-card" style="display:none">
+            <div class="jy-card-head">Your goals</div>
+            <div id="jy-goals-items"></div>
+          </div>
+          <div class="jy-card" id="jy-goal-empty-card">
             <div class="jy-goal-empty">
               <div class="jy-goal-empty-ico"><span data-grace-icon="goals" data-grace-size="24"></span></div>
               <div style="font-size:16px;font-weight:800;margin-bottom:6px">No goals yet</div>
               <p style="font-size:12px;color:var(--ios-muted);line-height:1.5;margin:0 0 14px">Set your first spiritual goal to build streaks and celebrate progress.</p>
-              <button type="button" class="btn dark" onclick="showToast('Goal creator opening…')">Create your first goal</button>
+              <button type="button" class="btn dark" onclick="jyToggleGoalForm()">Create your first goal</button>
             </div>
           </div>
           <div class="jy-card">
             <div class="jy-card-head">Featured ideas</div>
-            <div class="jy-goal-idea" onclick="showToast('Added: Daily Prayer')">
+            <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Daily Prayer','5 min every morning')">
               <div class="jy-goal-idea-ico"><span data-grace-icon="prayer" data-grace-size="16"></span></div>
               <div><div style="font-size:12px;font-weight:700">Daily Prayer</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">5 min every morning</div></div>
             </div>
-            <div class="jy-goal-idea" onclick="showToast('Added: Scripture Reading')">
+            <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Scripture Reading','One chapter per day')">
               <div class="jy-goal-idea-ico"><span data-grace-icon="bible" data-grace-size="16"></span></div>
               <div><div style="font-size:12px;font-weight:700">Scripture Reading</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">One chapter per day</div></div>
             </div>
@@ -3961,7 +4031,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <button type="button" class="divinity-close" onclick="closeDivinitySession()" aria-label="Close">×</button>
         </div>
         <div class="divinity-body">
-          <iframe id="divinity-agent-frame" title="Divinity AI companion" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
+          <iframe id="divinity-agent-frame" title="Divinity avatar session" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
           <div class="divinity-video-overlay is-hidden" id="divinity-video-overlay">
             <button type="button" class="divinity-video-close" onclick="closeDivinityVideo()" aria-label="Close video">×</button>
             <video id="divinity-intro-video" autoplay playsinline></video>
@@ -4018,7 +4088,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           </button>
           <button type="button" class="drawer-item" data-drawer-tab="profile" onclick="navigateFromDrawer('profile')">
             <span class="drawer-item-icon" data-drawer-icon="profile"></span>
-            <span>Profile</span>
+            <span>My Journey</span>
           </button>
         </nav>
         <div class="drawer-section-label">Get Connected</div>
@@ -4071,7 +4141,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
         </button>
         <button class="tab" data-tab="profile" onclick="showScreen('profile')">
           <span class="tab-icon" data-grace-icon="profile" data-grace-size="22"></span>
-          <span>Profile</span>
+          <span>Journey</span>
         </button>
       </div>
     </div>
@@ -4225,25 +4295,25 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <div class="social-notify-summary">Start a habit with a template or create your own</div>
         </div>
         <div class="jy-goals-scroll">
-          <div class="jy-goal-idea" onclick="showToast('Added: Daily Prayer')">
+          <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Daily Prayer','5 min every morning')">
             <div class="jy-goal-idea-ico"><span data-grace-icon="prayer" data-grace-size="16"></span></div>
             <div><div style="font-size:12px;font-weight:700">Daily Prayer</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">5 min every morning</div></div>
           </div>
-          <div class="jy-goal-idea" onclick="showToast('Added: Scripture Reading')">
+          <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Scripture Reading','One chapter per day')">
             <div class="jy-goal-idea-ico"><span data-grace-icon="bible" data-grace-size="16"></span></div>
             <div><div style="font-size:12px;font-weight:700">Scripture Reading</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">One chapter per day</div></div>
           </div>
-          <div class="jy-goal-idea" onclick="showToast('Added: Weekly Giving')">
+          <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Weekly Giving','Consistent tithe')">
             <div class="jy-goal-idea-ico"><span data-grace-icon="give" data-grace-size="16"></span></div>
             <div><div style="font-size:12px;font-weight:700">Weekly Giving</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">Consistent tithe</div></div>
           </div>
-          <div class="jy-goal-idea" onclick="showToast('Added: Group Attendance')">
+          <div class="jy-goal-idea" onclick="jyAddGoalIdea(this,'Group Attendance','Weekly small group')">
             <div class="jy-goal-idea-ico"><span data-grace-icon="groups" data-grace-size="16"></span></div>
             <div><div style="font-size:12px;font-weight:700">Group Attendance</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">Weekly small group</div></div>
           </div>
         </div>
         <div class="social-notify-foot" style="flex-direction:column;gap:8px;align-items:stretch">
-          <button type="button" class="btn dark" onclick="showToast('Goal creator opening…')">Create goal</button>
+          <button type="button" class="btn dark" onclick="closeProfileGoalsSheet();scrollJourney('jy-goals');jyToggleGoalForm(true)">Create goal</button>
           <button type="button" class="jy-btn-ghost" style="width:100%" onclick="showToast('Settings')">Manage settings</button>
           <button type="button" class="social-notify-mark" onclick="closeProfileGoalsSheet()">Close</button>
         </div>
@@ -4447,6 +4517,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <button type="button" class="cn-pm-type" onclick="selectCnPostType(this)">Prayer Request</button>
           <button type="button" class="cn-pm-type" onclick="selectCnPostType(this)">Blessing</button>
           <button type="button" class="cn-pm-type" onclick="selectCnPostType(this)">Milestone</button>
+          <button type="button" class="cn-pm-type" onclick="selectCnPostType(this)">Event</button>
           <button type="button" class="cn-pm-type" onclick="selectCnPostType(this)">Praise</button>
         </div>
         <textarea class="cn-pm-text" id="cn-pm-text" placeholder="What's on your heart?"></textarea>
@@ -4911,8 +4982,8 @@ function updateSocialBadge() {
 function syncSocialRequestKpi() {
   var el = document.getElementById('cn-kpi-requests');
   if (!el) return;
-  var n = socialNotifications.filter(function(x) { return x.type === 'request' && !x.read; }).length;
-  el.textContent = String(n);
+  var pendingRows = document.querySelectorAll('#cn-panel-community .cn-req-row .cn-req-accept').length;
+  el.textContent = String(pendingRows);
 }
 
 function showSocialBanner(item) {
@@ -5825,6 +5896,7 @@ function cnAcceptReq(btn) {
   btn.style.background = '#dcfce7';
   btn.style.color = '#15803d';
   showToast('Connection accepted');
+  syncSocialRequestKpi();
 }
 
 function playCnReel(el, label) {
@@ -6520,6 +6592,60 @@ function scrollJourney(id) {
   scroller.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
+/* Faith goals */
+var jyGoals = [];
+
+function jyToggleGoalForm(forceOpen) {
+  var f = document.getElementById('jy-goal-form');
+  if (!f) return;
+  var open = forceOpen === true || f.style.display === 'none';
+  f.style.display = open ? '' : 'none';
+  if (open) setTimeout(function() { document.getElementById('jy-goal-name')?.focus(); }, 60);
+}
+
+function jyRenderGoals() {
+  var wrap = document.getElementById('jy-goals-items');
+  var listCard = document.getElementById('jy-goals-list-card');
+  var emptyCard = document.getElementById('jy-goal-empty-card');
+  if (!wrap) return;
+  wrap.innerHTML = jyGoals.map(function(g) {
+    return '<div style="padding:10px 0;border-bottom:1px solid #f7f5f2">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+        '<div><div style="font-size:12px;font-weight:700">' + g.title + '</div><div style="font-size:10px;color:var(--ios-muted);margin-top:2px">' + g.subtitle + '</div></div>' +
+        '<span style="font-size:11px;font-weight:700;color:#888">' + g.progress + '%</span>' +
+      '</div>' +
+      '<div class="jy-growth-bar" style="margin-top:8px"><div class="jy-growth-fill" style="width:' + g.progress + '%"></div></div>' +
+    '</div>';
+  }).join('');
+  if (listCard) listCard.style.display = jyGoals.length ? '' : 'none';
+  if (emptyCard) emptyCard.style.display = jyGoals.length ? 'none' : '';
+}
+
+function jyAddGoal(title, subtitle) {
+  var name = (title || document.getElementById('jy-goal-name')?.value || '').trim();
+  if (!name) { showToast('Give your goal a name'); return; }
+  var cadence = document.getElementById('jy-goal-cadence')?.value || 'Daily';
+  var sub = subtitle || (cadence === 'Weekly' ? 'Once per week' : 'Every day');
+  jyGoals.unshift({ title: name, subtitle: sub, progress: 0 });
+  jyRenderGoals();
+  var nameInput = document.getElementById('jy-goal-name');
+  if (nameInput) nameInput.value = '';
+  var form = document.getElementById('jy-goal-form');
+  if (form) form.style.display = 'none';
+  showToast('Goal added — track it here');
+}
+
+function jyAddGoalIdea(el, title, sub) {
+  if (el && el.classList.contains('added')) return;
+  jyAddGoal(title, sub);
+  if (el) {
+    el.classList.add('added');
+    el.style.opacity = '.55';
+    var titleEl = el.querySelector('div > div');
+    if (titleEl) titleEl.textContent = title + ' · Added ✓';
+  }
+}
+
 function jyJournalTab(mode, btn) {
   document.getElementById('jy-j-write').style.display = mode === 'write' ? '' : 'none';
   document.getElementById('jy-j-history').style.display = mode === 'history' ? '' : 'none';
@@ -6556,15 +6682,31 @@ function saveJournal() {
   }
   var countEl = document.getElementById('jy-journal-count');
   if (countEl) countEl.textContent = String((parseInt(countEl.textContent, 10) || 0) + 1);
+  var reflEl = document.getElementById('jy-stat-reflections');
+  if (reflEl) reflEl.textContent = String((parseInt(reflEl.textContent, 10) || 0) + 1);
+  var stillEl = document.getElementById('jy-stat-stillness');
+  if (stillEl) stillEl.textContent = ((parseInt(stillEl.textContent, 10) || 0) + 5) + ' min';
   var streakEl = document.getElementById('jy-write-streak');
   if (streakEl && streakEl.textContent === '0') streakEl.textContent = '1';
   var pulseEl = document.getElementById('jy-pulse-val');
   if (pulseEl) pulseEl.textContent = String((parseInt(pulseEl.textContent, 10) || 0) + 10);
+  jyLastJournalMood = moodLabel || '';
+  jyLastJournalText = text;
+  var bridge = document.getElementById('jy-journal-study-cta');
+  if (bridge) bridge.style.display = '';
   journal.value = '';
   var chars = document.getElementById('jy-j-chars');
   if (chars) chars.textContent = '0/1500';
   document.querySelectorAll('.jy-mood-chip').forEach(function(c) { c.classList.remove('selected'); });
   showToast('Reflection saved');
+}
+
+var jyLastJournalMood = '';
+var jyLastJournalText = '';
+function jyStudyFromJournal() {
+  var topic = jyLastJournalMood ? 'Reflection · ' + jyLastJournalMood : "Today's reflection";
+  startJyStudy(topic);
+  scrollJourney('jy-study');
 }
 
 document.addEventListener('keydown', function (e) {
@@ -6868,7 +7010,10 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
         const key = screen ? screen.id.replace(/^screen-/, '') : 'home';
         return ({ leaders: 'ai', give: 'give', community: 'groups', profile: 'study', care: 'outreach' })[key] || key;
       },
-      onUnknown: (entry) => console.info('GRACE admin inbox (members card):', entry),
+      onUnknown: (entry) => {
+        console.info('GRACE admin inbox (members card):', entry);
+        showToast("Shared with your leaders — they'll follow up");
+      },
       getState: () => ({
         goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
         goalTarget: window.GRACE_METRICS?.givingGoal?.target ?? 2400,
