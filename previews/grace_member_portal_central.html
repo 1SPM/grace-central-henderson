@@ -1775,8 +1775,48 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
 
-      <!-- Daily lifestyle loop -->
-      <div class="dash-daily-loop" id="home-daily-loop"></div>
+      <div class="dash-mod">
+        <div class="dash-mod-head">
+          <div>
+            <div class="dash-mod-title">GRACE at Central</div>
+            <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
+          </div>
+        </div>
+        <div class="dash-mod-body">
+          <div class="dash-pillars">
+            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
+              <div class="dash-pillar-name">Journey</div>
+              <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
+              <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
+            </div>
+            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
+              <div class="dash-pillar-name">Impact</div>
+              <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
+              <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
+            </div>
+            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
+              <div class="dash-pillar-name">Care</div>
+              <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
+              <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
+            </div>
+            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
+              <div class="dash-pillar-name">Connect</div>
+              <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
+              <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
+            </div>
+            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()">
+              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
+              <div class="dash-pillar-name">Giving</div>
+              <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
+              <span class="dash-pillar-badge" id="dash-pillar-giving-badge">$230 · May</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Today's next step -->
       <div class="card" style="margin-bottom:14px">
@@ -1842,49 +1882,6 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <span class="grace-tutorial-reopen-sub">New here or need a refresher? Reopen the orientation — I'm always in the sidebar orb.</span>
           </span>
         </button>
-      </div>
-
-      <div class="dash-mod">
-        <div class="dash-mod-head">
-          <div>
-            <div class="dash-mod-title">GRACE at Central</div>
-            <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
-          </div>
-        </div>
-        <div class="dash-mod-body">
-          <div class="dash-pillars">
-            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')">
-              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
-              <div class="dash-pillar-name">Journey</div>
-              <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
-              <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
-            </div>
-            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')">
-              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
-              <div class="dash-pillar-name">Impact</div>
-              <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
-              <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
-            </div>
-            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')">
-              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
-              <div class="dash-pillar-name">Care</div>
-              <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
-              <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
-            </div>
-            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')">
-              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
-              <div class="dash-pillar-name">Connect</div>
-              <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
-              <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
-            </div>
-            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()">
-              <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
-              <div class="dash-pillar-name">Giving</div>
-              <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
-              <span class="dash-pillar-badge" id="dash-pillar-giving-badge">$230 · May</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Wallet (GRACE Card + Balance) -->

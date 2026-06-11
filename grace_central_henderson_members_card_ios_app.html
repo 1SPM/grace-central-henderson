@@ -2223,58 +2223,6 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           </div>
         </div>
 
-        <div class="daily-loop">
-          <div class="daily-item" onclick="showScreen('care')">
-            <div class="daily-time">☀ Morning</div>
-            <div class="daily-action">Pastoral care</div>
-            <div class="daily-status done">✓ Blessing read</div>
-          </div>
-          <div class="daily-item" onclick="showScreen('give')">
-            <div class="daily-time">◎ Day</div>
-            <div class="daily-action">Impact</div>
-            <div class="daily-status pending" id="daily-impact-status">+$18.42 this month</div>
-          </div>
-          <div class="daily-item" onclick="showScreen('profile')">
-            <div class="daily-time">☾ Evening</div>
-            <div class="daily-action">Reflect</div>
-            <div class="daily-status pending">Write today · build rhythm</div>
-          </div>
-        </div>
-
-        <div class="pilot-next-card">
-          <div>
-            <div class="pilot-next-kicker">Today's next step</div>
-            <div class="pilot-next-title">Review this month's impact for Food Pantry</div>
-            <div class="pilot-next-copy">See your card-generated impact, then choose where Central Henderson should route it.</div>
-          </div>
-          <button type="button" class="pilot-next-btn" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review</button>
-        </div>
-
-        <div class="home-grace-card" id="home-grace-card">
-          <div class="home-grace-row">
-            <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
-              <div class="grace-orb__halo grace-orb__halo--outer"></div>
-              <div class="grace-orb__halo"></div>
-              <div class="grace-orb__core">
-                <div class="grace-orb__mist"></div>
-                <div class="grace-orb__wave" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
-              </div>
-            </div>
-            <div class="home-grace-body">
-              <div class="home-grace-title">GRACE <span class="grace-acronym-tag" id="home-grace-acronym">Growth · Resource · Assistance · Community · Engagement</span></div>
-              <div class="home-grace-status" id="home-grace-status">Let&apos;s find your next step, Maya…</div>
-              <div class="home-grace-note" id="home-grace-note">GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.</div>
-            </div>
-          </div>
-          <div class="home-grace-inputrow">
-            <input type="text" class="home-grace-input" id="home-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendGraceHome()}">
-            <button type="button" class="home-grace-send" onclick="sendGraceHome()" aria-label="Send message to GRACE">→</button>
-          </div>
-        </div>
-
-
         <div class="dash-mod">
           <div class="dash-mod-head">
             <div class="dash-mod-title">GRACE at Central</div>
@@ -2313,6 +2261,40 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
             </div>
           </div>
         </div>
+
+        <div class="pilot-next-card">
+          <div>
+            <div class="pilot-next-kicker">Today's next step</div>
+            <div class="pilot-next-title">Review this month's impact for Food Pantry</div>
+            <div class="pilot-next-copy">See your card-generated impact, then choose where Central Henderson should route it.</div>
+          </div>
+          <button type="button" class="pilot-next-btn" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review</button>
+        </div>
+
+        <div class="home-grace-card" id="home-grace-card">
+          <div class="home-grace-row">
+            <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
+              <div class="grace-orb__halo grace-orb__halo--outer"></div>
+              <div class="grace-orb__halo"></div>
+              <div class="grace-orb__core">
+                <div class="grace-orb__mist"></div>
+                <div class="grace-orb__wave" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+            <div class="home-grace-body">
+              <div class="home-grace-title">GRACE <span class="grace-acronym-tag" id="home-grace-acronym">Growth · Resource · Assistance · Community · Engagement</span></div>
+              <div class="home-grace-status" id="home-grace-status">Let&apos;s find your next step, Maya…</div>
+              <div class="home-grace-note" id="home-grace-note">GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.</div>
+            </div>
+          </div>
+          <div class="home-grace-inputrow">
+            <input type="text" class="home-grace-input" id="home-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendGraceHome()}">
+            <button type="button" class="home-grace-send" onclick="sendGraceHome()" aria-label="Send message to GRACE">→</button>
+          </div>
+        </div>
+
 
         <div class="home-ai-wrap">
           <div class="home-ai-teaser" onclick="showScreen('leaders')">
