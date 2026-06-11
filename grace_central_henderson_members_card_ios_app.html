@@ -111,8 +111,11 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   display:flex;flex-direction:column;justify-content:space-between;gap:12px
 }
 .home-donate-stack{
-  position:absolute;top:14px;right:14px;z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:6px;
-  max-width:58%;pointer-events:none
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+  max-width:min(220px,58vw);pointer-events:none
+}
+.home-hero-top-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;position:relative;z-index:1
 }
 .home-hero-brand{position:relative;z-index:1;flex-shrink:0}
 .home-hero-logo{height:40px;width:auto;max-width:min(100%,280px);object-fit:contain;object-position:left center;display:block}
@@ -203,11 +206,36 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   flex-shrink:0;padding:8px 12px;border-radius:10px;border:none;background:#fff;color:#1e3a5f;
   font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap
 }
+.home-grace-wrap{margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
 .home-grace-card{
+  position:relative;
   background:linear-gradient(140deg,#0f2744 0%,#1B2A4A 55%,#16213c 100%);
-  border:1px solid rgba(96,165,250,.25);border-radius:16px;padding:14px;margin-bottom:12px;
+  border:1px solid rgba(96,165,250,.25);border-radius:16px;padding:14px;
   box-shadow:0 10px 26px rgba(15,39,68,.28)
 }
+.home-grace-dismiss{
+  position:absolute;top:10px;right:10px;z-index:2;
+  width:30px;height:30px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+  font-size:18px;line-height:1;cursor:pointer;font-family:inherit;
+  display:grid;place-items:center
+}
+.home-grace-dismiss:active{background:rgba(255,255,255,.2);color:#fff}
+.home-grace-foot{margin-top:10px}
+.home-grace-dismiss-note{font-size:10px;color:rgba(255,255,255,.45);line-height:1.4;display:block;text-align:center}
+.home-grace-reopen{
+  display:none;align-items:center;gap:10px;width:100%;
+  padding:12px 14px;border-radius:14px;border:1px dashed rgba(124,92,237,.35);
+  background:linear-gradient(135deg,#faf9ff,#f4f2fc);cursor:pointer;font-family:inherit;
+  text-align:left
+}
+.home-grace-reopen:active{border-color:rgba(124,92,237,.55);background:#f0ecff}
+.home-grace-reopen-orb{flex-shrink:0}
+.home-grace-reopen-copy{flex:1;min-width:0}
+.home-grace-reopen-title{font-size:12px;font-weight:800;color:#4c3f8f}
+.home-grace-reopen-sub{font-size:10px;color:#8b7ec8;margin-top:2px;line-height:1.4}
+.home-grace-wrap.is-dismissed .home-grace-card{display:none}
+.home-grace-wrap.is-dismissed .home-grace-reopen{display:flex}
 .home-grace-row{display:flex;align-items:flex-start;gap:12px}
 .home-grace-card .grace-orb{flex-shrink:0;margin-top:2px}
 .home-grace-body{flex:1;min-width:0}
@@ -2245,14 +2273,16 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
       </div>
       <div class="scroll">
         <div class="home-hero">
-          <div class="home-donate-stack" id="home-donate-stack" aria-live="polite"></div>
           <div class="home-hero-top">
             <div class="home-hero-left">
               <div class="home-hero-date" id="home-hero-date">Sat, May 30 · Central Henderson</div>
               <h1 class="home-hero-name">Good morning, Maya</h1>
               <p class="home-hero-tagline">Your guide to growth, resources, and community at Central Henderson.</p>
             </div>
-            <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+            <div class="home-hero-top-right">
+              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <div class="home-donate-stack" id="home-donate-stack" aria-live="polite"></div>
+            </div>
           </div>
           <div class="home-hero-leader" id="home-leader-chip" onclick="showScreen('leaders')" role="button" tabindex="0" aria-label="Open your leader avatar">
             <img id="home-leader-chip-av" src="previews/assets/Pastor-James-Wilson-profile.jpg" alt="">
@@ -2319,28 +2349,41 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
           <button type="button" class="pilot-next-btn" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review</button>
         </div>
 
-        <div class="home-grace-card" id="home-grace-card">
-          <div class="home-grace-row">
-            <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
-              <div class="grace-orb__halo grace-orb__halo--outer"></div>
-              <div class="grace-orb__halo"></div>
-              <div class="grace-orb__core">
-                <div class="grace-orb__mist"></div>
-                <div class="grace-orb__wave" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <div class="home-grace-wrap" id="home-grace-wrap">
+          <div class="home-grace-card" id="home-grace-card">
+            <button type="button" class="home-grace-dismiss" onclick="dismissHomeGraceCard()" aria-label="Dismiss GRACE card">×</button>
+            <div class="home-grace-row">
+              <div class="grace-orb grace-orb--md" role="img" aria-label="GRACE">
+                <div class="grace-orb__halo grace-orb__halo--outer"></div>
+                <div class="grace-orb__halo"></div>
+                <div class="grace-orb__core">
+                  <div class="grace-orb__mist"></div>
+                  <div class="grace-orb__wave" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  </div>
                 </div>
               </div>
+              <div class="home-grace-body">
+                <div class="home-grace-title">GRACE <span class="grace-acronym-tag" id="home-grace-acronym">Growth · Resource · Assistance · Community · Engagement</span></div>
+                <div class="home-grace-status" id="home-grace-status">Let&apos;s find your next step, Maya…</div>
+                <div class="home-grace-note" id="home-grace-note">GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.</div>
+              </div>
             </div>
-            <div class="home-grace-body">
-              <div class="home-grace-title">GRACE <span class="grace-acronym-tag" id="home-grace-acronym">Growth · Resource · Assistance · Community · Engagement</span></div>
-              <div class="home-grace-status" id="home-grace-status">Let&apos;s find your next step, Maya…</div>
-              <div class="home-grace-note" id="home-grace-note">GRACE helps you navigate church life — for deeper conversation, connect with a leader avatar.</div>
+            <div class="home-grace-inputrow">
+              <input type="text" class="home-grace-input" id="home-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendGraceHome()}">
+              <button type="button" class="home-grace-send" onclick="sendGraceHome()" aria-label="Send message to GRACE">→</button>
+            </div>
+            <div class="home-grace-foot">
+              <span class="home-grace-dismiss-note" id="home-grace-dismiss-note">Dismiss anytime — GRACE stays in the menu.</span>
             </div>
           </div>
-          <div class="home-grace-inputrow">
-            <input type="text" class="home-grace-input" id="home-grace-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendGraceHome()}">
-            <button type="button" class="home-grace-send" onclick="sendGraceHome()" aria-label="Send message to GRACE">→</button>
-          </div>
+          <button type="button" class="home-grace-reopen" id="home-grace-reopen" onclick="showHomeGraceCard()" aria-label="Show GRACE card again">
+            <span class="home-grace-reopen-orb" id="home-grace-reopen-orb"></span>
+            <span class="home-grace-reopen-copy">
+              <span class="home-grace-reopen-title" id="home-grace-reopen-title">Talk with GRACE</span>
+              <span class="home-grace-reopen-sub" id="home-grace-reopen-sub">New here? Reopen the guide — GRACE is always in the menu.</span>
+            </span>
+          </button>
         </div>
 
 
@@ -6447,6 +6490,30 @@ function sendHomeChat() {
   }
 }
 
+const GRACE_HOME_CARD_KEY = 'grace.home.grace-card.dismissed.central-henderson.ios';
+function dismissHomeGraceCard() {
+  const wrap = document.getElementById('home-grace-wrap');
+  if (wrap) wrap.classList.add('is-dismissed');
+  try { localStorage.setItem(GRACE_HOME_CARD_KEY, '1'); } catch (e) {}
+}
+function showHomeGraceCard() {
+  const wrap = document.getElementById('home-grace-wrap');
+  if (wrap) wrap.classList.remove('is-dismissed');
+  try { localStorage.removeItem(GRACE_HOME_CARD_KEY); } catch (e) {}
+  document.getElementById('home-grace-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function initHomeGraceCard() {
+  const wrap = document.getElementById('home-grace-wrap');
+  if (!wrap) return;
+  const reopenOrb = document.getElementById('home-grace-reopen-orb');
+  if (reopenOrb && typeof GRACE_MESSAGING !== 'undefined' && typeof GRACE_MESSAGING.renderGraceOrb === 'function') {
+    reopenOrb.innerHTML = GRACE_MESSAGING.renderGraceOrb('sm');
+  }
+  try {
+    if (localStorage.getItem(GRACE_HOME_CARD_KEY) === '1') wrap.classList.add('is-dismissed');
+  } catch (e) {}
+}
+
 function sendGraceHome() {
   const input = document.getElementById('home-grace-input');
   const raw = input ? input.value.trim() : '';
@@ -7061,6 +7128,13 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
   setGrace('home-grace-note', graceMsg.system.disclaimer);
   const graceInput = document.getElementById('home-grace-input');
   if (graceInput) graceInput.placeholder = graceMsg.system.homePlaceholder;
+  const tut = graceMsg.system.tutorial;
+  if (tut) {
+    setGrace('home-grace-dismiss-note', 'Dismiss anytime — GRACE stays in the menu.');
+    setGrace('home-grace-reopen-title', tut.reopenLabel || 'Talk with GRACE');
+    setGrace('home-grace-reopen-sub', 'Reopen the guide — GRACE is always in the menu.');
+  }
+  initHomeGraceCard();
 
   /* ── GRACE Companion — orb-launched chat sheet with agency over the app ── */
   if (typeof GRACE_COMPANION !== 'undefined') {

@@ -359,17 +359,17 @@
 
 .gcp-orb-bound:hover .grace-orb,
 .gcp-orb-bound.grace-orb:hover {
-  filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.65)) drop-shadow(0 0 34px rgba(168, 85, 247, 0.4));
+  filter: drop-shadow(0 0 18px rgba(244, 114, 182, 0.65)) drop-shadow(0 0 34px rgba(252, 211, 77, 0.3));
 }
 
-.gcp-orb-bound:focus-visible { outline: 2px solid #7c5ced; outline-offset: 3px; border-radius: 50%; }
+.gcp-orb-bound:focus-visible { outline: 2px solid #f472b6; outline-offset: 3px; border-radius: 50%; }
 
-.grace-orb.is-speaking .grace-orb__wave span { animation-duration: 0.38s; }
+.grace-orb.is-speaking .grace-orb__wave span { animation-duration: 1.1s; }
 
-.grace-orb.is-speaking .grace-orb__halo { animation-duration: 0.9s; border-color: rgba(147, 197, 253, 0.85); }
+.grace-orb.is-speaking .grace-orb__halo { animation-duration: 0.9s; border-color: rgba(251, 207, 232, 0.9); }
 
 .grace-orb.is-speaking {
-  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.45));
+  filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.7)) drop-shadow(0 0 40px rgba(252, 211, 77, 0.35));
 }
 
 /* Compact tweaks inside sheet on small screens */
