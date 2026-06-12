@@ -9,6 +9,10 @@ interface MemberLayoutProps {
   onTabChange: (tab: MemberPortalTab, leaderId?: string) => void;
   onBack?: () => void;
   churchName?: string;
+  /** Signed-in member's first name — shown in the header when present. */
+  memberName?: string;
+  /** White-label branding from church settings. */
+  branding?: { primaryColor?: string; logoUrl?: string };
   leaders?: LeaderProfile[];
 }
 
@@ -20,14 +24,21 @@ const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'giving', label: 'Give', icon: DollarSign },
 ];
 
+const DEFAULT_PRIMARY = '#4f46e5'; // indigo-600
+
 export function MemberLayout({
   children,
   activeTab,
   onTabChange,
   onBack,
   churchName = 'Grace Church',
+  memberName,
+  branding,
   leaders,
 }: MemberLayoutProps) {
+  const primaryColor = branding?.primaryColor || DEFAULT_PRIMARY;
+  const logoUrl = branding?.logoUrl;
+
   return (
     <div className="h-full bg-gray-50 dark:bg-dark-900 flex flex-col relative overflow-hidden">
       {/* Header */}
@@ -41,14 +52,29 @@ export function MemberLayout({
           </button>
         )}
         <div className="flex items-center gap-2.5 flex-1">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">G</span>
-          </div>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={churchName}
+              className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+            />
+          ) : (
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <span className="text-white font-bold text-sm">
+                {churchName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
           <div>
             <h1 className="font-semibold text-gray-900 dark:text-dark-100 text-sm leading-tight">
               {churchName}
             </h1>
-            <p className="text-xs text-gray-500 dark:text-dark-400">Member Portal</p>
+            <p className="text-xs text-gray-500 dark:text-dark-400">
+              {memberName ? `Welcome, ${memberName}` : 'Member Portal'}
+            </p>
           </div>
         </div>
       </header>
@@ -75,9 +101,10 @@ export function MemberLayout({
                 onClick={() => onTabChange(id)}
                 className={`flex flex-col items-center py-2 px-1.5 min-w-0 flex-1 transition-colors ${
                   isActive
-                    ? 'text-indigo-600 dark:text-indigo-400'
+                    ? ''
                     : 'text-gray-400 dark:text-dark-500 hover:text-gray-600 dark:hover:text-dark-400'
                 }`}
+                style={isActive ? { color: primaryColor } : undefined}
               >
                 <Icon
                   size={22}

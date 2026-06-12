@@ -135,7 +135,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
 }
 
-export type View = 'home' | 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship' | 'grace' | 'mail' | 'financial-hub';
+export type View = 'home' | 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship' | 'grace' | 'mail' | 'financial-hub' | 'portal-activity';
 
 // Family/Household type for grouping
 export interface Family {
@@ -150,7 +150,7 @@ export interface Family {
 }
 
 // Member Portal Tab
-export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy' | 'my-ministry' | 'care' | 'scan';
+export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy' | 'my-ministry' | 'care' | 'scan' | 'card';
 
 // ============================================
 // COLLECTION & DONATION MANAGEMENT TYPES

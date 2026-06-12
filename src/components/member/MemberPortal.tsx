@@ -11,6 +11,7 @@ import { MemberLegacyPage } from './MemberLegacyPage';
 import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
 import { MemberScanPage } from './MemberScanPage';
+import { MemberCardPage } from './MemberCardPage';
 import { DEMO_LEADERS } from './demoLeaders';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
@@ -25,6 +26,9 @@ interface MemberPortalProps {
   currentMember?: Person | null;
   churchName?: string;
   churchProfile?: ChurchProfile;
+  branding?: { primaryColor?: string; logoUrl?: string };
+  churchSlug?: string | null;
+  churchId?: string;
   announcements?: Announcement[];
   prayers?: PrayerRequest[];
   onBack?: () => void;
@@ -47,6 +51,9 @@ export function MemberPortal({
   currentMember,
   churchName = 'Grace Church',
   churchProfile,
+  branding,
+  churchSlug,
+  churchId,
   announcements = [],
   prayers = [],
   onBack,
@@ -116,6 +123,10 @@ export function MemberPortal({
             giving={giving}
             personId={currentMember?.id}
             churchName={churchName}
+            churchSlug={churchSlug}
+            churchId={churchId}
+            memberEmail={currentMember?.email}
+            memberName={currentMember ? `${currentMember.firstName} ${currentMember.lastName}` : undefined}
           />
         );
 
@@ -186,6 +197,16 @@ export function MemberPortal({
           <MyMinistryPage />
         );
 
+      case 'card':
+        return (
+          <MemberCardPage
+            churchName={churchName}
+            memberName={currentMember ? `${currentMember.firstName} ${currentMember.lastName}` : undefined}
+            memberEmail={currentMember?.email ?? undefined}
+            primaryColor={branding?.primaryColor}
+          />
+        );
+
       case 'scan':
         return <MemberScanPage />;
 
@@ -210,6 +231,8 @@ export function MemberPortal({
       onTabChange={handleTabChange}
       onBack={onBack}
       churchName={churchName}
+      memberName={currentMember?.firstName}
+      branding={branding}
       leaders={leaders}
     >
       {renderContent()}

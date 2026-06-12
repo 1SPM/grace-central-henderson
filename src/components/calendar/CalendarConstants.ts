@@ -5,6 +5,8 @@ export interface RSVP {
   personId: string;
   status: 'yes' | 'no' | 'maybe';
   guestCount: number;
+  /** Where the RSVP originated — member portal or staff entry. */
+  source?: 'portal' | 'admin';
 }
 
 export type EventCategory = CalendarEvent['category'];

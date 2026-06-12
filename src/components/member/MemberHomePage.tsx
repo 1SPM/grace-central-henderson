@@ -1,4 +1,4 @@
-import { Users, QrCode, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield, MapPin } from 'lucide-react';
+import { Users, QrCode, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield, MapPin, Clock, CreditCard } from 'lucide-react';
 import { AnnouncementFeed } from './AnnouncementFeed';
 import type { CalendarEvent, MemberPortalTab, Announcement, Person, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
@@ -66,6 +66,7 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
         </h2>
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
           {[
+            { id: 'card' as MemberPortalTab, label: 'GRACE Impact Card', desc: 'A card that gives back', icon: CreditCard, iconColor: 'text-indigo-600 dark:text-indigo-400', bgColor: 'bg-indigo-100 dark:bg-indigo-500/20' },
             { id: 'directory' as MemberPortalTab, label: 'Member Directory', desc: 'Find & connect with members', icon: Users, iconColor: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-100 dark:bg-blue-500/20' },
             { id: 'shop' as MemberPortalTab, label: 'Church Shop', desc: 'Merch & resources', icon: ShoppingBag, iconColor: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-100 dark:bg-emerald-500/20' },
             { id: 'legacy' as MemberPortalTab, label: 'Legacy Planning', desc: 'Estate & planned giving', icon: Shield, iconColor: 'text-amber-600 dark:text-amber-400', bgColor: 'bg-amber-100 dark:bg-amber-500/20' },
@@ -88,6 +89,28 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
           ))}
         </div>
       </div>
+
+      {/* Service Times */}
+      {(churchProfile?.serviceTimes?.length ?? 0) > 0 && (
+        <div>
+          <h2 className="text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-2 px-1">
+            Service Times
+          </h2>
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-100 dark:border-dark-700 divide-y divide-gray-100 dark:divide-dark-700">
+            {churchProfile!.serviceTimes.map((st, i) => (
+              <div key={i} className="px-4 py-3 flex items-center gap-3">
+                <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Clock size={16} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">{st.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">{st.day} · {st.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Contact Info */}
       <div>

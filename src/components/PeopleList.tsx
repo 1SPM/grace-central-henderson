@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft, ArrowUpDown } from 'lucide-react';
+import { Search, UserPlus, ChevronRight, Download, Check, X, Filter, Tag, UserCog, Upload, ChevronLeft, ArrowUpDown, Smartphone } from 'lucide-react';
 import { Person, MemberStatus } from '../types';
 import { STATUS_COLORS } from '../constants';
 import { exportPeopleToCSV } from '../utils/csvExport';
+import { invitePortalMembers } from '../lib/services/memberInvites';
 import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
@@ -244,6 +245,25 @@ export function PeopleList({
     toast.success(`Exported ${selectedPeople.length} people to CSV`);
   };
 
+  const [isInviting, setIsInviting] = useState(false);
+  const handleInviteToPortal = async () => {
+    if (selectedIds.size === 0 || isInviting) return;
+    setIsInviting(true);
+    try {
+      const outcome = await invitePortalMembers(Array.from(selectedIds));
+      const skipped = outcome.total - outcome.invited;
+      toast.success(
+        `Sent ${outcome.invited} portal invitation${outcome.invited === 1 ? '' : 's'}` +
+        (skipped > 0 ? ` (${skipped} skipped — no email or already linked)` : '')
+      );
+      clearSelection();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Portal invitations failed');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
   const clearAdvancedFilters = () => {
     setTagFilter('');
     setHasEmailFilter(null);
@@ -354,6 +374,14 @@ export function PeopleList({
                   >
                     <Download size={16} />
                     Export Selected
+                  </button>
+                  <button
+                    onClick={handleInviteToPortal}
+                    disabled={isInviting}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-stone-100 dark:bg-dark-800 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20 disabled:opacity-50"
+                  >
+                    <Smartphone size={16} />
+                    {isInviting ? 'Inviting…' : 'Invite to Portal'}
                   </button>
                 </>
               ) : bulkAction === 'status' ? (

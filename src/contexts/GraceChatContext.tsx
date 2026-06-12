@@ -3,6 +3,7 @@ import type { Person } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
+import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
 import { buildGreeting, loadStoredMessages, persistMessages } from '../lib/grace-chat/persistence';
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
@@ -214,13 +215,21 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length]);
 
+  // Portal engagement + Impact Card aggregates (Phase D) — lets admins
+  // ask GRACE about member-portal activity and the card program.
+  const opsContext = useGraceOpsAggregates(data.churchId);
+
   // Memoize context so we're not rebuilding this on every keystroke.
   // Depend on the specific fields we read so re-computation tracks the
   // actual inputs, not every new wrapper object identity.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const dataContext = useMemo(() => buildDataContext(data), [
+  const dataContext = useMemo(() => {
+    const base = buildDataContext(data);
+    return opsContext ? `${base}\n${opsContext}` : base;
+  }, [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
+    opsContext,
   ]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

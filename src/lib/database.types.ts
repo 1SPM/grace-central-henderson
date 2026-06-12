@@ -25,7 +25,8 @@ export type EventCategory =
 export type AttendanceType = 'sunday' | 'wednesday' | 'small-group' | 'special';
 export type GivingFund = 'tithe' | 'offering' | 'missions' | 'building' | 'benevolence' | 'other';
 export type GivingMethod = 'cash' | 'check' | 'card' | 'online' | 'bank';
-export type UserRole = 'admin' | 'staff' | 'volunteer';
+export type UserRole = 'admin' | 'pastor' | 'staff' | 'volunteer' | 'member';
+export type MemberInvitationStatus = 'pending' | 'sent' | 'accepted' | 'revoked' | 'expired';
 
 // Row types (what you get from the database)
 export interface Church {
@@ -79,6 +80,26 @@ export interface Person {
   notes: string | null;
   tags: string[];
   family_id: string | null;
+  clerk_user_id: string | null;
+  portal_enabled: boolean;
+  portal_last_seen_at: string | null;
+  directory_opt_in: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MemberInvitation {
+  id: string;
+  church_id: string;
+  person_id: string;
+  email: string;
+  token: string;
+  status: MemberInvitationStatus;
+  invited_by_user_id: string | null;
+  clerk_invitation_id: string | null;
+  sent_at: string | null;
+  accepted_at: string | null;
+  expires_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -182,6 +203,51 @@ export interface Giving {
   created_at: string;
 }
 
+export type MemberActivityEventType =
+  | 'login' | 'rsvp' | 'checkin' | 'gift' | 'prayer' | 'care_message'
+  | 'help_request' | 'directory_view' | 'announcement_view'
+  | 'kyc_submitted' | 'card_issued' | 'card_frozen' | 'card_txn';
+
+export interface MemberActivityEvent {
+  id: string;
+  church_id: string;
+  person_id: string | null;
+  event_type: MemberActivityEventType;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export type AnnouncementDbCategory = 'general' | 'event' | 'urgent' | 'update' | 'celebration';
+
+export interface AnnouncementRow {
+  id: string;
+  church_id: string;
+  title: string;
+  body: string | null;
+  image_url: string | null;
+  category: AnnouncementDbCategory;
+  pinned: boolean;
+  published_at: string;
+  expires_at: string | null;
+  created_by_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventRsvp {
+  id: string;
+  church_id: string;
+  event_id: string;
+  person_id: string;
+  status: 'yes' | 'no' | 'maybe';
+  guest_count: number;
+  source: 'portal' | 'admin';
+  created_at: string;
+  updated_at: string;
+}
+
 // Insert types (for creating new records)
 export interface PersonInsert {
   church_id: string;
@@ -251,6 +317,11 @@ export interface Database {
         Insert: PersonInsert;
         Update: Partial<Person>;
       };
+      member_invitations: {
+        Row: MemberInvitation;
+        Insert: Partial<MemberInvitation> & { church_id: string; person_id: string; email: string; token: string };
+        Update: Partial<MemberInvitation>;
+      };
       small_groups: {
         Row: SmallGroup;
         Insert: Partial<SmallGroup> & { church_id: string; name: string };
@@ -290,6 +361,21 @@ export interface Database {
         Row: Giving;
         Insert: Partial<Giving> & { church_id: string; amount: number; date: string };
         Update: Partial<Giving>;
+      };
+      member_activity_events: {
+        Row: MemberActivityEvent;
+        Insert: Partial<MemberActivityEvent> & { church_id: string; event_type: MemberActivityEventType };
+        Update: never;
+      };
+      announcements: {
+        Row: AnnouncementRow;
+        Insert: Partial<AnnouncementRow> & { church_id: string; title: string };
+        Update: Partial<AnnouncementRow>;
+      };
+      event_rsvps: {
+        Row: EventRsvp;
+        Insert: Partial<EventRsvp> & { church_id: string; event_id: string; person_id: string; status: 'yes' | 'no' | 'maybe' };
+        Update: Partial<EventRsvp>;
       };
     };
   };

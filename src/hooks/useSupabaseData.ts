@@ -63,6 +63,10 @@ function convertLegacyPerson(p: LegacyPerson): Person {
     notes: p.notes || null,
     tags: p.tags,
     family_id: p.familyId || null,
+    clerk_user_id: null,
+    portal_enabled: false,
+    portal_last_seen_at: null,
+    directory_opt_in: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -296,6 +300,10 @@ export function useSupabaseData() {
         notes: person.notes ?? null,
         tags: person.tags || [],
         family_id: person.family_id ?? null,
+        clerk_user_id: null,
+        portal_enabled: false,
+        portal_last_seen_at: null,
+        directory_opt_in: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

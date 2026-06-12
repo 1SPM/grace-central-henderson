@@ -14,6 +14,7 @@ import { useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, RefreshCw, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
 import { FLAGS, flagEnabled } from '../lib/observability/featureFlags';
 import { useFinancialHub, defaultRange, isoDate, type FinancialHubTimelinePoint } from '../hooks/useFinancialHub';
+import { CardProgramSection } from './financial/CardProgramSection';
 
 interface FinancialHubProps {
   onBack?: () => void;
@@ -166,6 +167,9 @@ export function FinancialHub({ onBack }: FinancialHubProps) {
           <SourceBreakdownCard summary={data.summary} />
         </>
       )}
+
+      {/* ---- GRACE Impact Card program (Enterprise) ---- */}
+      <CardProgramSection />
     </div>
   );
 }

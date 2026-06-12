@@ -3,8 +3,26 @@
  */
 
 import { createLogger } from '../../utils/logger';
+import { getClerkTokenProvider } from '../supabase';
 
 const log = createLogger('ai-service');
+
+/**
+ * Attaches the Clerk session token when available so /api/ai/generate
+ * can meter the call against the church's AI budget (Phase D gateway
+ * routing). Unauthenticated calls (demo, marketing) stay unmetered.
+ */
+async function buildHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  try {
+    const provider = getClerkTokenProvider();
+    const token = provider ? await provider() : null;
+    if (token) headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // Token retrieval is best-effort; the call proceeds unmetered.
+  }
+  return headers;
+}
 
 export interface AIGenerateOptions {
   prompt: string;
@@ -46,9 +64,7 @@ export async function generateAIText(options: AIGenerateOptions): Promise<AIGene
   try {
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: await buildHeaders(),
       body: JSON.stringify({
         prompt,
         context,
@@ -93,7 +109,7 @@ export async function generateAIStreamed({ prompt, maxTokens, onChunk, signal }:
   try {
     const response = await fetch(`${API_ENDPOINT}?stream=1`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await buildHeaders(),
       body: JSON.stringify({ prompt, maxTokens }),
       signal,
     });

@@ -1,8 +1,48 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders.js';
+import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { checkBudget } from '../_lib/ai/budget.js';
+import { recordUsage } from '../_lib/ai/usage.js';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const MODEL = 'gemini-2.5-flash';
+
+/**
+ * Metering context (Phase D): when the caller sends a Clerk Bearer
+ * token, this route runs through the AI gateway's budget pipeline —
+ * checkBudget before the provider call, recordUsage after. Ask Grace
+ * is the highest-volume inference path, so this is where the
+ * per-tenant budget tracking matters most.
+ *
+ * Calls without a token (marketing site, demo mode) stay unmetered —
+ * identical to the pre-Phase-D behavior.
+ */
+interface Metering {
+  supabase: SupabaseClient;
+  churchId: string;
+  actorClerkId: string;
+}
+
+async function resolveMetering(req: VercelRequest): Promise<Metering | null> {
+  if (!req.headers.authorization || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
+  const auth = await requireClerkAuth(req);
+  if (!auth.ok) return null;
+  return {
+    supabase: createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } }),
+    churchId: auth.churchId,
+    actorClerkId: auth.clerkUserId,
+  };
+}
+
+/** Rough fallback when the provider doesn't report token counts. */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
 
 // Rate limiting (simple in-memory, resets on cold start)
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
@@ -59,6 +99,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const shouldStream = req.query.stream === '1' || req.query.stream === 'true';
 
+  // ---- AI gateway: budget check (Phase D) ----
+  const metering = await resolveMetering(req);
+  if (metering) {
+    const budget = await checkBudget(metering.supabase, metering.churchId);
+    if (budget.status !== 'ok') {
+      void recordUsage(metering.supabase, {
+        churchId: metering.churchId,
+        provider: 'gemini',
+        model: MODEL,
+        feature: 'ask-grace',
+        promptTokens: 0,
+        completionTokens: 0,
+        success: false,
+        errorCode: budget.status === 'hard_cut' ? 'budget_hard_cut' : 'budget_over_cap',
+        latencyMs: 0,
+        actorClerkId: metering.actorClerkId,
+      });
+      return res.status(402).json({
+        error: budget.status === 'hard_cut'
+          ? 'Monthly AI budget exhausted. Ask Grace is paused until the new billing month or a cap increase.'
+          : 'Monthly AI budget reached. Ask Grace responses may be limited — consider raising the cap in Settings.',
+        budget_status: budget.status,
+        spent_micro_usd: budget.spentMicroUsd,
+        cap_micro_usd: budget.capMicroUsd,
+      });
+    }
+  }
+
+  const meterResult = (input: {
+    success: boolean;
+    promptTokens?: number;
+    completionTokens?: number;
+    errorCode?: string;
+    latencyMs: number;
+  }) => {
+    if (!metering) return;
+    void recordUsage(metering.supabase, {
+      churchId: metering.churchId,
+      provider: 'gemini',
+      model: MODEL,
+      feature: 'ask-grace',
+      promptTokens: input.promptTokens ?? estimateTokens(fullPrompt),
+      completionTokens: input.completionTokens ?? 0,
+      success: input.success,
+      errorCode: input.errorCode,
+      latencyMs: input.latencyMs,
+      actorClerkId: metering.actorClerkId,
+    });
+  };
+
   const sendHermesFallback = async () => {
     const hermes = await generateWithHermes({ prompt: fullPrompt, maxTokens });
     if (!hermes.success || !hermes.text) return false;
@@ -78,6 +168,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(503).json({ error: 'AI service not configured' });
   }
 
+  const started = Date.now();
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     const config = {
@@ -95,21 +186,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.setHeader('X-Accel-Buffering', 'no');
 
       const stream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: MODEL,
         contents: fullPrompt,
         config,
       });
 
+      let streamedText = '';
+      let promptTokens: number | undefined;
+      let completionTokens: number | undefined;
       for await (const chunk of stream) {
         const chunkText = chunk.text;
-        if (chunkText) res.write(chunkText);
+        if (chunkText) {
+          streamedText += chunkText;
+          res.write(chunkText);
+        }
+        // The final chunk carries usage metadata when the API reports it.
+        if (chunk.usageMetadata) {
+          promptTokens = chunk.usageMetadata.promptTokenCount ?? promptTokens;
+          completionTokens = chunk.usageMetadata.candidatesTokenCount ?? completionTokens;
+        }
       }
       res.end();
+      meterResult({
+        success: true,
+        promptTokens,
+        completionTokens: completionTokens ?? estimateTokens(streamedText),
+        latencyMs: Date.now() - started,
+      });
       return;
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: MODEL,
       contents: fullPrompt,
       config,
     });
@@ -117,16 +225,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = response.text;
 
     if (!text) {
+      meterResult({ success: false, errorCode: 'empty_response', latencyMs: Date.now() - started });
       return res.status(500).json({ error: 'No response generated' });
     }
+
+    meterResult({
+      success: true,
+      promptTokens: response.usageMetadata?.promptTokenCount,
+      completionTokens: response.usageMetadata?.candidatesTokenCount ?? estimateTokens(text),
+      latencyMs: Date.now() - started,
+    });
 
     return res.status(200).json({
       success: true,
       text,
-      model: 'gemini-2.5-flash',
+      model: MODEL,
     });
   } catch (error) {
     console.error('Gemini API error:', error);
+    meterResult({
+      success: false,
+      errorCode: 'provider_error',
+      completionTokens: 0,
+      latencyMs: Date.now() - started,
+    });
 
     // Pass through specifics so the client UI can show something useful
     const message = error instanceof Error ? error.message : String(error);

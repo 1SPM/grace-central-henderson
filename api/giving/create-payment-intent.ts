@@ -47,6 +47,9 @@ const SCHEMA = {
   email: email_({ max: 320 }),
   donor_name: str({ max: 200 }),
   note: str({ max: 500 }),
+  // Member-portal gifts attach the giver's person record so the webhook
+  // attributes the giving row to them (admin GivingDashboard + history).
+  person_id: str({ max: 60, pattern: /^[0-9a-fA-F-]+$/ }),
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -61,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
-  const { church_slug, amount_cents, fund, email, donor_name, note } = body;
+  const { church_slug, amount_cents, fund, email, donor_name, note, person_id } = body;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const { data: church, error } = await supabase
@@ -78,6 +81,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       error: 'giving_not_active',
       detail: 'This church has not finished setting up online giving yet.',
     });
+  }
+
+  // Attribution guard: only attach person_id if that person actually
+  // belongs to this church (prevents cross-tenant attribution spoofing).
+  let verifiedPersonId: string | null = null;
+  if (person_id) {
+    const { data: person } = await supabase
+      .from('people')
+      .select('id')
+      .eq('id', person_id)
+      .eq('church_id', church.id)
+      .maybeSingle();
+    verifiedPersonId = person?.id ?? null;
   }
 
   const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -107,6 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         donor_name: donor_name || '',
         platform_fee_bps: String(PLATFORM_FEE_BPS),
         note: note || '',
+        ...(verifiedPersonId ? { person_id: verifiedPersonId } : {}),
       },
     });
 

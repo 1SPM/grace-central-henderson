@@ -79,8 +79,18 @@ export function useGraceInbox(args: {
     };
 
     void fetchInbox();
+    // Realtime push (Phase D) — instant injection on new rows. The 60s
+    // poll stays as a fallback for environments without Realtime.
+    const channel = sb
+      .channel('grace-inbox-live')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'grace_inbox_messages' },
+        () => { void fetchInbox(); },
+      )
+      .subscribe();
     const interval = setInterval(fetchInbox, 60_000);
-    return () => { cancelled = true; clearInterval(interval); };
+    return () => { cancelled = true; clearInterval(interval); void sb.removeChannel(channel); };
   }, []);
 }
 

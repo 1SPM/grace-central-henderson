@@ -54,6 +54,7 @@ const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m 
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
+const PortalActivity = lazy(() => import('./PortalActivity').then(m => ({ default: m.PortalActivity })));
 const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
@@ -236,6 +237,7 @@ export function ViewRenderer(props: ViewRendererProps) {
     case 'dashboard':
       return (
         <Dashboard
+          churchId={churchId}
           people={people}
           tasks={tasks}
           events={events}
@@ -543,6 +545,9 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'connect-card':
         return <ConnectCard churchId={churchId} churchName={churchName} />;
+
+      case 'portal-activity':
+        return <PortalActivity churchId={churchId} people={people} onViewPerson={handlers.viewPerson} />;
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;

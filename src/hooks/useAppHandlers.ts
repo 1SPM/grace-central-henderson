@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
 import { createLogger } from '../utils/logger';
 import { useToast } from '../components/Toast';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { logMemberActivity } from '../lib/services/memberActivity';
+import type { EventRsvp } from '../lib/database.types';
 
 const log = createLogger('app-handlers');
 import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
@@ -99,8 +102,29 @@ export function useAppHandlers({
   // Attendance state (demo data)
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
 
-  // RSVP state (demo data)
-  const [rsvps, setRsvps] = useState<{ eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[]>([]);
+  // RSVPs — persisted in event_rsvps, mirrored into local state for the UI.
+  const [rsvps, setRsvps] = useState<{ eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number; source?: 'portal' | 'admin' }[]>([]);
+
+  // Hydrate persisted RSVPs.
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !supabase) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase!
+        .from('event_rsvps')
+        .select('*')
+        .eq('church_id', churchId);
+      if (cancelled || error || !data) return;
+      setRsvps((data as EventRsvp[]).map(r => ({
+        eventId: r.event_id,
+        personId: r.person_id,
+        status: r.status,
+        guestCount: r.guest_count,
+        source: r.source,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, [churchId]);
 
   // Volunteer assignments state (demo data)
   const [volunteerAssignments, setVolunteerAssignments] = useState<{
@@ -177,19 +201,54 @@ export function useAppHandlers({
       };
       setAttendanceRecords((prev) => [...prev, newRecord]);
     }
+    logMemberActivity({
+      churchId,
+      personId,
+      eventType: 'checkin',
+      metadata: { event_type: eventType, event_name: eventName ?? null },
+    });
   }, [checkInToDb, churchId]);
 
-  const handleRSVP = useCallback((eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0) => {
+  const handleRSVP = useCallback((eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0, source: 'portal' | 'admin' = 'portal') => {
     setRsvps((prev) => {
       const existingIndex = prev.findIndex((r) => r.eventId === eventId && r.personId === personId);
       if (existingIndex >= 0) {
         const updated = [...prev];
-        updated[existingIndex] = { eventId, personId, status, guestCount };
+        updated[existingIndex] = { eventId, personId, status, guestCount, source };
         return updated;
       }
-      return [...prev, { eventId, personId, status, guestCount }];
+      return [...prev, { eventId, personId, status, guestCount, source }];
     });
-  }, []);
+
+    // Persist (upsert on event+person) — fire-and-forget so the UI stays snappy.
+    if (isSupabaseConfigured() && supabase) {
+      void supabase
+        .from('event_rsvps')
+        .upsert(
+          {
+            church_id: churchId,
+            event_id: eventId,
+            person_id: personId,
+            status,
+            guest_count: guestCount,
+            source,
+          },
+          { onConflict: 'event_id,person_id' },
+        )
+        .then(({ error }) => {
+          if (error) log.warn('RSVP persist failed', error.message);
+        });
+    }
+
+    logMemberActivity({
+      churchId,
+      personId,
+      eventType: 'rsvp',
+      entityType: 'calendar_event',
+      entityId: eventId,
+      metadata: { status, guest_count: guestCount, source },
+    });
+  }, [churchId]);
 
   const handleAssignVolunteer = useCallback((eventId: string, roleId: string, personId: string) => {
     const newAssignment = {

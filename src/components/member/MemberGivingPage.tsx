@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Heart,
   DollarSign,
@@ -10,21 +10,46 @@ import {
   History,
   ChevronRight,
 } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js/pure';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { GIVING_FUNDS, RECURRING_INTERVALS } from '../../lib/services/payments';
+import { logMemberActivity } from '../../lib/services/memberActivity';
 import type { Giving } from '../../types';
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 interface MemberGivingPageProps {
   giving?: Giving[];
   personId?: string;
   churchName?: string;
+  /** Slug for the Stripe Connect giving endpoints. Absent in demo mode. */
+  churchSlug?: string | null;
+  churchId?: string;
+  memberEmail?: string;
+  memberName?: string;
 }
 
 type GivingView = 'main' | 'give' | 'history';
-type GivingStep = 'amount' | 'details' | 'processing' | 'success';
+type GivingStep = 'amount' | 'details' | 'payment' | 'success';
 
 const PRESET_AMOUNTS = [25, 50, 100, 250];
 
-export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Church' }: MemberGivingPageProps) {
+/** API expects weekly|monthly|yearly; quarterly is not offered for card subs. */
+const STRIPE_FREQUENCIES: Record<string, string> = {
+  week: 'weekly',
+  month: 'monthly',
+  year: 'yearly',
+};
+
+export function MemberGivingPage({
+  giving = [],
+  personId,
+  churchName = 'Grace Church',
+  churchSlug,
+  churchId,
+  memberEmail,
+  memberName,
+}: MemberGivingPageProps) {
   const [view, setView] = useState<GivingView>('main');
 
   // Calculate giving stats
@@ -38,7 +63,17 @@ export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Ch
     : null;
 
   if (view === 'give') {
-    return <GiveForm churchName={churchName} onBack={() => setView('main')} />;
+    return (
+      <GiveForm
+        churchName={churchName}
+        churchSlug={churchSlug}
+        churchId={churchId}
+        personId={personId}
+        memberEmail={memberEmail}
+        memberName={memberName}
+        onBack={() => setView('main')}
+      />
+    );
   }
 
   if (view === 'history') {
@@ -133,12 +168,24 @@ export function MemberGivingPage({ giving = [], personId, churchName = 'Grace Ch
   );
 }
 
-// Give Form Component
+// Give Form Component — real Stripe Connect checkout when the church has
+// giving configured (slug + publishable key); simulated success otherwise
+// so demo mode keeps working.
 function GiveForm({
   churchName,
-  onBack
+  churchSlug,
+  churchId,
+  personId,
+  memberEmail,
+  memberName,
+  onBack,
 }: {
   churchName: string;
+  churchSlug?: string | null;
+  churchId?: string;
+  personId?: string;
+  memberEmail?: string;
+  memberName?: string;
   onBack: () => void;
 }) {
   const [step, setStep] = useState<GivingStep>('amount');
@@ -147,20 +194,47 @@ function GiveForm({
   const [fund, setFund] = useState('tithe');
   const [isRecurring, setIsRecurring] = useState(false);
   const [frequency, setFrequency] = useState('month');
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState(memberEmail ?? '');
+  const [firstName, setFirstName] = useState(memberName?.split(' ')[0] ?? '');
+  const [lastName, setLastName] = useState(memberName?.split(' ').slice(1).join(' ') ?? '');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coverFees, setCoverFees] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  const canUseStripe = !!PUBLISHABLE_KEY && !!churchSlug;
+  const recurringOptions = canUseStripe
+    ? RECURRING_INTERVALS.filter(i => i.id in STRIPE_FREQUENCIES)
+    : RECURRING_INTERVALS;
 
   const numericAmount = parseFloat(amount) || 0;
   const processingFee = numericAmount * 0.029 + 0.30;
   const totalAmount = coverFees ? numericAmount + processingFee : numericAmount;
 
+  const stripePromise = useMemo(() => {
+    if (!PUBLISHABLE_KEY || !clientSecret) return null;
+    return loadStripe(PUBLISHABLE_KEY);
+  }, [clientSecret]);
+
   const handlePresetAmount = (value: number) => {
     setAmount(value.toString());
     setCustomAmount(false);
+  };
+
+  const recordGiftActivity = () => {
+    if (!churchId) return;
+    logMemberActivity({
+      churchId,
+      personId,
+      eventType: 'gift',
+      metadata: {
+        amount: Number(totalAmount.toFixed(2)),
+        fund,
+        recurring: isRecurring,
+        frequency: isRecurring ? frequency : null,
+        source: 'portal',
+      },
+    });
   };
 
   const handleSubmit = async () => {
@@ -168,9 +242,44 @@ function GiveForm({
     setError(null);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setStep('success');
+      if (!canUseStripe) {
+        // Demo fallback — no Stripe configured.
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        recordGiftActivity();
+        setStep('success');
+        return;
+      }
+
+      const amountCents = Math.round(totalAmount * 100);
+      const endpoint = isRecurring ? '/api/giving/create-subscription' : '/api/giving/create-payment-intent';
+      const reqBody: Record<string, unknown> = {
+        church_slug: churchSlug,
+        amount_cents: amountCents,
+        fund,
+        email: email.trim() || undefined,
+        donor_name: `${firstName.trim()} ${lastName.trim()}`.trim() || undefined,
+        person_id: personId || undefined,
+      };
+      if (isRecurring) {
+        reqBody.frequency = STRIPE_FREQUENCIES[frequency] ?? 'monthly';
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqBody),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        if (body.error === 'giving_not_active') {
+          setError('Online giving is not fully set up yet. Please contact the church office.');
+        } else {
+          setError(body.detail || body.error || `Could not start payment (HTTP ${res.status})`);
+        }
+        return;
+      }
+      setClientSecret(body.client_secret);
+      setStep('payment');
     } catch {
       setError('Payment processing failed. Please try again.');
     } finally {
@@ -206,6 +315,12 @@ function GiveForm({
               <span className="font-medium text-slate-600 capitalize">{frequency}ly</span>
             </div>
           )}
+          {email && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Receipt</span>
+              <span className="font-medium text-gray-900 dark:text-white">{email}</span>
+            </div>
+          )}
         </div>
 
         <button
@@ -214,6 +329,40 @@ function GiveForm({
         >
           Done
         </button>
+      </div>
+    );
+  }
+
+  if (step === 'payment' && stripePromise && clientSecret) {
+    return (
+      <div className="p-4">
+        <button
+          onClick={() => { setClientSecret(null); setStep('details'); }}
+          className="text-sm text-gray-500 mb-4"
+        >
+          ← Back
+        </button>
+
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Payment</h2>
+        <p className="text-gray-500 dark:text-dark-400 text-sm mb-6">
+          ${totalAmount.toFixed(2)} to {churchName}{isRecurring ? ` · ${frequency}ly` : ''} — secured by Stripe
+        </p>
+
+        <Elements
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: { theme: 'stripe', variables: { colorPrimary: '#059669' } },
+          }}
+        >
+          <PortalPayStep
+            amount={totalAmount}
+            onSuccess={() => {
+              recordGiftActivity();
+              setStep('success');
+            }}
+          />
+        </Elements>
       </div>
     );
   }
@@ -303,12 +452,12 @@ function GiveForm({
           {isProcessing ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Processing...
+              {canUseStripe ? 'Preparing payment…' : 'Processing...'}
             </>
           ) : (
             <>
               <CreditCard size={20} />
-              Pay ${totalAmount.toFixed(2)}
+              {canUseStripe ? `Continue to Pay $${totalAmount.toFixed(2)}` : `Pay $${totalAmount.toFixed(2)}`}
             </>
           )}
         </button>
@@ -425,8 +574,8 @@ function GiveForm({
           </button>
         </div>
         {isRecurring && (
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {RECURRING_INTERVALS.map((interval) => (
+          <div className={`mt-3 grid gap-2 ${recurringOptions.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+            {recurringOptions.map((interval) => (
               <button
                 key={interval.id}
                 onClick={() => setFrequency(interval.id)}
@@ -449,6 +598,67 @@ function GiveForm({
         className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl disabled:opacity-50"
       >
         Continue with ${numericAmount.toFixed(2)} {isRecurring && `/ ${frequency}`}
+      </button>
+    </div>
+  );
+}
+
+// Stripe Elements confirmation step (must render inside <Elements>).
+function PortalPayStep({ amount, onSuccess }: { amount: number; onSuccess: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
+    if (!stripe || !elements) return;
+    setSubmitting(true);
+    setError(null);
+    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: window.location.href },
+      redirect: 'if_required',
+    });
+    if (stripeError) {
+      setError(stripeError.message ?? 'Payment failed. Please try a different card.');
+      setSubmitting(false);
+      return;
+    }
+    if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+      onSuccess();
+      return;
+    }
+    setError('Unexpected payment state. Please try again or contact the church office.');
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <PaymentElement />
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-500/10 text-red-600 rounded-xl text-sm">
+          <AlertCircle size={18} />
+          {error}
+        </div>
+      )}
+
+      <button
+        onClick={handlePay}
+        disabled={submitting}
+        className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
+      >
+        {submitting ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Processing…
+          </>
+        ) : (
+          <>
+            <CreditCard size={20} />
+            Give ${amount.toFixed(2)}
+          </>
+        )}
       </button>
     </div>
   );

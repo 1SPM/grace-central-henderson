@@ -1,5 +1,19 @@
-import { useState, useCallback } from 'react';
+/**
+ * Announcements — church-published content rendered in the member portal
+ * feed and managed from the admin Announcements page.
+ *
+ * Backed by the `announcements` table (migration 018). Falls back to
+ * in-memory demo data when Supabase is not configured so the demo
+ * experience is unchanged.
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { createLogger } from '../utils/logger';
 import type { Announcement, AnnouncementCategory } from '../types';
+import type { AnnouncementRow } from '../lib/database.types';
+
+const log = createLogger('announcements');
 
 const now = new Date().toISOString();
 const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -54,8 +68,47 @@ const DEMO_ANNOUNCEMENTS: Announcement[] = [
   },
 ];
 
-export function useAnnouncements() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(DEMO_ANNOUNCEMENTS);
+function fromRow(row: AnnouncementRow): Announcement {
+  return {
+    id: row.id,
+    churchId: row.church_id,
+    title: row.title,
+    body: row.body ?? undefined,
+    imageUrl: row.image_url ?? undefined,
+    category: row.category as AnnouncementCategory,
+    pinned: row.pinned,
+    publishedAt: row.published_at,
+    expiresAt: row.expires_at ?? undefined,
+    createdBy: row.created_by_name ?? undefined,
+    createdAt: row.created_at,
+  };
+}
+
+export function useAnnouncements(churchId: string = 'demo-church') {
+  const useDb = isSupabaseConfigured() && !!supabase;
+  const [announcements, setAnnouncements] = useState<Announcement[]>(useDb ? [] : DEMO_ANNOUNCEMENTS);
+
+  // Hydrate from Supabase.
+  useEffect(() => {
+    if (!useDb || !supabase) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .eq('church_id', churchId)
+        .order('published_at', { ascending: false });
+      if (cancelled) return;
+      if (error) {
+        // Table may not exist yet in older deployments — keep demo data usable.
+        log.warn('announcements load failed, using demo data', error.message);
+        setAnnouncements(DEMO_ANNOUNCEMENTS);
+        return;
+      }
+      setAnnouncements(((data ?? []) as AnnouncementRow[]).map(fromRow));
+    })();
+    return () => { cancelled = true; };
+  }, [useDb, churchId]);
 
   const addAnnouncement = useCallback((data: {
     title: string;
@@ -65,9 +118,9 @@ export function useAnnouncements() {
     pinned: boolean;
     expiresAt?: string;
   }) => {
-    const newAnnouncement: Announcement = {
+    const local: Announcement = {
       id: `ann-${Date.now()}`,
-      churchId: 'demo',
+      churchId,
       title: data.title,
       body: data.body,
       imageUrl: data.imageUrl,
@@ -78,16 +131,68 @@ export function useAnnouncements() {
       createdBy: 'You',
       createdAt: new Date().toISOString(),
     };
-    setAnnouncements(prev => [newAnnouncement, ...prev]);
-  }, []);
+    setAnnouncements(prev => [local, ...prev]);
+
+    if (useDb && supabase) {
+      void supabase
+        .from('announcements')
+        .insert({
+          church_id: churchId,
+          title: data.title,
+          body: data.body ?? null,
+          image_url: data.imageUrl ?? null,
+          category: data.category,
+          pinned: data.pinned,
+          expires_at: data.expiresAt ?? null,
+        })
+        .select()
+        .single()
+        .then(({ data: row, error }) => {
+          if (error || !row) {
+            log.warn('announcement insert failed', error?.message);
+            return;
+          }
+          // Swap the optimistic row for the persisted one.
+          setAnnouncements(prev => prev.map(a => (a.id === local.id ? fromRow(row as AnnouncementRow) : a)));
+        });
+    }
+  }, [useDb, churchId]);
 
   const updateAnnouncement = useCallback((id: string, data: Partial<Omit<Announcement, 'id' | 'churchId' | 'createdAt'>>) => {
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
-  }, []);
+
+    if (useDb && supabase) {
+      const updates: Record<string, unknown> = {};
+      if (data.title !== undefined) updates.title = data.title;
+      if (data.body !== undefined) updates.body = data.body ?? null;
+      if (data.imageUrl !== undefined) updates.image_url = data.imageUrl ?? null;
+      if (data.category !== undefined) updates.category = data.category;
+      if (data.pinned !== undefined) updates.pinned = data.pinned;
+      if (data.expiresAt !== undefined) updates.expires_at = data.expiresAt ?? null;
+      if (Object.keys(updates).length === 0) return;
+      void supabase
+        .from('announcements')
+        .update(updates)
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) log.warn('announcement update failed', error.message);
+        });
+    }
+  }, [useDb]);
 
   const deleteAnnouncement = useCallback((id: string) => {
     setAnnouncements(prev => prev.filter(a => a.id !== id));
-  }, []);
+
+    if (useDb && supabase) {
+      void supabase
+        .from('announcements')
+        .delete()
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) log.warn('announcement delete failed', error.message);
+        });
+    }
+  }, [useDb]);
 
   // Filter out expired announcements for display
   const activeAnnouncements = announcements.filter(a => {

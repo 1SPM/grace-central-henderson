@@ -14,7 +14,13 @@
  *   - Run agents in parallel without IO contention
  */
 
-export type AgentId = 'member-care' | 'stewardship' | 'operations';
+export type AgentId =
+  | 'member-care'
+  | 'stewardship'
+  | 'operations'
+  | 'portal-engagement'
+  | 'card-ops'
+  | 'crisis-escalation';
 
 export type ObservationKind =
   // member-care
@@ -28,6 +34,14 @@ export type ObservationKind =
   // operations
   | 'event_no_leader'
   | 'task_overdue'
+  // portal-engagement
+  | 'portal_inactive'
+  | 'portal_never_signed_in'
+  // card-ops (RUNBOOK RB-016)
+  | 'kyc_stuck'
+  | 'card_frozen_stale'
+  // crisis-escalation
+  | 'crisis_conversation'
   ;
 
 export type ObservationSeverity = 'info' | 'attention' | 'urgent';
@@ -56,24 +70,34 @@ export interface AgentSettings {
   member_care_enabled: boolean;
   stewardship_enabled: boolean;
   operations_enabled: boolean;
+  portal_engagement_enabled: boolean;
+  card_ops_enabled: boolean;
+  crisis_escalation_enabled: boolean;
   member_care_inactive_days: number;
   member_care_birthday_window_days: number;
   stewardship_lapsed_days: number;
   stewardship_large_gift_micro_usd: number;
   stewardship_flag_first_time_gift: boolean;
   operations_event_no_leader_days: number;
+  portal_engagement_inactive_days: number;
+  card_ops_kyc_stuck_hours: number;
 }
 
 export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
   member_care_enabled: true,
   stewardship_enabled: true,
   operations_enabled: true,
+  portal_engagement_enabled: true,
+  card_ops_enabled: true,
+  crisis_escalation_enabled: true,
   member_care_inactive_days: 30,
   member_care_birthday_window_days: 7,
   stewardship_lapsed_days: 60,
   stewardship_large_gift_micro_usd: 1_000_000_000,
   stewardship_flag_first_time_gift: true,
   operations_event_no_leader_days: 7,
+  portal_engagement_inactive_days: 14,
+  card_ops_kyc_stuck_hours: 48,                 // per RUNBOOK RB-016
 };
 
 /**
@@ -91,6 +115,9 @@ export interface AgentPersonSnapshot {
   joined_at?: string | null;               // when they first connected
   /** Most recent interaction timestamp from the `interactions` table. */
   last_interaction_at?: string | null;
+  /** Member portal provisioning + presence (Phase A/B columns). */
+  portal_enabled?: boolean | null;
+  portal_last_seen_at?: string | null;
 }
 
 export interface AgentGivingSnapshot {
@@ -115,6 +142,36 @@ export interface AgentTaskSnapshot {
   status: string;                          // 'pending' | 'done' | ...
 }
 
+export interface AgentPortalActivitySnapshot {
+  person_id: string | null;
+  event_type: string;
+  created_at: string;                      // ISO 8601
+}
+
+export interface AgentKycSnapshot {
+  id: string;
+  person_id: string | null;
+  status: string;                          // 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired'
+  submitted_at: string;                    // ISO 8601
+}
+
+export interface AgentCardSnapshot {
+  id: string;
+  cardholder_person_id: string | null;
+  cardholder_name: string;
+  status: string;                          // 'pending' | 'active' | 'frozen' | 'cancelled' | 'expired'
+  frozen_at?: string | null;
+}
+
+export interface AgentCrisisConversationSnapshot {
+  id: string;
+  person_id: string | null;
+  category?: string | null;
+  status: string;                          // anchor_conversations.status
+  crisis_flagged_at: string;               // ISO 8601
+  leader_id: string | null;
+}
+
 export interface AgentInput {
   churchId: string;
   /** "Now" — injected for deterministic testing. */
@@ -124,6 +181,11 @@ export interface AgentInput {
   giving: AgentGivingSnapshot[];
   events: AgentEventSnapshot[];
   tasks: AgentTaskSnapshot[];
+  /** Portal activity events in the lookback window (Phase D agents). */
+  portalActivity: AgentPortalActivitySnapshot[];
+  kycVerifications: AgentKycSnapshot[];
+  cards: AgentCardSnapshot[];
+  crisisConversations: AgentCrisisConversationSnapshot[];
 }
 
 export type AgentFunction = (input: AgentInput) => AgentObservation[];

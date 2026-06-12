@@ -25,7 +25,7 @@ interface CalendarProps {
   people: Person[];
   rsvps: RSVP[];
   churchName?: string;
-  onRSVP: (eventId: string, personId: string, status: RSVP['status'], guestCount?: number) => void;
+  onRSVP: (eventId: string, personId: string, status: RSVP['status'], guestCount?: number, source?: 'portal' | 'admin') => void;
   onAddEvent?: (event: {
     title: string;
     description?: string;
@@ -190,13 +190,14 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
 
   const getRSVPCounts = useCallback((eventId: string) => {
     const eventRsvps = rsvpsByEvent.get(eventId) || [];
-    let yesCount = 0, noCount = 0, maybeCount = 0, totalAttending = 0;
+    let yesCount = 0, noCount = 0, maybeCount = 0, totalAttending = 0, fromPortal = 0;
     eventRsvps.forEach(r => {
       if (r.status === 'yes') { yesCount++; totalAttending += 1 + r.guestCount; }
       else if (r.status === 'no') { noCount++; }
       else { maybeCount++; }
+      if (r.source === 'portal') fromPortal++;
     });
-    return { yes: yesCount, no: noCount, maybe: maybeCount, totalAttending };
+    return { yes: yesCount, no: noCount, maybe: maybeCount, totalAttending, fromPortal };
   }, [rsvpsByEvent]);
 
   const categoryCounts = useMemo(() => {
@@ -271,7 +272,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
 
   const handleRSVP = useCallback(() => {
     if (!selectedEvent || !rsvpPersonId) return;
-    onRSVP(selectedEvent.id, rsvpPersonId, rsvpStatus, rsvpGuests);
+    onRSVP(selectedEvent.id, rsvpPersonId, rsvpStatus, rsvpGuests, 'admin');
     setShowRSVPModal(false);
     setSelectedEvent(null);
     setRsvpPersonId('');
@@ -601,7 +602,7 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
                               {!event.allDay && <span className="flex items-center gap-1"><Clock size={10} />{eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>}
                             </div>
                             {event.location && <p className="text-xs text-gray-400 dark:text-dark-500 mt-1 flex items-center gap-1"><MapPin size={10} />{event.location}</p>}
-                            {counts.yes > 0 && <div className="flex items-center gap-1 mt-2"><Users size={10} className="text-gray-400" /><span className="text-xs text-gray-500 dark:text-dark-400">{counts.totalAttending} attending</span></div>}
+                            {counts.yes > 0 && <div className="flex items-center gap-1 mt-2"><Users size={10} className="text-gray-400" /><span className="text-xs text-gray-500 dark:text-dark-400">{counts.totalAttending} attending{counts.fromPortal > 0 ? ` · ${counts.fromPortal} via portal` : ''}</span></div>}
                             <button onClick={() => openRSVPModal(event)} className="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">Manage RSVPs</button>
                           </div>
                         </div>

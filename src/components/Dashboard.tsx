@@ -20,6 +20,10 @@ import {
   BarChart3,
   DollarSign,
   Mail,
+  Smartphone,
+  LogIn,
+  CalendarCheck,
+  HeartHandshake,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
@@ -36,8 +40,10 @@ import { VerifiedLeadersCard } from './dashboard/VerifiedLeadersCard';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
+import { usePortalActivity } from '../hooks/usePortalActivity';
 
 interface DashboardProps {
+  churchId?: string;
   people: Person[];
   tasks: Task[];
   events?: CalendarEvent[];
@@ -67,10 +73,11 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
+export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
   const mailStats = useMailInboxStats();
+  const portalActivity = usePortalActivity(churchId ?? '');
   const churchName = churchSettings?.profile?.name || 'Grace CRM';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
@@ -428,6 +435,41 @@ export function Dashboard({ people, tasks, events = [], giving = [], prayers = [
           onClick={onViewTasks}
         />
       </div>
+
+      {/* Member Portal engagement (last 7 days) */}
+      {churchId && !portalActivity.isDemo && (
+        <button
+          onClick={() => onNavigate?.('portal-activity')}
+          className="w-full mb-6 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors text-left"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                <Smartphone size={16} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Member Portal — last 7 days</h3>
+            </div>
+            <ChevronRight size={16} className="text-gray-400 dark:text-dark-500" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {[
+              { label: 'Active members', value: portalActivity.summary.activeMembers7d, icon: Users },
+              { label: 'Logins', value: portalActivity.summary.logins7d, icon: LogIn },
+              { label: 'RSVPs', value: portalActivity.summary.rsvps7d, icon: CalendarCheck },
+              { label: 'Gifts', value: portalActivity.summary.gifts7d, icon: DollarSign },
+              { label: 'Care messages', value: portalActivity.summary.careMessages7d, icon: HeartHandshake },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="flex items-center gap-2">
+                <Icon size={14} className="text-gray-400 dark:text-dark-500 flex-shrink-0" />
+                <div>
+                  <p className="text-lg font-bold text-gray-900 dark:text-dark-100 leading-none">{value}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </button>
+      )}
 
       {/* Members Need Care Alert — positioned high for pastoral priority */}
       {inactive.length > 0 && (

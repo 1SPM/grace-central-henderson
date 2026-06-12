@@ -29,6 +29,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { memberCareAgent } from './member-care';
 import { stewardshipAgent } from './stewardship';
 import { operationsAgent } from './operations';
+import { portalEngagementAgent } from './portal-engagement';
+import { cardOpsAgent } from './card-ops';
+import { crisisEscalationAgent } from './crisis-escalation';
 import type {
   AgentInput,
   AgentObservation,
@@ -38,6 +41,10 @@ import type {
   AgentGivingSnapshot,
   AgentPersonSnapshot,
   AgentTaskSnapshot,
+  AgentPortalActivitySnapshot,
+  AgentKycSnapshot,
+  AgentCardSnapshot,
+  AgentCrisisConversationSnapshot,
 } from './types';
 import { DEFAULT_AGENT_SETTINGS } from './types';
 
@@ -45,6 +52,9 @@ const AGENTS: Array<{ id: AgentId; fn: (input: AgentInput) => AgentObservation[]
   { id: 'member-care', fn: memberCareAgent },
   { id: 'stewardship', fn: stewardshipAgent },
   { id: 'operations',  fn: operationsAgent },
+  { id: 'portal-engagement', fn: portalEngagementAgent },
+  { id: 'card-ops', fn: cardOpsAgent },
+  { id: 'crisis-escalation', fn: crisisEscalationAgent },
 ];
 
 const DEDUP_WINDOW_HOURS = 24;
@@ -74,12 +84,18 @@ export async function loadSettings(
     member_care_enabled: data.member_care_enabled !== false,
     stewardship_enabled: data.stewardship_enabled !== false,
     operations_enabled:  data.operations_enabled  !== false,
+    // Phase D columns may not exist on older settings rows — default enabled.
+    portal_engagement_enabled: data.portal_engagement_enabled !== false,
+    card_ops_enabled:          data.card_ops_enabled          !== false,
+    crisis_escalation_enabled: data.crisis_escalation_enabled !== false,
     member_care_inactive_days:        Number(data.member_care_inactive_days        ?? DEFAULT_AGENT_SETTINGS.member_care_inactive_days),
     member_care_birthday_window_days: Number(data.member_care_birthday_window_days ?? DEFAULT_AGENT_SETTINGS.member_care_birthday_window_days),
     stewardship_lapsed_days:          Number(data.stewardship_lapsed_days          ?? DEFAULT_AGENT_SETTINGS.stewardship_lapsed_days),
     stewardship_large_gift_micro_usd: Number(data.stewardship_large_gift_micro_usd ?? DEFAULT_AGENT_SETTINGS.stewardship_large_gift_micro_usd),
     stewardship_flag_first_time_gift: data.stewardship_flag_first_time_gift !== false,
     operations_event_no_leader_days:  Number(data.operations_event_no_leader_days  ?? DEFAULT_AGENT_SETTINGS.operations_event_no_leader_days),
+    portal_engagement_inactive_days:  Number(data.portal_engagement_inactive_days  ?? DEFAULT_AGENT_SETTINGS.portal_engagement_inactive_days),
+    card_ops_kyc_stuck_hours:         Number(data.card_ops_kyc_stuck_hours         ?? DEFAULT_AGENT_SETTINGS.card_ops_kyc_stuck_hours),
   };
 }
 
@@ -95,7 +111,7 @@ async function fetchPeople(supabase: SupabaseClient, churchId: string): Promise<
   //     through the recent-visitor follow-up path).
   const { data: people, error } = await supabase
     .from('people')
-    .select('id, first_name, last_name, status, birth_date, join_date')
+    .select('id, first_name, last_name, status, birth_date, join_date, portal_enabled, portal_last_seen_at')
     .eq('church_id', churchId)
     .limit(10_000);
   if (error || !people) return [];
@@ -119,6 +135,8 @@ async function fetchPeople(supabase: SupabaseClient, churchId: string): Promise<
     status: string | null;
     birth_date: string | null;
     join_date: string | null;
+    portal_enabled: boolean | null;
+    portal_last_seen_at: string | null;
   }>).map((p): AgentPersonSnapshot => ({
     id: p.id,
     first_name: p.first_name,
@@ -128,6 +146,8 @@ async function fetchPeople(supabase: SupabaseClient, churchId: string): Promise<
     birthday: p.birth_date,
     joined_at: p.join_date,
     last_interaction_at: lastByPerson.get(p.id) ?? null,
+    portal_enabled: p.portal_enabled,
+    portal_last_seen_at: p.portal_last_seen_at,
   }));
 }
 
@@ -193,6 +213,59 @@ async function fetchTasks(supabase: SupabaseClient, churchId: string): Promise<A
     due_date: t.due_date,
     status: t.completed ? 'done' : 'pending',
   }));
+}
+
+async function fetchPortalActivity(
+  supabase: SupabaseClient,
+  churchId: string,
+  sinceIso: string,
+): Promise<AgentPortalActivitySnapshot[]> {
+  const { data, error } = await supabase
+    .from('member_activity_events')
+    .select('person_id, event_type, created_at')
+    .eq('church_id', churchId)
+    .gte('created_at', sinceIso)
+    .limit(10_000);
+  if (error || !data) return [];
+  return data as AgentPortalActivitySnapshot[];
+}
+
+async function fetchKyc(supabase: SupabaseClient, churchId: string): Promise<AgentKycSnapshot[]> {
+  const { data, error } = await supabase
+    .from('kyc_verifications')
+    .select('id, person_id, status, submitted_at')
+    .eq('church_id', churchId)
+    .in('status', ['pending', 'in_review'])
+    .limit(1000);
+  if (error || !data) return [];
+  return data as AgentKycSnapshot[];
+}
+
+async function fetchCards(supabase: SupabaseClient, churchId: string): Promise<AgentCardSnapshot[]> {
+  const { data, error } = await supabase
+    .from('cards')
+    .select('id, cardholder_person_id, cardholder_name, status, frozen_at')
+    .eq('church_id', churchId)
+    .in('status', ['active', 'frozen'])
+    .limit(2000);
+  if (error || !data) return [];
+  return data as AgentCardSnapshot[];
+}
+
+async function fetchCrisisConversations(
+  supabase: SupabaseClient,
+  churchId: string,
+): Promise<AgentCrisisConversationSnapshot[]> {
+  const { data, error } = await supabase
+    .from('anchor_conversations')
+    .select('id, person_id, category, status, crisis_flagged_at, leader_id')
+    .eq('church_id', churchId)
+    .eq('crisis_flagged', true)
+    .not('status', 'in', '("closed","archived")')
+    .limit(500);
+  if (error || !data) return [];
+  return (data as Array<AgentCrisisConversationSnapshot & { crisis_flagged_at: string | null }>)
+    .filter(c => !!c.crisis_flagged_at) as AgentCrisisConversationSnapshot[];
 }
 
 async function loadRecentDedupKeys(
@@ -281,15 +354,24 @@ export async function runAgentsForChurch(
   const sinceDedup = new Date(now.getTime() - DEDUP_WINDOW_HOURS * 3_600_000).toISOString();
   const sinceGiving = new Date(now.getTime() - 365 * 86_400_000).toISOString();
 
-  const [people, giving, events, tasks, dedup] = await Promise.all([
+  const sincePortal = new Date(now.getTime() - 60 * 86_400_000).toISOString();
+
+  const [people, giving, events, tasks, dedup, portalActivity, kycVerifications, cards, crisisConversations] = await Promise.all([
     fetchPeople(supabase, churchId),
     fetchRecentGiving(supabase, churchId, sinceGiving),
     fetchEvents(supabase, churchId),
     fetchTasks(supabase, churchId),
     loadRecentDedupKeys(supabase, churchId, sinceDedup),
+    fetchPortalActivity(supabase, churchId, sincePortal),
+    fetchKyc(supabase, churchId),
+    fetchCards(supabase, churchId),
+    fetchCrisisConversations(supabase, churchId),
   ]);
 
-  const input: AgentInput = { churchId, now, settings, people, giving, events, tasks };
+  const input: AgentInput = {
+    churchId, now, settings, people, giving, events, tasks,
+    portalActivity, kycVerifications, cards, crisisConversations,
+  };
 
   const result: RunResult = {
     churchId,
@@ -302,6 +384,9 @@ export async function runAgentsForChurch(
       'member-care': { generated: 0, written: 0, skipped: 0, failed: 0 },
       'stewardship': { generated: 0, written: 0, skipped: 0, failed: 0 },
       'operations':  { generated: 0, written: 0, skipped: 0, failed: 0 },
+      'portal-engagement': { generated: 0, written: 0, skipped: 0, failed: 0 },
+      'card-ops':          { generated: 0, written: 0, skipped: 0, failed: 0 },
+      'crisis-escalation': { generated: 0, written: 0, skipped: 0, failed: 0 },
     },
   };
 

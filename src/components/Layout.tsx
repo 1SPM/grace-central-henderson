@@ -34,9 +34,11 @@ import {
   Sparkles,
   Import,
   ShieldCheck,
+  Smartphone,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
+import { NotificationCenter } from './NotificationCenter';
 
 interface LayoutProps {
   currentView: View;
@@ -44,6 +46,7 @@ interface LayoutProps {
   children: ReactNode;
   onOpenSearch?: () => void;
   isDemo?: boolean;
+  churchId?: string;
 }
 
 type Tone = 'indigo' | 'violet' | 'sky' | 'rose' | 'amber' | 'emerald';
@@ -88,6 +91,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
   { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
+  { view: 'portal-activity', label: 'Portal Activity', icon: <Smartphone size={18} /> },
   { view: 'financial-hub', label: 'Financial Hub', icon: <DollarSign size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
@@ -166,9 +170,10 @@ const viewLabels: Record<View, string> = {
   grace: 'Grace',
   mail: 'Mail',
   'financial-hub': 'Financial Hub',
+  'portal-activity': 'Portal Activity',
 };
 
-export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false }: LayoutProps) {
+export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
@@ -475,6 +480,9 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               </button>
             </>
           )}
+
+          {/* Live notification center (Supabase Realtime) */}
+          <NotificationCenter churchId={churchId} onNavigate={(v) => setView(v as View)} />
         </header>
 
         <TrialBanner />

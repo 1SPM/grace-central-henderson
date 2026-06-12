@@ -24,4 +24,5 @@ export interface GraceData {
   prayers: PrayerRequest[];
   attendance: Attendance[];
   churchName?: string;
+  churchId?: string;
 }

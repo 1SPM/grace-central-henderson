@@ -21,6 +21,7 @@ import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
 
 // Lazy load MemberPortal for standalone access
 const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
+const MemberSignIn = lazy(() => import('./components/member/MemberSignIn').then(m => ({ default: m.MemberSignIn })));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
 const PricingPage = lazy(() => import('./components/marketing/PricingPage').then(m => ({ default: m.PricingPage })));
 const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
@@ -39,6 +40,7 @@ import { useModals } from './hooks/useModals';
 import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
 import { useChurchSettings } from './hooks/useChurchSettings';
+import { useCurrentMember } from './hooks/useCurrentMember';
 import { usePastoralCare } from './hooks/usePastoralCare';
 import { useAnnouncements } from './hooks/useAnnouncements';
 import { useDiscipleship } from './hooks/useDiscipleship';
@@ -137,9 +139,9 @@ function App() {
   const collectionMgmt = useCollectionManagement(giving);
   const charityBasketMgmt = useCharityBaskets();
   const pastoralCare = usePastoralCare();
-  const announcementData = useAnnouncements();
+  const announcementData = useAnnouncements(churchId);
   const discipleshipData = useDiscipleship(people);
-  const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
+  const { settings: churchSettings, churchSlug, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
   const [showTutorialPicker, setShowTutorialPicker] = useState(false);
 
@@ -256,6 +258,13 @@ function App() {
 
   // Check if we're accessing the standalone member portal
   const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
+
+  // Resolve the signed-in user to their CRM person record (member identity).
+  const { member: currentDbMember } = useCurrentMember(dbPeople, isDemo);
+  const currentMember = useMemo(
+    () => (currentDbMember ? personMap.get(currentDbMember.id) ?? toPersonLegacy(currentDbMember) : null),
+    [currentDbMember, personMap]
+  );
 
   // Public marketing routes — flagged early; rendered after all hooks
   // run (below) to satisfy rules-of-hooks. The marketing pages don't
@@ -400,6 +409,29 @@ function App() {
   // Standalone Member Portal (no admin sidebar/layout)
   if (isPortalRoute) {
     const churchName = churchSettings?.profile?.name || 'Grace Church';
+    const branding = churchSettings?.branding;
+    const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+    // Members must sign in when real auth is configured. Demo mode keeps
+    // the portal open with a demo member identity.
+    if (isClerkConfigured && !isSignedIn) {
+      return (
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+          }>
+            <MemberSignIn
+              churchName={churchName}
+              primaryColor={branding?.primaryColor}
+              logoUrl={branding?.logoUrl}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      );
+    }
+
     return (
       <ErrorBoundary>
         <Suspense fallback={
@@ -414,8 +446,12 @@ function App() {
             giving={giving}
             attendance={[...attendanceFromDb, ...attendanceRecords]}
             rsvps={rsvps}
+            currentMember={currentMember}
             churchName={churchName}
             churchProfile={churchSettings?.profile}
+            branding={branding}
+            churchSlug={churchSlug}
+            churchId={churchId}
             announcements={announcementData.activeAnnouncements}
             prayers={prayers}
             onRSVP={handlers.rsvp}
@@ -427,6 +463,7 @@ function App() {
             onSendMessage={pastoralCare.sendMessage}
           />
           </div>
+          <PWAInstallPrompt />
         </Suspense>
       </ErrorBoundary>
     );
@@ -493,6 +530,7 @@ function App() {
         prayers={prayers}
         attendance={[...attendanceFromDb, ...attendanceRecords]}
         churchName={churchSettings?.profile?.name}
+        churchId={churchId}
         onAddTask={handlers.addTask}
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}
@@ -506,7 +544,7 @@ function App() {
         onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
         onMarkPrayerAnswered={markPrayerAnswered}
       >
-      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo}>
+      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo} churchId={churchId}>
         <ErrorBoundary>
           <ViewRenderer
             view={view}

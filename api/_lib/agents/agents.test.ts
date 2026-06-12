@@ -15,6 +15,10 @@ function baseInput(overrides: Partial<AgentInput> = {}): AgentInput {
     giving: [],
     events: [],
     tasks: [],
+    portalActivity: [],
+    kycVerifications: [],
+    cards: [],
+    crisisConversations: [],
     ...overrides,
   };
 }

@@ -1,4 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
+import {
+  fetchMyConversations,
+  fetchAdminCare,
+  createCareConversation,
+  sendCareMessage,
+} from '../lib/services/careApi';
+import { createLogger } from '../utils/logger';
 import type {
   LeaderProfile,
   HelpRequest,
@@ -8,6 +16,10 @@ import type {
   HelpCategory,
   ConversationPriority,
 } from '../types';
+
+const log = createLogger('pastoral-care');
+
+const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
 // Demo leader profiles
 const INITIAL_LEADERS: LeaderProfile[] = [
@@ -187,11 +199,48 @@ const DEMO_SESSIONS: PastoralSession[] = [
 ];
 
 export function usePastoralCare() {
+  const { user, isSignedIn } = useAuthContext();
   const [leaders, setLeaders] = useState<LeaderProfile[]>(INITIAL_LEADERS);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [conversations, setConversations] = useState<PastoralConversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [sessions] = useState<PastoralSession[]>(DEMO_SESSIONS);
+  const [usingApi, setUsingApi] = useState(false);
+
+  const isStaff = !!user && STAFF_ROLES.includes(user.role);
+
+  // Hydrate from the care API (anchor_* tables) when real auth is live.
+  // Staff get the church-wide feed; members get their own threads.
+  // In demo mode both calls return null and the local demo flow stays.
+  useEffect(() => {
+    if (!isSignedIn) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = isStaff
+          ? (await fetchAdminCare())?.conversations ?? null
+          : await fetchMyConversations();
+        if (cancelled || data === null) return;
+        setUsingApi(true);
+        setConversations(data);
+        setHelpRequests(data.map(c => ({
+          id: c.id,
+          category: c.category,
+          isAnonymous: c.isAnonymous,
+          personId: c.personId,
+          assignedLeaderId: c.leaderId,
+          conversationId: c.id,
+          status: c.status === 'resolved' ? 'resolved' as const : 'active' as const,
+          priority: c.priority,
+          createdAt: c.createdAt,
+          resolvedAt: c.resolvedAt,
+        })));
+      } catch (err) {
+        log.warn('care API hydrate failed, staying on demo data', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isSignedIn, isStaff]);
 
   const createHelpRequest = useCallback((request: {
     category: HelpCategory;
@@ -199,6 +248,38 @@ export function usePastoralCare() {
     isAnonymous: boolean;
     leaderId?: string;
   }) => {
+    if (usingApi) {
+      void (async () => {
+        try {
+          const conv = await createCareConversation({
+            category: request.category,
+            description: request.description,
+            isAnonymous: request.isAnonymous,
+            leaderId: request.leaderId,
+          });
+          if (conv) {
+            setConversations(prev => [conv, ...prev]);
+            setHelpRequests(prev => [{
+              id: conv.id,
+              category: conv.category,
+              description: request.description,
+              isAnonymous: conv.isAnonymous,
+              personId: conv.personId,
+              assignedLeaderId: conv.leaderId,
+              conversationId: conv.id,
+              status: 'active' as const,
+              priority: conv.priority,
+              createdAt: conv.createdAt,
+            }, ...prev]);
+            setActiveConversationId(conv.id);
+          }
+        } catch (err) {
+          log.warn('care request create failed', err);
+        }
+      })();
+      return;
+    }
+
     const leader = request.leaderId
       ? leaders.find(l => l.id === request.leaderId) || matchLeader(request.category, leaders)
       : matchLeader(request.category, leaders);
@@ -264,9 +345,30 @@ export function usePastoralCare() {
     setHelpRequests(prev => [...prev, newRequest]);
     setConversations(prev => [...prev, newConversation]);
     setActiveConversationId(conversationId);
-  }, [leaders]);
+  }, [leaders, usingApi]);
 
   const sendMessage = useCallback((conversationId: string, content: string) => {
+    if (usingApi) {
+      // Optimistic local append; the API persists + crisis-screens it.
+      const optimistic: PastoralMessage = {
+        id: `msg-${Date.now()}`,
+        conversationId,
+        sender: isStaff ? 'leader' : 'user',
+        senderName: isStaff ? 'Care Team' : 'You',
+        content,
+        timestamp: new Date().toISOString(),
+      };
+      setConversations(prev => prev.map(conv =>
+        conv.id === conversationId
+          ? { ...conv, messages: [...conv.messages, optimistic], updatedAt: optimistic.timestamp }
+          : conv
+      ));
+      void sendCareMessage(conversationId, content, isStaff).catch(err => {
+        log.warn('care message send failed', err);
+      });
+      return;
+    }
+
     setConversations(prev => prev.map(conv => {
       if (conv.id !== conversationId) return conv;
 
@@ -300,7 +402,7 @@ export function usePastoralCare() {
         updatedAt: new Date().toISOString(),
       };
     }));
-  }, [leaders]);
+  }, [leaders, usingApi, isStaff]);
 
   const resolveConversation = useCallback((conversationId: string) => {
     setConversations(prev => prev.map(conv =>

@@ -109,6 +109,7 @@ const DEFAULT_SETTINGS: ChurchSettings = {
 
 export function useChurchSettings(churchId: string = 'demo-church') {
   const [settings, setSettings] = useState<ChurchSettings>(DEFAULT_SETTINGS);
+  const [churchSlug, setChurchSlug] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Error state kept for API compatibility but errors now fall back gracefully
   const [error] = useState<string | null>(null);
@@ -138,9 +139,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     try {
       const { data, error: fetchError } = await supabase
         .from('churches')
-        .select('settings')
+        .select('settings, slug')
         .eq('id', churchId)
         .single();
+
+      if (data?.slug) {
+        setChurchSlug(data.slug as string);
+      }
 
       if (fetchError) {
         // Suppress errors for missing rows or missing tables (common in demo/new setups)
@@ -248,6 +253,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
 
   return {
     settings,
+    churchSlug,
     isLoading,
     error,
     saveSettings,
