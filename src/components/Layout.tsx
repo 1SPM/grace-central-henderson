@@ -268,7 +268,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         {/* Logo */}
         <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: 'linear-gradient(150deg, #818cf8, #4f46e5)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: 'linear-gradient(150deg, #6161FF, #5034FF)' }}>
               <span className="serif text-white text-[17px] leading-none">G</span>
             </div>
             <span className={`font-bold text-gray-900 dark:text-gray-100 tracking-[0.04em] ${sidebarCollapsed ? 'lg:hidden' : ''}`}>

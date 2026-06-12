@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  /* Brand ink — deep slate-navy, editorial */
-  --color-primary: 15 23 42;       /* slate-900 — CTAs, active nav */
-  --color-primary-dark: 2 6 23;    /* slate-950 — hover */
-  --color-accent: 55 65 81;        /* gray-700 */
+  /* Brand — Monday purple */
+  --color-primary: 97 97 255;      /* #6161FF — CTAs, active nav, focus */
+  --color-primary-dark: 81 81 213; /* #5151D5 — hover */
+  --color-accent: 103 104 121;     /* #676879 — Monday neutral text */
 
-  /* Gold accent — muted old-gold, for highlights, pinned, active indicators */
-  --gold:         #a67a2f;
-  --gold-soft:    #c9a65a;
-  --gold-line:    #d9c793;
+  /* Accent highlights — Monday purple tones (formerly gold) */
+  --gold:         #6161FF;
+  --gold-soft:    #9595FF;
+  --gold-line:    #DCDCFF;
 
-  /* Canvas palette — warm editorial gray, more grey than beige */
-  --paper-canvas: #ebe8e0; /* body background — warm gray */
-  --paper-card:   #f7f5ef; /* cards, modals — soft lift */
-  --paper-raised: #ffffff; /* inputs — crisp white */
-  --paper-sink:   #dcd8cb; /* sidebar — aged parchment depth */
-  --paper-line:   #cdc7b5; /* borders on paper surfaces */
+  /* Canvas palette — clean Monday whites */
+  --paper-canvas: #F6F7FB; /* body background — light cool gray */
+  --paper-card:   #FFFFFF; /* cards, modals — crisp white */
+  --paper-raised: #FFFFFF; /* inputs */
+  --paper-sink:   #FFFFFF; /* sidebar */
+  --paper-line:   #D0D4E4; /* borders on surfaces */
 
   /* Ink (text) */
-  --ink:          #0f172a;
+  --ink:          #323338;
 
   /* Glass effect variables */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -36,16 +36,15 @@
   --shadow-xl: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Editorial typography */
+/* Monday-style typography — friendly geometric sans */
 body {
-  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  letter-spacing: -0.011em;
-  background-color: #ebe8e0; /* warm editorial gray */
-  color: #0f172a; /* deep slate-navy */
+  letter-spacing: -0.005em;
+  background-color: #F6F7FB; /* light cool gray canvas */
+  color: #323338; /* Monday dark text */
 }
 
 /* Tabular numbers everywhere by default for stats/currency/dates */
@@ -57,23 +56,22 @@ time {
   font-variant-numeric: tabular-nums;
 }
 
-/* Serif editorial accent — KPIs, hero numbers, H1s that want presence */
+/* Display accent — KPIs, hero numbers, H1s (bold geometric sans, Monday style) */
 .stat-number,
 .serif {
-  font-family: 'Fraunces', Georgia, Cambria, 'Times New Roman', serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-family: 'Poppins', 'Figtree', -apple-system, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 
-/* Quiet section headers — Attio pattern */
+/* Quiet section headers */
 .section-eyebrow {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgb(100 116 139); /* slate-500 */
+  color: #676879; /* Monday neutral */
 }
 
 /* Hairline divider — Mercury pattern */
@@ -205,33 +203,33 @@ select:focus {
     border: 1px solid rgba(255, 255, 255, 0.04);
   }
 
-  /* Buttons — 2024 tighter radius */
+  /* Buttons — Monday pill shape */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-md font-medium text-sm transition-all duration-150;
-    letter-spacing: -0.01em;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-medium text-sm transition-all duration-150;
+    letter-spacing: -0.005em;
   }
 
   .btn-primary {
-    background-color: #0f172a; /* slate-900 navy */
+    background-color: #6161FF; /* Monday purple */
     color: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(97, 97, 255, 0.25);
     transition: all 0.15s ease;
   }
 
   .btn-primary:hover {
-    background-color: #020617; /* slate-950 */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    background-color: #5151D5;
+    box-shadow: 0 4px 12px rgba(97, 97, 255, 0.3);
   }
 
-  /* Gold gradient — used sparingly for highlights: logo, pinned items, key indicators */
+  /* Brand gradient — highlights: logo, pinned items, key indicators (formerly gold) */
   .gold-gradient {
-    background-image: linear-gradient(135deg, #e7c77f 0%, #b38b3e 45%, #8b5e1a 100%);
+    background-image: linear-gradient(135deg, #9595FF 0%, #6161FF 45%, #5034FF 100%);
   }
   .gold-gradient-soft {
-    background-image: linear-gradient(135deg, #f1dba7 0%, #c9a65a 60%, #a67a2f 100%);
+    background-image: linear-gradient(135deg, #DCDCFF 0%, #9595FF 60%, #6161FF 100%);
   }
   .gold-text-gradient {
-    background-image: linear-gradient(135deg, #c9a65a 0%, #8b5e1a 100%);
+    background-image: linear-gradient(135deg, #6161FF 0%, #5034FF 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -248,18 +246,22 @@ select:focus {
   }
 
   .btn-ghost {
-    @apply text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 rounded-md;
+    @apply text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 rounded-full;
   }
 
   .dark .btn-ghost {
     @apply text-gray-400 hover:bg-white/5 hover:text-gray-200;
   }
 
-  /* Cards — hairline border, no shadow (Mercury/Attio pattern) */
+  /* Cards — white surface, light border, soft hover lift (Monday pattern) */
   .card {
     @apply rounded-xl;
-    background-color: #f7f5ef;
-    border: 0.5px solid rgb(15 23 42 / 0.08);
+    background-color: #FFFFFF;
+    border: 1px solid #D0D4E4;
+  }
+
+  .card:hover {
+    box-shadow: 0 6px 20px rgba(29, 31, 67, 0.06);
   }
 
   .dark .card {
@@ -267,10 +269,14 @@ select:focus {
     border-color: rgb(255 255 255 / 0.06);
   }
 
+  .dark .card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
   .card-solid {
     @apply rounded-xl;
-    background-color: #f7f5ef;
-    border: 0.5px solid rgb(15 23 42 / 0.08);
+    background-color: #FFFFFF;
+    border: 1px solid #D0D4E4;
   }
 
   .dark .card-solid {
@@ -286,9 +292,9 @@ select:focus {
   }
 
   .input:focus {
-    @apply border-blue-900/40;
+    border-color: #6161FF;
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.10);
+    box-shadow: 0 0 0 3px rgba(97, 97, 255, 0.12);
   }
 
   .dark .input {
@@ -314,11 +320,15 @@ select:focus {
     @apply bg-white/5 text-gray-400;
   }
 
-  /* Stat cards — hairline, no shadow, no colored chip */
+  /* Stat cards — white, light border, soft hover lift */
   .stat-card {
     @apply p-5 rounded-xl;
-    background-color: #f7f5ef;
-    border: 0.5px solid rgb(15 23 42 / 0.08);
+    background-color: #FFFFFF;
+    border: 1px solid #D0D4E4;
+  }
+
+  .stat-card:hover {
+    box-shadow: 0 6px 20px rgba(29, 31, 67, 0.06);
   }
 
   .dark .stat-card {
@@ -334,10 +344,10 @@ select:focus {
     @apply border-white/5;
   }
 
-  /* Sidebar — deeper paper tone, distinct from main canvas */
+  /* Sidebar — crisp white, Monday workspace style */
   .sidebar-glass {
     @apply border-r border-stone-300/70;
-    background-color: #dcd8cb; /* parchment, a notch deeper than body */
+    background-color: #FFFFFF;
   }
 
   .dark .sidebar-glass {
@@ -354,8 +364,8 @@ select:focus {
   }
 
   .nav-item.active {
-    @apply bg-blue-50 text-blue-900;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    background-color: rgba(97, 97, 255, 0.10);
+    color: #5034FF;
   }
 
   .dark .nav-item {
@@ -367,8 +377,7 @@ select:focus {
   }
 
   .dark .nav-item.active {
-    @apply bg-slate-500/15 text-slate-200;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
+    @apply bg-indigo-500/15 text-indigo-300;
   }
 
   /* Premium modal overlay */
@@ -382,12 +391,12 @@ select:focus {
     @apply bg-black/60;
   }
 
-  /* Modal content — hairline only on backdrop-dimmed overlay */
+  /* Modal content — white surface on backdrop-dimmed overlay */
   .modal-content {
     @apply rounded-xl;
-    background-color: #f7f5ef;
-    border: 0.5px solid rgb(15 23 42 / 0.12);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+    background-color: #FFFFFF;
+    border: 1px solid #D0D4E4;
+    box-shadow: 0 20px 40px -10px rgba(29, 31, 67, 0.18);
   }
 
   .dark .modal-content {
@@ -423,10 +432,10 @@ a:focus-visible,
   box-shadow: inset 0 0 0 1.5px rgb(var(--color-primary)), 0 0 0 3px rgb(var(--color-primary) / 0.12);
 }
 
-/* Selection — warm gold, editorial */
+/* Selection — Monday purple tint */
 ::selection {
-  background: rgba(217, 199, 147, 0.45); /* --gold-line */
-  color: #0f172a;
+  background: rgba(97, 97, 255, 0.22);
+  color: #1F2027;
 }
 
 /* Premium number styling */
@@ -463,7 +472,7 @@ a:focus-visible,
 
 /* Accessibility: High Contrast Mode */
 html.high-contrast {
-  --color-primary: 99 102 241; /* More saturated indigo */
+  --color-primary: 80 52 255; /* deep Monday purple */
   --hc-muted-text: #374151;
   --hc-border: #9ca3af;
 }
