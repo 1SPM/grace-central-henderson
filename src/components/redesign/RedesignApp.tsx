@@ -10,23 +10,28 @@ import { DashboardView } from './RedesignDashboard';
 import { dashboardFromGraceData } from './useRedesignDashboard';
 import type { GraceData } from './useGraceData';
 import type { RedesignActions } from './actions';
+import { churchShortName } from '../../config/centralHenderson';
 import { RedesignPeople } from './RedesignPeople';
 import { RedesignAttendance, RedesignReports } from './RedesignAnalytics';
 import { RedesignEngagement } from './RedesignEngagement';
 import { RedesignAskGrace } from './RedesignAskGrace';
 import { RedesignGroups, RedesignEvents, RedesignGiving, RedesignPlaceholder } from './RedesignMisc';
 
-export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
+export function RedesignApp({ data, actions, onAddPerson, onOpenClassic, addressee, timezone, churchShortName: churchLabel }: {
   data: GraceData;
   actions: RedesignActions;
   onAddPerson: () => void;
   onOpenClassic: () => void;
+  addressee?: string;
+  timezone?: string;
+  churchShortName?: string;
 }) {
   const [screen, setScreen] = useState('dashboard');
+  const sidebarBrand = churchLabel ? churchShortName(churchLabel) : 'GRACE';
 
   let body: React.ReactNode;
   switch (screen) {
-    case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} onOpenCalendar={() => setScreen('events')} />; break;
+    case 'dashboard': body = <DashboardView d={dashboardFromGraceData(data)} onAddPerson={onAddPerson} onOpenCalendar={() => setScreen('events')} addressee={addressee} timezone={timezone} />; break;
     case 'members': body = <RedesignPeople data={data} actions={actions} onAddPerson={onAddPerson} />; break;
     case 'attendance': body = <RedesignAttendance data={data} actions={actions} />; break;
     case 'engagement': body = <RedesignEngagement data={data} actions={actions} />; break;
@@ -41,10 +46,11 @@ export function RedesignApp({ data, actions, onAddPerson, onOpenClassic }: {
   return (
     <div className="grace-v2" data-palette="sanctuary" data-card="soft">
       <div className="app" data-sidebar="full">
-        <Sidebar active={screen} onNav={setScreen} />
+        <Sidebar active={screen} onNav={setScreen} brandName={sidebarBrand} timezone={timezone} />
         <div className="main">
           <Topbar
             title={SHELL_TITLES[screen] || screen}
+            timezone={timezone}
             action={<button className="btn" onClick={onOpenClassic}><Icon name="grid" size={14} /> Classic view</button>}
           />
           {body}

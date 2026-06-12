@@ -40,6 +40,12 @@ import {
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
 import { NotificationCenter } from './NotificationCenter';
+import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
+import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHenderson';
+import { GraceOrb } from './grace/GraceOrb';
+import { useGraceChat } from '../contexts/GraceChatContext';
+import { useAuthContext } from '../contexts/AuthContext';
+import { resolveAddressee } from '../lib/greeting';
 
 interface LayoutProps {
   currentView: View;
@@ -48,6 +54,9 @@ interface LayoutProps {
   onOpenSearch?: () => void;
   isDemo?: boolean;
   churchId?: string;
+  timezone?: string;
+  churchName?: string;
+  branding?: { primaryColor?: string; logoUrl?: string };
 }
 
 type Tone = 'indigo' | 'violet' | 'sky' | 'rose' | 'amber' | 'emerald';
@@ -56,16 +65,6 @@ interface NavSection {
   label?: string;
   items: { view: View; label: string; icon: ReactNode; tone: Tone }[];
 }
-
-// Soft tinted icon-chip styles (static strings so Tailwind keeps them)
-const TONE_CHIP: Record<Tone, string> = {
-  indigo: 'bg-indigo-50 text-indigo-600',
-  violet: 'bg-violet-50 text-violet-600',
-  sky: 'bg-sky-50 text-sky-600',
-  rose: 'bg-rose-50 text-rose-600',
-  amber: 'bg-amber-50 text-amber-600',
-  emerald: 'bg-emerald-50 text-emerald-600',
-};
 
 // Single flat list — daily-driver views only. Everything else lives behind "More…"
 const navSections: NavSection[] = [
@@ -176,7 +175,38 @@ const viewLabels: Record<View, string> = {
   wallets: 'Member Wallets',
 };
 
-export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId }: LayoutProps) {
+function adminRoleLabel(role?: string | null): string {
+  if (role === 'pastor') return 'Admin · Pastor';
+  if (role === 'admin') return 'Admin';
+  if (role === 'staff') return 'Staff';
+  return 'Signed in · Admin';
+}
+
+function AdminUserAvatar({ name, initials }: { name: string; initials: string }) {
+  const [failed, setFailed] = useState(false);
+  const cls = 'w-10 h-10 rounded-full ring-2 ring-rose-400 object-cover flex-shrink-0 bg-rose-50 flex items-center justify-center text-xs font-semibold text-rose-700';
+  if (failed || !name.trim()) {
+    return <div className={cls}>{initials}</div>;
+  }
+  const url = `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4,c0aede,ffd5dc&radius=50`;
+  return (
+    <img
+      className={cls}
+      src={url}
+      alt={name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding }: LayoutProps) {
+  const grace = useGraceChat();
+  const { user } = useAuthContext();
+  const addressee = resolveAddressee(user?.firstName, user?.role);
+  const displayChurch = churchShortName(churchName || 'Central Henderson Church');
+  const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
+  const logoUrl = branding?.logoUrl;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
@@ -258,33 +288,61 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         />
       )}
 
-      {/* Sidebar - Glass effect */}
+      {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 dark:bg-dark-900 flex flex-col transform transition-all duration-200 ease-out border-r border-stone-300/70 dark:border-white/5 ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-dark-900 flex flex-col transform transition-all duration-200 ease-out border-r border-stone-200 dark:border-white/5 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'} backdrop-blur-xl`}
-        style={{ backgroundColor: 'color-mix(in oklab, var(--paper-sink) 82%, transparent)' }}
+        } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
       >
-        {/* Logo */}
-        <div className={`flex items-center h-14 border-b border-gray-200/50 dark:border-white/5 ${sidebarCollapsed ? 'lg:justify-center lg:px-0 px-4' : 'px-4'}`}>
-          <div className={`flex items-center ${sidebarCollapsed ? 'lg:justify-center' : 'gap-2.5'}`}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: 'linear-gradient(150deg, #6161FF, #5034FF)' }}>
-              <span className="serif text-white text-[17px] leading-none">G</span>
+        {/* Brand header */}
+        <div className={`border-b border-gray-200/60 dark:border-white/5 ${sidebarCollapsed ? 'lg:px-2 px-4 py-3' : 'px-4 py-4'}`}>
+          <div className={`flex items-start ${sidebarCollapsed ? 'lg:flex-col lg:items-center lg:gap-2' : 'gap-3'}`}>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={displayChurch}
+                className={`rounded-full object-cover flex-shrink-0 ${sidebarCollapsed ? 'w-10 h-10' : 'w-[72px] h-[72px]'}`}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => grace.openPanel()}
+                className="rounded-full flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-400/50"
+                title="Ask GRACE"
+              >
+                <GraceOrb size={sidebarCollapsed ? 'sm' : 'md'} />
+              </button>
+            )}
+            <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-[15px] leading-tight truncate">
+                {displayChurch}
+              </h2>
+              <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-0.5 tracking-wide">
+                My GRACE Admin Panel
+              </p>
             </div>
-            <span className={`font-bold text-gray-900 dark:text-gray-100 tracking-[0.04em] ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-              GRACE
-            </span>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg shrink-0"
+            >
+              <X size={18} className="text-gray-500" />
+            </button>
           </div>
-          {/* Mobile close button */}
+
+          {/* GRACE quick access — full row when expanded; hidden when sidebar collapsed (Ask Grace nav item remains) */}
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"
+            type="button"
+            onClick={() => grace.openPanel()}
+            className={`mt-3 w-full flex items-center gap-2.5 rounded-xl bg-rose-50/80 dark:bg-rose-500/10 hover:bg-rose-100/80 dark:hover:bg-rose-500/15 border border-rose-200/60 dark:border-rose-500/20 transition-colors ${
+              sidebarCollapsed ? 'lg:hidden' : 'px-3 py-2'
+            }`}
           >
-            <X size={18} className="text-gray-500" />
+            <GraceOrb size="sm" />
+            <span className="text-[13px] font-semibold text-rose-700 dark:text-rose-300">
+              Ask GRACE
+            </span>
           </button>
         </div>
-
-
         {/* Navigation */}
         <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
           {navSections.map((section, sectionIdx) => (
@@ -313,13 +371,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-indigo-50/80 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium border-l-2 border-indigo-500 pl-[6px]'
+                          ? 'bg-gray-100/90 dark:bg-white/5 text-gray-900 dark:text-gray-100 font-medium'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-black/[0.03] dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
                       <span className={`flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 transition-colors ${
-                        isActive ? 'bg-indigo-500 text-white shadow-sm' : TONE_CHIP[item.tone]
+                        isActive ? 'bg-rose-500 text-white shadow-sm' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
                       }`}>
                         {item.icon}
                       </span>
@@ -383,6 +441,24 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
         {/* Footer */}
         <div className={`px-3 py-2 border-t border-gray-200/50 dark:border-white/5 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+          {/* Signed-in admin profile */}
+          <div
+            className={`mb-2 pb-2 border-b border-gray-200/50 dark:border-white/5 ${
+              sidebarCollapsed ? 'lg:flex lg:justify-center lg:pb-2' : ''
+            }`}
+          >
+            <div className={`flex items-center gap-2.5 ${sidebarCollapsed ? 'lg:justify-center' : 'px-1 py-1'}`}>
+              <AdminUserAvatar name={addressee} initials={avatarInitials} />
+              <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{addressee}</p>
+                <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  {adminRoleLabel(user?.role)}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Collapse toggle - desktop only */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -464,7 +540,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             )}
           </nav>
 
-          {/* Cmd+K hint (desktop) / search icon (mobile) */}
+          {/* Live clock + search */}
+          <LiveClockDisplay timezone={timezone || CENTRAL_HENDERSON_TIMEZONE} className="mr-2" />
           {onOpenSearch && (
             <>
               <button

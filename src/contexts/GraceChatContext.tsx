@@ -8,6 +8,8 @@ import { buildGreeting, loadStoredMessages, persistMessages } from '../lib/grace
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
+import { resolveAddressee } from '../lib/greeting';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../config/centralHenderson';
 
 export type { PendingAction } from '../lib/grace-actions';
 export type ActionInstance = ChatActionInstance;
@@ -38,7 +40,7 @@ interface GraceChatContextValue {
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
 function buildDataContext(data: GraceData): string {
-  const { people, tasks, giving, events, groups, prayers, attendance, churchName } = data;
+  const { people, tasks, giving, events, groups, prayers, attendance, churchName, churchProfile, graceFacts, userFirstName, userRole } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -86,7 +88,31 @@ function buildDataContext(data: GraceData): string {
   const totalGiving = recentGiving.reduce((s, g) => s + g.amount, 0);
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
+  const resolvedChurch = churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
+  const operator = userFirstName ? resolveAddressee(userFirstName, userRole) : 'the pastor';
+  const profileLines: string[] = [];
+  if (churchProfile) {
+    const p = churchProfile;
+    if (p.address || p.city) {
+      profileLines.push(`Address: ${[p.address, p.city, p.state, p.zip].filter(Boolean).join(', ')}`);
+    }
+    if (p.phone) profileLines.push(`Phone: ${p.phone}`);
+    if (p.email) profileLines.push(`Email: ${p.email}`);
+    if (p.website) profileLines.push(`Website: ${p.website}`);
+    if (p.serviceTimes?.length) {
+      profileLines.push(`Service times: ${p.serviceTimes.map(st => `${st.day} ${st.time}${st.name ? ` (${st.name})` : ''}`).join('; ')}`);
+    }
+  }
+  const profileBlock = profileLines.length
+    ? `\n== CHURCH PROFILE ==\n${profileLines.join('\n')}`
+    : '';
+  const factsBlock = graceFacts?.trim()
+    ? `\n== CHURCH FACTS (cite these for location, service times, ministries, policies) ==\n${graceFacts.trim()}`
+    : '';
+
   return `You are Grace, an AI assistant inside a church CRM. Be concise. Bullets for lists. No "Great question!", no padding, no repeating the user back. Don't end every reply with "Want me to show you X?".
+
+You are assisting ${operator}${userRole ? ` (${userRole})` : ''} at ${resolvedChurch}.${profileBlock}${factsBlock}
 
 Tone: warm, plainspoken. Honor the church's faith without pretending to share it. If asked theology, briefly note you're an AI without belief, then offer something useful. Never preach.
 
@@ -124,7 +150,7 @@ Send (only when user explicitly says email/text/send/message — NOT for "follow
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
-Church: ${churchName || 'Grace Community Church'} · Today: ${now.toLocaleDateString()}
+Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
 Giving last 30d: $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
 Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}
@@ -229,6 +255,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   }, [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
+    data.churchProfile, data.graceFacts, data.userFirstName, data.userRole,
     opsContext,
   ]);
 

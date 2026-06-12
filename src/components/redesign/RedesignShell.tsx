@@ -1,23 +1,6 @@
 /* Ported sidebar + topbar shell from the redesign prototype. */
-import { useEffect, useState } from 'react';
 import { Icon, type IconName } from './Icon';
-
-function LiveClock() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-  const date = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  return (
-    <div className="live-clock" title={now.toLocaleString()}>
-      <Icon name="calendar" size={13} />
-      <span className="lc-date">{date}</span>
-      <span className="lc-time">{time}</span>
-    </div>
-  );
-}
+import { LiveClockDisplay } from '../dashboard/ClockCalendarBanner';
 
 type Tone = 'indigo' | 'ai' | 'sky' | 'emerald' | 'rose' | 'amber' | 'violet';
 interface NavItem { id: string; label: string; icon: IconName; tone: Tone; count?: number; }
@@ -56,12 +39,12 @@ function NavList({ items, active, onNav }: { items: NavItem[]; active: string; o
   );
 }
 
-export function Sidebar({ active, onNav }: { active: string; onNav: (id: string) => void }) {
+export function Sidebar({ active, onNav, brandName = 'GRACE' }: { active: string; onNav: (id: string) => void; brandName?: string; timezone?: string }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">G</div>
-        <div className="brand-name">GRACE</div>
+        <div className="brand-mark">{brandName.charAt(0).toUpperCase()}</div>
+        <div className="brand-name">{brandName.toUpperCase()}</div>
       </div>
 
       <div className="nav-section">
@@ -87,12 +70,12 @@ export function Sidebar({ active, onNav }: { active: string; onNav: (id: string)
   );
 }
 
-export function Topbar({ title, action }: { title: string; action?: React.ReactNode }) {
+export function Topbar({ title, action, timezone }: { title: string; action?: React.ReactNode; timezone?: string }) {
   return (
     <div className="topbar">
       <h1>{title}</h1>
       <div style={{ marginLeft: 'auto' }} className="row">
-        <LiveClock />
+        <LiveClockDisplay variant="redesign" timezone={timezone} />
         <div className="search-box">
           <Icon name="search" size={14} />
           <span>Search people, events, messages…</span>

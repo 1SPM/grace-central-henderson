@@ -1,4 +1,6 @@
 import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, Attendance } from '../../types';
+import type { ChurchProfile } from '../../hooks/useChurchSettings';
+import type { User } from '../services/auth';
 import type { PendingAction } from '../grace-actions';
 
 export interface ActionInstance {
@@ -25,4 +27,8 @@ export interface GraceData {
   attendance: Attendance[];
   churchName?: string;
   churchId?: string;
+  churchProfile?: ChurchProfile;
+  graceFacts?: string;
+  userFirstName?: string;
+  userRole?: User['role'];
 }

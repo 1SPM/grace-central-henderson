@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import type { View } from './types';
+import { resolveAddressee } from './lib/greeting';
 import { useAuthContext } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -83,7 +84,7 @@ function MarketingLoading({ label }: { label: string }) {
 }
 
 function App() {
-  const { churchId, isSignedIn } = useAuthContext();
+  const { churchId, isSignedIn, user } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
@@ -475,6 +476,9 @@ function App() {
       <ErrorBoundary>
         <RedesignApp
           data={redesignData}
+          addressee={resolveAddressee(user?.firstName, user?.role)}
+          timezone={churchSettings?.timezone}
+          churchShortName={churchSettings?.profile?.name}
           actions={{
             checkIn: (personId, eventType) => handlers.checkIn(personId, eventType),
             addInteraction: (i) => handlers.addInteraction(i),
@@ -531,6 +535,10 @@ function App() {
         attendance={[...attendanceFromDb, ...attendanceRecords]}
         churchName={churchSettings?.profile?.name}
         churchId={churchId}
+        churchProfile={churchSettings?.profile}
+        graceFacts={churchSettings?.graceFacts}
+        userFirstName={user?.firstName}
+        userRole={user?.role}
         onAddTask={handlers.addTask}
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}
@@ -544,7 +552,16 @@ function App() {
         onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
         onMarkPrayerAnswered={markPrayerAnswered}
       >
-      <Layout currentView={view} setView={setView} onOpenSearch={modals.openSearch} isDemo={isDemo} churchId={churchId}>
+      <Layout
+        currentView={view}
+        setView={setView}
+        onOpenSearch={modals.openSearch}
+        isDemo={isDemo}
+        churchId={churchId}
+        timezone={churchSettings?.timezone}
+        churchName={churchSettings?.profile?.name}
+        branding={churchSettings?.branding}
+      >
         <ErrorBoundary>
           <ViewRenderer
             view={view}

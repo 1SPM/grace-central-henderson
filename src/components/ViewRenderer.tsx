@@ -259,6 +259,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           eventsCount={events.length}
           onNavigate={(v) => setView(v as View)}
           onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
+          onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}

@@ -321,9 +321,9 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
     email: 'demo@grace-crm.com',
-    firstName: 'Demo',
+    firstName: 'Nick',
     lastName: 'User',
-    role: 'admin',
+    role: 'pastor',
     churchId: DEFAULT_CHURCH_ID,
     createdAt: new Date().toISOString(),
   };
@@ -333,12 +333,12 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     isSignedIn: true,
     user: demoUser,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: ROLE_PERMISSIONS.admin,
+    permissions: ROLE_PERMISSIONS.pastor,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => ROLE_PERMISSIONS.admin[permission],
-    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.admin[p]),
+    hasPermission: (permission) => ROLE_PERMISSIONS.pastor[permission],
+    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),

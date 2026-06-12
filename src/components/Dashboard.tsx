@@ -35,9 +35,16 @@ import { ProgressBar } from './ui/ProgressBar';
 import { KanbanBoard } from './ui/KanbanBoard';
 import { VerifiedLeadersPanel } from './dashboard/VerifiedLeadersPanel';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
+import { ClockCalendarBanner } from './dashboard/ClockCalendarBanner';
+import { GraceGettingStartedPanel } from './grace/GraceGettingStartedPanel';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
 import { usePortalActivity } from '../hooks/usePortalActivity';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useChurchClock } from '../hooks/useChurchClock';
+import { buildCalendarIndex } from '../lib/calendarEvents';
+import { greetingWord, resolveAddressee } from '../lib/greeting';
+import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
 
 interface DashboardProps {
   churchId?: string;
@@ -61,6 +68,7 @@ interface DashboardProps {
   eventsCount?: number;
   onNavigate?: (view: string) => void;
   onDismissChecklist?: () => void;
+  onDismissGraceIntro?: () => void;
   onReopenWizard?: () => void;
   onOpenTutorials?: () => void;
   leaders?: LeaderProfile[];
@@ -70,14 +78,18 @@ interface DashboardProps {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
+export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onDismissGraceIntro, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
   const mailStats = useMailInboxStats();
   const portalActivity = usePortalActivity(churchId ?? '');
-  const churchName = churchSettings?.profile?.name || 'Grace CRM';
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  const { user } = useAuthContext();
+  const churchName = churchSettings?.profile?.name || 'Central Henderson Church';
+  const timezone = churchSettings?.timezone || CENTRAL_HENDERSON_TIMEZONE;
+  const { zoned } = useChurchClock(timezone);
+  const greeting = greetingWord(zoned.hour24);
+  const addressee = resolveAddressee(user?.firstName, user?.role);
+  const calendarIndex = useMemo(() => buildCalendarIndex(events), [events]);
   const checklistStale = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const key = 'grace.checklistFirstSeenAt';
@@ -187,12 +199,15 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
             <div className="flex items-center gap-1.5 mb-1">
               <Sparkles size={13} className="text-amber-500" />
               <span className="text-[11px] uppercase tracking-[0.15em] text-gray-500 dark:text-dark-400 font-medium">
-                Good {greeting}
+                {greeting}
               </span>
             </div>
             <h1 className="serif text-2xl text-slate-900 dark:text-dark-100 leading-tight truncate">
-              {churchName}
+              {addressee}
             </h1>
+            <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-0.5 truncate">
+              {churchName}
+            </p>
             <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
               Here's what needs your attention today.
             </p>
@@ -283,6 +298,23 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           )}
         </div>
       </div>
+
+      {activeTab === 'overview' && (
+        <ClockCalendarBanner
+          className="mb-6"
+          eventDays={calendarIndex.eventDays}
+          eventsByDay={calendarIndex.eventsByDay}
+          onOpenCalendar={onViewCalendar}
+          timezone={timezone}
+        />
+      )}
+
+      {activeTab === 'overview' && !churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
+        <GraceGettingStartedPanel
+          churchName={churchName}
+          onDismiss={onDismissGraceIntro}
+        />
+      )}
 
       {/* Today action strip — only on overview */}
       {activeTab === 'overview' && (

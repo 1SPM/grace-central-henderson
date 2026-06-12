@@ -67,7 +67,7 @@ export function Settings({
   const { status, saveIntegrations } = useIntegrations();
   const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
   const { theme, toggleTheme } = useTheme();
-  const { settings: churchSettings, saveProfile, isLoading: settingsLoading } = useChurchSettings();
+  const { settings: churchSettings, saveProfile, saveGraceFacts, isLoading: settingsLoading } = useChurchSettings();
   const { settings: aiSettings, toggleSetting, enableAll, disableAll } = useAISettings();
 
   // Church profile state
@@ -83,6 +83,7 @@ export function Settings({
     serviceTimes: [] as ServiceTime[],
   });
   const [profileSaved, setProfileSaved] = useState(false);
+  const [graceFacts, setGraceFacts] = useState('');
 
   // Load church profile from settings
   useEffect(() => {
@@ -98,6 +99,9 @@ export function Settings({
         website: churchSettings.profile.website || '',
         serviceTimes: churchSettings.profile.serviceTimes || [],
       });
+    }
+    if (churchSettings?.graceFacts !== undefined) {
+      setGraceFacts(churchSettings.graceFacts || '');
     }
   }, [churchSettings]);
 
@@ -157,8 +161,9 @@ export function Settings({
   const handleSaveProfile = async () => {
     setSaving(true);
     const success = await saveProfile(churchProfile);
+    const factsOk = await saveGraceFacts(graceFacts);
     setSaving(false);
-    if (success) {
+    if (success && factsOk) {
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2000);
     }
@@ -609,6 +614,21 @@ export function Settings({
                 onChange={(e) => setChurchProfile({ ...churchProfile, website: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-dark-400 mb-1">
+                Grace AI knowledge
+              </label>
+              <textarea
+                rows={6}
+                placeholder="Service times, address, ministries, parking, welcome tone — facts Grace can cite when assisting pastors and members."
+                value={graceFacts}
+                onChange={(e) => setGraceFacts(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y min-h-[120px]"
+              />
+              <p className="text-xs text-gray-400 dark:text-dark-500 mt-1">
+                Used by Ask Grace for church-specific answers (service times, location, ministries).
+              </p>
             </div>
             <button
               onClick={handleSaveProfile}

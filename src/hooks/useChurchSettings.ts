@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../config/centralHenderson';
 
 const log = createLogger('church-settings');
 const isProduction = import.meta.env.PROD;
@@ -57,6 +58,7 @@ export interface OnboardingState {
   activeTutorial?: string | null;
   activeTutorialStep?: number;
   selectedTutorials?: string[];
+  graceIntroDismissed?: boolean;
 }
 
 export interface ChurchSettings {
@@ -72,40 +74,29 @@ export interface ChurchSettings {
     primaryColor?: string;
     logoUrl?: string;
   };
+  /** Pastor-curated facts for Grace AI (stored as grace_facts in DB JSON). */
+  graceFacts?: string;
+  /** IANA timezone for clocks and scheduling display. */
+  timezone?: string;
   onboarding?: OnboardingState;
 }
 
-const DEFAULT_SETTINGS: ChurchSettings = {
-  profile: {
-    name: 'Grace Community Church',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    phone: '',
-    email: '',
-    website: '',
-    serviceTimes: [
-      { day: 'Sunday', time: '9:00 AM', name: 'Sunday Worship' },
-      { day: 'Sunday', time: '11:00 AM', name: 'Sunday Worship' },
-      { day: 'Wednesday', time: '7:00 PM', name: 'Bible Study' },
-    ],
-  },
-  integrations: {},
-  notifications: {
-    newVisitorAlerts: true,
-    taskReminders: true,
-    prayerNotifications: false,
-    birthdayReminders: true,
-  },
-  branding: {},
-  onboarding: {
-    wizardCompleted: false,
-    wizardDismissed: false,
-    completedSteps: [],
-    checklistDismissed: false,
-  },
-};
+const DEFAULT_SETTINGS: ChurchSettings = CENTRAL_HENDERSON_DEFAULT_SETTINGS;
+
+function normalizeSettings(raw: Record<string, unknown>): Partial<ChurchSettings> {
+  const { grace_facts, ...rest } = raw;
+  const merged = rest as Partial<ChurchSettings>;
+  if (typeof grace_facts === 'string') merged.graceFacts = grace_facts;
+  return merged;
+}
+
+function settingsForStorage(settings: ChurchSettings): Record<string, unknown> {
+  const { graceFacts, ...rest } = settings;
+  return {
+    ...rest,
+    ...(graceFacts ? { grace_facts: graceFacts } : {}),
+  };
+}
 
 export function useChurchSettings(churchId: string = 'demo-church') {
   const [settings, setSettings] = useState<ChurchSettings>(DEFAULT_SETTINGS);
@@ -127,10 +118,12 @@ export function useChurchSettings(churchId: string = 'demo-church') {
       const stored = localStorage.getItem(`grace-crm-settings-${churchId}`);
       if (stored) {
         try {
-          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+          setSettings({ ...DEFAULT_SETTINGS, ...normalizeSettings(JSON.parse(stored)) });
         } catch {
           setSettings(DEFAULT_SETTINGS);
         }
+      } else {
+        setSettings(DEFAULT_SETTINGS);
       }
       setIsLoading(false);
       return;
@@ -156,7 +149,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
         }
         // Fall through to use DEFAULT_SETTINGS (already set)
       } else if (data?.settings) {
-        setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
+        setSettings({ ...DEFAULT_SETTINGS, ...normalizeSettings(data.settings as Record<string, unknown>) });
       }
     } catch {
       // Supabase may be configured but non-functional - silently fall back to defaults
@@ -173,7 +166,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     if (!supabase) {
       // Demo mode fallback: avoid persistent browser storage in production
       if (!isProduction) {
-        localStorage.setItem(`grace-crm-settings-${churchId}`, JSON.stringify(updatedSettings));
+        localStorage.setItem(`grace-crm-settings-${churchId}`, JSON.stringify(settingsForStorage(updatedSettings)));
       }
       setSettings(updatedSettings);
       return true;
@@ -182,7 +175,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     try {
       const { error: updateError } = await supabase
         .from('churches')
-        .update({ settings: updatedSettings })
+        .update({ settings: settingsForStorage(updatedSettings) })
         .eq('id', churchId);
 
       if (updateError) {
@@ -246,6 +239,10 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     return saveSettings({ integrations: clearedIntegrations });
   }, [saveSettings, settings.integrations]);
 
+  const saveGraceFacts = useCallback(async (graceFacts: string): Promise<boolean> => {
+    return saveSettings({ graceFacts });
+  }, [saveSettings]);
+
   // Load settings on mount
   useEffect(() => {
     loadSettings();
@@ -258,6 +255,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     error,
     saveSettings,
     saveProfile,
+    saveGraceFacts,
     saveIntegrations,
     saveOnboarding,
     clearIntegration,

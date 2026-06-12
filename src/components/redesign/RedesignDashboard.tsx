@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { useRedesignDashboard, type DashboardData } from './useRedesignDashboard';
 import { PersonAvatar } from './PersonAvatar';
+import { ClockCalendarBanner } from '../dashboard/ClockCalendarBanner';
+import { useChurchClock } from '../../hooks/useChurchClock';
+import { greetingWord } from '../../lib/greeting';
+import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
 
 const WALLPAPER_KEY = 'grace-hero-wallpaper';
 
@@ -63,148 +67,26 @@ function HeroArt() {
   );
 }
 
-function greetingWord(h: number): string {
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
-function GreetingBlock({ prayersOpen, activeMembers }: { prayersOpen: number; activeMembers: number }) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+function GreetingBlock({
+  addressee,
+  timezone,
+  prayersOpen,
+  activeMembers,
+}: {
+  addressee: string;
+  timezone?: string;
+  prayersOpen: number;
+  activeMembers: number;
+}) {
+  const { zoned, format } = useChurchClock(timezone || CENTRAL_HENDERSON_TIMEZONE);
+  const salutation = greetingWord(zoned.hour24);
+  const dateStr = format({ weekday: 'long', month: 'long', day: 'numeric' });
+  const time = format({ hour: 'numeric', minute: '2-digit', second: '2-digit' });
   return (
     <div>
-      <h2 className="hello">{greetingWord(now.getHours())}, <em>Pastor</em></h2>
+      <h2 className="hello">{salutation}, <em>{addressee}</em></h2>
       <div className="date">
         {dateStr} · <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{time}</span> · <span style={{ color: 'var(--c-rose-ink)' }}>●</span> {prayersOpen} prayer {prayersOpen === 1 ? 'request' : 'requests'} open · {activeMembers} active members
-      </div>
-    </div>
-  );
-}
-
-const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-function AnalogClock({ now }: { now: Date }) {
-  const s = now.getSeconds();
-  const m = now.getMinutes();
-  const h = now.getHours() % 12;
-  const secA = s * 6;                       // 360/60
-  const minA = m * 6 + s * 0.1;
-  const hrA = h * 30 + m * 0.5;             // 360/12
-  // hand endpoints from center (50,50)
-  const hand = (angle: number, len: number) => {
-    const rad = (angle - 90) * Math.PI / 180;
-    return { x2: 50 + len * Math.cos(rad), y2: 50 + len * Math.sin(rad) };
-  };
-  const hr = hand(hrA, 26), mn = hand(minA, 36), sc = hand(secA, 40);
-  return (
-    <svg viewBox="0 0 100 100" className="analog-clock" width="64" height="64" aria-label="Current time">
-      <circle cx="50" cy="50" r="47" className="ac-face" />
-      {Array.from({ length: 12 }, (_, i) => {
-        const a = (i * 30 - 90) * Math.PI / 180;
-        const r1 = i % 3 === 0 ? 38 : 41, r2 = 45;
-        return <line key={i} x1={50 + r1 * Math.cos(a)} y1={50 + r1 * Math.sin(a)} x2={50 + r2 * Math.cos(a)} y2={50 + r2 * Math.sin(a)} className={i % 3 === 0 ? 'ac-tick ac-tick-major' : 'ac-tick'} />;
-      })}
-      <line x1="50" y1="50" x2={hr.x2} y2={hr.y2} className="ac-hand ac-hour" />
-      <line x1="50" y1="50" x2={mn.x2} y2={mn.y2} className="ac-hand ac-min" />
-      <line x1="50" y1="50" x2={sc.x2} y2={sc.y2} className="ac-hand ac-sec" />
-      <circle cx="50" cy="50" r="3" className="ac-pin" />
-    </svg>
-  );
-}
-
-const keyOf = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-
-/* Top-of-dashboard banner: analog clock (left) + interactive mini calendar with a
-   selected-day agenda (right). Click any day to see what's on / what to do. */
-function ClockCalendar({ eventDays, eventsByDay, onOpenCalendar }: {
-  eventDays: string[];
-  eventsByDay: DashboardData['eventsByDay'];
-  onOpenCalendar?: () => void;
-}) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const today = new Date();
-  const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-  const [selected, setSelected] = useState<Date>(() => new Date(today.getFullYear(), today.getMonth(), today.getDate()));
-
-  const eventSet = new Set(eventDays);
-  const month = viewMonth.getMonth();
-  const first = new Date(viewMonth.getFullYear(), month, 1);
-  const start = new Date(first);
-  start.setDate(1 - first.getDay());
-  const cells = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
-
-  const shiftMonth = (delta: number) => setViewMonth(m => new Date(m.getFullYear(), m.getMonth() + delta, 1));
-  const selKey = keyOf(selected);
-  const agenda = eventsByDay[selKey] ?? [];
-  const isToday = (d: Date) => keyOf(d) === keyOf(today);
-
-  return (
-    <div className="card clock-cal-banner">
-      <div className="ccb-clock">
-        <AnalogClock now={now} />
-        <div className="ccb-digital">{now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
-        <div className="ccb-date">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-      </div>
-      <div className="ccb-cal">
-        <div className="cc-month">
-          <span>{viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-          <div className="row" style={{ gap: 4 }}>
-            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => shiftMonth(-1)} title="Previous month"><Icon name="arrow_left" size={13} /></button>
-            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => shiftMonth(1)} title="Next month"><Icon name="arrow_right" size={13} /></button>
-          </div>
-        </div>
-        <div className="mc-grid">
-          {MC_DOW.map((d, i) => <div key={i} className="mc-dow">{d}</div>)}
-          {cells.map((d, i) => {
-            const inMonth = d.getMonth() === month;
-            const hasEvent = eventSet.has(keyOf(d));
-            const sel = keyOf(d) === selKey;
-            return (
-              <button
-                key={i}
-                className={`mc-day${inMonth ? '' : ' other'}${isToday(d) ? ' today' : ''}${sel ? ' sel' : ''}`}
-                onClick={() => setSelected(new Date(d.getFullYear(), d.getMonth(), d.getDate()))}
-              >
-                <span>{d.getDate()}</span>
-                {hasEvent && <i className="mc-dot" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="ccb-agenda">
-        <div className="cc-agenda-head">
-          {isToday(selected) ? 'Today' : selected.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-        </div>
-        {agenda.length > 0 ? (
-          <div className="col" style={{ gap: 8 }}>
-            {agenda.map((e, i) => (
-              <div key={i} className="cc-agenda-item">
-                <i className="mc-dot" style={{ position: 'static' }} />
-                <span className="cc-agenda-title">{e.title}</span>
-                <span className="mute" style={{ fontSize: 11.5 }}>{e.time}</span>
-              </div>
-            ))}
-            {onOpenCalendar && <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', marginTop: 2 }} onClick={onOpenCalendar}>Open calendar <Icon name="arrow_right" size={12} /></button>}
-          </div>
-        ) : (
-          <div className="col" style={{ gap: 10, alignItems: 'flex-start' }}>
-            <span className="mute" style={{ fontSize: 12.5 }}>Nothing scheduled for this day.</span>
-            <button className="btn btn-sm btn-primary" onClick={onOpenCalendar}><Icon name="plus" size={12} /> Schedule an event</button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -324,18 +206,36 @@ export function RedesignDashboard() {
   return <DashboardView d={d} />;
 }
 
-export function DashboardView({ d, onAddPerson, onOpenCalendar }: { d: DashboardData; onAddPerson?: () => void; onOpenCalendar?: () => void }) {
+export function DashboardView({
+  d,
+  onAddPerson,
+  onOpenCalendar,
+  addressee = 'Pastor',
+  timezone,
+}: {
+  d: DashboardData;
+  onAddPerson?: () => void;
+  onOpenCalendar?: () => void;
+  addressee?: string;
+  timezone?: string;
+}) {
   return (
     <div className="page">
       <div className="greeting">
-        <GreetingBlock prayersOpen={d.prayersOpen} activeMembers={d.activeMembers} />
+        <GreetingBlock addressee={addressee} timezone={timezone} prayersOpen={d.prayersOpen} activeMembers={d.activeMembers} />
         <div className="row">
           <button className="btn"><Icon name="calendar" size={14} /> This week</button>
           <button className="btn btn-primary" onClick={onAddPerson}><Icon name="plus" size={14} /> Add member</button>
         </div>
       </div>
 
-      <ClockCalendar eventDays={d.eventDays} eventsByDay={d.eventsByDay} onOpenCalendar={onOpenCalendar} />
+      <ClockCalendarBanner
+        variant="redesign"
+        eventDays={d.eventDays}
+        eventsByDay={d.eventsByDay}
+        onOpenCalendar={onOpenCalendar}
+        timezone={timezone}
+      />
 
       <div className="hero-card">
         <HeroArt />

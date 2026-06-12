@@ -3,6 +3,7 @@ import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, User
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
+import { GraceOrb } from './grace/GraceOrb';
 
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
@@ -675,50 +676,9 @@ export function AvatarSkyPanel() {
             'linear-gradient(180deg, #b8cee0 0%, #d6dde0 28%, #ecd9b8 60%, #ecc28e 88%, #d99a64 100%)',
         }}
       />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '14%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '180px',
-          height: '180px',
-          background:
-            'radial-gradient(circle, rgba(255,235,180,0.95) 0%, rgba(255,220,150,0.55) 30%, rgba(255,220,150,0) 70%)',
-          filter: 'blur(2px)',
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '38%',
-          left: '-30%',
-          width: '160px',
-          height: '50px',
-          background:
-            'radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%)',
-          filter: 'blur(8px)',
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '52%',
-          right: '-25%',
-          width: '140px',
-          height: '42px',
-          background:
-            'radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 70%)',
-          filter: 'blur(8px)',
-        }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(160,110,70,0) 0%, rgba(120,80,50,0.18) 65%, rgba(80,55,40,0.32) 100%)',
-        }}
-      />
+      <div className="absolute inset-0 flex items-start justify-center pt-6">
+        <GraceOrb size="lg" />
+      </div>
       <div className="relative flex-1 flex items-end justify-center pb-5">
         <span className="text-[10px] uppercase tracking-[0.2em] text-stone-50/80 font-medium drop-shadow-sm">
           Grace
