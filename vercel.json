@@ -6,10 +6,10 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [
-    { "path": "/api/cron/ai-anomaly", "schedule": "0 * * * *" },
+    { "path": "/api/cron/ai-anomaly", "schedule": "0 5 * * *" },
     { "path": "/api/cron/reconcile-stripe", "schedule": "0 6 * * *" },
     { "path": "/api/cron/agents", "schedule": "0 7 * * *" },
-    { "path": "/api/cron/send-pending-emails", "schedule": "*/5 * * * *" }
+    { "path": "/api/cron/send-pending-emails", "schedule": "0 8 * * *" }
   ],
   "headers": [
     {
