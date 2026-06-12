@@ -13,7 +13,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { sendViaResend, htmlToText } from './resend';
+import { sendViaResend, htmlToText } from './resend.js';
 
 export interface QueueEmailInput {
   supabase: SupabaseClient;

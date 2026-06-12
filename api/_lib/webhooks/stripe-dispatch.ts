@@ -20,9 +20,9 @@
 
 import type Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { claimEvent, markProcessed, markFailed, markSkipped } from './idempotency';
-import { recordFailure, markResolved } from './dlq';
-import { getStripeHandler, extractChurchIdFromEvent } from './stripe-handlers';
+import { claimEvent, markProcessed, markFailed, markSkipped } from './idempotency.js';
+import { recordFailure, markResolved } from './dlq.js';
+import { getStripeHandler, extractChurchIdFromEvent } from './stripe-handlers.js';
 
 export type DispatchOutcome =
   | { status: 'duplicate'; eventRowId: string }

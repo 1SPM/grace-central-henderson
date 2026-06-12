@@ -11,7 +11,7 @@
  * them yet, which is the most dangerous state.
  */
 
-import type { AgentFunction, AgentObservation } from './types';
+import type { AgentFunction, AgentObservation } from './types.js';
 
 export const crisisEscalationAgent: AgentFunction = (input) => {
   if (!input.settings.crisis_escalation_enabled) return [];

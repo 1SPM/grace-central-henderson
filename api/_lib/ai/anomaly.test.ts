@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectAnomaly, DEFAULT_ANOMALY_CONFIG } from './anomaly';
+import { detectAnomaly, DEFAULT_ANOMALY_CONFIG } from './anomaly.js';
 
 describe('ai/anomaly — detectAnomaly', () => {
   it('flags 6× spike when above the $0.10 absolute floor', () => {

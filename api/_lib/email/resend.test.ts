@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { htmlToText, sendViaResend } from './resend';
+import { htmlToText, sendViaResend } from './resend.js';
 
 describe('htmlToText', () => {
   it('strips HTML tags', () => {

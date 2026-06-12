@@ -26,12 +26,12 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { memberCareAgent } from './member-care';
-import { stewardshipAgent } from './stewardship';
-import { operationsAgent } from './operations';
-import { portalEngagementAgent } from './portal-engagement';
-import { cardOpsAgent } from './card-ops';
-import { crisisEscalationAgent } from './crisis-escalation';
+import { memberCareAgent } from './member-care.js';
+import { stewardshipAgent } from './stewardship.js';
+import { operationsAgent } from './operations.js';
+import { portalEngagementAgent } from './portal-engagement.js';
+import { cardOpsAgent } from './card-ops.js';
+import { crisisEscalationAgent } from './crisis-escalation.js';
 import type {
   AgentInput,
   AgentObservation,
@@ -45,8 +45,8 @@ import type {
   AgentKycSnapshot,
   AgentCardSnapshot,
   AgentCrisisConversationSnapshot,
-} from './types';
-import { DEFAULT_AGENT_SETTINGS } from './types';
+} from './types.js';
+import { DEFAULT_AGENT_SETTINGS } from './types.js';
 
 const AGENTS: Array<{ id: AgentId; fn: (input: AgentInput) => AgentObservation[] }> = [
   { id: 'member-care', fn: memberCareAgent },

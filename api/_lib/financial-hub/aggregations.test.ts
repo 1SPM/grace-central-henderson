@@ -7,7 +7,7 @@ import {
   topGivers,
   comparePeriods,
   type LedgerRow,
-} from './aggregations';
+} from './aggregations.js';
 
 function row(overrides: Partial<LedgerRow>): LedgerRow {
   return {

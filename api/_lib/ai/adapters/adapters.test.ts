@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { callGemini } from './gemini';
-import { callClaude } from './claude';
-import { callOpenAi } from './openai';
+import { callGemini } from './gemini.js';
+import { callClaude } from './claude.js';
+import { callOpenAi } from './openai.js';
 
 function mockFetch(response: { ok: boolean; status?: number; body?: unknown; text?: string }): typeof fetch {
   return vi.fn().mockResolvedValue({

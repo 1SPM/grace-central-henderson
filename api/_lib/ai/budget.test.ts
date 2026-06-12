@@ -7,7 +7,7 @@ import {
   checkBudget,
   DEFAULT_MONTHLY_CAP_MICRO_USD,
   DEFAULT_HARD_CUTOFF_MULTIPLIER,
-} from './budget';
+} from './budget.js';
 
 describe('ai/budget — pure helpers', () => {
   it('monthStartUtc snaps to first day of month at midnight UTC', () => {

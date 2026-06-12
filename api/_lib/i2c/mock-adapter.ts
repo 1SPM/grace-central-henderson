@@ -22,7 +22,7 @@ import type {
   SubmitKycInput,
   CardActionInput,
   CardActionResult,
-} from './types';
+} from './types.js';
 
 function hash(input: string): string {
   // Cheap deterministic hash — sufficient for mock ids; NOT a security primitive.

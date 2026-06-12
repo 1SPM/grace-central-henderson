@@ -7,7 +7,7 @@
 
 import { Router, Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
-import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders';
+import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders.js';
 
 const router = Router();
 

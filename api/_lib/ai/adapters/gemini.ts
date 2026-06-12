@@ -6,7 +6,7 @@
  * specific upstream.
  */
 
-import type { ProviderCallResult } from '../gateway';
+import type { ProviderCallResult } from '../gateway.js';
 
 export interface GeminiCallOptions {
   apiKey: string;

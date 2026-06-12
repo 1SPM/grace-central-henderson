@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { memberCareAgent } from './member-care';
-import { stewardshipAgent } from './stewardship';
-import { operationsAgent } from './operations';
-import { DEFAULT_AGENT_SETTINGS, type AgentInput } from './types';
+import { memberCareAgent } from './member-care.js';
+import { stewardshipAgent } from './stewardship.js';
+import { operationsAgent } from './operations.js';
+import { DEFAULT_AGENT_SETTINGS, type AgentInput } from './types.js';
 
 const NOW = new Date('2026-05-25T12:00:00Z');
 

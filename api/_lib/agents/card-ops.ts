@@ -11,7 +11,7 @@
  * interactions (FYI-grade).
  */
 
-import type { AgentFunction, AgentObservation } from './types';
+import type { AgentFunction, AgentObservation } from './types.js';
 
 const FROZEN_STALE_DAYS = 14;
 

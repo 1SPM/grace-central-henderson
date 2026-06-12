@@ -7,7 +7,7 @@ import {
   bool_,
   int_,
   arrayOfStr,
-} from './validation';
+} from './validation.js';
 
 describe('validation/str', () => {
   it('accepts string within bounds', () => {

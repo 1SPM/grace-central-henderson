@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
-import { isValidPhone, sanitizeString, LIMITS } from './validation';
+import { isValidPhone, sanitizeString, LIMITS } from './validation.js';
 
 const router = Router();
 

@@ -5,7 +5,7 @@ import {
   appendLedgerEntry,
   dollarsToMicroUsd,
   centsToMicroUsd,
-} from './ledger';
+} from './ledger.js';
 
 describe('ledger — pure helpers', () => {
   it('dollarsToMicroUsd', () => {

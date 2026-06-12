@@ -5,7 +5,7 @@
  * without OPENAI_API_KEY.
  */
 
-import type { ProviderCallResult } from '../gateway';
+import type { ProviderCallResult } from '../gateway.js';
 
 export interface OpenAiCallOptions {
   apiKey: string;

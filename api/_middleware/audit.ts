@@ -24,7 +24,7 @@
 
 import type { Response, NextFunction } from 'express';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { AuthenticatedRequest } from './auth';
+import type { AuthenticatedRequest } from './auth.js';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -154,7 +154,7 @@ function reportAuditFailure(err: unknown, row: AuditRow): void {
   // Best-effort Sentry report. Server-side Sentry module is imported via
   // api/instrument.ts; we keep this dependency dynamic so audit.ts has
   // no synchronous coupling to it.
-  void import('../instrument').then(({ Sentry, sentryEnabled }) => {
+  void import('../instrument.js').then(({ Sentry, sentryEnabled }) => {
     if (sentryEnabled) {
       Sentry.withScope((scope) => {
         scope.setContext('audit_row', { ...row, before: undefined, after: undefined });

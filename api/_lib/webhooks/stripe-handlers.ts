@@ -17,10 +17,10 @@
 
 import type Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { appendLedgerEntry, centsToMicroUsd, type LedgerEntryInput } from '../ledger';
-import { planSlugForPriceId, type PlanSlug } from '../billing/plans';
-import { queueEmail } from '../email/queue';
-import { renderDonationReceiptEmail } from '../email/templates/donation-receipt';
+import { appendLedgerEntry, centsToMicroUsd, type LedgerEntryInput } from '../ledger.js';
+import { planSlugForPriceId, type PlanSlug } from '../billing/plans.js';
+import { queueEmail } from '../email/queue.js';
+import { renderDonationReceiptEmail } from '../email/templates/donation-receipt.js';
 
 export interface StripeHandlerContext {
   supabase: SupabaseClient;

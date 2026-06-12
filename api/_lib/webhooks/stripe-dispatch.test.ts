@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type Stripe from 'stripe';
-import { dispatchStripeEvent } from './stripe-dispatch';
+import { dispatchStripeEvent } from './stripe-dispatch.js';
 
 /**
  * Stateful in-memory Supabase mock that supports:

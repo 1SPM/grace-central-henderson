@@ -12,7 +12,7 @@
  * of tasks would train staff to ignore the agent.
  */
 
-import type { AgentFunction, AgentObservation, AgentPersonSnapshot } from './types';
+import type { AgentFunction, AgentObservation, AgentPersonSnapshot } from './types.js';
 
 function displayName(p: AgentPersonSnapshot): string {
   if (p.full_name && p.full_name.trim()) return p.full_name.trim();

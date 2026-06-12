@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mockI2cAdapter, getI2cAdapter } from './index';
+import { mockI2cAdapter, getI2cAdapter } from './index.js';
 
 describe('i2c/mock-adapter — submitKyc', () => {
   it('approves a normal submission instantly', async () => {

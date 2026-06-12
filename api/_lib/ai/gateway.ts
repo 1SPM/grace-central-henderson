@@ -22,9 +22,9 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { checkBudget, BudgetCheck, BudgetStatus } from './budget';
-import { recordUsage } from './usage';
-import { moderate, type ModerationResult } from './moderation';
+import { checkBudget, BudgetCheck, BudgetStatus } from './budget.js';
+import { recordUsage } from './usage.js';
+import { moderate, type ModerationResult } from './moderation.js';
 
 export interface ProviderCallResult {
   success: boolean;

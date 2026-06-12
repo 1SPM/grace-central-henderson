@@ -10,8 +10,8 @@ import {
   churchIdFromAuth,
   buildAuditRow,
   auditMutations,
-} from './audit';
-import type { AuthenticatedRequest } from './auth';
+} from './audit.js';
+import type { AuthenticatedRequest } from './auth.js';
 
 function mockReq(over: Partial<AuthenticatedRequest> = {}): AuthenticatedRequest {
   return {

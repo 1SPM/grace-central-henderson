@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import handler from '../../api/giving/text-to-give';
+import handler from '../../api/giving/_text-to-give';
 
 interface MockResponse {
   statusCode: number;

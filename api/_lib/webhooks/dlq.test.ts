@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { unpackError, recordFailure, markResolved } from './dlq';
+import { unpackError, recordFailure, markResolved } from './dlq.js';
 
 describe('webhooks/dlq — unpackError', () => {
   it('handles Error instance with message + stack + class', () => {

@@ -17,7 +17,7 @@
  * and free of model cost.
  */
 
-import type { AgentFunction, AgentGivingSnapshot, AgentObservation } from './types';
+import type { AgentFunction, AgentGivingSnapshot, AgentObservation } from './types.js';
 
 function dollarsFromMicro(m: number): number {
   return m / 1_000_000;

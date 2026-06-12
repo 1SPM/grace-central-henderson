@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { moderate } from './moderation';
+import { moderate } from './moderation.js';
 
 function mockFetch(response: { ok: boolean; status?: number; body?: unknown }): typeof fetch {
   return vi.fn().mockResolvedValue({

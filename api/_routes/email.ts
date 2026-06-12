@@ -9,7 +9,7 @@ import {
   sanitizeHtml,
   validateEmailArray,
   LIMITS,
-} from './validation';
+} from './validation.js';
 
 const router = Router();
 const RESEND_BASE_URL = 'https://api.resend.com';

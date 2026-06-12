@@ -15,7 +15,7 @@
 
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
-import { scrub, stripQuery } from '../src/lib/observability/scrub';
+import { scrub, stripQuery } from '../src/lib/observability/scrub.js';
 
 const dsn = process.env.SENTRY_DSN;
 

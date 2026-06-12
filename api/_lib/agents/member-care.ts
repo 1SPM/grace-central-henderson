@@ -13,7 +13,7 @@
  * be actioned by a staff member, not just observed.
  */
 
-import type { AgentFunction, AgentObservation, AgentPersonSnapshot } from './types';
+import type { AgentFunction, AgentObservation, AgentPersonSnapshot } from './types.js';
 
 const VISITOR_FOLLOWUP_WINDOW_DAYS = 14;
 

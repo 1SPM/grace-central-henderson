@@ -14,8 +14,8 @@
  * that pretends to be real.
  */
 
-import type { I2cAdapter } from './types';
-import { mockI2cAdapter } from './mock-adapter';
+import type { I2cAdapter } from './types.js';
+import { mockI2cAdapter } from './mock-adapter.js';
 
 export function getI2cAdapter(opts: { liveMode?: boolean } = {}): I2cAdapter {
   const apiKey = process.env.I2C_API_KEY;
@@ -27,5 +27,5 @@ export function getI2cAdapter(opts: { liveMode?: boolean } = {}): I2cAdapter {
   return mockI2cAdapter;
 }
 
-export type { I2cAdapter } from './types';
-export { mockI2cAdapter } from './mock-adapter';
+export type { I2cAdapter } from './types.js';
+export { mockI2cAdapter } from './mock-adapter.js';

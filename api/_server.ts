@@ -23,7 +23,7 @@
 
 // MUST be the first side-effect import — runs Sentry.init() at module
 // top level, before Express or http are evaluated. See api/instrument.ts.
-import { Sentry, sentryEnabled } from './instrument';
+import { Sentry, sentryEnabled } from './instrument.js';
 
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -31,18 +31,18 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 // Import route modules
-import { initPaymentRoutes } from './_routes/payments';
-import emailRoutes from './_routes/email';
-import smsRoutes from './_routes/sms';
-import agentRoutes from './_routes/agents';
-import aiRoutes from './_routes/ai';
-import { initWebhookRoutes } from './_routes/webhooks';
+import { initPaymentRoutes } from './_routes/payments.js';
+import emailRoutes from './_routes/email.js';
+import smsRoutes from './_routes/sms.js';
+import agentRoutes from './_routes/agents.js';
+import aiRoutes from './_routes/ai.js';
+import { initWebhookRoutes } from './_routes/webhooks.js';
 
 // Import middleware
-import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth';
-import { csrfCookie, csrfProtection } from './_middleware/csrf';
-import { rateLimit } from './_middleware/rateLimit';
-import { auditMutations } from './_middleware/audit';
+import { requireAuth, optionalAuth, getAuthStatus } from './_middleware/auth.js';
+import { csrfCookie, csrfProtection } from './_middleware/csrf.js';
+import { rateLimit } from './_middleware/rateLimit.js';
+import { auditMutations } from './_middleware/audit.js';
 
 // Initialize Express
 const app = express();

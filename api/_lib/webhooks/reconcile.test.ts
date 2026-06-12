@@ -3,7 +3,7 @@ import {
   bucketLedgerRows,
   detectReconciliationAnomalies,
   DEFAULT_RECONCILE_CONFIG,
-} from './reconcile';
+} from './reconcile.js';
 
 describe('reconcile — bucketLedgerRows', () => {
   it('groups rows by (church, date, source) and tracks credit/debit/fee separately', () => {

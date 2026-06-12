@@ -9,4 +9,4 @@
  * that wants to know whether Sentry is active.
  */
 
-export { Sentry, sentryEnabled } from '../instrument';
+export { Sentry, sentryEnabled } from '../instrument.js';

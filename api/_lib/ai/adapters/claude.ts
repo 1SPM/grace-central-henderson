@@ -6,7 +6,7 @@
  * silently mis-route Claude calls to a fallback.
  */
 
-import type { ProviderCallResult } from '../gateway';
+import type { ProviderCallResult } from '../gateway.js';
 
 export interface ClaudeCallOptions {
   apiKey: string;

@@ -9,7 +9,7 @@
  * Operations observations are mostly TASKS (admin needs to act).
  */
 
-import type { AgentFunction, AgentObservation } from './types';
+import type { AgentFunction, AgentObservation } from './types.js';
 
 export const operationsAgent: AgentFunction = (input) => {
   if (!input.settings.operations_enabled) return [];

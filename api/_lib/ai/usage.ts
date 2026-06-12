@@ -8,7 +8,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { costMicroUsd } from './pricing';
+import { costMicroUsd } from './pricing.js';
 
 export interface RecordUsageInput {
   churchId: string | null;
@@ -84,7 +84,7 @@ export async function recordUsage(
       error: err instanceof Error ? err.message : String(err),
     });
     // Best-effort Sentry. Same pattern as audit middleware.
-    void import('../../instrument').then(({ Sentry, sentryEnabled }) => {
+    void import('../../instrument.js').then(({ Sentry, sentryEnabled }) => {
       if (sentryEnabled) {
         Sentry.withScope((scope) => {
           scope.setContext('usage_row', row);

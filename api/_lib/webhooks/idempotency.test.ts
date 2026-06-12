@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { claimEvent, markProcessed, markFailed, markSkipped } from './idempotency';
+import { claimEvent, markProcessed, markFailed, markSkipped } from './idempotency.js';
 
 /**
  * Stateful mock: tracks rows + supports UNIQUE(source, source_event_id).

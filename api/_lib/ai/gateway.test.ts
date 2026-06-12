@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { generate } from './gateway';
-import { buildUsageRow } from './usage';
+import { generate } from './gateway.js';
+import { buildUsageRow } from './usage.js';
 
 /**
  * Simulates Supabase with in-memory mutable state:

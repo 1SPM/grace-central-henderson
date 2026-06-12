@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { costMicroUsd, microUsdToUsd, modelKey, RATES } from './pricing';
+import { costMicroUsd, microUsdToUsd, modelKey, RATES } from './pricing.js';
 
 describe('ai/pricing', () => {
   it('modelKey normalizes case + trims', () => {
