@@ -21,7 +21,8 @@ import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberC
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
 const Groups = lazy(() => import('./Groups').then(m => ({ default: m.Groups })));
 const Prayer = lazy(() => import('./Prayer').then(m => ({ default: m.Prayer })));
-const GivingDashboard = lazy(() => import('./GivingDashboard').then(m => ({ default: m.GivingDashboard })));
+const GivingHub = lazy(() => import('./giving/GivingHub').then(m => ({ default: m.GivingHub })));
+const WalletsView = lazy(() => import('./financial/WalletsView').then(m => ({ default: m.WalletsView })));
 const OnlineGivingForm = lazy(() => import('./OnlineGivingForm').then(m => ({ default: m.OnlineGivingForm })));
 const BatchEntry = lazy(() => import('./BatchEntry').then(m => ({ default: m.BatchEntry })));
 const PledgeManager = lazy(() => import('./PledgeManager').then(m => ({ default: m.PledgeManager })));
@@ -59,7 +60,7 @@ const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
-const LeaderManagement = lazy(() => import('./pastoral/LeaderManagement').then(m => ({ default: m.LeaderManagement })));
+const LeadersHub = lazy(() => import('./pastoral/leadersHub/LeadersHub').then(m => ({ default: m.LeadersHub })));
 const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
 const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
 const DiscipleshipDashboard = lazy(() => import('./DiscipleshipDashboard').then(m => ({ default: m.DiscipleshipDashboard })));
@@ -407,7 +408,7 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'giving':
         return (
-          <GivingDashboard
+          <GivingHub
             giving={giving}
             people={people}
             campaigns={collectionMgmt.campaigns}
@@ -507,6 +508,9 @@ export function ViewRenderer(props: ViewRendererProps) {
           );
         }
         return <FinancialHub onBack={() => setView('dashboard')} />;
+
+      case 'wallets':
+        return <WalletsView people={people} />;
 
       case 'birthdays':
         return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
@@ -721,7 +725,7 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'leader-management':
         return (
-          <LeaderManagement
+          <LeadersHub
             leaders={pastoralCare.leaders}
             sessions={pastoralCare.sessions}
             onAddLeader={pastoralCare.addLeader}

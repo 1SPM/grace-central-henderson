@@ -3,10 +3,8 @@ import { formatLocalDate } from '../utils/validation';
 import {
   Users,
   UserPlus,
-  AlertCircle,
   ChevronRight,
   CheckCircle2,
-  Clock,
   ArrowRight,
   Sparkles,
   Heart,
@@ -24,19 +22,18 @@ import {
   LogIn,
   CalendarCheck,
   HeartHandshake,
+  CalendarDays,
+  Bot,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
-import { GivingWidget } from './GivingWidget';
-
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 import { StatCard } from './ui/StatCard';
 import { StatusBadge, priorityToVariant } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { KanbanBoard } from './ui/KanbanBoard';
-import { CalendarWidget } from './dashboard/CalendarWidget';
-import { VerifiedLeadersCard } from './dashboard/VerifiedLeadersCard';
+import { VerifiedLeadersPanel } from './dashboard/VerifiedLeadersPanel';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
@@ -100,24 +97,14 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
     pendingTasks: tasks.filter(t => !t.completed),
   }), [people, tasks]);
 
-  // Memoize sorted pending tasks
-  const sortedPendingTasks = useMemo(() =>
-    [...pendingTasks].sort((a, b) => {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    }).slice(0, 5),
-    [pendingTasks]
-  );
-
   // Memoize person lookup map for O(1) access
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
 
   // Generate trend data for sparklines from real data
   const completedTasks = tasks.filter(t => t.completed).length;
-  const taskCompletionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
   // Compute weekly sparkline data from created_at dates (last 7 weeks)
-  const { peopleSparkline, visitorsSparkline, tasksSparkline } = useMemo(() => {
+  const { peopleSparkline, tasksSparkline } = useMemo(() => {
     const now = new Date();
     const weeks = 7;
     const peopleCounts: number[] = [];
@@ -141,6 +128,55 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
 
     return { peopleSparkline: peopleCounts, visitorsSparkline: visitorCounts, tasksSparkline: taskCounts };
   }, [people, visitors, tasks, pendingTasks]);
+
+  // KPI row + card grid data (mockup dashboard restructure)
+  const DEMO_MONTHLY_GOAL = 100000;
+  const DEMO_AI_SESSIONS_TODAY = 47;
+  const { givingMtd, goalPct, fundTotalsMtd, openCare, newMembersThisWeek, upcomingEvents } = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const mtdGifts = giving.filter(g => new Date(g.date) >= monthStart);
+    const source = mtdGifts.length > 0 ? mtdGifts : giving;
+    const mtd = source.reduce((sum, g) => sum + g.amount, 0);
+
+    const fundTotals: Record<string, number> = {};
+    source.forEach(g => {
+      fundTotals[g.fund] = (fundTotals[g.fund] || 0) + g.amount;
+    });
+    const funds = Object.entries(fundTotals)
+      .map(([fund, amount]) => ({ fund, amount }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5);
+
+    const care = prayers
+      .filter(p => !p.isAnswered)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const weekAgo = new Date(now.getTime() - 7 * 86400000);
+    let newThisWeek = people.filter(
+      p => p.status === 'member' && p.joinDate && new Date(p.joinDate) >= weekAgo,
+    );
+    if (newThisWeek.length === 0) {
+      newThisWeek = people
+        .filter(p => p.status === 'member' && p.joinDate)
+        .sort((a, b) => (b.joinDate || '').localeCompare(a.joinDate || ''))
+        .slice(0, 4);
+    }
+
+    const upcoming = [...events]
+      .filter(e => new Date(e.startDate) >= new Date(now.toDateString()))
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+      .slice(0, 4);
+
+    return {
+      givingMtd: mtd,
+      goalPct: Math.min(Math.round((mtd / DEMO_MONTHLY_GOAL) * 100), 100),
+      fundTotalsMtd: funds,
+      openCare: care,
+      newMembersThisWeek: newThisWeek.slice(0, 4),
+      upcomingEvents: upcoming,
+    };
+  }, [giving, prayers, people, events]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -392,47 +428,46 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
       )}
 
 
-      {/* Stats Grid with Sparklines */}
+      {/* KPI row — pinned at top of overview */}
       <div data-tutorial="dashboard-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
-          label="Total People"
+          label="Members"
           value={people.length}
           icon={<Users size={20} />}
-          change={12}
-          changeLabel="vs last month"
+          change={visitors.length > 0 ? Math.min(visitors.length * 5, 20) : 0}
+          changeLabel={`${visitors.length} visitors in pipeline`}
           sparklineData={peopleSparkline}
           accentColor="blue"
           onClick={onViewPeople}
         />
         <StatCard
-          label="New Visitors"
-          value={visitors.length}
-          icon={<UserPlus size={20} />}
-          change={visitors.length > 0 ? Math.min(visitors.length * 10, 25) : 0}
-          changeLabel="this week"
-          sparklineData={visitorsSparkline}
-          accentColor="amber"
-          onClick={onViewVisitors}
+          label="Giving MTD"
+          value={`$${Math.round(givingMtd).toLocaleString()}`}
+          icon={<DollarSign size={20} />}
+          change={goalPct}
+          changeLabel="of monthly goal"
+          accentColor="emerald"
+          onClick={onViewGiving}
         />
         <StatCard
-          label="Need Attention"
-          value={inactive.length}
-          icon={<AlertCircle size={20} />}
-          change={inactive.length > 0 ? -8 : 0}
-          changeLabel="improving"
+          label="Care Requests"
+          value={openCare.length}
+          icon={<Heart size={20} />}
+          change={openCare.length > 0 ? -openCare.length : 0}
+          changeLabel={openCare.length > 0 ? `${Math.min(openCare.length, 3)} flagged` : 'all clear'}
           invertTrend
           accentColor="rose"
-          onClick={onViewInactive}
+          onClick={() => onNavigate?.('prayer')}
         />
         <StatCard
-          label="Tasks Done"
-          value={`${taskCompletionRate}%`}
-          icon={<ListTodo size={20} />}
-          change={taskCompletionRate > 0 ? 15 : 0}
-          changeLabel="this week"
+          label="AI Sessions Today"
+          value={DEMO_AI_SESSIONS_TODAY}
+          icon={<Bot size={20} />}
+          change={18}
+          changeLabel="vs yesterday"
           sparklineData={tasksSparkline}
-          accentColor="emerald"
-          onClick={onViewTasks}
+          accentColor="amber"
+          onClick={onViewLeaders}
         />
       </div>
 
@@ -560,181 +595,237 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         </button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Recent Visitors */}
-        <div data-tutorial="dashboard-visitors" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
-          <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <UserPlus className="text-amber-600 dark:text-amber-400" size={18} />
+      {/* Main content + Verified Leaders right rail */}
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-4 mb-6 items-start">
+        <div className="space-y-4 min-w-0">
+          {/* Card grid: giving / events / care / new members */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Giving by fund */}
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+                    <DollarSign size={15} className="text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving by fund</h2>
                 </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900 dark:text-dark-100">Recent Visitors</h2>
-                  <span className="text-xs text-gray-500 dark:text-dark-400">Last 30 days</span>
-                </div>
+                <button
+                  onClick={onViewGiving}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+                >
+                  Giving Hub <ArrowRight size={12} />
+                </button>
               </div>
-              {visitors.length > 0 && (
-                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 px-2 py-0.5 rounded-full">
-                  {visitors.length} new
-                </span>
+              {fundTotalsMtd.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-dark-500 py-4 text-center">No giving recorded yet</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {fundTotalsMtd.map(({ fund, amount }) => {
+                    const max = fundTotalsMtd[0].amount || 1;
+                    return (
+                      <div key={fund}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-gray-600 dark:text-dark-300 capitalize">{fund}</span>
+                          <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
+                            ${amount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${(amount / max) * 100}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming events */}
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                    <CalendarDays size={15} className="text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Upcoming events</h2>
+                </div>
+                <button
+                  onClick={onViewCalendar}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+                >
+                  Calendar <ArrowRight size={12} />
+                </button>
+              </div>
+              {upcomingEvents.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-dark-500 py-4 text-center">Nothing scheduled</p>
+              ) : (
+                <div className="space-y-1">
+                  {upcomingEvents.map(event => (
+                    <button
+                      key={event.id}
+                      onClick={onViewCalendar}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors text-left"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-[9px] uppercase text-blue-600 dark:text-blue-400 leading-none">
+                          {new Date(event.startDate).toLocaleString('default', { month: 'short' })}
+                        </span>
+                        <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 leading-none mt-0.5">
+                          {new Date(event.startDate).getDate()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{event.title}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-dark-500 truncate">
+                          {event.allDay
+                            ? 'All day'
+                            : new Date(event.startDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                          {event.location ? ` · ${event.location}` : ''}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recent care requests */}
+            <div data-tutorial="dashboard-tasks" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-rose-50 dark:bg-rose-900/20 rounded-lg flex items-center justify-center">
+                    <Heart size={15} className="text-rose-500" />
+                  </div>
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Recent care requests</h2>
+                </div>
+                <button
+                  onClick={() => onNavigate?.('prayer')}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+                >
+                  View all <ArrowRight size={12} />
+                </button>
+              </div>
+              {openCare.length === 0 ? (
+                <div className="py-4 text-center">
+                  <CheckCircle2 className="text-emerald-500 mx-auto mb-1" size={20} />
+                  <p className="text-xs text-gray-400 dark:text-dark-500">No open care requests</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {openCare.slice(0, 4).map((prayer, i) => {
+                    const person = personMap.get(prayer.personId);
+                    return (
+                      <button
+                        key={prayer.id}
+                        onClick={() => person && onViewPerson(person.id)}
+                        className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-dark-850 hover:bg-gray-100 dark:hover:bg-dark-750 transition-colors text-left"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+                            {person ? `${person.firstName} ${person.lastName}` : 'Member'}
+                          </p>
+                          <span
+                            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                              i === 0
+                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                                : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                            }`}
+                          >
+                            {i === 0 ? 'Escalated → Pastor' : 'AI → Leader'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate mt-0.5">{prayer.content}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* New members this week */}
+            <div data-tutorial="dashboard-visitors" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
+                    <UserPlus size={15} className="text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">New members</h2>
+                </div>
+                <button
+                  onClick={onViewPeople}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+                >
+                  People <ArrowRight size={12} />
+                </button>
+              </div>
+              {newMembersThisWeek.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-dark-500 py-4 text-center">No new members yet</p>
+              ) : (
+                <div className="space-y-1">
+                  {newMembersThisWeek.map(person => (
+                    <button
+                      key={person.id}
+                      onClick={() => onViewPerson(person.id)}
+                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-medium">
+                          {person.firstName[0]}{person.lastName[0]}
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-gray-900 dark:text-dark-100">
+                            {person.firstName} {person.lastName}
+                          </p>
+                          <p className="text-[11px] text-gray-400 dark:text-dark-500">
+                            Joined {formatLocalDate(person.joinDate, 'recently')}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-400 dark:group-hover:text-dark-500" />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
-          <div className="p-4">
-            {visitors.length === 0 ? (
-              <p className="text-gray-400 dark:text-dark-500 text-sm py-6 text-center">No recent visitors</p>
-            ) : (
-              <div className="space-y-1">
-                {visitors.slice(0, 5).map((person) => (
-                  <button
-                    key={person.id}
-                    onClick={() => onViewPerson(person.id)}
-                    className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/10 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-400 text-xs font-medium">
-                        {person.firstName[0]}{person.lastName[0]}
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
-                        <p className="text-xs text-gray-500 dark:text-dark-500">
-                          {formatLocalDate(person.firstVisit, 'Unknown')}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-400 dark:group-hover:text-dark-500" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Priority Tasks */}
-        <div data-tutorial="dashboard-tasks" className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden shadow-sm">
-          <div className="bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-stone-100 dark:bg-dark-700 rounded-lg flex items-center justify-center shadow-sm">
-                  <CheckCircle2 className="text-indigo-600 dark:text-indigo-400" size={18} />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900 dark:text-dark-100">Priority Follow-Ups</h2>
-                  <span className="text-xs text-gray-500 dark:text-dark-400">Tasks needing attention</span>
-                </div>
-              </div>
+          {/* Quick Links to Dedicated Pages */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {onViewAnalytics && (
               <button
-                onClick={onViewTasks}
-                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
+                onClick={onViewAnalytics}
+                className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
               >
-                View all
-                <ArrowRight size={12} />
-              </button>
-            </div>
-          </div>
-          <div className="p-4">
-            {pendingTasks.length === 0 ? (
-              <div className="py-6 text-center">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <CheckCircle2 className="text-emerald-500" size={24} />
+                <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="text-emerald-600 dark:text-emerald-400" size={20} />
                 </div>
-                <p className="text-gray-500 dark:text-dark-400 text-sm font-medium">All caught up!</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {sortedPendingTasks.map((task) => {
-                  const person = task.personId ? personMap.get(task.personId) : undefined;
-                  const isOverdue = new Date(task.dueDate) < new Date();
-
-                  return (
-                    <div
-                      key={task.id}
-                      className={`p-3 rounded-lg border ${isOverdue ? 'border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/5' : 'border-gray-100 dark:border-dark-700 bg-gray-50 dark:bg-dark-850'}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{task.title}</p>
-                          {person && (
-                            <p className="text-xs text-gray-500 dark:text-dark-500 mt-0.5">
-                              {person.firstName} {person.lastName}
-                            </p>
-                          )}
-                        </div>
-                        <StatusBadge variant={priorityToVariant(task.priority)} icon>
-                          {task.priority}
-                        </StatusBadge>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <Clock size={10} className={isOverdue ? 'text-red-500' : 'text-gray-400 dark:text-dark-500'} />
-                        <span className={`text-[10px] ${isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-dark-500'}`}>
-                          {isOverdue ? 'Overdue' : 'Due'}: {new Date(task.dueDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Analytics</p>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Growth metrics & member insights</p>
+                </div>
+                <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
+              </button>
+            )}
+            {onViewGiving && (
+              <button
+                onClick={onViewGiving}
+                className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
+              >
+                <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900/20 rounded-lg flex items-center justify-center">
+                  <DollarSign className="text-slate-600 dark:text-slate-400" size={20} />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Details</p>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Full transaction history & reports</p>
+                </div>
+                <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
+              </button>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Verified Leaders */}
-      {onViewLeaders && (
-        <div className="mb-6">
-          <VerifiedLeadersCard leaders={leaders} onViewAll={onViewLeaders} />
-        </div>
-      )}
-
-      {/* Giving + Calendar Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        {/* Giving Widget — spans 2 columns */}
-        {onViewGiving && (
-          <div className="lg:col-span-2">
-            <GivingWidget giving={giving} onViewGiving={onViewGiving} />
-          </div>
-        )}
-
-        {/* Calendar Widget — compact, collapses when empty */}
-        <div className="lg:col-span-1">
-          <CalendarWidget events={events} onViewCalendar={onViewCalendar} />
-        </div>
-      </div>
-
-      {/* Quick Links to Dedicated Pages */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {onViewAnalytics && (
-          <button
-            onClick={onViewAnalytics}
-            className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
-          >
-            <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
-              <BarChart3 className="text-emerald-600 dark:text-emerald-400" size={20} />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Analytics</p>
-              <p className="text-xs text-gray-500 dark:text-dark-400">Growth metrics & member insights</p>
-            </div>
-            <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
-          </button>
-        )}
-        {onViewGiving && (
-          <button
-            onClick={onViewGiving}
-            className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600 transition-all group shadow-sm"
-          >
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="text-slate-600 dark:text-slate-400" size={20} />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Details</p>
-              <p className="text-xs text-gray-500 dark:text-dark-400">Full transaction history & reports</p>
-            </div>
-            <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
-          </button>
-        )}
+        {/* Right rail: Verified Leaders AI clergy panel */}
+        <VerifiedLeadersPanel leaders={leaders} onManageLeaders={onViewLeaders} />
       </div>
       </>
       )}

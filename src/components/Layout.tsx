@@ -35,6 +35,7 @@ import {
   Import,
   ShieldCheck,
   Smartphone,
+  Wallet,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -93,6 +94,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
   { view: 'portal-activity', label: 'Portal Activity', icon: <Smartphone size={18} /> },
   { view: 'financial-hub', label: 'Financial Hub', icon: <DollarSign size={18} /> },
+  { view: 'wallets', label: 'Member Wallets', icon: <Wallet size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
@@ -171,6 +173,7 @@ const viewLabels: Record<View, string> = {
   mail: 'Mail',
   'financial-hub': 'Financial Hub',
   'portal-activity': 'Portal Activity',
+  wallets: 'Member Wallets',
 };
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId }: LayoutProps) {
