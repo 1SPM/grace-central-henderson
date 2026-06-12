@@ -469,7 +469,7 @@ function App() {
     );
   }
 
-  // Redesign landing at / (keeps the classic app fully reachable via "Classic view")
+  // Alternate redesign shell at #/redesign (classic app is the default at #/dashboard).
   if (view === 'home') {
     return (
       <ErrorBoundary>
