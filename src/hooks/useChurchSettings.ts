@@ -90,6 +90,23 @@ function normalizeSettings(raw: Record<string, unknown>): Partial<ChurchSettings
   return merged;
 }
 
+/**
+ * Stored settings can be partial (e.g. a row seeded with just profile.name).
+ * A shallow spread would replace whole sections and drop required fields
+ * like profile.serviceTimes, so merge each section against the defaults.
+ */
+function mergeWithDefaults(partial: Partial<ChurchSettings>): ChurchSettings {
+  return {
+    ...DEFAULT_SETTINGS,
+    ...partial,
+    profile: { ...DEFAULT_SETTINGS.profile, ...partial.profile },
+    integrations: { ...DEFAULT_SETTINGS.integrations, ...partial.integrations },
+    notifications: { ...DEFAULT_SETTINGS.notifications, ...partial.notifications },
+    branding: { ...DEFAULT_SETTINGS.branding, ...partial.branding },
+    onboarding: { ...DEFAULT_SETTINGS.onboarding!, ...partial.onboarding },
+  };
+}
+
 function settingsForStorage(settings: ChurchSettings): Record<string, unknown> {
   const { graceFacts, ...rest } = settings;
   return {
@@ -118,7 +135,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
       const stored = localStorage.getItem(`grace-crm-settings-${churchId}`);
       if (stored) {
         try {
-          setSettings({ ...DEFAULT_SETTINGS, ...normalizeSettings(JSON.parse(stored)) });
+          setSettings(mergeWithDefaults(normalizeSettings(JSON.parse(stored))));
         } catch {
           setSettings(DEFAULT_SETTINGS);
         }
@@ -149,7 +166,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
         }
         // Fall through to use DEFAULT_SETTINGS (already set)
       } else if (data?.settings) {
-        setSettings({ ...DEFAULT_SETTINGS, ...normalizeSettings(data.settings as Record<string, unknown>) });
+        setSettings(mergeWithDefaults(normalizeSettings(data.settings as Record<string, unknown>)));
       }
     } catch {
       // Supabase may be configured but non-functional - silently fall back to defaults
