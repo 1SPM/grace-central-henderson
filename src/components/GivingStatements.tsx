@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import type { Giving, Person, GivingStatement } from '../types';
+import { useToast } from './Toast';
 
 // Helper function moved outside component
 const formatCurrency = (amount: number) => {
@@ -26,6 +27,55 @@ const formatCurrency = (amount: number) => {
     currency: 'USD',
   }).format(amount);
 };
+
+// Build the HTML body for an emailed giving statement
+function buildStatementEmailHtml(
+  person: Person,
+  personGiving: { total: number; byFund: Record<string, number>; transactions: Giving[] },
+  year: number,
+  churchName: string,
+  churchAddress: string,
+  churchPhone: string,
+  churchEmail: string,
+): string {
+  const fundRows = Object.entries(personGiving.byFund)
+    .map(
+      ([fund, amount]) =>
+        `<tr><td style="padding:6px 12px;border-bottom:1px solid #eee;text-transform:capitalize;">${fund}</td><td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right;">${formatCurrency(amount)}</td></tr>`
+    )
+    .join('');
+
+  const txRows = [...personGiving.transactions]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map(
+      (t) =>
+        `<tr><td style="padding:4px 12px;border-bottom:1px solid #f3f3f3;">${new Date(t.date).toLocaleDateString()}</td><td style="padding:4px 12px;border-bottom:1px solid #f3f3f3;text-transform:capitalize;">${t.fund}</td><td style="padding:4px 12px;border-bottom:1px solid #f3f3f3;text-align:right;">${formatCurrency(t.amount)}</td></tr>`
+    )
+    .join('');
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #1f2937;">
+      <div style="text-align:center; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
+        <h1 style="margin: 0 0 4px; font-size: 22px;">${churchName}</h1>
+        <p style="margin: 0; color: #6b7280; font-size: 13px;">${churchAddress}<br/>${churchPhone} • ${churchEmail}</p>
+      </div>
+      <h2 style="font-size: 18px; margin: 20px 0 4px;">${year} Annual Giving Statement</h2>
+      <p style="margin: 0 0 16px; color: #6b7280; font-size: 13px;">Prepared for ${person.firstName} ${person.lastName}</p>
+      <p style="font-size: 15px;">Total contributions for ${year}: <strong>${formatCurrency(personGiving.total)}</strong></p>
+      <h3 style="font-size: 14px; margin: 20px 0 8px;">Giving by Fund</h3>
+      <table style="width:100%; border-collapse: collapse; font-size: 13px;">${fundRows}</table>
+      <h3 style="font-size: 14px; margin: 20px 0 8px;">Contribution Detail</h3>
+      <table style="width:100%; border-collapse: collapse; font-size: 12px;">
+        <tr style="color:#6b7280; text-align:left;"><th style="padding:4px 12px;">Date</th><th style="padding:4px 12px;">Fund</th><th style="padding:4px 12px; text-align:right;">Amount</th></tr>
+        ${txRows}
+      </table>
+      <p style="margin-top: 24px; font-size: 11px; color: #6b7280;">
+        No goods or services were provided in exchange for these contributions other than intangible religious benefits.
+        Please retain this statement for your tax records.
+      </p>
+    </div>
+  `;
+}
 
 // Render a giving statement onto a jsPDF doc (on the current page)
 function renderStatementPage(
@@ -434,6 +484,8 @@ interface GivingStatementsProps {
   churchEmail?: string;
   onGenerateStatement: (personId: string, year: number) => void;
   onSendStatement: (statementId: string, method: 'email' | 'print') => void;
+  /** Marks a statement sent by person+year (creates the record if needed). */
+  onMarkStatementSent?: (personId: string, year: number, method: 'email' | 'print') => void;
   onBack?: () => void;
 }
 
@@ -447,15 +499,18 @@ export function GivingStatements({
   churchEmail = 'giving@gracechurch.org',
   onGenerateStatement,
   onSendStatement,
+  onMarkStatementSent,
   onBack,
 }: GivingStatementsProps) {
   const currentYear = new Date().getFullYear();
+  const toast = useToast();
   const [selectedYear, setSelectedYear] = useState(currentYear - 1); // Default to last year for tax purposes
   const [searchQuery, setSearchQuery] = useState('');
   const [previewPerson, setPreviewPerson] = useState<Person | null>(null);
   const [showBulkSend, setShowBulkSend] = useState(false);
   const [bulkSendMethod, setBulkSendMethod] = useState<'email' | 'print'>('email');
   const [selectedPeople, setSelectedPeople] = useState<Set<string>>(new Set());
+  const [emailingIds, setEmailingIds] = useState<Set<string>>(new Set());
 
   // Calculate giving by person for selected year
   const givingByPerson = useMemo(() => {
@@ -567,6 +622,70 @@ export function GivingStatements({
     });
     doc.save(`Giving_Statements_${selectedYear}_All.pdf`);
   }, [selectedPeople, peopleWithGiving, givingByPerson, selectedYear, churchName, churchAddress, churchPhone, churchEmail, handleDownloadPdf]);
+
+  // Send one statement via the real email service (Resend behind /api/email/send)
+  const sendStatementEmail = useCallback(async (person: Person): Promise<boolean> => {
+    const data = givingByPerson[person.id];
+    if (!data || !person.email) return false;
+
+    const html = buildStatementEmailHtml(
+      person, data, selectedYear,
+      churchName, churchAddress, churchPhone, churchEmail,
+    );
+    const res = await fetch('/api/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: person.email,
+        subject: `Your ${selectedYear} Giving Statement — ${churchName}`,
+        html,
+      }),
+    });
+    if (!res.ok) return false;
+    onMarkStatementSent?.(person.id, selectedYear, 'email');
+    return true;
+  }, [givingByPerson, selectedYear, churchName, churchAddress, churchPhone, churchEmail, onMarkStatementSent]);
+
+  const handleEmailStatement = useCallback(async (person: Person) => {
+    if (emailingIds.has(person.id)) return;
+    setEmailingIds((prev) => new Set(prev).add(person.id));
+    try {
+      const ok = await sendStatementEmail(person);
+      if (ok) {
+        toast.success(`Statement emailed to ${person.firstName} ${person.lastName}`);
+      } else {
+        toast.error(`Could not email statement to ${person.firstName}. Check that email is configured.`);
+      }
+    } catch {
+      toast.error(`Could not email statement to ${person.firstName}.`);
+    } finally {
+      setEmailingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(person.id);
+        return next;
+      });
+    }
+  }, [emailingIds, sendStatementEmail, toast]);
+
+  const handleBulkEmail = useCallback(async () => {
+    const targets = peopleWithGiving.filter((p) => selectedPeople.has(p.id) && p.email);
+    if (targets.length === 0) {
+      toast.warning('None of the selected donors have an email address.');
+      return;
+    }
+    let sent = 0;
+    let failed = 0;
+    for (const person of targets) {
+      try {
+        const ok = await sendStatementEmail(person);
+        if (ok) sent += 1; else failed += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    if (sent > 0) toast.success(`Emailed ${sent} statement${sent === 1 ? '' : 's'}.`);
+    if (failed > 0) toast.error(`${failed} statement${failed === 1 ? '' : 's'} failed to send.`);
+  }, [peopleWithGiving, selectedPeople, sendStatementEmail, toast]);
 
   return (
     <div data-tutorial="giving-statements" className="p-8">
@@ -799,15 +918,27 @@ export function GivingStatements({
                         </button>
                         {person.email && (
                           <button
-                            onClick={() => statement && onSendStatement(statement.id, 'email')}
-                            className="p-2 text-gray-400 hover:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-500/10 rounded-lg"
+                            onClick={() => void handleEmailStatement(person)}
+                            disabled={emailingIds.has(person.id)}
+                            className="p-2 text-gray-400 hover:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-500/10 rounded-lg disabled:opacity-50"
                             title="Send via Email"
                           >
-                            <Mail size={16} />
+                            {emailingIds.has(person.id) ? (
+                              <Clock size={16} className="animate-pulse" />
+                            ) : (
+                              <Mail size={16} />
+                            )}
                           </button>
                         )}
                         <button
-                          onClick={() => statement && onSendStatement(statement.id, 'print')}
+                          onClick={() => {
+                            handleDownloadPdf(person);
+                            if (statement) {
+                              onSendStatement(statement.id, 'print');
+                            } else {
+                              onMarkStatementSent?.(person.id, selectedYear, 'print');
+                            }
+                          }}
                           className="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg"
                           title="Print"
                         >
@@ -875,7 +1006,7 @@ export function GivingStatements({
                   <div>
                     <p className="font-medium text-gray-900 dark:text-dark-100">Send via Email</p>
                     <p className="text-sm text-gray-500 dark:text-dark-400">
-                      Statements will be sent as PDF attachments
+                      Statements will be emailed to each donor
                     </p>
                   </div>
                 </label>
@@ -920,6 +1051,8 @@ export function GivingStatements({
                 onClick={() => {
                   if (bulkSendMethod === 'print') {
                     handleDownloadAllPdf();
+                  } else {
+                    void handleBulkEmail();
                   }
                   setShowBulkSend(false);
                 }}

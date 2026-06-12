@@ -3,9 +3,17 @@
  *
  * Manages agent configuration, state, and execution.
  * Provides a unified interface for the agent dashboard.
+ *
+ * Config persistence: localStorage is the fast local cache, but the
+ * source of truth is church_agent_settings.messaging_settings in
+ * Supabase (read/written via /api/agents/settings). The daily cron
+ * reads the same row, so toggles made here control the automated
+ * sends. In demo mode (no Clerk token) we silently stay on
+ * localStorage only.
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { getClerkTokenProvider } from '../lib/supabase';
 import {
   LifeEventAgent,
   DonationProcessingAgent,
@@ -63,6 +71,13 @@ interface UseAgentsOptions {
 }
 
 const STORAGE_KEY_PREFIX = 'grace-crm-agent-';
+
+async function agentSettingsAuthHeaders(): Promise<Record<string, string> | null> {
+  const provider = getClerkTokenProvider();
+  const token = provider ? await provider() : null;
+  if (!token) return null;
+  return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
 
 export function useAgents({
   churchId,
@@ -158,6 +173,70 @@ export function useAgents({
       JSON.stringify(newMemberConfig)
     );
   }, [newMemberConfig]);
+
+  // Hydrate config from Supabase (church_agent_settings.messaging_settings).
+  // Remote config wins over localStorage when present.
+  const remoteHydratedRef = useRef(false);
+  const skipNextSaveRef = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const headers = await agentSettingsAuthHeaders();
+        if (!headers) return; // demo mode — localStorage only
+        const res = await fetch('/api/agents/settings', { headers });
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { messaging_settings?: Record<string, unknown> };
+        const remote = data.messaging_settings ?? {};
+        const hasRemote = Boolean(
+          remote['life-event-agent'] || remote['donation-processing-agent'] || remote['new-member-agent']
+        );
+        // Applying remote state re-triggers the save effect once; skip that echo.
+        if (hasRemote) skipNextSaveRef.current = true;
+        if (remote['life-event-agent']) setLifeEventConfig(remote['life-event-agent'] as LifeEventConfig);
+        if (remote['donation-processing-agent']) setDonationConfig(remote['donation-processing-agent'] as DonationProcessingConfig);
+        if (remote['new-member-agent']) setNewMemberConfig(remote['new-member-agent'] as NewMemberConfig);
+      } catch {
+        // Network/auth issues — stay on localStorage.
+      } finally {
+        if (!cancelled) remoteHydratedRef.current = true;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Persist config changes back to Supabase (debounced) so the daily
+  // messaging cron picks them up. Fire-and-forget; localStorage already
+  // captured the change synchronously above.
+  useEffect(() => {
+    if (!remoteHydratedRef.current) return;
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      void (async () => {
+        try {
+          const headers = await agentSettingsAuthHeaders();
+          if (!headers) return;
+          await fetch('/api/agents/settings', {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({
+              messaging_settings: {
+                'life-event-agent': lifeEventConfig,
+                'donation-processing-agent': donationConfig,
+                'new-member-agent': newMemberConfig,
+              },
+            }),
+          });
+        } catch {
+          // Best-effort sync; the next change will retry.
+        }
+      })();
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [lifeEventConfig, donationConfig, newMemberConfig]);
 
   // Create agent context
   const createContext = useCallback(

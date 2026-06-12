@@ -5,6 +5,9 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
 
+  // Fallback church UUID when Clerk isn't configured (single-tenant interim)
+  readonly VITE_DEFAULT_CHURCH_ID?: string;
+
   // Clerk (Authentication)
   readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 

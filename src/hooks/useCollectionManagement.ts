@@ -179,6 +179,38 @@ export function useCollectionManagement(giving: GivingRecord[]) {
     );
   };
 
+  // Mark a statement sent by person + year, creating the statement record
+  // if it was never explicitly generated (used after a real email send).
+  const markStatementSent = (personId: string, year: number, method: 'email' | 'print') => {
+    const now = new Date().toISOString();
+    setGivingStatements((prev) => {
+      const existing = prev.find((s) => s.personId === personId && s.year === year);
+      if (existing) {
+        return prev.map((s) =>
+          s.id === existing.id ? { ...s, sentAt: now, sentMethod: method } : s
+        );
+      }
+      const personGiving = giving.filter(
+        (g) => g.personId === personId && new Date(g.date).getFullYear() === year
+      );
+      const byFund: Record<string, number> = {};
+      personGiving.forEach((g) => {
+        byFund[g.fund] = (byFund[g.fund] || 0) + g.amount;
+      });
+      const newStatement: GivingStatement = {
+        id: `stmt-${Date.now()}-${personId}`,
+        personId,
+        year,
+        totalAmount: personGiving.reduce((sum, g) => sum + g.amount, 0),
+        byFund,
+        generatedAt: now,
+        sentAt: now,
+        sentMethod: method,
+      };
+      return [...prev, newStatement];
+    });
+  };
+
   return {
     // Data
     campaigns,
@@ -200,5 +232,6 @@ export function useCollectionManagement(giving: GivingRecord[]) {
     // Statement actions
     generateStatement,
     sendStatement,
+    markStatementSent,
   };
 }

@@ -18,8 +18,10 @@ import {
 import { supabase } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 
-// Default church ID for demo/fallback mode
-const DEFAULT_CHURCH_ID = 'demo-church';
+// Default church ID for demo/fallback mode. When Supabase is configured but
+// Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
+// at the real church row so reads and writes carry a valid UUID.
+const DEFAULT_CHURCH_ID: string = import.meta.env.VITE_DEFAULT_CHURCH_ID || 'demo-church';
 
 interface AuthContextType {
   isLoaded: boolean;
@@ -134,7 +136,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
                 first_name: clerkUser.firstName,
                 last_name: clerkUser.lastName,
                 role: 'staff', // Default role
-                church_id: 'demo-church', // Default church
+                church_id: DEFAULT_CHURCH_ID, // Default church
               })
               .select()
               .single();
@@ -165,7 +167,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
             lastName: clerkUser.lastName || 'User',
             imageUrl: clerkUser.imageUrl,
             role: 'admin',
-            churchId: 'demo-church',
+            churchId: DEFAULT_CHURCH_ID,
             createdAt: new Date().toISOString(),
           };
           setUser(mockUser);

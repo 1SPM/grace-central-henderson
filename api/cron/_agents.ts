@@ -15,6 +15,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { listChurchesWithAgents, runAgentsForChurch, type RunResult } from '../_lib/agents/runner.js';
+import { runMessagingAgentsForChurch, type MessagingRunResult } from '../_lib/agents/messaging.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -43,6 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const results: Array<RunResult | { churchId: string; error: string }> = [];
+  const messagingResults: Array<MessagingRunResult | { churchId: string; error: string }> = [];
   let succeeded = 0;
   let failed = 0;
 
@@ -57,6 +59,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       results.push({ churchId, error: msg });
       failed += 1;
     }
+
+    // Messaging agents (life-event greetings, new-member drip, donation
+    // thank-yous) queue into email_outbox; the send-pending-emails cron
+    // drains it an hour later. Failures here don't fail the church run.
+    try {
+      const m = await runMessagingAgentsForChurch(supabase, churchId, startedAt);
+      messagingResults.push(m);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[agents cron] messaging failed', { churchId, msg });
+      messagingResults.push({ churchId, error: msg });
+    }
   }
 
   return res.status(200).json({
@@ -67,5 +81,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     churches_succeeded: succeeded,
     churches_failed: failed,
     results,
+    messaging_results: messagingResults,
   });
 }

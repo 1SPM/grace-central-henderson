@@ -13,6 +13,7 @@ import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
 import { useChurchPlan } from '../hooks/useChurchPlan';
+import { useServerAgents } from '../hooks/useServerAgents';
 import { useTutorial } from '../contexts/TutorialContext';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory, Announcement, AnnouncementCategory, DiscipleshipMilestone, MilestoneType } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
@@ -161,6 +162,7 @@ interface ViewRendererProps {
     deletePledge: (id: string) => void;
     generateStatement: (personId: string, year: number) => void;
     sendStatement: (statementId: string, method: 'email' | 'print') => void;
+    markStatementSent: (personId: string, year: number, method: 'email' | 'print') => void;
   };
   charityBasketMgmt: {
     baskets: CharityBasket[];
@@ -226,6 +228,7 @@ export function ViewRenderer(props: ViewRendererProps) {
   const { getBlockedMessage } = useRouteGuard();
   const { openPicker: openTutorialPicker } = useTutorial();
   const { plan: currentPlan } = useChurchPlan();
+  const serverAgentData = useServerAgents(churchId);
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -456,8 +459,13 @@ export function ViewRenderer(props: ViewRendererProps) {
             giving={giving}
             people={people}
             statements={collectionMgmt.givingStatements}
+            churchName={churchName}
+            churchAddress={[settings?.profile?.address, settings?.profile?.city, settings?.profile?.state, settings?.profile?.zip].filter(Boolean).join(', ') || undefined}
+            churchPhone={settings?.profile?.phone || undefined}
+            churchEmail={settings?.profile?.email || undefined}
             onGenerateStatement={collectionMgmt.generateStatement}
             onSendStatement={collectionMgmt.sendStatement}
+            onMarkStatementSent={collectionMgmt.markStatementSent}
             onBack={() => setView('giving')}
           />
         );
@@ -529,6 +537,11 @@ export function ViewRenderer(props: ViewRendererProps) {
               onToggleAgent={agents.toggleAgent}
               onUpdateConfig={agents.updateConfig}
               onRunAgent={agents.runAgent}
+              serverAgents={serverAgentData.serverAgents}
+              serverObservations={serverAgentData.observations}
+              serverAgentsRunning={serverAgentData.running}
+              serverRunError={serverAgentData.runError}
+              onRunServerAgents={() => void serverAgentData.runNow()}
             />
           </div>
         );

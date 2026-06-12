@@ -72,6 +72,8 @@ interface UseAppHandlersProps {
   setSelectedPersonId: (id: string | null) => void;
   openPersonForm: (person?: Person) => void;
   closePersonForm: () => void;
+  /** Fired after a person's status changes (e.g. visitor → member) so agents can react. */
+  onPersonStatusChange?: (personId: string, previousStatus: string, newStatus: string) => void;
 }
 
 export function useAppHandlers({
@@ -96,6 +98,7 @@ export function useAppHandlers({
   setSelectedPersonId,
   openPersonForm,
   closePersonForm,
+  onPersonStatusChange,
 }: UseAppHandlersProps) {
   const toast = useToast();
 
@@ -322,6 +325,7 @@ export function useAppHandlers({
   const handleSavePerson = useCallback(async (personData: Omit<Person, 'id'> | Person) => {
     try {
       if ('id' in personData) {
+        const previousStatus = dbPeople.find(p => p.id === personData.id)?.status;
         await updatePerson(personData.id, {
           first_name: personData.firstName,
           last_name: personData.lastName,
@@ -340,6 +344,9 @@ export function useAppHandlers({
           tags: personData.tags,
           family_id: personData.familyId || null,
         });
+        if (previousStatus && previousStatus !== personData.status) {
+          onPersonStatusChange?.(personData.id, previousStatus, personData.status);
+        }
       } else {
         await addPerson({
           church_id: churchId,
@@ -366,13 +373,17 @@ export function useAppHandlers({
       log.error('Failed to save person', error);
       toast.error('Failed to save person. Please try again.');
     }
-  }, [addPerson, updatePerson, churchId, closePersonForm, toast]);
+  }, [addPerson, updatePerson, churchId, closePersonForm, toast, dbPeople, onPersonStatusChange]);
 
   const handleBulkUpdateStatus = useCallback(async (ids: string[], status: Person['status']) => {
     let failures = 0;
     for (const id of ids) {
       try {
+        const previousStatus = dbPeople.find(p => p.id === id)?.status;
         await updatePerson(id, { status });
+        if (previousStatus && previousStatus !== status) {
+          onPersonStatusChange?.(id, previousStatus, status);
+        }
       } catch (error) {
         log.error(`Failed to update status for person ${id}`, error);
         failures++;
@@ -381,7 +392,7 @@ export function useAppHandlers({
     if (failures > 0) {
       toast.error(`Failed to update ${failures} of ${ids.length} people.`);
     }
-  }, [updatePerson, toast]);
+  }, [updatePerson, toast, dbPeople, onPersonStatusChange]);
 
   const handleBulkAddTag = useCallback(async (ids: string[], tag: string) => {
     let failures = 0;

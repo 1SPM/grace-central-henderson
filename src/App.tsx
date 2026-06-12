@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import type { View } from './types';
 import { resolveAddressee } from './lib/greeting';
 import { useAuthContext } from './contexts/AuthContext';
@@ -150,6 +150,10 @@ function App() {
     setShowWizard(true);
   }, []);
 
+  // Bridge: useAppHandlers is created before useAgents, so route status-change
+  // events through a ref that the agents hook fills in below.
+  const personStatusChangeRef = useRef<((personId: string, previousStatus: string, newStatus: string) => void) | null>(null);
+
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
     churchId,
@@ -173,6 +177,8 @@ function App() {
     setSelectedPersonId,
     openPersonForm: modals.openPersonForm,
     closePersonForm: modals.closePersonForm,
+    onPersonStatusChange: (personId, previousStatus, newStatus) =>
+      personStatusChangeRef.current?.(personId, previousStatus, newStatus),
   });
 
   // Agent task creation callback
@@ -231,6 +237,15 @@ function App() {
     })),
     onCreateTask: handleAgentCreateTask,
   });
+
+  // When a person becomes a member, kick off the New Member welcome sequence.
+  const agentHandleNewMember = agents.handleNewMember;
+  useEffect(() => {
+    personStatusChangeRef.current = (personId, previousStatus, newStatus) => {
+      void agentHandleNewMember(personId, previousStatus, newStatus);
+    };
+    return () => { personStatusChangeRef.current = null; };
+  }, [agentHandleNewMember]);
 
   // Keyboard shortcuts
   useEffect(() => {

@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, AlertTriangle, Mail, Smartphone, CheckCheck } from 'lucide-react';
+import { Bell, AlertTriangle, Mail, Smartphone, CheckCheck, Bot } from 'lucide-react';
 import { useRealtimeNotifications, type LiveNotification } from '../hooks/useRealtimeNotifications';
 
 interface NotificationCenterProps {
@@ -15,7 +15,15 @@ interface NotificationCenterProps {
 function iconFor(kind: LiveNotification['kind']) {
   if (kind === 'crisis') return <AlertTriangle size={14} className="text-red-500" />;
   if (kind === 'inbox') return <Mail size={14} className="text-blue-500" />;
+  if (kind === 'agent') return <Bot size={14} className="text-purple-500" />;
   return <Smartphone size={14} className="text-indigo-500" />;
+}
+
+function targetView(n: LiveNotification): string {
+  if (n.kind === 'agent') return 'agents';
+  if (n.id.startsWith('agent-')) return n.kind === 'crisis' ? 'pastoral-care' : 'agents';
+  if (n.kind === 'inbox' || n.kind === 'crisis') return n.id.startsWith('inbox-') ? 'mail' : 'pastoral-care';
+  return 'portal-activity';
 }
 
 function timeAgo(iso: string): string {
@@ -93,7 +101,7 @@ export function NotificationCenter({ churchId, onNavigate }: NotificationCenterP
                   key={n.id}
                   onClick={() => {
                     setOpen(false);
-                    onNavigate?.(n.kind === 'inbox' || n.kind === 'crisis' ? (n.id.startsWith('inbox-') ? 'mail' : 'pastoral-care') : 'portal-activity');
+                    onNavigate?.(targetView(n));
                   }}
                   className={`w-full px-4 py-2.5 flex items-start gap-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors border-b border-gray-50 dark:border-dark-800 last:border-0 ${
                     !n.read ? 'bg-indigo-50/40 dark:bg-indigo-500/5' : ''

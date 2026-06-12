@@ -23,6 +23,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'agentmail/reply': () => import('./agentmail/_reply.js'),
   'agentmail/send': () => import('./agentmail/_send.js'),
   'agents/run': () => import('./agents/_run.js'),
+  'agents/settings': () => import('./agents/_settings.js'),
   'ai/generate': () => import('./ai/_generate.js'),
   'billing/connect-onboarding': () => import('./billing/_connect-onboarding.js'),
   'billing/connect-status': () => import('./billing/_connect-status.js'),
