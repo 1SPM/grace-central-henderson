@@ -1,10 +1,10 @@
 import { lazy, Suspense, ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
-import { ActionFeed } from './ActionFeed';
+import { ActionCenter } from './ActionCenter';
 import { GraceAIHub } from './grace/GraceAIHub';
-import { MailInbox } from './MailInbox';
-import { PeopleList } from './PeopleList';
+import { Congregation } from './Congregation';
+import { navigateView } from '../lib/actionCenterNav';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
 import { NotFound } from './NotFound';
@@ -20,7 +20,6 @@ import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberC
 
 // Lazy load less frequently used views for code splitting
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
-const Groups = lazy(() => import('./Groups').then(m => ({ default: m.Groups })));
 const Prayer = lazy(() => import('./Prayer').then(m => ({ default: m.Prayer })));
 const GivingHub = lazy(() => import('./giving/GivingHub').then(m => ({ default: m.GivingHub })));
 const WalletsView = lazy(() => import('./financial/WalletsView').then(m => ({ default: m.WalletsView })));
@@ -275,11 +274,24 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'feed':
       return (
-        <ActionFeed
+        <ActionCenter
           people={people}
           tasks={tasks}
+          prayers={prayers}
           onToggleTask={handlers.toggleTask}
           onSelectPerson={handlers.viewPerson}
+        />
+      );
+
+    case 'mail':
+      return (
+        <ActionCenter
+          people={people}
+          tasks={tasks}
+          prayers={prayers}
+          onToggleTask={handlers.toggleTask}
+          onSelectPerson={handlers.viewPerson}
+          defaultTab="mail"
         />
       );
 
@@ -308,18 +320,40 @@ export function ViewRenderer(props: ViewRendererProps) {
         />
       );
 
-    case 'mail':
-      return <MailInbox people={people} tasks={tasks} prayers={prayers} />;
-
     case 'people':
       return (
-        <PeopleList
+        <Congregation
           people={people}
+          groups={groups}
+          churchId={churchId}
           onViewPerson={handlers.viewPerson}
           onAddPerson={handlers.addPerson}
           onBulkUpdateStatus={handlers.bulkUpdateStatus}
           onBulkAddTag={handlers.bulkAddTag}
           onImportCSV={handlers.importCSV}
+          onCreateGroup={handlers.createGroup}
+          onAddMember={handlers.addGroupMember}
+          onRemoveMember={handlers.removeGroupMember}
+          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+        />
+      );
+
+    case 'groups':
+      return (
+        <Congregation
+          people={people}
+          groups={groups}
+          churchId={churchId}
+          onViewPerson={handlers.viewPerson}
+          onAddPerson={handlers.addPerson}
+          onBulkUpdateStatus={handlers.bulkUpdateStatus}
+          onBulkAddTag={handlers.bulkAddTag}
+          onImportCSV={handlers.importCSV}
+          onCreateGroup={handlers.createGroup}
+          onAddMember={handlers.addGroupMember}
+          onRemoveMember={handlers.removeGroupMember}
+          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+          defaultTab="groups"
         />
       );
 
@@ -394,20 +428,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             onAssign={handlers.assignVolunteer}
             onUpdateStatus={handlers.updateVolunteerStatus}
             onRemove={handlers.removeVolunteer}
-          />
-        );
-
-      case 'groups':
-        return (
-          <Groups
-            groups={groups}
-            people={people}
-            churchId={churchId}
-            onCreateGroup={handlers.createGroup}
-            onAddMember={handlers.addGroupMember}
-            onRemoveMember={handlers.removeGroupMember}
-            onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
-            onViewPerson={handlers.viewPerson}
           />
         );
 

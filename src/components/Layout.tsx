@@ -45,6 +45,7 @@ import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHe
 import { GraceOrb } from './grace/GraceOrb';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
+import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
 
 interface LayoutProps {
@@ -73,10 +74,8 @@ const navSections: NavSection[] = [
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={16} />, tone: 'indigo' },
       { view: 'grace', label: 'AI Clergy', icon: <Sparkles size={16} />, tone: 'violet' },
-      { view: 'mail', label: 'Mail', icon: <Mail size={16} />, tone: 'sky' },
-      { view: 'feed', label: 'Follow-ups', icon: <ListTodo size={16} />, tone: 'rose' },
-      { view: 'people', label: 'People', icon: <Users size={16} />, tone: 'sky' },
-      { view: 'groups', label: 'Groups', icon: <Users2 size={16} />, tone: 'violet' },
+      { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
+      { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={16} />, tone: 'amber' },
       { view: 'sunday-prep', label: 'Sunday', icon: <Church size={16} />, tone: 'emerald' },
       { view: 'live-service', label: 'Live Service', icon: <Radio size={16} />, tone: 'rose' },
@@ -117,9 +116,9 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
 const viewLabels: Record<View, string> = {
   home: 'Home',
   dashboard: 'Dashboard',
-  feed: 'Actions',
+  feed: 'Action Center',
   pipeline: 'Pipeline',
-  people: 'People',
+  people: 'Congregation',
   person: 'Profile',
   tasks: 'Follow-Ups',
   attendance: 'Attendance',
@@ -254,7 +253,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const getBreadcrumbs = () => {
     if (currentView === 'person') {
       return [
-        { label: 'People', view: 'people' as View },
+        { label: 'Congregation', view: 'people' as View },
         { label: 'Profile', view: currentView },
       ];
     }
@@ -360,7 +359,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                 {section.items.map((item) => {
                   const isActive = currentView === item.view ||
                     (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
-                    (item.view === 'people' && ['person', 'skills'].includes(currentView)) ||
+                    (item.view === 'people' && ['person', 'skills', 'groups'].includes(currentView)) ||
                     (item.view === 'pastoral-care' && currentView === 'leader-management') ||
                     (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
 
@@ -563,7 +562,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           )}
 
           {/* Live notification center (Supabase Realtime) */}
-          <NotificationCenter churchId={churchId} onNavigate={(v) => setView(v as View)} />
+          <NotificationCenter churchId={churchId} onNavigate={(v) => navigateView(v, setView)} />
         </header>
 
         <TrialBanner />

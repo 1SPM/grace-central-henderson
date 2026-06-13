@@ -32,10 +32,9 @@ type SearchResult = {
 // Primary views exposed to the command palette. Lean, not all 52.
 const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
   { view: 'dashboard', label: 'Home', subtitle: 'Dashboard', icon: <LayoutDashboard size={16} /> },
-  { view: 'feed', label: 'Actions', subtitle: 'Today\'s follow-ups', icon: <ListTodo size={16} /> },
-  { view: 'people', label: 'People', subtitle: 'Directory', icon: <Users size={16} /> },
+  { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups & mail', icon: <ListTodo size={16} /> },
+  { view: 'people', label: 'Congregation', subtitle: 'Directory & small groups', icon: <Users size={16} /> },
   { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },
-  { view: 'groups', label: 'Groups', subtitle: 'Small groups', icon: <Users2 size={16} /> },
   { view: 'calendar', label: 'Calendar', subtitle: 'Events', icon: <Calendar size={16} /> },
   { view: 'giving', label: 'Giving', subtitle: 'Donations & pledges', icon: <DollarSign size={16} /> },
   { view: 'announcements', label: 'Announcements', subtitle: 'Announcement board', icon: <Megaphone size={16} /> },

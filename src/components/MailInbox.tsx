@@ -27,6 +27,8 @@ interface MailInboxProps {
   people: Person[];
   tasks: Task[];
   prayers: PrayerRequest[];
+  /** When true, hide the page header (used inside Action Center tab). */
+  embedded?: boolean;
 }
 
 type FilterKey = 'all' | 'review' | 'auto' | 'crisis';
@@ -42,7 +44,7 @@ function formatRelativeTime(iso: string): string {
   return `${d}d ago`;
 }
 
-export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
+export function MailInbox({ people, tasks, prayers, embedded = false }: MailInboxProps) {
   const [rows, setRows] = useState<MailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -196,14 +198,21 @@ export function MailInbox({ people, tasks, prayers }: MailInboxProps) {
   }, [replyDrafts]);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <header className="mb-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Mail size={20} className="text-amber-700 dark:text-amber-400" />
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Mail</h1>
-        </div>
-        <p className="text-sm text-gray-500 dark:text-dark-400">Inbound emails to <code className="text-amber-700 dark:text-amber-400">askgrace@agentmail.to</code> — Grace handles what she can, surfaces the rest.</p>
-      </header>
+    <div className={`max-w-5xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
+      {!embedded && (
+        <header className="mb-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Mail size={20} className="text-amber-700 dark:text-amber-400" />
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Mail</h1>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-dark-400">Inbound emails to <code className="text-amber-700 dark:text-amber-400">askgrace@agentmail.to</code> — Grace handles what she can, surfaces the rest.</p>
+        </header>
+      )}
+      {embedded && (
+        <p className="text-sm text-gray-500 dark:text-dark-400 mb-4">
+          Inbound emails to <code className="text-amber-700 dark:text-amber-400">askgrace@agentmail.to</code> — Grace handles what she can, surfaces the rest.
+        </p>
+      )}
 
       <div className="flex gap-1.5 mb-4 flex-wrap">
         {([

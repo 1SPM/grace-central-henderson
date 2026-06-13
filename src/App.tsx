@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import type { View } from './types';
 import { resolveAddressee } from './lib/greeting';
+import { navigateView } from './lib/actionCenterNav';
 import { useAuthContext, SignInPage } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
@@ -637,7 +638,7 @@ function App() {
           onSelectPerson={handlers.viewPerson}
           onSelectTask={() => setView('tasks')}
           onSelectPrayer={() => setView('prayer')}
-          onNavigate={(v) => setView(v)}
+          onNavigate={(v) => navigateView(v, setView)}
           onClose={modals.closeSearch}
         />
       )}

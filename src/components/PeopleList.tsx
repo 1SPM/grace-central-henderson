@@ -21,6 +21,8 @@ interface PeopleListProps {
   onBulkUpdateStatus?: (ids: string[], status: MemberStatus) => void;
   onBulkAddTag?: (ids: string[], tag: string) => void;
   onImportCSV?: (people: Partial<Person>[]) => Promise<void>;
+  /** When true, hide page title (used inside Congregation tab). */
+  embedded?: boolean;
 }
 
 const statusLabels: Record<MemberStatus, string> = {
@@ -37,7 +39,8 @@ export function PeopleList({
   onAddPerson,
   onBulkUpdateStatus,
   onBulkAddTag,
-  onImportCSV
+  onImportCSV,
+  embedded = false,
 }: PeopleListProps) {
   const toast = useToast();
   const [search, setSearch] = useState('');
@@ -299,16 +302,24 @@ export function PeopleList({
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">People</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
+    <div className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
+      <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
+        {!embedded ? (
+          <div>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">People</h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              {filtered.length === people.length
+                ? `${people.length} total people in your congregation`
+                : `${filtered.length} of ${people.length} people`}
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-dark-400">
             {filtered.length === people.length
               ? `${people.length} total people in your congregation`
               : `${filtered.length} of ${people.length} people`}
           </p>
-        </div>
+        )}
         <div className="flex items-center gap-3">
           {/* Sort Dropdown */}
           <div className="relative">

@@ -13,9 +13,11 @@ interface GroupsProps {
   onRemoveMember?: (groupId: string, personId: string) => void;
   onEmailGroup?: (groupId: string) => void;
   onViewPerson?: (personId: string) => void;
+  /** When true, hide page title (used inside Congregation tab). */
+  embedded?: boolean;
 }
 
-export function Groups({ groups, people, churchId, onCreateGroup, onAddMember, onRemoveMember, onEmailGroup, onViewPerson }: GroupsProps) {
+export function Groups({ groups, people, churchId, onCreateGroup, onAddMember, onRemoveMember, onEmailGroup, onViewPerson, embedded = false }: GroupsProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
@@ -84,15 +86,21 @@ export function Groups({ groups, people, churchId, onCreateGroup, onAddMember, o
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Small Groups</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
+      <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
+        {!embedded ? (
+          <div>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Small Groups</h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              {activeGroups.length} groups · {totalMembers} members
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-dark-400">
             {activeGroups.length} groups · {totalMembers} members
           </p>
-        </div>
+        )}
         <button
           onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors font-medium"
