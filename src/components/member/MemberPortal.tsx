@@ -239,9 +239,10 @@ export function MemberPortal({
         return (
           <MemberJourneyPage
             milestones={milestones.filter(m => m.personId === currentMember?.id)}
+            member={currentMember}
             personId={currentMember?.id}
             churchId={churchId}
-            memberName={currentMember?.firstName}
+            giving={giving.filter(g => g.personId === currentMember?.id)}
           />
         );
 

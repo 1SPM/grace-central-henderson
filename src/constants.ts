@@ -23,6 +23,27 @@ const getBirthDateForUpcoming = (daysFromNow: number): string => {
 };
 
 export const SAMPLE_PEOPLE: Person[] = [
+  // === MAYA THOMPSON — primary demo portal member ===
+  {
+    id: 'maya-001',
+    firstName: 'Maya',
+    lastName: 'Thompson',
+    email: 'maya.thompson@centralhenderson.org',
+    phone: '(702) 555-0192',
+    status: 'member',
+    photo: 'https://i.pravatar.cc/150?u=maya-thompson-grace',
+    joinDate: '2022-03-20',
+    firstVisit: '2022-01-09',
+    birthDate: '1994-11-14',
+    address: '4821 Sunrise Blvd',
+    city: 'Henderson',
+    state: 'NV',
+    zip: '89002',
+    tags: ['partner', 'young-adult', 'womens-ministry'],
+    smallGroups: ['women-connect'],
+    notes: 'Partner-level giving member. Active in Women\'s Ministry. Joined after Welcome Sunday January 2022. Reflection rhythm: 7 days.',
+  },
+
   // === ORIGINAL PEOPLE (with birthDates added) ===
   {
     id: '1',
@@ -811,6 +832,13 @@ export const SAMPLE_ATTENDANCE: Attendance[] = [
 ];
 
 export const SAMPLE_GIVING: Giving[] = [
+  // === MAYA THOMPSON — Partner-level recurring giving ===
+  { id: 'mg-1', personId: 'maya-001', amount: 220, fund: 'tithe', date: getDateString(-60), method: 'online', isRecurring: true, note: 'Monthly tithe' },
+  { id: 'mg-2', personId: 'maya-001', amount: 220, fund: 'tithe', date: getDateString(-30), method: 'online', isRecurring: true, note: 'Monthly tithe' },
+  { id: 'mg-3', personId: 'maya-001', amount: 220, fund: 'tithe', date: getDateString(0), method: 'online', isRecurring: true, note: 'Monthly tithe' },
+  { id: 'mg-4', personId: 'maya-001', amount: 50, fund: 'missions', date: getDateString(-14), method: 'online', isRecurring: false, note: 'Community outreach fund' },
+  { id: 'mg-5', personId: 'maya-001', amount: 18.42, fund: 'offering', date: getDateString(-2), method: 'card', isRecurring: false, note: 'Card-generated · GRACE Impact Card routed gift' },
+
   // === ORIGINAL GIVING RECORDS ===
   { id: '1', personId: '2', amount: 250, fund: 'tithe', date: getDateString(-14), method: 'online', isRecurring: true },
   { id: '2', personId: '4', amount: 500, fund: 'tithe', date: getDateString(-14), method: 'check', isRecurring: false },

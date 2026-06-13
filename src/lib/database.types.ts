@@ -211,7 +211,9 @@ export type MemberActivityEventType =
   | 'connection_request' | 'connection_accept' | 'group_post' | 'group_join'
   | 'community_view' | 'watch_join' | 'watch_chat'
   // My Journey portal tab events
-  | 'journey_view' | 'milestone_achieved' | 'milestone_step_request';
+  | 'journey_view' | 'milestone_achieved' | 'milestone_step_request'
+  // Reflection & study events (Journal / Bible Study tabs)
+  | 'journal_entry' | 'bible_study' | 'mood_check';
 
 // Discipleship milestone row (discipleship_milestones table)
 export type MilestoneTypeDb =

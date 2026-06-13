@@ -95,9 +95,14 @@ export function useCurrentMember(dbPeople: DbPerson[], isDemo: boolean): Current
       if (byEmail) return byEmail;
     }
 
-    // 3. Demo mode: pick a stable demo member so personalized flows work
+    // 3. Demo mode: prefer Maya Thompson as the showcase portal member,
+    //    fall back to any other member so personalized flows always work
     if (isDemo) {
-      return dbPeople.find(p => p.status === 'member') ?? null;
+      return (
+        dbPeople.find(p => p.id === 'maya-001') ??
+        dbPeople.find(p => p.status === 'member') ??
+        null
+      );
     }
 
     return null;

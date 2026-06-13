@@ -28,6 +28,8 @@ export interface PortalEngagementSummary {
   journeyViews7d: number;
   /** Milestone step requests submitted by members in the last 7 days */
   stepRequests7d: number;
+  /** Journal reflections saved in the last 7 days */
+  journalEntries7d: number;
 }
 
 export interface MemberEngagementRow {
@@ -48,6 +50,7 @@ const EMPTY_SUMMARY: PortalEngagementSummary = {
   totalEvents30d: 0,
   journeyViews7d: 0,
   stepRequests7d: 0,
+  journalEntries7d: 0,
 };
 
 export function usePortalActivity(churchId: string) {
@@ -103,6 +106,7 @@ export function usePortalActivity(churchId: string) {
       totalEvents30d: events.length,
       journeyViews7d: count('journey_view'),
       stepRequests7d: count('milestone_step_request'),
+      journalEntries7d: count('journal_entry'),
     };
   }, [events]);
 

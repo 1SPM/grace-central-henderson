@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
-import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup, HelpRequest } from '../../types';
+import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup, HelpRequest, DiscipleshipMilestone } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -18,6 +18,7 @@ interface MemberPortalPreviewProps {
   prayers?: PrayerRequest[];
   groups?: SmallGroup[];
   churchId?: string;
+  milestones?: DiscipleshipMilestone[];
   onBack: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -42,6 +43,7 @@ export function MemberPortalPreview({
   prayers,
   groups = [],
   churchId,
+  milestones = [],
   onBack,
   onRSVP,
   onCheckIn,
@@ -53,6 +55,11 @@ export function MemberPortalPreview({
   onSendMessage,
   helpRequests = [],
 }: MemberPortalPreviewProps) {
+  // Resolve demo member — prefer Maya Thompson, fall back to any member
+  const demoMember = useMemo(
+    () => people.find(p => p.id === 'maya-001') ?? people.find(p => p.status === 'member') ?? null,
+    [people]
+  );
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
   const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
 
@@ -97,6 +104,8 @@ export function MemberPortalPreview({
           prayers={prayers}
           groups={groups}
           churchId={churchId}
+          currentMember={demoMember}
+          milestones={milestones}
           onBack={onBack}
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
@@ -179,6 +188,8 @@ export function MemberPortalPreview({
                       prayers={prayers}
                       groups={groups}
                       churchId={churchId}
+                      currentMember={demoMember}
+                      milestones={milestones}
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
                       onPastorSignup={onPastorSignup}

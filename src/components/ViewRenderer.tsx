@@ -696,6 +696,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             prayers={prayers}
             groups={groups}
             churchId={churchId}
+            milestones={discipleshipData.milestones}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}

@@ -56,10 +56,14 @@ const EVENT_META: Record<string, { label: string; icon: typeof LogIn; color: str
   connection_request: { label: 'Connection request', icon: Users, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-500/10' },
   connection_accept: { label: 'Connection accepted', icon: Users, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-500/10' },
   community_view: { label: 'Community view', icon: Eye, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-dark-700' },
-  // My Journey events
+  // My Journey — milestone events
   journey_view: { label: 'Viewed My Journey', icon: MapPin, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-500/10' },
   milestone_achieved: { label: 'Milestone recorded', icon: Award, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
   milestone_step_request: { label: 'Next-step interest', icon: MapPin, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-500/10' },
+  // My Journey — reflection & study events
+  journal_entry: { label: 'Journal entry saved', icon: Award, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-500/10' },
+  bible_study: { label: 'Bible study progress', icon: Award, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-500/10' },
+  mood_check: { label: 'Mood logged', icon: Award, color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-500/10' },
 };
 
 function timeAgo(iso: string): string {
@@ -97,6 +101,9 @@ function describeEvent(e: MemberActivityEvent, personName: string | undefined): 
     case 'journey_view': return `${name} viewed their My Journey page`;
     case 'milestone_achieved': return `${name} achieved a milestone: ${String(e.metadata?.milestone_type ?? '').replace(/_/g, ' ')}`;
     case 'milestone_step_request': return `${name} expressed interest in: ${String(e.metadata?.milestone_type ?? '').replace(/_/g, ' ')}`;
+    case 'journal_entry': return `${name} saved a reflection (${String(e.metadata?.prompt_tag ?? 'journal')})${e.metadata?.mood ? ` · ${e.metadata.mood}` : ''}`;
+    case 'bible_study': return `${name} progressed in a Bible study${e.metadata?.completed ? ' · completed!' : ` · ${e.metadata?.progress ?? 0}%`}`;
+    case 'mood_check': return `${name} logged their mood: ${String(e.metadata?.mood ?? '')}`;
     default: return `${name} — ${e.event_type}`;
   }
 }
@@ -131,6 +138,7 @@ export function PortalActivity({ churchId, people, groups = [], onViewPerson }: 
     { label: 'Check-ins (7d)', value: summary.checkins7d, icon: QrCode, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-500/10' },
     { label: 'Journey views (7d)', value: summary.journeyViews7d, icon: MapPin, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-500/10' },
     { label: 'Step requests (7d)', value: summary.stepRequests7d, icon: Award, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-500/10' },
+    { label: 'Journal entries (7d)', value: summary.journalEntries7d, icon: Award, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-500/10' },
   ];
 
   return (
@@ -152,7 +160,7 @@ export function PortalActivity({ churchId, people, groups = [], onViewPerson }: 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 mb-6">
+      <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3 mb-6">
         {summaryCards.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-2`}>
