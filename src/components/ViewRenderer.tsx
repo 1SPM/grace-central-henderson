@@ -53,7 +53,11 @@ const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => (
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
-const CrisisCenterDispatch = lazy(() => import('./pastoral/CrisisCenterDispatch').then(m => ({ default: m.CrisisCenterDispatch })));
+const CrisisCenterDispatch = lazy(() =>
+  import(/* webpackChunkName: "crisis-dispatch-v3" */ './pastoral/CrisisCenterDispatch').then(m => ({
+    default: m.CrisisCenterDispatch,
+  })),
+);
 const PortalActivity = lazy(() => import('./PortalActivity').then(m => ({ default: m.PortalActivity })));
 const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));

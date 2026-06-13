@@ -85,7 +85,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        cacheId: 'grace-crm-crisis-dispatch-v2',
+        cacheId: 'grace-crm-crisis-dispatch-v3',
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
