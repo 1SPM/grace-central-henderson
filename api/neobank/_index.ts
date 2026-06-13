@@ -63,6 +63,8 @@ const POST_SCHEMA = {
   note: str({ max: 300 }),
 };
 
+type Db = SupabaseClient;
+
 function mergeCardMetadata(existing: unknown, patch: Record<string, unknown>) {
   const base = existing && typeof existing === 'object' && !Array.isArray(existing)
     ? existing as Record<string, unknown>
