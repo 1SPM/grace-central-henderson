@@ -16,6 +16,7 @@ import {
 } from '../../hooks/useImpactCardProgram';
 import { CardProgramSection } from './CardProgramSection';
 import { ImpactCardMonitoring } from './ImpactCardMonitoring';
+import { ImpactCardSetupGuide } from './ImpactCardSetupGuide';
 import { MemberWalletDetail } from './MemberWalletDetail';
 
 type RosterFilter = 'all' | 'active' | 'declines' | 'kyc_pending' | 'high_spend';
@@ -23,8 +24,10 @@ type RosterFilter = 'all' | 'active' | 'declines' | 'kyc_pending' | 'high_spend'
 interface WalletsViewProps {
   people: Person[];
   giving?: Giving[];
+  churchName?: string;
   initialPersonId?: string | null;
   onViewPortalActivity?: () => void;
+  onNavigate?: (view: import('../../types').View) => void;
 }
 
 function kycBadge(status: MemberAccountRow['kycStatus']) {
@@ -57,7 +60,7 @@ const FILTER_LABELS: Record<RosterFilter, string> = {
   high_spend: 'High spend',
 };
 
-export function WalletsView({ people, giving = [], initialPersonId, onViewPortalActivity }: WalletsViewProps) {
+export function WalletsView({ people, giving = [], churchName = 'Grace Church', initialPersonId, onViewPortalActivity, onNavigate }: WalletsViewProps) {
   const program = useImpactCardProgram();
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(initialPersonId ?? null);
@@ -105,6 +108,7 @@ export function WalletsView({ people, giving = [], initialPersonId, onViewPortal
         person={selected}
         adminData={program.data}
         giving={giving}
+        churchName={churchName}
         onBack={() => setSelectedId(null)}
         onRefresh={program.refetch}
         onViewPortalActivity={onViewPortalActivity}
@@ -152,6 +156,12 @@ export function WalletsView({ people, giving = [], initialPersonId, onViewPortal
 
       {program.state === 'ready' && program.data && (
         <>
+          <ImpactCardSetupGuide
+            adapterMode={program.data.adapter_mode}
+            onNavigate={onNavigate}
+            onViewPortalActivity={onViewPortalActivity}
+          />
+
           <CardProgramSection program={program} embedded />
 
           <div className="mt-8 mb-6">

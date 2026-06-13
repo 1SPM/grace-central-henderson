@@ -5,10 +5,13 @@ import {
   ArrowUpRight,
   BadgeCheck,
   Ban,
+  Copy,
   CreditCard,
+  Download,
   ExternalLink,
   Gift,
   Heart,
+  Landmark,
   Loader2,
   MapPin,
   Play,
@@ -25,6 +28,8 @@ import {
   cancelCard,
   freezeCard,
   issueCard,
+  issueReplacementCard,
+  markTransferForReview,
   retryTransfer,
   setCardLimits,
   setImpactRoute,
@@ -42,18 +47,126 @@ import {
   IMPACT_ROUTE_OPTIONS,
   spendMicroToEarnedPoints,
 } from '../../hooks/useImpactCardProgram';
+import { buildStatementInput, downloadImpactCardStatement } from './impactCardStatement';
 
 type DetailTab = 'overview' | 'transactions' | 'transfers' | 'giving' | 'route' | 'activity';
+
+type StaffAction = 'freeze' | 'cancel' | 'replace' | 'review_transfer';
 
 interface MemberWalletDetailProps {
   person: Person;
   adminData: AdminCardData;
   giving?: Giving[];
+  churchName?: string;
   onBack: () => void;
   onRefresh: () => Promise<void>;
   onViewPortalActivity?: () => void;
   busyId: string | null;
   withBusy: (id: string, fn: () => Promise<unknown>) => Promise<void>;
+}
+
+function copyText(value: string) {
+  void navigator.clipboard.writeText(value);
+}
+
+function StaffReasonModal({
+  title,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  confirmLabel: string;
+  onConfirm: (reason: string) => void;
+  onCancel: () => void;
+}) {
+  const [reason, setReason] = useState('');
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+      <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5 w-full max-w-md shadow-xl">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2">{title}</h3>
+        <textarea
+          value={reason}
+          onChange={e => setReason(e.target.value)}
+          placeholder="Staff reason (required)…"
+          rows={3}
+          className="w-full text-sm border border-gray-200 dark:border-dark-600 rounded-lg px-3 py-2 dark:bg-dark-800"
+        />
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onCancel} className="px-3 py-1.5 text-sm text-gray-500">Cancel</button>
+          <button
+            onClick={() => reason.trim().length >= 3 && onConfirm(reason.trim())}
+            disabled={reason.trim().length < 3}
+            className="px-3 py-1.5 text-sm font-medium bg-slate-900 text-white rounded-lg disabled:opacity-50"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DepositPanel({
+  account,
+  busyId,
+  personId,
+  withBusy,
+}: {
+  account: NonNullable<ReturnType<typeof getMemberAccount>>;
+  busyId: string | null;
+  personId: string;
+  withBusy: (id: string, fn: () => Promise<unknown>) => Promise<void>;
+}) {
+  const maskedAcct = `••••${account.account_number_last4}`;
+  return (
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+      <p className="section-eyebrow mb-3 flex items-center gap-1"><Landmark size={12} /> ACH deposit details</p>
+      <dl className="space-y-2 text-sm">
+        <div className="flex justify-between gap-2">
+          <dt className="text-gray-500 dark:text-dark-400">Account name</dt>
+          <dd className="font-medium text-gray-900 dark:text-dark-100">{account.account_name}</dd>
+        </div>
+        <div className="flex justify-between gap-2 items-center">
+          <dt className="text-gray-500 dark:text-dark-400">Account number</dt>
+          <dd className="flex items-center gap-1.5 font-mono text-gray-900 dark:text-dark-100">
+            {maskedAcct}
+            <button onClick={() => copyText(maskedAcct)} className="p-1 text-gray-400 hover:text-gray-600" title="Copy">
+              <Copy size={12} />
+            </button>
+          </dd>
+        </div>
+        {account.routing_number && (
+          <div className="flex justify-between gap-2 items-center">
+            <dt className="text-gray-500 dark:text-dark-400">Routing number</dt>
+            <dd className="flex items-center gap-1.5 font-mono text-gray-900 dark:text-dark-100">
+              {account.routing_number}
+              <button onClick={() => copyText(account.routing_number!)} className="p-1 text-gray-400 hover:text-gray-600" title="Copy">
+                <Copy size={12} />
+              </button>
+            </dd>
+          </div>
+        )}
+        <div className="flex justify-between gap-2">
+          <dt className="text-gray-500 dark:text-dark-400">Last synced</dt>
+          <dd className="text-gray-700 dark:text-dark-300">
+            {account.last_synced_at ? new Date(account.last_synced_at).toLocaleString() : '—'}
+          </dd>
+        </div>
+      </dl>
+      <p className="text-[10px] text-gray-400 dark:text-dark-500 mt-3 leading-relaxed">
+        Full account numbers are not stored in CRM (PCI). Unmasked values are available in the i2c merchant console.
+      </p>
+      <button
+        onClick={() => withBusy(`sync-${personId}`, () => syncAccountBalance(personId))}
+        disabled={busyId === `sync-${personId}`}
+        className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-dark-600 rounded-lg disabled:opacity-50"
+      >
+        {busyId === `sync-${personId}` ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+        Sync balance from i2c
+      </button>
+    </div>
+  );
 }
 
 function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: string | null }) {
@@ -100,6 +213,7 @@ export function MemberWalletDetail({
   person,
   adminData,
   giving = [],
+  churchName = 'Grace Church',
   onBack,
   onViewPortalActivity,
   busyId,
@@ -112,6 +226,7 @@ export function MemberWalletDetail({
   const [monthlyLimit, setMonthlyLimit] = useState('');
   const [routeLabel, setRouteLabel] = useState('');
   const [routeFund, setRouteFund] = useState('tithe');
+  const [staffAction, setStaffAction] = useState<{ type: StaffAction; cardId?: string; transferId?: string } | null>(null);
 
   const cards = getMemberCards(adminData, person.id);
   const account = getMemberAccount(adminData, person.id);
@@ -120,6 +235,33 @@ export function MemberWalletDetail({
   const allTransactions = getMemberTransactions(adminData, person.id);
   const kyc = adminData.kyc_queue.find(k => k.person_id === person.id);
   const activeCard = cards.find(c => c.status === 'active' || c.status === 'frozen') ?? cards[0];
+  const lastStaffAction = activeCard?.metadata?.last_staff_action;
+
+  const handleStaffConfirm = async (reason: string) => {
+    if (!staffAction) return;
+    const { type, cardId, transferId } = staffAction;
+    setStaffAction(null);
+    if (type === 'freeze' && cardId) {
+      await withBusy(cardId, () => freezeCard(cardId, reason));
+    } else if (type === 'cancel' && cardId) {
+      await withBusy(cardId, () => cancelCard(cardId, reason));
+    } else if (type === 'replace' && cardId) {
+      await withBusy(`replace-${cardId}`, () => issueReplacementCard(cardId, reason));
+    } else if (type === 'review_transfer' && transferId) {
+      await withBusy(`review-${transferId}`, () => markTransferForReview(transferId, reason));
+    }
+  };
+
+  const exportStatement = () => {
+    downloadImpactCardStatement(buildStatementInput(person, adminData, churchName, {
+      account,
+      impactRoute,
+      transactions: allTransactions,
+      transfers,
+      impactMtdMicroUsd: impactMtd,
+      spendMtdMicroUsd: mtdSpendMicro,
+    }));
+  };
 
   const transactions = useMemo(() => {
     if (txnFilter === 'declined') return allTransactions.filter(t => t.event_type === 'declined');
@@ -228,7 +370,7 @@ export function MemberWalletDetail({
             <div className="flex flex-wrap gap-2 mt-3">
               {activeCard.status === 'active' && (
                 <button
-                  onClick={() => withBusy(activeCard.id, () => freezeCard(activeCard.id))}
+                  onClick={() => setStaffAction({ type: 'freeze', cardId: activeCard.id })}
                   disabled={busyId === activeCard.id}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-cyan-300 dark:border-cyan-500/40 text-cyan-700 dark:text-cyan-400 rounded-lg disabled:opacity-50"
                 >
@@ -250,13 +392,18 @@ export function MemberWalletDetail({
               >
                 <Save size={12} /> Set limits
               </button>
+              {(activeCard.status === 'active' || activeCard.status === 'frozen') && (
+                <button
+                  onClick={() => setStaffAction({ type: 'replace', cardId: activeCard.id })}
+                  disabled={busyId === `replace-${activeCard.id}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-indigo-300 text-indigo-700 rounded-lg disabled:opacity-50"
+                >
+                  <CreditCard size={12} /> Issue replacement
+                </button>
+              )}
               {activeCard.status !== 'cancelled' && (
                 <button
-                  onClick={() => {
-                    if (window.confirm(`Cancel card ${activeCard.masked_pan}?`)) {
-                      void withBusy(activeCard.id, () => cancelCard(activeCard.id));
-                    }
-                  }}
+                  onClick={() => setStaffAction({ type: 'cancel', cardId: activeCard.id })}
                   disabled={busyId === activeCard.id}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-red-300 text-red-600 rounded-lg disabled:opacity-50"
                 >
@@ -377,6 +524,19 @@ export function MemberWalletDetail({
 
       {tab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {account && (
+            <div className="lg:col-span-2">
+              <DepositPanel account={account} busyId={busyId} personId={person.id} withBusy={withBusy} />
+            </div>
+          )}
+          <div className="lg:col-span-2 flex justify-end">
+            <button
+              onClick={exportStatement}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750"
+            >
+              <Download size={14} /> Export statement (PDF)
+            </button>
+          </div>
           <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <h2 className="text-sm font-medium mb-3">Recent transactions</h2>
             {allTransactions.slice(0, 5).length === 0 ? (
@@ -397,6 +557,12 @@ export function MemberWalletDetail({
           </div>
           <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <p className="section-eyebrow mb-2 flex items-center gap-1"><Shield size={12} /> Admin notes</p>
+            {lastStaffAction && (
+              <p className="text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5 mb-2">
+                Last staff action ({lastStaffAction.action.replace('_', ' ')}): {lastStaffAction.reason}
+                <span className="text-gray-400 block mt-0.5">{new Date(lastStaffAction.at).toLocaleString()}</span>
+              </p>
+            )}
             <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">
               Staff can force-freeze, override impact routes, retry failed transfers, and sync balances.
               Deposit account numbers are masked for PCI. Full ACH details available via i2c admin console.
@@ -440,16 +606,25 @@ export function MemberWalletDetail({
             <p className="text-sm text-gray-400 text-center py-8">No transfers recorded</p>
           ) : (
             transfers.map(tr => (
-              <div key={tr.id} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0">
-                <TransferRow tr={tr} />
+              <div key={tr.id} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0 gap-2">
+                <TransferRow tr={tr} reviewNote={tr.metadata?.staff_review?.note} />
                 {tr.status === 'failed' && (
-                  <button
-                    onClick={() => withBusy(`retry-${tr.id}`, () => retryTransfer(tr.id))}
-                    disabled={busyId === `retry-${tr.id}`}
-                    className="flex items-center gap-1 px-2 py-1 text-xs text-amber-700 border border-amber-300 rounded-lg ml-2 flex-shrink-0"
-                  >
-                    <RotateCcw size={11} /> Retry
-                  </button>
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => withBusy(`retry-${tr.id}`, () => retryTransfer(tr.id))}
+                      disabled={busyId === `retry-${tr.id}`}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-amber-700 border border-amber-300 rounded-lg"
+                    >
+                      <RotateCcw size={11} /> Retry
+                    </button>
+                    <button
+                      onClick={() => setStaffAction({ type: 'review_transfer', transferId: tr.id })}
+                      disabled={busyId === `review-${tr.id}`}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 border border-red-300 rounded-lg"
+                    >
+                      Mark for review
+                    </button>
+                  </div>
                 )}
               </div>
             ))
@@ -545,6 +720,25 @@ export function MemberWalletDetail({
           )}
         </div>
       )}
+
+      {staffAction && (
+        <StaffReasonModal
+          title={
+            staffAction.type === 'freeze' ? 'Freeze card — staff reason required'
+              : staffAction.type === 'cancel' ? 'Cancel card — staff reason required'
+                : staffAction.type === 'replace' ? 'Issue replacement card'
+                  : 'Mark transfer for review'
+          }
+          confirmLabel={
+            staffAction.type === 'freeze' ? 'Freeze card'
+              : staffAction.type === 'cancel' ? 'Cancel card'
+                : staffAction.type === 'replace' ? 'Issue replacement'
+                  : 'Mark for review'
+          }
+          onConfirm={reason => void handleStaffConfirm(reason)}
+          onCancel={() => setStaffAction(null)}
+        />
+      )}
     </div>
   );
 }
@@ -577,7 +771,7 @@ function TxnRow({ tx }: { tx: { id: string; direction: string; merchant_name: st
   );
 }
 
-function TransferRow({ tr }: { tr: { direction: string; transfer_type: string; counterparty_name: string; status: string; initiated_at: string; amount_micro_usd: number } }) {
+function TransferRow({ tr, reviewNote }: { tr: { direction: string; transfer_type: string; counterparty_name: string; status: string; initiated_at: string; amount_micro_usd: number }; reviewNote?: string }) {
   return (
     <div className="flex items-center justify-between flex-1 min-w-0">
       <div className="min-w-0">
@@ -587,6 +781,9 @@ function TransferRow({ tr }: { tr: { direction: string; transfer_type: string; c
         <p className="text-[11px] text-gray-400 capitalize">
           {tr.transfer_type} · {tr.status} · {new Date(tr.initiated_at).toLocaleString()}
         </p>
+        {reviewNote && (
+          <p className="text-[10px] text-red-600 dark:text-red-400 mt-0.5">Review: {reviewNote}</p>
+        )}
       </div>
       <span className="text-sm font-medium tabular-nums flex-shrink-0 ml-2">
         {tr.direction === 'inbound' ? '+' : '−'}{fmtImpactUsd(tr.amount_micro_usd)}

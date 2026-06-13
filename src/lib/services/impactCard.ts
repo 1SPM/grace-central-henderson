@@ -27,6 +27,15 @@ export interface CardRecord {
   daily_limit_micro_usd: number;
   monthly_limit_micro_usd: number;
   issued_at: string;
+  metadata?: {
+    last_staff_action?: {
+      action: string;
+      reason: string;
+      at: string;
+      clerk_user_id?: string;
+    };
+    [key: string]: unknown;
+  };
 }
 
 export interface CardTransaction {
@@ -67,6 +76,14 @@ export interface CardTransferRecord {
   failure_reason: string | null;
   initiated_at: string;
   completed_at: string | null;
+  metadata?: {
+    staff_review?: {
+      note: string;
+      marked_at: string;
+      clerk_user_id?: string;
+    };
+    [key: string]: unknown;
+  };
 }
 
 export interface ImpactRouteRecord {
@@ -196,16 +213,16 @@ export function issueCard(kycVerificationId: string) {
   return post<{ card: CardRecord }>({ action: 'issue_card', kyc_verification_id: kycVerificationId });
 }
 
-export function freezeCard(cardId: string) {
-  return post<{ card: CardRecord }>({ action: 'freeze_card', card_id: cardId });
+export function freezeCard(cardId: string, reason?: string) {
+  return post<{ card: CardRecord }>({ action: 'freeze_card', card_id: cardId, reason });
 }
 
 export function unfreezeCard(cardId: string) {
   return post<{ card: CardRecord }>({ action: 'unfreeze_card', card_id: cardId });
 }
 
-export function cancelCard(cardId: string) {
-  return post<{ card: CardRecord }>({ action: 'cancel_card', card_id: cardId });
+export function cancelCard(cardId: string, reason?: string) {
+  return post<{ card: CardRecord }>({ action: 'cancel_card', card_id: cardId, reason });
 }
 
 export function reviewKyc(kycVerificationId: string, decision: 'approve' | 'reject', rejectionReason?: string) {
@@ -262,6 +279,14 @@ export function createTransfer(input: {
 
 export function retryTransfer(transferId: string) {
   return post<{ transfer: CardTransferRecord }>({ action: 'retry_transfer', transfer_id: transferId });
+}
+
+export function issueReplacementCard(cardId: string, reason?: string) {
+  return post<{ card: CardRecord }>({ action: 'issue_replacement_card', card_id: cardId, reason });
+}
+
+export function markTransferForReview(transferId: string, note: string) {
+  return post<{ transfer: CardTransferRecord }>({ action: 'review_transfer', transfer_id: transferId, note });
 }
 
 export async function fetchMemberAccount(personId: string) {

@@ -609,8 +609,10 @@ export function ViewRenderer(props: ViewRendererProps) {
           <WalletsView
             people={people}
             giving={giving}
+            churchName={churchName}
             initialPersonId={selectedPersonId}
             onViewPortalActivity={() => setView('portal-activity')}
+            onNavigate={setView}
           />
         );
 

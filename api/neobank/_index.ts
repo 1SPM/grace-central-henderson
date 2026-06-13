@@ -59,9 +59,16 @@ const POST_SCHEMA = {
   direction: str({ max: 10, pattern: /^(outbound|inbound)$/ }),
   account_id: str({ max: 60, pattern: /^[0-9a-fA-F-]+$/ }),
   transfer_id: str({ max: 60, pattern: /^[0-9a-fA-F-]+$/ }),
+  reason: str({ max: 300 }),
+  note: str({ max: 300 }),
 };
 
-type Db = SupabaseClient;
+function mergeCardMetadata(existing: unknown, patch: Record<string, unknown>) {
+  const base = existing && typeof existing === 'object' && !Array.isArray(existing)
+    ? existing as Record<string, unknown>
+    : {};
+  return { ...base, ...patch };
+}
 
 async function resolvePerson(supabase: Db, auth: AuthOk) {
   const { data } = await supabase
@@ -185,12 +192,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!me || me.id !== personId) return res.status(403).json({ error: 'forbidden' });
       }
 
-      const { data: account } = await supabase
+      let account = await supabase
         .from('card_accounts')
         .select('*')
         .eq('church_id', auth.churchId)
         .eq('person_id', personId)
-        .maybeSingle();
+        .maybeSingle()
+        .then(r => r.data);
+
+      if (account && !account.routing_number && isStaff) {
+        const deposit = await adapter.getDepositInstructions({
+          i2cAccountId: account.i2c_account_id,
+          churchId: auth.churchId,
+          accountName: account.account_name,
+        });
+        const { data: refreshed } = await supabase
+          .from('card_accounts')
+          .update({
+            routing_number: deposit.routingNumber,
+            account_number_last4: deposit.accountNumberLast4,
+          })
+          .eq('id', account.id)
+          .select()
+          .single();
+        account = refreshed ?? account;
+      }
 
       const { data: route } = await supabase
         .from('impact_routes')
@@ -475,16 +501,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       if (card.status === 'cancelled') return res.status(409).json({ error: 'card_cancelled' });
 
+      const staffReason = isStaff && body.reason ? body.reason : undefined;
+      if (isStaff && (body.action === 'freeze_card' || body.action === 'cancel_card') && !staffReason) {
+        return res.status(400).json({ error: 'reason required for staff freeze/cancel' });
+      }
+
       const result = body.action === 'freeze_card'
-        ? await adapter.freezeCard({ i2cCardId: card.i2c_card_id })
+        ? await adapter.freezeCard({ i2cCardId: card.i2c_card_id, reason: staffReason })
         : body.action === 'unfreeze_card'
           ? await adapter.unfreezeCard({ i2cCardId: card.i2c_card_id })
-          : await adapter.cancelCard({ i2cCardId: card.i2c_card_id });
+          : await adapter.cancelCard({ i2cCardId: card.i2c_card_id, reason: staffReason });
 
       const updates: Record<string, unknown> = { status: result.status };
       if (result.status === 'frozen') updates.frozen_at = new Date().toISOString();
       if (result.status === 'active') updates.frozen_at = null;
       if (result.status === 'cancelled') updates.cancelled_at = new Date().toISOString();
+      if (staffReason && (body.action === 'freeze_card' || body.action === 'cancel_card')) {
+        updates.metadata = mergeCardMetadata(card.metadata, {
+          last_staff_action: {
+            action: body.action,
+            reason: staffReason,
+            at: new Date().toISOString(),
+            clerk_user_id: auth.clerkUserId,
+          },
+        });
+      }
 
       const { data: updated, error } = await supabase
         .from('cards')
@@ -498,6 +539,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : result.status === 'cancelled' ? 'card_cancelled' : 'card_unfrozen';
       await logActivity(supabase, auth.churchId, card.cardholder_person_id, eventType, cardId, {
         actor: isStaff ? 'staff' : 'member',
+        reason: staffReason ?? null,
       });
       return res.status(200).json({ card: updated });
     }
@@ -717,6 +759,125 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
       if (error) return res.status(500).json({ error: 'transfer_update_failed' });
+      return res.status(200).json({ transfer: updated });
+    }
+
+    case 'issue_replacement_card': {
+      if (!isStaff) return res.status(403).json({ error: 'forbidden' });
+      const cardId = body.card_id;
+      if (!cardId) return res.status(400).json({ error: 'card_id required' });
+      const replacementReason = body.reason ?? 'Staff-issued replacement card';
+
+      const { data: oldCard } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('id', cardId)
+        .eq('church_id', auth.churchId)
+        .maybeSingle();
+      if (!oldCard) return res.status(404).json({ error: 'card_not_found' });
+      if (oldCard.status === 'cancelled') return res.status(409).json({ error: 'card_cancelled' });
+
+      const { data: kyc } = await supabase
+        .from('kyc_verifications')
+        .select('*')
+        .eq('church_id', auth.churchId)
+        .eq('person_id', oldCard.cardholder_person_id)
+        .eq('status', 'approved')
+        .order('reviewed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!kyc) return res.status(409).json({ error: 'kyc_not_approved' });
+
+      await adapter.cancelCard({ i2cCardId: oldCard.i2c_card_id, reason: replacementReason });
+      await supabase
+        .from('cards')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          metadata: mergeCardMetadata(oldCard.metadata, {
+            replaced_by_staff: true,
+            replacement_reason: replacementReason,
+            replaced_at: new Date().toISOString(),
+          }),
+        })
+        .eq('id', oldCard.id);
+
+      const result = await adapter.issueCard({
+        churchId: auth.churchId,
+        kycVerificationId: kyc.id,
+        cardholderName: kyc.full_name,
+      });
+
+      const { data: newCard, error } = await supabase
+        .from('cards')
+        .insert({
+          church_id: auth.churchId,
+          cardholder_person_id: kyc.person_id,
+          kyc_verification_id: kyc.id,
+          i2c_card_id: result.i2cCardId,
+          masked_pan: result.maskedPan,
+          cardholder_name: kyc.full_name,
+          expiry_month: result.expiryMonth,
+          expiry_year: result.expiryYear,
+          status: result.status,
+          activated_at: result.status === 'active' ? new Date().toISOString() : null,
+          metadata: {
+            adapter_mode: adapter.mode,
+            program: 'GRACE Impact Card',
+            replaced_card_id: oldCard.id,
+            replacement_reason: replacementReason,
+          },
+        })
+        .select()
+        .single();
+      if (error || !newCard) return res.status(500).json({ error: 'card_insert_failed' });
+
+      await logActivity(supabase, auth.churchId, kyc.person_id, 'card_replaced', newCard.id, {
+        old_card_id: oldCard.id,
+        reason: replacementReason,
+      });
+      return res.status(201).json({ card: newCard });
+    }
+
+    case 'review_transfer': {
+      if (!isStaff) return res.status(403).json({ error: 'forbidden' });
+      const transferId = body.transfer_id;
+      if (!transferId || !body.note) {
+        return res.status(400).json({ error: 'transfer_id and note required' });
+      }
+
+      const { data: transfer } = await supabase
+        .from('card_transfers')
+        .select('*')
+        .eq('id', transferId)
+        .eq('church_id', auth.churchId)
+        .maybeSingle();
+      if (!transfer) return res.status(404).json({ error: 'transfer_not_found' });
+      if (transfer.status !== 'failed') return res.status(409).json({ error: 'transfer_not_failed' });
+
+      const metadata = transfer.metadata && typeof transfer.metadata === 'object' && !Array.isArray(transfer.metadata)
+        ? transfer.metadata as Record<string, unknown>
+        : {};
+      const { data: updated, error } = await supabase
+        .from('card_transfers')
+        .update({
+          metadata: {
+            ...metadata,
+            staff_review: {
+              note: body.note,
+              marked_at: new Date().toISOString(),
+              clerk_user_id: auth.clerkUserId,
+            },
+          },
+        })
+        .eq('id', transferId)
+        .select()
+        .single();
+      if (error) return res.status(500).json({ error: 'transfer_update_failed' });
+
+      await logActivity(supabase, auth.churchId, transfer.person_id, 'transfer_marked_review', transferId, {
+        note: body.note,
+      });
       return res.status(200).json({ transfer: updated });
     }
 
