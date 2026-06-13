@@ -33,6 +33,8 @@ import {
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
+const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
@@ -93,15 +95,133 @@ function logActivity(supabase: Db, churchId: string, personId: string | null, ev
   });
 }
 
+async function buildAdminCardProgramPayload(
+  supabase: Db,
+  churchId: string,
+  adapter: ReturnType<typeof getI2cAdapter>,
+) {
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+
+  const [{ data: kycQueue }, { data: cards }, { data: interchange }] = await Promise.all([
+    supabase
+      .from('kyc_verifications')
+      .select('*')
+      .eq('church_id', churchId)
+      .order('submitted_at', { ascending: false })
+      .limit(200),
+    supabase
+      .from('cards')
+      .select('*')
+      .eq('church_id', churchId)
+      .order('issued_at', { ascending: false })
+      .limit(500),
+    supabase
+      .from('interchange_events')
+      .select('*')
+      .eq('church_id', churchId)
+      .gte('occurred_at', monthStart.toISOString())
+      .order('occurred_at', { ascending: false })
+      .limit(1000),
+  ]);
+
+  const events = interchange ?? [];
+  const accountData = await loadAdminAccountData(supabase, churchId);
+
+  const interchangeMtdMicroUsd = events
+    .filter(e => e.event_type === 'fee' && e.direction === 'credit')
+    .reduce((sum, e) => sum + Number(e.amount_micro_usd), 0);
+  const spendMtdMicroUsd = events
+    .filter(e => e.event_type === 'capture' && e.direction === 'debit')
+    .reduce((sum, e) => sum + Number(e.amount_micro_usd), 0);
+
+  const totalFloatMicroUsd = (accountData.accounts ?? []).reduce(
+    (sum, a) => sum + Number(a.available_balance_micro_usd),
+    0,
+  );
+  const impactMtdMicroUsd = (accountData.impact_allocations ?? []).reduce(
+    (sum, a) => sum + Number(a.amount_micro_usd),
+    0,
+  ) || interchangeMtdMicroUsd;
+
+  const declineCount = events.filter(e => e.event_type === 'declined').length;
+  const pendingTransfers = (accountData.transfers ?? []).filter(t => t.status === 'pending' || t.status === 'processing').length;
+  const failedTransfers = (accountData.transfers ?? []).filter(t => t.status === 'failed').length;
+
+  const { data: i2cLedger } = await supabase
+    .from('ledger_entries')
+    .select('amount_micro_usd, direction')
+    .eq('church_id', churchId)
+    .eq('source', 'i2c')
+    .gte('occurred_at', monthStart.toISOString());
+
+  const ledgerI2cMicroUsd = (i2cLedger ?? []).reduce((sum, row) => {
+    const amt = Number(row.amount_micro_usd);
+    return sum + (row.direction === 'credit' ? amt : -amt);
+  }, 0);
+
+  return {
+    kyc_queue: kycQueue ?? [],
+    cards: cards ?? [],
+    interchange_events: events.slice(0, 100),
+    ...accountData,
+    summary: {
+      pending_kyc: (kycQueue ?? []).filter(k => k.status === 'pending' || k.status === 'in_review').length,
+      active_cards: (cards ?? []).filter(c => c.status === 'active').length,
+      frozen_cards: (cards ?? []).filter(c => c.status === 'frozen').length,
+      interchange_mtd_micro_usd: interchangeMtdMicroUsd,
+      spend_mtd_micro_usd: spendMtdMicroUsd,
+      total_float_micro_usd: totalFloatMicroUsd,
+      impact_mtd_micro_usd: impactMtdMicroUsd,
+      decline_count_mtd: declineCount,
+      pending_transfers: pendingTransfers,
+      failed_transfers: failedTransfers,
+      ledger_i2c_net_mtd_micro_usd: ledgerI2cMicroUsd,
+      reconciliation_delta_micro_usd: interchangeMtdMicroUsd - ledgerI2cMicroUsd,
+    },
+    adapter_mode: adapter.mode,
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    return res.status(503).json({ error: 'service_not_configured' });
+    return res.status(503).json({
+      error: 'service_not_configured',
+      detail: 'Set SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL (or SUPABASE_URL) on the deployment.',
+    });
   }
 
-  const auth = await requireClerkAuth(req);
-  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
-
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+  const adapter = getI2cAdapter({ liveMode: process.env.I2C_LIVE === 'true' });
+  const resource = req.method === 'GET' ? String(req.query.resource ?? 'me') : null;
+
+  const auth = await requireClerkAuth(req);
+  if (!auth.ok) {
+    if (
+      DEMO_MODE
+      && DEMO_CHURCH_ID
+      && req.method === 'GET'
+      && resource === 'admin'
+    ) {
+      const gate = await requirePlanGate(DEMO_CHURCH_ID, 'cardProgram', supabase);
+      if (!gate.ok) {
+        return res.status(gate.status).json({
+          error: gate.error,
+          detail: gate.detail,
+          required_plan: gate.required_plan,
+        });
+      }
+      const payload = await buildAdminCardProgramPayload(supabase, DEMO_CHURCH_ID, adapter);
+      return res.status(200).json(payload);
+    }
+    return res.status(auth.status).json({
+      error: auth.error,
+      detail: auth.error === 'jwt missing church_id claim'
+        ? 'Configure the Clerk JWT template to include app_metadata.church_id (see RUNBOOK RB-011).'
+        : auth.error,
+    });
+  }
 
   const gate = await requirePlanGate(auth.churchId, 'cardProgram', supabase);
   if (!gate.ok) {
@@ -113,7 +233,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const isStaff = STAFF_ROLES.includes(auth.role);
-  const adapter = getI2cAdapter({ liveMode: process.env.I2C_LIVE === 'true' });
 
   // ---------- READS ----------
   if (req.method === 'GET') {
@@ -239,91 +358,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (resource === 'admin') {
-      if (!isStaff) return res.status(403).json({ error: 'forbidden' });
-      const monthStart = new Date();
-      monthStart.setUTCDate(1);
-      monthStart.setUTCHours(0, 0, 0, 0);
-
-      const [{ data: kycQueue }, { data: cards }, { data: interchange }] = await Promise.all([
-        supabase
-          .from('kyc_verifications')
-          .select('*')
-          .eq('church_id', auth.churchId)
-          .order('submitted_at', { ascending: false })
-          .limit(200),
-        supabase
-          .from('cards')
-          .select('*')
-          .eq('church_id', auth.churchId)
-          .order('issued_at', { ascending: false })
-          .limit(500),
-        supabase
-          .from('interchange_events')
-          .select('*')
-          .eq('church_id', auth.churchId)
-          .gte('occurred_at', monthStart.toISOString())
-          .order('occurred_at', { ascending: false })
-          .limit(1000),
-      ]);
-
-      const events = interchange ?? [];
-      const accountData = await loadAdminAccountData(supabase, auth.churchId);
-
-      // Interchange revenue ≈ fee events credited to the program.
-      const interchangeMtdMicroUsd = events
-        .filter(e => e.event_type === 'fee' && e.direction === 'credit')
-        .reduce((sum, e) => sum + Number(e.amount_micro_usd), 0);
-      const spendMtdMicroUsd = events
-        .filter(e => e.event_type === 'capture' && e.direction === 'debit')
-        .reduce((sum, e) => sum + Number(e.amount_micro_usd), 0);
-
-      const totalFloatMicroUsd = (accountData.accounts ?? []).reduce(
-        (sum, a) => sum + Number(a.available_balance_micro_usd),
-        0,
-      );
-      const impactMtdMicroUsd = (accountData.impact_allocations ?? []).reduce(
-        (sum, a) => sum + Number(a.amount_micro_usd),
-        0,
-      ) || interchangeMtdMicroUsd;
-
-      const declineCount = events.filter(e => e.event_type === 'declined').length;
-      const pendingTransfers = (accountData.transfers ?? []).filter(t => t.status === 'pending' || t.status === 'processing').length;
-      const failedTransfers = (accountData.transfers ?? []).filter(t => t.status === 'failed').length;
-
-      // i2c ledger reconciliation hint
-      const { data: i2cLedger } = await supabase
-        .from('ledger_entries')
-        .select('amount_micro_usd, direction')
-        .eq('church_id', auth.churchId)
-        .eq('source', 'i2c')
-        .gte('occurred_at', monthStart.toISOString());
-
-      const ledgerI2cMicroUsd = (i2cLedger ?? []).reduce((sum, row) => {
-        const amt = Number(row.amount_micro_usd);
-        return sum + (row.direction === 'credit' ? amt : -amt);
-      }, 0);
-
-      return res.status(200).json({
-        kyc_queue: kycQueue ?? [],
-        cards: cards ?? [],
-        interchange_events: events.slice(0, 100),
-        ...accountData,
-        summary: {
-          pending_kyc: (kycQueue ?? []).filter(k => k.status === 'pending' || k.status === 'in_review').length,
-          active_cards: (cards ?? []).filter(c => c.status === 'active').length,
-          frozen_cards: (cards ?? []).filter(c => c.status === 'frozen').length,
-          interchange_mtd_micro_usd: interchangeMtdMicroUsd,
-          spend_mtd_micro_usd: spendMtdMicroUsd,
-          total_float_micro_usd: totalFloatMicroUsd,
-          impact_mtd_micro_usd: impactMtdMicroUsd,
-          decline_count_mtd: declineCount,
-          pending_transfers: pendingTransfers,
-          failed_transfers: failedTransfers,
-          ledger_i2c_net_mtd_micro_usd: ledgerI2cMicroUsd,
-          reconciliation_delta_micro_usd: interchangeMtdMicroUsd - ledgerI2cMicroUsd,
-        },
-        adapter_mode: adapter.mode,
-      });
+      if (!isStaff) return res.status(403).json({ error: 'forbidden', detail: 'Staff role required for admin card program view.' });
+      const payload = await buildAdminCardProgramPayload(supabase, auth.churchId, adapter);
+      return res.status(200).json(payload);
     }
 
     if (resource === 'transactions') {

@@ -94,7 +94,7 @@ interface CardProgramSectionProps {
 export function CardProgramSection({ program: programProp, embedded }: CardProgramSectionProps) {
   const internal = useImpactCardProgram();
   const program = programProp ?? internal;
-  const { data, state, gateMessage, refetch } = program;
+  const { data, state, gateMessage, errorMessage, refetch } = program;
 
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -118,7 +118,16 @@ export function CardProgramSection({ program: programProp, embedded }: CardProgr
     );
   }
 
-  if (state === 'unavailable') return null;
+  if (state === 'unavailable') {
+    return (
+      <div className={embedded ? '' : 'mt-8'}>
+        {!embedded && <SectionHeader />}
+        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4 text-sm text-amber-800 dark:text-amber-300">
+          {program.errorMessage || 'Impact Card program data is unavailable.'}
+        </div>
+      </div>
+    );
+  }
 
   if (state === 'gated') {
     return (

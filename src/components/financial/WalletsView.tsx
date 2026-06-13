@@ -5,6 +5,7 @@ import {
   CreditCard,
   Filter,
   Loader2,
+  RefreshCw,
   Search,
 } from 'lucide-react';
 import type { Giving, Person } from '../../types';
@@ -150,7 +151,39 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
 
       {program.state === 'gated' && (
         <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl p-5 text-sm text-indigo-800 dark:text-indigo-300 mb-6">
-          {program.gateMessage || 'The GRACE Impact Card program requires the Enterprise plan.'}
+          <p className="font-medium mb-1">Enterprise plan required</p>
+          <p>{program.gateMessage || 'The GRACE Impact Card program requires the Enterprise plan.'}</p>
+          {program.requiredPlan && (
+            <p className="text-xs mt-2 opacity-80">Upgrade to {program.requiredPlan} in Settings → Billing.</p>
+          )}
+        </div>
+      )}
+
+      {program.state === 'unavailable' && (
+        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-5 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-1">
+                Impact Card dashboard unavailable
+              </p>
+              <p className="text-sm text-amber-800 dark:text-amber-300">
+                {program.errorMessage || 'Could not load church-wide monitoring or member account roster.'}
+              </p>
+              {program.errorCode && (
+                <p className="text-[11px] text-amber-700/70 dark:text-amber-400/70 mt-2 font-mono">
+                  {program.errorCode}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => void program.refetch()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white dark:bg-dark-850 border border-amber-200 dark:border-amber-500/30 rounded-lg text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/20 flex-shrink-0"
+            >
+              <RefreshCw size={13} />
+              Retry
+            </button>
+          </div>
         </div>
       )}
 

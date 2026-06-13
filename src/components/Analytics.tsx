@@ -17,7 +17,8 @@ import {
   MessageSquare,
   CheckCircle,
 } from 'lucide-react';
-import type { Person, MemberStatus, Task, Giving, PrayerRequest, CalendarEvent, Interaction } from '../types';
+import type { Person, MemberStatus, Task, Giving, PrayerRequest, CalendarEvent, Interaction, DiscipleshipMilestone } from '../types';
+import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
 
 interface AnalyticsProps {
   people: Person[];
@@ -26,6 +27,7 @@ interface AnalyticsProps {
   prayers: PrayerRequest[];
   events: CalendarEvent[];
   interactions: Interaction[];
+  milestones?: DiscipleshipMilestone[];
   onViewPerson?: (id: string) => void;
 }
 
@@ -104,7 +106,7 @@ const activityIconMap: Record<string, { icon: typeof UserPlus; color: string; bg
   giving: { icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
 };
 
-export function Analytics({ people, tasks, giving, prayers, events, interactions, onViewPerson }: AnalyticsProps) {
+export function Analytics({ people, tasks, giving, prayers, events, interactions, milestones = [], onViewPerson }: AnalyticsProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
 
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
@@ -213,6 +215,50 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
       healthScore, retentionScore, engagementScore, givingScore, taskScore,
     };
   }, [people, tasks, giving, prayers, events, interactions, timeRange]);
+
+  // Discipleship / Spiritual Growth metrics
+  const discipleshipMetrics = useMemo(() => {
+    const milestonesByPerson = new Map<string, Set<string>>();
+    milestones.forEach(m => {
+      if (!milestonesByPerson.has(m.personId)) milestonesByPerson.set(m.personId, new Set());
+      milestonesByPerson.get(m.personId)!.add(m.milestoneType);
+    });
+
+    const totalPeople = people.length;
+
+    const funnelStats = DEFAULT_MILESTONE_DEFINITIONS.map(def => ({
+      type: def.type,
+      label: def.label,
+      color: def.color,
+      count: people.filter(p => milestonesByPerson.get(p.id)?.has(def.type)).length,
+      pct: totalPeople > 0
+        ? Math.round((people.filter(p => milestonesByPerson.get(p.id)?.has(def.type)).length / totalPeople) * 100)
+        : 0,
+    }));
+
+    // Active members (visitor/regular/member/leader) who have no milestone past first_visit — growth opportunity
+    const activePeopleList = people.filter(p => ['visitor', 'regular', 'member', 'leader'].includes(p.status));
+    const needsNextStep = activePeopleList.filter(p => {
+      const types = milestonesByPerson.get(p.id);
+      if (!types) return true; // no milestones at all
+      const advanced = ['attended_class', 'baptized', 'joined_group', 'serving', 'leading'];
+      return !advanced.some(t => types.has(t));
+    });
+
+    // Average milestones per person who has at least one
+    const peopleWithMilestones = people.filter(p => milestonesByPerson.has(p.id));
+    const avgMilestones = peopleWithMilestones.length > 0
+      ? (milestones.length / peopleWithMilestones.length).toFixed(1)
+      : '0';
+
+    const atStep3Plus = people.filter(p => {
+      const types = milestonesByPerson.get(p.id);
+      if (!types) return false;
+      return ['baptized', 'joined_group', 'serving', 'leading'].some(t => types.has(t));
+    }).length;
+
+    return { funnelStats, needsNextStep, avgMilestones, atStep3Plus, milestonesByPerson };
+  }, [milestones, people]);
 
   // Activity feed items
   const activities = useMemo(() => {
@@ -404,6 +450,86 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
             <MiniStat label="Conversion" value={`${metrics.conversionRate}%`} />
           </div>
         </div>
+      </div>
+
+      {/* Spiritual Growth Section */}
+      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <SectionHeader icon={<TrendingUp size={18} />} title="Spiritual Growth" subtitle="Discipleship milestone funnel" color="indigo" />
+          <div className="flex gap-4 text-center">
+            <div>
+              <p className="text-lg font-bold text-gray-900 dark:text-dark-100">{discipleshipMetrics.atStep3Plus}</p>
+              <p className="text-[10px] text-gray-500 dark:text-dark-400">Step 3+</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-gray-900 dark:text-dark-100">{discipleshipMetrics.avgMilestones}</p>
+              <p className="text-[10px] text-gray-500 dark:text-dark-400">Avg steps</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{discipleshipMetrics.needsNextStep.length}</p>
+              <p className="text-[10px] text-gray-500 dark:text-dark-400">Need follow-up</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Funnel bars */}
+        <div className="space-y-3">
+          {discipleshipMetrics.funnelStats.map((step, idx) => {
+            const barColors: Record<string, string> = {
+              blue: 'bg-blue-500', slate: 'bg-slate-500', cyan: 'bg-cyan-500',
+              green: 'bg-green-500', amber: 'bg-amber-500', rose: 'bg-rose-500',
+            };
+            const barBg = barColors[step.color] ?? 'bg-indigo-500';
+            return (
+              <div key={step.type} className="flex items-center gap-3">
+                <span className="text-xs font-medium text-gray-400 dark:text-dark-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                <span className="text-sm text-gray-700 dark:text-dark-300 w-28 flex-shrink-0 truncate">{step.label}</span>
+                <div className="flex-1 h-5 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${barBg} rounded-full transition-all duration-700`}
+                    style={{ width: `${step.pct}%` }}
+                  />
+                </div>
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-100 w-10 text-right flex-shrink-0">{step.pct}%</span>
+                <span className="text-xs text-gray-400 dark:text-dark-500 w-14 flex-shrink-0">{step.count}/{people.length}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Growth opportunity callout */}
+        {discipleshipMetrics.needsNextStep.length > 0 && (
+          <div className="mt-5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                  {discipleshipMetrics.needsNextStep.length} portal members need a next-step conversation
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                  These members are active in the portal but haven't progressed past First Visit.
+                  Consider a pastoral check-in or small-group invitation.
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {discipleshipMetrics.needsNextStep.slice(0, 5).map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => onViewPerson?.(p.id)}
+                      className="text-[11px] font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+                    >
+                      {p.firstName} {p.lastName}
+                    </button>
+                  ))}
+                  {discipleshipMetrics.needsNextStep.length > 5 && (
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 px-2 py-0.5">
+                      +{discipleshipMetrics.needsNextStep.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Row 3: Giving Trend + Giving by Fund */}

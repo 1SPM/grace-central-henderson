@@ -149,7 +149,7 @@ function App() {
   const charityBasketMgmt = useCharityBaskets();
   const pastoralCare = usePastoralCare();
   const announcementData = useAnnouncements(churchId);
-  const discipleshipData = useDiscipleship(people);
+  const discipleshipData = useDiscipleship(people, churchId);
   const { settings: churchSettings, churchSlug, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
   const [showTutorialPicker, setShowTutorialPicker] = useState(false);
@@ -496,6 +496,7 @@ function App() {
             activeConversation={pastoralCare.activeConversation}
             onSendMessage={pastoralCare.sendMessage}
             helpRequests={pastoralCare.helpRequests}
+            milestones={discipleshipData.milestones}
           />
           </div>
           <PWAInstallPrompt />

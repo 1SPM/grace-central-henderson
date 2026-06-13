@@ -3,6 +3,7 @@ import type { Person } from '../types';
 import {
   fetchAdminCardProgram,
   microUsdToDollars,
+  NeobankFetchError,
   PlanGateError,
   type AdminCardData,
   type CardAccountRecord,
@@ -19,6 +20,9 @@ export interface UseImpactCardProgramResult {
   data: AdminCardData | null;
   state: ImpactCardProgramState;
   gateMessage: string;
+  errorMessage: string;
+  errorCode: string;
+  requiredPlan: string | null;
   refetch: () => Promise<void>;
 }
 
@@ -194,19 +198,48 @@ export function getMemberImpactMtd(adminData: AdminCardData, personId: string): 
   return computeImpactMtd(personId, cardIds, adminData.interchange_events, adminData.impact_allocations ?? []);
 }
 
+function unavailableMessage(err: unknown): { message: string; code: string } {
+  if (err instanceof NeobankFetchError) {
+    if (err.code === 'service_not_configured' || err.status === 503) {
+      return {
+        code: err.code,
+        message: 'Impact Card backend is not configured on this deployment (missing Supabase service key or Clerk secret). Ask your admin to set SUPABASE_SERVICE_ROLE_KEY and CLERK_SECRET_KEY on Vercel.',
+      };
+    }
+    if (err.status === 401) {
+      return {
+        code: err.code,
+        message: err.detail.includes('church_id')
+          ? 'Staff sign-in token is missing the church_id claim. Configure the Clerk JWT template (RB-011) or use demo mode.'
+          : 'Sign in as staff to load Impact Card Accounts, or enable demo mode for sandbox preview.',
+      };
+    }
+    if (err.status === 403 && err.code === 'forbidden') {
+      return { code: err.code, message: 'Your account does not have staff access to the Impact Card program.' };
+    }
+    return { code: err.code, message: err.detail };
+  }
+  if (err instanceof Error) {
+    return { code: 'request_failed', message: err.message };
+  }
+  return { code: 'unknown', message: 'Could not load Impact Card program data.' };
+}
+
 export function useImpactCardProgram(): UseImpactCardProgramResult {
   const [data, setData] = useState<AdminCardData | null>(null);
   const [state, setState] = useState<ImpactCardProgramState>('loading');
   const [gateMessage, setGateMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorCode, setErrorCode] = useState('');
+  const [requiredPlan, setRequiredPlan] = useState<string | null>(null);
 
   const refetch = useCallback(async () => {
+    setState('loading');
+    setErrorMessage('');
+    setErrorCode('');
+    setRequiredPlan(null);
     try {
       const result = await fetchAdminCardProgram();
-      if (result === null) {
-        setData(null);
-        setState('unavailable');
-        return;
-      }
       setData({
         ...result,
         accounts: result.accounts ?? [],
@@ -218,10 +251,15 @@ export function useImpactCardProgram(): UseImpactCardProgramResult {
       setGateMessage('');
     } catch (err) {
       if (err instanceof PlanGateError) {
+        setData(null);
         setGateMessage(err.message);
+        setRequiredPlan(err.requiredPlan);
         setState('gated');
       } else {
+        const { message, code } = unavailableMessage(err);
         setData(null);
+        setErrorMessage(message);
+        setErrorCode(code);
         setState('unavailable');
       }
     }
@@ -231,5 +269,5 @@ export function useImpactCardProgram(): UseImpactCardProgramResult {
     void refetch();
   }, [refetch]);
 
-  return { data, state, gateMessage, refetch };
+  return { data, state, gateMessage, errorMessage, errorCode, requiredPlan, refetch };
 }

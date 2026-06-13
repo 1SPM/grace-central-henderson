@@ -209,7 +209,26 @@ export type MemberActivityEventType =
   | 'kyc_submitted' | 'card_issued' | 'card_frozen' | 'card_txn'
   | 'community_post' | 'community_react' | 'community_comment'
   | 'connection_request' | 'connection_accept' | 'group_post' | 'group_join'
-  | 'community_view' | 'watch_join' | 'watch_chat';
+  | 'community_view' | 'watch_join' | 'watch_chat'
+  // My Journey portal tab events
+  | 'journey_view' | 'milestone_achieved' | 'milestone_step_request';
+
+// Discipleship milestone row (discipleship_milestones table)
+export type MilestoneTypeDb =
+  | 'first_visit' | 'attended_class' | 'baptized'
+  | 'joined_group' | 'serving' | 'leading';
+
+export interface DiscipleshipMilestoneRow {
+  id: string;
+  church_id: string;
+  person_id: string;
+  milestone_type: MilestoneTypeDb;
+  completed_at: string;
+  notes: string | null;
+  verified_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface WatchSermonRow {
   id: string;
@@ -493,6 +512,15 @@ export interface Database {
         Row: WatchChatMessageRow;
         Insert: Partial<WatchChatMessageRow> & { church_id: string; author_name: string; body: string };
         Update: Partial<WatchChatMessageRow>;
+      };
+      discipleship_milestones: {
+        Row: DiscipleshipMilestoneRow;
+        Insert: Partial<DiscipleshipMilestoneRow> & {
+          church_id: string;
+          person_id: string;
+          milestone_type: MilestoneTypeDb;
+        };
+        Update: Partial<Pick<DiscipleshipMilestoneRow, 'completed_at' | 'notes' | 'verified_by'>>;
       };
     };
   };

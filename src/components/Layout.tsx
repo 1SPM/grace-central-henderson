@@ -75,8 +75,9 @@ const navSections: NavSection[] = [
       { view: 'leadership', label: 'Leadership', icon: <Crown size={16} />, tone: 'violet' },
       { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
+      { view: 'wallets', label: 'Impact Card Accounts', icon: <Wallet size={16} />, tone: 'indigo' },
       { view: 'sunday-prep', label: 'Sunday Service Tools', icon: <Church size={16} />, tone: 'emerald' },
-      { view: 'giving', label: 'Giving', icon: <DollarSign size={16} />, tone: 'emerald' },
+      { view: 'giving', label: 'Impact Campaigns', icon: <DollarSign size={16} />, tone: 'emerald' },
       { view: 'pastoral-care', label: 'Crisis Center Dispatch', icon: <Heart size={16} />, tone: 'rose' },
     ],
   },
@@ -90,7 +91,6 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
   { view: 'portal-activity', label: 'Portal Activity', icon: <Smartphone size={18} /> },
   { view: 'financial-hub', label: 'Financial Hub', icon: <DollarSign size={18} /> },
-  { view: 'wallets', label: 'Impact Card Accounts', icon: <Wallet size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
@@ -124,7 +124,7 @@ const viewLabels: Record<View, string> = {
   volunteers: 'Volunteers',
   groups: 'Groups',
   prayer: 'Prayer',
-  giving: 'Giving',
+  giving: 'Impact Campaigns',
   'online-giving': 'Online Giving',
   'batch-entry': 'Batch Entry',
   pledges: 'Pledges',
@@ -259,7 +259,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
     const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
     if (givingSubViews.includes(currentView)) {
       return [
-        { label: 'Giving', view: 'giving' as View },
+        { label: 'Impact Campaigns', view: 'giving' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
     }

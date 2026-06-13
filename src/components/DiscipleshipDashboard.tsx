@@ -9,13 +9,18 @@ import {
   Check,
   Search,
   TrendingUp,
+  Smartphone,
+  MapPin,
+  Star,
 } from 'lucide-react';
 import type { Person, DiscipleshipMilestone, MilestoneType } from '../types';
 import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
+import { usePortalActivity } from '../hooks/usePortalActivity';
 
 interface DiscipleshipDashboardProps {
   people: Person[];
   milestones: DiscipleshipMilestone[];
+  churchId?: string;
   onAddMilestone: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string }) => void;
   onRemoveMilestone: (id: string) => void;
   onViewPerson?: (id: string) => void;
@@ -41,9 +46,29 @@ const MILESTONE_COLORS: Record<MilestoneType, string> = {
 
 type FilterStatus = 'all' | MilestoneType;
 
-export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRemoveMilestone, onViewPerson }: DiscipleshipDashboardProps) {
+export function DiscipleshipDashboard({ people, milestones, churchId = '', onAddMilestone, onRemoveMilestone, onViewPerson }: DiscipleshipDashboardProps) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+
+  // Portal activity data for the "Portal Signals" column
+  const { memberRollup, events: portalEvents } = usePortalActivity(churchId);
+
+  // Build lookup: personId -> engagement row
+  const engagementMap = useMemo(() => new Map(memberRollup.map(r => [r.personId, r])), [memberRollup]);
+
+  // Build lookup: personId -> Set of milestone types they've requested via My Journey
+  const stepRequestsByPerson = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    portalEvents
+      .filter(e => e.event_type === 'milestone_step_request' && e.person_id)
+      .forEach(e => {
+        const type = String(e.metadata?.milestone_type ?? '');
+        if (!type) return;
+        if (!map.has(e.person_id!)) map.set(e.person_id!, new Set());
+        map.get(e.person_id!)!.add(type);
+      });
+    return map;
+  }, [portalEvents]);
 
   // Build milestone lookup: personId -> Set of milestoneTypes
   const milestonesByPerson = useMemo(() => {
@@ -175,18 +200,27 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
                     </th>
                   );
                 })}
+                <th className="px-3 py-3 text-center bg-gray-50 dark:bg-dark-800 min-w-[120px]">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <Smartphone size={14} className="text-indigo-500" />
+                    <span className="text-[10px] font-semibold text-gray-500 dark:text-dark-400">Portal Signals</span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-700">
               {filteredPeople.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-400 dark:text-dark-500">
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-dark-500">
                     No people found
                   </td>
                 </tr>
               ) : (
                 filteredPeople.slice(0, 50).map(person => {
                   const personMilestones = milestonesByPerson.get(person.id);
+                  const engagement = engagementMap.get(person.id);
+                  const stepRequests = stepRequestsByPerson.get(person.id);
+                  const hasStepRequests = stepRequests && stepRequests.size > 0;
                   return (
                     <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-dark-800/50">
                       <td className="px-4 py-3 sticky left-0 bg-stone-100 dark:bg-dark-850 z-10">
@@ -208,25 +242,58 @@ export function DiscipleshipDashboard({ people, milestones, onAddMilestone, onRe
                       {DEFAULT_MILESTONE_DEFINITIONS.map(def => {
                         const milestone = personMilestones?.get(def.type);
                         const isCompleted = !!milestone;
+                        const memberRequested = stepRequests?.has(def.type);
                         return (
-                          <td key={def.type} className="px-3 py-3 text-center">
+                          <td key={def.type} className="px-3 py-3 text-center relative">
                             <button
                               onClick={() => toggleMilestone(person.id, def.type)}
                               className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto transition-all ${
                                 isCompleted
                                   ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-500/20'
+                                  : memberRequested
+                                  ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-500/20 ring-1 ring-amber-400'
                                   : 'bg-gray-100 dark:bg-dark-700 text-gray-300 dark:text-dark-600 hover:bg-gray-200 dark:hover:bg-dark-600 hover:text-gray-400'
                               }`}
                               title={isCompleted
                                 ? `${def.label}: ${new Date(milestone!.completedAt).toLocaleDateString()}`
+                                : memberRequested
+                                ? `${def.label}: Member has expressed interest — click to mark complete`
                                 : `Mark ${def.label} as complete`
                               }
                             >
-                              <Check size={14} />
+                              {memberRequested && !isCompleted ? <Star size={12} /> : <Check size={14} />}
                             </button>
                           </td>
                         );
                       })}
+                      {/* Portal Signals column */}
+                      <td className="px-3 py-3 text-center">
+                        {engagement ? (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="flex items-center gap-1">
+                              <Smartphone size={11} className="text-indigo-500" />
+                              <span className="text-xs font-semibold text-gray-700 dark:text-dark-300">
+                                {engagement.eventCount30d}
+                              </span>
+                            </div>
+                            {hasStepRequests && (
+                              <div className="flex items-center gap-1">
+                                <MapPin size={10} className="text-amber-500" />
+                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                                  Interested
+                                </span>
+                              </div>
+                            )}
+                            <span className="text-[9px] text-gray-400 dark:text-dark-600">
+                              {engagement.byType?.journey_view
+                                ? `${engagement.byType.journey_view} journey view${engagement.byType.journey_view > 1 ? 's' : ''}`
+                                : 'No journey views'}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-gray-300 dark:text-dark-700">—</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })

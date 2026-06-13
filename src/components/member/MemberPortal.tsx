@@ -14,7 +14,8 @@ import { MemberScanPage } from './MemberScanPage';
 import { MemberCardPage } from './MemberCardPage';
 import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
 import { ConnectCommunityPage } from './community/ConnectCommunityPage';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest, SmallGroup, HelpRequest } from '../../types';
+import { MemberJourneyPage } from './MemberJourneyPage';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest, SmallGroup, HelpRequest, DiscipleshipMilestone } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -43,6 +44,7 @@ interface MemberPortalProps {
   activeConversation?: PastoralConversation;
   onSendMessage?: (conversationId: string, content: string) => void;
   helpRequests?: HelpRequest[];
+  milestones?: DiscipleshipMilestone[];
 }
 
 export function MemberPortal({
@@ -70,6 +72,7 @@ export function MemberPortal({
   activeConversation,
   onSendMessage,
   helpRequests = [],
+  milestones = [],
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
   const [showChat, setShowChat] = useState(false);
@@ -229,6 +232,16 @@ export function MemberPortal({
             events={events}
             currentMember={currentMember}
             onNavigateDirectory={() => setActiveTab('directory')}
+          />
+        );
+
+      case 'my-journey':
+        return (
+          <MemberJourneyPage
+            milestones={milestones.filter(m => m.personId === currentMember?.id)}
+            personId={currentMember?.id}
+            churchId={churchId}
+            memberName={currentMember?.firstName}
           />
         );
 

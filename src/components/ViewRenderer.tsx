@@ -842,6 +842,7 @@ export function ViewRenderer(props: ViewRendererProps) {
               prayers={prayers}
               events={events}
               interactions={interactions}
+              milestones={discipleshipData.milestones}
               onViewPerson={handlers.viewPerson}
             />
           </div>
@@ -862,6 +863,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           <DiscipleshipDashboard
             people={people}
             milestones={discipleshipData.milestones}
+            churchId={churchId}
             onAddMilestone={discipleshipData.addMilestone}
             onRemoveMilestone={discipleshipData.removeMilestone}
             onViewPerson={handlers.viewPerson}

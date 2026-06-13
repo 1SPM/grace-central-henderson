@@ -30,6 +30,7 @@ import { escapeHtml } from '../utils/security';
 import { AISuggestButton } from './AIAssistant';
 import { getDemoCommunityDataForCRM, fetchConnections } from '../lib/services/community';
 import { useImpactCardProgram, getMemberCards } from '../hooks/useImpactCardProgram';
+import { usePortalActivity } from '../hooks/usePortalActivity';
 
 interface PersonProfileProps {
   person: Person;
@@ -96,6 +97,15 @@ export function PersonProfile({
   const memberCards = impactCardProgram.data ? getMemberCards(impactCardProgram.data, person.id) : [];
   const liveCard = memberCards.find(c => c.status === 'active' || c.status === 'frozen');
   const kycRecord = impactCardProgram.data?.kyc_queue.find(k => k.person_id === person.id);
+
+  // Portal signals: milestone types this member has requested via My Journey tab
+  const { events: personPortalEvents } = usePortalActivity(churchId ?? '');
+  const stepRequestedMilestones = new Set(
+    personPortalEvents
+      .filter(e => e.event_type === 'milestone_step_request' && e.person_id === person.id)
+      .map(e => String(e.metadata?.milestone_type ?? ''))
+      .filter(Boolean),
+  );
 
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState<Interaction['type']>('note');
@@ -415,6 +425,7 @@ export function PersonProfile({
               milestones={milestones}
               onAddMilestone={onAddMilestone}
               onRemoveMilestone={onRemoveMilestone}
+              stepRequestedMilestones={stepRequestedMilestones}
             />
           )}
 

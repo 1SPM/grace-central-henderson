@@ -24,6 +24,10 @@ export interface PortalEngagementSummary {
   checkins7d: number;
   community7d: number;
   totalEvents30d: number;
+  /** My Journey tab views in the last 7 days */
+  journeyViews7d: number;
+  /** Milestone step requests submitted by members in the last 7 days */
+  stepRequests7d: number;
 }
 
 export interface MemberEngagementRow {
@@ -42,6 +46,8 @@ const EMPTY_SUMMARY: PortalEngagementSummary = {
   checkins7d: 0,
   community7d: 0,
   totalEvents30d: 0,
+  journeyViews7d: 0,
+  stepRequests7d: 0,
 };
 
 export function usePortalActivity(churchId: string) {
@@ -95,6 +101,8 @@ export function usePortalActivity(churchId: string) {
       checkins7d: count('checkin'),
       community7d: recent.filter(e => communityTypes.includes(e.event_type)).length,
       totalEvents30d: events.length,
+      journeyViews7d: count('journey_view'),
+      stepRequests7d: count('milestone_step_request'),
     };
   }, [events]);
 

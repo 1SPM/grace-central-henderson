@@ -150,6 +150,26 @@ export class PlanGateError extends Error {
   }
 }
 
+export class NeobankFetchError extends Error {
+  status: number;
+  code: string;
+  detail: string;
+  requiredPlan?: string;
+
+  constructor(status: number, body: Record<string, unknown>) {
+    const code = String(body.error ?? 'request_failed');
+    const detail = String(
+      body.detail ?? body.error ?? `Impact Card API request failed (HTTP ${status})`,
+    );
+    super(detail);
+    this.name = 'NeobankFetchError';
+    this.status = status;
+    this.code = code;
+    this.detail = detail;
+    if (body.required_plan) this.requiredPlan = String(body.required_plan);
+  }
+}
+
 async function authHeaders(): Promise<Record<string, string> | null> {
   const provider = getClerkTokenProvider();
   const token = provider ? await provider() : null;
@@ -157,15 +177,23 @@ async function authHeaders(): Promise<Record<string, string> | null> {
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 }
 
+function isPlanGateResponse(status: number, body: Record<string, unknown>): boolean {
+  return (
+    status === 402
+    || body.error === 'plan_required'
+    || (status === 403 && body.error === 'subscription_inactive')
+  );
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
-  const body = await res.json().catch(() => ({}));
-  if (res.status === 402 || (res.status === 403 && body.error === 'subscription_inactive')) {
+  const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+  if (isPlanGateResponse(res.status, body)) {
     throw new PlanGateError(
-      body.detail || 'The Impact Card program requires the Enterprise plan.',
-      body.required_plan ?? 'enterprise',
+      String(body.detail || 'The Impact Card program requires the Enterprise plan.'),
+      String(body.required_plan ?? 'enterprise'),
     );
   }
-  if (!res.ok) throw new Error(body.error || `request failed (HTTP ${res.status})`);
+  if (!res.ok) throw new NeobankFetchError(res.status, body);
   return body as T;
 }
 
@@ -181,10 +209,12 @@ export async function fetchMyCard(): Promise<MyCardData | null> {
   return handleResponse<MyCardData>(res);
 }
 
-export async function fetchAdminCardProgram(): Promise<AdminCardData | null> {
+/** Demo mode allows unauthenticated admin reads when the server has VITE_ENABLE_DEMO_MODE. */
+export async function fetchAdminCardProgram(): Promise<AdminCardData> {
   const headers = await authHeaders();
-  if (!headers) return null;
-  const res = await fetch('/api/neobank?resource=admin', { headers });
+  const res = await fetch('/api/neobank?resource=admin', {
+    headers: headers ?? { 'Content-Type': 'application/json' },
+  });
   return handleResponse<AdminCardData>(res);
 }
 

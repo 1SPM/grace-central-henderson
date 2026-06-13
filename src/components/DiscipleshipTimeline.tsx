@@ -8,6 +8,7 @@ import {
   Crown,
   Check,
   X,
+  Star,
 } from 'lucide-react';
 import type { DiscipleshipMilestone, MilestoneType } from '../types';
 import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
@@ -17,6 +18,8 @@ interface DiscipleshipTimelineProps {
   milestones: DiscipleshipMilestone[];
   onAddMilestone: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string; notes?: string }) => void;
   onRemoveMilestone?: (id: string) => void;
+  /** Milestone types this member has expressed interest in via My Journey portal tab */
+  stepRequestedMilestones?: Set<string>;
 }
 
 const MILESTONE_ICONS: Record<MilestoneType, typeof DoorOpen> = {
@@ -37,7 +40,7 @@ const MILESTONE_COLORS: Record<string, { bg: string; ring: string; text: string;
   rose: { bg: 'bg-rose-100 dark:bg-rose-500/10', ring: 'ring-rose-500', text: 'text-rose-600 dark:text-rose-400', fill: 'bg-rose-500' },
 };
 
-export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onRemoveMilestone }: DiscipleshipTimelineProps) {
+export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onRemoveMilestone, stepRequestedMilestones }: DiscipleshipTimelineProps) {
   const [activePopover, setActivePopover] = useState<MilestoneType | null>(null);
   const [markDate, setMarkDate] = useState('');
   const [markNotes, setMarkNotes] = useState('');
@@ -88,26 +91,30 @@ export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onR
             const colors = MILESTONE_COLORS[def.color];
             const Icon = MILESTONE_ICONS[def.type];
             const isActive = activePopover === def.type;
+            const memberRequested = stepRequestedMilestones?.has(def.type) && !isCompleted;
 
             return (
               <div key={def.type} className="flex flex-col items-center relative" style={{ width: `${100 / totalCount}%` }}>
                 {/* Circle */}
-                <button
-                  onClick={() => {
-                    if (isCompleted) {
-                      setActivePopover(isActive ? null : def.type);
-                    } else {
-                      setActivePopover(isActive ? null : def.type);
-                    }
-                  }}
-                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    isCompleted
-                      ? `${colors.fill} text-white ring-2 ${colors.ring} ring-offset-2 ring-offset-white dark:ring-offset-dark-850 shadow-sm`
-                      : 'bg-gray-200 dark:bg-dark-600 text-gray-400 dark:text-dark-500 hover:bg-gray-300 dark:hover:bg-dark-500'
-                  }`}
-                >
-                  {isCompleted ? <Check size={16} /> : <Icon size={16} />}
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setActivePopover(isActive ? null : def.type)}
+                    className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      isCompleted
+                        ? `${colors.fill} text-white ring-2 ${colors.ring} ring-offset-2 ring-offset-white dark:ring-offset-dark-850 shadow-sm`
+                        : memberRequested
+                        ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400 ring-offset-1 ring-offset-white dark:ring-offset-dark-850'
+                        : 'bg-gray-200 dark:bg-dark-600 text-gray-400 dark:text-dark-500 hover:bg-gray-300 dark:hover:bg-dark-500'
+                    }`}
+                    title={memberRequested ? 'Member expressed interest via My Journey' : undefined}
+                  >
+                    {isCompleted ? <Check size={16} /> : memberRequested ? <Star size={14} /> : <Icon size={16} />}
+                  </button>
+                  {/* Step-request indicator dot */}
+                  {memberRequested && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full border-2 border-white dark:border-dark-850 z-20" />
+                  )}
+                </div>
 
                 {/* Label */}
                 <span className={`text-[10px] font-medium mt-2 text-center leading-tight ${
@@ -155,6 +162,14 @@ export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onR
                       </div>
                     ) : (
                       <div className="space-y-2">
+                        {memberRequested && (
+                          <div className="flex items-center gap-1.5 px-2 py-1.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg">
+                            <Star size={11} className="text-amber-500 flex-shrink-0" />
+                            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                              Member expressed interest via My Journey
+                            </p>
+                          </div>
+                        )}
                         <input
                           type="date"
                           value={markDate}

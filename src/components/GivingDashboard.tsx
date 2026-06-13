@@ -189,7 +189,7 @@ export function GivingDashboard({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Giving</h1>
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Impact Campaigns</h1>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">Track donations and stewardship</p>
         </div>
         <div className="flex items-center gap-2">
