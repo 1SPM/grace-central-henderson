@@ -97,6 +97,19 @@
         'THE GIFT': 'grace',
       },
     },
+    pastoralCare: {
+      categories: [
+        { id: 'marriage', title: 'Marriage & Relationships', subtitle: 'Relationship guidance & support', tint: 'pink', icon: 'heart', leaderIdx: 4, prefill: 'I need support with marriage and relationships' },
+        { id: 'addiction', title: 'Addiction & Recovery', subtitle: 'Freedom from substance & behavioral addiction', tint: 'yellow', icon: 'help', leaderIdx: 9, prefill: 'I need support with addiction and recovery' },
+        { id: 'grief', title: 'Grief & Loss', subtitle: 'Support through loss and mourning', tint: 'blue', icon: 'prayer', leaderIdx: 1, prefill: 'I need support with grief and loss' },
+        { id: 'faith', title: 'Faith Questions', subtitle: 'Exploring faith, doubt, and spiritual growth', tint: 'gray', icon: 'resources', leaderIdx: 0, prefill: 'I have questions about faith and spiritual growth' },
+        { id: 'crisis', title: 'Crisis / Urgent', subtitle: 'Immediate help for an urgent situation', tint: 'red', icon: 'crisis', action: 'crisis' },
+        { id: 'financial', title: 'Financial Help', subtitle: 'Financial counseling & assistance', tint: 'green', icon: 'give', leaderIdx: 1, prefill: 'I need financial counseling and assistance' },
+        { id: 'anxiety', title: 'Anxiety & Depression', subtitle: 'Mental health support & encouragement', tint: 'cyan', icon: 'help', leaderIdx: 9, prefill: 'I need support with anxiety or depression' },
+        { id: 'parenting', title: 'Parenting', subtitle: 'Parenting guidance & family support', tint: 'orange', icon: 'kids', leaderIdx: 4, prefill: 'I need parenting guidance and family support' },
+        { id: 'other', title: 'Something Else', subtitle: 'General pastoral support & conversation', tint: 'gray', icon: 'prayer', leaderIdx: null, prefill: 'I need pastoral support and someone to talk with' },
+      ],
+    },
   };
 
   global.GRACE_METRICS = GRACE_METRICS;

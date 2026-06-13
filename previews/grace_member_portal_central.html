@@ -418,10 +418,23 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .lg-head{padding:12px 16px;font-size:13px;font-weight:600;color:#1a1a1a;border-bottom:1px solid #f3f0eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .lg-count{font-size:10px;font-weight:600;color:#aaa}
 .leader-roster-scroll{overflow-y:auto;flex:1;min-height:0}
-.leader-crisis-ad{display:block;padding:10px 12px 14px;border-top:1px solid #f3f0eb;flex-shrink:0;background:#fff;text-decoration:none}
+.leader-crisis-ad{display:block;padding:10px 12px 8px;border-top:1px solid #f3f0eb;flex-shrink:0;background:#fff;text-decoration:none}
 .leader-crisis-ad img{width:100%;height:auto;border-radius:12px;display:block;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .leader-crisis-ad:hover img{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.12)}
 .leader-crisis-ad:focus-visible{outline:2px solid #EE2B37;outline-offset:2px;border-radius:14px}
+.leader-crisis-outreach{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 14px;border-top:1px solid #f3f0eb;background:#fafafa}
+.lco-head{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px}
+.lco-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start;width:100%;padding:8px 10px;border:none;border-radius:10px;background:#fff;border:1px solid #ece8e1;text-align:left;font-family:inherit;cursor:pointer;text-decoration:none;color:inherit;margin-bottom:6px}
+.lco-row:hover{background:#fff5f5;border-color:#fecaca}
+.lco-row--urgent{background:linear-gradient(90deg,#fff5f5 0%,#fff 72%);border-color:#fecaca}
+.lco-row-title{font-size:12px;font-weight:700;line-height:1.3;grid-column:1}
+.lco-row-desc{font-size:10px;color:#888;margin-top:2px;line-height:1.35;grid-column:1}
+.lco-row-action{font-size:13px;font-weight:800;color:#C41E2A;white-space:nowrap;padding-top:1px;grid-column:2;grid-row:1/span 2;align-self:center}
+.lco-pastoral{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:10px;border:1px solid rgba(238,43,55,.35);background:#fff7f8;color:#111;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;margin-bottom:6px}
+.lco-pastoral:hover{background:#ffeef0}
+.lco-all{width:100%;padding:8px;border:none;background:transparent;color:#1e3a5f;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:2px}
+.lco-all:hover{color:#0f2744}
+.lco-note{font-size:10px;color:#888;line-height:1.45;margin:4px 0 0;text-align:center}
 .lg-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #f7f5f2;transition:background .12s}
 .lg-item:last-child{border-bottom:none}
 .lg-item:hover{background:#f7f3ed}
@@ -494,6 +507,40 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
 .bc-btn{width:100%;padding:9px;background:#EE2B37;border:none;color:#fff;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}
 .bc-btn:hover{background:#b8862e}
 .ai-main-extras{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex-shrink:0}
+.leader-pastoral-care{flex-shrink:0;border:1px solid #ece8e1;border-radius:14px;background:#fff;padding:18px 20px 16px}
+.pcare-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.pcare-head-main{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.pcare-head-ico{width:40px;height:40px;border-radius:10px;background:#f7f5f2;border:1px solid #ece8e1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pcare-head-title{font-size:18px;font-weight:800;color:#1a1a1a;line-height:1.2}
+.pcare-head-sub{font-size:12px;color:#888;margin-top:4px;line-height:1.45;max-width:420px}
+.pcare-new-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;border:none;background:#111827;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.pcare-new-btn:hover{background:#000}
+.pcare-intro{text-align:center;margin-bottom:16px;padding:0 8px}
+.pcare-intro h3{font-size:22px;font-weight:800;color:#1a1a1a;letter-spacing:-.02em;margin-bottom:8px}
+.pcare-intro p{font-size:13px;color:#888;line-height:1.55;max-width:560px;margin:0 auto}
+.pcare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.pcare-grid--highlight{animation:pcarePulse .6s ease}
+@keyframes pcarePulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 3px rgba(238,43,55,.25)}}
+.pcare-card{border-radius:14px;padding:16px 14px;cursor:pointer;transition:transform .12s,box-shadow .12s;border:1px solid transparent;min-height:118px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+.pcare-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.pcare-card-ico{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid rgba(0,0,0,.06)}
+.pcare-card-title{font-size:13px;font-weight:700;color:#1a1a1a;line-height:1.35;margin-bottom:4px}
+.pcare-card-sub{font-size:11px;color:#666;line-height:1.45}
+.pcare-tint-pink{background:#fdf2f4;border-color:#fce7ea}
+.pcare-tint-yellow{background:#fefce8;border-color:#fef08a}
+.pcare-tint-blue{background:#eff6ff;border-color:#bfdbfe}
+.pcare-tint-gray{background:#f9fafb;border-color:#e5e7eb}
+.pcare-tint-red{background:#fef2f2;border-color:#fecaca}
+.pcare-tint-green{background:#f0fdf4;border-color:#bbf7d0}
+.pcare-tint-cyan{background:#ecfeff;border-color:#a5f3fc}
+.pcare-tint-orange{background:#fff7ed;border-color:#fed7aa}
+.pcare-recent{margin-bottom:12px;padding-top:4px}
+.pcare-recent-title{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.pcare-recent-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;background:#f7f5f2;border-radius:10px;margin-bottom:6px;font-size:12px}
+.pcare-recent-row strong{color:#1a1a1a;font-weight:600}
+.pcare-recent-meta{font-size:10px;color:#888;margin-top:2px}
+.pcare-recent-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d;white-space:nowrap}
+.pcare-foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#aaa;text-align:center;padding-top:4px}
 .pulse-card{background:#fff;border:1px solid #ece8e1;border-radius:14px;padding:16px}
 .pulse-live-dot{width:7px;height:7px;border-radius:50%;background:#EE2B37;animation:ld 1.4s infinite;flex-shrink:0}
 @keyframes ld{0%,100%{opacity:1}50%{opacity:.35}}
@@ -509,6 +556,12 @@ body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px
   .ai-shell{grid-template-columns:1fr;min-height:auto}
   .ai-right{min-height:min(70vh,640px)}
   .ai-main-extras{grid-template-columns:1fr}
+  .pcare-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){
+  .pcare-grid{grid-template-columns:1fr}
+  .pcare-head{flex-direction:column;align-items:stretch}
+  .pcare-new-btn{width:100%;justify-content:center}
 }
 
 /* ══ NETWORK SOCIAL ENGINE ══ */
@@ -2173,25 +2226,26 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div style="padding:8px 14px 12px;font-size:10px;color:#aaa;line-height:1.45;border-top:1px solid #f7f5f2" id="ai-chat-disclaimer">Avatar reflects approved teachings — not a live person. Human follow-up available. For crisis support, tap Help now for 988, national helplines, and pastoral care.</div>
           </div>
 
-          <!-- Bible study + points (main column) -->
-          <div class="ai-main-extras">
-          <div class="bible-card">
-            <div class="bc-title">📖 Today's Scripture</div>
-            <div class="bc-verse" id="leader-scripture-verse">"Let your roots grow down into him, and let your lives be built on him."</div>
-            <div class="bc-ref" id="leader-scripture-ref">Colossians 2:7 · NLT</div>
-            <div class="bc-topics" id="leader-scripture-topics"></div>
-            <button class="bc-btn" onclick="openProfileStudy('grace')">Start Bible Study with AI →</button>
-          </div>
-          <div class="pulse-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div style="font-size:12px;font-weight:600;color:#1a1a1a">Recent activity</div>
-              <span style="font-size:9px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:4px"><span class="pulse-live-dot"></span>Live</span>
+          <!-- Pastoral care (CRM-style triage) -->
+          <section class="leader-pastoral-care" id="leader-pastoral-care" aria-labelledby="pcare-head-title">
+            <header class="pcare-head">
+              <div class="pcare-head-main">
+                <div class="pcare-head-ico"><span data-grace-icon="prayer" data-grace-size="20"></span></div>
+                <div>
+                  <div class="pcare-head-title" id="pcare-head-title">Pastoral Care</div>
+                  <div class="pcare-head-sub">AI-assisted pastoral support — 24/7 confidential care</div>
+                </div>
+              </div>
+              <button type="button" class="pcare-new-btn" onclick="openPastoralCarePicker()">+ New help request</button>
+            </header>
+            <div class="pcare-intro">
+              <h3>How Can We Help?</h3>
+              <p>Central Henderson Church is here for you — 24/7, confidential support. Select what best describes your situation.</p>
             </div>
-            <div class="pulse-score" id="leader-pulse-score">4</div>
-            <div class="pulse-sub">Church participation · this week</div>
-            <div class="pulse-activity" id="leader-pulse-activity"></div>
-          </div>
-          </div>
+            <div class="pcare-grid" id="pcare-grid" role="list"></div>
+            <div class="pcare-recent" id="pcare-recent" hidden></div>
+            <footer class="pcare-foot"><span aria-hidden="true">🛡</span> All conversations are private and confidential</footer>
+          </section>
 
         </div>
 
@@ -2208,6 +2262,32 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <a class="leader-crisis-ad" href="#" onclick="openCrisisSupport();return false" aria-label="Are you in crisis? Get help now — Central 24-7">
               <img src="assets/crisis-mode-ad.png" alt="Are you in crisis mode? Click for help — Central Church 24-7">
             </a>
+            <div class="leader-crisis-outreach" aria-label="Crisis outreach lines">
+              <div class="lco-head">Crisis lines · 24/7 confidential</div>
+              <a class="lco-row lco-row--urgent" href="tel:911">
+                <span class="lco-row-title">Emergency services</span>
+                <span class="lco-row-desc">If you or someone else is in immediate danger</span>
+                <span class="lco-row-action">911</span>
+              </a>
+              <a class="lco-row" href="tel:988">
+                <span class="lco-row-title">988 Suicide &amp; Crisis Lifeline</span>
+                <span class="lco-row-desc">Call or text 988 · Nevada statewide</span>
+                <span class="lco-row-action">988</span>
+              </a>
+              <a class="lco-row" href="sms:741741&amp;body=HOME">
+                <span class="lco-row-title">Crisis Text Line</span>
+                <span class="lco-row-desc">Text HOME to 741741 · 24/7 support</span>
+                <span class="lco-row-action">Text</span>
+              </a>
+              <a class="lco-row" href="tel:988">
+                <span class="lco-row-title">Veterans Crisis Line</span>
+                <span class="lco-row-desc">Call 988, then press 1</span>
+                <span class="lco-row-action">988 · 1</span>
+              </a>
+              <button type="button" class="lco-pastoral" onclick="alertPastoralCare()"><span aria-hidden="true">♥</span> Alert on-call pastoral care</button>
+              <button type="button" class="lco-all" onclick="openCrisisSupport()">View all hotlines</button>
+              <p class="lco-note">Free, confidential · Call 911 first in immediate danger.</p>
+            </div>
           </div>
 
         </div>
@@ -5791,8 +5871,123 @@ const LEADER_STATE = {
     verse: '"Let your roots grow down into him, and let your lives be built on him."',
     ref: 'Colossians 2:7 · NLT',
     topics: ['Foundational Faith', 'Faith', 'Guidance & Wisdom', 'Growing in Him']
+  },
+  care: {
+    requests: [],
+    lastCategory: null,
+    openCount: 0
   }
 };
+const FALLBACK_PASTORAL_CATEGORIES = [
+  { id: 'marriage', title: 'Marriage & Relationships', subtitle: 'Relationship guidance & support', tint: 'pink', icon: 'heart', leaderIdx: 4, prefill: 'I need support with marriage and relationships' },
+  { id: 'addiction', title: 'Addiction & Recovery', subtitle: 'Freedom from substance & behavioral addiction', tint: 'yellow', icon: 'help', leaderIdx: 9, prefill: 'I need support with addiction and recovery' },
+  { id: 'grief', title: 'Grief & Loss', subtitle: 'Support through loss and mourning', tint: 'blue', icon: 'prayer', leaderIdx: 1, prefill: 'I need support with grief and loss' },
+  { id: 'faith', title: 'Faith Questions', subtitle: 'Exploring faith, doubt, and spiritual growth', tint: 'gray', icon: 'resources', leaderIdx: 0, prefill: 'I have questions about faith and spiritual growth' },
+  { id: 'crisis', title: 'Crisis / Urgent', subtitle: 'Immediate help for an urgent situation', tint: 'red', icon: 'crisis', action: 'crisis' },
+  { id: 'financial', title: 'Financial Help', subtitle: 'Financial counseling & assistance', tint: 'green', icon: 'give', leaderIdx: 1, prefill: 'I need financial counseling and assistance' },
+  { id: 'anxiety', title: 'Anxiety & Depression', subtitle: 'Mental health support & encouragement', tint: 'cyan', icon: 'help', leaderIdx: 9, prefill: 'I need support with anxiety or depression' },
+  { id: 'parenting', title: 'Parenting', subtitle: 'Parenting guidance & family support', tint: 'orange', icon: 'kids', leaderIdx: 4, prefill: 'I need parenting guidance and family support' },
+  { id: 'other', title: 'Something Else', subtitle: 'General pastoral support & conversation', tint: 'gray', icon: 'prayer', leaderIdx: null, prefill: 'I need pastoral support and someone to talk with' }
+];
+function getPastoralCareCategories() {
+  const m = typeof GRACE_METRICS !== 'undefined' ? GRACE_METRICS : null;
+  const seeded = m?.pastoralCare?.categories;
+  return Array.isArray(seeded) && seeded.length ? seeded : FALLBACK_PASTORAL_CATEGORIES;
+}
+function matchLeaderForCare(categoryId) {
+  const cat = getPastoralCareCategories().find(c => c.id === categoryId);
+  if (!cat) return currentLeader;
+  if (cat.action === 'crisis') return null;
+  if (typeof cat.leaderIdx === 'number') return cat.leaderIdx;
+  return LEADER_STATE.assignedIdx ?? currentLeader ?? 0;
+}
+function hydratePastoralCare() {
+  const m = typeof GRACE_METRICS !== 'undefined' ? GRACE_METRICS : null;
+  if (LEADER_STATE.care.requests.length) return;
+  const demo = m?.pastoralCare?.recentRequests;
+  if (Array.isArray(demo) && demo.length) {
+    LEADER_STATE.care.requests = demo.map(r => ({ ...r }));
+    LEADER_STATE.care.openCount = demo.filter(r => r.status === 'Submitted').length;
+    return;
+  }
+  LEADER_STATE.care.requests = [
+    { id: 'pc-demo-1', categoryId: 'grief', label: 'Grief & Loss', leader: 'Rev. Sandra Mitchell', status: 'Resolved', time: '3 days ago' },
+    { id: 'pc-demo-2', categoryId: 'prayer', label: 'Prayer follow-up', leader: 'Pastor James Wilson', status: 'Resolved', time: '1 week ago' }
+  ];
+}
+function renderPastoralCare() {
+  const grid = document.getElementById('pcare-grid');
+  if (!grid) return;
+  const cats = getPastoralCareCategories();
+  grid.innerHTML = cats.map(cat => `
+    <button type="button" class="pcare-card pcare-tint-${cat.tint || 'gray'}" role="listitem" data-pcare-id="${cat.id}" onclick="startPastoralCareRequest('${cat.id}')">
+      <div class="pcare-card-ico"><span data-grace-icon="${cat.icon || 'prayer'}" data-grace-size="18"></span></div>
+      <div class="pcare-card-title">${cat.title}</div>
+      <div class="pcare-card-sub">${cat.subtitle || ''}</div>
+    </button>`).join('');
+  if (typeof initGracePortalIcons === 'function') initGracePortalIcons(grid);
+  const recent = document.getElementById('pcare-recent');
+  if (!recent) return;
+  const rows = LEADER_STATE.care.requests.slice(0, 3);
+  if (!rows.length) {
+    recent.hidden = true;
+    recent.innerHTML = '';
+    return;
+  }
+  recent.hidden = false;
+  recent.innerHTML = `
+    <div class="pcare-recent-title">Recent care activity</div>
+    ${rows.map(r => `
+      <div class="pcare-recent-row">
+        <div><strong>${r.label}</strong><div class="pcare-recent-meta">${r.leader} · ${r.time}</div></div>
+        <span class="pcare-recent-status">${r.status}</span>
+      </div>`).join('')}`;
+}
+function openPastoralCarePicker() {
+  goSection('ai');
+  const section = document.getElementById('leader-pastoral-care');
+  const grid = document.getElementById('pcare-grid');
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (grid) {
+    grid.classList.add('pcare-grid--highlight');
+    const first = grid.querySelector('.pcare-card');
+    if (first) first.focus();
+    setTimeout(() => grid.classList.remove('pcare-grid--highlight'), 900);
+  }
+  showPortalToast('Choose a category below to start a confidential care request', '🙏');
+}
+function startPastoralCareRequest(categoryId) {
+  const cat = getPastoralCareCategories().find(c => c.id === categoryId);
+  if (!cat) return;
+  if (cat.action === 'crisis' || categoryId === 'crisis') {
+    openCrisisSupport();
+    return;
+  }
+  const leaderIdx = matchLeaderForCare(categoryId);
+  const leader = aiLeaders[leaderIdx] || aiLeaders[0];
+  if (leaderIdx !== currentLeader) switchLeader(leaderIdx);
+  LEADER_STATE.care.lastCategory = categoryId;
+  LEADER_STATE.care.openCount++;
+  const req = {
+    id: 'pc-' + Date.now(),
+    categoryId,
+    label: cat.title,
+    leader: leader.name,
+    status: 'Submitted',
+    time: 'Just now'
+  };
+  LEADER_STATE.care.requests.unshift(req);
+  if (LEADER_STATE.care.requests.length > 8) LEADER_STATE.care.requests.pop();
+  renderPastoralCare();
+  syncLeaderKpis();
+  goSection('ai');
+  const chatInput = document.getElementById('chat-input');
+  if (chatInput) {
+    chatInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    chatInput.focus();
+  }
+  sendCmd(cat.prefill || ('I need support with ' + cat.title.toLowerCase()), 'care');
+}
 function leaderShortName(l) {
   if (!l || !l.name) return 'Leader';
   const parts = l.name.split(' ');
@@ -5882,13 +6077,16 @@ function hydrateLeader() {
   }
   LEADER_STATE.reachableNow = aiLeaders.filter(l => getLeaderReachable(l)).length;
   LEADER_STATE.assignedIdx = currentLeader;
+  hydratePastoralCare();
   syncLeaderKpis();
   renderLeaderActivity();
   renderLeaderScripture();
+  renderPastoralCare();
   renderLeaderRoster();
 }
 function initLeaderHero() {
   hydrateLeader();
+  renderPastoralCare();
   renderLeaderChatSeed();
   if (!leaderHeroWelcomed) {
     showPortalToast('Your verified leadership team is ready', '◈');
