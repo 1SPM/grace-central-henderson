@@ -4,6 +4,7 @@ import { Dashboard } from './Dashboard';
 import { ActionCenter } from './ActionCenter';
 import { GraceAIHub } from './grace/GraceAIHub';
 import { Congregation } from './Congregation';
+import { SundayPage } from './SundayPage';
 import { navigateView } from '../lib/actionCenterNav';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
@@ -19,7 +20,6 @@ import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, Calend
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
 
 // Lazy load less frequently used views for code splitting
-const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
 const Prayer = lazy(() => import('./Prayer').then(m => ({ default: m.Prayer })));
 const GivingHub = lazy(() => import('./giving/GivingHub').then(m => ({ default: m.GivingHub })));
 const WalletsView = lazy(() => import('./financial/WalletsView').then(m => ({ default: m.WalletsView })));
@@ -45,7 +45,6 @@ const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ defa
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
-const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
@@ -254,12 +253,12 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewVisitors={() => setView('pipeline')}
           onViewInactive={() => setView('people')}
           onViewActions={() => setView('feed')}
-          onViewCalendar={() => setView('calendar')}
+          onViewCalendar={() => navigateView('calendar', setView)}
           onViewAnalytics={() => setView('analytics')}
           churchSettings={settings}
           groupsCount={groups.length}
           eventsCount={events.length}
-          onNavigate={(v) => setView(v as View)}
+          onNavigate={(v) => navigateView(v, setView)}
           onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
           onReopenWizard={onReopenWizard}
@@ -357,6 +356,39 @@ export function ViewRenderer(props: ViewRendererProps) {
         />
       );
 
+    case 'sunday-prep':
+      return (
+        <SundayPage
+          people={people}
+          prayers={prayers}
+          events={events}
+          rsvps={rsvps}
+          churchName={churchName}
+          onViewPerson={handlers.viewPerson}
+          onRSVP={handlers.rsvp}
+          onAddEvent={handlers.addEvent}
+          onUpdateEvent={handlers.updateEvent}
+          onDeleteEvent={handlers.deleteEvent}
+        />
+      );
+
+    case 'calendar':
+      return (
+        <SundayPage
+          people={people}
+          prayers={prayers}
+          events={events}
+          rsvps={rsvps}
+          churchName={churchName}
+          onViewPerson={handlers.viewPerson}
+          onRSVP={handlers.rsvp}
+          onAddEvent={handlers.addEvent}
+          onUpdateEvent={handlers.updateEvent}
+          onDeleteEvent={handlers.deleteEvent}
+          defaultTab="calendar"
+        />
+      );
+
     case 'person':
       if (!selectedPerson) {
         setView('people');
@@ -403,21 +435,6 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'attendance':
         return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
-
-      case 'calendar':
-        return (
-          <Calendar
-            events={events}
-            people={people}
-            rsvps={rsvps}
-            churchName={churchName}
-            onRSVP={handlers.rsvp}
-            onAddEvent={handlers.addEvent}
-            onUpdateEvent={handlers.updateEvent}
-            onDeleteEvent={handlers.deleteEvent}
-            onViewPerson={handlers.viewPerson}
-          />
-        );
 
       case 'volunteers':
         return (
@@ -662,13 +679,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           />
         );
 
-      case 'sunday-prep':
-        return (
-          <div className="p-6 max-w-6xl mx-auto">
-            <SundayPrep people={people} prayers={prayers} onViewPerson={handlers.viewPerson} />
-          </div>
-        );
-
       case 'event-registration':
         return (
           <EventRegistration
@@ -678,7 +688,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             onUpdateEvent={handlers.updateEvent}
             onDeleteEvent={handlers.deleteEvent}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('calendar')}
+            onBack={() => navigateView('calendar', setView)}
           />
         );
 
@@ -755,7 +765,7 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'life-services':
         return (
           <LifeServices
-            onNavigate={setView}
+            onNavigate={(v) => navigateView(v, setView)}
             events={events}
             people={people}
           />

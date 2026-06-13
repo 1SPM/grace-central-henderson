@@ -685,7 +685,7 @@ function App() {
             onSaveProfile={saveChurchProfile}
             onSaveSettings={saveChurchSettings}
             onOpenPersonForm={modals.openPersonForm}
-            onSetView={(v: string) => setView(v as View)}
+            onSetView={(v: string) => navigateView(v, setView)}
             onComplete={() => setShowWizard(false)}
             onDismiss={() => setShowWizard(false)}
           />

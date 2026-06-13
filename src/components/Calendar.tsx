@@ -38,9 +38,11 @@ interface CalendarProps {
   onUpdateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => void;
   onDeleteEvent?: (eventId: string) => void;
   onViewPerson?: (personId: string) => void;
+  /** When true, hide page title (used inside Sunday tab). */
+  embedded?: boolean;
 }
 
-export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson }: CalendarProps) {
+export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onViewPerson, embedded = false }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [showBirthdays, setShowBirthdays] = useState(true);
@@ -286,15 +288,21 @@ export function Calendar({ events, people, rsvps, churchName = 'Church', onRSVP,
   }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className={`max-w-7xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Calendar / Events</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
+      <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
+        {!embedded ? (
+          <div>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Calendar / Events</h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-dark-400">
             {events.length} events · {birthdays.length} birthdays · {anniversaries.length} anniversaries
           </p>
-        </div>
+        )}
         <div className="flex items-center gap-2">
           <div className="relative">
             <button

@@ -40,6 +40,8 @@ interface SundayPrepProps {
   people: Person[];
   prayers: PrayerRequest[];
   onViewPerson?: (id: string) => void;
+  /** When true, hide hero header (used inside Sunday tab). */
+  embedded?: boolean;
 }
 
 interface SermonSection {
@@ -139,7 +141,7 @@ const sectionTypeConfig = {
   },
 };
 
-export function SundayPrep({ people, prayers }: SundayPrepProps) {
+export function SundayPrep({ people, prayers, onViewPerson, embedded = false }: SundayPrepProps) {
   const { settings: aiSettings } = useAISettings();
   const [sermonTitle, setSermonTitle] = useState(() =>
     localStorage.getItem('sermon-title') || ''
@@ -507,6 +509,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
 
       <div data-tutorial="sunday-prep-main" className="space-y-6">
         {/* Header */}
+        {!embedded && (
         <div className="relative overflow-hidden rounded-xl h-32 no-print">
           <img
             src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1200&h=400&fit=crop"
@@ -549,6 +552,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
             </div>
           </div>
         </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Content Sources */}

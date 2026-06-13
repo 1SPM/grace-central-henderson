@@ -1,5 +1,6 @@
 import type { View } from '../types';
 import { openCongregation } from './congregationNav';
+import { openSunday } from './sundayNav';
 
 export type ActionCenterTab = 'followups' | 'mail';
 
@@ -34,6 +35,10 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
   }
   if (view === 'groups') {
     openCongregation('groups', setView);
+    return;
+  }
+  if (view === 'calendar') {
+    openSunday('calendar', setView);
     return;
   }
   setView(view as View);
