@@ -4,15 +4,16 @@ import {
   Building2,
   Check,
   Coins,
+  CreditCard,
   DollarSign,
   Flag,
   LayoutGrid,
-  Star,
   User,
 } from 'lucide-react';
-import type { Giving, Person, Pledge } from '../../types';
+import type { Giving, Person, Pledge, View } from '../../types';
 import type { GivingHubTab, GivingNavTarget } from './GivingHub';
-import { demoCampaigns, demoFundStreamSplits, demoPoints } from './demoGivingHub';
+import { demoCampaigns, demoFundStreamSplits } from './demoGivingHub';
+import { fmtImpactUsd, useImpactCardProgram } from '../../hooks/useImpactCardProgram';
 
 interface GivingOverviewProps {
   giving: Giving[];
@@ -20,6 +21,7 @@ interface GivingOverviewProps {
   pledges: Pledge[];
   onNavigate: (view: GivingNavTarget['view']) => void;
   onGoToTab: (tab: GivingHubTab) => void;
+  onNavigateToWallets?: (view: View) => void;
 }
 
 const ACCENT_BAR: Record<string, string> = {
@@ -44,7 +46,10 @@ function StreamPill({ kind, children }: { kind: 'direct' | 'points' | 'campaign'
   );
 }
 
-export function GivingOverview({ giving, pledges, onNavigate, onGoToTab }: GivingOverviewProps) {
+export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavigateToWallets }: GivingOverviewProps) {
+  const program = useImpactCardProgram();
+  const cardSummary = program.data?.summary;
+
   const stats = useMemo(() => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -97,16 +102,28 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab }: Givin
           <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">{stats.funds.length}</p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">active</p>
         </div>
-        <div className="rounded-xl p-4 bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/20 dark:to-violet-900/10 border border-violet-200 dark:border-violet-800/40">
+        <div className="rounded-xl p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800/40">
           <p className="text-[11px] font-medium text-gray-600 dark:text-dark-300 flex items-center gap-1.5">
-            <Star size={13} /> Points redeemed
+            <CreditCard size={13} /> Card interchange
           </p>
           <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">
-            ${demoPoints.redeemedMtdUsd.toLocaleString()}
+            {program.state === 'ready' && cardSummary
+              ? fmtImpactUsd(cardSummary.interchange_mtd_micro_usd)
+              : '—'}
           </p>
-          <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1 font-medium">
-            ▲ toward tithe this month
+          <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">
+            {program.state === 'ready' && cardSummary
+              ? `${cardSummary.active_cards} active cards · i2c MTD`
+              : 'Impact Card program'}
           </p>
+          {onNavigateToWallets && program.state === 'ready' && (
+            <button
+              onClick={() => onNavigateToWallets('wallets')}
+              className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium mt-1 hover:underline"
+            >
+              Impact Card Accounts →
+            </button>
+          )}
         </div>
       </div>
 

@@ -495,6 +495,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             campaigns={collectionMgmt.campaigns}
             pledges={collectionMgmt.pledges}
             onNavigate={(subView) => setView(subView)}
+            onNavigateToWallets={setView}
           />
         );
 
@@ -593,7 +594,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             />
           );
         }
-        return <FinancialHub onBack={() => setView('dashboard')} />;
+        return <FinancialHub onBack={() => setView('dashboard')} onNavigate={setView} />;
 
       case 'wallets':
         return <WalletsView people={people} />;

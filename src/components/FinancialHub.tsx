@@ -11,13 +11,15 @@
  */
 
 import { useMemo, useState } from 'react';
-import { ArrowDownRight, ArrowUpRight, RefreshCw, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, RefreshCw, Calendar as CalendarIcon, AlertCircle, CreditCard, ChevronRight } from 'lucide-react';
 import { FLAGS, flagEnabled } from '../lib/observability/featureFlags';
 import { useFinancialHub, defaultRange, isoDate, type FinancialHubTimelinePoint } from '../hooks/useFinancialHub';
-import { CardProgramSection } from './financial/CardProgramSection';
+import { fmtImpactUsd, useImpactCardProgram } from '../hooks/useImpactCardProgram';
+import type { View } from '../types';
 
 interface FinancialHubProps {
   onBack?: () => void;
+  onNavigate?: (view: View) => void;
 }
 
 function fmtUsd(n: number): string {
@@ -44,7 +46,7 @@ function rangePresets(): Array<{ label: string; days: number }> {
   ];
 }
 
-export function FinancialHub({ onBack }: FinancialHubProps) {
+export function FinancialHub({ onBack, onNavigate }: FinancialHubProps) {
   const flagOn = flagEnabled(FLAGS.FINANCIAL_HUB);
 
   const [range, setRange] = useState(defaultRange(30));
@@ -168,8 +170,7 @@ export function FinancialHub({ onBack }: FinancialHubProps) {
         </>
       )}
 
-      {/* ---- GRACE Impact Card program (Enterprise) ---- */}
-      <CardProgramSection />
+      <ImpactCardSummaryCard onNavigate={onNavigate} />
     </div>
   );
 }
@@ -340,6 +341,68 @@ function FundBreakdownCard({ funds }: { funds: { fund: string; creditUsd: number
             <div className="text-[11px] text-gray-500 dark:text-dark-500 mt-0.5">
               {(f.percentOfTotal * 100).toFixed(1)}% · {fmtCount(f.count)} gifts
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ImpactCardSummaryCard({ onNavigate }: { onNavigate?: (view: View) => void }) {
+  const program = useImpactCardProgram();
+
+  if (program.state === 'loading' || program.state === 'unavailable') return null;
+
+  if (program.state === 'gated') {
+    return (
+      <div className="mt-6 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl p-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h3 className="text-sm font-medium text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+              <CreditCard size={16} /> Impact Card Accounts
+            </h3>
+            <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
+              {program.gateMessage || 'The GRACE Impact Card program requires the Enterprise plan.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const summary = program.data?.summary;
+  if (!summary) return null;
+
+  return (
+    <div className="mt-6 bg-stone-100 dark:bg-dark-800 border border-stone-200 dark:border-dark-700 rounded-xl p-5">
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+        <div>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 flex items-center gap-2">
+            <CreditCard size={16} className="text-indigo-600 dark:text-indigo-400" /> Impact Card Accounts
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
+            i2cInc merchant program — card usage and interchange revenue
+          </p>
+        </div>
+        {onNavigate && (
+          <button
+            onClick={() => onNavigate('wallets')}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
+          >
+            Open Impact Card Accounts <ChevronRight size={14} />
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'Active cards', value: String(summary.active_cards) },
+          { label: 'Pending KYC', value: String(summary.pending_kyc) },
+          { label: 'Card spend (MTD)', value: fmtImpactUsd(summary.spend_mtd_micro_usd) },
+          { label: 'Interchange (MTD)', value: fmtImpactUsd(summary.interchange_mtd_micro_usd) },
+        ].map(({ label, value }) => (
+          <div key={label} className="bg-white dark:bg-dark-850 rounded-lg border border-stone-200/60 dark:border-dark-700 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-dark-400">{label}</p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-dark-100 mt-1">{value}</p>
           </div>
         ))}
       </div>

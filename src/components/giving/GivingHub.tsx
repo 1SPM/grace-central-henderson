@@ -8,7 +8,7 @@ import {
   Star,
   Wand2,
 } from 'lucide-react';
-import type { Giving, Person, Campaign, Pledge } from '../../types';
+import type { Giving, Person, Campaign, Pledge, View } from '../../types';
 import { GivingOverview } from './GivingOverview';
 import { RevenueStreams } from './RevenueStreams';
 import { PointsRewards } from './PointsRewards';
@@ -44,6 +44,7 @@ interface GivingHubProps {
   campaigns?: Campaign[];
   pledges?: Pledge[];
   onNavigate: (view: GivingNavTarget['view']) => void;
+  onNavigateToWallets?: (view: View) => void;
 }
 
 const TABS: { id: GivingHubTab; label: string; icon: typeof Flag; badge?: number }[] = [
@@ -56,7 +57,7 @@ const TABS: { id: GivingHubTab; label: string; icon: typeof Flag; badge?: number
   { id: 'causes', label: 'Member causes', icon: HeartHandshake, badge: demoCauseStats.awaitingReview },
 ];
 
-export function GivingHub({ giving, people, campaigns = [], pledges = [], onNavigate }: GivingHubProps) {
+export function GivingHub({ giving, people, campaigns = [], pledges = [], onNavigate, onNavigateToWallets }: GivingHubProps) {
   const [tab, setTab] = useState<GivingHubTab>('overview');
 
   return (
@@ -107,9 +108,10 @@ export function GivingHub({ giving, people, campaigns = [], pledges = [], onNavi
           pledges={pledges}
           onNavigate={onNavigate}
           onGoToTab={setTab}
+          onNavigateToWallets={onNavigateToWallets}
         />
       )}
-      {tab === 'streams' && <RevenueStreams />}
+      {tab === 'streams' && <RevenueStreams onNavigateToWallets={onNavigateToWallets} />}
       {tab === 'points' && <PointsRewards />}
       {tab === 'campaigns' && <CampaignsTab campaigns={campaigns} pledges={pledges} onGoToTab={setTab} />}
       {tab === 'maker' && <CampaignMaker />}

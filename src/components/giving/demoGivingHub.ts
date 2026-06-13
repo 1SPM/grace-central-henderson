@@ -122,20 +122,6 @@ export const demoRecurring: RecurringGiver[] = [
   { name: 'Amara Williams', amount: 75, frequency: 'Weekly', fund: 'Youth', nextDate: 'Jun 15' },
 ];
 
-export interface InterchangeSummary {
-  debit: number;
-  credit: number;
-  accountFees: number;
-  rewardsPoolAllocation: number;
-}
-
-export const demoInterchange: InterchangeSummary = {
-  debit: 10908,
-  credit: 3275,
-  accountFees: 1250,
-  rewardsPoolAllocation: 2500,
-};
-
 /**
  * Per-fund revenue stream split, applied to whatever real fund totals
  * exist. Fractions per stream sum to <= 1; remainder counts as direct.
@@ -149,30 +135,7 @@ export const demoFundStreamSplits: Record<string, { points: number; campaign: nu
   other: { points: 0, campaign: 0, card: 0 },
 };
 
-// ── Points & rewards ──────────────────────────────────────────────
-
-export interface PointsSummary {
-  poolPoints: number;
-  poolUsd: number;
-  earnedMtdPoints: number;
-  earnedMtdFromSpend: number;
-  redeemedMtdPoints: number;
-  redeemedMtdUsd: number;
-  earnRate: string;
-  redeemRate: string;
-}
-
-export const demoPoints: PointsSummary = {
-  poolPoints: 248400,
-  poolUsd: 2484,
-  earnedMtdPoints: 384000,
-  earnedMtdFromSpend: 384000,
-  redeemedMtdPoints: 384000,
-  redeemedMtdUsd: 3840,
-  earnRate: '1 pt / $1',
-  redeemRate: '100 pts = $1 toward giving',
-};
-
+// ── Points & rewards (rules & leaderboard demo; pool/spend from live API) ──
 export interface EarnRule {
   id: string;
   title: string;

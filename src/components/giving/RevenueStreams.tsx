@@ -1,10 +1,11 @@
-import { Repeat } from 'lucide-react';
+import { Repeat, ChevronRight } from 'lucide-react';
 import {
-  demoInterchange,
   demoRecurring,
   demoRevenueStreams,
   type StreamKind,
 } from './demoGivingHub';
+import { fmtImpactUsd, useImpactCardProgram } from '../../hooks/useImpactCardProgram';
+import type { View } from '../../types';
 
 const KIND_PILL: Record<StreamKind, string> = {
   direct: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -14,19 +15,29 @@ const KIND_PILL: Record<StreamKind, string> = {
   member: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
 };
 
-export function RevenueStreams() {
-  const totalMtd = demoRevenueStreams.reduce((sum, s) => sum + s.mtdVolume, 0);
-  const interchangeTotal = demoInterchange.debit + demoInterchange.credit;
-  const netToChurch = interchangeTotal + demoInterchange.accountFees - demoInterchange.rewardsPoolAllocation;
+interface RevenueStreamsProps {
+  onNavigateToWallets?: (view: View) => void;
+}
+
+export function RevenueStreams({ onNavigateToWallets }: RevenueStreamsProps) {
+  const program = useImpactCardProgram();
+  const summary = program.data?.summary;
+
+  const spendMtd = summary?.spend_mtd_micro_usd ?? 0;
+  const interchangeMtd = summary?.interchange_mtd_micro_usd ?? 0;
+  const rewardsPoolAllocation = Math.round(interchangeMtd * 0.5);
+  const netToChurch = interchangeMtd - rewardsPoolAllocation;
+
+  const totalMtd = demoRevenueStreams.reduce((sum, s) => sum + s.mtdVolume, 0)
+    + (program.state === 'ready' ? spendMtd / 1_000_000 : 0);
 
   return (
     <div className="space-y-4">
-      {/* Stream audit table */}
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="flex items-center justify-between p-5 pb-3">
           <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">All revenue streams — full audit</h2>
           <span className="text-xs text-gray-500 dark:text-dark-400">
-            MTD total <strong className="text-gray-900 dark:text-dark-100">${totalMtd.toLocaleString()}</strong>
+            MTD total <strong className="text-gray-900 dark:text-dark-100">${Math.round(totalMtd).toLocaleString()}</strong>
           </span>
         </div>
         <div className="overflow-x-auto">
@@ -72,13 +83,34 @@ export function RevenueStreams() {
                   </td>
                 </tr>
               ))}
+              {program.state === 'ready' && spendMtd > 0 && (
+                <tr className="border-b border-gray-100 dark:border-dark-700 last:border-0 bg-blue-50/50 dark:bg-blue-900/10">
+                  <td className="px-5 py-2.5">
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                      Card spend
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-dark-300 text-xs">i2c card interchange</td>
+                  <td className="px-3 py-2.5 text-right font-medium text-gray-900 dark:text-dark-100 tabular-nums">
+                    {fmtImpactUsd(spendMtd)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right text-gray-400 dark:text-dark-500">—</td>
+                  <td className="px-3 py-2.5 text-right text-gray-400 dark:text-dark-500">—</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-dark-300 text-xs">Interchange → ledger</td>
+                  <td className="px-3 py-2.5 text-gray-500 dark:text-dark-400 text-xs">i2c settlement</td>
+                  <td className="px-5 py-2.5">
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                      Live
+                    </span>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Recurring giving */}
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
@@ -108,38 +140,53 @@ export function RevenueStreams() {
           </div>
         </div>
 
-        {/* Interchange revenue */}
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-1">Interchange revenue</h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Interchange revenue</h2>
+            {onNavigateToWallets && program.state === 'ready' && (
+              <button
+                onClick={() => onNavigateToWallets('wallets')}
+                className="text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5 hover:underline"
+              >
+                Impact Card Accounts <ChevronRight size={12} />
+              </button>
+            )}
+          </div>
           <p className="text-xs text-gray-500 dark:text-dark-400 mb-4">
-            Card program revenue — funds the rewards pool, remainder to the church
+            i2cInc merchant program — card spend generates interchange credited to the church ledger
           </p>
-          <div className="space-y-2.5">
-            {[
-              { label: 'Debit interchange (MTD)', value: demoInterchange.debit },
-              { label: 'Credit interchange (MTD)', value: demoInterchange.credit },
-              { label: 'Account & program fees', value: demoInterchange.accountFees },
-            ].map(row => (
-              <div key={row.label} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-dark-300">{row.label}</span>
+          {program.state === 'ready' ? (
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-dark-300">Card spend (MTD)</span>
                 <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
-                  ${row.value.toLocaleString()}
+                  {fmtImpactUsd(spendMtd)}
                 </span>
               </div>
-            ))}
-            <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200 dark:border-dark-700">
-              <span className="text-violet-700 dark:text-violet-300">→ Rewards pool allocation</span>
-              <span className="font-medium text-violet-700 dark:text-violet-300 tabular-nums">
-                −${demoInterchange.rewardsPoolAllocation.toLocaleString()}
-              </span>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-dark-300">Interchange to church (MTD)</span>
+                <span className="font-medium text-emerald-700 dark:text-emerald-400 tabular-nums">
+                  {fmtImpactUsd(interchangeMtd)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200 dark:border-dark-700">
+                <span className="text-violet-700 dark:text-violet-300">→ Rewards pool allocation (est.)</span>
+                <span className="font-medium text-violet-700 dark:text-violet-300 tabular-nums">
+                  −{fmtImpactUsd(rewardsPoolAllocation)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-dark-700">
+                <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Net to church</span>
+                <span className="stat-number text-lg text-emerald-700 dark:text-emerald-400 tabular-nums">
+                  {fmtImpactUsd(netToChurch)}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-dark-700">
-              <span className="text-sm font-medium text-gray-900 dark:text-dark-100">Net to church</span>
-              <span className="stat-number text-lg text-emerald-700 dark:text-emerald-400 tabular-nums">
-                ${netToChurch.toLocaleString()}
-              </span>
-            </div>
-          </div>
+          ) : program.state === 'gated' ? (
+            <p className="text-sm text-indigo-700 dark:text-indigo-300">{program.gateMessage}</p>
+          ) : (
+            <p className="text-sm text-gray-400 dark:text-dark-500">Sign in to view live interchange data</p>
+          )}
         </div>
       </div>
     </div>
