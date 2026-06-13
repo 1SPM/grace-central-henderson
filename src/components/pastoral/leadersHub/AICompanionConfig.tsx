@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Activity, BookOpen, Brain, Mic, Radio, ShieldAlert, Zap } from 'lucide-react';
+import type { LeaderProfile } from '../../../types';
+import { CENTRAL_HENDERSON_COMPANION_CONFIG } from '../../../config/centralHendersonLeaders';
 import { demoCompanionConfig } from './demoLeadersHub';
 
 type ConfigTab = 'brain' | 'triggers' | 'channels' | 'activity';
@@ -11,22 +13,59 @@ const TABS: { id: ConfigTab; label: string; icon: typeof Brain }[] = [
   { id: 'activity', label: 'Activity', icon: Activity },
 ];
 
-export function AICompanionConfig() {
+interface AICompanionConfigProps {
+  leaders?: LeaderProfile[];
+}
+
+export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
+  const activeLeaders = leaders.filter(l => l.isActive);
+  const [selectedLeaderId, setSelectedLeaderId] = useState(activeLeaders[0]?.id ?? '');
   const [tab, setTab] = useState<ConfigTab>('brain');
   const [triggers, setTriggers] = useState(demoCompanionConfig.triggers);
   const [channels, setChannels] = useState(demoCompanionConfig.channels);
 
+  const selectedLeader = activeLeaders.find(l => l.id === selectedLeaderId) ?? activeLeaders[0];
+  const brain = useMemo(() => {
+    if (!selectedLeader) return demoCompanionConfig.brain;
+    const cfg = CENTRAL_HENDERSON_COMPANION_CONFIG[selectedLeader.id];
+    if (!cfg) return demoCompanionConfig.brain;
+    return {
+      persona: cfg.persona,
+      knowledgeBase: cfg.knowledgeBase,
+      boundaries: cfg.boundaries,
+      voiceModel: cfg.voiceModel,
+    };
+  }, [selectedLeader]);
+
   return (
     <div className="space-y-4">
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-        <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">AI companion configuration</h2>
-        <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-          Each verified leader has a digital twin. Configure its persona, escalation triggers, channels, and review
-          its session activity.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">AI companion configuration</h2>
+            <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
+              Each verified leader has a digital twin. Configure persona, escalation triggers, and channels per leader.
+            </p>
+          </div>
+          {activeLeaders.length > 0 && (
+            <select
+              value={selectedLeader?.id ?? ''}
+              onChange={e => setSelectedLeaderId(e.target.value)}
+              className="text-sm border border-gray-200 dark:border-dark-600 rounded-lg px-3 py-2 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 min-w-[200px]"
+            >
+              {activeLeaders.map(l => (
+                <option key={l.id} value={l.id}>{l.displayName}</option>
+              ))}
+            </select>
+          )}
+        </div>
+        {selectedLeader && (
+          <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
+            {selectedLeader.title} · {selectedLeader.isAvailable ? 'Live / reachable' : 'AI on duty'}
+          </p>
+        )}
       </div>
 
-      {/* Sub-tabs */}
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
@@ -49,10 +88,10 @@ export function AICompanionConfig() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2 flex items-center gap-1.5">
               <Brain size={14} className="text-violet-500" /> Persona
             </h3>
-            <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">{demoCompanionConfig.brain.persona}</p>
+            <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">{brain.persona}</p>
             <div className="mt-4 p-3 bg-gray-50 dark:bg-dark-850 rounded-lg flex items-center gap-2.5">
               <Mic size={14} className="text-gray-400 flex-shrink-0" />
-              <p className="text-[11px] text-gray-500 dark:text-dark-400">{demoCompanionConfig.brain.voiceModel}</p>
+              <p className="text-[11px] text-gray-500 dark:text-dark-400">{brain.voiceModel}</p>
             </div>
           </div>
           <div className="space-y-4">
@@ -61,7 +100,7 @@ export function AICompanionConfig() {
                 <BookOpen size={14} className="text-blue-500" /> Knowledge base
               </h3>
               <div className="flex flex-wrap gap-1.5">
-                {demoCompanionConfig.brain.knowledgeBase.map(kb => (
+                {brain.knowledgeBase.map(kb => (
                   <span key={kb} className="text-[11px] px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
                     {kb}
                   </span>
@@ -73,7 +112,7 @@ export function AICompanionConfig() {
                 <ShieldAlert size={14} className="text-rose-500" /> Boundaries
               </h3>
               <ul className="space-y-1.5">
-                {demoCompanionConfig.brain.boundaries.map(b => (
+                {brain.boundaries.map(b => (
                   <li key={b} className="text-xs text-gray-600 dark:text-dark-300 flex gap-2">
                     <span className="text-rose-400 flex-shrink-0">•</span> {b}
                   </li>
@@ -144,7 +183,9 @@ export function AICompanionConfig() {
 
       {tab === 'activity' && (
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">Session log</h3>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">
+            Session log — {selectedLeader?.displayName ?? 'Leader'}
+          </h3>
           <div className="space-y-3">
             {demoCompanionConfig.activity.map(entry => (
               <div key={entry.time + entry.event} className="flex gap-3">

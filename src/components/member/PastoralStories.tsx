@@ -1,7 +1,8 @@
 import { useState, type CSSProperties } from 'react';
 import { MessageCircle, X, Star, Clock, Globe, Heart } from 'lucide-react';
 import type { LeaderProfile } from '../../types';
-import { DEMO_LEADERS } from './demoLeaders';
+import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
+import { getLeaderHubStats } from '../pastoral/leadersHub/demoLeadersHub';
 
 interface PastoralStoriesProps {
   leaders?: LeaderProfile[];
@@ -9,7 +10,7 @@ interface PastoralStoriesProps {
 }
 
 export function PastoralStories({
-  leaders = DEMO_LEADERS,
+  leaders = CENTRAL_HENDERSON_LEADERS,
   onStartChat,
 }: PastoralStoriesProps) {
   const [selectedLeader, setSelectedLeader] = useState<LeaderProfile | null>(null);
@@ -210,7 +211,23 @@ function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheet
         </div>
 
         {/* Quick stats */}
-        <div className="px-5 pb-3 flex items-center justify-center gap-4">
+        <div className="px-5 pb-3 flex items-center justify-center gap-4 flex-wrap">
+          {(() => {
+            const stats = getLeaderHubStats(leader);
+            return (
+              <>
+                <div className="text-[11px] text-gray-500 dark:text-dark-400">
+                  <span className="font-semibold text-gray-700 dark:text-dark-200">{stats.sessions}</span> sessions
+                </div>
+                <div className="text-[11px] text-gray-500 dark:text-dark-400">
+                  <span className="font-semibold text-gray-700 dark:text-dark-200">{stats.rating}★</span> rating
+                </div>
+                <div className="text-[11px] text-gray-500 dark:text-dark-400">
+                  <span className="font-semibold text-gray-700 dark:text-dark-200">{stats.blessings}/28</span> blessings
+                </div>
+              </>
+            );
+          })()}
           {leader.yearsOfPractice && (
             <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-dark-400">
               <Clock size={12} />

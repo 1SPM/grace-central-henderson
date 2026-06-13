@@ -17,6 +17,7 @@ import {
 } from '../lib/services/auth';
 import { supabase } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
+import { TEMP_DISPLAY_NAME } from '../lib/greeting';
 
 // Default church ID for demo/fallback mode. When Supabase is configured but
 // Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
@@ -323,7 +324,7 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
     email: 'demo@grace-crm.com',
-    firstName: 'Nick',
+    firstName: TEMP_DISPLAY_NAME,
     lastName: 'User',
     role: 'pastor',
     churchId: DEFAULT_CHURCH_ID,

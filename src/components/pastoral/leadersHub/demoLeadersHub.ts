@@ -1,93 +1,15 @@
 import type { LeaderProfile } from '../../../types';
+import {
+  CENTRAL_HENDERSON_LEADER_STATS,
+  type LeaderHubStats,
+} from '../../../config/centralHendersonLeaders';
 
 /**
- * Demo data for the Leaders Hub (roster stats, availability, care
- * dispatch, inbox, AI companion config). Stats are keyed by leader id
- * with a deterministic fallback, so the hub works with real leader rows
- * or the DEMO_LEADERS roster. Swap these for backend reads later.
+ * Leaders Hub stats — reads from canonical Central Henderson config
+ * with deterministic fallback for ad-hoc leaders.
  */
 
-export interface LeaderHubStats {
-  sessions: number;
-  aiPct: number;
-  rating: number;
-  dms: number;
-  blessings: number;
-  availability: ('live' | 'ai' | 'off')[]; // Mon..Sun
-  dmThreshold: string;
-  hours: string;
-  liveOverride: boolean;
-  todaysBlessing: string;
-  careAssignments: string[];
-}
-
-const STATS: Record<string, LeaderHubStats> = {
-  'leader-1': {
-    sessions: 142,
-    aiPct: 68,
-    rating: 4.9,
-    dms: 36,
-    blessings: 58,
-    availability: ['live', 'ai', 'live', 'ai', 'live', 'ai', 'live'],
-    dmThreshold: 'AI replies, escalate on crisis keywords',
-    hours: 'Mon–Fri · 9a–4p',
-    liveOverride: false,
-    todaysBlessing: '“The Lord bless you and keep you; the Lord make his face shine on you.” — Numbers 6:24-25. Praying strength over every family this week.',
-    careAssignments: ['Marriage counseling queue', 'New member welcome calls', 'Sunday altar follow-up'],
-  },
-  'leader-2': {
-    sessions: 118,
-    aiPct: 54,
-    rating: 4.8,
-    dms: 52,
-    blessings: 31,
-    availability: ['ai', 'live', 'ai', 'live', 'ai', 'off', 'live'],
-    dmThreshold: 'AI triage first, escalate after 2 turns',
-    hours: 'Tue/Thu · 10a–6p',
-    liveOverride: true,
-    todaysBlessing: '“Cast all your anxiety on him because he cares for you.” — 1 Peter 5:7. You are not carrying this alone.',
-    careAssignments: ['Crisis line on-call', 'Grief support group', 'Hospital visitation'],
-  },
-  'leader-3': {
-    sessions: 87,
-    aiPct: 75,
-    rating: 4.7,
-    dms: 19,
-    blessings: 12,
-    availability: ['ai', 'ai', 'live', 'ai', 'ai', 'live', 'off'],
-    dmThreshold: 'AI handles all financial Q&A, escalate on hardship',
-    hours: 'Wed/Sat · 12p–5p',
-    liveOverride: false,
-    todaysBlessing: '“And my God will meet all your needs according to the riches of his glory.” — Philippians 4:19.',
-    careAssignments: ['Financial counseling', 'Benevolence fund review', 'Recovery group Tuesdays'],
-  },
-  'leader-4': {
-    sessions: 104,
-    aiPct: 41,
-    rating: 4.9,
-    dms: 64,
-    blessings: 44,
-    availability: ['live', 'live', 'ai', 'live', 'live', 'live', 'live'],
-    dmThreshold: 'Prefers live replies, AI only after-hours',
-    hours: 'Mon–Sat · 8a–8p',
-    liveOverride: false,
-    todaysBlessing: '“Start children off on the way they should go.” — Proverbs 22:6. Cheering on every parent today!',
-    careAssignments: ['Youth check-ins', 'Family transitions', 'College send-off prep'],
-  },
-  'leader-5': {
-    sessions: 96,
-    aiPct: 62,
-    rating: 4.8,
-    dms: 28,
-    blessings: 22,
-    availability: ['ai', 'live', 'ai', 'live', 'ai', 'live', 'off'],
-    dmThreshold: 'AI triage, instant escalation on relapse signals',
-    hours: 'Tue–Sun · varies',
-    liveOverride: false,
-    todaysBlessing: '“Therefore, if anyone is in Christ, the new creation has come.” — 2 Corinthians 5:17. One day at a time.',
-    careAssignments: ['Celebrate Recovery', 'Sponsor matching', 'Step-study facilitation'],
-  },
-};
+export type { LeaderHubStats };
 
 function hashCode(str: string): number {
   let h = 0;
@@ -96,7 +18,9 @@ function hashCode(str: string): number {
 }
 
 export function getLeaderHubStats(leader: LeaderProfile): LeaderHubStats {
-  if (STATS[leader.id]) return STATS[leader.id];
+  if (CENTRAL_HENDERSON_LEADER_STATS[leader.id]) {
+    return CENTRAL_HENDERSON_LEADER_STATS[leader.id];
+  }
   const h = hashCode(leader.id);
   return {
     sessions: 40 + (h % 90),
@@ -108,7 +32,7 @@ export function getLeaderHubStats(leader: LeaderProfile): LeaderHubStats {
     dmThreshold: 'AI triage first, escalate on crisis keywords',
     hours: 'Mon–Fri · 9a–5p',
     liveOverride: false,
-    todaysBlessing: '“This is the day that the Lord has made; let us rejoice and be glad in it.” — Psalm 118:24.',
+    todaysBlessing: '"This is the day that the Lord has made; let us rejoice and be glad in it." — Psalm 118:24.',
     careAssignments: ['General care queue'],
   };
 }
@@ -123,12 +47,12 @@ export interface DispatchRoute {
 }
 
 export const demoDispatchMatrix: DispatchRoute[] = [
-  { service: 'Marriage & family', leaderAi: 'Pastor Mike — AI twin', escalation: 'Crisis keywords → live pastor', status: 'Routing' },
-  { service: 'Mental health & crisis', leaderAi: 'Pastor Sarah — AI twin', escalation: 'Always pages on-call within 5 min', status: 'Live' },
-  { service: 'Grief support', leaderAi: 'Pastor Sarah — AI twin', escalation: 'Escalate after 3 exchanges', status: 'Routing' },
-  { service: 'Financial counseling', leaderAi: 'Deacon Robert — AI twin', escalation: 'Hardship signals → benevolence team', status: 'Routing' },
-  { service: 'Recovery & addiction', leaderAi: 'Pastor James — AI twin', escalation: 'Relapse signals → instant page', status: 'Live' },
-  { service: 'Youth & parenting', leaderAi: 'Sister Grace — AI twin', escalation: 'Minor safety → mandatory live + log', status: 'Routing' },
+  { service: 'Marriage & family', leaderAi: 'Pastor James Wilson — AI twin', escalation: 'Crisis keywords → live pastor', status: 'Routing' },
+  { service: 'Mental health & crisis', leaderAi: 'Pastor Sarah Chen — AI twin', escalation: 'Always pages on-call within 5 min', status: 'Live' },
+  { service: 'Grief support', leaderAi: 'Elder Ruth Abramowitz — AI twin', escalation: 'Escalate after 3 exchanges', status: 'Routing' },
+  { service: 'Pastoral care dispatch', leaderAi: 'Deacon Marcus Collins — AI twin', escalation: 'Hospital / crisis → live team', status: 'Live' },
+  { service: 'Youth & parenting', leaderAi: 'Sister Maria Rodriguez — AI twin', escalation: 'Minor safety → mandatory live + log', status: 'Routing' },
+  { service: 'Family counseling', leaderAi: 'Pastor Michael Hayes — AI twin', escalation: 'Domestic signals → instant page', status: 'Routing' },
 ];
 
 export interface CareLogEntry {
@@ -142,11 +66,11 @@ export interface CareLogEntry {
 
 export const demoCareLog: CareLogEntry[] = [
   { time: '8:14 AM', member: 'Anonymous', service: 'Mental health', handledBy: 'AI', leader: 'Pastor Sarah twin', outcome: 'Comforted · resources shared' },
-  { time: '9:02 AM', member: 'James Okafor', service: 'Financial', handledBy: 'AI', leader: 'Deacon Robert twin', outcome: 'Budget plan drafted' },
-  { time: '10:41 AM', member: 'Maria Santos', service: 'Marriage', handledBy: 'Live', leader: 'Pastor Mike', outcome: 'Session booked Thursday' },
-  { time: '11:55 AM', member: 'Anonymous', service: 'Recovery', handledBy: 'AI', leader: 'Pastor James twin', outcome: 'Escalated → live call placed' },
-  { time: '1:20 PM', member: 'Robert Chen', service: 'Grief', handledBy: 'AI', leader: 'Pastor Sarah twin', outcome: 'Prayer sent · follow-up set' },
-  { time: '2:08 PM', member: 'Amara Williams', service: 'Parenting', handledBy: 'Live', leader: 'Sister Grace', outcome: 'In conversation now' },
+  { time: '9:02 AM', member: 'James Okafor', service: 'Marriage', handledBy: 'AI', leader: 'Pastor Michael twin', outcome: 'Pre-marital resources shared' },
+  { time: '10:41 AM', member: 'Maria Santos', service: 'Marriage', handledBy: 'Live', leader: 'Pastor James Wilson', outcome: 'Session booked Thursday' },
+  { time: '11:55 AM', member: 'Anonymous', service: 'Crisis', handledBy: 'AI', leader: 'Deacon Marcus twin', outcome: 'Escalated → live call placed' },
+  { time: '1:20 PM', member: 'Robert Chen', service: 'Grief', handledBy: 'AI', leader: 'Elder Ruth twin', outcome: 'Prayer sent · follow-up set' },
+  { time: '2:08 PM', member: 'Amara Williams', service: 'Parenting', handledBy: 'Live', leader: 'Sister Maria Rodriguez', outcome: 'In conversation now' },
 ];
 
 // ── Leader inbox ──────────────────────────────────────────────────
@@ -170,11 +94,11 @@ export const demoInbox: InboxMessage[] = [
   { id: 'msg-6', from: 'Anonymous member', initials: '?', preview: 'Is it okay to come to recovery group even if I slipped this week?', time: '6 hrs ago', state: 'ai-replied', topic: 'Recovery' },
 ];
 
-// ── AI companion config ───────────────────────────────────────────
+// ── AI companion config (global defaults; per-leader in centralHendersonLeaders) ──
 
 export const demoCompanionConfig = {
   brain: {
-    persona: 'Warm, pastoral, scripture-grounded. Mirrors Pastor Mike\'s teaching style and favorite passages. Never diagnoses; always points to hope and practical next steps.',
+    persona: 'Warm, pastoral, scripture-grounded. Mirrors Pastor James Wilson\'s teaching style and favorite passages.',
     knowledgeBase: ['Sermon archive (2019–2026)', 'Marriage course curriculum', 'Church statement of faith', 'Benevolence policy'],
     boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
     voiceModel: 'Cloned voice — approved 2026-03-12 (consent on file)',
@@ -195,8 +119,8 @@ export const demoCompanionConfig = {
   ],
   activity: [
     { time: 'Today 2:08 PM', event: 'Handled parenting question, shared course link (4 turns)' },
-    { time: 'Today 11:55 AM', event: 'Escalated recovery conversation to live call — relapse signal' },
-    { time: 'Today 9:02 AM', event: 'Drafted budget plan from financial counseling playbook' },
+    { time: 'Today 11:55 AM', event: 'Escalated crisis conversation to Deacon Marcus — live call' },
+    { time: 'Today 9:02 AM', event: 'Drafted pre-marital resource plan from counseling playbook' },
     { time: 'Yesterday 8:31 PM', event: 'After-hours grief support, scheduled follow-up prayer' },
     { time: 'Yesterday 3:15 PM', event: 'Knowledge base synced — 2 new sermons indexed' },
   ],

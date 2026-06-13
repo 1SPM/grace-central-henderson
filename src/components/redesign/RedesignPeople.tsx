@@ -3,6 +3,7 @@ import { Icon, type IconName } from './Icon';
 import type { GraceData, GPerson } from './useGraceData';
 import type { RedesignActions, InteractionType } from './actions';
 import { PersonAvatar } from './PersonAvatar';
+import { getLeaderByPersonId, isCentralStaffPerson } from '../../config/centralHendersonLeaders';
 
 const INTER_ICON: Record<string, IconName> = { note: 'book', call: 'phone', email: 'mail', visit: 'user', text: 'chat', prayer: 'pray' };
 
@@ -76,6 +77,11 @@ function MemberDetail({ person, interactions, actions, onBack }: { person: GPers
           </div>
         </div>
         <div className="actions">
+          {isCentralStaffPerson(person.id) && getLeaderByPersonId(person.id) && (
+            <a className="btn btn-sm" href="#/grace?tab=clergy&leader={getLeaderByPersonId(person.id)!.id}">
+              AI Clergy
+            </a>
+          )}
           <button className="btn btn-sm"><Icon name="mail" size={13} /> Message</button>
           <button className="btn btn-sm"><Icon name="phone" size={13} /> Call</button>
         </div>
@@ -141,14 +147,25 @@ export function RedesignPeople({ data, actions, onAddPerson }: { data: GraceData
     { id: 'member', label: 'Members', n: data.people.filter(p => p.status === 'member' || p.status === 'regular').length },
     { id: 'visitor', label: 'Visitors', n: data.people.filter(p => p.status === 'visitor').length },
     { id: 'inactive', label: 'Inactive', n: data.people.filter(p => p.status === 'inactive').length },
-    { id: 'leader', label: 'Leaders', n: data.people.filter(p => p.status === 'leader').length },
+    {
+      id: 'leader',
+      label: 'Leaders',
+      n: data.people.filter(p => p.status === 'leader' && !isCentralStaffPerson(p.id)).length,
+    },
+    {
+      id: 'central-staff',
+      label: 'Central Staff',
+      n: data.people.filter(p => isCentralStaffPerson(p.id)).length,
+    },
   ], [data.people]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     return data.people.filter(p => {
       if (filter === 'member' && !(p.status === 'member' || p.status === 'regular')) return false;
-      if (filter !== 'all' && filter !== 'member' && p.status !== filter) return false;
+      if (filter === 'leader' && (p.status !== 'leader' || isCentralStaffPerson(p.id))) return false;
+      if (filter === 'central-staff' && !isCentralStaffPerson(p.id)) return false;
+      if (filter !== 'all' && filter !== 'member' && filter !== 'leader' && filter !== 'central-staff' && p.status !== filter) return false;
       if (query && !p.name.toLowerCase().includes(query) && !p.email.toLowerCase().includes(query)) return false;
       return true;
     });

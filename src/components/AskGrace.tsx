@@ -4,6 +4,7 @@ import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
+import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
@@ -130,7 +131,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       ? 'flex flex-col h-full bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 border border-stone-300/70 dark:border-white/5 rounded-xl overflow-hidden'
       : 'flex flex-col h-full';
 
-  const showSuggestions = chat.messages.length === 1;
+  const showSuggestions = chat.messages.length === 1 && variant !== 'panel';
 
   return (
     <div className={wrapperClass}>
@@ -666,25 +667,69 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
   );
 }
 
-export function AvatarSkyPanel() {
+interface GraceAdminSidePanelProps {
+  salutation: string;
+  tags: GraceQuickTag[];
+  onTagClick: (prompt: string) => void;
+  loading?: boolean;
+}
+
+export function GraceAdminSidePanel({
+  salutation,
+  tags,
+  onTagClick,
+  loading = false,
+}: GraceAdminSidePanelProps) {
   return (
-    <div className="hidden sm:flex flex-col w-[220px] shrink-0 relative overflow-hidden border-r border-stone-300/60 dark:border-white/5">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(180deg, #b8cee0 0%, #d6dde0 28%, #ecd9b8 60%, #ecc28e 88%, #d99a64 100%)',
-        }}
-      />
-      <div className="absolute inset-0 flex items-start justify-center pt-6">
-        <GraceOrb size="lg" />
+    <div className="hidden sm:flex flex-col w-[220px] shrink-0 bg-gradient-to-b from-blue-900 to-blue-950 border-r border-blue-800/60 text-white">
+      <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b border-white/10">
+        <GraceOrb size="md" />
+        <p className="mt-4 text-sm font-semibold text-center leading-snug text-white">
+          {salutation}
+        </p>
+        <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-blue-200/80 font-medium">
+          GRACE · Admin Assistant
+        </p>
       </div>
-      <div className="relative flex-1 flex items-end justify-center pb-5">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-stone-50/80 font-medium drop-shadow-sm">
-          Grace
+
+      <div className="flex-1 overflow-y-auto px-3 py-4">
+        <p className="text-[10px] uppercase tracking-[0.12em] text-blue-300/70 font-medium mb-2 px-1">
+          Popular requests
+        </p>
+        <div className="flex flex-col gap-1.5">
+          {tags.map(tag => (
+            <button
+              key={tag.label}
+              type="button"
+              disabled={loading}
+              onClick={() => onTagClick(tag.prompt)}
+              className="text-left text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-blue-50 transition-colors disabled:opacity-50"
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="py-4 flex justify-center border-t border-white/10">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-blue-200/60 font-medium">
+          GRACE
         </span>
       </div>
     </div>
+  );
+}
+
+/** @deprecated Use GraceAdminSidePanel */
+export function AvatarSkyPanel() {
+  const chat = useGraceChat();
+  return (
+    <GraceAdminSidePanel
+      salutation={chat.salutation}
+      tags={chat.quickTags}
+      onTagClick={(prompt) => void chat.sendMessage(prompt)}
+      loading={chat.loading}
+    />
   );
 }
 
@@ -773,7 +818,12 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
               overflow-hidden flex"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
-            <AvatarSkyPanel />
+            <GraceAdminSidePanel
+              salutation={chat.salutation}
+              tags={chat.quickTags}
+              onTagClick={(prompt) => void chat.sendMessage(prompt)}
+              loading={chat.loading}
+            />
             <div className="flex-1 min-w-0">
               <AskGraceChat variant="panel" onClose={chat.closePanel} />
             </div>

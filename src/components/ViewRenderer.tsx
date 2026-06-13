@@ -2,7 +2,7 @@ import { lazy, Suspense, ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionFeed } from './ActionFeed';
-import { AskGraceChat, AvatarSkyPanel } from './AskGrace';
+import { GraceAIHub } from './grace/GraceAIHub';
 import { MailInbox } from './MailInbox';
 import { PeopleList } from './PeopleList';
 import { PersonProfile } from './PersonProfile';
@@ -61,7 +61,6 @@ const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
-const LeadersHub = lazy(() => import('./pastoral/leadersHub/LeadersHub').then(m => ({ default: m.LeadersHub })));
 const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
 const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
 const DiscipleshipDashboard = lazy(() => import('./DiscipleshipDashboard').then(m => ({ default: m.DiscipleshipDashboard })));
@@ -266,7 +265,10 @@ export function ViewRenderer(props: ViewRendererProps) {
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}
-          onViewLeaders={() => setView('leader-management')}
+          onViewLeaders={() => {
+            window.history.pushState(null, '', '#/grace?tab=clergy');
+            setView('grace');
+          }}
         />
       );
 
@@ -282,12 +284,27 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'grace':
       return (
-        <div className="h-[calc(100vh-32px)] flex bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 overflow-hidden">
-          <AvatarSkyPanel />
-          <div className="flex-1 min-w-0">
-            <AskGraceChat variant="panel" />
-          </div>
-        </div>
+        <GraceAIHub
+          churchName={churchName}
+          leaders={pastoralCare.leaders}
+          sessions={pastoralCare.sessions}
+          onAddLeader={pastoralCare.addLeader}
+          onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
+          onDeleteLeader={pastoralCare.deleteLeader}
+        />
+      );
+
+    case 'leader-management':
+      return (
+        <GraceAIHub
+          churchName={churchName}
+          leaders={pastoralCare.leaders}
+          sessions={pastoralCare.sessions}
+          defaultTab="clergy"
+          onAddLeader={pastoralCare.addLeader}
+          onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
+          onDeleteLeader={pastoralCare.deleteLeader}
+        />
       );
 
     case 'mail':
@@ -734,19 +751,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             people={people}
             onViewPerson={handlers.viewPerson}
             onBack={() => setView('life-services')}
-          />
-        );
-
-      case 'leader-management':
-        return (
-          <LeadersHub
-            leaders={pastoralCare.leaders}
-            sessions={pastoralCare.sessions}
-            onAddLeader={pastoralCare.addLeader}
-            onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
-            onDeleteLeader={pastoralCare.deleteLeader}
-            onBack={() => setView('pastoral-care')}
-            churchName={churchName}
           />
         );
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import type { View } from './types';
 import { resolveAddressee } from './lib/greeting';
-import { useAuthContext } from './contexts/AuthContext';
+import { useAuthContext, SignInPage } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
 import { GlobalSearch } from './components/GlobalSearch';
@@ -83,8 +83,16 @@ function MarketingLoading({ label }: { label: string }) {
   );
 }
 
+/** Demo mode is auto-signed-in — send /sign-in visitors to the app home. */
+function DemoSignInRedirect() {
+  useEffect(() => {
+    window.location.replace('/');
+  }, []);
+  return <MarketingLoading label="Redirecting…" />;
+}
+
 function App() {
-  const { churchId, isSignedIn, user } = useAuthContext();
+  const { churchId, isSignedIn, isLoaded, user } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
@@ -293,6 +301,8 @@ function App() {
   const isWelcomeRoute = path === '/welcome';
   const isTermsRoute = path === '/terms' || path === '/terms-of-service';
   const isPrivacyRoute = path === '/privacy' || path === '/privacy-policy';
+  const isSignInRoute = path === '/sign-in';
+  const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   // Treat the root as a public landing for unauthenticated visitors only.
   // Signed-in users hitting `/` get the existing app dashboard.
   const isLandingRoute = path === '/' && !isSignedIn;
@@ -385,6 +395,13 @@ function App() {
     );
   }
 
+  if (isSignInRoute) {
+    if (!isClerkConfigured) {
+      return <DemoSignInRedirect />;
+    }
+    return <SignInPage />;
+  }
+
   if (isLandingRoute) {
     return (
       <Suspense fallback={<MarketingLoading label="Loading…" />}>
@@ -409,7 +426,7 @@ function App() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -552,6 +569,7 @@ function App() {
         churchId={churchId}
         churchProfile={churchSettings?.profile}
         graceFacts={churchSettings?.graceFacts}
+        churchTimezone={churchSettings?.timezone}
         userFirstName={user?.firstName}
         userRole={user?.role}
         onAddTask={handlers.addTask}

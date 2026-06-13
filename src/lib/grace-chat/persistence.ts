@@ -1,13 +1,20 @@
 import type { GraceMessage, GraceData } from './types';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../../config/centralHenderson';
 
 export const GRACE_MESSAGES_STORAGE_KEY = 'grace-chat-messages-v1';
 export const MESSAGES_PERSIST_LIMIT = 50;
 
-const GREETING_FALLBACK: GraceMessage = {
-  id: 'greet',
-  role: 'assistant',
-  content: 'Hi — ask me anything about your church data, or ask me to add, update, or complete CRM work. I’ll make editable action cards before anything is saved.',
-};
+function greetingFallback(data: GraceData, salutation?: string): GraceMessage {
+  const churchName = data.churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
+  const opener = salutation
+    ? `${salutation}\n\nI'm GRACE — your admin assistant for ${churchName}.`
+    : `Hi — I'm GRACE, your admin assistant for ${churchName}.`;
+  return {
+    id: 'greet',
+    role: 'assistant',
+    content: `${opener}\n\nAsk me anything about your church data, or pick a starter on the left. I'll make editable action cards before anything is saved.`,
+  };
+}
 
 /**
  * Compose the assistant's greeting based on live church data — surfaces overdue
@@ -15,8 +22,9 @@ const GREETING_FALLBACK: GraceMessage = {
  * when there's something worth flagging. Falls back to the static intro when
  * the church is quiet so the panel doesn't open with awkward emptiness.
  */
-export function buildGreeting(data: GraceData): GraceMessage {
+export function buildGreeting(data: GraceData, salutation?: string): GraceMessage {
   const { people, tasks, events, prayers, attendance } = data;
+  const churchName = data.churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400_000);
@@ -39,16 +47,20 @@ export function buildGreeting(data: GraceData): GraceMessage {
   if (activePrayers > 0) lines.push(`${activePrayers} active prayer ${activePrayers === 1 ? 'request' : 'requests'}`);
   if (eventsSoon > 0) lines.push(`${eventsSoon} ${eventsSoon === 1 ? 'event' : 'events'} in the next 7 days`);
 
-  if (lines.length === 0) return GREETING_FALLBACK;
+  if (lines.length === 0) return greetingFallback(data, salutation);
+
+  const opener = salutation
+    ? `${salutation}\n\nI'm GRACE — your admin assistant for ${churchName}. Here's what needs attention:`
+    : `Hi — I'm GRACE, your admin assistant for ${churchName}. Here's what needs attention:`;
 
   const headline = lines.length === 1
-    ? `Quick read: ${lines[0]}.`
-    : `Quick read:\n• ${lines.slice(0, 4).join('\n• ')}`;
+    ? `${lines[0]}.`
+    : lines.slice(0, 4).map(l => `• ${l}`).join('\n');
 
   return {
     id: 'greet',
     role: 'assistant',
-    content: `${headline}\n\nAsk me anything, or pick a starter below.`,
+    content: `${opener}\n\n${headline}\n\nAsk me anything, or pick a starter on the left.`,
   };
 }
 

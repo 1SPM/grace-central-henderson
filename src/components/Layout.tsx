@@ -33,7 +33,6 @@ import {
   Cake,
   Sparkles,
   Import,
-  ShieldCheck,
   Smartphone,
   Wallet,
 } from 'lucide-react';
@@ -72,7 +71,7 @@ const navSections: NavSection[] = [
     label: 'Main',
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={16} />, tone: 'indigo' },
-      { view: 'grace', label: 'Ask Grace', icon: <Sparkles size={16} />, tone: 'violet' },
+      { view: 'grace', label: 'AI Clergy', icon: <Sparkles size={16} />, tone: 'violet' },
       { view: 'mail', label: 'Mail', icon: <Mail size={16} />, tone: 'sky' },
       { view: 'feed', label: 'Follow-ups', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'People', icon: <Users size={16} />, tone: 'sky' },
@@ -102,7 +101,6 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'pipeline', label: 'Pipeline', icon: <Workflow size={18} /> },
   { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
-  { view: 'leader-management', label: 'Leaders', icon: <ShieldCheck size={18} /> },
   { view: 'skills', label: 'Skills & talents', icon: <Sparkles size={18} /> },
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
@@ -168,7 +166,7 @@ const viewLabels: Record<View, string> = {
   analytics: 'Analytics',
   announcements: 'Announcements',
   discipleship: 'Discipleship',
-  grace: 'Grace',
+  grace: 'AI Clergy',
   mail: 'Mail',
   'financial-hub': 'Financial Hub',
   'portal-activity': 'Portal Activity',

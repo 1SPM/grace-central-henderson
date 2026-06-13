@@ -11,6 +11,9 @@ interface ImportMetaEnv {
   // Clerk (Authentication)
   readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 
+  // Interim admin display name when auth has no first name yet
+  readonly VITE_TEMP_NAME?: string;
+
   // Stripe (Payments)
   readonly VITE_STRIPE_PUBLISHABLE_KEY?: string;
 

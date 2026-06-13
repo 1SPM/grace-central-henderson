@@ -9,8 +9,10 @@ import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
 import { CSVImportWizard } from './CSVImportWizard';
+import { isPastoralStaffRecord } from '../config/centralHendersonLeaders';
 
 type SortOption = 'name-asc' | 'name-desc' | 'status' | 'newest' | 'oldest';
+type PeopleStatusFilter = MemberStatus | 'all' | 'central-staff';
 
 interface PeopleListProps {
   people: Person[];
@@ -39,7 +41,7 @@ export function PeopleList({
 }: PeopleListProps) {
   const toast = useToast();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<PeopleStatusFilter>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
@@ -125,7 +127,14 @@ export function PeopleList({
       const matchesSearch =
         `${person.firstName} ${person.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
         person.email.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
+      const matchesStatus =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'central-staff'
+            ? isPastoralStaffRecord(person.id, person.tags)
+            : statusFilter === 'leader'
+              ? person.status === 'leader' && !isPastoralStaffRecord(person.id, person.tags)
+              : person.status === statusFilter;
       const matchesTag = !tagFilter || person.tags.includes(tagFilter);
       const matchesEmail = hasEmailFilter === null || (hasEmailFilter ? person.email : !person.email);
       const matchesPhone = hasPhoneFilter === null || (hasPhoneFilter ? person.phone : !person.phone);
@@ -183,9 +192,18 @@ export function PeopleList({
       member: 0,
       leader: 0,
       inactive: 0,
+      'central-staff': 0,
     };
     people.forEach(p => {
-      counts[p.status]++;
+      if (p.status in counts && p.status !== 'leader') {
+        counts[p.status as keyof typeof counts]++;
+      } else if (p.status === 'leader') {
+        if (isPastoralStaffRecord(p.id, p.tags)) {
+          counts['central-staff']++;
+        } else {
+          counts.leader++;
+        }
+      }
     });
     return counts;
   }, [people]);
@@ -469,7 +487,7 @@ export function PeopleList({
             onApplyFilter={handleApplyFilter}
           />
           <div className="flex flex-wrap gap-2">
-            {(['all', 'visitor', 'regular', 'member', 'leader', 'inactive'] as const).map((status) => (
+            {(['all', 'visitor', 'regular', 'member', 'leader', 'central-staff', 'inactive'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
@@ -481,10 +499,19 @@ export function PeopleList({
                     : 'text-gray-500 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800'
                 }`}
               >
-                {status === 'all' ? 'All' : statusLabels[status]} ({statusCounts[status]})
+                {status === 'all'
+                  ? 'All'
+                  : status === 'central-staff'
+                    ? 'Central Staff'
+                    : statusLabels[status as MemberStatus]} ({statusCounts[status]})
               </button>
             ))}
           </div>
+          {statusFilter === 'central-staff' && (
+            <p className="text-xs text-gray-500 dark:text-dark-400 mt-2">
+              Pastoral AI clergy linked to AI Clergy — distinct from congregation leaders (elders, small-group leaders).
+            </p>
+          )}
         </div>
 
         {/* Advanced Filters */}

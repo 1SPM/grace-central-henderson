@@ -8,8 +8,11 @@ import { buildGreeting, loadStoredMessages, persistMessages } from '../lib/grace
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
-import { resolveAddressee } from '../lib/greeting';
-import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../config/centralHenderson';
+import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
+import { useChurchClock } from '../hooks/useChurchClock';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
+import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 
 export type { PendingAction } from '../lib/grace-actions';
 export type ActionInstance = ChatActionInstance;
@@ -35,6 +38,8 @@ interface GraceChatContextValue {
   replyContext: ReplyContext | null;
   people: Person[];
   suggestions: string[];
+  quickTags: GraceQuickTag[];
+  salutation: string;
 }
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
@@ -89,7 +94,6 @@ function buildDataContext(data: GraceData): string {
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
   const resolvedChurch = churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
-  const operator = userFirstName ? resolveAddressee(userFirstName, userRole) : 'the pastor';
   const profileLines: string[] = [];
   if (churchProfile) {
     const p = churchProfile;
@@ -110,11 +114,15 @@ function buildDataContext(data: GraceData): string {
     ? `\n== CHURCH FACTS (cite these for location, service times, ministries, policies) ==\n${graceFacts.trim()}`
     : '';
 
-  return `You are Grace, an AI assistant inside a church CRM. Be concise. Bullets for lists. No "Great question!", no padding, no repeating the user back. Don't end every reply with "Want me to show you X?".
+  const personaHeader = buildAdminPersonaHeader({
+    churchName: resolvedChurch,
+    operatorFirstName: userFirstName,
+    userRole,
+    profileBlock,
+    factsBlock,
+  });
 
-You are assisting ${operator}${userRole ? ` (${userRole})` : ''} at ${resolvedChurch}.${profileBlock}${factsBlock}
-
-Tone: warm, plainspoken. Honor the church's faith without pretending to share it. If asked theology, briefly note you're an AI without belief, then offer something useful. Never preach.
+  return `${personaHeader}
 
 TONE EXAMPLES — match the moment; don't sound the same every reply:
 - Celebratory (first gift, baptism, a goal hit): "That's a big one — first gift from the Riveras. Logged it."
@@ -208,11 +216,22 @@ interface GraceChatProviderProps extends GraceData, GraceHandlers {
   children: ReactNode;
 }
 
+function computeSalutation(data: GraceData, hour24: number): string {
+  return resolveGraceSalutation(hour24, data.userFirstName, data.userRole);
+}
+
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+  const tz = data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE;
+  const { zoned } = useChurchClock(tz);
+  const salutation = useMemo(
+    () => computeSalutation(data, zoned.hour24),
+    [zoned.hour24, data.userFirstName, data.userRole],
+  );
+
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
     const stored = loadStoredMessages();
     if (stored) return stored;
-    return [buildGreeting(data)];
+    return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE)))];
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -236,10 +255,10 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   useEffect(() => {
     setMessages(m => {
       if (m.length !== 1 || m[0].id !== 'greet') return m;
-      return [buildGreeting(data)];
+      return [buildGreeting(data, salutation)];
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length]);
+  }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length, salutation]);
 
   // Portal engagement + Impact Card aggregates (Phase D) — lets admins
   // ask GRACE about member-portal activity and the card program.
@@ -255,7 +274,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   }, [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
-    data.churchProfile, data.graceFacts, data.userFirstName, data.userRole,
+    data.churchProfile, data.graceFacts, data.userFirstName, data.userRole, data.churchTimezone,
     opsContext,
   ]);
 
@@ -263,6 +282,11 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const suggestions = useMemo(() => buildSuggestions(data), [
     data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);
+
+  const quickTags = useMemo(
+    () => mergeQuickTags(GRACE_ADMIN_QUICK_TAGS, suggestions),
+    [suggestions],
+  );
 
   const brainContext = useMemo(() => buildBrainContext(brainEntries), [brainEntries]);
 
@@ -278,9 +302,9 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const closePanel = useCallback(() => setPanelOpen(false), []);
 
   const clearMessages = useCallback(() => {
-    setMessages([buildGreeting(data)]);
+    setMessages([buildGreeting(data, salutation)]);
     setReplyContext(null);
-  }, [data]);
+  }, [data, salutation]);
 
   const sendMessage = useCallback(async (query: string) => {
     if (!query.trim()) return;
@@ -506,7 +530,9 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     replyContext,
     people: data.people,
     suggestions,
-  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, replyContext, data.people, suggestions]);
+    quickTags,
+    salutation,
+  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, replyContext, data.people, suggestions, quickTags, salutation]);
 
   return <GraceChatContext.Provider value={value}>{children}</GraceChatContext.Provider>;
 }

@@ -31,4 +31,6 @@ export interface GraceData {
   graceFacts?: string;
   userFirstName?: string;
   userRole?: User['role'];
+  /** IANA timezone for salutation clock (e.g. America/Los_Angeles). */
+  churchTimezone?: string;
 }

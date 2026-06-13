@@ -5,8 +5,6 @@ import {
   MessageCircle,
   ChevronRight,
   Clock,
-  Star,
-  Globe,
   Calendar,
   ArrowRight,
   ChevronLeft,
@@ -16,7 +14,8 @@ import type { LeaderProfile, HelpRequest, HelpCategory, MemberPortalTab, Pastora
 import { VerifiedBadge } from '../pastoral/VerifiedBadge';
 import { HelpIntakeForm } from '../pastoral/HelpIntakeForm';
 import { ChatWindow } from '../pastoral/ChatWindow';
-import { DEMO_LEADERS } from './demoLeaders';
+import { CENTRAL_HENDERSON_LEADERS, getExpertiseDisplayTags, GRACE_AI_FAQ } from '../../config/centralHendersonLeaders';
+import { getLeaderHubStats } from '../pastoral/leadersHub/demoLeadersHub';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   'marriage': 'Marriage', 'addiction': 'Recovery', 'grief': 'Grief',
@@ -47,7 +46,7 @@ interface MemberCarePageProps {
 }
 
 export function MemberCarePage({
-  leaders = DEMO_LEADERS,
+  leaders = CENTRAL_HENDERSON_LEADERS,
   helpRequests = [],
   onCreateHelpRequest,
   onNavigate,
@@ -60,6 +59,8 @@ export function MemberCarePage({
 }: MemberCarePageProps) {
   const [view, setView] = useState<CareView>('home');
   const [submitted, setSubmitted] = useState(false);
+  const [faqOpen, setFaqOpen] = useState<string | null>(null);
+  const [activeLeaderId, setActiveLeaderId] = useState<string | null>(null);
 
   // When showChat is triggered (e.g. from tapping a pastor story), switch to chat view
   useEffect(() => {
@@ -143,15 +144,27 @@ export function MemberCarePage({
         </button>
 
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-100">Our Care Leaders</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-100">
+            {churchName.includes('Henderson') ? 'Central Henderson Leadership' : 'Our Care Leaders'}
+          </h2>
           <p className="text-sm text-gray-500 dark:text-dark-400">
-            Trained pastoral leaders ready to walk alongside you
+            {activeLeaders.length} verified · {availableLeaders.length} reachable now
           </p>
         </div>
 
         <div className="space-y-3">
           {activeLeaders.map(leader => (
-            <LeaderCard key={leader.id} leader={leader} onGetHelp={() => setView('request')} />
+            <LeaderCard
+              key={leader.id}
+              leader={leader}
+              isActive={activeLeaderId === leader.id}
+              onProfile={() => setActiveLeaderId(leader.id)}
+              onSwitch={() => {
+                setActiveLeaderId(leader.id);
+                setView('request');
+              }}
+              onGetHelp={() => setView('request')}
+            />
           ))}
           {activeLeaders.length === 0 && (
             <div className="text-center py-12 text-gray-500 dark:text-dark-400">
@@ -436,90 +449,132 @@ export function MemberCarePage({
       )}
 
       {/* Privacy Note */}
-      <div className="flex items-center gap-2 justify-center text-xs text-gray-400 dark:text-dark-500 pb-4">
+      <div className="flex items-center gap-2 justify-center text-xs text-gray-400 dark:text-dark-500 pb-2">
         <Shield size={12} />
         All conversations are private and confidential
+      </div>
+
+      {/* Member FAQ strip */}
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 mb-4">
+        <h3 className="text-xs font-semibold text-gray-700 dark:text-dark-200 uppercase tracking-wide mb-2">
+          About GRACE & leader avatars
+        </h3>
+        <div className="space-y-2">
+          {GRACE_AI_FAQ.filter(f => f.audience === 'member' || f.audience === 'both').slice(0, 4).map(item => (
+            <div key={item.id}>
+              <button
+                type="button"
+                onClick={() => setFaqOpen(faqOpen === item.id ? null : item.id)}
+                className="w-full text-left text-xs font-medium text-gray-800 dark:text-dark-100 py-1"
+              >
+                {item.question}
+              </button>
+              {faqOpen === item.id && (
+                <p className="text-[11px] text-gray-500 dark:text-dark-400 leading-relaxed pb-2">{item.answer}</p>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-// Simplified leader card for the leaders list view
-function LeaderCard({ leader, onGetHelp }: { leader: LeaderProfile; onGetHelp: () => void }) {
+// Leader card with stats and profile/switch actions
+function LeaderCard({
+  leader,
+  onGetHelp,
+  onProfile,
+  onSwitch,
+  isActive,
+}: {
+  leader: LeaderProfile;
+  onGetHelp: () => void;
+  onProfile?: () => void;
+  onSwitch?: () => void;
+  isActive?: boolean;
+}) {
+  const stats = getLeaderHubStats(leader);
+  const tags = getExpertiseDisplayTags(leader.expertiseAreas);
+
   return (
-    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+    <div className={`bg-stone-100 dark:bg-dark-800 rounded-xl border p-5 transition-colors ${
+      isActive
+        ? 'border-amber-400 dark:border-amber-500/50 ring-1 ring-amber-200 dark:ring-amber-500/30'
+        : 'border-gray-200 dark:border-dark-700'
+    }`}>
       <div className="flex items-start gap-4">
         <div className="relative flex-shrink-0">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-lg">
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+            leader.isAvailable
+              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 ring-2 ring-emerald-300/50'
+              : 'bg-gradient-to-br from-slate-500 to-slate-600'
+          }`}>
             {leader.displayName.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
           <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-dark-800 ${
-            leader.isAvailable ? 'bg-emerald-500' : 'bg-gray-400'
+            leader.isAvailable ? 'bg-emerald-500' : 'bg-amber-400'
           }`} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className="text-base font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h3>
             {leader.isVerified && <VerifiedBadge size="sm" />}
-            {leader.isAvailable && (
+            {isActive && (
+              <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded-full">
+                Active
+              </span>
+            )}
+            {leader.isAvailable ? (
               <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Available
+                Reachable
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                AI on duty
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">{leader.title}</p>
-
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400 dark:text-dark-500">
-            {leader.yearsOfPractice && (
-              <span className="flex items-center gap-1">
-                <Calendar size={11} />
-                {leader.yearsOfPractice} yrs
-              </span>
-            )}
-            {leader.language && leader.language !== 'English' && (
-              <span className="flex items-center gap-1">
-                <Globe size={11} />
-                {leader.language}
-              </span>
-            )}
-            {leader.credentials.length > 0 && (
-              <span className="flex items-center gap-1">
-                <Star size={11} />
-                {leader.credentials.length} credential{leader.credentials.length > 1 ? 's' : ''}
-              </span>
-            )}
+          <p className="text-[10px] text-gray-400 dark:text-dark-500 mt-1">
+            {tags.join(' · ')}
+          </p>
+          <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-500 dark:text-dark-400">
+            <span>{stats.sessions} sessions</span>
+            <span>{stats.rating}★</span>
+            <span>{stats.blessings}/28 blessings</span>
           </div>
         </div>
       </div>
 
       <p className="text-xs text-gray-500 dark:text-dark-400 mt-3 line-clamp-2">{leader.bio}</p>
 
-      <div className="flex flex-wrap gap-1.5 mt-3">
-        {leader.expertiseAreas.map(area => (
-          <span key={area} className="px-2 py-0.5 bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 rounded-full text-[10px] font-medium">
-            {CATEGORY_LABELS[area]}
-          </span>
-        ))}
-      </div>
-
-      {leader.personalityTraits.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {leader.personalityTraits.map(trait => (
-            <span key={trait} className="px-2 py-0.5 bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 rounded-full text-[10px] font-medium">
-              {trait}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-4">
+      <div className="flex flex-wrap gap-2 mt-4">
+        {onProfile && (
+          <button
+            type="button"
+            onClick={onProfile}
+            className="px-3 py-1.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 text-xs font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-dark-850"
+          >
+            Profile
+          </button>
+        )}
+        {onSwitch && (
+          <button
+            type="button"
+            onClick={onSwitch}
+            className="px-3 py-1.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 text-xs font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-dark-850"
+          >
+            Switch
+          </button>
+        )}
         <button
           onClick={onGetHelp}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-colors"
         >
-          <MessageCircle size={16} />
-          Request a Conversation
+          <MessageCircle size={14} />
+          Begin conversation
         </button>
       </div>
     </div>

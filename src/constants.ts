@@ -408,6 +408,112 @@ export const SAMPLE_PEOPLE: Person[] = [
     smallGroups: [],
     familyId: 'fam-1',
     notes: 'Lisa & Mark\'s son, age 5. In preschool class.'
+  },
+
+  // === Central Henderson pastoral staff (AI clergy) ===
+  {
+    id: '00000000-0000-0000-0000-000000000101',
+    firstName: 'James',
+    lastName: 'Wilson',
+    email: 'pastor.james@centralchurch.online',
+    phone: '702-735-4010',
+    status: 'leader',
+    joinDate: getDateString(-3650),
+    birthDate: '1972-03-14',
+    tags: ['pastoral-staff', 'senior-pastor'],
+    smallGroups: [],
+    notes: 'Senior Pastor. AI companion deployed in AI Clergy.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000102',
+    firstName: 'Marcus',
+    lastName: 'Collins',
+    email: 'marcus.collins@centralchurch.online',
+    phone: '702-735-4011',
+    status: 'leader',
+    joinDate: getDateString(-2800),
+    birthDate: '1978-07-22',
+    tags: ['pastoral-staff', 'care-director'],
+    smallGroups: [],
+    notes: 'Pastoral Care Director.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000103',
+    firstName: 'Maria',
+    lastName: 'Rodriguez',
+    email: 'maria.rodriguez@centralchurch.online',
+    phone: '702-735-4012',
+    status: 'leader',
+    joinDate: getDateString(-2200),
+    birthDate: '1985-11-08',
+    tags: ['pastoral-staff', 'youth-family'],
+    smallGroups: [],
+    notes: 'Youth & Family Ministry.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000104',
+    firstName: 'Thomas',
+    lastName: 'Grant',
+    email: 'thomas.grant@centralchurch.online',
+    phone: '702-735-4013',
+    status: 'leader',
+    joinDate: getDateString(-3000),
+    birthDate: '1968-04-30',
+    tags: ['pastoral-staff', 'missions'],
+    smallGroups: [],
+    notes: 'Missions & Outreach Lead.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000105',
+    firstName: 'Sarah',
+    lastName: 'Chen',
+    email: 'sarah.chen@centralchurch.online',
+    phone: '702-735-4014',
+    status: 'leader',
+    joinDate: getDateString(-2600),
+    birthDate: '1980-09-19',
+    tags: ['pastoral-staff', 'womens-ministry'],
+    smallGroups: [],
+    notes: 'Women\'s Ministry Pastor.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000106',
+    firstName: 'David',
+    lastName: 'Okafor',
+    email: 'david.okafor@centralchurch.online',
+    phone: '702-735-4015',
+    status: 'leader',
+    joinDate: getDateString(-2000),
+    birthDate: '1983-01-12',
+    tags: ['pastoral-staff', 'worship-arts'],
+    smallGroups: [],
+    notes: 'Worship & Arts Ministry.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000107',
+    firstName: 'Michael',
+    lastName: 'Hayes',
+    email: 'michael.hayes@centralchurch.online',
+    phone: '702-735-4016',
+    status: 'leader',
+    joinDate: getDateString(-2900),
+    birthDate: '1976-12-05',
+    tags: ['pastoral-staff', 'counseling'],
+    smallGroups: [],
+    notes: 'Family & Counseling Pastor.'
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000108',
+    firstName: 'Ruth',
+    lastName: 'Abramowitz',
+    email: 'ruth.abramowitz@centralchurch.online',
+    phone: '702-735-4017',
+    status: 'leader',
+    joinDate: getDateString(-3500),
+    birthDate: '1965-06-28',
+    tags: ['pastoral-staff', 'prayer-ministry'],
+    smallGroups: [],
+    notes: 'Prayer Ministry Lead Elder.'
   }
 ];
 

@@ -79,7 +79,12 @@ export function MemberLayout({
         </div>
       </header>
 
-      {/* Online Pastors — Instagram Stories style */}
+      {/* Online Pastors — leader avatars */}
+      {churchName.toLowerCase().includes('henderson') && (
+        <p className="px-4 pt-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500">
+          Central Henderson Leadership
+        </p>
+      )}
       <PastoralStories
         leaders={leaders}
         onStartChat={(leaderId) => onTabChange('care', leaderId)}

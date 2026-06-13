@@ -12,7 +12,7 @@ import { MyMinistryPage } from './MyMinistryPage';
 import { MemberCarePage } from './MemberCarePage';
 import { MemberScanPage } from './MemberScanPage';
 import { MemberCardPage } from './MemberCardPage';
-import { DEMO_LEADERS } from './demoLeaders';
+import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
 import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
@@ -61,7 +61,7 @@ export function MemberPortal({
   onCheckIn,
   onPastorSignup,
   onCreateHelpRequest,
-  leaders = DEMO_LEADERS,
+  leaders = CENTRAL_HENDERSON_LEADERS,
   conversations = [],
   activeConversation,
   onSendMessage,
