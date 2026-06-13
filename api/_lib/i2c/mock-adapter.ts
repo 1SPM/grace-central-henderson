@@ -22,6 +22,12 @@ import type {
   SubmitKycInput,
   CardActionInput,
   CardActionResult,
+  AccountBalanceInput,
+  AccountBalanceResult,
+  DepositInstructionsInput,
+  DepositInstructionsResult,
+  InitiateTransferInput,
+  InitiateTransferResult,
 } from './types.js';
 
 function hash(input: string): string {
@@ -90,5 +96,30 @@ export const mockI2cAdapter: I2cAdapter = {
 
   async cancelCard(input: CardActionInput): Promise<CardActionResult> {
     return { i2cCardId: input.i2cCardId, status: 'cancelled', raw: { mock: true, action: 'cancel', reason: input.reason } };
+  },
+
+  async getBalance(input: AccountBalanceInput): Promise<AccountBalanceResult> {
+    const seed = parseInt(hash(input.i2cAccountId).replace(/[^0-9]/g, '') || '3240', 10);
+    const balanceMicro = (seed % 9000 + 1000) * 1_000_000;
+    return { availableBalanceMicroUsd: balanceMicro, raw: { mock: true, account: input.i2cAccountId } };
+  },
+
+  async getDepositInstructions(input: DepositInstructionsInput): Promise<DepositInstructionsResult> {
+    const last4 = String(parseInt(hash(input.i2cAccountId).replace(/[^0-9]/g, '') || '6789', 10) % 10000).padStart(4, '0');
+    return {
+      accountNumberLast4: last4,
+      routingNumber: '084009519',
+      accountName: input.accountName,
+      raw: { mock: true },
+    };
+  },
+
+  async initiateTransfer(input: InitiateTransferInput): Promise<InitiateTransferResult> {
+    const id = `mock_xfer_${hash(`${input.i2cAccountId}|${input.amountMicroUsd}|${Date.now()}`)}`;
+    return {
+      i2cTransferId: id,
+      status: 'completed',
+      raw: { mock: true, request: input },
+    };
   },
 };

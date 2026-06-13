@@ -16,13 +16,12 @@
 
 import type { I2cAdapter } from './types.js';
 import { mockI2cAdapter } from './mock-adapter.js';
+import { liveI2cAdapter } from './live-adapter.js';
 
 export function getI2cAdapter(opts: { liveMode?: boolean } = {}): I2cAdapter {
   const apiKey = process.env.I2C_API_KEY;
   if (opts.liveMode && apiKey) {
-    throw new Error(
-      'i2c live adapter not yet implemented (TD-036). Set I2C_LIVE flag false or unset I2C_API_KEY to use mock.',
-    );
+    return liveI2cAdapter;
   }
   return mockI2cAdapter;
 }

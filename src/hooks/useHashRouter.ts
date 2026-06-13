@@ -96,6 +96,11 @@ function parseHash(): { view: View; personId: string | null } {
     return { view: 'person', personId: parts[1] };
   }
 
+  // Handle wallets/:personId deep link to Impact Card account detail
+  if (basePath === 'wallets' && parts[1]) {
+    return { view: 'wallets', personId: parts[1] };
+  }
+
   // Legacy routes → Leadership hub
   if (basePath === 'grace' || basePath === 'leader-management') {
     return { view: 'leadership', personId: null };
@@ -109,6 +114,9 @@ function buildHash(view: View, personId?: string | null): string {
   const path = VIEW_TO_PATH[view] || '';
   if (!path) return '';
   if (view === 'person' && personId) {
+    return `#/${path}/${personId}`;
+  }
+  if (view === 'wallets' && personId) {
     return `#/${path}/${personId}`;
   }
   return `#/${path}`;
@@ -128,7 +136,7 @@ export function useHashRouter(): UseHashRouterReturn {
   // Update URL when view changes (skip during popstate to avoid double push)
   const setView = useCallback((newView: View) => {
     setState(prev => {
-      const personId = newView === 'person' ? prev.personId : null;
+      const personId = newView === 'person' || newView === 'wallets' ? prev.personId : null;
       const hash = buildHash(newView, personId);
       const currentHash = window.location.hash;
       const normalizedCurrent = currentHash === '#/' ? '' : currentHash;
@@ -141,8 +149,8 @@ export function useHashRouter(): UseHashRouterReturn {
 
   const setSelectedPersonId = useCallback((id: string | null) => {
     setState(prev => {
-      if (id && prev.view === 'person') {
-        const hash = buildHash('person', id);
+      if (id && (prev.view === 'person' || prev.view === 'wallets')) {
+        const hash = buildHash(prev.view, id);
         window.history.replaceState(null, '', hash);
       }
       return { ...prev, personId: id };

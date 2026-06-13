@@ -23,6 +23,7 @@ import {
   freezeCard,
   unfreezeCard,
   cancelCard,
+  issueCard,
   type AdminCardData,
   type CardRecord,
 } from '../../lib/services/impactCard';
@@ -78,6 +79,11 @@ async function simulateTransaction(card: CardRecord): Promise<void> {
     merchant_name: merchant.name,
     occurred_at: new Date().toISOString(),
   });
+}
+
+async function approveAndIssue(kycId: string): Promise<void> {
+  await reviewKyc(kycId, 'approve');
+  await issueCard(kycId);
 }
 
 interface CardProgramSectionProps {
@@ -152,6 +158,20 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
     <div className={embedded ? '' : 'mt-8'}>
       <SectionHeader mode={data.adapter_mode} />
 
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-dark-400">
+        <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-dark-700">
+          Adapter: {data.adapter_mode === 'live' ? 'i2c live' : 'i2c sandbox (mock)'}
+        </span>
+        <a
+          href="https://www.i2cinc.com/products/merchant-services"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >
+          i2c program docs →
+        </a>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Pending KYC', value: String(data.summary.pending_kyc), icon: ShieldCheck, accent: 'text-amber-600 dark:text-amber-400' },
@@ -191,6 +211,14 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
                     className="px-2.5 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 flex items-center gap-1"
                   >
                     <ShieldCheck size={12} /> Approve
+                  </button>
+                  <button
+                    onClick={() => withBusy(`issue-${kyc.id}`, () => approveAndIssue(kyc.id))}
+                    disabled={busyId === `issue-${kyc.id}`}
+                    title="Approve KYC and issue card in one step"
+                    className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <CreditCard size={12} /> Approve + Issue
                   </button>
                   <button
                     onClick={() => withBusy(kyc.id, () => reviewKyc(kyc.id, 'reject'))}

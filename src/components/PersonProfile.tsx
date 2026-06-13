@@ -15,6 +15,7 @@ import {
   Clock,
   Pencil,
   Smartphone,
+  CreditCard,
   Loader2,
   Check,
   X,
@@ -28,6 +29,7 @@ import { DiscipleshipTimeline } from './DiscipleshipTimeline';
 import { escapeHtml } from '../utils/security';
 import { AISuggestButton } from './AIAssistant';
 import { getDemoCommunityDataForCRM, fetchConnections } from '../lib/services/community';
+import { useImpactCardProgram, getMemberCards } from '../hooks/useImpactCardProgram';
 
 interface PersonProfileProps {
   person: Person;
@@ -47,6 +49,7 @@ interface PersonProfileProps {
   onAddToGroup?: (groupId: string, personId: string) => void;
   onRemoveFromGroup?: (groupId: string, personId: string) => void;
   onSendEmail?: () => void;
+  onViewImpactCard?: () => void;
   churchId?: string;
 }
 
@@ -85,9 +88,14 @@ export function PersonProfile({
   onAddToGroup,
   onRemoveFromGroup,
   onSendEmail,
+  onViewImpactCard,
   churchId,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
+  const impactCardProgram = useImpactCardProgram();
+  const memberCards = impactCardProgram.data ? getMemberCards(impactCardProgram.data, person.id) : [];
+  const liveCard = memberCards.find(c => c.status === 'active' || c.status === 'frozen');
+  const kycRecord = impactCardProgram.data?.kyc_queue.find(k => k.person_id === person.id);
 
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState<Interaction['type']>('note');
@@ -280,6 +288,26 @@ export function PersonProfile({
                     <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[person.status]}`}>
                       {statusLabels[person.status]}
                     </span>
+                    {onViewImpactCard && impactCardProgram.state === 'ready' && (
+                      <button
+                        onClick={onViewImpactCard}
+                        className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium transition-colors ${
+                          liveCard
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 hover:bg-indigo-200'
+                            : kycRecord
+                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200'
+                              : 'bg-gray-100 text-gray-600 dark:bg-dark-700 dark:text-dark-400 hover:bg-gray-200'
+                        }`}
+                        title="Open Impact Card account"
+                      >
+                        <CreditCard size={12} />
+                        {liveCard
+                          ? `Impact Card · ${liveCard.status}`
+                          : kycRecord
+                            ? `Impact Card · KYC ${kycRecord.status.replace('_', ' ')}`
+                            : 'Impact Card'}
+                      </button>
+                    )}
                   </div>
                   {onEditPerson && (
                     <button

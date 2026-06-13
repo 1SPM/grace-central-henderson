@@ -613,6 +613,8 @@ function App() {
             rsvps={rsvps}
             volunteerAssignments={volunteerAssignments}
             selectedPerson={selectedPerson}
+            selectedPersonId={selectedPersonId}
+            setSelectedPersonId={setSelectedPersonId}
             handlers={handlers}
             collectionMgmt={collectionMgmt}
             charityBasketMgmt={charityBasketMgmt}

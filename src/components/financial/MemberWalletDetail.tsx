@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import {
   ArrowDownLeft,
   ArrowLeft,
@@ -5,31 +6,57 @@ import {
   BadgeCheck,
   Ban,
   CreditCard,
+  ExternalLink,
+  Gift,
+  Heart,
   Loader2,
+  MapPin,
   Play,
+  RefreshCw,
+  RotateCcw,
+  Save,
   Shield,
   Snowflake,
+  Wallet,
 } from 'lucide-react';
-import type { Person } from '../../types';
+import type { Giving, Person } from '../../types';
 import type { AdminCardData, CardRecord } from '../../lib/services/impactCard';
-import { cancelCard, freezeCard, unfreezeCard } from '../../lib/services/impactCard';
+import {
+  cancelCard,
+  freezeCard,
+  issueCard,
+  retryTransfer,
+  setCardLimits,
+  setImpactRoute,
+  syncAccountBalance,
+  unfreezeCard,
+} from '../../lib/services/impactCard';
 import {
   fmtImpactUsd,
+  getMemberAccount,
   getMemberCards,
+  getMemberImpactMtd,
+  getMemberImpactRoute,
   getMemberTransactions,
+  getMemberTransfers,
+  IMPACT_ROUTE_OPTIONS,
   spendMicroToEarnedPoints,
 } from '../../hooks/useImpactCardProgram';
+
+type DetailTab = 'overview' | 'transactions' | 'transfers' | 'giving' | 'route' | 'activity';
 
 interface MemberWalletDetailProps {
   person: Person;
   adminData: AdminCardData;
+  giving?: Giving[];
   onBack: () => void;
   onRefresh: () => Promise<void>;
+  onViewPortalActivity?: () => void;
   busyId: string | null;
   withBusy: (id: string, fn: () => Promise<unknown>) => Promise<void>;
 }
 
-function CardVisual({ card }: { card: CardRecord }) {
+function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: string | null }) {
   const isFrozen = card.status === 'frozen';
   return (
     <div
@@ -42,10 +69,14 @@ function CardVisual({ card }: { card: CardRecord }) {
       <p className="text-base tracking-[0.2em] font-medium mb-4">{card.masked_pan}</p>
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] text-white/50 uppercase">Daily limit</p>
-          <p className="text-sm font-semibold">{fmtImpactUsd(card.daily_limit_micro_usd)}</p>
-          <p className="text-[10px] text-white/50 uppercase mt-2">Monthly limit</p>
-          <p className="text-sm font-semibold">{fmtImpactUsd(card.monthly_limit_micro_usd)}</p>
+          <p className="text-[10px] text-white/50 uppercase">Cardholder</p>
+          <p className="text-sm font-semibold truncate max-w-[180px]">{card.cardholder_name}</p>
+          {routeLabel && (
+            <>
+              <p className="text-[10px] text-white/50 uppercase mt-2">Impact route</p>
+              <p className="text-sm font-semibold">{routeLabel}</p>
+            </>
+          )}
         </div>
         <span
           className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${
@@ -59,21 +90,75 @@ function CardVisual({ card }: { card: CardRecord }) {
   );
 }
 
+function microFromDollarsInput(value: string): number | null {
+  const n = parseFloat(value);
+  if (Number.isNaN(n) || n < 0) return null;
+  return Math.round(n * 1_000_000);
+}
+
 export function MemberWalletDetail({
   person,
   adminData,
+  giving = [],
   onBack,
+  onViewPortalActivity,
   busyId,
   withBusy,
 }: MemberWalletDetailProps) {
-  const cards = getMemberCards(adminData, person.id);
-  const transactions = getMemberTransactions(adminData, person.id);
-  const kyc = adminData.kyc_queue.find(k => k.person_id === person.id);
+  const [tab, setTab] = useState<DetailTab>('overview');
+  const [txnFilter, setTxnFilter] = useState<'all' | 'declined'>('all');
+  const [limitsCardId, setLimitsCardId] = useState<string | null>(null);
+  const [dailyLimit, setDailyLimit] = useState('');
+  const [monthlyLimit, setMonthlyLimit] = useState('');
+  const [routeLabel, setRouteLabel] = useState('');
+  const [routeFund, setRouteFund] = useState('tithe');
 
-  const mtdSpendMicro = transactions
+  const cards = getMemberCards(adminData, person.id);
+  const account = getMemberAccount(adminData, person.id);
+  const impactRoute = getMemberImpactRoute(adminData, person.id);
+  const transfers = getMemberTransfers(adminData, person.id);
+  const allTransactions = getMemberTransactions(adminData, person.id);
+  const kyc = adminData.kyc_queue.find(k => k.person_id === person.id);
+  const activeCard = cards.find(c => c.status === 'active' || c.status === 'frozen') ?? cards[0];
+
+  const transactions = useMemo(() => {
+    if (txnFilter === 'declined') return allTransactions.filter(t => t.event_type === 'declined');
+    return allTransactions;
+  }, [allTransactions, txnFilter]);
+
+  const mtdSpendMicro = allTransactions
     .filter(t => t.event_type === 'capture' && t.direction === 'debit')
     .reduce((sum, t) => sum + t.amount_micro_usd, 0);
+  const impactMtd = getMemberImpactMtd(adminData, person.id);
   const earnedPoints = spendMicroToEarnedPoints(mtdSpendMicro);
+  const personGiving = giving.filter(g => g.personId === person.id);
+  const givingYtd = personGiving.reduce((s, g) => s + g.amount, 0);
+  const givingGoal = 5000;
+
+  const openLimitsEditor = (card: CardRecord) => {
+    setLimitsCardId(card.id);
+    setDailyLimit(String(card.daily_limit_micro_usd / 1_000_000));
+    setMonthlyLimit(String(card.monthly_limit_micro_usd / 1_000_000));
+  };
+
+  const saveLimits = async (cardId: string) => {
+    const daily = microFromDollarsInput(dailyLimit);
+    const monthly = microFromDollarsInput(monthlyLimit);
+    if (daily === null || monthly === null) return;
+    await withBusy(`limits-${cardId}`, () =>
+      setCardLimits(cardId, { dailyMicroUsd: daily, monthlyMicroUsd: monthly }),
+    );
+    setLimitsCardId(null);
+  };
+
+  const tabs: { id: DetailTab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'transactions', label: 'Transactions' },
+    { id: 'transfers', label: 'Transfers' },
+    { id: 'giving', label: 'Giving' },
+    { id: 'route', label: 'Impact Route' },
+    { id: 'activity', label: 'Activity' },
+  ];
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -114,156 +199,398 @@ export function MemberWalletDetail({
                 i2c sandbox
               </span>
             )}
-            {adminData.adapter_mode === 'live' && (
-              <span className="text-[11px] font-medium px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                i2c live
-              </span>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
-          {cards.length === 0 ? (
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-8 text-center">
-              <CreditCard size={32} className="mx-auto text-gray-300 dark:text-dark-600 mb-2" />
-              <p className="text-sm text-gray-500 dark:text-dark-400">No Impact Card issued for this member</p>
-            </div>
+      {/* Command center header — two panel mockup layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div>
+          {activeCard ? (
+            <CardVisual card={activeCard} routeLabel={impactRoute?.route_label} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {cards.map(card => (
-                <div key={card.id} className="space-y-3">
-                  <CardVisual card={card} />
-                  <div className="flex items-center gap-2">
-                    {card.status === 'active' && (
-                      <button
-                        onClick={() => withBusy(card.id, () => freezeCard(card.id))}
-                        disabled={busyId === card.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-cyan-300 dark:border-cyan-500/40 text-cyan-700 dark:text-cyan-400 rounded-lg disabled:opacity-50"
-                      >
-                        {busyId === card.id ? <Loader2 size={12} className="animate-spin" /> : <Snowflake size={12} />}
-                        Freeze
-                      </button>
-                    )}
-                    {card.status === 'frozen' && (
-                      <button
-                        onClick={() => withBusy(card.id, () => unfreezeCard(card.id))}
-                        disabled={busyId === card.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 rounded-lg disabled:opacity-50"
-                      >
-                        {busyId === card.id ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
-                        Unfreeze
-                      </button>
-                    )}
-                    {card.status !== 'cancelled' && card.status !== 'expired' && (
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Cancel card ${card.masked_pan}? This cannot be undone.`)) {
-                            void withBusy(card.id, () => cancelCard(card.id));
-                          }
-                        }}
-                        disabled={busyId === card.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-400 rounded-lg disabled:opacity-50"
-                      >
-                        <Ban size={12} /> Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-2xl p-8 text-center border border-dashed border-gray-300 dark:border-dark-600 bg-stone-50 dark:bg-dark-850">
+              <CreditCard size={32} className="mx-auto text-gray-300 dark:text-dark-600 mb-2" />
+              <p className="text-sm text-gray-500 dark:text-dark-400 mb-3">No Impact Card issued</p>
+              {kyc?.status === 'approved' && (
+                <button
+                  onClick={() => withBusy(`issue-${kyc.id}`, () => issueCard(kyc.id))}
+                  disabled={busyId === `issue-${kyc.id}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 text-white rounded-lg disabled:opacity-50"
+                >
+                  {busyId === `issue-${kyc.id}` ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
+                  Issue card
+                </button>
+              )}
             </div>
           )}
-
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Recent transactions</h2>
-              <span className="text-[10px] text-gray-400 dark:text-dark-500">i2c merchant program</span>
-            </div>
-            {transactions.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-dark-500 text-center py-6">No card activity yet</p>
-            ) : (
-              <div className="space-y-0.5">
-                {transactions.map(tx => (
-                  <div
-                    key={tx.id}
-                    className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          tx.direction === 'credit'
-                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-dark-400'
-                        }`}
-                      >
-                        {tx.direction === 'credit' ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
-                          {tx.merchant_name ?? tx.event_type}
-                        </p>
-                        <p className="text-[11px] text-gray-400 dark:text-dark-500">
-                          {new Date(tx.occurred_at).toLocaleString()} · {tx.event_type}
-                          {tx.decline_reason ? ` · ${tx.decline_reason}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`text-sm font-medium tabular-nums flex-shrink-0 ${
-                        tx.direction === 'credit'
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : 'text-gray-900 dark:text-dark-100'
-                      }`}
-                    >
-                      {tx.direction === 'credit' ? '+' : '−'}{fmtImpactUsd(tx.amount_micro_usd)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-            <p className="section-eyebrow">Card spend (MTD)</p>
-            <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-1.5">
-              {fmtImpactUsd(mtdSpendMicro)}
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
-              ≈ {earnedPoints.toLocaleString()} pts earned (1 pt / $1 spend)
-            </p>
-          </div>
-
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-            <p className="section-eyebrow mb-2 flex items-center gap-1.5">
-              <Shield size={12} /> Program
-            </p>
-            <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">
-              Card issued via i2cInc merchant services. Member spend generates interchange revenue
-              credited to the church ledger; rewards points are estimated from capture events until
-              a dedicated points ledger is deployed.
-            </p>
-          </div>
-
-          {kyc && (
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-              <p className="section-eyebrow mb-2">KYC record</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{kyc.full_name}</p>
-              <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-1 capitalize">
-                Status: {kyc.status.replace('_', ' ')}
-              </p>
-              <p className="text-[11px] text-gray-400 dark:text-dark-500">
-                Submitted {new Date(kyc.submitted_at).toLocaleDateString()}
-              </p>
-              {kyc.rejection_reason && (
-                <p className="text-[11px] text-red-600 dark:text-red-400 mt-1">{kyc.rejection_reason}</p>
+          {activeCard && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {activeCard.status === 'active' && (
+                <button
+                  onClick={() => withBusy(activeCard.id, () => freezeCard(activeCard.id))}
+                  disabled={busyId === activeCard.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-cyan-300 dark:border-cyan-500/40 text-cyan-700 dark:text-cyan-400 rounded-lg disabled:opacity-50"
+                >
+                  <Snowflake size={12} /> Freeze
+                </button>
+              )}
+              {activeCard.status === 'frozen' && (
+                <button
+                  onClick={() => withBusy(activeCard.id, () => unfreezeCard(activeCard.id))}
+                  disabled={busyId === activeCard.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 rounded-lg disabled:opacity-50"
+                >
+                  <Play size={12} /> Unfreeze
+                </button>
+              )}
+              <button
+                onClick={() => openLimitsEditor(activeCard)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-lg"
+              >
+                <Save size={12} /> Set limits
+              </button>
+              {activeCard.status !== 'cancelled' && (
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Cancel card ${activeCard.masked_pan}?`)) {
+                      void withBusy(activeCard.id, () => cancelCard(activeCard.id));
+                    }
+                  }}
+                  disabled={busyId === activeCard.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-red-300 text-red-600 rounded-lg disabled:opacity-50"
+                >
+                  <Ban size={12} /> Cancel
+                </button>
               )}
             </div>
           )}
         </div>
+
+        <div className="space-y-3">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="section-eyebrow flex items-center gap-1"><Wallet size={12} /> Available balance</p>
+                <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-1">
+                  {account ? fmtImpactUsd(account.available_balance_micro_usd) : '—'}
+                </p>
+                {account && (
+                  <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-1">
+                    Acct ••••{account.account_number_last4}
+                    {account.routing_number ? ` · Routing ${account.routing_number}` : ''}
+                  </p>
+                )}
+              </div>
+              {account && (
+                <button
+                  onClick={() => withBusy(`sync-${person.id}`, () => syncAccountBalance(person.id))}
+                  disabled={busyId === `sync-${person.id}`}
+                  className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg"
+                  title="Sync balance from i2c"
+                >
+                  {busyId === `sync-${person.id}` ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <p className="section-eyebrow flex items-center gap-1"><Heart size={12} /> Card Impact MTD</p>
+              <p className="stat-number text-xl text-emerald-700 dark:text-emerald-400 mt-1">{fmtImpactUsd(impactMtd)}</p>
+            </div>
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+              <p className="section-eyebrow">Spend MTD</p>
+              <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1">{fmtImpactUsd(mtdSpendMicro)}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">≈ {earnedPoints} pts</p>
+            </div>
+          </div>
+          {impactRoute && (
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-500/30 p-3 flex items-center gap-2">
+              <MapPin size={14} className="text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-indigo-900 dark:text-indigo-200">Current route: {impactRoute.route_label}</p>
+                <p className="text-[10px] text-indigo-600/70 dark:text-indigo-400/70 capitalize">Fund: {impactRoute.route_fund}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Limits editor modal inline */}
+      {limitsCardId && (
+        <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/30 rounded-xl">
+          <p className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-3">Adjust spending limits (USD)</p>
+          <div className="flex flex-wrap gap-3 items-end">
+            <label className="text-xs">
+              Daily
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={dailyLimit}
+                onChange={e => setDailyLimit(e.target.value)}
+                className="block mt-1 px-2 py-1.5 text-sm border rounded-lg w-28 dark:bg-dark-800 dark:border-dark-600"
+              />
+            </label>
+            <label className="text-xs">
+              Monthly
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={monthlyLimit}
+                onChange={e => setMonthlyLimit(e.target.value)}
+                className="block mt-1 px-2 py-1.5 text-sm border rounded-lg w-28 dark:bg-dark-800 dark:border-dark-600"
+              />
+            </label>
+            <button
+              onClick={() => void saveLimits(limitsCardId)}
+              disabled={busyId === `limits-${limitsCardId}`}
+              className="px-3 py-1.5 text-xs font-medium bg-slate-900 text-white rounded-lg disabled:opacity-50"
+            >
+              Save limits
+            </button>
+            <button onClick={() => setLimitsCardId(null)} className="px-3 py-1.5 text-xs text-gray-500">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-gray-200 dark:border-dark-700 mb-4 overflow-x-auto">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`px-3 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+              tab === t.id
+                ? 'border-slate-900 dark:border-dark-100 text-slate-900 dark:text-dark-100'
+                : 'border-transparent text-gray-500 dark:text-dark-400 hover:text-gray-700'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <h2 className="text-sm font-medium mb-3">Recent transactions</h2>
+            {allTransactions.slice(0, 5).length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">No activity</p>
+            ) : (
+              allTransactions.slice(0, 5).map(tx => (
+                <TxnRow key={tx.id} tx={tx} />
+              ))
+            )}
+          </div>
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <h2 className="text-sm font-medium mb-3">Recent transfers</h2>
+            {transfers.slice(0, 5).length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">No transfers</p>
+            ) : (
+              transfers.slice(0, 5).map(tr => <TransferRow key={tr.id} tr={tr} />)
+            )}
+          </div>
+          <div className="lg:col-span-2 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <p className="section-eyebrow mb-2 flex items-center gap-1"><Shield size={12} /> Admin notes</p>
+            <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">
+              Staff can force-freeze, override impact routes, retry failed transfers, and sync balances.
+              Deposit account numbers are masked for PCI. Full ACH details available via i2c admin console.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {tab === 'transactions' && (
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h2 className="text-sm font-medium">Card transactions</h2>
+            <div className="flex gap-1">
+              {(['all', 'declined'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setTxnFilter(f)}
+                  className={`px-2.5 py-1 text-xs rounded-lg capitalize ${
+                    txnFilter === f
+                      ? 'bg-slate-900 text-white dark:bg-dark-100 dark:text-dark-900'
+                      : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300'
+                  }`}
+                >
+                  {f === 'declined' ? 'Declines only' : 'All'}
+                </button>
+              ))}
+            </div>
+          </div>
+          {transactions.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No transactions{txnFilter === 'declined' ? ' declined' : ''}</p>
+          ) : (
+            transactions.map(tx => <TxnRow key={tx.id} tx={tx} />)
+          )}
+        </div>
+      )}
+
+      {tab === 'transfers' && (
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <h2 className="text-sm font-medium mb-3">Send / Receive / Give activity</h2>
+          {transfers.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No transfers recorded</p>
+          ) : (
+            transfers.map(tr => (
+              <div key={tr.id} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0">
+                <TransferRow tr={tr} />
+                {tr.status === 'failed' && (
+                  <button
+                    onClick={() => withBusy(`retry-${tr.id}`, () => retryTransfer(tr.id))}
+                    disabled={busyId === `retry-${tr.id}`}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-amber-700 border border-amber-300 rounded-lg ml-2 flex-shrink-0"
+                  >
+                    <RotateCcw size={11} /> Retry
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {tab === 'giving' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <p className="section-eyebrow flex items-center gap-1"><Gift size={12} /> Giving goal progress</p>
+            <p className="stat-number text-2xl mt-2">${givingYtd.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 mt-1">of ${givingGoal.toLocaleString()} goal</p>
+            <div className="h-2 bg-gray-200 dark:bg-dark-700 rounded-full mt-3 overflow-hidden">
+              <div
+                className="h-full bg-emerald-600 rounded-full"
+                style={{ width: `${Math.min(100, (givingYtd / givingGoal) * 100)}%` }}
+              />
+            </div>
+          </div>
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <h2 className="text-sm font-medium mb-3">Recent gifts (Stripe)</h2>
+            {personGiving.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">No giving records</p>
+            ) : (
+              personGiving.slice(0, 10).map(g => (
+                <div key={g.id} className="flex justify-between py-2 border-b border-gray-100 dark:border-dark-700 last:border-0 text-sm">
+                  <span className="text-gray-700 dark:text-dark-300 capitalize">{g.fund} · {g.date}</span>
+                  <span className="font-medium tabular-nums">${g.amount.toLocaleString()}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'route' && (
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 max-w-lg">
+          <h2 className="text-sm font-medium mb-1">Override impact route</h2>
+          <p className="text-xs text-gray-500 mb-4">Staff override — logged in activity feed</p>
+          <div className="space-y-3">
+            <label className="block text-xs">
+              Cause / fund
+              <select
+                value={routeLabel || impactRoute?.route_label || ''}
+                onChange={e => {
+                  const opt = IMPACT_ROUTE_OPTIONS.find(o => o.label === e.target.value);
+                  setRouteLabel(e.target.value);
+                  if (opt) setRouteFund(opt.fund);
+                }}
+                className="block w-full mt-1 px-3 py-2 text-sm border rounded-lg dark:bg-dark-850 dark:border-dark-600"
+              >
+                <option value="">Select route…</option>
+                {IMPACT_ROUTE_OPTIONS.map(o => (
+                  <option key={o.label} value={o.label}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              onClick={() => {
+                const label = routeLabel || impactRoute?.route_label;
+                if (!label) return;
+                void withBusy(`route-${person.id}`, () => setImpactRoute(person.id, label, routeFund));
+              }}
+              disabled={busyId === `route-${person.id}` || !(routeLabel || impactRoute?.route_label)}
+              className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg disabled:opacity-50"
+            >
+              Save route override
+            </button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'activity' && (
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <p className="text-sm text-gray-600 dark:text-dark-300 mb-3">
+            Card program events (KYC, issue, freeze, transactions) appear in Portal Activity.
+          </p>
+          {onViewPortalActivity && (
+            <button
+              onClick={onViewPortalActivity}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg"
+            >
+              Open Portal Activity <ExternalLink size={14} />
+            </button>
+          )}
+          {kyc && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-700">
+              <p className="section-eyebrow mb-2">KYC record</p>
+              <p className="text-sm font-medium">{kyc.full_name}</p>
+              <p className="text-xs text-gray-400 capitalize">Status: {kyc.status.replace('_', ' ')}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TxnRow({ tx }: { tx: { id: string; direction: string; merchant_name: string | null; event_type: string; occurred_at: string; decline_reason: string | null; amount_micro_usd: number } }) {
+  return (
+    <div className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-dark-700 last:border-0">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+          tx.event_type === 'declined'
+            ? 'bg-red-100 dark:bg-red-900/30 text-red-600'
+            : tx.direction === 'credit'
+              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600'
+              : 'bg-gray-100 dark:bg-dark-700 text-gray-500'
+        }`}>
+          {tx.direction === 'credit' ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium truncate">{tx.merchant_name ?? tx.event_type}</p>
+          <p className="text-[11px] text-gray-400">
+            {new Date(tx.occurred_at).toLocaleString()} · {tx.event_type}
+            {tx.decline_reason ? ` · ${tx.decline_reason}` : ''}
+          </p>
+        </div>
+      </div>
+      <span className={`text-sm font-medium tabular-nums flex-shrink-0 ${tx.direction === 'credit' ? 'text-emerald-700' : 'text-gray-900 dark:text-dark-100'}`}>
+        {tx.direction === 'credit' ? '+' : '−'}{fmtImpactUsd(tx.amount_micro_usd)}
+      </span>
+    </div>
+  );
+}
+
+function TransferRow({ tr }: { tr: { direction: string; transfer_type: string; counterparty_name: string; status: string; initiated_at: string; amount_micro_usd: number } }) {
+  return (
+    <div className="flex items-center justify-between flex-1 min-w-0">
+      <div className="min-w-0">
+        <p className="text-sm font-medium truncate">
+          {tr.direction === 'outbound' ? 'Send' : 'Receive'} · {tr.counterparty_name}
+        </p>
+        <p className="text-[11px] text-gray-400 capitalize">
+          {tr.transfer_type} · {tr.status} · {new Date(tr.initiated_at).toLocaleString()}
+        </p>
+      </div>
+      <span className="text-sm font-medium tabular-nums flex-shrink-0 ml-2">
+        {tr.direction === 'inbound' ? '+' : '−'}{fmtImpactUsd(tr.amount_micro_usd)}
+      </span>
     </div>
   );
 }

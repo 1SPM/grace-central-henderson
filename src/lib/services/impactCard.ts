@@ -41,25 +41,87 @@ export interface CardTransaction {
   occurred_at: string;
 }
 
+export interface CardAccountRecord {
+  id: string;
+  person_id: string;
+  i2c_account_id: string;
+  account_name: string;
+  account_number_last4: string;
+  routing_number: string | null;
+  available_balance_micro_usd: number;
+  status: 'pending' | 'active' | 'frozen' | 'closed';
+  last_synced_at: string | null;
+}
+
+export interface CardTransferRecord {
+  id: string;
+  person_id: string;
+  card_account_id: string | null;
+  direction: 'outbound' | 'inbound';
+  transfer_type: 'member' | 'ach' | 'bank' | 'give' | 'receive';
+  counterparty_name: string;
+  counterparty_ref: string | null;
+  amount_micro_usd: number;
+  memo: string | null;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  failure_reason: string | null;
+  initiated_at: string;
+  completed_at: string | null;
+}
+
+export interface ImpactRouteRecord {
+  id: string;
+  person_id: string;
+  route_label: string;
+  route_fund: string;
+  set_by: 'member' | 'staff' | 'system';
+  effective_at: string;
+}
+
+export interface ImpactAllocationRecord {
+  id: string;
+  person_id: string;
+  period_month: string;
+  amount_micro_usd: number;
+  route_label: string | null;
+  source: 'interchange' | 'manual' | 'adjustment';
+}
+
 export interface MyCardData {
   person_id: string | null;
   kyc: KycRecord | null;
   cards: CardRecord[];
   transactions: CardTransaction[];
+  account: CardAccountRecord | null;
+  impact_route: ImpactRouteRecord | null;
+  transfers: CardTransferRecord[];
   adapter_mode: 'live' | 'mock';
+}
+
+export interface AdminCardSummary {
+  pending_kyc: number;
+  active_cards: number;
+  frozen_cards: number;
+  interchange_mtd_micro_usd: number;
+  spend_mtd_micro_usd: number;
+  total_float_micro_usd: number;
+  impact_mtd_micro_usd: number;
+  decline_count_mtd: number;
+  pending_transfers: number;
+  failed_transfers: number;
+  ledger_i2c_net_mtd_micro_usd: number;
+  reconciliation_delta_micro_usd: number;
 }
 
 export interface AdminCardData {
   kyc_queue: (KycRecord & { person_id: string | null; email: string })[];
   cards: CardRecord[];
   interchange_events: CardTransaction[];
-  summary: {
-    pending_kyc: number;
-    active_cards: number;
-    frozen_cards: number;
-    interchange_mtd_micro_usd: number;
-    spend_mtd_micro_usd: number;
-  };
+  accounts: CardAccountRecord[];
+  transfers: CardTransferRecord[];
+  impact_routes: ImpactRouteRecord[];
+  impact_allocations: ImpactAllocationRecord[];
+  summary: AdminCardSummary;
   adapter_mode: 'live' | 'mock';
 }
 
@@ -162,4 +224,49 @@ export function setCardLimits(cardId: string, limits: { dailyMicroUsd?: number; 
     daily_limit_micro_usd: limits.dailyMicroUsd,
     monthly_limit_micro_usd: limits.monthlyMicroUsd,
   });
+}
+
+export function setImpactRoute(personId: string, routeLabel: string, routeFund?: string) {
+  return post<{ impact_route: ImpactRouteRecord }>({
+    action: 'set_impact_route',
+    person_id: personId,
+    route_label: routeLabel,
+    route_fund: routeFund,
+  });
+}
+
+export function syncAccountBalance(personId: string) {
+  return post<{ account: CardAccountRecord }>({ action: 'sync_balance', person_id: personId });
+}
+
+export function createTransfer(input: {
+  personId: string;
+  amountMicroUsd: number;
+  direction: 'outbound' | 'inbound';
+  transferType: CardTransferRecord['transfer_type'];
+  counterpartyName: string;
+  counterpartyRef?: string;
+  memo?: string;
+}) {
+  return post<{ transfer: CardTransferRecord }>({
+    action: 'create_transfer',
+    person_id: input.personId,
+    amount_micro_usd: input.amountMicroUsd,
+    direction: input.direction,
+    transfer_type: input.transferType,
+    counterparty_name: input.counterpartyName,
+    counterparty_ref: input.counterpartyRef,
+    memo: input.memo,
+  });
+}
+
+export function retryTransfer(transferId: string) {
+  return post<{ transfer: CardTransferRecord }>({ action: 'retry_transfer', transfer_id: transferId });
+}
+
+export async function fetchMemberAccount(personId: string) {
+  const headers = await authHeaders();
+  if (!headers) return null;
+  const res = await fetch(`/api/neobank?resource=account&person_id=${encodeURIComponent(personId)}`, { headers });
+  return handleResponse<{ account: CardAccountRecord | null; impact_route: ImpactRouteRecord | null; transfers: CardTransferRecord[] }>(res);
 }

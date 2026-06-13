@@ -15,6 +15,7 @@ import { ArrowDownRight, ArrowUpRight, RefreshCw, Calendar as CalendarIcon, Aler
 import { FLAGS, flagEnabled } from '../lib/observability/featureFlags';
 import { useFinancialHub, defaultRange, isoDate, type FinancialHubTimelinePoint } from '../hooks/useFinancialHub';
 import { fmtImpactUsd, useImpactCardProgram } from '../hooks/useImpactCardProgram';
+import { ImpactCardMonitoring } from './financial/ImpactCardMonitoring';
 import type { View } from '../types';
 
 interface FinancialHubProps {
@@ -406,6 +407,11 @@ function ImpactCardSummaryCard({ onNavigate }: { onNavigate?: (view: View) => vo
           </div>
         ))}
       </div>
+      {program.data && (
+        <div className="mt-4">
+          <ImpactCardMonitoring data={program.data} compact />
+        </div>
+      )}
     </div>
   );
 }

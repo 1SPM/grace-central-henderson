@@ -61,6 +61,46 @@ export interface CardActionResult {
   raw: unknown;
 }
 
+export interface AccountBalanceInput {
+  i2cAccountId: string;
+  churchId: string;
+}
+
+export interface AccountBalanceResult {
+  availableBalanceMicroUsd: number;
+  raw: unknown;
+}
+
+export interface DepositInstructionsInput {
+  i2cAccountId: string;
+  churchId: string;
+  accountName: string;
+}
+
+export interface DepositInstructionsResult {
+  accountNumberLast4: string;
+  routingNumber: string;
+  accountName: string;
+  raw: unknown;
+}
+
+export interface InitiateTransferInput {
+  i2cAccountId: string;
+  churchId: string;
+  amountMicroUsd: number;
+  direction: 'outbound' | 'inbound';
+  transferType: 'member' | 'ach' | 'bank' | 'give' | 'receive';
+  counterpartyName: string;
+  counterpartyRef?: string;
+  memo?: string;
+}
+
+export interface InitiateTransferResult {
+  i2cTransferId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  raw: unknown;
+}
+
 export interface I2cAdapter {
   mode: 'live' | 'mock';
   submitKyc(input: SubmitKycInput): Promise<KycResult>;
@@ -68,4 +108,7 @@ export interface I2cAdapter {
   freezeCard(input: CardActionInput): Promise<CardActionResult>;
   unfreezeCard(input: CardActionInput): Promise<CardActionResult>;
   cancelCard(input: CardActionInput): Promise<CardActionResult>;
+  getBalance(input: AccountBalanceInput): Promise<AccountBalanceResult>;
+  getDepositInstructions(input: DepositInstructionsInput): Promise<DepositInstructionsResult>;
+  initiateTransfer(input: InitiateTransferInput): Promise<InitiateTransferResult>;
 }

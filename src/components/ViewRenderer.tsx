@@ -106,6 +106,8 @@ interface ViewRendererProps {
   rsvps: { eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number }[];
   volunteerAssignments: { id: string; eventId: string; roleId: string; personId: string; status: 'confirmed' | 'pending' | 'declined' }[];
   selectedPerson?: Person;
+  selectedPersonId?: string | null;
+  setSelectedPersonId?: (id: string | null) => void;
   onOpenEmailSidebar?: (recipients?: string[], groupId?: string) => void;
   onReopenWizard?: () => void;
   handlers: {
@@ -217,7 +219,7 @@ interface ViewRendererProps {
 
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
-    attendanceRecords, rsvps, volunteerAssignments, selectedPerson, handlers,
+    attendanceRecords, rsvps, volunteerAssignments, selectedPerson, selectedPersonId, setSelectedPersonId, handlers,
     collectionMgmt, charityBasketMgmt, agents, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
 
   const { settings, saveOnboarding } = useChurchSettings(churchId);
@@ -433,6 +435,11 @@ export function ViewRenderer(props: ViewRendererProps) {
           onRemoveFromGroup={handlers.removeGroupMember}
           onSendEmail={onOpenEmailSidebar ? () => onOpenEmailSidebar([selectedPerson.id]) : undefined}
           churchId={churchId}
+          onViewImpactCard={() => {
+            setSelectedPersonId?.(selectedPerson.id);
+            window.history.pushState(null, '', `#/wallets/${selectedPerson.id}`);
+            setView('wallets');
+          }}
         />
       );
 
@@ -597,7 +604,14 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <FinancialHub onBack={() => setView('dashboard')} onNavigate={setView} />;
 
       case 'wallets':
-        return <WalletsView people={people} />;
+        return (
+          <WalletsView
+            people={people}
+            giving={giving}
+            initialPersonId={selectedPersonId}
+            onViewPortalActivity={() => setView('portal-activity')}
+          />
+        );
 
       case 'birthdays':
         return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
