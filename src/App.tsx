@@ -6,7 +6,6 @@ import { useAuthContext, SignInPage } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { PersonForm } from './components/PersonForm';
 import { GlobalSearch } from './components/GlobalSearch';
-import { QuickActions } from './components/QuickActions';
 import { QuickTaskForm } from './components/QuickTaskForm';
 import { QuickPrayerForm } from './components/QuickPrayerForm';
 import { QuickNote } from './components/QuickNote';
@@ -646,15 +645,6 @@ function App() {
         />
       )}
 
-      {!modals.showSearch && (
-        <QuickActions
-          onAddPerson={handlers.addPerson}
-          onAddTask={modals.openQuickTask}
-          onAddPrayer={modals.openQuickPrayer}
-          onAddNote={modals.openQuickNote}
-          onAddDonation={modals.openQuickDonation}
-        />
-      )}
 
       <AskGrace hideDock={view === 'leadership' || view === 'grace'} />
 
