@@ -35,6 +35,7 @@ import {
   Import,
   Smartphone,
   Wallet,
+  Radio,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -78,6 +79,7 @@ const navSections: NavSection[] = [
       { view: 'groups', label: 'Groups', icon: <Users2 size={16} />, tone: 'violet' },
       { view: 'calendar', label: 'Calendar', icon: <Calendar size={16} />, tone: 'amber' },
       { view: 'sunday-prep', label: 'Sunday', icon: <Church size={16} />, tone: 'emerald' },
+      { view: 'live-service', label: 'Live Service', icon: <Radio size={16} />, tone: 'rose' },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={16} />, tone: 'emerald' },
       { view: 'pastoral-care', label: 'Care', icon: <Heart size={16} />, tone: 'rose' },
     ],
@@ -150,6 +152,7 @@ const viewLabels: Record<View, string> = {
   'member-events': 'Member Events',
   'member-checkin': 'Member Check-In',
   'sunday-prep': 'Sunday Prep',
+  'live-service': 'Live Service',
   families: 'Families',
   skills: 'Skills & Talents',
   'email-templates': 'Email Templates',

@@ -49,6 +49,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   'member-events': 'member-events',
   'member-checkin': 'member-checkin',
   'sunday-prep': 'sunday-prep',
+  'live-service': 'live-service',
   'event-registration': 'event-registration',
   reminders: 'reminders',
   'planning-center-import': 'planning-center-import',

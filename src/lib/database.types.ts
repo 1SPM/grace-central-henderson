@@ -209,7 +209,33 @@ export type MemberActivityEventType =
   | 'kyc_submitted' | 'card_issued' | 'card_frozen' | 'card_txn'
   | 'community_post' | 'community_react' | 'community_comment'
   | 'connection_request' | 'connection_accept' | 'group_post' | 'group_join'
-  | 'community_view';
+  | 'community_view' | 'watch_join' | 'watch_chat';
+
+export interface WatchSermonRow {
+  id: string;
+  church_id: string;
+  title: string;
+  series_title: string | null;
+  part_label: string | null;
+  speaker: string | null;
+  preached_at: string | null;
+  duration_seconds: number | null;
+  view_count: number;
+  thumbnail_url: string | null;
+  video_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WatchChatMessageRow {
+  id: string;
+  church_id: string;
+  person_id: string | null;
+  author_name: string;
+  body: string;
+  is_hidden: boolean;
+  created_at: string;
+}
 
 export type CommunityPostDbType =
   | 'prayer' | 'blessing' | 'praise' | 'milestone' | 'event' | 'group_activity' | 'scripture';
@@ -457,6 +483,16 @@ export interface Database {
         Row: MemberConnectionRequestRow;
         Insert: Partial<MemberConnectionRequestRow> & { church_id: string; from_person_id: string; to_person_id: string };
         Update: Partial<MemberConnectionRequestRow>;
+      };
+      watch_sermons: {
+        Row: WatchSermonRow;
+        Insert: Partial<WatchSermonRow> & { church_id: string; title: string };
+        Update: Partial<WatchSermonRow>;
+      };
+      watch_chat_messages: {
+        Row: WatchChatMessageRow;
+        Insert: Partial<WatchChatMessageRow> & { church_id: string; author_name: string; body: string };
+        Update: Partial<WatchChatMessageRow>;
       };
     };
   };

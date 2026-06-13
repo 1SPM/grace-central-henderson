@@ -21,6 +21,7 @@ import {
   GraduationCap,
   Moon,
   Sun,
+  Radio,
 } from 'lucide-react';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
@@ -81,6 +82,8 @@ export function Settings({
     email: '',
     website: '',
     serviceTimes: [] as ServiceTime[],
+    liveStreamUrl: '',
+    currentSeries: { title: '', part: '', speaker: '' },
   });
   const [profileSaved, setProfileSaved] = useState(false);
   const [graceFacts, setGraceFacts] = useState('');
@@ -98,6 +101,12 @@ export function Settings({
         email: churchSettings.profile.email || '',
         website: churchSettings.profile.website || '',
         serviceTimes: churchSettings.profile.serviceTimes || [],
+        liveStreamUrl: churchSettings.profile.liveStreamUrl || '',
+        currentSeries: {
+          title: churchSettings.profile.currentSeries?.title || '',
+          part: churchSettings.profile.currentSeries?.part || '',
+          speaker: churchSettings.profile.currentSeries?.speaker || '',
+        },
       });
     }
     if (churchSettings?.graceFacts !== undefined) {
@@ -747,6 +756,99 @@ export function Settings({
                 <>
                   <Save size={16} />
                   Save Service Times
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Live Service */}
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
+              <Radio className="text-rose-600 dark:text-rose-400" size={20} />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 dark:text-dark-100">Live Service</h2>
+              <p className="text-sm text-gray-500 dark:text-dark-400">Stream and series shown on the Live Service dashboard</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1.5">
+                Live stream embed URL
+              </label>
+              <input
+                type="url"
+                value={churchProfile.liveStreamUrl}
+                onChange={(e) => setChurchProfile({ ...churchProfile, liveStreamUrl: e.target.value })}
+                placeholder="https://www.youtube.com/embed/..."
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1.5">
+                  Current series
+                </label>
+                <input
+                  type="text"
+                  value={churchProfile.currentSeries.title}
+                  onChange={(e) => setChurchProfile({
+                    ...churchProfile,
+                    currentSeries: { ...churchProfile.currentSeries, title: e.target.value },
+                  })}
+                  placeholder="Honor Each Other"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1.5">
+                  Part
+                </label>
+                <input
+                  type="text"
+                  value={churchProfile.currentSeries.part}
+                  onChange={(e) => setChurchProfile({
+                    ...churchProfile,
+                    currentSeries: { ...churchProfile.currentSeries, part: e.target.value },
+                  })}
+                  placeholder="Part 4"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1.5">
+                  Speaker
+                </label>
+                <input
+                  type="text"
+                  value={churchProfile.currentSeries.speaker}
+                  onChange={(e) => setChurchProfile({
+                    ...churchProfile,
+                    currentSeries: { ...churchProfile.currentSeries, speaker: e.target.value },
+                  })}
+                  placeholder="Pastor James Wilson"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving || settingsLoading}
+              className="w-full px-4 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-medium hover:bg-rose-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {profileSaved ? (
+                <>
+                  <Check size={16} />
+                  Saved!
+                </>
+              ) : saving ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Live Service
                 </>
               )}
             </button>

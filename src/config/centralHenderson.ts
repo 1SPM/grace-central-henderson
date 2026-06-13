@@ -43,6 +43,12 @@ export const CENTRAL_HENDERSON_DEFAULT_SETTINGS: ChurchSettings = {
       { day: 'Sunday', time: '1:00 PM', name: 'Weekend Experience' },
       { day: 'Sunday', time: '5:00 PM', name: 'Weekend Experience (Spanish)' },
     ],
+    liveStreamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCentralHenderson',
+    currentSeries: {
+      title: 'Honor Each Other',
+      part: 'Part 4',
+      speaker: 'Pastor James Wilson',
+    },
   },
   graceFacts: CENTRAL_HENDERSON_GRACE_FACTS,
   timezone: CENTRAL_HENDERSON_TIMEZONE,

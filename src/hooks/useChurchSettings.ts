@@ -35,6 +35,12 @@ export interface ServiceTime {
   name: string;
 }
 
+export interface CurrentSeries {
+  title: string;
+  part?: string;
+  speaker?: string;
+}
+
 export interface ChurchProfile {
   name: string;
   address: string;
@@ -45,6 +51,8 @@ export interface ChurchProfile {
   email: string;
   website: string;
   serviceTimes: ServiceTime[];
+  liveStreamUrl?: string;
+  currentSeries?: CurrentSeries;
 }
 
 export interface OnboardingState {
