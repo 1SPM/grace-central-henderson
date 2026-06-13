@@ -2,9 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const BUILD_VERSION = Date.now().toString();
+
 export default defineConfig({
+  define: {
+    __GRACE_BUILD_VERSION__: JSON.stringify(BUILD_VERSION),
+  },
   plugins: [
     react(),
+    {
+      name: 'inject-grace-build-version',
+      transformIndexHtml(html) {
+        return html.replace(
+          '</head>',
+          `    <meta name="grace-build" content="${BUILD_VERSION}" />\n  </head>`,
+        );
+      },
+    },
     // Security headers plugin for development server
     {
       name: 'security-headers',
@@ -71,6 +85,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        cacheId: 'grace-crm-crisis-dispatch-v2',
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
         cleanupOutdatedCaches: true,
         skipWaiting: true,

@@ -1,7 +1,10 @@
-/* Small fixed banner that appears when a new service-worker build is ready.
-   Ends the "I shipped but the open tab still shows the old build" lag.
-   Renders globally (mounted in main.tsx) — independent of any route. */
+/* Reloads the tab when a new service-worker build is ready so deploys
+   reach long-open sessions without a manual hard refresh. */
 import { useEffect, useState } from 'react';
+
+function reloadForNewBuild() {
+  window.location.reload();
+}
 
 export function UpdatePrompt() {
   const [show, setShow] = useState(false);
@@ -12,18 +15,27 @@ export function UpdatePrompt() {
     let pollId: ReturnType<typeof setInterval> | undefined;
 
     function attach(reg: ServiceWorkerRegistration) {
+      const promptOrReload = () => {
+        if (reg.waiting) {
+          reloadForNewBuild();
+          return;
+        }
+        setShow(true);
+      };
+
       const onStateChange = (sw: ServiceWorker) => () => {
-        if (sw.state === 'installed' && navigator.serviceWorker.controller) setShow(true);
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) promptOrReload();
       };
       const onUpdateFound = () => {
         const sw = reg.installing;
         if (sw) sw.addEventListener('statechange', onStateChange(sw));
       };
       reg.addEventListener('updatefound', onUpdateFound);
-      // If a SW is already waiting (skipWaiting may have promoted it just now), prompt.
-      if (reg.waiting && navigator.serviceWorker.controller) setShow(true);
-      // Poll for updates so a long-open tab notices new deploys.
-      pollId = setInterval(() => { reg.update().catch(() => { /* ignore */ }); }, 60_000);
+      if (reg.waiting && navigator.serviceWorker.controller) promptOrReload();
+      // Check for new deploys every 30s on long-lived tabs.
+      pollId = setInterval(() => { reg.update().catch(() => { /* ignore */ }); }, 30_000);
+      // Immediate check on mount.
+      reg.update().catch(() => { /* ignore */ });
     }
 
     navigator.serviceWorker.getRegistration().then(reg => {
@@ -31,9 +43,7 @@ export function UpdatePrompt() {
       if (reg) attach(reg);
     }).catch(() => { /* ignore */ });
 
-    // If the controller changes (new SW took over), the new build is now active —
-    // the page assets, however, were loaded by the old controller. Prompt to reload.
-    const onControllerChange = () => setShow(true);
+    const onControllerChange = () => reloadForNewBuild();
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
 
     return () => {
@@ -63,7 +73,7 @@ export function UpdatePrompt() {
       }} />
       <span>A new version of Grace is ready.</span>
       <button
-        onClick={() => window.location.reload()}
+        onClick={reloadForNewBuild}
         style={{
           marginLeft: 4,
           background: '#fff', color: '#18181b',

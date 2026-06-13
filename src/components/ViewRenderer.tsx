@@ -53,7 +53,7 @@ const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => (
 const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
-const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
+const CrisisCenterDispatch = lazy(() => import('./pastoral/CrisisCenterDispatch').then(m => ({ default: m.CrisisCenterDispatch })));
 const PortalActivity = lazy(() => import('./PortalActivity').then(m => ({ default: m.PortalActivity })));
 const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
@@ -767,7 +767,7 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'pastoral-care':
         return (
-          <PastoralCareDashboard
+          <CrisisCenterDispatch
             leaders={pastoralCare.leaders}
             helpRequests={pastoralCare.helpRequests}
             conversations={pastoralCare.conversations}

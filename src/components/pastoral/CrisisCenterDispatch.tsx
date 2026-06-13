@@ -19,7 +19,7 @@ import { CareDispatch } from './leadersHub/CareDispatch';
 
 type DashboardTab = 'dispatch' | 'conversations' | 'leaders' | 'new-request' | 'add-leader' | 'edit-leader';
 
-interface PastoralCareDashboardProps {
+interface CrisisCenterDispatchProps {
   leaders: LeaderProfile[];
   helpRequests: HelpRequest[];
   conversations: PastoralConversation[];
@@ -72,7 +72,7 @@ const TAB_LABELS: Record<'dispatch' | 'conversations' | 'leaders', string> = {
   leaders: 'Leaders',
 };
 
-export function PastoralCareDashboard({
+export function CrisisCenterDispatch({
   leaders,
   conversations,
   activeConversation,
@@ -89,7 +89,7 @@ export function PastoralCareDashboard({
   onToggleLeaderAvailability,
   onBack,
   churchName,
-}: PastoralCareDashboardProps) {
+}: CrisisCenterDispatchProps) {
   const [tab, setTab] = useState<DashboardTab>('dispatch');
   const [editingLeader, setEditingLeader] = useState<LeaderProfile | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);

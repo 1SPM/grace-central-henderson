@@ -68,6 +68,22 @@ function PublicConnectPage() {
 
 import { UpdatePrompt } from './components/UpdatePrompt';
 
+// If index.html came from a newer deploy than this tab's cached bundle, reload once.
+const buildMeta = document.querySelector('meta[name="grace-build"]')?.getAttribute('content');
+const storedBuild = localStorage.getItem('grace-build');
+if (buildMeta && storedBuild && buildMeta !== storedBuild) {
+  localStorage.setItem('grace-build', buildMeta);
+  if ('serviceWorker' in navigator) {
+    void navigator.serviceWorker.getRegistrations().then(regs =>
+      Promise.all(regs.map(r => r.unregister())),
+    ).finally(() => window.location.reload());
+  } else {
+    window.location.reload();
+  }
+} else if (buildMeta) {
+  localStorage.setItem('grace-build', buildMeta);
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SentryErrorBoundary fallback={<div style={{ padding: 24 }}>Something went wrong. The team has been notified.</div>}>
