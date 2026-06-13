@@ -14,7 +14,7 @@ import { MemberScanPage } from './MemberScanPage';
 import { MemberCardPage } from './MemberCardPage';
 import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
 import { ConnectCommunityPage } from './community/ConnectCommunityPage';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest, SmallGroup } from '../../types';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest, SmallGroup, HelpRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -42,6 +42,7 @@ interface MemberPortalProps {
   conversations?: PastoralConversation[];
   activeConversation?: PastoralConversation;
   onSendMessage?: (conversationId: string, content: string) => void;
+  helpRequests?: HelpRequest[];
 }
 
 export function MemberPortal({
@@ -68,6 +69,7 @@ export function MemberPortal({
   conversations = [],
   activeConversation,
   onSendMessage,
+  helpRequests = [],
 }: MemberPortalProps) {
   const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
   const [showChat, setShowChat] = useState(false);
@@ -184,6 +186,7 @@ export function MemberPortal({
         return (
           <MemberCarePage
             leaders={leaders}
+            helpRequests={helpRequests}
             onCreateHelpRequest={onCreateHelpRequest}
             onNavigate={(tab) => handleTabChange(tab)}
             churchName={churchName}
@@ -197,7 +200,10 @@ export function MemberPortal({
 
       case 'my-ministry':
         return (
-          <MyMinistryPage />
+          <MyMinistryPage
+            helpRequests={helpRequests}
+            leader={leaders.find(l => l.isActive && l.isAvailable) ?? leaders[0]}
+          />
         );
 
       case 'card':

@@ -42,7 +42,7 @@ const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.Reac
   { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, calendar & live service', icon: <Church size={16} /> },
   { view: 'attendance', label: 'Attendance', subtitle: 'Check-in & counts', icon: <UserCheck size={16} /> },
   { view: 'child-checkin', label: 'Child Check-in', subtitle: 'Kids ministry', icon: <Baby size={16} /> },
-  { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Counseling & chats', icon: <Heart size={16} /> },
+  { view: 'pastoral-care', label: 'Crisis Center Dispatch', subtitle: '24-hour member request receiving', icon: <Heart size={16} /> },
   { view: 'discipleship', label: 'Discipleship', subtitle: 'Spiritual pathways', icon: <TrendingUp size={16} /> },
   { view: 'analytics', label: 'Analytics', subtitle: 'Trends & stats', icon: <BarChart3 size={16} /> },
 ];

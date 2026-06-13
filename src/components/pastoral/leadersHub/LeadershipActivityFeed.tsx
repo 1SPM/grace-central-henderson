@@ -114,7 +114,7 @@ export function LeadershipActivityFeed({
             onClick={goToCare}
             className="text-xs font-medium text-slate-700 dark:text-dark-200 hover:underline"
           >
-            Open Care inbox →
+            Crisis Center Dispatch →
           </button>
         </div>
       </div>
@@ -169,14 +169,14 @@ export function LeadershipActivityFeed({
         <div>
           <p className="text-sm font-medium text-gray-900 dark:text-dark-100">Member conversations live in Care</p>
           <p className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">
-            This feed tracks human and AI companion activity. Open Care to read threads and reply as staff.
+            This feed tracks human and AI companion activity. Open Crisis Center Dispatch to read threads and reply as staff.
           </p>
           <button
             type="button"
             onClick={goToCare}
             className="mt-2 text-xs font-medium text-rose-700 dark:text-rose-300 hover:underline"
           >
-            Go to Pastoral Care
+            Crisis Center Dispatch
           </button>
         </div>
       </div>

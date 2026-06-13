@@ -269,6 +269,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             window.history.pushState(null, '', '#/leadership');
             setView('leadership');
           }}
+          careConversations={pastoralCare.conversations}
         />
       );
 
@@ -698,6 +699,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             conversations={pastoralCare.conversations}
             activeConversation={pastoralCare.activeConversation}
             onSendMessage={pastoralCare.sendMessage}
+            helpRequests={pastoralCare.helpRequests}
           />
         );
 

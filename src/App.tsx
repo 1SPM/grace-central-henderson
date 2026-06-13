@@ -496,6 +496,7 @@ function App() {
             conversations={pastoralCare.conversations}
             activeConversation={pastoralCare.activeConversation}
             onSendMessage={pastoralCare.sendMessage}
+            helpRequests={pastoralCare.helpRequests}
           />
           </div>
           <PWAInstallPrompt />

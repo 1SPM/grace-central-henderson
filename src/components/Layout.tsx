@@ -77,7 +77,7 @@ const navSections: NavSection[] = [
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
       { view: 'sunday-prep', label: 'Sunday Service Tools', icon: <Church size={16} />, tone: 'emerald' },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={16} />, tone: 'emerald' },
-      { view: 'pastoral-care', label: 'Care', icon: <Heart size={16} />, tone: 'rose' },
+      { view: 'pastoral-care', label: 'Crisis Center Dispatch', icon: <Heart size={16} />, tone: 'rose' },
     ],
   },
 ];
@@ -156,7 +156,7 @@ const viewLabels: Record<View, string> = {
   'reminders': 'Automated Reminders',
   'planning-center-import': 'Planning Center Import',
   'qr-checkin': 'QR Check-In',
-  'pastoral-care': 'Pastoral Care',
+  'pastoral-care': 'Crisis Center Dispatch',
   'life-services': 'Life Services',
   'wedding-services': 'Weddings',
   'funeral-services': 'Funerals',

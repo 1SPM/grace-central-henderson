@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
-import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup } from '../../types';
+import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup, HelpRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -27,6 +27,7 @@ interface MemberPortalPreviewProps {
   conversations?: PastoralConversation[];
   activeConversation?: PastoralConversation;
   onSendMessage?: (conversationId: string, content: string) => void;
+  helpRequests?: HelpRequest[];
 }
 
 export function MemberPortalPreview({
@@ -50,6 +51,7 @@ export function MemberPortalPreview({
   conversations,
   activeConversation,
   onSendMessage,
+  helpRequests = [],
 }: MemberPortalPreviewProps) {
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
   const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
@@ -104,6 +106,7 @@ export function MemberPortalPreview({
           conversations={conversations}
           activeConversation={activeConversation}
           onSendMessage={onSendMessage}
+          helpRequests={helpRequests}
         />
       </div>
     );
@@ -184,6 +187,7 @@ export function MemberPortalPreview({
                       conversations={conversations}
                       activeConversation={activeConversation}
                       onSendMessage={onSendMessage}
+                      helpRequests={helpRequests}
                     />
                   </div>
                 </div>

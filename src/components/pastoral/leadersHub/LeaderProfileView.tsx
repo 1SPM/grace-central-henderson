@@ -165,7 +165,7 @@ export function LeaderProfileView({ leader, activity, onBack, onNavigate }: Lead
                   onClick={() => onNavigate('pastoral-care')}
                   className="text-xs font-medium text-slate-600 dark:text-dark-300 hover:underline"
                 >
-                  View in Care →
+                  Open in Dispatch →
                 </button>
               )}
             </div>

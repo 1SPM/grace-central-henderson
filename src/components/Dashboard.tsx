@@ -25,7 +25,7 @@ import {
   CalendarDays,
   Bot,
 } from 'lucide-react';
-import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile } from '../types';
+import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile, PastoralConversation, HelpCategory } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { SetupChecklist } from './SetupChecklist';
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
@@ -73,12 +73,25 @@ interface DashboardProps {
   onOpenTutorials?: () => void;
   leaders?: LeaderProfile[];
   onViewLeaders?: () => void;
+  careConversations?: PastoralConversation[];
 }
+
+const CARE_CATEGORY_LABELS: Record<HelpCategory, string> = {
+  marriage: 'Marriage',
+  addiction: 'Recovery',
+  grief: 'Grief',
+  'faith-questions': 'Faith',
+  crisis: 'Crisis',
+  financial: 'Financial',
+  'anxiety-depression': 'Mental Health',
+  parenting: 'Parenting',
+  general: 'General',
+};
 
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onDismissGraceIntro, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, }: DashboardProps) {
+export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onDismissGraceIntro, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, careConversations = [], }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
   const mailStats = useMailInboxStats();
@@ -160,9 +173,13 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5);
 
-    const care = prayers
-      .filter(p => !p.isAnswered)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const care = careConversations
+      .filter(c => c.status === 'active' || c.status === 'waiting' || c.status === 'escalated')
+      .sort((a, b) => {
+        if (a.priority === 'crisis' && b.priority !== 'crisis') return -1;
+        if (b.priority === 'crisis' && a.priority !== 'crisis') return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
 
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
     let newThisWeek = people.filter(
@@ -188,7 +205,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
       newMembersThisWeek: newThisWeek.slice(0, 4),
       upcomingEvents: upcoming,
     };
-  }, [giving, prayers, people, events]);
+  }, [giving, careConversations, people, events]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -482,14 +499,14 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           onClick={onViewGiving}
         />
         <StatCard
-          label="Care Requests"
+          label="Open dispatch"
           value={openCare.length}
           icon={<Heart size={20} />}
-          change={openCare.length > 0 ? -openCare.length : 0}
-          changeLabel={openCare.length > 0 ? `${Math.min(openCare.length, 3)} flagged` : 'all clear'}
+          change={openCare.filter(c => c.priority === 'crisis').length}
+          changeLabel={openCare.length > 0 ? `${openCare.filter(c => c.priority === 'crisis').length} crisis` : 'all clear'}
           invertTrend
           accentColor="rose"
-          onClick={() => onNavigate?.('prayer')}
+          onClick={() => onNavigate?.('pastoral-care')}
         />
         <StatCard
           label="AI Sessions Today"
@@ -731,42 +748,47 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Recent care requests</h2>
                 </div>
                 <button
-                  onClick={() => onNavigate?.('prayer')}
+                  onClick={() => onNavigate?.('pastoral-care')}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
                 >
-                  View all <ArrowRight size={12} />
+                  Crisis Center Dispatch <ArrowRight size={12} />
                 </button>
               </div>
               {openCare.length === 0 ? (
                 <div className="py-4 text-center">
                   <CheckCircle2 className="text-emerald-500 mx-auto mb-1" size={20} />
-                  <p className="text-xs text-gray-400 dark:text-dark-500">No open care requests</p>
+                  <p className="text-xs text-gray-400 dark:text-dark-500">No open member requests</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {openCare.slice(0, 4).map((prayer, i) => {
-                    const person = personMap.get(prayer.personId);
+                  {openCare.slice(0, 4).map((conv) => {
+                    const lastMessage = conv.messages[conv.messages.length - 1];
+                    const person = conv.personId ? personMap.get(conv.personId) : undefined;
                     return (
                       <button
-                        key={prayer.id}
-                        onClick={() => person && onViewPerson(person.id)}
+                        key={conv.id}
+                        onClick={() => onNavigate?.('pastoral-care')}
                         className="w-full p-2.5 rounded-lg bg-gray-50 dark:bg-dark-850 hover:bg-gray-100 dark:hover:bg-dark-750 transition-colors text-left"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
-                            {person ? `${person.firstName} ${person.lastName}` : 'Member'}
+                            {conv.isAnonymous ? 'Anonymous' : person ? `${person.firstName} ${person.lastName}` : 'Member'}
                           </p>
                           <span
                             className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                              i === 0
+                              conv.priority === 'crisis'
                                 ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
-                                : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                                : conv.status === 'escalated'
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                  : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
                             }`}
                           >
-                            {i === 0 ? 'Escalated → Pastor' : 'AI → Leader'}
+                            {conv.priority === 'crisis' ? 'Crisis' : CARE_CATEGORY_LABELS[conv.category]}
                           </span>
                         </div>
-                        <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate mt-0.5">{prayer.content}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate mt-0.5">
+                          {lastMessage ? lastMessage.content : `${CARE_CATEGORY_LABELS[conv.category]} request`}
+                        </p>
                       </button>
                     );
                   })}

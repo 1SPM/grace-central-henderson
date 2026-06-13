@@ -1,5 +1,5 @@
 import { Bot, PhoneCall, Radio } from 'lucide-react';
-import type { PastoralSession, LeaderProfile, HelpCategory } from '../../../types';
+import type { LeaderProfile, HelpCategory, PastoralConversation } from '../../../types';
 import { demoCareLog, demoDispatchMatrix, type CareLogEntry } from './demoLeadersHub';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
@@ -14,41 +14,107 @@ const CATEGORY_LABELS: Record<HelpCategory, string> = {
   general: 'General',
 };
 
+type DispatchLogEntry = CareLogEntry & { conversationId?: string };
+
 interface CareDispatchProps {
-  sessions: PastoralSession[];
+  conversations: PastoralConversation[];
   leaders: LeaderProfile[];
+  onOpenConversation: (id: string) => void;
+  memberNames?: Map<string, string>;
 }
 
-export function CareDispatch({ sessions, leaders }: CareDispatchProps) {
-  // Real pastoral sessions feed the care log when present; demo rows
-  // otherwise so the dispatch board always demonstrates the flow.
-  const today = new Date().toDateString();
-  const todaySessions = sessions.filter(s => new Date(s.startedAt).toDateString() === today);
-  const leaderName = (id: string) => leaders.find(l => l.id === id)?.displayName ?? 'Care team';
+function isToday(iso: string): boolean {
+  return new Date(iso).toDateString() === new Date().toDateString();
+}
 
-  const careLog: CareLogEntry[] =
-    todaySessions.length > 0
-      ? todaySessions.slice(0, 8).map(s => ({
-          time: new Date(s.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-          member: s.isAnonymous ? 'Anonymous' : 'Member',
-          service: CATEGORY_LABELS[s.category],
-          handledBy: s.sessionType === 'chat' ? 'AI' : 'Live',
-          leader: leaderName(s.leaderId),
-          outcome: s.status === 'completed' ? 'Completed' : s.status === 'active' ? 'In conversation now' : s.status,
-        }))
+function sortDispatchQueue(conversations: PastoralConversation[]): PastoralConversation[] {
+  const priorityOrder: Record<string, number> = { crisis: 0, high: 1, medium: 2, low: 3 };
+  return [...conversations]
+    .filter(c => c.status !== 'resolved' && c.status !== 'archived')
+    .sort((a, b) => {
+      const pa = priorityOrder[a.priority] ?? 2;
+      const pb = priorityOrder[b.priority] ?? 2;
+      if (pa !== pb) return pa - pb;
+      if (!a.leaderId && b.leaderId) return -1;
+      if (a.leaderId && !b.leaderId) return 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+}
+
+function conversationToLogEntry(
+  conv: PastoralConversation,
+  leaders: LeaderProfile[],
+  memberNames?: Map<string, string>,
+): DispatchLogEntry {
+  const leaderName = conv.leaderId
+    ? leaders.find(l => l.id === conv.leaderId)?.displayName ?? 'Care team'
+    : 'Unassigned';
+  const lastMsg = conv.messages[conv.messages.length - 1];
+  const handledBy: 'AI' | 'Live' =
+    lastMsg?.sender === 'leader' ? 'Live' : lastMsg?.sender === 'ai' ? 'AI' : 'AI';
+  const memberLabel = conv.isAnonymous
+    ? 'Anonymous'
+    : conv.personId && memberNames?.get(conv.personId)
+      ? memberNames.get(conv.personId)!
+      : 'Member';
+
+  let outcome = 'In queue';
+  if (conv.status === 'escalated') outcome = 'Escalated → live team';
+  else if (conv.status === 'active' && lastMsg?.sender === 'leader') outcome = 'Live response sent';
+  else if (conv.status === 'active' && lastMsg?.sender === 'ai') outcome = 'AI triage active';
+  else if (conv.status === 'waiting') outcome = 'Awaiting response';
+  else if (conv.priority === 'crisis') outcome = 'Crisis flagged';
+
+  return {
+    conversationId: conv.id,
+    time: new Date(conv.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+    member: memberLabel,
+    service: CATEGORY_LABELS[conv.category],
+    handledBy,
+    leader: leaderName,
+    outcome,
+  };
+}
+
+export function CareDispatch({ conversations, leaders, onOpenConversation, memberNames }: CareDispatchProps) {
+  const openQueue = sortDispatchQueue(conversations);
+  const todayConversations = conversations.filter(c => isToday(c.createdAt) || isToday(c.updatedAt));
+
+  const careLog: DispatchLogEntry[] =
+    openQueue.length > 0
+      ? openQueue.map(c => conversationToLogEntry(c, leaders, memberNames))
       : demoCareLog;
 
   const aiHandled = careLog.filter(c => c.handledBy === 'AI').length;
+  const escalations = openQueue.filter(
+    c => c.status === 'escalated' || c.priority === 'crisis',
+  ).length;
 
   return (
     <div className="space-y-4">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Care touches today', value: careLog.length, sub: 'all services' },
-          { label: 'AI handled', value: aiHandled, sub: `${careLog.length ? Math.round((aiHandled / careLog.length) * 100) : 0}% of volume` },
-          { label: 'Escalations', value: careLog.filter(c => c.outcome.toLowerCase().includes('escalat')).length || 1, sub: 'paged to live clergy' },
-          { label: 'Avg first response', value: '38s', sub: 'AI triage on care line' },
+          {
+            label: 'Care touches today',
+            value: todayConversations.length || careLog.length,
+            sub: 'member requests received',
+          },
+          {
+            label: 'AI handled',
+            value: aiHandled,
+            sub: `${careLog.length ? Math.round((aiHandled / careLog.length) * 100) : 0}% of volume`,
+          },
+          {
+            label: 'Escalations',
+            value: escalations,
+            sub: 'crisis / live handoff',
+          },
+          {
+            label: 'Unassigned',
+            value: openQueue.filter(c => !c.leaderId).length,
+            sub: 'awaiting leader match',
+          },
         ].map(kpi => (
           <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
             <p className="section-eyebrow">{kpi.label}</p>
@@ -62,7 +128,7 @@ export function CareDispatch({ sessions, leaders }: CareDispatchProps) {
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="flex items-center gap-2 p-5 pb-3">
           <Radio size={15} className="text-gray-400" />
-          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Care dispatch — service routing</h2>
+          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Crisis Center Dispatch — service routing</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -104,11 +170,18 @@ export function CareDispatch({ sessions, leaders }: CareDispatchProps) {
         </div>
       </div>
 
-      {/* Today's care log */}
+      {/* Open dispatch queue */}
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="flex items-center gap-2 p-5 pb-3">
           <PhoneCall size={15} className="text-gray-400" />
-          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Today's care log</h2>
+          <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">
+            Open dispatch queue
+            {openQueue.length > 0 && (
+              <span className="ml-2 text-xs font-normal text-gray-500 dark:text-dark-400">
+                ({openQueue.length} active)
+              </span>
+            )}
+          </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -123,26 +196,35 @@ export function CareDispatch({ sessions, leaders }: CareDispatchProps) {
               </tr>
             </thead>
             <tbody>
-              {careLog.map((entry, i) => (
-                <tr key={`${entry.time}-${i}`} className="border-b border-gray-100 dark:border-dark-700 last:border-0">
-                  <td className="px-5 py-2.5 text-xs text-gray-500 dark:text-dark-400 whitespace-nowrap">{entry.time}</td>
-                  <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-dark-100">{entry.member}</td>
-                  <td className="px-3 py-2.5 text-xs text-gray-600 dark:text-dark-300">{entry.service}</td>
-                  <td className="px-3 py-2.5">
-                    <span
-                      className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                        entry.handledBy === 'AI'
-                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                      }`}
-                    >
-                      {entry.handledBy}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-gray-600 dark:text-dark-300">{entry.leader}</td>
-                  <td className="px-5 py-2.5 text-xs text-gray-500 dark:text-dark-400">{entry.outcome}</td>
-                </tr>
-              ))}
+              {careLog.map((entry, i) => {
+                const isClickable = !!entry.conversationId;
+                return (
+                  <tr
+                    key={entry.conversationId ?? `${entry.time}-${i}`}
+                    onClick={isClickable ? () => onOpenConversation(entry.conversationId!) : undefined}
+                    className={`border-b border-gray-100 dark:border-dark-700 last:border-0 ${
+                      isClickable ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors' : ''
+                    }`}
+                  >
+                    <td className="px-5 py-2.5 text-xs text-gray-500 dark:text-dark-400 whitespace-nowrap">{entry.time}</td>
+                    <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-dark-100">{entry.member}</td>
+                    <td className="px-3 py-2.5 text-xs text-gray-600 dark:text-dark-300">{entry.service}</td>
+                    <td className="px-3 py-2.5">
+                      <span
+                        className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                          entry.handledBy === 'AI'
+                            ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                        }`}
+                      >
+                        {entry.handledBy}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-xs text-gray-600 dark:text-dark-300">{entry.leader}</td>
+                    <td className="px-5 py-2.5 text-xs text-gray-500 dark:text-dark-400">{entry.outcome}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
