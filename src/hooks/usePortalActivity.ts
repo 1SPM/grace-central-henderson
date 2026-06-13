@@ -22,6 +22,7 @@ export interface PortalEngagementSummary {
   gifts7d: number;
   careMessages7d: number;
   checkins7d: number;
+  community7d: number;
   totalEvents30d: number;
 }
 
@@ -39,6 +40,7 @@ const EMPTY_SUMMARY: PortalEngagementSummary = {
   gifts7d: 0,
   careMessages7d: 0,
   checkins7d: 0,
+  community7d: 0,
   totalEvents30d: 0,
 };
 
@@ -83,6 +85,7 @@ export function usePortalActivity(churchId: string) {
     const recent = events.filter(e => new Date(e.created_at).getTime() >= sevenDaysAgo);
     const activePeople = new Set(recent.map(e => e.person_id).filter(Boolean));
     const count = (type: string) => recent.filter(e => e.event_type === type).length;
+    const communityTypes = ['community_post', 'group_post', 'community_react', 'community_comment', 'connection_request', 'connection_accept'];
     return {
       activeMembers7d: activePeople.size,
       logins7d: count('login'),
@@ -90,6 +93,7 @@ export function usePortalActivity(churchId: string) {
       gifts7d: count('gift'),
       careMessages7d: count('care_message') + count('help_request'),
       checkins7d: count('checkin'),
+      community7d: recent.filter(e => communityTypes.includes(e.event_type)).length,
       totalEvents30d: events.length,
     };
   }, [events]);

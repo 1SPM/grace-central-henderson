@@ -150,7 +150,76 @@ export interface Family {
 }
 
 // Member Portal Tab
-export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy' | 'my-ministry' | 'care' | 'scan' | 'card';
+export type MemberPortalTab = 'home' | 'directory' | 'giving' | 'events' | 'checkin' | 'pastor-signup' | 'shop' | 'legacy' | 'my-ministry' | 'care' | 'scan' | 'card' | 'connect';
+
+// ============================================
+// COMMUNITY / CONNECT AT CENTRAL
+// ============================================
+
+export type CommunityPostType =
+  | 'prayer'
+  | 'blessing'
+  | 'praise'
+  | 'milestone'
+  | 'event'
+  | 'group_activity'
+  | 'scripture';
+
+export type CommunityPostVisibility = 'church' | 'connections' | 'group';
+
+export type CommunityReactionType = 'pray' | 'amen' | 'share';
+
+export interface CommunityPost {
+  id: string;
+  churchId: string;
+  authorPersonId: string;
+  postType: CommunityPostType;
+  body: string;
+  visibility: CommunityPostVisibility;
+  groupId?: string;
+  metadata?: Record<string, unknown>;
+  isHidden?: boolean;
+  createdAt: string;
+  /** Populated client-side */
+  authorName?: string;
+  authorPhoto?: string;
+  reactionCounts?: { pray: number; amen: number; share: number };
+  commentCount?: number;
+  myReactions?: CommunityReactionType[];
+}
+
+export interface CommunityComment {
+  id: string;
+  churchId: string;
+  postId: string;
+  authorPersonId: string;
+  body: string;
+  createdAt: string;
+  authorName?: string;
+}
+
+export interface MemberConnection {
+  id: string;
+  churchId: string;
+  personAId: string;
+  personBId: string;
+  createdAt: string;
+}
+
+export interface MemberConnectionRequest {
+  id: string;
+  churchId: string;
+  fromPersonId: string;
+  toPersonId: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: string;
+  respondedAt?: string;
+  /** Populated client-side */
+  fromName?: string;
+  fromPhoto?: string;
+}
+
+export type CommunityFeedFilter = 'all' | 'blessing' | 'prayer' | 'milestone' | 'event' | 'group';
 
 // ============================================
 // COLLECTION & DONATION MANAGEMENT TYPES

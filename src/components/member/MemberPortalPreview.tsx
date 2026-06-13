@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
-import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest } from '../../types';
+import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -16,6 +16,8 @@ interface MemberPortalPreviewProps {
   churchProfile?: ChurchProfile;
   announcements?: Announcement[];
   prayers?: PrayerRequest[];
+  groups?: SmallGroup[];
+  churchId?: string;
   onBack: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -37,6 +39,8 @@ export function MemberPortalPreview({
   churchProfile,
   announcements,
   prayers,
+  groups = [],
+  churchId,
   onBack,
   onRSVP,
   onCheckIn,
@@ -89,6 +93,8 @@ export function MemberPortalPreview({
           churchProfile={churchProfile}
           announcements={announcements}
           prayers={prayers}
+          groups={groups}
+          churchId={churchId}
           onBack={onBack}
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
@@ -168,6 +174,8 @@ export function MemberPortalPreview({
                       churchProfile={churchProfile}
                       announcements={announcements}
                       prayers={prayers}
+                      groups={groups}
+                      churchId={churchId}
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
                       onPastorSignup={onPastorSignup}

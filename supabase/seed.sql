@@ -743,6 +743,38 @@ INSERT INTO drip_campaign_enrollments (id, campaign_id, person_id, current_step,
   ('33334444-3333-4444-3333-444433334452', '11112222-1111-2222-1111-222211112224', '00000000-0000-0000-0000-000000000043', 1, 'active', '2025-01-19 15:00:00', NULL, '2025-01-26 15:00:00')
 ON CONFLICT (id) DO NOTHING;
 
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- COMMUNITY SOCIAL (Connect at Central) — migration 022
+-- ============================================
+INSERT INTO community_posts (id, church_id, author_person_id, post_type, body, visibility, group_id, metadata, created_at) VALUES
+  ('cp000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000031', 'prayer', 'Please pray for my college applications — decisions come back next week. Also praying for our youth retreat planning.', 'church', NULL, '{}', now() - interval '3 hours'),
+  ('cp000001-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000015', 'praise', 'Got the job! Thank you all for praying through the interview season. God is faithful.', 'church', NULL, '{}', now() - interval '8 hours'),
+  ('cp000001-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000024', 'milestone', 'Giving goal updated — thank you for your generosity this quarter!', 'church', NULL, '{"milestoneType":"giving_goal"}', now() - interval '1 day'),
+  ('cp000001-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000032', 'scripture', '"The Lord is my shepherd; I shall not want." — Psalm 23:1. Rest in His provision today.', 'church', NULL, '{}', now() - interval '1 day'),
+  ('cp000001-0000-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000030', 'event', 'Attending Summer BBQ Fellowship this Saturday — who else is going?', 'church', NULL, '{"eventName":"Summer BBQ Fellowship"}', now() - interval '2 days'),
+  ('cp000001-0000-0000-0000-000000000006', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000010', 'group_activity', '12 members from Young Adults watched the 9:45 AM Sunday service together this morning!', 'group', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee02', '{"serviceTime":"9:45 AM","memberCount":12}', now() - interval '5 hours'),
+  ('cp000001-0000-0000-0000-000000000007', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000009', 'blessing', 'Grateful for this community. You all showed up with meals when my mom was in the hospital — I felt so loved.', 'group', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee03', '{}', now() - interval '3 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO community_reactions (id, church_id, post_id, person_id, reaction_type) VALUES
+  ('cr000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'cp000001-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000010', 'pray'),
+  ('cr000001-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'cp000001-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000015', 'pray'),
+  ('cr000001-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111', 'cp000001-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000031', 'amen'),
+  ('cr000001-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111', 'cp000001-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000015', 'amen')
+ON CONFLICT (post_id, person_id, reaction_type) DO NOTHING;
+
+INSERT INTO member_connections (id, church_id, person_a_id, person_b_id, created_at) VALUES
+  ('mc000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000015', now() - interval '14 days'),
+  ('mc000001-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000030', '00000000-0000-0000-0000-000000000031', now() - interval '7 days')
+ON CONFLICT (church_id, person_a_id, person_b_id) DO NOTHING;
+
+INSERT INTO member_connection_requests (id, church_id, from_person_id, to_person_id, status, created_at) VALUES
+  ('mcr00001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000029', '00000000-0000-0000-0000-000000000015', 'pending', now() - interval '6 hours'),
+  ('mcr00001-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000034', '00000000-0000-0000-0000-000000000015', 'pending', now() - interval '12 hours')
+ON CONFLICT (church_id, from_person_id, to_person_id) DO NOTHING;
+
 -- ============================================
 -- END OF SEED DATA
 -- ============================================

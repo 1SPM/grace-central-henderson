@@ -206,7 +206,63 @@ export interface Giving {
 export type MemberActivityEventType =
   | 'login' | 'rsvp' | 'checkin' | 'gift' | 'prayer' | 'care_message'
   | 'help_request' | 'directory_view' | 'announcement_view'
-  | 'kyc_submitted' | 'card_issued' | 'card_frozen' | 'card_txn';
+  | 'kyc_submitted' | 'card_issued' | 'card_frozen' | 'card_txn'
+  | 'community_post' | 'community_react' | 'community_comment'
+  | 'connection_request' | 'connection_accept' | 'group_post' | 'group_join'
+  | 'community_view';
+
+export type CommunityPostDbType =
+  | 'prayer' | 'blessing' | 'praise' | 'milestone' | 'event' | 'group_activity' | 'scripture';
+
+export interface CommunityPostRow {
+  id: string;
+  church_id: string;
+  author_person_id: string;
+  post_type: CommunityPostDbType;
+  body: string;
+  visibility: 'church' | 'connections' | 'group';
+  group_id: string | null;
+  metadata: Record<string, unknown>;
+  is_hidden: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommunityReactionRow {
+  id: string;
+  church_id: string;
+  post_id: string;
+  person_id: string;
+  reaction_type: 'pray' | 'amen' | 'share';
+  created_at: string;
+}
+
+export interface CommunityCommentRow {
+  id: string;
+  church_id: string;
+  post_id: string;
+  author_person_id: string;
+  body: string;
+  created_at: string;
+}
+
+export interface MemberConnectionRow {
+  id: string;
+  church_id: string;
+  person_a_id: string;
+  person_b_id: string;
+  created_at: string;
+}
+
+export interface MemberConnectionRequestRow {
+  id: string;
+  church_id: string;
+  from_person_id: string;
+  to_person_id: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: string;
+  responded_at: string | null;
+}
 
 export interface MemberActivityEvent {
   id: string;
@@ -376,6 +432,31 @@ export interface Database {
         Row: EventRsvp;
         Insert: Partial<EventRsvp> & { church_id: string; event_id: string; person_id: string; status: 'yes' | 'no' | 'maybe' };
         Update: Partial<EventRsvp>;
+      };
+      community_posts: {
+        Row: CommunityPostRow;
+        Insert: Partial<CommunityPostRow> & { church_id: string; author_person_id: string; post_type: CommunityPostDbType; body: string };
+        Update: Partial<CommunityPostRow>;
+      };
+      community_reactions: {
+        Row: CommunityReactionRow;
+        Insert: Partial<CommunityReactionRow> & { church_id: string; post_id: string; person_id: string; reaction_type: 'pray' | 'amen' | 'share' };
+        Update: never;
+      };
+      community_comments: {
+        Row: CommunityCommentRow;
+        Insert: Partial<CommunityCommentRow> & { church_id: string; post_id: string; author_person_id: string; body: string };
+        Update: never;
+      };
+      member_connections: {
+        Row: MemberConnectionRow;
+        Insert: Partial<MemberConnectionRow> & { church_id: string; person_a_id: string; person_b_id: string };
+        Update: never;
+      };
+      member_connection_requests: {
+        Row: MemberConnectionRequestRow;
+        Insert: Partial<MemberConnectionRequestRow> & { church_id: string; from_person_id: string; to_person_id: string };
+        Update: Partial<MemberConnectionRequestRow>;
       };
     };
   };

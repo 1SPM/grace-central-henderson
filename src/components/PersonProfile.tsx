@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatLocalDate } from '../utils/validation';
 import {
   ArrowLeft,
@@ -20,13 +20,14 @@ import {
   X,
   Users,
 } from 'lucide-react';
-import { Person, Interaction, Task, Giving, SmallGroup, DiscipleshipMilestone, MilestoneType } from '../types';
+import { Person, Interaction, Task, Giving, SmallGroup, DiscipleshipMilestone, MilestoneType, CommunityPost } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { PersonGivingHistory } from './PersonGivingHistory';
 import { DiscipleshipTimeline } from './DiscipleshipTimeline';
 import { escapeHtml } from '../utils/security';
 import { AISuggestButton } from './AIAssistant';
+import { getDemoCommunityDataForCRM, fetchConnections } from '../lib/services/community';
 
 interface PersonProfileProps {
   person: Person;
@@ -46,6 +47,7 @@ interface PersonProfileProps {
   onAddToGroup?: (groupId: string, personId: string) => void;
   onRemoveFromGroup?: (groupId: string, personId: string) => void;
   onSendEmail?: () => void;
+  churchId?: string;
 }
 
 const interactionTypes = [
@@ -83,6 +85,7 @@ export function PersonProfile({
   onAddToGroup,
   onRemoveFromGroup,
   onSendEmail,
+  churchId,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
 
@@ -110,6 +113,23 @@ export function PersonProfile({
   // Compute person's groups
   const personGroups = groups.filter(g => g.members?.includes(person.id));
   const availableGroups = groups.filter(g => !g.members?.includes(person.id));
+
+  const [personPosts, setPersonPosts] = useState<CommunityPost[]>([]);
+  const [connectionCount, setConnectionCount] = useState(0);
+
+  useEffect(() => {
+    const demo = getDemoCommunityDataForCRM();
+    setPersonPosts(demo.posts.filter(p => p.authorPersonId === person.id).slice(0, 5));
+    const conns = demo.connections.filter(
+      c => c.personAId === person.id || c.personBId === person.id,
+    );
+    setConnectionCount(conns.length);
+    if (churchId) {
+      void fetchConnections(churchId, person.id).then(fetched => {
+        if (fetched.length > 0) setConnectionCount(fetched.length);
+      });
+    }
+  }, [person.id, churchId]);
 
   const handleSendEmail = async () => {
     if (!person.email || !emailBody.trim()) return;
@@ -643,6 +663,29 @@ export function PersonProfile({
                         <X size={16} />
                       </button>
                     )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Community activity */}
+          <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Community</h2>
+              <span className="text-xs text-gray-500 dark:text-dark-400">{connectionCount} connection{connectionCount !== 1 ? 's' : ''}</span>
+            </div>
+            {personPosts.length === 0 ? (
+              <p className="text-gray-400 dark:text-dark-400 text-sm py-2 text-center">No community posts yet</p>
+            ) : (
+              <div className="space-y-2">
+                {personPosts.map(post => (
+                  <div key={post.id} className="p-3 rounded-xl border border-gray-100 dark:border-dark-700 text-sm">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 capitalize">{post.postType.replace('_', ' ')}</span>
+                      <span className="text-[10px] text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-gray-600 dark:text-dark-300 line-clamp-2 text-xs">{post.body}</p>
                   </div>
                 ))}
               </div>

@@ -487,6 +487,7 @@ function App() {
             churchId={churchId}
             announcements={announcementData.activeAnnouncements}
             prayers={prayers}
+            groups={groups}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}
             leaders={pastoralCare.leaders}

@@ -13,7 +13,8 @@ import { MemberCarePage } from './MemberCarePage';
 import { MemberScanPage } from './MemberScanPage';
 import { MemberCardPage } from './MemberCardPage';
 import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
-import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest } from '../../types';
+import { ConnectCommunityPage } from './community/ConnectCommunityPage';
+import type { MemberPortalTab, Person, CalendarEvent, Giving, Attendance, HelpCategory, LeaderProfile, PastoralConversation, Announcement, PrayerRequest, SmallGroup } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
 
@@ -31,6 +32,7 @@ interface MemberPortalProps {
   churchId?: string;
   announcements?: Announcement[];
   prayers?: PrayerRequest[];
+  groups?: SmallGroup[];
   onBack?: () => void;
   onRSVP?: (eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount?: number) => void;
   onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
@@ -56,6 +58,7 @@ export function MemberPortal({
   churchId,
   announcements = [],
   prayers = [],
+  groups = [],
   onBack,
   onRSVP,
   onCheckIn,
@@ -209,6 +212,19 @@ export function MemberPortal({
 
       case 'scan':
         return <MemberScanPage />;
+
+      case 'connect':
+        return (
+          <ConnectCommunityPage
+            churchId={churchId}
+            churchName={churchName}
+            people={people}
+            groups={groups}
+            events={events}
+            currentMember={currentMember}
+            onNavigateDirectory={() => setActiveTab('directory')}
+          />
+        );
 
       default:
         return (

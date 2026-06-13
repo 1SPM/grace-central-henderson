@@ -346,6 +346,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onAddToGroup={handlers.addGroupMember}
           onRemoveFromGroup={handlers.removeGroupMember}
           onSendEmail={onOpenEmailSidebar ? () => onOpenEmailSidebar([selectedPerson.id]) : undefined}
+          churchId={churchId}
         />
       );
 
@@ -400,10 +401,12 @@ export function ViewRenderer(props: ViewRendererProps) {
           <Groups
             groups={groups}
             people={people}
+            churchId={churchId}
             onCreateGroup={handlers.createGroup}
             onAddMember={handlers.addGroupMember}
             onRemoveMember={handlers.removeGroupMember}
             onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+            onViewPerson={handlers.viewPerson}
           />
         );
 
@@ -582,7 +585,7 @@ export function ViewRenderer(props: ViewRendererProps) {
         return <ConnectCard churchId={churchId} churchName={churchName} />;
 
       case 'portal-activity':
-        return <PortalActivity churchId={churchId} people={people} onViewPerson={handlers.viewPerson} />;
+        return <PortalActivity churchId={churchId} people={people} groups={groups} onViewPerson={handlers.viewPerson} />;
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
@@ -612,6 +615,8 @@ export function ViewRenderer(props: ViewRendererProps) {
             churchProfile={settings?.profile}
             announcements={announcementData.activeAnnouncements}
             prayers={prayers}
+            groups={groups}
+            churchId={churchId}
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}

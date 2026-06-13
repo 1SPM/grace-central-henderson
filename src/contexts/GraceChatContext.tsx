@@ -13,6 +13,7 @@ import { useChurchClock } from '../hooks/useChurchClock';
 import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
+import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
 
 export type { PendingAction } from '../lib/grace-actions';
 export type ActionInstance = ChatActionInstance;
@@ -90,6 +91,13 @@ function buildDataContext(data: GraceData): string {
   const openTasks = tasks.filter(t => !t.completed).slice(0, 15);
   const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 10);
 
+  const { posts: communityPosts, connections: communityConnections } = getDemoCommunityDataForCRM();
+  const groupActivityLines = groups.slice(0, 8).map(g => {
+    const stats = computeGroupCommunityStats(g, people, communityPosts, [], communityConnections);
+    const inactive = stats.inactiveMembers.length;
+    return `${g.name} (${g.members?.length ?? 0} members, ${stats.posts7d} posts this week${inactive ? `, ${inactive} inactive` : ''})`;
+  });
+
   const totalGiving = recentGiving.reduce((s, g) => s + g.amount, 0);
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
@@ -165,7 +173,7 @@ Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeop
 Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
-Groups: ${groups.slice(0, 8).map(g => `${g.name} (${g.members?.length ?? 0})`).join(', ') || 'none'}
+Groups: ${groupActivityLines.join(', ') || 'none'}
 Active prayers (${prayers.filter(p => !p.isAnswered).length}): ${activePrayers.slice(0, 6).map(p => p.content.slice(0, 50)).join(' | ') || 'none'}`;
 }
 

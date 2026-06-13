@@ -1,4 +1,4 @@
-import { Users, QrCode, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield, MapPin, Clock, CreditCard } from 'lucide-react';
+import { Users, QrCode, Phone, Mail, Globe, ChevronRight, ShoppingBag, Shield, MapPin, Clock, CreditCard, MessageCircle } from 'lucide-react';
 import { AnnouncementFeed } from './AnnouncementFeed';
 import type { CalendarEvent, MemberPortalTab, Announcement, Person, PrayerRequest } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
@@ -30,6 +30,21 @@ export function MemberHomePage({ churchName, churchProfile, events, announcement
           </p>
         </div>
       </div>
+
+      {/* Connect at Central — community social */}
+      <button
+        onClick={() => onNavigate('connect')}
+        className="w-full bg-stone-100 dark:bg-dark-800 rounded-xl p-4 border border-gray-100 dark:border-dark-700 text-left hover:shadow-md transition-shadow active:scale-[0.98] flex items-center gap-4"
+      >
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+          <MessageCircle size={24} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 dark:text-dark-100 text-sm">Connect</h3>
+          <p className="text-xs text-gray-500 dark:text-dark-400">Prayer, praise, and community with your church family</p>
+        </div>
+        <ChevronRight size={16} className="text-gray-400" />
+      </button>
 
       {/* Check In — prominent standalone action */}
       <button

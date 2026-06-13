@@ -1,17 +1,21 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Users2, MapPin, Clock, User, Plus, ChevronDown, ChevronUp, UserPlus, UserMinus, Edit2, X, Check, Search, Mail } from 'lucide-react';
+import { Users2, MapPin, Clock, User, Plus, ChevronDown, ChevronUp, UserPlus, UserMinus, Edit2, X, Check, Search, Mail, Link2, Activity } from 'lucide-react';
 import { SmallGroup, Person } from '../types';
+import { useGroupCommunityActivity } from '../hooks/useGroupCommunityActivity';
+import { GroupCommunityPanel } from './GroupCommunityPanel';
 
 interface GroupsProps {
   groups: SmallGroup[];
   people: Person[];
+  churchId?: string;
   onCreateGroup?: (group: Omit<SmallGroup, 'id'>) => void;
   onAddMember?: (groupId: string, personId: string) => void;
   onRemoveMember?: (groupId: string, personId: string) => void;
   onEmailGroup?: (groupId: string) => void;
+  onViewPerson?: (personId: string) => void;
 }
 
-export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMember, onEmailGroup }: GroupsProps) {
+export function Groups({ groups, people, churchId, onCreateGroup, onAddMember, onRemoveMember, onEmailGroup, onViewPerson }: GroupsProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
@@ -51,6 +55,8 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
     activeGroups.forEach(g => g.members.forEach(m => uniqueMembers.add(m)));
     return uniqueMembers.size;
   }, [activeGroups]);
+
+  const { churchSummary, getGroupStats } = useGroupCommunityActivity(churchId, groups, people);
 
   const handleCreateGroup = (groupData: Omit<SmallGroup, 'id'>) => {
     if (onCreateGroup) {
@@ -96,6 +102,30 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
         </button>
       </div>
 
+      {/* Community activity KPI bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+          <div className="text-2xl font-bold text-gray-900 dark:text-dark-100">{activeGroups.length}</div>
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-400 mt-1">Groups</div>
+        </div>
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{churchSummary.activeMembers7d}</div>
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-400 mt-1 flex items-center justify-center gap-1">
+            <Activity size={10} /> Active this week
+          </div>
+        </div>
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+          <div className="text-2xl font-bold text-gray-900 dark:text-dark-100">{churchSummary.totalConnections}</div>
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-400 mt-1 flex items-center justify-center gap-1">
+            <Link2 size={10} /> Connections
+          </div>
+        </div>
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4 text-center">
+          <div className="text-2xl font-bold text-amber-600">{churchSummary.pendingRequests}</div>
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-400 mt-1">New requests</div>
+        </div>
+      </div>
+
       {/* Groups Grid */}
       <div data-tutorial="groups-list" className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {activeGroups.map((group, groupIndex) => {
@@ -103,6 +133,7 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
           const members = group.members.map(id => personMap.get(id)).filter(Boolean) as Person[];
           const isExpanded = expandedGroup === group.id;
           const isAddingMember = addingMemberTo === group.id;
+          const groupStats = isExpanded ? getGroupStats(group.id) : null;
 
           return (
             <div
@@ -326,6 +357,17 @@ export function Groups({ groups, people, onCreateGroup, onAddMember, onRemoveMem
                     )}
                   </div>
                 </div>
+              )}
+
+              {/* Community activity panel */}
+              {isExpanded && groupStats && (
+                <GroupCommunityPanel
+                  group={group}
+                  stats={groupStats}
+                  people={people}
+                  onViewPerson={onViewPerson}
+                  onEmailInactive={onEmailGroup ? () => onEmailGroup(group.id) : undefined}
+                />
               )}
             </div>
           );

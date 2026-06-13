@@ -22,6 +22,9 @@ export function RedesignGroups({ data }: { data: GraceData }) {
               </div>
               <div className="serif" style={{ fontSize: 30, lineHeight: 1 }}>{g.memberCount}</div>
               <div className="mute" style={{ fontSize: 12, marginTop: 2 }}>{g.memberCount === 1 ? 'member' : 'members'}</div>
+              <div className="mute" style={{ fontSize: 11, marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+                Portal community activity monitored in CRM Groups
+              </div>
             </div>
           ))}
         </div>

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { DollarSign, Calendar, ArrowLeft, Home, Heart, ScanLine } from 'lucide-react';
+import { DollarSign, Calendar, ArrowLeft, Home, Heart, ScanLine, Users } from 'lucide-react';
 import type { MemberPortalTab, LeaderProfile } from '../../types';
 import { PastoralStories } from './PastoralStories';
 
@@ -18,6 +18,7 @@ interface MemberLayoutProps {
 
 const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
   { id: 'home', label: 'Home', icon: Home },
+  { id: 'connect', label: 'Connect', icon: Users },
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'scan', label: 'Scan', icon: ScanLine },
   { id: 'care', label: 'Care', icon: Heart },
