@@ -35,7 +35,6 @@ import {
   Import,
   Smartphone,
   Wallet,
-  Radio,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -76,8 +75,7 @@ const navSections: NavSection[] = [
       { view: 'leadership', label: 'Leadership', icon: <Crown size={16} />, tone: 'violet' },
       { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
-      { view: 'sunday-prep', label: 'Sunday', icon: <Church size={16} />, tone: 'emerald' },
-      { view: 'live-service', label: 'Live Service', icon: <Radio size={16} />, tone: 'rose' },
+      { view: 'sunday-prep', label: 'Sunday Service Tools', icon: <Church size={16} />, tone: 'emerald' },
       { view: 'giving', label: 'Giving', icon: <DollarSign size={16} />, tone: 'emerald' },
       { view: 'pastoral-care', label: 'Care', icon: <Heart size={16} />, tone: 'rose' },
     ],
@@ -149,7 +147,7 @@ const viewLabels: Record<View, string> = {
   'member-giving': 'Member Giving',
   'member-events': 'Member Events',
   'member-checkin': 'Member Check-In',
-  'sunday-prep': 'Sunday',
+  'sunday-prep': 'Sunday Service Tools',
   'live-service': 'Live Service',
   families: 'Families',
   skills: 'Skills & Talents',
@@ -274,10 +272,10 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
       ];
     }
     // Sub-pages under Sunday
-    const sundaySubViews = ['calendar', 'event-registration'];
+    const sundaySubViews = ['calendar', 'event-registration', 'live-service'];
     if (sundaySubViews.includes(currentView)) {
       return [
-        { label: 'Sunday', view: 'sunday-prep' as View },
+        { label: 'Sunday Service Tools', view: 'sunday-prep' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
     }
@@ -368,7 +366,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                   const isActive = currentView === item.view ||
                     (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
                     (item.view === 'people' && ['person', 'skills', 'groups'].includes(currentView)) ||
-                    (item.view === 'sunday-prep' && ['calendar', 'event-registration'].includes(currentView)) ||
+                    (item.view === 'sunday-prep' && ['calendar', 'event-registration', 'live-service'].includes(currentView)) ||
                     (item.view === 'leadership' && ['grace', 'leader-management'].includes(currentView)) ||
                     (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
 

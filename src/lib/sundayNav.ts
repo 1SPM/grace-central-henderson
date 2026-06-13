@@ -1,6 +1,6 @@
 import type { View } from '../types';
 
-export type SundayTab = 'prep' | 'calendar';
+export type SundayTab = 'prep' | 'calendar' | 'live';
 
 export function parseSundayTab(): SundayTab {
   if (typeof window === 'undefined') return 'prep';
@@ -8,14 +8,18 @@ export function parseSundayTab(): SundayTab {
   const qIndex = hash.indexOf('?');
   if (qIndex < 0) return 'prep';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
-  return tab === 'calendar' ? 'calendar' : 'prep';
+  if (tab === 'calendar') return 'calendar';
+  if (tab === 'live') return 'live';
+  return 'prep';
 }
 
 export function sundayHash(tab: SundayTab = 'prep'): string {
-  return tab === 'calendar' ? '#/sunday-prep?tab=calendar' : '#/sunday-prep';
+  if (tab === 'calendar') return '#/sunday-prep?tab=calendar';
+  if (tab === 'live') return '#/sunday-prep?tab=live';
+  return '#/sunday-prep';
 }
 
-/** Navigate to Sunday hub, optionally opening the Calendar tab. */
+/** Navigate to Sunday hub, optionally opening a specific tab. */
 export function openSunday(tab: SundayTab, setView: (view: View) => void): void {
   setView('sunday-prep');
   window.history.replaceState(null, '', sundayHash(tab));

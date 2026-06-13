@@ -42,6 +42,10 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
     openSunday('calendar', setView);
     return;
   }
+  if (view === 'live-service') {
+    openSunday('live', setView);
+    return;
+  }
   if (view === 'grace' || view === 'leader-management') {
     openLeadership(view === 'leader-management' ? 'manage' : 'team', setView);
     return;

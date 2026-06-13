@@ -17,6 +17,8 @@ interface LiveServiceDashboardProps {
   timezone?: string;
   people: Person[];
   onViewPerson?: (id: string) => void;
+  /** When true, hide page title (used inside Sunday tab). */
+  embedded?: boolean;
 }
 
 export function LiveServiceDashboard({
@@ -26,6 +28,7 @@ export function LiveServiceDashboard({
   timezone = CENTRAL_HENDERSON_TIMEZONE,
   people,
   onViewPerson,
+  embedded = false,
 }: LiveServiceDashboardProps) {
   const {
     stats,
@@ -43,12 +46,13 @@ export function LiveServiceDashboard({
   } = useLiveServiceOps({ churchId, churchProfile, timezone, people });
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div className={`max-w-7xl mx-auto space-y-6 ${embedded ? 'px-4 sm:px-6 pt-4 pb-6' : 'p-4 sm:p-6'}`}>
+      <div className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 ${embedded ? 'mb-2' : ''}`}>
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Live Service</h1>
+            {!embedded && (
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-100">Live Service</h1>
+            )}
             {isLive && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-600 text-white text-[10px] font-bold uppercase">
                 <Radio size={10} className="animate-pulse" />
@@ -67,9 +71,11 @@ export function LiveServiceDashboard({
               </span>
             ) : null}
           </div>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-            Growth, resources, and community engagement at {churchName}.
-          </p>
+          {!embedded && (
+            <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+              Growth, resources, and community engagement at {churchName}.
+            </p>
+          )}
         </div>
         <button
           type="button"

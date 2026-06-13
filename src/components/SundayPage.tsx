@@ -1,19 +1,26 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar as CalendarIcon, Church } from 'lucide-react';
+import { Calendar as CalendarIcon, Church, Radio } from 'lucide-react';
 import { SundayPrep } from './SundayPrep';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { parseSundayTab, sundayHash, type SundayTab } from '../lib/sundayNav';
+import type { ChurchProfile } from '../hooks/useChurchSettings';
 import type { CalendarEvent, Person, PrayerRequest } from '../types';
 import type { RSVP } from './calendar/CalendarConstants';
 
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
+const LiveServiceDashboard = lazy(() =>
+  import('./live-service/LiveServiceDashboard').then(m => ({ default: m.LiveServiceDashboard })),
+);
 
 interface SundayPageProps {
+  churchId: string;
   people: Person[];
   prayers: PrayerRequest[];
   events: CalendarEvent[];
   rsvps: RSVP[];
   churchName?: string;
+  churchProfile?: ChurchProfile;
+  timezone?: string;
   onViewPerson: (personId: string) => void;
   onRSVP: (eventId: string, personId: string, status: RSVP['status'], guestCount?: number, source?: 'portal' | 'admin') => void;
   onAddEvent?: (event: {
@@ -33,14 +40,18 @@ interface SundayPageProps {
 const TABS: { id: SundayTab; label: string; icon: typeof Church }[] = [
   { id: 'prep', label: 'Sunday Prep', icon: Church },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
+  { id: 'live', label: 'Live Service', icon: Radio },
 ];
 
 export function SundayPage({
+  churchId,
   people,
   prayers,
   events,
   rsvps,
-  churchName,
+  churchName = 'Church',
+  churchProfile,
+  timezone,
   onViewPerson,
   onRSVP,
   onAddEvent,
@@ -60,10 +71,19 @@ export function SundayPage({
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'calendar') {
-      window.history.replaceState(null, '', sundayHash('calendar'));
+    if (defaultTab === 'calendar' || defaultTab === 'live') {
+      window.history.replaceState(null, '', sundayHash(defaultTab));
     }
   }, [defaultTab]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    const base = hash.split('?')[0].split('/')[0];
+    if (base === 'live-service') {
+      window.history.replaceState(null, '', sundayHash('live'));
+      setTab('live');
+    }
+  }, []);
 
   const syncTabFromHash = useCallback(() => {
     setTab(parseSundayTab());
@@ -93,10 +113,10 @@ export function SundayPage({
             </div>
             <div>
               <h1 className="serif text-2xl sm:text-3xl text-slate-900 dark:text-dark-100 leading-none">
-                Sunday
+                Sunday Service Tools
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Sermon prep and church calendar · {upcomingCount} upcoming events
+                Sermon prep, calendar, and live service · {upcomingCount} upcoming events
               </p>
             </div>
           </div>
@@ -127,11 +147,12 @@ export function SundayPage({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {tab === 'prep' ? (
+        {tab === 'prep' && (
           <div className="p-6 max-w-6xl mx-auto">
             <SundayPrep embedded people={people} prayers={prayers} onViewPerson={onViewPerson} />
           </div>
-        ) : (
+        )}
+        {tab === 'calendar' && (
           <Suspense fallback={<ListSkeleton />}>
             <Calendar
               embedded
@@ -143,6 +164,19 @@ export function SundayPage({
               onAddEvent={onAddEvent}
               onUpdateEvent={onUpdateEvent}
               onDeleteEvent={onDeleteEvent}
+              onViewPerson={onViewPerson}
+            />
+          </Suspense>
+        )}
+        {tab === 'live' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <LiveServiceDashboard
+              embedded
+              churchId={churchId}
+              churchName={churchName}
+              churchProfile={churchProfile}
+              timezone={timezone}
+              people={people}
               onViewPerson={onViewPerson}
             />
           </Suspense>

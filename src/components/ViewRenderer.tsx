@@ -55,7 +55,6 @@ const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRChe
 const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 const PastoralCareDashboard = lazy(() => import('./pastoral/PastoralCareDashboard').then(m => ({ default: m.PastoralCareDashboard })));
 const PortalActivity = lazy(() => import('./PortalActivity').then(m => ({ default: m.PortalActivity })));
-const LiveServiceDashboard = lazy(() => import('./live-service/LiveServiceDashboard').then(m => ({ default: m.LiveServiceDashboard })));
 const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
@@ -353,11 +352,14 @@ export function ViewRenderer(props: ViewRendererProps) {
     case 'sunday-prep':
       return (
         <SundayPage
+          churchId={churchId}
           people={people}
           prayers={prayers}
           events={events}
           rsvps={rsvps}
           churchName={churchName}
+          churchProfile={settings?.profile}
+          timezone={settings?.timezone}
           onViewPerson={handlers.viewPerson}
           onRSVP={handlers.rsvp}
           onAddEvent={handlers.addEvent}
@@ -369,17 +371,40 @@ export function ViewRenderer(props: ViewRendererProps) {
     case 'calendar':
       return (
         <SundayPage
+          churchId={churchId}
           people={people}
           prayers={prayers}
           events={events}
           rsvps={rsvps}
           churchName={churchName}
+          churchProfile={settings?.profile}
+          timezone={settings?.timezone}
           onViewPerson={handlers.viewPerson}
           onRSVP={handlers.rsvp}
           onAddEvent={handlers.addEvent}
           onUpdateEvent={handlers.updateEvent}
           onDeleteEvent={handlers.deleteEvent}
           defaultTab="calendar"
+        />
+      );
+
+    case 'live-service':
+      return (
+        <SundayPage
+          churchId={churchId}
+          people={people}
+          prayers={prayers}
+          events={events}
+          rsvps={rsvps}
+          churchName={churchName}
+          churchProfile={settings?.profile}
+          timezone={settings?.timezone}
+          onViewPerson={handlers.viewPerson}
+          onRSVP={handlers.rsvp}
+          onAddEvent={handlers.addEvent}
+          onUpdateEvent={handlers.updateEvent}
+          onDeleteEvent={handlers.deleteEvent}
+          defaultTab="live"
         />
       );
 
@@ -618,18 +643,6 @@ export function ViewRenderer(props: ViewRendererProps) {
 
       case 'portal-activity':
         return <PortalActivity churchId={churchId} people={people} groups={groups} onViewPerson={handlers.viewPerson} />;
-
-      case 'live-service':
-        return (
-          <LiveServiceDashboard
-            churchId={churchId}
-            churchName={churchName}
-            churchProfile={settings?.profile}
-            timezone={settings?.timezone}
-            people={people}
-            onViewPerson={handlers.viewPerson}
-          />
-        );
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
