@@ -1,26 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
+  Activity,
   BarChart3,
   Bot,
   ChevronLeft,
-  HeartHandshake,
-  Inbox,
+  Crown,
   Settings2,
   Users,
 } from 'lucide-react';
-import type { LeaderProfile, PastoralSession } from '../../../types';
+import type { LeaderProfile, PastoralSession, View } from '../../../types';
 import type { LeaderOnboardingData } from '../LeaderOnboardingWizard';
 import { LeaderManagement } from '../LeaderManagement';
 import { CENTRAL_HENDERSON_LEADERS } from '../../../config/centralHendersonLeaders';
+import { useLeadershipActivity } from '../../../hooks/useLeadershipActivity';
+import { leadershipHash, parseLeadershipWorkspaceTab, type LeadershipWorkspaceTab } from '../../../lib/leadershipNav';
+import { countLeadershipBadges } from '../../../hooks/useLeadershipRoster';
 import { LeadersRoster } from './LeadersRoster';
 import { LeaderProfileView } from './LeaderProfileView';
-import { CareDispatch } from './CareDispatch';
-import { LeaderInbox } from './LeaderInbox';
+import { LeadershipActivityFeed } from './LeadershipActivityFeed';
 import { AICompanionConfig } from './AICompanionConfig';
 import { LeaderAnalytics } from './LeaderAnalytics';
-import { demoInbox } from './demoLeadersHub';
 
-type HubTab = 'roster' | 'dispatch' | 'inbox' | 'companion' | 'analytics' | 'manage';
+export type HubTab = LeadershipWorkspaceTab;
 
 export interface LeadersHubContentProps {
   leaders: LeaderProfile[];
@@ -29,6 +30,7 @@ export interface LeadersHubContentProps {
   onToggleLeaderAvailability?: (leaderId: string) => void;
   onDeleteLeader?: (leaderId: string) => void;
   onBack?: () => void;
+  onNavigate?: (view: View | string) => void;
   churchName?: string;
   embedded?: boolean;
   initialTab?: HubTab;
@@ -42,33 +44,53 @@ export function LeadersHubContent({
   onToggleLeaderAvailability,
   onDeleteLeader,
   onBack,
+  onNavigate,
   churchName,
   embedded = false,
-  initialTab = 'roster',
+  initialTab = 'team',
   initialLeaderId = null,
 }: LeadersHubContentProps) {
   const [tab, setTab] = useState<HubTab>(initialTab);
   const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(initialLeaderId);
+  const { data: activity, loading: activityLoading, isLive } = useLeadershipActivity();
 
   useEffect(() => {
     if (initialLeaderId) {
       setSelectedLeaderId(initialLeaderId);
-      setTab('roster');
+      setTab('team');
     }
   }, [initialLeaderId]);
 
+  useEffect(() => {
+    if (initialTab) setTab(initialTab);
+  }, [initialTab]);
+
+  const syncTabFromHash = useCallback(() => {
+    setTab(parseLeadershipWorkspaceTab());
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('hashchange', syncTabFromHash);
+    return () => window.removeEventListener('hashchange', syncTabFromHash);
+  }, [syncTabFromHash]);
+
+  const selectTab = (next: HubTab) => {
+    setTab(next);
+    setSelectedLeaderId(null);
+    window.history.replaceState(null, '', leadershipHash('team', next));
+  };
+
   const roster = leaders.length > 0 ? leaders : CENTRAL_HENDERSON_LEADERS;
   const selectedLeader = selectedLeaderId ? roster.find(l => l.id === selectedLeaderId) : null;
-  const inboxAttention = demoInbox.filter(m => m.state !== 'ai-replied').length;
-  const activeCount = roster.filter(l => l.isActive).length;
+  const badges = countLeadershipBadges(roster);
+  const unassignedCount = activity?.summary.unassigned ?? 0;
 
   const TABS: { id: HubTab; label: string; icon: typeof Users; badge?: number }[] = [
-    { id: 'roster', label: 'Roster', icon: Users },
-    { id: 'dispatch', label: 'Care dispatch', icon: HeartHandshake },
-    { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxAttention },
-    { id: 'companion', label: 'AI companion', icon: Bot },
+    { id: 'team', label: 'Team', icon: Crown },
+    { id: 'activity', label: 'Activity', icon: Activity, badge: unassignedCount || undefined },
+    { id: 'companions', label: 'AI Companions', icon: Bot },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'manage', label: 'Manage & applications', icon: Settings2 },
+    { id: 'manage', label: 'Manage', icon: Settings2 },
   ];
 
   if (tab === 'manage') {
@@ -79,7 +101,7 @@ export function LeadersHubContent({
         onAddLeader={onAddLeader}
         onToggleLeaderAvailability={onToggleLeaderAvailability}
         onDeleteLeader={onDeleteLeader}
-        onBack={() => setTab('roster')}
+        onBack={() => selectTab('team')}
         churchName={churchName}
       />
     );
@@ -100,13 +122,14 @@ export function LeadersHubContent({
                 <ChevronLeft size={15} /> Pastoral care
               </button>
             )}
-            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Leaders</h1>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Leadership</h1>
             <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">
-              Your verified care team — live presence, AI companions, and dispatch
+              Pastors, clergy, and AI companion deployments
             </p>
           </div>
           <button
-            onClick={() => setTab('manage')}
+            type="button"
+            onClick={() => selectTab('manage')}
             className="px-3 py-2 bg-slate-900 hover:bg-slate-950 text-white text-sm font-medium rounded-lg transition-colors"
           >
             Add leader
@@ -117,13 +140,14 @@ export function LeadersHubContent({
       {embedded && (
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">AI Clergy</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Leadership team</h2>
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
-              {activeCount} verified leaders · {activeCount} AI companions deployed
+              {badges.staff} staff · {badges.aiDeployed} AI companions · {badges.humanOnly} human-only
             </p>
           </div>
           <button
-            onClick={() => setTab('manage')}
+            type="button"
+            onClick={() => selectTab('manage')}
             className="px-3 py-2 bg-slate-900 hover:bg-slate-950 text-white text-sm font-medium rounded-lg transition-colors"
           >
             + Add leader
@@ -135,10 +159,8 @@ export function LeadersHubContent({
         {TABS.map(({ id, label, icon: Icon, badge }) => (
           <button
             key={id}
-            onClick={() => {
-              setTab(id);
-              setSelectedLeaderId(null);
-            }}
+            type="button"
+            onClick={() => selectTab(id)}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px transition-colors ${
               tab === id
                 ? 'border-slate-900 dark:border-dark-100 text-slate-900 dark:text-dark-100 font-medium'
@@ -156,21 +178,36 @@ export function LeadersHubContent({
         ))}
       </div>
 
-      {tab === 'roster' &&
+      {tab === 'team' &&
         (selectedLeader ? (
-          <LeaderProfileView leader={selectedLeader} onBack={() => setSelectedLeaderId(null)} />
+          <LeaderProfileView
+            leader={selectedLeader}
+            activity={activity}
+            onBack={() => setSelectedLeaderId(null)}
+            onNavigate={onNavigate}
+          />
         ) : (
-          <LeadersRoster leaders={roster} onSelectLeader={setSelectedLeaderId} />
+          <LeadersRoster
+            leaders={roster}
+            activity={activity}
+            onSelectLeader={setSelectedLeaderId}
+          />
         ))}
-      {tab === 'dispatch' && <CareDispatch sessions={sessions} leaders={roster} />}
-      {tab === 'inbox' && <LeaderInbox />}
-      {tab === 'companion' && <AICompanionConfig leaders={roster} />}
-      {tab === 'analytics' && <LeaderAnalytics leaders={roster} />}
+      {tab === 'activity' && (
+        <LeadershipActivityFeed
+          activity={activity}
+          loading={activityLoading}
+          isLive={isLive}
+          onNavigate={onNavigate}
+        />
+      )}
+      {tab === 'companions' && <AICompanionConfig leaders={roster} />}
+      {tab === 'analytics' && <LeaderAnalytics leaders={roster} activity={activity} isLive={isLive} />}
     </div>
   );
 }
 
-/** Standalone leaders page (legacy route — prefer GraceAIHub clergy tab). */
+/** Standalone leaders page (legacy route — prefer LeadershipPage). */
 export function LeadersHub(props: LeadersHubContentProps) {
   return <LeadersHubContent {...props} />;
 }

@@ -422,7 +422,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1972-03-14',
     tags: ['pastoral-staff', 'senior-pastor'],
     smallGroups: [],
-    notes: 'Senior Pastor. AI companion deployed in AI Clergy.'
+    notes: 'Senior Pastor. AI companion deployed in Leadership.'
   },
   {
     id: '00000000-0000-0000-0000-000000000102',

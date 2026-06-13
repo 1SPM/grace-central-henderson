@@ -7,7 +7,7 @@ interface NavItem { id: string; label: string; icon: IconName; tone: Tone; count
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'home', tone: 'indigo' },
-  { id: 'ai', label: 'AI Clergy', icon: 'sparkle', tone: 'ai' },
+  { id: 'ai', label: 'Leadership', icon: 'sparkle', tone: 'ai' },
   { id: 'members', label: 'People', icon: 'users', tone: 'sky', count: 312 },
   { id: 'attendance', label: 'Attendance', icon: 'check', tone: 'emerald' },
   { id: 'engagement', label: 'Engagement', icon: 'chat', tone: 'rose', count: 5 },
@@ -90,5 +90,5 @@ export function Topbar({ title, action, timezone }: { title: string; action?: Re
 
 export const SHELL_TITLES: Record<string, string> = {
   dashboard: 'Home', members: 'People', attendance: 'Attendance', engagement: 'Engagement',
-  reports: 'Reports', ai: 'AI Clergy', events: 'Events', groups: 'Groups', giving: 'Giving', settings: 'Settings',
+  reports: 'Reports', ai: 'Leadership', events: 'Events', groups: 'Groups', giving: 'Giving', settings: 'Settings',
 };

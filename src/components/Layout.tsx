@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   ListTodo,
   Users,
+  Crown,
   Users2,
   DollarSign,
   Settings,
@@ -72,7 +73,7 @@ const navSections: NavSection[] = [
     label: 'Main',
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={16} />, tone: 'indigo' },
-      { view: 'grace', label: 'AI Clergy', icon: <Sparkles size={16} />, tone: 'violet' },
+      { view: 'leadership', label: 'Leadership', icon: <Crown size={16} />, tone: 'violet' },
       { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
       { view: 'sunday-prep', label: 'Sunday', icon: <Church size={16} />, tone: 'emerald' },
@@ -166,7 +167,8 @@ const viewLabels: Record<View, string> = {
   analytics: 'Analytics',
   announcements: 'Announcements',
   discipleship: 'Discipleship',
-  grace: 'AI Clergy',
+  leadership: 'Leadership',
+  grace: 'Leadership',
   mail: 'Mail',
   'financial-hub': 'Financial Hub',
   'portal-activity': 'Portal Activity',
@@ -367,7 +369,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                     (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
                     (item.view === 'people' && ['person', 'skills', 'groups'].includes(currentView)) ||
                     (item.view === 'sunday-prep' && ['calendar', 'event-registration'].includes(currentView)) ||
-                    (item.view === 'pastoral-care' && currentView === 'leader-management') ||
+                    (item.view === 'leadership' && ['grace', 'leader-management'].includes(currentView)) ||
                     (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
 
                   return (

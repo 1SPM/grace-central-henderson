@@ -1,6 +1,6 @@
 /**
  * Central Henderson Church — canonical pastoral AI clergy roster.
- * Single source of truth for CRM AI Clergy hub, member portal, and People (Central Staff).
+ * Single source of truth for CRM Leadership hub, member portal, and People (Central Staff).
  */
 import type { HelpCategory, LeaderProfile } from '../types';
 
@@ -468,9 +468,9 @@ export const GRACE_AI_FAQ: GraceFaqItem[] = [
   },
   {
     id: 'manage-clergy',
-    question: 'How do I manage AI clergy in the admin?',
+    question: 'How do I manage leadership in the admin?',
     answer:
-      'Open AI Clergy. View the roster, open a leader profile for settings, configure AI companion persona and knowledge base, review analytics, and process onboarding applications.',
+      'Open Leadership. View the team roster, open a leader profile for settings, configure AI companion persona and knowledge base, review activity and analytics, and process onboarding applications.',
     audience: 'admin',
   },
 ];

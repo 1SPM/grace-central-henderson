@@ -51,6 +51,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'import/giving': () => import('./import/_giving.js'),
   'import/people': () => import('./import/_people.js'),
   'leader-apply': () => import('./_leader-apply.js'),
+  'leadership/activity': () => import('./leadership/_activity.js'),
   'members/accept-invitation': () => import('./members/_accept-invitation.js'),
   'members/invite': () => import('./members/_invite.js'),
   'neobank': () => import('./neobank/_index.js'),

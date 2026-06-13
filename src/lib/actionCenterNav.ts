@@ -1,6 +1,7 @@
 import type { View } from '../types';
 import { openCongregation } from './congregationNav';
 import { openSunday } from './sundayNav';
+import { openLeadership } from './leadershipNav';
 
 export type ActionCenterTab = 'followups' | 'mail';
 
@@ -39,6 +40,10 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
   }
   if (view === 'calendar') {
     openSunday('calendar', setView);
+    return;
+  }
+  if (view === 'grace' || view === 'leader-management') {
+    openLeadership(view === 'leader-management' ? 'manage' : 'team', setView);
     return;
   }
   setView(view as View);

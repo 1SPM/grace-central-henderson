@@ -64,6 +64,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   analytics: 'analytics',
   announcements: 'announcements',
   discipleship: 'discipleship',
+  leadership: 'leadership',
   grace: 'grace',
   mail: 'mail',
   'financial-hub': 'financial-hub',
@@ -93,6 +94,11 @@ function parseHash(): { view: View; personId: string | null } {
   // Handle person/:id routes
   if (basePath === 'person' && parts[1]) {
     return { view: 'person', personId: parts[1] };
+  }
+
+  // Legacy routes → Leadership hub
+  if (basePath === 'grace' || basePath === 'leader-management') {
+    return { view: 'leadership', personId: null };
   }
 
   const view = PATH_TO_VIEW[basePath];

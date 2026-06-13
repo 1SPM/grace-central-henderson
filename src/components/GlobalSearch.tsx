@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
-  LayoutDashboard, Users, DollarSign, Megaphone, Church, UserCheck, Baby,
+  LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, Baby,
   BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Users2, Radio,
 } from 'lucide-react';
 import { Person, Task, PrayerRequest, View } from '../types';
@@ -32,6 +32,7 @@ type SearchResult = {
 // Primary views exposed to the command palette. Lean, not all 52.
 const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
   { view: 'dashboard', label: 'Home', subtitle: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  { view: 'leadership', label: 'Leadership', subtitle: 'Pastors, clergy & AI companions', icon: <Crown size={16} /> },
   { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups & mail', icon: <ListTodo size={16} /> },
   { view: 'people', label: 'Congregation', subtitle: 'Directory & small groups', icon: <Users size={16} /> },
   { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },

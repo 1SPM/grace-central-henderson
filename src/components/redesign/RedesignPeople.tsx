@@ -78,8 +78,8 @@ function MemberDetail({ person, interactions, actions, onBack }: { person: GPers
         </div>
         <div className="actions">
           {isCentralStaffPerson(person.id) && getLeaderByPersonId(person.id) && (
-            <a className="btn btn-sm" href="#/grace?tab=clergy&leader={getLeaderByPersonId(person.id)!.id}">
-              AI Clergy
+            <a className="btn btn-sm" href={`#/leadership?leader=${getLeaderByPersonId(person.id)!.id}`}>
+              Leadership
             </a>
           )}
           <button className="btn btn-sm"><Icon name="mail" size={13} /> Message</button>

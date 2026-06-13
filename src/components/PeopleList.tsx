@@ -520,7 +520,7 @@ export function PeopleList({
           </div>
           {statusFilter === 'central-staff' && (
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-2">
-              Pastoral AI clergy linked to AI Clergy — distinct from congregation leaders (elders, small-group leaders).
+              Pastoral staff linked to Leadership — distinct from congregation leaders (elders, small-group leaders).
             </p>
           )}
         </div>

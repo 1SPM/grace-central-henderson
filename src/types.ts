@@ -135,7 +135,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
 }
 
-export type View = 'home' | 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'live-service' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship' | 'grace' | 'mail' | 'financial-hub' | 'portal-activity' | 'wallets';
+export type View = 'home' | 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'live-service' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship' | 'leadership' | 'grace' | 'mail' | 'financial-hub' | 'portal-activity' | 'wallets';
 
 // Family/Household type for grouping
 export interface Family {
@@ -473,6 +473,9 @@ export interface LeaderProfile {
   anchors?: string;
   socialMinistryDate?: string;
   createdAt: string;
+  /** When false, leader is human-only with no AI companion deployed. */
+  hasAiCompanion?: boolean;
+  leaderSource?: 'roster' | 'people' | 'application';
 }
 
 export interface AIPersona {

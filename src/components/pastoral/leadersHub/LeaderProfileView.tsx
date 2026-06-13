@@ -1,31 +1,43 @@
 import { useState } from 'react';
-import { ArrowLeft, Clock, HeartHandshake, MessageSquare, ShieldCheck, Sparkles } from 'lucide-react';
-import type { LeaderProfile } from '../../../types';
+import { ArrowLeft, Bot, Clock, HeartHandshake, MessageSquare, ShieldCheck, User } from 'lucide-react';
+import type { LeaderProfile, View } from '../../../types';
+import type { LeadershipActivityData } from '../../../lib/services/leadershipApi';
+import { statsForLeader } from '../../../lib/services/leadershipApi';
 import { getLeaderHubStats } from './demoLeadersHub';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 interface LeaderProfileViewProps {
   leader: LeaderProfile;
+  activity?: LeadershipActivityData | null;
   onBack: () => void;
+  onNavigate?: (view: View | string) => void;
 }
 
-export function LeaderProfileView({ leader, onBack }: LeaderProfileViewProps) {
+export function LeaderProfileView({ leader, activity, onBack, onNavigate }: LeaderProfileViewProps) {
   const stats = getLeaderHubStats(leader);
+  const live = statsForLeader(activity ?? null, leader.id);
   const [liveOverride, setLiveOverride] = useState(stats.liveOverride);
   const initials = leader.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const hasAi = leader.hasAiCompanion !== false;
+  const humanMsgs = live?.humanMessages ?? Math.round(stats.dms * (1 - stats.aiPct / 100));
+  const aiMsgs = live?.aiMessages ?? Math.round(stats.dms * (stats.aiPct / 100));
+
+  const leaderEvents = (activity?.recentEvents ?? []).filter(
+    ev => ev.leaderId === leader.id,
+  ).slice(0, 5);
 
   return (
     <div className="space-y-4">
       <button
+        type="button"
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-dark-400 hover:text-gray-800 dark:hover:text-dark-200 transition-colors"
       >
-        <ArrowLeft size={15} /> Roster
+        <ArrowLeft size={15} /> Team
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Profile column */}
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start">
           <div className="flex items-center gap-3 mb-4">
             <div className="relative shrink-0">
@@ -36,13 +48,25 @@ export function LeaderProfileView({ leader, onBack }: LeaderProfileViewProps) {
                   {initials}
                 </div>
               )}
-              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-amber-500 border-2 border-stone-100 dark:border-dark-800 flex items-center justify-center">
-                <ShieldCheck size={11} className="text-white" />
-              </div>
+              {leader.isVerified && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-amber-500 border-2 border-stone-100 dark:border-dark-800 flex items-center justify-center">
+                  <ShieldCheck size={11} className="text-white" />
+                </div>
+              )}
             </div>
             <div className="min-w-0">
               <h2 className="text-base font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
               <p className="text-xs text-gray-500 dark:text-dark-400">{leader.title}</p>
+              <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                  <User size={9} className="inline mr-0.5" /> Human
+                </span>
+                {hasAi && (
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                    <Bot size={9} className="inline mr-0.5" /> AI companion
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <p className="text-xs text-gray-500 dark:text-dark-400 mb-4">{leader.bio}</p>
@@ -60,43 +84,45 @@ export function LeaderProfileView({ leader, onBack }: LeaderProfileViewProps) {
               </p>
               <p className="text-xs text-gray-700 dark:text-dark-300">{stats.hours}</p>
             </div>
-            <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg cursor-pointer">
-              <div>
-                <p className="text-xs font-medium text-gray-900 dark:text-dark-100">Live override</p>
-                <p className="text-[10px] text-gray-500 dark:text-dark-400">
-                  Route everything to me live, pause the AI twin
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={liveOverride}
-                onChange={e => setLiveOverride(e.target.checked)}
-                className="w-4 h-4 accent-slate-900"
-              />
-            </label>
+            {hasAi && (
+              <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg cursor-pointer">
+                <div>
+                  <p className="text-xs font-medium text-gray-900 dark:text-dark-100">Live override</p>
+                  <p className="text-[10px] text-gray-500 dark:text-dark-400">
+                    Route everything live, pause AI companion
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={liveOverride}
+                  onChange={e => setLiveOverride(e.target.checked)}
+                  className="w-4 h-4 accent-slate-900"
+                />
+              </label>
+            )}
           </div>
         </div>
 
-        {/* Middle + right */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Today's blessing */}
-          <div className="rounded-xl p-5 bg-gradient-to-br from-amber-50 to-stone-100 dark:from-amber-900/20 dark:to-dark-800 border border-amber-200 dark:border-amber-800/40">
-            <p className="section-eyebrow mb-2 flex items-center gap-1.5">
-              <Sparkles size={12} className="text-amber-500" /> Today's blessing
-            </p>
-            <p className="serif text-base text-slate-900 dark:text-dark-100 leading-relaxed">{stats.todaysBlessing}</p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
-              Shared with {stats.blessings} members this month
-            </p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Conversations', value: live?.conversations ?? stats.sessions },
+              { label: 'Human replies', value: humanMsgs },
+              { label: 'AI replies', value: aiMsgs },
+            ].map(kpi => (
+              <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+                <p className="section-eyebrow">{kpi.label}</p>
+                <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1">{kpi.value}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Weekly availability */}
           <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Weekly availability</h3>
               <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-dark-400">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Live</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500" /> AI twin</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500" /> AI</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-dark-600" /> Off</span>
               </div>
             </div>
@@ -115,15 +141,11 @@ export function LeaderProfileView({ leader, onBack }: LeaderProfileViewProps) {
                     }`}
                   >
                     <p className="text-[10px] font-medium text-gray-500 dark:text-dark-400">{day}</p>
-                    <p
-                      className={`text-[10px] font-semibold mt-1 ${
-                        mode === 'live'
-                          ? 'text-emerald-700 dark:text-emerald-300'
-                          : mode === 'ai'
-                            ? 'text-violet-700 dark:text-violet-300'
-                            : 'text-gray-400 dark:text-dark-500'
-                      }`}
-                    >
+                    <p className={`text-[10px] font-semibold mt-1 ${
+                      mode === 'live' ? 'text-emerald-700 dark:text-emerald-300'
+                        : mode === 'ai' ? 'text-violet-700 dark:text-violet-300'
+                          : 'text-gray-400 dark:text-dark-500'
+                    }`}>
                       {mode === 'live' ? 'Live' : mode === 'ai' ? 'AI' : 'Off'}
                     </p>
                   </div>
@@ -132,17 +154,40 @@ export function LeaderProfileView({ leader, onBack }: LeaderProfileViewProps) {
             </div>
           </div>
 
-          {/* Care assignments */}
           <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3 flex items-center gap-1.5">
-              <HeartHandshake size={14} className="text-rose-500" /> Care assignments
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
+                <HeartHandshake size={14} className="text-rose-500" /> Recent activity
+              </h3>
+              {onNavigate && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate('pastoral-care')}
+                  className="text-xs font-medium text-slate-600 dark:text-dark-300 hover:underline"
+                >
+                  View in Care →
+                </button>
+              )}
+            </div>
+            {leaderEvents.length === 0 ? (
+              <p className="text-xs text-gray-500 dark:text-dark-400">No recent care activity for this leader.</p>
+            ) : (
+              <div className="space-y-2">
+                {leaderEvents.map((ev, i) => (
+                  <div key={`${ev.at}-${i}`} className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
+                    <p className="text-xs font-medium text-gray-800 dark:text-dark-200">{ev.type.replace('_', ' ')}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5 line-clamp-2">{ev.preview}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Care assignments</h3>
             <div className="space-y-2">
               {stats.careAssignments.map(assignment => (
-                <div
-                  key={assignment}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg"
-                >
+                <div key={assignment} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
                   <span className="text-sm text-gray-700 dark:text-dark-300">{assignment}</span>
                   <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                     Active

@@ -2,7 +2,7 @@ import { lazy, Suspense, ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { ActionCenter } from './ActionCenter';
-import { GraceAIHub } from './grace/GraceAIHub';
+import { LeadershipPage } from './leadership/LeadershipPage';
 import { Congregation } from './Congregation';
 import { SundayPage } from './SundayPage';
 import { navigateView } from '../lib/actionCenterNav';
@@ -265,8 +265,8 @@ export function ViewRenderer(props: ViewRendererProps) {
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}
           onViewLeaders={() => {
-            window.history.pushState(null, '', '#/grace?tab=clergy');
-            setView('grace');
+            window.history.pushState(null, '', '#/leadership');
+            setView('leadership');
           }}
         />
       );
@@ -294,25 +294,19 @@ export function ViewRenderer(props: ViewRendererProps) {
         />
       );
 
+    case 'leadership':
     case 'grace':
-      return (
-        <GraceAIHub
-          churchName={churchName}
-          leaders={pastoralCare.leaders}
-          sessions={pastoralCare.sessions}
-          onAddLeader={pastoralCare.addLeader}
-          onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
-          onDeleteLeader={pastoralCare.deleteLeader}
-        />
-      );
-
     case 'leader-management':
       return (
-        <GraceAIHub
+        <LeadershipPage
           churchName={churchName}
+          people={people}
           leaders={pastoralCare.leaders}
           sessions={pastoralCare.sessions}
-          defaultTab="clergy"
+          defaultWorkspaceTab={
+            view === 'leader-management' ? 'manage' : undefined
+          }
+          onNavigate={(v) => navigateView(v, setView)}
           onAddLeader={pastoralCare.addLeader}
           onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
           onDeleteLeader={pastoralCare.deleteLeader}

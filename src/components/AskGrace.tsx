@@ -740,11 +740,15 @@ interface AskGraceProps {
 function useIsOnGracePage(): boolean {
   const [onGrace, setOnGrace] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return window.location.hash.startsWith('#/grace');
+    const hash = window.location.hash;
+    return hash.startsWith('#/leadership') || hash.startsWith('#/grace');
   });
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const check = () => setOnGrace(window.location.hash.startsWith('#/grace'));
+    const check = () => {
+      const hash = window.location.hash;
+      setOnGrace(hash.startsWith('#/leadership') || hash.startsWith('#/grace'));
+    };
     window.addEventListener('hashchange', check);
     return () => window.removeEventListener('hashchange', check);
   }, []);
