@@ -15,13 +15,9 @@ const ADMIN_VIEWS = new Set<View>([
 
 // Views that require at least staff role
 const STAFF_VIEWS = new Set<View>([
-  'agents',
   'batch-entry',
   'campaigns',
   'statements',
-  'planning-center-import',
-  'follow-up-automation',
-  'reminders',
 ]);
 
 // All other views are accessible to any authenticated user

@@ -49,7 +49,7 @@ interface SettingsProps {
   giving?: Giving[];
   groups?: SmallGroup[];
   prayers?: PrayerRequest[];
-  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
+  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
   onRunWizard?: () => void;
   onOpenTutorials?: () => void;
 }

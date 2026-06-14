@@ -38,7 +38,6 @@ const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ defaul
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
 const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
-const FinancialHub = lazy(() => import('./FinancialHub').then(m => ({ default: m.FinancialHub })));
 const UpgradeRequired = lazy(() => import('./marketing/UpgradeRequired').then(m => ({ default: m.UpgradeRequired })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
@@ -49,10 +48,7 @@ const Families = lazy(() => import('./Families').then(m => ({ default: m.Familie
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
-const AutomatedReminders = lazy(() => import('./AutomatedReminders').then(m => ({ default: m.AutomatedReminders })));
-const PlanningCenterImport = lazy(() => import('./PlanningCenterImport').then(m => ({ default: m.PlanningCenterImport })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
-const FollowUpAutomation = lazy(() => import('./FollowUpAutomation').then(m => ({ default: m.FollowUpAutomation })));
 const CrisisCenterDispatch = lazy(() =>
   import(/* webpackChunkName: "crisis-dispatch-v3" */ './pastoral/CrisisCenterDispatch').then(m => ({
     default: m.CrisisCenterDispatch,
@@ -595,19 +591,6 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'reports':
         return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
 
-      case 'financial-hub':
-        if (!currentPlan.gates.financialHub) {
-          return (
-            <UpgradeRequired
-              featureName="Financial Hub"
-              requiredPlan="pro"
-              description="A real-time CFO dashboard with KPI cards, fund breakdown, top givers, and daily timeline — built on the same ledger your auditor uses."
-              onBack={() => setView('dashboard')}
-            />
-          );
-        }
-        return <FinancialHub onBack={() => setView('dashboard')} onNavigate={setView} />;
-
       case 'wallets':
         return (
           <WalletsView
@@ -723,29 +706,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           />
         );
 
-      case 'reminders':
-        return (
-          <AutomatedReminders
-            people={people}
-            tasks={tasks}
-            events={events}
-            prayers={prayers}
-            emailConfigured={false}
-            smsConfigured={false}
-            onBack={() => setView('settings')}
-          />
-        );
-
-      case 'planning-center-import':
-        return (
-          <PlanningCenterImport
-            existingPeople={people}
-            existingGroups={groups}
-            onImportPeople={handlers.importCSV}
-            onBack={() => setView('people')}
-          />
-        );
-
       case 'qr-checkin':
         return (
           <QRCheckIn
@@ -756,17 +716,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             churchId={churchId}
             onCheckIn={handlers.checkIn}
             onBack={() => setView('attendance')}
-          />
-        );
-
-      case 'follow-up-automation':
-        return (
-          <FollowUpAutomation
-            people={people}
-            tasks={tasks}
-            interactions={interactions}
-            onAddTask={handlers.addTask}
-            onBack={() => setView('settings')}
           />
         );
 

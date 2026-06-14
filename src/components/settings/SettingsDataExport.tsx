@@ -10,7 +10,6 @@ import {
   Calendar,
   CheckSquare,
   Heart,
-  Upload,
 } from 'lucide-react';
 import { UsersIcon } from 'lucide-react';
 import {
@@ -31,7 +30,7 @@ interface SettingsDataExportProps {
   giving: Giving[];
   groups: SmallGroup[];
   prayers: PrayerRequest[];
-  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'planning-center-import') => void;
+  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms') => void;
 }
 
 export function SettingsDataExport({
@@ -117,32 +116,6 @@ export function SettingsDataExport({
         </div>
       </div>
 
-      {/* Data Import */}
-      <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
-            <Upload size={20} className="text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-gray-900 dark:text-dark-100">Data Import</h2>
-            <p className="text-sm text-gray-500 dark:text-dark-400">Import from other systems</p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          {onNavigate && (
-            <button
-              onClick={() => onNavigate('planning-center-import')}
-              className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
-            >
-              <Upload size={16} />
-              Import from Planning Center
-            </button>
-          )}
-          <p className="text-xs text-gray-400 dark:text-dark-500 text-center pt-2">
-            Import people, groups, and other data from Planning Center exports
-          </p>
-        </div>
-      </div>
     </>
   );
 }

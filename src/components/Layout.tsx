@@ -32,7 +32,6 @@ import {
   ClipboardList,
   Cake,
   Sparkles,
-  Import,
   Smartphone,
   Wallet,
 } from 'lucide-react';
@@ -90,7 +89,6 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
   { view: 'portal-activity', label: 'Portal Activity', icon: <Smartphone size={18} /> },
-  { view: 'financial-hub', label: 'Financial Hub', icon: <DollarSign size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
   { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
@@ -103,9 +101,6 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
   { view: 'email-templates', label: 'Email templates', icon: <Mail size={18} /> },
-  { view: 'follow-up-automation', label: 'Automations', icon: <Workflow size={18} /> },
-  { view: 'agents', label: 'Rules engine', icon: <Workflow size={18} /> },
-  { view: 'planning-center-import', label: 'Planning Center import', icon: <Import size={18} /> },
   { view: 'member-portal', label: 'Member Portal', icon: <Globe size={18} /> },
 ];
 
@@ -133,7 +128,7 @@ const viewLabels: Record<View, string> = {
   'charity-baskets': 'Charity Baskets',
   'donation-tracker': 'Donation Tracker',
   'member-stats': 'Member Stats',
-  agents: 'Rules Engine',
+  agents: 'Agents',
   'follow-up-automation': 'Automations',
   tags: 'Tags',
   reports: 'Reports',
@@ -154,7 +149,7 @@ const viewLabels: Record<View, string> = {
   'email-templates': 'Email Templates',
   'event-registration': 'Event Registration',
   'reminders': 'Automated Reminders',
-  'planning-center-import': 'Planning Center Import',
+  'planning-center-import': 'Data Import',
   'qr-checkin': 'QR Check-In',
   'pastoral-care': 'Crisis Center Dispatch',
   'life-services': 'Life Services',
@@ -168,7 +163,7 @@ const viewLabels: Record<View, string> = {
   leadership: 'Leadership',
   grace: 'Leadership',
   mail: 'Mail',
-  'financial-hub': 'Financial Hub',
+  'financial-hub': 'Financial Hub',  // kept for breadcrumb if navigated to directly
   'portal-activity': 'Portal Activity',
   wallets: 'Impact Card Accounts',
 };

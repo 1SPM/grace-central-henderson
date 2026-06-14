@@ -136,6 +136,9 @@ export interface CalendarEvent {
 }
 
 export type View = 'home' | 'dashboard' | 'feed' | 'people' | 'person' | 'tasks' | 'calendar' | 'groups' | 'prayer' | 'giving' | 'settings' | 'pipeline' | 'attendance' | 'volunteers' | 'tags' | 'reports' | 'birthdays' | 'online-giving' | 'batch-entry' | 'pledges' | 'campaigns' | 'statements' | 'charity-baskets' | 'donation-tracker' | 'member-stats' | 'agents' | 'connect-card' | 'directory' | 'child-checkin' | 'forms' | 'member-portal' | 'member-directory' | 'member-giving' | 'member-events' | 'member-checkin' | 'sunday-prep' | 'live-service' | 'families' | 'skills' | 'email-templates' | 'event-registration' | 'reminders' | 'planning-center-import' | 'qr-checkin' | 'follow-up-automation' | 'pastoral-care' | 'life-services' | 'wedding-services' | 'funeral-services' | 'estate-planning' | 'leader-management' | 'analytics' | 'announcements' | 'discipleship' | 'leadership' | 'grace' | 'mail' | 'financial-hub' | 'portal-activity' | 'wallets';
+// Note: financial-hub, follow-up-automation, agents (Rules engine), planning-center-import
+// are retained in the type union to avoid breaking any saved hash routes, but their
+// nav entries and pages have been removed from Layout and ViewRenderer.
 
 // Family/Household type for grouping
 export interface Family {
