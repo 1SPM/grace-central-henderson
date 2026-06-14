@@ -26,7 +26,6 @@ import {
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile, PastoralConversation, HelpCategory } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
 import { StatCard } from './ui/StatCard';
-import { VerifiedLeadersPanel } from './dashboard/VerifiedLeadersPanel';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { ClockCalendarBanner } from './dashboard/ClockCalendarBanner';
 import { GraceGettingStartedPanel } from './grace/GraceGettingStartedPanel';
@@ -461,9 +460,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         </button>
       </div>
 
-      {/* Main content + Verified Leaders right rail */}
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-4 mb-6 items-start">
-        <div className="space-y-4 min-w-0">
+      <div className="space-y-4 min-w-0 mb-6">
           {/* Card grid: giving / events / care / new members */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Giving by fund */}
@@ -693,10 +690,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
               </button>
             )}
           </div>
-        </div>
-
-        {/* Right rail: Verified Leaders AI clergy panel */}
-        <VerifiedLeadersPanel leaders={leaders} onManageLeaders={onViewLeaders} />
       </div>
     </div>
   );
