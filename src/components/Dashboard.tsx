@@ -20,7 +20,6 @@ import {
   LogIn,
   CalendarCheck,
   HeartHandshake,
-  CalendarDays,
   Bot,
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile, PastoralConversation, HelpCategory } from '../types';
@@ -129,7 +128,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
 
   // KPI row + card grid data (mockup dashboard restructure)
   const DEMO_MONTHLY_GOAL = 100000;
-  const { givingMtd, goalPct, fundTotalsMtd, openCare, newMembersThisWeek, upcomingEvents } = useMemo(() => {
+  const { givingMtd, goalPct, fundTotalsMtd, openCare, newMembersThisWeek } = useMemo(() => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const mtdGifts = giving.filter(g => new Date(g.date) >= monthStart);
@@ -164,20 +163,14 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         .slice(0, 4);
     }
 
-    const upcoming = [...events]
-      .filter(e => new Date(e.startDate) >= new Date(now.toDateString()))
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-      .slice(0, 4);
-
     return {
       givingMtd: mtd,
       goalPct: Math.min(Math.round((mtd / DEMO_MONTHLY_GOAL) * 100), 100),
       fundTotalsMtd: funds,
       openCare: care,
       newMembersThisWeek: newThisWeek.slice(0, 4),
-      upcomingEvents: upcoming,
     };
-  }, [giving, careConversations, people, events]);
+  }, [giving, careConversations, people]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -464,7 +457,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
       </div>
 
       <div className="space-y-4 min-w-0 mb-6">
-          {/* Card grid: giving / events / care / new members */}
+          {/* Card grid: giving / care / new members */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Giving by fund */}
             <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
@@ -502,55 +495,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
                       </div>
                     );
                   })}
-                </div>
-              )}
-            </div>
-
-            {/* Upcoming events */}
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                    <CalendarDays size={15} className="text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Upcoming events</h2>
-                </div>
-                <button
-                  onClick={onViewCalendar}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
-                >
-                  Calendar <ArrowRight size={12} />
-                </button>
-              </div>
-              {upcomingEvents.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-dark-500 py-4 text-center">Nothing scheduled</p>
-              ) : (
-                <div className="space-y-1">
-                  {upcomingEvents.map(event => (
-                    <button
-                      key={event.id}
-                      onClick={onViewCalendar}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors text-left"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-[9px] uppercase text-blue-600 dark:text-blue-400 leading-none">
-                          {new Date(event.startDate).toLocaleString('default', { month: 'short' })}
-                        </span>
-                        <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 leading-none mt-0.5">
-                          {new Date(event.startDate).getDate()}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{event.title}</p>
-                        <p className="text-[11px] text-gray-400 dark:text-dark-500 truncate">
-                          {event.allDay
-                            ? 'All day'
-                            : new Date(event.startDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                          {event.location ? ` · ${event.location}` : ''}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
                 </div>
               )}
             </div>
