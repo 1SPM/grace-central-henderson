@@ -5,7 +5,6 @@ import {
   ListTodo,
   Users,
   Crown,
-  Users2,
   DollarSign,
   Settings,
   Menu,
@@ -298,6 +297,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   };
 
   const breadcrumbs = getBreadcrumbs();
+  const moreActive = moreItems.some(item => isMoreItemActive(item.view));
 
   return (
     <div className="flex h-screen dark:bg-dark-950">
@@ -423,14 +423,18 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           <div className="mt-4 relative group">
             <button
               onClick={handleMoreToggle}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors ${
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors ${
                 sidebarCollapsed ? 'lg:justify-center' : ''
+              } ${
+                moreActive
+                  ? 'bg-slate-50/80 dark:bg-white/5 text-slate-700 dark:text-slate-300 font-medium'
+                  : 'text-gray-500 dark:text-dark-400'
               }`}
               title={sidebarCollapsed ? 'Expand More views' : undefined}
               aria-label={sidebarCollapsed ? 'More views' : undefined}
               aria-expanded={moreOpen}
             >
-              <MoreHorizontal size={18} className="text-gray-400" />
+              <MoreHorizontal size={18} className={moreActive ? 'text-slate-600 dark:text-slate-300' : 'text-gray-400'} />
               <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>More</span>
               <ChevronDown
                 size={14}

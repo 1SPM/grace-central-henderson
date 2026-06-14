@@ -1,4 +1,4 @@
-import { useMemo, useState, lazy, Suspense } from 'react';
+import { useMemo } from 'react';
 import { formatLocalDate } from '../utils/validation';
 import {
   Users,
@@ -11,8 +11,6 @@ import {
   LayoutDashboard,
   Church,
   ListTodo,
-  LayoutGrid,
-  List,
   Zap,
   BookOpen,
   BarChart3,
@@ -27,11 +25,7 @@ import {
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile, PastoralConversation, HelpCategory } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
-const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 import { StatCard } from './ui/StatCard';
-import { StatusBadge, priorityToVariant } from './ui/StatusBadge';
-import { ProgressBar } from './ui/ProgressBar';
-import { KanbanBoard } from './ui/KanbanBoard';
 import { VerifiedLeadersPanel } from './dashboard/VerifiedLeadersPanel';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { ClockCalendarBanner } from './dashboard/ClockCalendarBanner';
@@ -83,11 +77,7 @@ const CARE_CATEGORY_LABELS: Record<HelpCategory, string> = {
   general: 'General',
 };
 
-type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
-type TaskViewMode = 'list' | 'kanban';
-
 export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, onNavigate, onDismissGraceIntro, onOpenTutorials, leaders = [], onViewLeaders, careConversations = [], }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
   const mailStats = useMailInboxStats();
   const portalActivity = usePortalActivity(churchId ?? '');
@@ -98,7 +88,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
   const greeting = greetingWord(zoned.hour24);
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const calendarIndex = useMemo(() => buildCalendarIndex(events), [events]);
-  const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
   // Memoize filtered arrays to prevent recalculation on every render
   const { visitors, inactive, pendingTasks } = useMemo(() => ({
@@ -109,9 +98,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
 
   // Memoize person lookup map for O(1) access
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
-
-  // Generate trend data for sparklines from real data
-  const completedTasks = tasks.filter(t => t.completed).length;
 
   // Compute weekly sparkline data from created_at dates (last 7 weeks)
   const { peopleSparkline, tasksSparkline } = useMemo(() => {
@@ -254,17 +240,10 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
 
         {/* Tab row */}
         <div className="flex items-center gap-1 -mb-1 border-t border-stone-200 dark:border-dark-700 pt-3">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'overview'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
-            }`}
-          >
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-slate-900 text-white">
             <LayoutDashboard size={14} />
             Overview
-          </button>
+          </span>
           <button
             data-tutorial="dashboard-sunday-prep"
             onClick={() => onNavigate?.('sunday-prep')}
@@ -285,152 +264,34 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         </div>
       </div>
 
-      {activeTab === 'overview' && (
-        <ClockCalendarBanner
-          className="mb-6"
-          eventDays={calendarIndex.eventDays}
-          eventsByDay={calendarIndex.eventsByDay}
-          onOpenCalendar={onViewCalendar}
-          timezone={timezone}
-        />
-      )}
+      <ClockCalendarBanner
+        className="mb-6"
+        eventDays={calendarIndex.eventDays}
+        eventsByDay={calendarIndex.eventsByDay}
+        onOpenCalendar={onViewCalendar}
+        timezone={timezone}
+      />
 
-      {activeTab === 'overview' && !churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
+      {!churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
         <GraceGettingStartedPanel
           churchName={churchName}
           onDismiss={onDismissGraceIntro}
         />
       )}
 
-      {/* Today action strip — only on overview */}
-      {activeTab === 'overview' && (
-        <TodayActionStrip
-          people={people}
-          tasks={tasks}
-          events={events}
-          prayers={prayers}
-          mailNeedsReview={mailStats.needsReview}
-          mailFlagged={mailStats.flagged}
-          onViewTasks={onViewActions ?? onViewTasks}
-          onViewVisitors={onViewVisitors}
-          onViewInactive={onViewInactive}
-          onViewCalendar={onViewCalendar}
-          onNavigate={onNavigate}
-        />
-      )}
-
-      {/* Tab Content */}
-      {activeTab === 'sunday-prep' ? (
-        <Suspense fallback={<div className="py-12 text-center text-sm text-gray-500">Loading Sunday Prep…</div>}>
-          <SundayPrep people={people} prayers={prayers} onViewPerson={onViewPerson} />
-        </Suspense>
-      ) : activeTab === 'tasks' ? (
-        <>
-          {/* Tasks Header with View Toggle */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
-                <ListTodo className="text-indigo-600 dark:text-indigo-400" size={20} />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Task Board</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{tasks.length} total tasks, {pendingTasks.length} pending</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
-              <button
-                onClick={() => setTaskViewMode('kanban')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  taskViewMode === 'kanban'
-                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                <LayoutGrid size={14} />
-                Board
-              </button>
-              <button
-                onClick={() => setTaskViewMode('list')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  taskViewMode === 'list'
-                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                <List size={14} />
-                List
-              </button>
-            </div>
-          </div>
-
-          {/* Task Progress */}
-          {tasks.length > 0 && (
-            <div className="mb-6 bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-emerald-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Progress</span>
-                </div>
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{completedTasks}/{tasks.length} completed</span>
-              </div>
-              <ProgressBar value={completedTasks} max={tasks.length} color="emerald" size="lg" />
-            </div>
-          )}
-
-          {/* Kanban or List View */}
-          {taskViewMode === 'kanban' ? (
-            <KanbanBoard
-              tasks={tasks}
-              people={people}
-              onViewPerson={onViewPerson}
-              onAddTask={onViewTasks}
-            />
-          ) : (
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-              <div className="divide-y divide-gray-100 dark:divide-dark-700">
-                {tasks.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <ListTodo className="text-gray-300 dark:text-gray-600 mx-auto mb-3" size={32} />
-                    <p className="text-gray-400 dark:text-gray-500">No tasks yet</p>
-                  </div>
-                ) : (
-                  tasks.map(task => {
-                    const person = task.personId ? people.find(p => p.id === task.personId) : undefined;
-                    const isOverdue = !task.completed && new Date(task.dueDate) < new Date();
-                    return (
-                      <div
-                        key={task.id}
-                        className={`p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors ${
-                          task.completed ? 'opacity-60' : ''
-                        }`}
-                      >
-                        <div className={`w-3 h-3 rounded-full ${
-                          task.completed ? 'bg-emerald-500' : isOverdue ? 'bg-rose-500' : 'bg-amber-500'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium text-gray-900 dark:text-white ${
-                            task.completed ? 'line-through' : ''
-                          }`}>{task.title}</p>
-                          {person && (
-                            <p className="text-xs text-gray-400 dark:text-gray-500">{person.firstName} {person.lastName}</p>
-                          )}
-                        </div>
-                        <StatusBadge variant={priorityToVariant(task.priority)} icon>
-                          {task.priority}
-                        </StatusBadge>
-                        <span className={`text-xs ${isOverdue ? 'text-rose-500 font-medium' : 'text-gray-400'}`}>
-                          {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
+      <TodayActionStrip
+        people={people}
+        tasks={tasks}
+        events={events}
+        prayers={prayers}
+        mailNeedsReview={mailStats.needsReview}
+        mailFlagged={mailStats.flagged}
+        onViewTasks={onViewActions ?? onViewTasks}
+        onViewVisitors={onViewVisitors}
+        onViewInactive={onViewInactive}
+        onViewCalendar={onViewCalendar}
+        onNavigate={onNavigate}
+      />
 
 
       {/* KPI row — pinned at top of overview */}
@@ -618,7 +479,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
                   onClick={onViewGiving}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
                 >
-                  Giving Hub <ArrowRight size={12} />
+                  Impact Campaigns <ArrowRight size={12} />
                 </button>
               </div>
               {fundTotalsMtd.length === 0 ? (
@@ -765,7 +626,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
                   onClick={onViewPeople}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
                 >
-                  People <ArrowRight size={12} />
+                  Congregation <ArrowRight size={12} />
                 </button>
               </div>
               {newMembersThisWeek.length === 0 ? (
@@ -825,8 +686,8 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
                   <DollarSign className="text-slate-600 dark:text-slate-400" size={20} />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Giving Details</p>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">Full transaction history & reports</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Impact Campaigns</p>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">Campaigns, pledges & transaction history</p>
                 </div>
                 <ArrowRight size={16} className="text-gray-300 dark:text-dark-600 group-hover:text-gray-500 dark:group-hover:text-dark-400 group-hover:translate-x-0.5 transition-all" />
               </button>
@@ -837,8 +698,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         {/* Right rail: Verified Leaders AI clergy panel */}
         <VerifiedLeadersPanel leaders={leaders} onManageLeaders={onViewLeaders} />
       </div>
-      </>
-      )}
     </div>
   );
 }

@@ -1,10 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
 import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup, HelpRequest, DiscipleshipMilestone, MemberPortalTab } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
+
+const PREVIEW_TABS: { id: MemberPortalTab; label: string }[] = [
+  { id: 'home', label: 'Home' },
+  { id: 'my-journey', label: 'Journey' },
+  { id: 'giving', label: 'Give' },
+  { id: 'events', label: 'Events' },
+  { id: 'care', label: 'Care' },
+  { id: 'directory', label: 'Directory' },
+];
 
 interface MemberPortalPreviewProps {
   people: Person[];
@@ -63,7 +72,12 @@ export function MemberPortalPreview({
     [people]
   );
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
+  const [previewTab, setPreviewTab] = useState<MemberPortalTab>(initialTab);
   const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
+
+  useEffect(() => {
+    setPreviewTab(initialTab);
+  }, [initialTab]);
 
   // Generate a shareable URL for the portal
   // Uses /portal route which renders standalone member portal without admin UI
@@ -95,6 +109,7 @@ export function MemberPortalPreview({
           </button>
         </div>
         <MemberPortal
+          key={previewTab}
           people={people}
           events={events}
           giving={giving}
@@ -108,7 +123,7 @@ export function MemberPortalPreview({
           churchId={churchId}
           currentMember={demoMember}
           milestones={milestones}
-          initialTab={initialTab}
+          initialTab={previewTab}
           onBack={onBack}
           onRSVP={onRSVP}
           onCheckIn={onCheckIn}
@@ -180,6 +195,7 @@ export function MemberPortalPreview({
                   {/* Screen Content — flex container ensures children fill the frame */}
                   <div className="h-full overflow-hidden flex flex-col" style={{ transform: 'translateZ(0)' }}>
                     <MemberPortal
+                      key={previewTab}
                       people={people}
                       events={events}
                       giving={giving}
@@ -193,7 +209,7 @@ export function MemberPortalPreview({
                       churchId={churchId}
                       currentMember={demoMember}
                       milestones={milestones}
-                      initialTab={initialTab}
+                      initialTab={previewTab}
                       onRSVP={onRSVP}
                       onCheckIn={onCheckIn}
                       onPastorSignup={onPastorSignup}
@@ -217,6 +233,39 @@ export function MemberPortalPreview({
 
           {/* QR Code & Sharing Panel */}
           <div className="space-y-6">
+            {/* Preview Tab Picker */}
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-500/10 rounded-xl flex items-center justify-center">
+                  <Smartphone className="text-slate-600 dark:text-slate-400" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-dark-100">
+                    Preview Tabs
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                    Jump between member portal sections
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {PREVIEW_TABS.map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setPreviewTab(tab.id)}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      previewTab === tab.id
+                        ? 'bg-slate-900 dark:bg-dark-100 text-white dark:text-dark-900'
+                        : 'bg-white dark:bg-dark-700 text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-600 border border-gray-200 dark:border-dark-600'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* QR Code Card */}
             <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-4">

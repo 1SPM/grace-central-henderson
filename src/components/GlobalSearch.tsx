@@ -3,7 +3,7 @@ import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
   LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, Baby,
   BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet, Smartphone,
-  FileText, Tag, Settings,
+  FileText, Tag, Settings, Globe, Mail,
 } from 'lucide-react';
 import { Person, Task, PrayerRequest, View } from '../types';
 import { generateAIText } from '../lib/services/ai';
@@ -50,7 +50,10 @@ const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.Reac
   { view: 'announcements', label: 'Announcements', subtitle: 'Announcement board', icon: <Megaphone size={16} /> },
   { view: 'attendance', label: 'Attendance', subtitle: 'Check-in & counts', icon: <UserCheck size={16} /> },
   { view: 'child-checkin', label: 'Child Check-in', subtitle: 'Kids ministry', icon: <Baby size={16} /> },
+  { view: 'life-services', label: 'Life Services', subtitle: 'Weddings, funerals & legacy planning', icon: <Heart size={16} /> },
   { view: 'discipleship', label: 'Discipleship', subtitle: 'Spiritual pathways', icon: <TrendingUp size={16} /> },
+  { view: 'member-portal', label: 'Member Portal Preview', subtitle: 'Preview Home, Journey, Give, Events & Care', icon: <Globe size={16} /> },
+  { view: 'email-templates', label: 'Email Templates', subtitle: 'Reusable outreach messages', icon: <Mail size={16} /> },
   { view: 'tags', label: 'Tags', subtitle: 'Segments and member labels', icon: <Tag size={16} /> },
   { view: 'settings', label: 'Settings', subtitle: 'Church profile, integrations & billing', icon: <Settings size={16} /> },
 ];
