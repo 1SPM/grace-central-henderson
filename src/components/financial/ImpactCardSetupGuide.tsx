@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { BookOpen, ChevronDown, ChevronUp, ExternalLink, X } from 'lucide-react';
 import type { AdminCardData } from '../../lib/services/impactCard';
-import type { View } from '../../types';
 
 const DISMISS_KEY = 'impact-card-guide-dismissed-v1';
 
 interface ImpactCardSetupGuideProps {
   adapterMode: AdminCardData['adapter_mode'];
-  onNavigate?: (view: View) => void;
   onViewPortalActivity?: () => void;
 }
 
 export function ImpactCardSetupGuide({
   adapterMode,
-  onNavigate,
   onViewPortalActivity,
 }: ImpactCardSetupGuideProps) {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === '1');
@@ -93,14 +90,6 @@ export function ImpactCardSetupGuide({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {onNavigate && (
-              <button
-                onClick={() => onNavigate('financial-hub')}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-white dark:bg-dark-850 border border-indigo-200 dark:border-indigo-500/30 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-              >
-                Financial Hub <ExternalLink size={11} />
-              </button>
-            )}
             {onViewPortalActivity && (
               <button
                 onClick={onViewPortalActivity}

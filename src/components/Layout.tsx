@@ -106,15 +106,22 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'member-portal', label: 'Member Portal', icon: <Globe size={18} /> },
 ];
 
+const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
+const peopleSubViews = ['person', 'groups'];
+const sundaySubViews = ['calendar', 'event-registration', 'live-service'];
+const leadershipSubViews = ['grace', 'leader-management'];
+const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
+const actionCenterSubViews = ['mail', 'tasks'];
+
 // View labels for breadcrumbs
 const viewLabels: Record<View, string> = {
   home: 'Home',
-  dashboard: 'Dashboard',
+  dashboard: 'Home',
   feed: 'Action Center',
   pipeline: 'Pipeline',
   people: 'Congregation',
   person: 'Profile',
-  tasks: 'Follow-Ups',
+  tasks: 'Task List',
   attendance: 'Attendance',
   calendar: 'Calendar',
   birthdays: 'Birthdays',
@@ -150,8 +157,8 @@ const viewLabels: Record<View, string> = {
   skills: 'Skills & Talents',
   'email-templates': 'Email Templates',
   'event-registration': 'Event Registration',
-  'reminders': 'Automated Reminders',
-  'planning-center-import': 'Data Import',
+  'reminders': 'Home',
+  'planning-center-import': 'Home',
   'qr-checkin': 'QR Check-In',
   'pastoral-care': 'Crisis Center Dispatch',
   'life-services': 'Life Services',
@@ -165,7 +172,7 @@ const viewLabels: Record<View, string> = {
   leadership: 'Leadership',
   grace: 'Leadership',
   mail: 'Mail',
-  'financial-hub': 'Financial Hub',  // kept for breadcrumb if navigated to directly
+  'financial-hub': 'Home',
   'portal-activity': 'Portal Activity',
   wallets: 'Impact Card Accounts',
 };
@@ -240,9 +247,23 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   }, [currentView]);
 
   const handleNavClick = (view: View) => {
-    setView(view);
+    navigateView(view, setView);
     setSidebarOpen(false);
   };
+
+  const handleMoreToggle = () => {
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      setMoreOpen(true);
+      return;
+    }
+    setMoreOpen(o => !o);
+  };
+
+  const isMoreItemActive = (view: View) => currentView === view ||
+    (view === 'life-services' && lifeServicesSubViews.includes(currentView)) ||
+    (view === 'skills' && currentView === 'skills') ||
+    (view === 'portal-activity' && currentView === 'portal-activity');
 
   // Breadcrumb paths
   const getBreadcrumbs = () => {
@@ -253,7 +274,6 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
       ];
     }
     // Sub-pages under Giving
-    const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
     if (givingSubViews.includes(currentView)) {
       return [
         { label: 'Impact Campaigns', view: 'giving' as View },
@@ -261,7 +281,6 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
       ];
     }
     // Sub-pages under Life Services
-    const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
     if (lifeServicesSubViews.includes(currentView)) {
       return [
         { label: 'Life Services', view: 'life-services' as View },
@@ -269,7 +288,6 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
       ];
     }
     // Sub-pages under Sunday
-    const sundaySubViews = ['calendar', 'event-registration', 'live-service'];
     if (sundaySubViews.includes(currentView)) {
       return [
         { label: 'Sunday Service Tools', view: 'sunday-prep' as View },
@@ -361,11 +379,11 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const isActive = currentView === item.view ||
-                    (item.view === 'giving' && ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'].includes(currentView)) ||
-                    (item.view === 'people' && ['person', 'skills', 'groups'].includes(currentView)) ||
-                    (item.view === 'sunday-prep' && ['calendar', 'event-registration', 'live-service'].includes(currentView)) ||
-                    (item.view === 'leadership' && ['grace', 'leader-management'].includes(currentView)) ||
-                    (item.view === 'life-services' && ['wedding-services', 'funeral-services', 'estate-planning'].includes(currentView));
+                    (item.view === 'feed' && actionCenterSubViews.includes(currentView)) ||
+                    (item.view === 'giving' && givingSubViews.includes(currentView)) ||
+                    (item.view === 'people' && peopleSubViews.includes(currentView)) ||
+                    (item.view === 'sunday-prep' && sundaySubViews.includes(currentView)) ||
+                    (item.view === 'leadership' && leadershipSubViews.includes(currentView));
 
                   return (
                     <button
@@ -378,6 +396,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                           ? 'bg-gray-100/90 dark:bg-white/5 text-gray-900 dark:text-gray-100 font-medium'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-black/[0.03] dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
+                      aria-label={sidebarCollapsed ? item.label : undefined}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
                       <span className={`flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 transition-colors ${
@@ -389,7 +408,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
                       {/* Tooltip for collapsed state */}
                       {sidebarCollapsed && (
-                        <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
+                        <span aria-hidden="true" className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
                           {item.label}
                         </span>
                       )}
@@ -401,13 +420,14 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           ))}
 
           {/* More… — collapsible power-user views */}
-          <div className="mt-4">
+          <div className="mt-4 relative group">
             <button
-              onClick={() => setMoreOpen(o => !o)}
+              onClick={handleMoreToggle}
               className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm text-gray-500 dark:text-dark-400 hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors ${
                 sidebarCollapsed ? 'lg:justify-center' : ''
               }`}
-              title={sidebarCollapsed ? 'More' : undefined}
+              title={sidebarCollapsed ? 'Expand More views' : undefined}
+              aria-label={sidebarCollapsed ? 'More views' : undefined}
               aria-expanded={moreOpen}
             >
               <MoreHorizontal size={18} className="text-gray-400" />
@@ -417,10 +437,15 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                 className={`text-gray-400 transition-transform ${moreOpen ? 'rotate-180' : ''} ${sidebarCollapsed ? 'lg:hidden' : ''}`}
               />
             </button>
+            {sidebarCollapsed && (
+              <span aria-hidden="true" className="hidden lg:group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
+                Expand More views
+              </span>
+            )}
             {moreOpen && !sidebarCollapsed && (
               <div className="mt-1 space-y-0.5">
                 {moreItems.map(item => {
-                  const isActive = currentView === item.view;
+                  const isActive = isMoreItemActive(item.view);
                   return (
                     <button
                       key={item.view}
@@ -443,10 +468,25 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           </div>
         </nav>
 
-        {/* Sidebar addon slot — hidden when collapsed */}
+        {/* Sidebar addon slot */}
         {sidebarAddon && !sidebarCollapsed && (
           <div className="px-3 pb-2">
             {sidebarAddon}
+          </div>
+        )}
+        {sidebarAddon && sidebarCollapsed && (
+          <div className="hidden lg:flex px-2 pb-2">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(false)}
+              className="w-full flex items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group relative"
+              title="Show setup checklist"
+            >
+              <Sparkles size={16} />
+              <span aria-hidden="true" className="hidden group-hover:flex absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg backdrop-blur-sm font-medium">
+                Show setup checklist
+              </span>
+            </button>
           </div>
         )}
 
@@ -476,6 +516,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             className={`hidden lg:flex w-full items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${
               sidebarCollapsed ? 'justify-center' : ''
             }`}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={sidebarCollapsed ? 'Expand (⌘B)' : 'Collapse (⌘B)'}
           >
             {sidebarCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
@@ -488,11 +529,12 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               sidebarCollapsed ? 'lg:justify-center' : ''
             }`}
             title={sidebarCollapsed ? 'Settings' : undefined}
+            aria-label="Settings"
           >
             <Settings size={18} />
             <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Settings</span>
             {sidebarCollapsed && (
-              <span className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+              <span aria-hidden="true" className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
                 Settings
               </span>
             )}
@@ -533,7 +575,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                     <ChevronRight size={14} className="mx-1 text-gray-300 dark:text-dark-600" />
                   )}
                   <button
-                    onClick={() => setView(crumb.view)}
+                    onClick={() => navigateView(crumb.view, setView)}
                     className={`px-1.5 py-0.5 rounded transition-colors ${
                       index === breadcrumbs.length - 1
                         ? 'font-medium text-gray-900 dark:text-dark-100'

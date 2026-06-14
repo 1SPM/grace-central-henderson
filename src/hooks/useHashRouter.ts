@@ -106,6 +106,11 @@ function parseHash(): { view: View; personId: string | null } {
     return { view: 'leadership', personId: null };
   }
 
+  // Removed feature routes → Home. Keeps old bookmarks from landing on NotFound.
+  if (['financial-hub', 'follow-up-automation', 'planning-center-import', 'reminders'].includes(basePath)) {
+    return { view: 'dashboard', personId: null };
+  }
+
   const view = PATH_TO_VIEW[basePath];
   return { view: view || 'dashboard', personId: null };
 }

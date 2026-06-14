@@ -49,7 +49,7 @@ interface SettingsProps {
   giving?: Giving[];
   groups?: SmallGroup[];
   prayers?: PrayerRequest[];
-  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
+  onNavigate?: (view: 'email-templates' | 'forms' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
   onRunWizard?: () => void;
   onOpenTutorials?: () => void;
 }
@@ -918,15 +918,6 @@ export function Settings({
                 className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 text-indigo-600 disabled:opacity-50"
               />
             </label>
-            {onNavigate && (
-              <button
-                onClick={() => onNavigate('reminders')}
-                className="w-full mt-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-xl text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-500/20 flex items-center justify-center gap-2"
-              >
-                <Clock size={16} />
-                Manage Automated Reminders
-              </button>
-            )}
             {!status.email && !status.sms && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
                 Configure Email or SMS to enable notifications

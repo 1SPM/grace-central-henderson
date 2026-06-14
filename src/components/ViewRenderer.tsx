@@ -13,8 +13,6 @@ import { ErrorBoundary, CompactErrorFallback } from './ErrorBoundary';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useRouteGuard } from '../hooks/useRouteGuard';
-import { useChurchPlan } from '../hooks/useChurchPlan';
-import { useServerAgents } from '../hooks/useServerAgents';
 import { useTutorial } from '../contexts/TutorialContext';
 import type { View, Person, Task, Interaction, SmallGroup, PrayerRequest, CalendarEvent, Giving, Attendance, Campaign, Pledge, DonationBatch, GivingStatement, CharityBasket, BasketItem, BatchItem, LeaderProfile, HelpRequest, PastoralConversation, PastoralSession, HelpCategory, Announcement, AnnouncementCategory, DiscipleshipMilestone, MilestoneType } from '../types';
 import type { AgentConfig, LifeEventConfig, DonationProcessingConfig, NewMemberConfig, LifeEvent, AgentLog, AgentStats } from '../lib/agents/types';
@@ -37,8 +35,6 @@ const BirthdayCalendar = lazy(() => import('./BirthdayCalendar').then(m => ({ de
 const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ default: m.CharityBaskets })));
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
-const AgentDashboard = lazy(() => import('./AgentDashboard').then(m => ({ default: m.AgentDashboard })));
-const UpgradeRequired = lazy(() => import('./marketing/UpgradeRequired').then(m => ({ default: m.UpgradeRequired })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
 const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
@@ -220,14 +216,12 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, selectedPersonId, setSelectedPersonId, handlers,
-    collectionMgmt, charityBasketMgmt, agents, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
+    collectionMgmt, charityBasketMgmt, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
 
   const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
   const { getBlockedMessage } = useRouteGuard();
   const { openPicker: openTutorialPicker } = useTutorial();
-  const { plan: currentPlan } = useChurchPlan();
-  const serverAgentData = useServerAgents(churchId);
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -257,10 +251,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewCalendar={() => navigateView('calendar', setView)}
           onViewAnalytics={() => setView('analytics')}
           churchSettings={settings}
-          groupsCount={groups.length}
-          eventsCount={events.length}
           onNavigate={(v) => navigateView(v, setView)}
-          onDismissChecklist={() => saveOnboarding({ checklistDismissed: true })}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
           onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
@@ -446,6 +437,14 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'tasks':
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
+
+    case 'agents':
+    case 'reminders':
+    case 'financial-hub':
+    case 'follow-up-automation':
+    case 'planning-center-import':
+      setView('dashboard');
+      return null;
   }
 
   // Lazy-loaded views wrapped in SafeView (Suspense + ErrorBoundary)
@@ -606,28 +605,6 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'birthdays':
         return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
 
-      case 'agents':
-        return (
-          <div className="p-6 max-w-7xl mx-auto">
-            <AgentDashboard
-              lifeEventConfig={agents.lifeEventConfig}
-              donationConfig={agents.donationConfig}
-              newMemberConfig={agents.newMemberConfig}
-              upcomingLifeEvents={agents.upcomingLifeEvents}
-              recentLogs={agents.logs}
-              stats={agents.stats}
-              onToggleAgent={agents.toggleAgent}
-              onUpdateConfig={agents.updateConfig}
-              onRunAgent={agents.runAgent}
-              serverAgents={serverAgentData.serverAgents}
-              serverObservations={serverAgentData.observations}
-              serverAgentsRunning={serverAgentData.running}
-              serverRunError={serverAgentData.runError}
-              onRunServerAgents={() => void serverAgentData.runNow()}
-            />
-          </div>
-        );
-
       case 'settings':
         return (
           <Settings
@@ -680,6 +657,13 @@ export function ViewRenderer(props: ViewRendererProps) {
             groups={groups}
             churchId={churchId}
             milestones={discipleshipData.milestones}
+            initialTab={
+              view === 'member-directory' ? 'directory' :
+              view === 'member-giving' ? 'giving' :
+              view === 'member-events' ? 'events' :
+              view === 'member-checkin' ? 'checkin' :
+              'home'
+            }
             onBack={() => setView('dashboard')}
             onRSVP={handlers.rsvp}
             onCheckIn={handlers.checkIn}

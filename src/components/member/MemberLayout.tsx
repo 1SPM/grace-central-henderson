@@ -14,6 +14,7 @@ interface MemberLayoutProps {
   /** White-label branding from church settings. */
   branding?: { primaryColor?: string; logoUrl?: string };
   leaders?: LeaderProfile[];
+  hidePastoralStories?: boolean;
 }
 
 const tabs: { id: MemberPortalTab; label: string; icon: typeof Home }[] = [
@@ -36,6 +37,7 @@ export function MemberLayout({
   memberName,
   branding,
   leaders,
+  hidePastoralStories = false,
 }: MemberLayoutProps) {
   const primaryColor = branding?.primaryColor || DEFAULT_PRIMARY;
   const logoUrl = branding?.logoUrl;
@@ -81,15 +83,19 @@ export function MemberLayout({
       </header>
 
       {/* Online Pastors — leader avatars */}
-      {churchName.toLowerCase().includes('henderson') && (
-        <p className="px-4 pt-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500">
-          Central Henderson Leadership
-        </p>
+      {!hidePastoralStories && (
+        <>
+          {churchName.toLowerCase().includes('henderson') && (
+            <p className="px-4 pt-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500">
+              Central Henderson Leadership
+            </p>
+          )}
+          <PastoralStories
+            leaders={leaders}
+            onStartChat={(leaderId) => onTabChange('care', leaderId)}
+          />
+        </>
       )}
-      <PastoralStories
-        leaders={leaders}
-        onStartChat={(leaderId) => onTabChange('care', leaderId)}
-      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto min-h-0">

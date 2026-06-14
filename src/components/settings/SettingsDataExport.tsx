@@ -30,7 +30,7 @@ interface SettingsDataExportProps {
   giving: Giving[];
   groups: SmallGroup[];
   prayers: PrayerRequest[];
-  onNavigate?: (view: 'reminders' | 'email-templates' | 'forms') => void;
+  onNavigate?: (view: 'email-templates' | 'forms') => void;
 }
 
 export function SettingsDataExport({

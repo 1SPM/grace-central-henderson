@@ -20,8 +20,8 @@ function iconFor(kind: LiveNotification['kind']) {
 }
 
 function targetView(n: LiveNotification): string {
-  if (n.kind === 'agent') return 'agents';
-  if (n.id.startsWith('agent-')) return n.kind === 'crisis' ? 'pastoral-care' : 'agents';
+  if (n.kind === 'agent') return 'dashboard';
+  if (n.id.startsWith('agent-')) return n.kind === 'crisis' ? 'pastoral-care' : 'dashboard';
   if (n.kind === 'inbox' || n.kind === 'crisis') return n.id.startsWith('inbox-') ? 'mail' : 'pastoral-care';
   return 'portal-activity';
 }

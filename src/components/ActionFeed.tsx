@@ -33,6 +33,8 @@ interface ActionFeedProps {
   tasks: Task[];
   onToggleTask: (taskId: string) => void;
   onSelectPerson: (personId: string) => void;
+  /** True when rendered inside the Action Center hub header. */
+  embedded?: boolean;
 }
 
 type FeedFilter = 'all' | 'tasks' | 'birthdays' | 'visitors';
@@ -85,6 +87,7 @@ export function ActionFeed({
   tasks,
   onToggleTask,
   onSelectPerson,
+  embedded = false,
 }: ActionFeedProps) {
   const { settings: churchSettings } = useChurchSettings();
   const { settings: aiSettings } = useAISettings();
@@ -634,7 +637,8 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
 
   return (
     <div data-tutorial="action-feed" className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Hero Header */}
+      {/* Standalone hero header. Hidden when the Action Center hub already owns page chrome. */}
+      {!embedded && (
       <div className="relative overflow-hidden rounded-xl h-32">
         <img
           src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop"
@@ -671,6 +675,26 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
           )}
         </div>
       </div>
+      )}
+
+      {embedded && todayProgress.total > 0 && (
+        <div className="bg-white/80 dark:bg-dark-800/80 border border-gray-200 dark:border-dark-700 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">
+              Today’s work queue
+            </p>
+            <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
+              {feedItems.length} item{feedItems.length !== 1 ? 's' : ''} need attention · {todayProgress.completed} of {todayProgress.total} done today
+            </p>
+          </div>
+          <div className="w-28 h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden flex-shrink-0">
+            <div
+              className="h-full bg-emerald-500 rounded-full transition-all"
+              style={{ width: `${(todayProgress.completed / todayProgress.total) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

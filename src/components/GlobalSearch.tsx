@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
   LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, Baby,
-  BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Users2, Wallet,
+  BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet, Smartphone,
+  FileText, Tag, Settings,
 } from 'lucide-react';
 import { Person, Task, PrayerRequest, View } from '../types';
 import { generateAIText } from '../lib/services/ai';
@@ -31,20 +32,27 @@ type SearchResult = {
 
 // Primary views exposed to the command palette. Lean, not all 52.
 const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
-  { view: 'dashboard', label: 'Home', subtitle: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  { view: 'dashboard', label: 'Home', subtitle: 'Today, KPIs & next actions', icon: <LayoutDashboard size={16} /> },
   { view: 'leadership', label: 'Leadership', subtitle: 'Pastors, clergy & AI companions', icon: <Crown size={16} /> },
   { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups & mail', icon: <ListTodo size={16} /> },
   { view: 'people', label: 'Congregation', subtitle: 'Directory & small groups', icon: <Users size={16} /> },
-  { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },
-  { view: 'giving', label: 'Giving', subtitle: 'Donations & pledges', icon: <DollarSign size={16} /> },
   { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'i2c card program & member usage', icon: <Wallet size={16} /> },
-  { view: 'announcements', label: 'Announcements', subtitle: 'Announcement board', icon: <Megaphone size={16} /> },
   { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, calendar & live service', icon: <Church size={16} /> },
+  { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
+  { view: 'pastoral-care', label: 'Crisis Center Dispatch', subtitle: '24-hour member request receiving', icon: <Heart size={16} /> },
+  { view: 'portal-activity', label: 'Portal Activity', subtitle: 'Member app signals & engagement', icon: <Smartphone size={16} /> },
+  { view: 'analytics', label: 'Analytics', subtitle: 'Trends, health score & growth', icon: <BarChart3 size={16} /> },
+  { view: 'pipeline', label: 'Pipeline', subtitle: 'Visitor follow-up stages', icon: <TrendingUp size={16} /> },
+  { view: 'reports', label: 'Reports', subtitle: 'Printable church reports', icon: <FileText size={16} /> },
+  { view: 'prayer', label: 'Prayer', subtitle: 'Prayer requests & answered prayers', icon: <Heart size={16} /> },
+  { view: 'tasks', label: 'Task List', subtitle: 'Advanced task management', icon: <CheckSquare size={16} /> },
+  { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },
+  { view: 'announcements', label: 'Announcements', subtitle: 'Announcement board', icon: <Megaphone size={16} /> },
   { view: 'attendance', label: 'Attendance', subtitle: 'Check-in & counts', icon: <UserCheck size={16} /> },
   { view: 'child-checkin', label: 'Child Check-in', subtitle: 'Kids ministry', icon: <Baby size={16} /> },
-  { view: 'pastoral-care', label: 'Crisis Center Dispatch', subtitle: '24-hour member request receiving', icon: <Heart size={16} /> },
   { view: 'discipleship', label: 'Discipleship', subtitle: 'Spiritual pathways', icon: <TrendingUp size={16} /> },
-  { view: 'analytics', label: 'Analytics', subtitle: 'Trends & stats', icon: <BarChart3 size={16} /> },
+  { view: 'tags', label: 'Tags', subtitle: 'Segments and member labels', icon: <Tag size={16} /> },
+  { view: 'settings', label: 'Settings', subtitle: 'Church profile, integrations & billing', icon: <Settings size={16} /> },
 ];
 
 type Mode = 'search' | 'ai';

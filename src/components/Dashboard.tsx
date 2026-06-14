@@ -63,12 +63,8 @@ interface DashboardProps {
   onViewCalendar?: () => void;
   onViewAnalytics?: () => void;
   churchSettings?: ChurchSettings;
-  groupsCount?: number;
-  eventsCount?: number;
   onNavigate?: (view: string) => void;
-  onDismissChecklist?: () => void;
   onDismissGraceIntro?: () => void;
-  onReopenWizard?: () => void;
   onOpenTutorials?: () => void;
   leaders?: LeaderProfile[];
   onViewLeaders?: () => void;
@@ -90,7 +86,7 @@ const CARE_CATEGORY_LABELS: Record<HelpCategory, string> = {
 type DashboardTab = 'overview' | 'sunday-prep' | 'tasks';
 type TaskViewMode = 'list' | 'kanban';
 
-export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, groupsCount = 0, eventsCount = 0, onNavigate, onDismissChecklist, onDismissGraceIntro, onReopenWizard, onOpenTutorials, leaders = [], onViewLeaders, careConversations = [], }: DashboardProps) {
+export function Dashboard({ churchId, people, tasks, events = [], giving = [], prayers = [], onViewPerson, onViewTasks, onViewGiving, onViewPeople, onViewVisitors, onViewInactive, onViewActions, onViewCalendar, onViewAnalytics, churchSettings, onNavigate, onDismissGraceIntro, onOpenTutorials, leaders = [], onViewLeaders, careConversations = [], }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const grace = useGraceChat();
   const mailStats = useMailInboxStats();
@@ -145,7 +141,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
 
   // KPI row + card grid data (mockup dashboard restructure)
   const DEMO_MONTHLY_GOAL = 100000;
-  const DEMO_AI_SESSIONS_TODAY = 47;
   const { givingMtd, goalPct, fundTotalsMtd, openCare, newMembersThisWeek, upcomingEvents } = useMemo(() => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -234,11 +229,11 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
               Add person
             </button>
             <button
-              onClick={onViewTasks}
+              onClick={onViewActions ?? onViewTasks}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white dark:bg-dark-700 hover:bg-stone-100 dark:hover:bg-dark-600 text-slate-800 dark:text-dark-100 border border-stone-300 dark:border-dark-600 rounded-lg transition-colors"
             >
               <ListTodo size={14} />
-              Tasks
+              Work Queue
             </button>
             <button
               onClick={() => onNavigate?.('mail')}
@@ -272,26 +267,11 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           </button>
           <button
             data-tutorial="dashboard-sunday-prep"
-            onClick={() => setActiveTab('sunday-prep')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'sunday-prep'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
-            }`}
+            onClick={() => onNavigate?.('sunday-prep')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700 transition-all"
           >
             <Church size={14} />
-            Sunday Prep
-          </button>
-          <button
-            onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'tasks'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700'
-            }`}
-          >
-            <ListTodo size={14} />
-            Task Board
+            Sunday Service Tools
           </button>
           {onOpenTutorials && (
             <button
@@ -331,7 +311,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           prayers={prayers}
           mailNeedsReview={mailStats.needsReview}
           mailFlagged={mailStats.flagged}
-          onViewTasks={onViewTasks}
+          onViewTasks={onViewActions ?? onViewTasks}
           onViewVisitors={onViewVisitors}
           onViewInactive={onViewInactive}
           onViewCalendar={onViewCalendar}
@@ -466,7 +446,7 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           onClick={onViewPeople}
         />
         <StatCard
-          label="Giving MTD"
+          label="Impact MTD"
           value={`$${Math.round(givingMtd).toLocaleString()}`}
           icon={<DollarSign size={20} />}
           change={goalPct}
@@ -485,11 +465,11 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           onClick={() => onNavigate?.('pastoral-care')}
         />
         <StatCard
-          label="AI Sessions Today"
-          value={DEMO_AI_SESSIONS_TODAY}
+          label="Leader Sessions"
+          value={leaders.length}
           icon={<Bot size={20} />}
-          change={18}
-          changeLabel="vs yesterday"
+          change={leaders.filter(l => l.isAvailable).length}
+          changeLabel="available leaders"
           sparklineData={tasksSparkline}
           accentColor="amber"
           onClick={onViewLeaders}
@@ -599,9 +579,9 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
           </div>
         </button>
 
-        {/* Sermon Builder CTA */}
+        {/* Sunday tools CTA */}
         <button
-          onClick={() => setActiveTab('sunday-prep')}
+          onClick={() => onNavigate?.('sunday-prep')}
           className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-left transition-all hover:shadow-lg hover:scale-[1.01] shadow-sm"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -612,9 +592,9 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
               </div>
               <ArrowRight className="text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" size={18} />
             </div>
-            <h3 className="text-base font-semibold text-white mb-1">Sermon Builder</h3>
+            <h3 className="text-base font-semibold text-white mb-1">Sunday Service Tools</h3>
             <p className="text-white/80 text-sm">
-              Prepare for Sunday with AI assistance
+              Plan, schedule, and run this week’s service
             </p>
           </div>
         </button>

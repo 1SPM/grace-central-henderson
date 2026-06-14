@@ -151,6 +151,15 @@ export function SetupChecklist({
               Resume setup
             </button>
           )}
+          {compact && onOpenTutorials && (
+            <button
+              onClick={onOpenTutorials}
+              title="Take a tour"
+              className="p-1 text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-md transition-colors"
+            >
+              <Sparkles size={13} />
+            </button>
+          )}
           {compact && onReopenWizard && (
             <button
               onClick={onReopenWizard}

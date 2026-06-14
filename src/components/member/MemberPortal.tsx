@@ -45,6 +45,7 @@ interface MemberPortalProps {
   onSendMessage?: (conversationId: string, content: string) => void;
   helpRequests?: HelpRequest[];
   milestones?: DiscipleshipMilestone[];
+  initialTab?: MemberPortalTab;
 }
 
 export function MemberPortal({
@@ -73,9 +74,14 @@ export function MemberPortal({
   onSendMessage,
   helpRequests = [],
   milestones = [],
+  initialTab = 'home',
 }: MemberPortalProps) {
-  const [activeTab, setActiveTab] = useState<MemberPortalTab>('home');
+  const [activeTab, setActiveTab] = useState<MemberPortalTab>(initialTab);
   const [showChat, setShowChat] = useState(false);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Handle deep links from ?portal=pastor-signup or ?portal=care
   useEffect(() => {
@@ -270,6 +276,7 @@ export function MemberPortal({
       memberName={currentMember?.firstName}
       branding={branding}
       leaders={leaders}
+      hidePastoralStories={['my-journey', 'giving', 'events'].includes(activeTab)}
     >
       {renderContent()}
     </MemberLayout>

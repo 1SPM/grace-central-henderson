@@ -119,6 +119,7 @@ export function ActionCenter({
             tasks={tasks}
             onToggleTask={onToggleTask}
             onSelectPerson={onSelectPerson}
+            embedded
           />
         ) : (
           <MailInbox embedded people={people} tasks={tasks} prayers={prayers} />

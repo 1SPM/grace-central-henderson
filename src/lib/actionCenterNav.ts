@@ -30,6 +30,10 @@ export function openActionCenter(
 
 /** Route helper — maps legacy views to tabbed hubs. */
 export function navigateView(view: View | string, setView: (v: View) => void): void {
+  if (['financial-hub', 'follow-up-automation', 'planning-center-import', 'reminders'].includes(view)) {
+    setView('dashboard');
+    return;
+  }
   if (view === 'mail') {
     openActionCenter('mail', setView);
     return;

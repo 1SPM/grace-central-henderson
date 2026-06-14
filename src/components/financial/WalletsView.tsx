@@ -191,7 +191,6 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
         <>
           <ImpactCardSetupGuide
             adapterMode={program.data.adapter_mode}
-            onNavigate={onNavigate}
             onViewPortalActivity={onViewPortalActivity}
           />
 
