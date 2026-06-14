@@ -19,6 +19,8 @@ import { CardProgramSection } from './CardProgramSection';
 import { ImpactCardMonitoring } from './ImpactCardMonitoring';
 import { ImpactCardSetupGuide } from './ImpactCardSetupGuide';
 import { MemberWalletDetail } from './MemberWalletDetail';
+import { HubPageHeader } from '../ui/HubPageHeader';
+import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 
 type RosterFilter = 'all' | 'active' | 'declines' | 'kyc_pending' | 'high_spend';
 
@@ -122,26 +124,29 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
   const summary = program.data?.summary;
   const kycApproved = accountRows.filter(r => r.kycStatus === 'approved').length;
   const withCards = accountRows.filter(r => r.cards.length > 0).length;
+  const headerMeta = getViewHeaderMeta('wallets');
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Impact Card Accounts</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-400 mt-1.5">
-            Neo-banking account command center — balances, Card Impact, transfers, and card program ops
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search members…"
-            className="pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 focus:outline-none focus:ring-2 focus:ring-slate-400 w-64"
-          />
-        </div>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="Neo-banking account command center — balances, Card Impact, transfers, and card program ops"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        className="mb-6"
+        trailing={
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search members…"
+              className="pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-stone-100 dark:bg-dark-800 text-gray-700 dark:text-dark-300 focus:outline-none focus:ring-2 focus:ring-slate-400 w-64"
+            />
+          </div>
+        }
+      />
 
       {program.state === 'loading' && (
         <div className="py-16 flex justify-center">

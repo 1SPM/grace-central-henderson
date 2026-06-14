@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import type { Person, MemberStatus, Task, Giving, PrayerRequest, CalendarEvent, Interaction, DiscipleshipMilestone } from '../types';
 import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 
 interface AnalyticsProps {
   people: Person[];
@@ -324,30 +326,34 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
   const categoryLabels: Record<string, string> = { 'follow-up': 'Follow-Up', care: 'Care', admin: 'Admin', outreach: 'Outreach' };
   const interactionLabels: Record<string, string> = { note: 'Notes', call: 'Calls', email: 'Emails', visit: 'Visits', text: 'Texts', prayer: 'Prayer' };
 
+  const headerMeta = getViewHeaderMeta('analytics');
+
   return (
     <div data-tutorial="analytics-overview" className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Analytics</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Insights into your congregation's health and growth</p>
-        </div>
-        <div className="flex bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
-          {([['7d', '7 Days'], ['30d', '30 Days'], ['90d', '90 Days'], ['all', 'All Time']] as const).map(([value, label]) => (
-            <button
-              key={value}
-              onClick={() => setTimeRange(value)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                timeRange === value
-                  ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="Insights into your congregation's health and growth"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        trailing={
+          <div className="flex bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
+            {([['7d', '7 Days'], ['30d', '30 Days'], ['90d', '90 Days'], ['all', 'All Time']] as const).map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setTimeRange(value)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  timeRange === value
+                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Congregation Health Score */}
       <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl p-6 text-white relative overflow-hidden">

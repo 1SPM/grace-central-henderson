@@ -23,6 +23,8 @@ import {
   Sun,
   Radio,
 } from 'lucide-react';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 import { useAISettings, AI_FEATURES, AISettings } from '../hooks/useAISettings';
 import { useIntegrations } from '../contexts/IntegrationsContext';
 import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
@@ -178,13 +180,19 @@ export function Settings({
     }
   };
 
+  const headerMeta = getViewHeaderMeta('settings');
+
   return (
     <div className="p-8">
       <div className="max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Settings</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">Manage your GRACE CRM configuration</p>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="Manage your GRACE CRM configuration"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        className="mb-8"
+      />
 
       {/* Run Setup Wizard */}
       {onRunWizard && (

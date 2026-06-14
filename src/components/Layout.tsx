@@ -40,7 +40,6 @@ import { NotificationCenter } from './NotificationCenter';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
 import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHenderson';
 import { GraceOrb } from './grace/GraceOrb';
-import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
@@ -202,7 +201,6 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
 }
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
-  const grace = useGraceChat();
   const { user } = useAuthContext();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
@@ -315,9 +313,15 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
       >
-        {/* Brand header */}
-        <div className={`border-b border-gray-200/60 dark:border-white/5 ${sidebarCollapsed ? 'lg:px-2 px-4 py-3' : 'px-4 py-4'}`}>
-          <div className={`flex items-start ${sidebarCollapsed ? 'lg:flex-col lg:items-center lg:gap-2' : 'gap-3'}`}>
+        {/* Brand header — matches member portal: blue orb, centered church name */}
+        <div className={`relative border-b border-gray-200/60 dark:border-white/5 ${sidebarCollapsed ? 'lg:px-2 px-4 py-3' : 'px-4 py-5'}`}>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden absolute top-3 right-3 p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg shrink-0 z-10"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+          <div className={`flex flex-col items-center text-center ${sidebarCollapsed ? 'lg:gap-2' : 'gap-3'}`}>
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -325,44 +329,21 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                 className={`rounded-full object-cover flex-shrink-0 ${sidebarCollapsed ? 'w-10 h-10' : 'w-[72px] h-[72px]'}`}
               />
             ) : (
-              <button
-                type="button"
-                onClick={() => grace.openPanel()}
-                className="rounded-full flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-400/50"
-                title="Ask GRACE"
-              >
-                <GraceOrb size={sidebarCollapsed ? 'sm' : 'md'} />
-              </button>
+              <GraceOrb
+                size={sidebarCollapsed ? 'sm' : 'md'}
+                rings
+                variant="blue"
+              />
             )}
-            <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-[15px] leading-tight truncate">
+            <div className={`min-w-0 w-full ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug">
                 {displayChurch}
               </h2>
-              <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-0.5 tracking-wide">
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1 tracking-wide">
                 My GRACE Admin Panel
               </p>
             </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg shrink-0"
-            >
-              <X size={18} className="text-gray-500" />
-            </button>
           </div>
-
-          {/* GRACE quick access — full row when expanded; hidden when sidebar collapsed (Ask Grace nav item remains) */}
-          <button
-            type="button"
-            onClick={() => grace.openPanel()}
-            className={`mt-3 w-full flex items-center gap-2.5 rounded-xl bg-rose-50/80 dark:bg-rose-500/10 hover:bg-rose-100/80 dark:hover:bg-rose-500/15 border border-rose-200/60 dark:border-rose-500/20 transition-colors ${
-              sidebarCollapsed ? 'lg:hidden' : 'px-3 py-2'
-            }`}
-          >
-            <GraceOrb size="sm" />
-            <span className="text-[13px] font-semibold text-rose-700 dark:text-rose-300">
-              Ask GRACE
-            </span>
-          </button>
         </div>
         {/* Navigation */}
         <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>

@@ -13,6 +13,8 @@ import {
   Crown,
   ChevronRight,
 } from 'lucide-react';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 import { Person, Family } from '../types';
 
 interface FamiliesProps {
@@ -121,25 +123,28 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
     }
   };
 
+  const headerMeta = getViewHeaderMeta('families');
+
   return (
     <div className="p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Families</h1>
-            <p className="text-gray-500 dark:text-dark-400 mt-1">
-              {families.length} households · {unassignedPeople.length} unassigned
-            </p>
-          </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
-          >
-            <Plus size={18} />
-            New Family
-          </button>
-        </div>
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle={`${families.length} households · ${unassignedPeople.length} unassigned`}
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          className="mb-6"
+          trailing={
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+            >
+              <Plus size={18} />
+              New Family
+            </button>
+          }
+        />
 
         {/* Search */}
         <div className="relative mb-6">

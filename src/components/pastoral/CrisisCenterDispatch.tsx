@@ -3,8 +3,9 @@ import {
   ChevronLeft,
   Link2,
   Check,
-  Radio,
 } from 'lucide-react';
+import { HubPageHeader } from '../ui/HubPageHeader';
+import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 import type { LeaderProfile, HelpRequest, PastoralConversation, HelpCategory } from '../../types';
 import { ChatWindow } from './ChatWindow';
 import type { LeaderFormData } from './LeaderRegistrationForm';
@@ -60,26 +61,24 @@ export function CrisisCenterDispatch({
     );
   }
 
+  const headerMeta = getViewHeaderMeta('pastoral-care');
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {onBack && (
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="24-hour receiving line for member help requests — AI triage, crisis escalation, live handoff"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        leading={
+          onBack ? (
             <button onClick={onBack} className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg">
               <ChevronLeft size={20} className="text-gray-500" />
             </button>
-          )}
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Radio size={22} className="text-rose-600" />
-              Crisis Center Dispatch
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              24-hour receiving line for member help requests — AI triage, crisis escalation, live handoff
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+          ) : undefined
+        }
+        trailing={
           <button
             onClick={() => {
               const url = `${window.location.origin}${window.location.pathname}?portal=pastor-signup`;
@@ -98,8 +97,8 @@ export function CrisisCenterDispatch({
             {linkCopied ? <Check size={16} /> : <Link2 size={16} />}
             {linkCopied ? 'Copied!' : 'Signup Link'}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       <CareDispatch
         conversations={conversations}

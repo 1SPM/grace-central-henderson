@@ -14,6 +14,8 @@ import {
   Star,
 } from 'lucide-react';
 import type { Person, DiscipleshipMilestone, MilestoneType } from '../types';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
 import { usePortalActivity } from '../hooks/usePortalActivity';
 
@@ -130,18 +132,18 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
     }
   };
 
+  const headerMeta = getViewHeaderMeta('discipleship');
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-slate-600 rounded-xl flex items-center justify-center">
-          <TrendingUp className="text-white" size={20} />
-        </div>
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Discipleship Pathways</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-400">Track spiritual growth across your congregation</p>
-        </div>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="Track spiritual growth across your congregation"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        className="mb-6"
+      />
 
       {/* Stats Bar */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-6">

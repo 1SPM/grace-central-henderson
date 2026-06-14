@@ -12,6 +12,8 @@ import {
   PartyPopper,
   MessageCircle,
 } from 'lucide-react';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 import type { Announcement, AnnouncementCategory } from '../types';
 
 const CATEGORY_CONFIG: Record<AnnouncementCategory, { label: string; icon: typeof Megaphone; bg: string; text: string }> = {
@@ -86,27 +88,27 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
 
+  const headerMeta = getViewHeaderMeta('announcements');
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center">
-            <Megaphone className="text-indigo-600 dark:text-indigo-400" size={20} />
-          </div>
-          <div>
-            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Announcements</h1>
-            <p className="text-sm text-gray-500 dark:text-dark-400">{announcements.length} announcement{announcements.length !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => { resetForm(); setShowForm(true); }}
-          className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 flex items-center gap-2"
-        >
-          <Plus size={16} />
-          New Announcement
-        </button>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle={`${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`}
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        className="mb-6"
+        trailing={
+          <button
+            onClick={() => { resetForm(); setShowForm(true); }}
+            className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 flex items-center gap-2"
+          >
+            <Plus size={16} />
+            New Announcement
+          </button>
+        }
+      />
 
       {/* Form */}
       {showForm && (

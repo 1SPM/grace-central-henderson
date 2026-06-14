@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Crown } from 'lucide-react';
 import { churchShortName } from '../../config/centralHenderson';
+import { HubPageHeader } from '../ui/HubPageHeader';
+import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';
 import { GraceAIFaq } from '../grace/GraceAIFaq';
 import { useLeadershipRoster } from '../../hooks/useLeadershipRoster';
@@ -100,26 +102,31 @@ export function LeadershipPage({
     { id: 'faq', label: 'Help & FAQ', icon: HelpCircle },
   ];
 
+  const headerMeta = getViewHeaderMeta('leadership');
+
   return (
     <div className="h-[calc(100vh-32px)] flex flex-col bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 overflow-hidden">
       <div className="shrink-0 border-b border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/90 backdrop-blur-sm px-4 sm:px-6 pt-4 pb-0">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-            <div>
-              <h1 className="serif text-2xl sm:text-3xl text-slate-900 dark:text-dark-100 leading-none">Leadership</h1>
-              <p className="text-xs text-gray-500 dark:text-dark-400 mt-1.5">
-                Pastors, clergy, and AI companion deployments for {shortName}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-400">
-              <span className="px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium">
-                {humanCount} staff
-              </span>
-              <span className="px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium">
-                {aiDeployedCount} AI companions active
-              </span>
-            </div>
-          </div>
+          <HubPageHeader
+            icon={headerMeta.icon}
+            title={headerMeta.title}
+            subtitle={`Pastors, clergy, and AI companion deployments for ${shortName}`}
+            iconBoxClassName={headerMeta.iconBoxClassName}
+            iconClassName={headerMeta.iconClassName}
+            size="sm"
+            className="mb-3"
+            trailing={
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-400">
+                <span className="px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium">
+                  {humanCount} staff
+                </span>
+                <span className="px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium">
+                  {aiDeployedCount} AI companions active
+                </span>
+              </div>
+            }
+          />
 
           <div className="flex items-center gap-1 overflow-x-auto">
             {HUB_TABS.map(({ id, label, icon: Icon }) => (

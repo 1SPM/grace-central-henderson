@@ -24,6 +24,8 @@ import {
   MapPin,
   Award,
 } from 'lucide-react';
+import { HubPageHeader } from './ui/HubPageHeader';
+import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
 import { usePortalActivity } from '../hooks/usePortalActivity';
 import type { MemberActivityEvent } from '../lib/database.types';
 import type { Person, SmallGroup } from '../types';
@@ -141,23 +143,27 @@ export function PortalActivity({ churchId, people, groups = [], onViewPerson }: 
     { label: 'Journal entries (7d)', value: summary.journalEntries7d, icon: Award, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-500/10' },
   ];
 
+  const headerMeta = getViewHeaderMeta('portal-activity');
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Portal Activity</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
-            What your members are doing in the companion app
-          </p>
-        </div>
-        <button
-          onClick={reload}
-          className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
-        >
-          <RefreshCw size={16} />
-          Refresh
-        </button>
-      </div>
+      <HubPageHeader
+        icon={headerMeta.icon}
+        title={headerMeta.title}
+        subtitle="What your members are doing in the companion app"
+        iconBoxClassName={headerMeta.iconBoxClassName}
+        iconClassName={headerMeta.iconClassName}
+        className="mb-6"
+        trailing={
+          <button
+            onClick={reload}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
+          >
+            <RefreshCw size={16} />
+            Refresh
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3 mb-6">
