@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense, type ReactNode } from 'react';
 import type { View } from './types';
 import { resolveAddressee } from './lib/greeting';
 import { navigateView } from './lib/actionCenterNav';
 import { useAuthContext, SignInPage } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
+import { SetupChecklist } from './components/SetupChecklist';
 import { PersonForm } from './components/PersonForm';
 import { GlobalSearch } from './components/GlobalSearch';
 import { QuickTaskForm } from './components/QuickTaskForm';
@@ -597,6 +598,26 @@ function App() {
         timezone={churchSettings?.timezone}
         churchName={churchSettings?.profile?.name}
         branding={churchSettings?.branding}
+        sidebarAddon={(() => {
+          if (!churchSettings || churchSettings.onboarding?.checklistDismissed) return null;
+          // Hide after 3 days of first exposure
+          const key = 'grace.checklistFirstSeenAt';
+          let firstSeen = localStorage.getItem(key);
+          if (!firstSeen) { firstSeen = String(Date.now()); localStorage.setItem(key, firstSeen); }
+          if (Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000) return null;
+          return (
+            <SetupChecklist
+              churchSettings={churchSettings}
+              peopleCount={people.length}
+              groupsCount={groups.length}
+              eventsCount={events.length}
+              onNavigate={(v) => navigateView(v as View, setView)}
+              onDismiss={() => saveOnboarding({ checklistDismissed: true })}
+              onReopenWizard={reopenWizard}
+              compact
+            />
+          ) as ReactNode;
+        })()}
       >
         <ErrorBoundary>
           <ViewRenderer

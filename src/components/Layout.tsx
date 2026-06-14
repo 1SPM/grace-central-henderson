@@ -56,6 +56,8 @@ interface LayoutProps {
   timezone?: string;
   churchName?: string;
   branding?: { primaryColor?: string; logoUrl?: string };
+  /** Optional content injected into the sidebar above the footer (hidden when collapsed). */
+  sidebarAddon?: ReactNode;
 }
 
 type Tone = 'indigo' | 'violet' | 'sky' | 'rose' | 'amber' | 'emerald';
@@ -193,7 +195,7 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
   );
 }
 
-export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding }: LayoutProps) {
+export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
   const grace = useGraceChat();
   const { user } = useAuthContext();
   const addressee = resolveAddressee(user?.firstName, user?.role);
@@ -440,6 +442,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             )}
           </div>
         </nav>
+
+        {/* Sidebar addon slot — hidden when collapsed */}
+        {sidebarAddon && !sidebarCollapsed && (
+          <div className="px-3 pb-2">
+            {sidebarAddon}
+          </div>
+        )}
 
         {/* Footer */}
         <div className={`px-3 py-2 border-t border-gray-200/50 dark:border-white/5 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>

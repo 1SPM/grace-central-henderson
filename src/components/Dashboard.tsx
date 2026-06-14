@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import { Person, Task, Giving, Interaction, PrayerRequest, CalendarEvent, LeaderProfile, PastoralConversation, HelpCategory } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
-import { SetupChecklist } from './SetupChecklist';
 const SundayPrep = lazy(() => import('./SundayPrep').then(m => ({ default: m.SundayPrep })));
 import { StatCard } from './ui/StatCard';
 import { StatusBadge, priorityToVariant } from './ui/StatusBadge';
@@ -103,16 +102,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
   const greeting = greetingWord(zoned.hour24);
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const calendarIndex = useMemo(() => buildCalendarIndex(events), [events]);
-  const checklistStale = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    const key = 'grace.checklistFirstSeenAt';
-    let firstSeen = localStorage.getItem(key);
-    if (!firstSeen) {
-      firstSeen = String(Date.now());
-      localStorage.setItem(key, firstSeen);
-    }
-    return Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000;
-  }, []);
   const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>('kanban');
 
   // Memoize filtered arrays to prevent recalculation on every render
@@ -462,19 +451,6 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
         </>
       ) : (
         <>
-      {/* Setup Checklist */}
-      {churchSettings && onNavigate && onDismissChecklist && !churchSettings.onboarding?.checklistDismissed && !checklistStale && (
-        <SetupChecklist
-          churchSettings={churchSettings}
-          peopleCount={people.length}
-          groupsCount={groupsCount}
-          eventsCount={eventsCount}
-          onNavigate={onNavigate}
-          onDismiss={onDismissChecklist}
-          onReopenWizard={onReopenWizard}
-          onOpenTutorials={onOpenTutorials}
-        />
-      )}
 
 
       {/* KPI row — pinned at top of overview */}
