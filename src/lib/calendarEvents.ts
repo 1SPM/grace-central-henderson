@@ -1,4 +1,5 @@
 import type { CalendarEvent } from '../types';
+import { mergeCalendarWithRhythm } from './churchCalendarRhythm';
 
 export type DayAgendaEvent = {
   id: string;
@@ -38,4 +39,10 @@ export function buildCalendarIndex(events: CalendarEvent[]): {
   }
 
   return { eventDays, eventsByDay };
+}
+
+/** Home calendar: staged events plus seasonal holidays and church milestones. */
+export function buildDashboardCalendarIndex(events: CalendarEvent[], anchorYear = new Date().getFullYear()) {
+  const merged = mergeCalendarWithRhythm(events, [anchorYear - 1, anchorYear, anchorYear + 1]);
+  return buildCalendarIndex(merged);
 }

@@ -34,7 +34,7 @@ import { useMailInboxStats } from '../hooks/useMailInboxStats';
 import { usePortalActivity } from '../hooks/usePortalActivity';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useChurchClock } from '../hooks/useChurchClock';
-import { buildCalendarIndex } from '../lib/calendarEvents';
+import { buildDashboardCalendarIndex } from '../lib/calendarEvents';
 import { greetingWord, resolveAddressee } from '../lib/greeting';
 import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
 
@@ -86,7 +86,10 @@ export function Dashboard({ churchId, people, tasks, events = [], giving = [], p
   const { zoned } = useChurchClock(timezone);
   const greeting = greetingWord(zoned.hour24);
   const addressee = resolveAddressee(user?.firstName, user?.role);
-  const calendarIndex = useMemo(() => buildCalendarIndex(events), [events]);
+  const calendarIndex = useMemo(
+    () => buildDashboardCalendarIndex(events, zoned.year),
+    [events, zoned.year],
+  );
 
   // Memoize filtered arrays to prevent recalculation on every render
   const { visitors, inactive, pendingTasks } = useMemo(() => ({
