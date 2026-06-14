@@ -29,7 +29,7 @@ export function ImpactCardMonitoring({ data, compact }: ImpactCardMonitoringProp
   if (Math.abs(summary.reconciliation_delta_micro_usd) > 100_000) {
     alerts.push({
       level: 'warn',
-      message: `i2c ledger vs interchange delta ${fmtImpactUsd(Math.abs(summary.reconciliation_delta_micro_usd))} — reconcile in Financial Hub`,
+      message: `i2c ledger vs interchange delta ${fmtImpactUsd(Math.abs(summary.reconciliation_delta_micro_usd))} — reconcile in Impact Card Accounts`,
     });
   }
   if (summary.pending_kyc > 0) {
@@ -124,7 +124,7 @@ export function ImpactCardMonitoring({ data, compact }: ImpactCardMonitoringProp
         </div>
         <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-3 flex items-center gap-1">
           <CreditCard size={11} />
-          Compare with Financial Hub processor table (source: i2c) for full audit trail.
+          Compare with Impact Card processor activity (source: i2c) for full audit trail.
         </p>
       </div>
     </div>

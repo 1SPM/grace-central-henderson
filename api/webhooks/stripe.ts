@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'missing signature' });
   }
 
-  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-12-18.acacia' });
+  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
   let event: Stripe.Event;
   try {
     const raw = await readRawBody(req);

@@ -88,7 +88,7 @@ async function handlePaymentIntentSucceeded(
     direction: 'credit',
     amountMicroUsd,
     currency: (pi.currency ?? 'usd').toUpperCase(),
-    description: pi.description ?? null,
+    description: pi.description ?? undefined,
     relatedGivingId: (givingRow as { id: string } | null)?.id ?? null,
     relatedPersonId: personId,
     occurredAt: new Date(event.created * 1000),

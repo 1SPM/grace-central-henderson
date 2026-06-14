@@ -11,7 +11,7 @@ import { isFeatureEnabled, getFeatureFlag } from './posthog';
 export const FLAGS = {
   /** Disables all writes app-wide. Used as a kill switch during incidents. */
   READ_ONLY_MODE: 'read-only-mode',
-  /** Gates the new Financial Hub dashboard route (Sprint 4). */
+  /** Legacy financial feature flag retained for compatibility with older telemetry. */
   FINANCIAL_HUB: 'financial-hub',
   /** Switches the interchange data source from mock to real i2c (Sprint 6). */
   I2C_LIVE: 'i2c-live',

@@ -7,7 +7,7 @@
  * Structure:
  *   Hero        — headline + subhead + primary CTA + secondary CTA
  *   Trust row   — small social-proof line (placeholder until pilots)
- *   Features    — three pillars: AI care, giving + Financial Hub, card program
+ *   Features    — three pillars: AI care, Impact Campaigns, card program
  *   Plan teaser — three pricing tiles → /pricing
  *   How it works — three-step "what changes for your church"
  *   FAQ         — three most common questions
@@ -133,7 +133,7 @@ function Features() {
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
-      title: 'A Financial Hub your CFO can read',
+      title: 'Impact Campaigns your CFO can read',
       copy:
         'Real-time interchange. MTD and YTD giving. Funds split by designation. Top givers with engagement signals. Append-only ledger that an auditor can trust. Zero spreadsheets.',
     },
@@ -165,7 +165,7 @@ function Features() {
 function PricingTeaser() {
   const tiers = [
     { name: 'Starter', price: 49, blurb: 'CRM + giving for small churches' },
-    { name: 'Pro', price: 199, blurb: 'Adds Financial Hub + AI care agents', highlight: true },
+    { name: 'Pro', price: 199, blurb: 'Adds Impact Campaigns + AI care agents', highlight: true },
     { name: 'Enterprise', price: 499, blurb: 'Adds card program + custom domain' },
   ];
   return (

@@ -107,7 +107,8 @@ function parseHash(): { view: View; personId: string | null } {
   }
 
   // Removed feature routes → Home. Keeps old bookmarks from landing on NotFound.
-  if (['financial-hub', 'follow-up-automation', 'planning-center-import', 'reminders'].includes(basePath)) {
+  if (['financial-hub', 'follow-up-automation', 'planning-center-import', 'reminders', 'agents'].includes(basePath)) {
+    window.history.replaceState(null, '', '#/dashboard');
     return { view: 'dashboard', personId: null };
   }
 

@@ -109,7 +109,7 @@ export function SettingsBilling() {
           <li>· Up to {plan.limits.members === null ? 'unlimited' : plan.limits.members.toLocaleString()} members</li>
           <li>· {plan.limits.aiCallsPerMonth.toLocaleString()} AI calls per month</li>
           <li>· {plan.limits.storageGb} GB storage</li>
-          {plan.gates.financialHub && <li>· Financial Hub dashboard</li>}
+          {plan.gates.financialHub && <li>· Impact Campaigns reporting</li>}
           {plan.gates.serverAgents && <li>· Daily AI care agents</li>}
           {plan.gates.customDomain && <li>· Custom domain</li>}
           {plan.gates.cardProgram && <li>· Member card program</li>}

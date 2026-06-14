@@ -87,7 +87,7 @@ export async function recordUsage(
     void import('../../instrument.js').then(({ Sentry, sentryEnabled }) => {
       if (sentryEnabled) {
         Sentry.withScope((scope) => {
-          scope.setContext('usage_row', row);
+          scope.setContext('usage_row', { ...row });
           Sentry.captureException(err);
         });
       }

@@ -253,7 +253,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           churchSettings={settings}
           onNavigate={(v) => navigateView(v, setView)}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
-          onReopenWizard={onReopenWizard}
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}
           onViewLeaders={() => {

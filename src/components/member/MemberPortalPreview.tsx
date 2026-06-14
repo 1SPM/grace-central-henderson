@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { QrCode, Smartphone, Monitor, ExternalLink, Copy, Check, ArrowLeft, Link2 } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { MemberPortal } from './MemberPortal';
+import { SAMPLE_GIVING, SAMPLE_PEOPLE } from '../../constants';
 import type { Person, CalendarEvent, Giving, Attendance, LeaderProfile, PastoralConversation, HelpCategory, Announcement, PrayerRequest, SmallGroup, HelpRequest, DiscipleshipMilestone, MemberPortalTab } from '../../types';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
@@ -68,9 +69,22 @@ export function MemberPortalPreview({
 }: MemberPortalPreviewProps) {
   // Resolve demo member — prefer Maya Thompson, fall back to any member
   const demoMember = useMemo(
-    () => people.find(p => p.id === 'maya-001') ?? people.find(p => p.status === 'member') ?? null,
+    () => (
+      people.find(p => p.id === 'maya-001') ??
+      SAMPLE_PEOPLE.find(p => p.id === 'maya-001') ??
+      people.find(p => p.status === 'member') ??
+      null
+    ),
     [people]
   );
+  const previewPeople = useMemo(() => {
+    if (!demoMember || people.some(p => p.id === demoMember.id)) return people;
+    return [demoMember, ...people];
+  }, [demoMember, people]);
+  const previewGiving = useMemo(() => {
+    if (demoMember?.id !== 'maya-001' || giving.some(g => g.personId === 'maya-001')) return giving;
+    return [...SAMPLE_GIVING.filter(g => g.personId === 'maya-001'), ...giving];
+  }, [demoMember?.id, giving]);
   const [viewMode, setViewMode] = useState<'phone' | 'full'>('phone');
   const [previewTab, setPreviewTab] = useState<MemberPortalTab>(initialTab);
   const { isCopied: copied, copy: copyToClipboard } = useCopyToClipboard();
@@ -110,9 +124,9 @@ export function MemberPortalPreview({
         </div>
         <MemberPortal
           key={previewTab}
-          people={people}
+          people={previewPeople}
           events={events}
-          giving={giving}
+          giving={previewGiving}
           attendance={attendance}
           rsvps={rsvps}
           churchName={churchName}
@@ -196,9 +210,9 @@ export function MemberPortalPreview({
                   <div className="h-full overflow-hidden flex flex-col" style={{ transform: 'translateZ(0)' }}>
                     <MemberPortal
                       key={previewTab}
-                      people={people}
+                      people={previewPeople}
                       events={events}
-                      giving={giving}
+                      giving={previewGiving}
                       attendance={attendance}
                       rsvps={rsvps}
                       churchName={churchName}

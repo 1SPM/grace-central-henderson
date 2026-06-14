@@ -43,7 +43,7 @@ export const cardOpsAgent: AgentFunction = (input) => {
       kind: 'kyc_stuck',
       severity: hours >= settings.card_ops_kyc_stuck_hours * 2 ? 'urgent' : 'attention',
       title: `${name}'s Impact Card application stuck ${Math.floor(hours / 24)}d ${hours % 24}h`,
-      detail: `KYC ${kyc.status.replace('_', ' ')} since ${submitted.toISOString().slice(0, 10)} — past the ${settings.card_ops_kyc_stuck_hours}h SLA (RB-016). Review it in Financial Hub → Card Program.`,
+      detail: `KYC ${kyc.status.replace('_', ' ')} since ${submitted.toISOString().slice(0, 10)} — past the ${settings.card_ops_kyc_stuck_hours}h SLA (RB-016). Review it in Impact Card Accounts.`,
       personId: kyc.person_id,
       relatedId: kyc.id,
       metadata: { hours_stuck: hours, kyc_status: kyc.status },

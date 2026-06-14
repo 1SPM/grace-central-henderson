@@ -61,7 +61,7 @@ export const PLANS: Record<PlanSlug, PlanDefinition> = {
     features: [
       'Everything in Starter',
       'Up to 1,000 members',
-      'Financial Hub dashboard',
+      'Impact Campaigns reporting',
       'Daily AI care agents (member care, stewardship, operations)',
       'Stripe Connect with platform fee',
       'Priority support (24-hr response)',

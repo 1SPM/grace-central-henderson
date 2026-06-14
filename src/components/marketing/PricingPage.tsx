@@ -49,7 +49,7 @@ const PLANS: PlanCard[] = [
     features: [
       'Everything in Starter',
       'Up to 1,000 members',
-      'Financial Hub dashboard',
+      'Impact Campaigns reporting',
       'Daily AI care agents',
       'Stripe Connect with platform fee',
       'Priority support (24-hr)',

@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'invalid request', expected: '{ action: "replay", webhook_event_id: "..." }' });
     }
     if (!STRIPE_SECRET_KEY) return res.status(503).json({ error: 'stripe not configured' });
-    const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-12-18.acacia' });
+    const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
 
     try {
       const outcome = await replayStripeEvent(body.webhook_event_id, {

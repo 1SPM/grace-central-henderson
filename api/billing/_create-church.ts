@@ -142,7 +142,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         supabase,
         churchId: church.id,
         toAddr: userEmail,
-        subject: '',   // overwritten by template
         templateId: 'welcome.v1',
         idempotencyKey: `welcome:${church.id}`,
         sendNow: true,

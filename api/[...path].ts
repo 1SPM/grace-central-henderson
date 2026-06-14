@@ -40,8 +40,6 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'cron/reconcile-stripe': () => import('./cron/_reconcile-stripe.js'),
   'cron/send-pending-emails': () => import('./cron/_send-pending-emails.js'),
   'email/send': () => import('./email/_send.js'),
-  'financial-hub/summary': () => import('./financial-hub/_summary.js'),
-  'financial-hub/top-givers': () => import('./financial-hub/_top-givers.js'),
   'giving/create-payment-intent': () => import('./giving/_create-payment-intent.js'),
   'giving/create-subscription': () => import('./giving/_create-subscription.js'),
   'giving/donor-portal-callback': () => import('./giving/_donor-portal-callback.js'),

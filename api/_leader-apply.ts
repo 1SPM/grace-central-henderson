@@ -45,12 +45,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
   const { displayName, email, phone, role, audienceUrl, audienceSize, expertiseAreas, bio, motivation } = body;
+  const applicantName = displayName as string;
+  const applicantEmail = email as string;
   const expertise: string[] = expertiseAreas ?? [];
 
   try {
 
     if (!supabaseUrl || !supabaseKey) {
-      console.log('Leader application (demo mode):', { displayName, email, role });
+      console.log('Leader application (demo mode):', { displayName: applicantName, email: applicantEmail, role });
       return res.status(200).json({ success: true, demo: true });
     }
 
@@ -59,8 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data, error } = await supabase
       .from('anchor_leader_applications')
       .insert({
-        display_name: displayName.trim(),
-        email: email.trim(),
+        display_name: applicantName.trim(),
+        email: applicantEmail.trim(),
         phone: phone?.trim() || null,
         role: role?.trim() || null,
         audience_url: audienceUrl?.trim() || null,

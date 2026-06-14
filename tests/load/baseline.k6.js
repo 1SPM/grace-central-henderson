@@ -9,7 +9,7 @@
  *     ramps down over 30 seconds. 3.5 minutes total.
  *   - Each VU loops a representative mix of read-heavy public traffic:
  *       65% — dashboard load (HTML + initial bundle)
- *       15% — financial-hub summary fetch
+ *       15% — Impact Campaigns page load
  *       15% — connect-card public submission (anonymous traffic spike)
  *        5% — Ask Grace chat (the most expensive endpoint)
  *
@@ -74,7 +74,7 @@ export const options = {
   thresholds: {
     // SLO: 95% of read requests under 500ms
     'http_req_duration{group:::dashboard}':       ['p(95)<500'],
-    'http_req_duration{group:::financial-hub}':   ['p(95)<500'],
+    'http_req_duration{group:::impact-campaigns}': ['p(95)<500'],
     'http_req_duration{group:::connect-card}':    ['p(95)<1000'],
     // SLO: 95% of AI requests under 2.5s (upstream-bound)
     'http_req_duration{group:::ask-grace}':       ['p(95)<2500'],
@@ -92,7 +92,7 @@ export const options = {
 function pickAction() {
   const r = Math.random();
   if (r < 0.65) return 'dashboard';
-  if (r < 0.80) return 'financial-hub';
+  if (r < 0.80) return 'impact-campaigns';
   if (r < 0.95) return 'connect-card';
   return 'ask-grace';
 }
@@ -115,22 +115,10 @@ function loadDashboard() {
   });
 }
 
-function loadFinancialHub() {
-  group('financial-hub', () => {
-    // Default to last 30 days; service returns 401 without auth, which
-    // is the expected unauthenticated behavior. We measure latency.
-    const today = new Date().toISOString().slice(0, 10);
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
-    const res = http.get(
-      `${BASE_URL}/api/financial-hub/summary?from=${thirtyDaysAgo}&to=${today}`,
-      { tags: { endpoint: 'financial-hub-summary' } },
-    );
-    // 401 is OK here (no auth) — it means the route is up + responding fast.
-    // We're measuring TTFB, not auth.
-    const ok = check(res, {
-      'financial-hub responded': (r) => r.status === 200 || r.status === 401,
-    });
-    errorRate.add(!ok);
+function loadImpactCampaigns() {
+  group('impact-campaigns', () => {
+    const res = http.get(`${BASE_URL}/#/giving`, { tags: { endpoint: 'impact-campaigns' } });
+    expectOk(res, 'GET /#/giving');
     sleep(Math.random() * 2 + 1);
   });
 }
@@ -177,7 +165,7 @@ function askGrace() {
 export default function () {
   switch (pickAction()) {
     case 'dashboard':      loadDashboard();      break;
-    case 'financial-hub':  loadFinancialHub();   break;
+    case 'impact-campaigns': loadImpactCampaigns(); break;
     case 'connect-card':   submitConnectCard();  break;
     case 'ask-grace':      askGrace();           break;
   }
@@ -187,7 +175,7 @@ export function setup() {
   console.log(`\n=== Grace CRM baseline load test ===`);
   console.log(`Target: ${BASE_URL}`);
   console.log(`Profile: 0 → 50 VU over 1min, hold 2min, ramp down 30s.`);
-  console.log(`Mix: 65% dashboard / 15% financial-hub / 15% connect-card / 5% ask-grace`);
+  console.log(`Mix: 65% dashboard / 15% impact-campaigns / 15% connect-card / 5% ask-grace`);
   console.log(`SLO targets: p95 < 500ms (reads), p95 < 2500ms (AI), error rate < 1%\n`);
 }
 
