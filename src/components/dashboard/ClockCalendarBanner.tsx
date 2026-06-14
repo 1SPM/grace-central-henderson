@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin, Plus } from 'lucide-react';
 import { useChurchClock } from '../../hooks/useChurchClock';
 import { calendarDayKey, type DayAgendaEvent } from '../../lib/calendarEvents';
@@ -41,6 +41,7 @@ export interface ClockCalendarBannerProps {
   timezone?: string;
   variant?: 'classic' | 'redesign';
   className?: string;
+  actionStrip?: ReactNode;
 }
 
 export function ClockCalendarBanner({
@@ -50,10 +51,12 @@ export function ClockCalendarBanner({
   timezone = CENTRAL_HENDERSON_TIMEZONE,
   variant = 'classic',
   className = '',
+  actionStrip,
 }: ClockCalendarBannerProps) {
   const { zoned, format, churchToday, churchTodayKey } = useChurchClock(timezone);
   const [viewMonth, setViewMonth] = useState(() => new Date(churchToday.getFullYear(), churchToday.getMonth(), 1));
   const [selected, setSelected] = useState<Date>(() => new Date(churchToday));
+  const [railTab, setRailTab] = useState<'today' | 'itinerary'>(() => (actionStrip ? 'today' : 'itinerary'));
 
   const eventSet = useMemo(() => new Set(eventDays), [eventDays]);
   const month = viewMonth.getMonth();
@@ -136,7 +139,7 @@ export function ClockCalendarBanner({
 
   return (
     <div className={`rounded-xl border border-stone-300 dark:border-dark-700 bg-white dark:bg-dark-850 shadow-sm overflow-hidden ${className}`}>
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-dark-700">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-dark-700">
         {/* Single-month calendar */}
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-3">
@@ -204,8 +207,43 @@ export function ClockCalendarBanner({
           </p>
         </div>
 
-        {/* Itinerary rail */}
-        <div className="px-5 py-4 flex flex-col min-h-[280px]">
+        {/* Today + itinerary rail */}
+        <div className="flex flex-col min-h-[280px]">
+          {actionStrip && (
+            <div className="flex border-b border-stone-200 dark:border-dark-700 px-5 pt-3 gap-1">
+              <button
+                type="button"
+                onClick={() => setRailTab('today')}
+                className={`px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] border-b-2 -mb-px transition-colors ${
+                  railTab === 'today'
+                    ? 'border-slate-900 dark:border-dark-100 text-slate-900 dark:text-dark-100'
+                    : 'border-transparent text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => setRailTab('itinerary')}
+                className={`px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] border-b-2 -mb-px transition-colors ${
+                  railTab === 'itinerary'
+                    ? 'border-slate-900 dark:border-dark-100 text-slate-900 dark:text-dark-100'
+                    : 'border-transparent text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200'
+                }`}
+              >
+                Itinerary
+              </button>
+            </div>
+          )}
+
+          {actionStrip && railTab === 'today' && (
+            <div className="px-5 py-4 flex-shrink-0 flex-1 min-h-0 overflow-y-auto">
+              {actionStrip}
+            </div>
+          )}
+
+          {(!actionStrip || railTab === 'itinerary') && (
+          <div className="px-5 py-4 flex flex-col flex-1 min-h-0">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-dark-400">Itinerary</p>
@@ -270,6 +308,8 @@ export function ClockCalendarBanner({
                 </button>
               )}
             </div>
+          )}
+          </div>
           )}
         </div>
       </div>

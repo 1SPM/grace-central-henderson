@@ -13,6 +13,10 @@ interface TodayActionStripProps {
   onViewInactive?: () => void;
   onViewCalendar?: () => void;
   onNavigate?: (view: string) => void;
+  variant?: 'standalone' | 'embedded';
+  hideMail?: boolean;
+  maxVisible?: number;
+  onViewAllActions?: () => void;
 }
 
 interface ActionCard {
@@ -80,7 +84,13 @@ export function TodayActionStrip({
   onViewInactive,
   onViewCalendar,
   onNavigate,
+  variant = 'standalone',
+  hideMail = false,
+  maxVisible,
+  onViewAllActions,
 }: TodayActionStripProps) {
+  const embedded = variant === 'embedded';
+  const itemCap = maxVisible ?? (embedded ? 4 : undefined);
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
   const sevenDaysAgo = new Date(now);
@@ -96,24 +106,28 @@ export function TodayActionStrip({
   const activePrayers = prayers.filter(p => !p.isAnswered).length;
 
   const cards: ActionCard[] = [
-    {
-      key: 'mail-flagged',
-      icon: AlertTriangle,
-      label: 'Flagged email',
-      count: mailFlagged,
-      hint: mailFlagged === 1 ? 'needs personal reply' : 'need personal reply',
-      tone: 'urgent',
-      onClick: () => onNavigate?.('mail'),
-    },
-    {
-      key: 'mail-review',
-      icon: Mail,
-      label: 'Email to review',
-      count: mailNeedsReview,
-      hint: mailNeedsReview === 1 ? 'awaiting your call' : 'awaiting your call',
-      tone: 'warm',
-      onClick: () => onNavigate?.('mail'),
-    },
+    ...(hideMail
+      ? []
+      : [
+          {
+            key: 'mail-flagged',
+            icon: AlertTriangle,
+            label: 'Flagged email',
+            count: mailFlagged,
+            hint: mailFlagged === 1 ? 'needs personal reply' : 'need personal reply',
+            tone: 'urgent' as const,
+            onClick: () => onNavigate?.('mail'),
+          },
+          {
+            key: 'mail-review',
+            icon: Mail,
+            label: 'Email to review',
+            count: mailNeedsReview,
+            hint: mailNeedsReview === 1 ? 'awaiting your call' : 'awaiting your call',
+            tone: 'warm' as const,
+            onClick: () => onNavigate?.('mail'),
+          },
+        ]),
     {
       key: 'overdue',
       icon: AlertTriangle,
@@ -126,9 +140,9 @@ export function TodayActionStrip({
     {
       key: 'visitors',
       icon: UserCheck,
-      label: 'New visitors',
+      label: 'New this week',
       count: newVisitors,
-      hint: 'this week',
+      hint: 'visitors',
       tone: 'warm',
       onClick: onViewVisitors,
     },
@@ -170,10 +184,21 @@ export function TodayActionStrip({
     },
   ];
 
-  const visible = cards.filter(c => c.count > 0);
+  const visible = cards.filter(c => c.count > 0 && !(embedded && c.key === 'events'));
+  const capped = itemCap != null ? visible.slice(0, itemCap) : visible;
+  const overflow = itemCap != null ? visible.length - capped.length : 0;
   const allClear = visible.length === 0;
 
   if (allClear) {
+    if (embedded) {
+      return (
+        <div className="flex items-center gap-2.5 rounded-lg bg-emerald-50/80 dark:bg-emerald-500/5 border border-emerald-200/60 dark:border-emerald-500/20 px-3 py-2.5">
+          <Heart size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">All clear today — nothing needs attention.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="mb-6 px-5 py-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/5 border border-emerald-200/60 dark:border-emerald-500/20 flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
@@ -183,6 +208,55 @@ export function TodayActionStrip({
           <p className="text-sm font-medium text-emerald-900 dark:text-emerald-300">All clear today.</p>
           <p className="text-xs text-emerald-700/80 dark:text-emerald-400/70">No overdue tasks, drifting members, or upcoming events. Good day to call someone.</p>
         </div>
+      </div>
+    );
+  }
+
+  if (embedded) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2.5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-dark-400">Today</p>
+          <span className="text-[11px] text-gray-500 dark:text-dark-500">{visible.length} need attention</span>
+        </div>
+        <div className="space-y-1.5 max-h-[220px] overflow-y-auto">
+          {capped.map(card => {
+            const tone = TONE[card.tone];
+            const Icon = card.icon;
+            return (
+              <button
+                key={card.key}
+                type="button"
+                onClick={card.onClick}
+                disabled={!card.onClick}
+                className={`group w-full flex items-center gap-2.5 p-2.5 rounded-lg border border-stone-200 dark:border-dark-700 bg-stone-50 dark:bg-dark-800 transition-all text-left ${tone.ring} ${card.onClick ? 'hover:shadow-sm cursor-pointer' : 'cursor-default'}`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${tone.iconBg}`}>
+                  <Icon size={14} className={tone.iconColor} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg font-semibold text-slate-900 dark:text-dark-100 leading-none">{card.count}</span>
+                    <span className="text-xs font-medium text-slate-700 dark:text-dark-200 truncate">{card.label}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-dark-400 truncate">{card.hint}</p>
+                </div>
+                {card.onClick && (
+                  <ArrowRight size={12} className="shrink-0 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-dark-300 transition-colors" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {(overflow > 0 || (onViewAllActions && visible.length > 0)) && (
+          <button
+            type="button"
+            onClick={onViewAllActions ?? onViewTasks}
+            className="mt-2 w-full text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-left"
+          >
+            {overflow > 0 ? `+${overflow} more · ` : ''}View all in Action Center
+          </button>
+        )}
       </div>
     );
   }
