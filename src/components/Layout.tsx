@@ -40,6 +40,7 @@ import { NotificationCenter } from './NotificationCenter';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
 import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHenderson';
 import { GraceOrb } from './grace/GraceOrb';
+import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
@@ -201,6 +202,7 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
 }
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
+  const grace = useGraceChat();
   const { user } = useAuthContext();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
@@ -329,11 +331,22 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                 className={`rounded-full object-cover flex-shrink-0 ${sidebarCollapsed ? 'w-10 h-10' : 'w-[72px] h-[72px]'}`}
               />
             ) : (
-              <GraceOrb
-                size={sidebarCollapsed ? 'sm' : 'md'}
-                rings
-                variant="blue"
-              />
+              <button
+                type="button"
+                onClick={() => {
+                  grace.openPanel();
+                  setSidebarOpen(false);
+                }}
+                className="rounded-full flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 hover:opacity-90 transition-opacity"
+                title="Ask Grace"
+                aria-label="Ask Grace"
+              >
+                <GraceOrb
+                  size={sidebarCollapsed ? 'sm' : 'md'}
+                  rings
+                  variant="blue"
+                />
+              </button>
             )}
             <div className={`min-w-0 w-full ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug">

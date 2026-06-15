@@ -1,7 +1,8 @@
-type GraceOrbSize = 'sm' | 'md' | 'lg';
+type GraceOrbSize = 'xs' | 'sm' | 'md' | 'lg';
 type GraceOrbVariant = 'sunrise' | 'blue';
 
 const SIZE_PX: Record<GraceOrbSize, number> = {
+  xs: 28,
   sm: 40,
   md: 72,
   lg: 160,

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Sparkles, Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil, Mail, MessageSquare } from 'lucide-react';
+import { Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil, Mail, MessageSquare } from 'lucide-react';
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
@@ -138,9 +138,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-blue-950 flex items-center justify-center">
-            <Sparkles size={14} className="text-blue-300" />
-          </div>
+          <GraceOrb size="xs" variant="blue" />
           <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
         </div>
         <div className="flex items-center gap-1">
@@ -786,10 +784,10 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
             <button
               type="button"
               onClick={() => chat.openPanel()}
-              className="w-6 h-6 rounded-full bg-blue-400/20 hover:bg-blue-400/30 flex items-center justify-center shrink-0 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 hover:opacity-90 transition-opacity"
               aria-label="Open Grace"
             >
-              <Sparkles size={13} className="text-blue-300" />
+              <GraceOrb size="xs" variant="blue" />
             </button>
             <input
               type="text"
