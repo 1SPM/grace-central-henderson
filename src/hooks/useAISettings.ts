@@ -81,7 +81,7 @@ export const AI_FEATURES: AIFeature[] = [
   {
     id: 'voiceReadback',
     name: 'Grace Voice Read-back',
-    description: 'Read Grace replies aloud (Brief auto-plays; tap speaker on any reply)',
+    description: 'Read Grace replies aloud with ElevenLabs neural voice (auto-greeting on open)',
     location: 'Ask Grace',
     enabled: true,
   },

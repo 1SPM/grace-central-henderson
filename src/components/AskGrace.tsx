@@ -67,6 +67,15 @@ function getSpeechRecognitionCtor(): (new () => MinimalRecognition) | null {
   return (Ctor as new () => MinimalRecognition) || null;
 }
 
+/** Skip TTS for configuration / error strings — not useful read aloud. */
+function shouldAutoSpeakReply(content: string): boolean {
+  const text = content.trim();
+  if (!text) return false;
+  return !/ai service not configured|ai not configured|network error|something went wrong/i.test(text);
+}
+
+const VOICE_GREETING_SESSION_KEY = 'grace-admin-voice-greeted';
+
 function useVoiceInput(onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<MinimalRecognition | null>(null);
@@ -88,7 +97,12 @@ function useVoiceInput(onTranscript: (text: string) => void) {
       if (transcript) onTranscript(transcript);
     };
     rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
+    rec.onerror = (event) => {
+      setListening(false);
+      if (event.error === 'not-allowed') {
+        console.warn('[Ask Grace] Microphone blocked — allow mic in browser settings or check Permissions-Policy.');
+      }
+    };
     recognitionRef.current = rec;
     setListening(true);
     rec.start();
@@ -117,6 +131,24 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     if (variant === 'panel') inputRef.current?.focus();
   }, [variant]);
 
+  // Auto-greet on first panel open this session — mirrors member portal companion.
+  useEffect(() => {
+    if (variant !== 'panel' || !aiSettings.voiceReadback || !speechSupported) return;
+    if (typeof window !== 'undefined' && sessionStorage.getItem(VOICE_GREETING_SESSION_KEY)) return;
+
+    const greeting = chat.messages.find(m => m.role === 'assistant' && m.content.trim());
+    if (!greeting || !shouldAutoSpeakReply(greeting.content)) return;
+
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(VOICE_GREETING_SESSION_KEY, '1');
+    }
+
+    const timer = window.setTimeout(() => {
+      speak(greeting.content, greeting.id);
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
@@ -126,15 +158,18 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
   useEffect(() => {
     const wasLoading = prevLoadingRef.current;
     prevLoadingRef.current = chat.loading;
-    if (wasLoading && !chat.loading) {
+    if (wasLoading && !chat.loading && aiSettings.voiceReadback && speechSupported) {
       const lastAssistant = [...chat.messages].reverse().find(
         m => m.role === 'assistant' && m.content.trim(),
       );
-      if (lastAssistant?.source === 'brief' && aiSettings.voiceReadback && speechSupported) {
-        setListenPromptId(lastAssistant.id);
+      if (lastAssistant && shouldAutoSpeakReply(lastAssistant.content)) {
+        if (lastAssistant.source === 'brief') {
+          setListenPromptId(lastAssistant.id);
+        }
+        speak(lastAssistant.content, lastAssistant.id);
       }
     }
-  }, [chat.loading, chat.messages, aiSettings.voiceReadback, speechSupported]);
+  }, [chat.loading, chat.messages, aiSettings.voiceReadback, speechSupported, speak]);
 
   if (!aiSettings.aiAssistant) return null;
 

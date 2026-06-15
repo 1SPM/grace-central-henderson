@@ -36,6 +36,7 @@ import emailRoutes from './_routes/email.js';
 import smsRoutes from './_routes/sms.js';
 import agentRoutes from './_routes/agents.js';
 import aiRoutes from './_routes/ai.js';
+import graceTtsRoutes from './_routes/grace-tts.js';
 import { initWebhookRoutes } from './_routes/webhooks.js';
 
 // Import middleware
@@ -103,6 +104,9 @@ app.use('/api/agents', requireAuth, csrfProtection, rateLimit(30), agentRoutes);
 
 // AI routes - optional auth, tighter rate limit
 app.use('/api/ai', optionalAuth, rateLimit(15), aiRoutes);
+
+// Grace voice (ElevenLabs TTS proxy) — no auth; rate limited
+app.use('/api/grace/tts', rateLimit(30), graceTtsRoutes);
 
 // ============================================
 // HEALTH CHECK

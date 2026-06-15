@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
             // Permissions policy
             res.setHeader(
               'Permissions-Policy',
-              'camera=(), microphone=(), geolocation=(), payment=(self)'
+              'camera=(), microphone=(self), geolocation=(), payment=(self)'
             );
             next();
           });
