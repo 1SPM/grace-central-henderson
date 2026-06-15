@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
               "font-src 'self' https://fonts.gstatic.com; " +
               "img-src 'self' data: https: blob:; " +
+              "media-src 'self' blob: data:; " +
               "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.twilio.com https://api.stripe.com https://*.clerk.accounts.dev wss://*.supabase.co https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://*.i.posthog.com; " +
               "frame-src 'self' https://js.stripe.com https://challenges.cloudflare.com https://*.clerk.accounts.dev; " +
               "frame-ancestors 'none';"
@@ -89,7 +90,7 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
-          cacheId: 'grace-crm-crisis-dispatch-v3',
+          cacheId: 'grace-crm-voice-v4',
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
           cleanupOutdatedCaches: true,
           skipWaiting: true,

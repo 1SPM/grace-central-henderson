@@ -180,7 +180,9 @@ export function useGraceSpeech() {
       });
       if (!res.ok) throw new Error(`TTS ${res.status}`);
 
-      const blob = await res.blob();
+      const buffer = await res.arrayBuffer();
+      const mime = res.headers.get('content-type')?.split(';')[0]?.trim() || 'audio/mpeg';
+      const blob = new Blob([buffer], { type: mime });
       const objectUrl = URL.createObjectURL(blob);
       objectUrlRef.current = objectUrl;
 
@@ -203,6 +205,12 @@ export function useGraceSpeech() {
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       cleanupAudio();
+      const isPlayError = err instanceof DOMException
+        && (err.name === 'NotAllowedError' || err.name === 'NotSupportedError');
+      if (isPlayError) {
+        log.warn('ElevenLabs audio playback blocked', err.name);
+        return;
+      }
       if (!fallbackLoggedRef.current) {
         fallbackLoggedRef.current = true;
         log.info('ElevenLabs unavailable, using browser speech');
