@@ -60,6 +60,12 @@ function getProviderError(data: Record<string, unknown>, status: number): string
     return base;
   }
   if (typeof detail === 'string' && detail.trim()) return detail.trim();
+  if (status === 500) {
+    return 'AI server unreachable. Run `npm run dev:api` in a second terminal (port 3010) and add GEMINI_API_KEY to .env.local.';
+  }
+  if (status === 503) {
+    return 'AI not configured. Add GEMINI_API_KEY to .env.local (copy from Vercel → Settings → Environment Variables).';
+  }
   return `Request failed with status ${status}`;
 }
 

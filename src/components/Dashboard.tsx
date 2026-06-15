@@ -16,6 +16,7 @@ import { DashboardCommandBar } from './dashboard/DashboardCommandBar';
 import { DashboardPulse } from './dashboard/DashboardPulse';
 import { DashboardDetails } from './dashboard/DashboardDetails';
 import { GraceGettingStartedPanel } from './grace/GraceGettingStartedPanel';
+import { MONDAY_BRIEF_PROMPT } from '../lib/grace-chat/adminQuickTags';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
 import { usePortalActivity } from '../hooks/usePortalActivity';
@@ -158,6 +159,7 @@ export function Dashboard({
         mailBacklog={mailBacklog}
         mailFlagged={mailStats.flagged}
         onAskGrace={() => grace.openPanel()}
+        onBrief={() => grace.openPanel(MONDAY_BRIEF_PROMPT)}
         onAddPerson={onViewPeople}
         onWorkQueue={workQueue}
         onMail={() => onNavigate?.('mail')}

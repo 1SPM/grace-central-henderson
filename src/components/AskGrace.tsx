@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil, Mail, MessageSquare } from 'lucide-react';
+import { Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus, CheckCircle2, UserCheck, HeartHandshake, Calendar, Mic, MicOff, Trash2, Pencil, Mail, MessageSquare, Volume2, VolumeX } from 'lucide-react';
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
+import { useGraceSpeech } from '../hooks/useGraceSpeech';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
@@ -104,9 +105,12 @@ function useVoiceInput(onTranscript: (text: string) => void) {
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
+  const { speak, stop, speakingId, supported: speechSupported } = useGraceSpeech();
   const [input, setInput] = useState('');
+  const [listenPromptId, setListenPromptId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const prevLoadingRef = useRef(chat.loading);
   const voice = useVoiceInput((text) => setInput(prev => prev ? `${prev} ${text}` : text));
 
   useEffect(() => {
@@ -117,12 +121,34 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
 
+  useEffect(() => () => { stop(); }, [stop]);
+
+  useEffect(() => {
+    const wasLoading = prevLoadingRef.current;
+    prevLoadingRef.current = chat.loading;
+    if (wasLoading && !chat.loading) {
+      const lastAssistant = [...chat.messages].reverse().find(
+        m => m.role === 'assistant' && m.content.trim(),
+      );
+      if (lastAssistant?.source === 'brief' && aiSettings.voiceReadback && speechSupported) {
+        setListenPromptId(lastAssistant.id);
+      }
+    }
+  }, [chat.loading, chat.messages, aiSettings.voiceReadback, speechSupported]);
+
   if (!aiSettings.aiAssistant) return null;
 
   const handleSend = async (query: string) => {
     if (!query.trim() || chat.loading) return;
+    stop();
+    setListenPromptId(null);
     setInput('');
     await chat.sendMessage(query);
+  };
+
+  const handleClose = () => {
+    stop();
+    onClose?.();
   };
 
   const wrapperClass = variant === 'inline'
@@ -153,7 +179,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
           )}
           {onClose && (
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-1.5 rounded-lg hover:bg-stone-200/70 dark:hover:bg-dark-800 text-gray-500"
               aria-label="Close"
             >
@@ -181,7 +207,41 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
                     ? <Loader2 size={16} className="animate-spin text-gray-500" />
                     : ''}
               </div>
+              {m.role === 'assistant' && m.content && speechSupported && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (speakingId === m.id) {
+                      stop();
+                    } else {
+                      setListenPromptId(null);
+                      speak(m.content, m.id);
+                    }
+                  }}
+                  className={`self-end ml-1 p-1.5 rounded-lg transition-colors shrink-0 ${
+                    speakingId === m.id
+                      ? 'bg-amber-500 text-white'
+                      : 'text-gray-500 hover:bg-stone-200/60 dark:hover:bg-dark-700'
+                  }`}
+                  aria-label={speakingId === m.id ? 'Stop reading aloud' : 'Read aloud'}
+                >
+                  {speakingId === m.id ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
+              )}
             </div>
+            {listenPromptId === m.id && m.role === 'assistant' && m.content && speechSupported && (
+              <button
+                type="button"
+                onClick={() => {
+                  setListenPromptId(null);
+                  speak(m.content, m.id);
+                }}
+                className="flex items-center gap-2 ml-1 px-3 py-2 text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+              >
+                <Volume2 size={14} />
+                Listen to briefing
+              </button>
+            )}
             {m.actions?.filter(a => !a.dismissed).map(a => (
               a.executed ? (
                 <div key={a.id} className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 pl-1">

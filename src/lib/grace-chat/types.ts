@@ -15,6 +15,8 @@ export interface GraceMessage {
   role: 'user' | 'assistant';
   content: string;
   actions?: ActionInstance[];
+  /** Set when the reply is a Monday Brief — triggers auto voice read-back. */
+  source?: 'brief';
 }
 
 export interface GraceData {

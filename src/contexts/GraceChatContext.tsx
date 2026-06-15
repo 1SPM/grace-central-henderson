@@ -12,7 +12,7 @@ import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
 import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
-import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
+import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
 
 export type { PendingAction } from '../lib/grace-actions';
@@ -318,10 +318,11 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     if (!query.trim()) return;
     const userMsgId = `u-${Date.now()}`;
     const assistantMsgId = `a-${Date.now() + 1}`;
+    const isBrief = query.trim() === MONDAY_BRIEF_PROMPT.trim();
     setMessages(m => [
       ...m,
       { id: userMsgId, role: 'user', content: query },
-      { id: assistantMsgId, role: 'assistant', content: '' },
+      { id: assistantMsgId, role: 'assistant', content: '', ...(isBrief ? { source: 'brief' as const } : {}) },
     ]);
     setLoading(true);
 

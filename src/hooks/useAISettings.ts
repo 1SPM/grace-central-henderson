@@ -19,6 +19,7 @@ export interface AISettings {
   messageComposer: boolean;
   aiAssistant: boolean;
   smartSearch: boolean;
+  voiceReadback: boolean;
 }
 
 const DEFAULT_SETTINGS: AISettings = {
@@ -29,6 +30,7 @@ const DEFAULT_SETTINGS: AISettings = {
   messageComposer: true,
   aiAssistant: true,
   smartSearch: true,
+  voiceReadback: true,
 };
 
 const STORAGE_KEY = 'grace-ai-settings';
@@ -74,6 +76,13 @@ export const AI_FEATURES: AIFeature[] = [
     name: 'AI Assistant',
     description: 'Floating assistant for ministry insights and suggestions',
     location: 'Global (bottom right)',
+    enabled: true,
+  },
+  {
+    id: 'voiceReadback',
+    name: 'Grace Voice Read-back',
+    description: 'Read Grace replies aloud (Brief auto-plays; tap speaker on any reply)',
+    location: 'Ask Grace',
     enabled: true,
   },
   {
@@ -124,6 +133,7 @@ export function useAISettings() {
       messageComposer: true,
       aiAssistant: true,
       smartSearch: true,
+      voiceReadback: true,
     });
   }, []);
 
@@ -136,6 +146,7 @@ export function useAISettings() {
       messageComposer: false,
       aiAssistant: false,
       smartSearch: false,
+      voiceReadback: false,
     });
   }, []);
 

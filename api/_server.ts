@@ -48,16 +48,20 @@ import { auditMutations } from './_middleware/audit.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
+// Initialize Stripe (optional — AI routes work without it)
+const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+const stripe = stripeKey
+  ? new Stripe(stripeKey, { apiVersion: '2023-10-16' })
+  : null;
 
-// Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_KEY || ''
-);
+// Initialize Supabase (service role preferred; anon key OK for local AI dev)
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_KEY ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ============================================
 // MIDDLEWARE
@@ -87,16 +91,18 @@ app.use(auditMutations(supabase));
 // ============================================
 
 // Protected routes - require authentication, CSRF, and rate limiting
-app.use('/api/payments', requireAuth, csrfProtection, rateLimit(30), initPaymentRoutes(stripe));
+if (stripe) {
+  app.use('/api/payments', requireAuth, csrfProtection, rateLimit(30), initPaymentRoutes(stripe));
+  app.use('/webhooks', initWebhookRoutes(stripe, supabase));
+} else {
+  console.warn('STRIPE_SECRET_KEY not set — payment and webhook routes disabled');
+}
 app.use('/api/email', requireAuth, csrfProtection, rateLimit(20), emailRoutes);
 app.use('/api/sms', requireAuth, csrfProtection, rateLimit(10), smsRoutes);
 app.use('/api/agents', requireAuth, csrfProtection, rateLimit(30), agentRoutes);
 
 // AI routes - optional auth, tighter rate limit
 app.use('/api/ai', optionalAuth, rateLimit(15), aiRoutes);
-
-// Webhooks - no auth (verified by signature)
-app.use('/webhooks', initWebhookRoutes(stripe, supabase));
 
 // ============================================
 // HEALTH CHECK
@@ -138,9 +144,9 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
-  console.log(`Grace CRM Payment API running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+app.listen(Number(PORT), '127.0.0.1', () => {
+  console.log(`Grace CRM Payment API running on http://127.0.0.1:${PORT}`);
+  console.log(`Health check: http://127.0.0.1:${PORT}/health`);
 });
 
 export default app;

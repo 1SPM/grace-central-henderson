@@ -1,4 +1,4 @@
-import { Sparkles, UserPlus, ListTodo, Mail, Church, BookOpen } from 'lucide-react';
+import { Sparkles, UserPlus, ListTodo, Mail, Church, BookOpen, Sunrise } from 'lucide-react';
 
 interface DashboardCommandBarProps {
   greeting: string;
@@ -8,6 +8,7 @@ interface DashboardCommandBarProps {
   mailBacklog: number;
   mailFlagged: number;
   onAskGrace: () => void;
+  onBrief: () => void;
   onAddPerson?: () => void;
   onWorkQueue: () => void;
   onMail?: () => void;
@@ -23,6 +24,7 @@ export function DashboardCommandBar({
   mailBacklog,
   mailFlagged,
   onAskGrace,
+  onBrief,
   onAddPerson,
   onWorkQueue,
   onMail,
@@ -48,6 +50,14 @@ export function DashboardCommandBar({
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">{heroSubline}</p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={onBrief}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+          >
+            <Sunrise size={14} />
+            Brief
+          </button>
           <button
             type="button"
             onClick={onAskGrace}

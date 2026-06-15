@@ -25,10 +25,40 @@ cp .env.example .env
 
 ```bash
 npm install
+cp .env.example .env.local
+# Add GEMINI_API_KEY to .env.local (same key as Vercel → Settings → Environment Variables)
+```
+
+**Frontend only** (dashboard, people, tasks — no Ask Grace AI):
+
+```bash
 npm run dev
 ```
 
+**Full local stack** (Ask Grace, Brief, AI features):
+
+```bash
+# Terminal 1 — API server on port 3001
+npm run dev:api
+
+# Terminal 2 — Vite frontend on port 3000 (proxies /api → 3001)
+npm run dev
+```
+
+Or start both in one terminal: `npm run dev:full`
+
 Open http://localhost:3000
+
+**Port 3010:** The API server runs on port 3010 by default (`PORT` in `.env.local`). Vite proxies `/api` there via `VITE_API_PROXY`. Ports 3001–3002 are often taken by other local dev servers.
+
+Verify AI is configured:
+
+```bash
+curl http://localhost:3000/api/ai/health
+# expect: {"status":"configured"}
+```
+
+**Voice read-back:** Grace can read replies aloud using your browser's built-in speech (Chrome, Edge, Safari). Toggle in Settings → AI Features → Grace Voice Read-back. The mic icon is voice *input* only; use the speaker icon on each reply to hear it read back.
 
 ---
 
