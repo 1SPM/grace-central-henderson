@@ -44,9 +44,9 @@ export function useGraceSpeech() {
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [provider, setProvider] = useState<GraceVoiceProvider>('none');
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const objectUrlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const fallbackLoggedRef = useRef(false);
   const browserSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -78,22 +78,17 @@ export function useGraceSpeech() {
   }, [browserSupported]);
 
   const cleanupAudio = useCallback(() => {
-    if (audioRef.current) {
+    if (sourceRef.current) {
       try {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+        sourceRef.current.stop();
       } catch {
-        // ignore
+        // ignore — may already be stopped
       }
-      audioRef.current = null;
+      sourceRef.current = null;
     }
-    if (objectUrlRef.current) {
-      try {
-        URL.revokeObjectURL(objectUrlRef.current);
-      } catch {
-        // ignore
-      }
-      objectUrlRef.current = null;
+    if (audioContextRef.current) {
+      void audioContextRef.current.close();
+      audioContextRef.current = null;
     }
     if (abortRef.current) {
       try {
@@ -181,30 +176,46 @@ export function useGraceSpeech() {
       if (!res.ok) throw new Error(`TTS ${res.status}`);
 
       const buffer = await res.arrayBuffer();
-      const mime = res.headers.get('content-type')?.split(';')[0]?.trim() || 'audio/mpeg';
-      const blob = new Blob([buffer], { type: mime });
-      const objectUrl = URL.createObjectURL(blob);
-      objectUrlRef.current = objectUrl;
+      if (buffer.byteLength === 0) throw new Error('TTS empty response');
 
-      const audio = new Audio(objectUrl);
-      audioRef.current = audio;
+      setIsSpeaking(true);
+      setSpeakingId(messageId ?? null);
 
-      audio.onplay = () => {
-        setIsSpeaking(true);
-        setSpeakingId(messageId ?? null);
-      };
-      const done = () => {
-        cleanupAudio();
-        setIsSpeaking(false);
-        setSpeakingId(null);
-      };
-      audio.onended = done;
-      audio.onerror = done;
+      // Web Audio avoids CSP media-src blob: restrictions on object URLs.
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
+      const decoded = await ctx.decodeAudioData(buffer.slice(0));
+      const source = ctx.createBufferSource();
+      sourceRef.current = source;
+      source.buffer = decoded;
+      source.connect(ctx.destination);
 
-      await audio.play();
+      await new Promise<void>((resolve, reject) => {
+        source.onended = () => {
+          sourceRef.current = null;
+          void ctx.close();
+          audioContextRef.current = null;
+          resolve();
+        };
+        source.addEventListener('error', () => {
+          sourceRef.current = null;
+          void ctx.close();
+          audioContextRef.current = null;
+          reject(new Error('Audio playback failed'));
+        }, { once: true });
+        if (ctx.state === 'suspended') {
+          void ctx.resume();
+        }
+        source.start(0);
+      });
+
+      setIsSpeaking(false);
+      setSpeakingId(null);
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       cleanupAudio();
+      setIsSpeaking(false);
+      setSpeakingId(null);
       const isPlayError = err instanceof DOMException
         && (err.name === 'NotAllowedError' || err.name === 'NotSupportedError');
       if (isPlayError) {
