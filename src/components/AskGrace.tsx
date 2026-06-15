@@ -38,7 +38,7 @@ function renderWithLinks(text: string) {
         href={part}
         target="_blank"
         rel="noopener noreferrer"
-        className="underline text-amber-700 dark:text-amber-400 hover:text-amber-800 break-all"
+        className="underline text-blue-700 dark:text-blue-400 hover:text-blue-800 break-all"
       >
         {part}
       </a>
@@ -138,8 +138,8 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center">
-            <Sparkles size={14} className="text-amber-300" />
+          <div className="w-7 h-7 rounded-md bg-blue-950 flex items-center justify-center">
+            <Sparkles size={14} className="text-blue-300" />
           </div>
           <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
         </div>
@@ -683,7 +683,7 @@ export function GraceAdminSidePanel({
   return (
     <div className="hidden sm:flex flex-col w-[220px] shrink-0 bg-gradient-to-b from-blue-900 to-blue-950 border-r border-blue-800/60 text-white">
       <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b border-white/10">
-        <GraceOrb size="md" />
+        <GraceOrb size="md" variant="blue" rings />
         <p className="mt-4 text-sm font-semibold text-center leading-snug text-white">
           {salutation}
         </p>
@@ -786,10 +786,10 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
             <button
               type="button"
               onClick={() => chat.openPanel()}
-              className="w-6 h-6 rounded-full bg-amber-400/20 hover:bg-amber-400/30 flex items-center justify-center shrink-0 transition-colors"
+              className="w-6 h-6 rounded-full bg-blue-400/20 hover:bg-blue-400/30 flex items-center justify-center shrink-0 transition-colors"
               aria-label="Open Grace"
             >
-              <Sparkles size={13} className="text-amber-300" />
+              <Sparkles size={13} className="text-blue-300" />
             </button>
             <input
               type="text"

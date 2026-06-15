@@ -51,7 +51,15 @@ async function parseJsonOrText(response: Response): Promise<Record<string, unkno
 
 function getProviderError(data: Record<string, unknown>, status: number): string {
   const error = data.error;
-  if (typeof error === 'string' && error.trim()) return error.trim();
+  const detail = data.detail;
+  if (typeof error === 'string' && error.trim()) {
+    const base = error.trim();
+    if (typeof detail === 'string' && detail.trim() && !base.includes(detail.trim())) {
+      return `${base}: ${detail.trim()}`;
+    }
+    return base;
+  }
+  if (typeof detail === 'string' && detail.trim()) return detail.trim();
   return `Request failed with status ${status}`;
 }
 
@@ -100,12 +108,17 @@ export interface StreamOptions extends AIGenerateOptions {
   signal?: AbortSignal;
 }
 
+export interface AIStreamResult {
+  streamed: boolean;
+  error?: string;
+}
+
 /**
  * Stream text from the Gemini AI model. Calls onChunk as tokens arrive.
- * If streaming isn't available (e.g. server misconfigured), returns without
- * invoking onChunk so the caller can fall back to generateAIText.
+ * Returns { streamed: false, error } when the stream fails so callers
+ * can surface the message without a redundant non-stream retry.
  */
-export async function generateAIStreamed({ prompt, maxTokens, onChunk, signal }: StreamOptions): Promise<void> {
+export async function generateAIStreamed({ prompt, maxTokens, onChunk, signal }: StreamOptions): Promise<AIStreamResult> {
   try {
     const response = await fetch(`${API_ENDPOINT}?stream=1`, {
       method: 'POST',
@@ -114,22 +127,40 @@ export async function generateAIStreamed({ prompt, maxTokens, onChunk, signal }:
       signal,
     });
 
-    if (!response.ok || !response.body) return;
+    if (!response.ok) {
+      const data = await parseJsonOrText(response);
+      return { streamed: false, error: getProviderError(data, response.status) };
+    }
+
+    if (!response.body) {
+      return { streamed: false, error: 'Streaming unavailable' };
+    }
 
     const contentType = response.headers.get('content-type') || '';
     // If the server didn't honor the stream flag, bail — caller falls back.
-    if (!contentType.includes('text/plain') && !contentType.includes('text/event-stream')) return;
+    if (!contentType.includes('text/plain') && !contentType.includes('text/event-stream')) {
+      return { streamed: false };
+    }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let streamed = false;
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       const text = decoder.decode(value, { stream: true });
-      if (text) onChunk(text);
+      if (text) {
+        streamed = true;
+        onChunk(text);
+      }
     }
+    return { streamed };
   } catch (e) {
     log.error('AI stream error', e);
+    return {
+      streamed: false,
+      error: e instanceof Error ? e.message : 'Network error',
+    };
   }
 }
 

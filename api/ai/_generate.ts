@@ -181,15 +181,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     if (shouldStream) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Cache-Control', 'no-cache, no-transform');
-      res.setHeader('X-Accel-Buffering', 'no');
-
       const stream = await ai.models.generateContentStream({
         model: MODEL,
         contents: fullPrompt,
         config,
       });
+
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('X-Accel-Buffering', 'no');
 
       let streamedText = '';
       let promptTokens: number | undefined;
@@ -255,6 +255,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Avoid leaking keys or noisy stack traces; truncate.
     const publicMessage = message.slice(0, 240);
+
+    if (res.headersSent) {
+      res.end();
+      return;
+    }
 
     if (/API key|invalid key/i.test(message)) {
       return res.status(401).json({ error: 'Invalid API key' });

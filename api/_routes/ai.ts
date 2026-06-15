@@ -2,7 +2,8 @@
  * AI Routes - Gemini API Integration
  *
  * Provides AI text generation endpoints using Google's Gemini API.
- * Works in both local development (Express) and production (Vercel serverless).
+ * Mirrors production behavior in api/ai/_generate.ts (model, streaming,
+ * thinkingConfig). Metering is production-only via the Vercel handler.
  */
 
 import { Router, Request, Response } from 'express';
@@ -12,10 +13,11 @@ import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaErro
 const router = Router();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const MODEL = 'gemini-2.5-flash';
 
 // Rate limiting (simple in-memory, resets on server restart)
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 20; // requests per minute
+const RATE_LIMIT = 120; // requests per minute
 const RATE_WINDOW = 60 * 1000; // 1 minute
 
 function isRateLimited(ip: string): boolean {
@@ -33,6 +35,22 @@ function isRateLimited(ip: string): boolean {
 
   record.count++;
   return false;
+}
+
+function providerErrorPayload(error: unknown): { status: number; body: { error: string; detail?: string } } {
+  const message = error instanceof Error ? error.message : String(error);
+  const publicMessage = message.slice(0, 240);
+
+  if (/API key|invalid key/i.test(message)) {
+    return { status: 401, body: { error: 'Invalid API key' } };
+  }
+  if (isGeminiQuotaError(message)) {
+    return { status: 429, body: { error: 'Gemini quota hit. Wait and try again, or check billing at https://aistudio.google.com/app/spend' } };
+  }
+  if (/safety|blocked|candidate/i.test(message)) {
+    return { status: 400, body: { error: 'Model refused the prompt (safety filter)' } };
+  }
+  return { status: 500, body: { error: 'AI generation failed', detail: publicMessage } };
 }
 
 /**
@@ -64,10 +82,18 @@ router.post('/generate', async (req: Request, res: Response) => {
   }
 
   const fullPrompt = buildFullPrompt(sanitizedPrompt, typeof context === 'string' ? context : undefined);
+  const shouldStream = req.query.stream === '1' || req.query.stream === 'true';
 
   const sendHermesFallback = async () => {
     const hermes = await generateWithHermes({ prompt: fullPrompt, maxTokens });
     if (!hermes.success || !hermes.text) return false;
+    if (shouldStream) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.write(hermes.text);
+      res.end();
+      return true;
+    }
     res.status(200).json({ success: true, text: hermes.text, model: hermes.model || 'hermes-agent' });
     return true;
   };
@@ -79,14 +105,35 @@ router.post('/generate', async (req: Request, res: Response) => {
 
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const config = {
+      maxOutputTokens: Math.min(maxTokens || 1024, 4096),
+      temperature: 0.7,
+      thinkingConfig: { thinkingBudget: 0 },
+    };
+
+    if (shouldStream) {
+      const stream = await ai.models.generateContentStream({
+        model: MODEL,
+        contents: fullPrompt,
+        config,
+      });
+
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('X-Accel-Buffering', 'no');
+
+      for await (const chunk of stream) {
+        const chunkText = chunk.text;
+        if (chunkText) res.write(chunkText);
+      }
+      res.end();
+      return;
+    }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: MODEL,
       contents: fullPrompt,
-      config: {
-        maxOutputTokens: Math.min(maxTokens || 1024, 4096),
-        temperature: 0.7,
-      },
+      config,
     });
 
     const text = response.text;
@@ -98,23 +145,23 @@ router.post('/generate', async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       text,
-      model: 'gemini-2.0-flash',
+      model: MODEL,
     });
   } catch (error) {
     console.error('Gemini API error:', error);
 
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        return res.status(401).json({ error: 'Invalid API key configuration' });
-      }
-      if (isGeminiQuotaError(error.message)) {
-        if (await sendHermesFallback()) return;
-        return res.status(429).json({ error: 'Gemini spend cap reached. Raise it at https://aistudio.google.com/app/spend' });
-      }
+    if (res.headersSent) {
+      res.end();
+      return;
     }
 
-    return res.status(500).json({ error: 'AI generation failed' });
+    const message = error instanceof Error ? error.message : String(error);
+    if (isGeminiQuotaError(message)) {
+      if (await sendHermesFallback()) return;
+    }
+
+    const payload = providerErrorPayload(error);
+    return res.status(payload.status).json(payload.body);
   }
 });
 
@@ -125,7 +172,7 @@ router.post('/generate', async (req: Request, res: Response) => {
 router.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: GEMINI_API_KEY || getHermesConfig().configured ? 'configured' : 'not_configured',
-    model: GEMINI_API_KEY ? 'gemini-2.0-flash' : 'hermes-agent',
+    model: GEMINI_API_KEY ? MODEL : 'hermes-agent',
     providers: {
       gemini: Boolean(GEMINI_API_KEY),
       hermes: getHermesConfig().configured,

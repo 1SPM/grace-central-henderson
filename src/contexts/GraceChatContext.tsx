@@ -399,7 +399,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
 
     try {
       let streamed = false;
-      await generateAIStreamed({
+      const streamResult = await generateAIStreamed({
         prompt,
         maxTokens: 1200,
         onChunk: (chunk) => {
@@ -410,8 +410,12 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
         },
       });
 
-      if (!streamed) {
-        // Fallback to non-streaming
+      if (streamResult.error) {
+        setMessages(m => m.map(msg =>
+          msg.id === assistantMsgId ? { ...msg, content: streamResult.error! } : msg
+        ));
+      } else if (!streamed) {
+        // Fallback to non-streaming when the server didn't honor stream mode
         const result = await generateAIText({ prompt, maxTokens: 1200 });
         const text = result.success && result.text
           ? result.text
