@@ -36,10 +36,10 @@ export function LeaderProfileView({ leader, activity, onBack, onNavigate }: Lead
         <ArrowLeft size={15} /> Team
       </button>
 
-      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-0">
-          <LeaderAvatar leader={leader} size="hero" rounded="xl" className="md:min-h-[240px]" showVerified />
-          <div className="p-5">
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <div className="flex items-start gap-4">
+          <LeaderAvatar leader={leader} size="lg" />
+          <div className="flex-1 min-w-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
             <p className="text-sm text-gray-500 dark:text-dark-400">{leader.title}</p>
             <div className="flex gap-1.5 mt-2 flex-wrap">

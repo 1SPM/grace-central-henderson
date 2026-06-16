@@ -47,7 +47,7 @@ export function LeaderAvatar({
         <img
           src={photo}
           alt={leader.displayName}
-          className={`${isHero ? 'w-full h-full' : styles.box} ${roundClass} object-cover object-top`}
+          className={`${isHero ? 'w-full h-full' : styles.box} ${roundClass} object-cover object-center`}
         />
       ) : (
         <div

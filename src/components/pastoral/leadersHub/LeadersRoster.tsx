@@ -49,7 +49,7 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
 
       <div>
         <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Clergy &amp; Staff</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {active.map(leader => {
             const live = statsForLeader(activity ?? null, leader.id);
             const stats = getLeaderHubStats(leader);
@@ -61,43 +61,45 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
                 key={leader.id}
                 type="button"
                 onClick={() => onSelectLeader(leader.id)}
-                className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden text-left hover:border-gray-300 dark:hover:border-dark-500 transition-colors"
+                className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-3.5 text-left hover:border-gray-300 dark:hover:border-dark-500 transition-colors"
               >
-                <LeaderAvatar leader={leader} size="hero" rounded="xl" className="rounded-t-xl rounded-b-none" />
-                <div className="p-3 space-y-2">
+                <div className="flex items-start gap-3 mb-2.5">
+                  <LeaderAvatar leader={leader} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100 truncate leading-tight">
+                      {leader.displayName}
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate mt-0.5">{leader.title}</p>
+                    <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                      {leader.isAvailable ? (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          Live
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                          AI on duty
+                        </span>
+                      )}
+                      {hasAi && (
+                        <span className="flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                          <Bot size={9} /> AI Live
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-1 pt-2.5 border-t border-gray-200 dark:border-dark-700 text-center">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100 truncate">{leader.displayName}</p>
-                    <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate">{leader.title}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{sessions}</p>
+                    <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Sessions</p>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {leader.isAvailable ? (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        Live
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-                        AI on duty
-                      </span>
-                    )}
-                    {hasAi && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                        <Bot size={9} /> AI Live
-                      </span>
-                    )}
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.rating.toFixed(1)}</p>
+                    <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Rating</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-1 pt-2 border-t border-gray-200 dark:border-dark-700 text-center">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{sessions}</p>
-                      <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Sessions</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.rating.toFixed(1)}</p>
-                      <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Rating</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.blessings}/28</p>
-                      <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Blessings</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.blessings}/28</p>
+                    <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Blessings</p>
                   </div>
                 </div>
               </button>
