@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
-  LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, Baby,
+  LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck,
   BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet,
-  FileText, Tag, Settings, Globe, Mail,
+  FileText, Tag, Settings, Smartphone, Mail,
 } from 'lucide-react';
 import { Person, Task, PrayerRequest, View } from '../types';
 import { generateAIText } from '../lib/services/ai';
@@ -34,27 +34,25 @@ type SearchResult = {
 const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
   { view: 'dashboard', label: 'Home', subtitle: 'Today, KPIs & next actions', icon: <LayoutDashboard size={16} /> },
   { view: 'leadership', label: 'Leadership', subtitle: 'Pastors, clergy & AI companions', icon: <Crown size={16} /> },
-  { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups & mail', icon: <ListTodo size={16} /> },
-  { view: 'people', label: 'Congregation', subtitle: 'Directory & small groups', icon: <Users size={16} /> },
-  { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'i2c card program & member usage', icon: <Wallet size={16} /> },
+  { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups, mail & birthdays', icon: <ListTodo size={16} /> },
+  { view: 'people', label: 'Congregation', subtitle: 'Directory, groups, skills & families', icon: <Users size={16} /> },
   { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, attendance, announcements & live service', icon: <Church size={16} /> },
+  { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'i2c card program & member usage', icon: <Wallet size={16} /> },
   { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
   { view: 'pastoral-care', label: 'Crisis Center Dispatch', subtitle: '24-hour member request receiving', icon: <Heart size={16} /> },
-  { view: 'discipleship-engagement', label: 'Discipleship & Engagement', subtitle: 'Pathways, portal signals & spiritual growth', icon: <TrendingUp size={16} /> },
-  { view: 'analytics', label: 'Analytics', subtitle: 'Trends, health score & growth', icon: <BarChart3 size={16} /> },
-  { view: 'pipeline', label: 'Pipeline', subtitle: 'Visitor follow-up stages', icon: <TrendingUp size={16} /> },
-  { view: 'reports', label: 'Reports', subtitle: 'Printable church reports', icon: <FileText size={16} /> },
+  { view: 'discipleship-engagement', label: 'Growth & Engagement', subtitle: 'Pathways, portal signals & spiritual growth', icon: <TrendingUp size={16} /> },
+  { view: 'analytics', label: 'Analytics', subtitle: 'Settings · Trends, health score & growth', icon: <BarChart3 size={16} /> },
+  { view: 'reports', label: 'Reports', subtitle: 'Settings · Printable church reports', icon: <FileText size={16} /> },
   { view: 'prayer', label: 'Prayer', subtitle: 'Prayer requests & answered prayers', icon: <Heart size={16} /> },
   { view: 'tasks', label: 'Task List', subtitle: 'Advanced task management', icon: <CheckSquare size={16} /> },
-  { view: 'families', label: 'Families', subtitle: 'Households', icon: <Home size={16} /> },
+  { view: 'families', label: 'Families', subtitle: 'Congregation · Households', icon: <Home size={16} /> },
   { view: 'attendance', label: 'Attendance', subtitle: 'Sunday Service Tools · Check-in & counts', icon: <UserCheck size={16} /> },
   { view: 'announcements', label: 'Announcements', subtitle: 'Sunday Service Tools · Announcement board', icon: <Megaphone size={16} /> },
-  { view: 'child-checkin', label: 'Child Check-in', subtitle: 'Kids ministry', icon: <Baby size={16} /> },
   { view: 'life-services', label: 'Life Services', subtitle: 'Weddings, funerals & legacy planning', icon: <Heart size={16} /> },
-  { view: 'member-portal', label: 'Member Portal Preview', subtitle: 'Preview Home, Journey, Give, Events & Care', icon: <Globe size={16} /> },
-  { view: 'email-templates', label: 'Email Templates', subtitle: 'Reusable outreach messages', icon: <Mail size={16} /> },
-  { view: 'tags', label: 'Tags', subtitle: 'Segments and member labels', icon: <Tag size={16} /> },
-  { view: 'settings', label: 'Settings', subtitle: 'Church profile, integrations & billing', icon: <Settings size={16} /> },
+  { view: 'grace-mobile', label: 'GRACE Mobile', subtitle: 'Mobile CRM for staff · Home, Actions, People, Sunday & Giving', icon: <Smartphone size={16} /> },
+  { view: 'email-templates', label: 'Email Templates', subtitle: 'Settings · Reusable outreach messages', icon: <Mail size={16} /> },
+  { view: 'tags', label: 'Tags', subtitle: 'Settings · Segments and member labels', icon: <Tag size={16} /> },
+  { view: 'settings', label: 'Settings', subtitle: 'Church profile, tools, integrations & billing', icon: <Settings size={16} /> },
 ];
 
 type Mode = 'search' | 'ai';

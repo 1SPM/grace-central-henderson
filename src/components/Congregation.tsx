@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Sparkles, Users, Users2 } from 'lucide-react';
+import { Home, Sparkles, Users, Users2 } from 'lucide-react';
 import { PeopleList } from './PeopleList';
 import { Groups } from './Groups';
 import { ListSkeleton } from './ui/ViewSkeleton';
 
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
+const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
 import {
   congregationHash,
   parseCongregationTab,
@@ -25,6 +26,7 @@ interface CongregationProps {
   onAddMember?: (groupId: string, personId: string) => void;
   onRemoveMember?: (groupId: string, personId: string) => void;
   onEmailGroup?: (groupId: string) => void;
+  onUpdatePerson?: (person: Person) => Promise<void>;
   defaultTab?: CongregationTab;
 }
 
@@ -32,6 +34,7 @@ const TABS: { id: CongregationTab; label: string; icon: typeof Users }[] = [
   { id: 'directory', label: 'Directory', icon: Users },
   { id: 'groups', label: 'Groups', icon: Users2 },
   { id: 'skills', label: 'Skills & Talents', icon: Sparkles },
+  { id: 'families', label: 'Families', icon: Home },
 ];
 
 export function Congregation({
@@ -47,18 +50,23 @@ export function Congregation({
   onAddMember,
   onRemoveMember,
   onEmailGroup,
+  onUpdatePerson,
   defaultTab,
 }: CongregationProps) {
   const initial = useMemo(() => defaultTab ?? parseCongregationTab(), [defaultTab]);
   const [tab, setTab] = useState<CongregationTab>(initial);
   const activeGroupCount = useMemo(() => groups.filter(g => g.isActive).length, [groups]);
+  const familyCount = useMemo(
+    () => new Set(people.filter(p => p.familyId).map(p => p.familyId)).size,
+    [people],
+  );
 
   useEffect(() => {
     if (defaultTab) setTab(defaultTab);
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'groups' || defaultTab === 'skills') {
+    if (defaultTab === 'groups' || defaultTab === 'skills' || defaultTab === 'families') {
       window.history.replaceState(null, '', congregationHash(defaultTab));
     }
   }, [defaultTab]);
@@ -94,7 +102,7 @@ export function Congregation({
                 Congregation
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                {people.length} people · {activeGroupCount} active groups
+                {people.length} people · {activeGroupCount} active groups · {familyCount} households
               </p>
             </div>
           </div>
@@ -116,6 +124,11 @@ export function Congregation({
                 {id === 'groups' && activeGroupCount > 0 && (
                   <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300">
                     {activeGroupCount}
+                  </span>
+                )}
+                {id === 'families' && familyCount > 0 && (
+                  <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                    {familyCount}
                   </span>
                 )}
               </button>
@@ -152,6 +165,16 @@ export function Congregation({
         {tab === 'skills' && (
           <Suspense fallback={<ListSkeleton />}>
             <SkillsDatabase embedded people={people} onViewPerson={onViewPerson} />
+          </Suspense>
+        )}
+        {tab === 'families' && onUpdatePerson && (
+          <Suspense fallback={<ListSkeleton />}>
+            <Families
+              embedded
+              people={people}
+              onSelectPerson={onViewPerson}
+              onUpdatePerson={onUpdatePerson}
+            />
           </Suspense>
         )}
       </div>

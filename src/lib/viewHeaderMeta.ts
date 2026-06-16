@@ -66,7 +66,7 @@ export const viewHeaderMeta = {
   'discipleship-engagement': {
     icon: TrendingUp,
     iconBoxClassName: 'bg-blue-600',
-    title: 'Discipleship & Engagement',
+    title: 'Growth & Engagement',
   },
   announcements: {
     icon: Megaphone,

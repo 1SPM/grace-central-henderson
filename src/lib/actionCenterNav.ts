@@ -2,8 +2,9 @@ import type { View } from '../types';
 import { openCongregation } from './congregationNav';
 import { openSunday } from './sundayNav';
 import { openLeadership } from './leadershipNav';
+import { openSettings, type SettingsTab } from './settingsNav';
 
-export type ActionCenterTab = 'followups' | 'mail';
+export type ActionCenterTab = 'followups' | 'mail' | 'birthdays';
 
 export function parseActionCenterTab(): ActionCenterTab {
   if (typeof window === 'undefined') return 'followups';
@@ -11,11 +12,15 @@ export function parseActionCenterTab(): ActionCenterTab {
   const qIndex = hash.indexOf('?');
   if (qIndex < 0) return 'followups';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
-  return tab === 'mail' ? 'mail' : 'followups';
+  if (tab === 'mail') return 'mail';
+  if (tab === 'birthdays') return 'birthdays';
+  return 'followups';
 }
 
 export function actionCenterHash(tab: ActionCenterTab = 'followups'): string {
-  return tab === 'mail' ? '#/actions?tab=mail' : '#/actions';
+  if (tab === 'mail') return '#/actions?tab=mail';
+  if (tab === 'birthdays') return '#/actions?tab=birthdays';
+  return '#/actions';
 }
 
 /** Navigate to Action Center, optionally opening the Mail tab. */
@@ -38,8 +43,28 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
     openActionCenter('mail', setView);
     return;
   }
+  if (view === 'birthdays') {
+    openActionCenter('birthdays', setView);
+    return;
+  }
   if (view === 'groups') {
     openCongregation('groups', setView);
+    return;
+  }
+  if (view === 'families') {
+    openCongregation('families', setView);
+    return;
+  }
+  if (view === 'skills') {
+    openCongregation('skills', setView);
+    return;
+  }
+  if (view === 'child-checkin') {
+    openSunday('attendance', setView);
+    return;
+  }
+  if (view === 'forms' || view === 'email-templates' || view === 'reports' || view === 'tags' || view === 'analytics') {
+    openSettings(view as SettingsTab, setView);
     return;
   }
   if (view === 'calendar') {

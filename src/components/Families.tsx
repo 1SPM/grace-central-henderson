@@ -21,9 +21,10 @@ interface FamiliesProps {
   people: Person[];
   onSelectPerson: (id: string) => void;
   onUpdatePerson: (person: Person) => Promise<void>;
+  embedded?: boolean;
 }
 
-export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesProps) {
+export function Families({ people, onSelectPerson, onUpdatePerson, embedded = false }: FamiliesProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState<string | null>(null);
@@ -126,16 +127,13 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
   const headerMeta = getViewHeaderMeta('families');
 
   return (
-    <div className="p-8">
-      <div className="max-w-6xl mx-auto">
-        <HubPageHeader
-          icon={headerMeta.icon}
-          title={headerMeta.title}
-          subtitle={`${families.length} households · ${unassignedPeople.length} unassigned`}
-          iconBoxClassName={headerMeta.iconBoxClassName}
-          iconClassName={headerMeta.iconClassName}
-          className="mb-6"
-          trailing={
+    <div className={embedded ? 'px-6 pt-4 pb-6 max-w-6xl mx-auto' : 'p-8'}>
+      <div className={embedded ? '' : 'max-w-6xl mx-auto'}>
+        {embedded ? (
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-sm text-gray-500 dark:text-dark-400">
+              {families.length} households · {unassignedPeople.length} unassigned
+            </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
@@ -143,8 +141,26 @@ export function Families({ people, onSelectPerson, onUpdatePerson }: FamiliesPro
               <Plus size={18} />
               New Family
             </button>
-          }
-        />
+          </div>
+        ) : (
+          <HubPageHeader
+            icon={headerMeta.icon}
+            title={headerMeta.title}
+            subtitle={`${families.length} households · ${unassignedPeople.length} unassigned`}
+            iconBoxClassName={headerMeta.iconBoxClassName}
+            iconClassName={headerMeta.iconClassName}
+            className="mb-6"
+            trailing={
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                <Plus size={18} />
+                New Family
+              </button>
+            }
+          />
+        )}
 
         {/* Search */}
         <div className="relative mb-6">

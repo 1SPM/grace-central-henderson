@@ -6,6 +6,7 @@ import { useToast } from './Toast';
 interface TagsManagerProps {
   people: Person[];
   onUpdatePersonTags: (personId: string, tags: string[]) => void;
+  embedded?: boolean;
 }
 
 interface TagInfo {
@@ -14,7 +15,7 @@ interface TagInfo {
   people: Person[];
 }
 
-export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
+export function TagsManager({ people, onUpdatePersonTags, embedded = false }: TagsManagerProps) {
   const toast = useToast();
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState('');
@@ -121,14 +122,20 @@ export function TagsManager({ people, onUpdatePersonTags }: TagsManagerProps) {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Tags Manager</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
+    <div className={embedded ? 'px-6 pt-4 pb-8' : 'p-8'}>
+      <div className={`flex items-center justify-between ${embedded ? 'mb-6' : 'mb-8'}`}>
+        {!embedded ? (
+          <div>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Tags Manager</h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              {tags.length} tags used across your congregation
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-dark-400">
             {tags.length} tags used across your congregation
           </p>
-        </div>
+        )}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowMergeModal(true)}

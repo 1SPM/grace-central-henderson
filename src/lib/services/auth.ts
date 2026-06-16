@@ -25,6 +25,14 @@ export interface User {
 
 export type UserRole = 'admin' | 'pastor' | 'staff' | 'volunteer' | 'member';
 
+/** Back-end staff roles that may access admin tools (and GRACE Mobile). */
+export const STAFF_ROLES: UserRole[] = ['admin', 'pastor', 'staff'];
+
+/** True when the given role is a back-end staff role. */
+export function isStaffRole(role: UserRole | null | undefined): boolean {
+  return !!role && STAFF_ROLES.includes(role);
+}
+
 export interface UserPermissions {
   canManageUsers: boolean;
   canManageSettings: boolean;

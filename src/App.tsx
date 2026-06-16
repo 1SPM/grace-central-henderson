@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense, type
 import type { View } from './types';
 import { resolveAddressee } from './lib/greeting';
 import { navigateView } from './lib/actionCenterNav';
+import { isStaffRole } from './lib/services/auth';
 import { useAuthContext, SignInPage } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { SetupChecklist } from './components/SetupChecklist';
@@ -21,9 +22,8 @@ import { TutorialProvider } from './contexts/TutorialContext';
 import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
 import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
 
-// Lazy load MemberPortal for standalone access
-const MemberPortal = lazy(() => import('./components/member/MemberPortal').then(m => ({ default: m.MemberPortal })));
-const MemberSignIn = lazy(() => import('./components/member/MemberSignIn').then(m => ({ default: m.MemberSignIn })));
+// Lazy load GRACE Mobile (standalone staff-gated mobile CRM at /mobile)
+const GraceMobile = lazy(() => import('./components/mobile/GraceMobile').then(m => ({ default: m.GraceMobile })));
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
 const PricingPage = lazy(() => import('./components/marketing/PricingPage').then(m => ({ default: m.PricingPage })));
 const SignUpFlow = lazy(() => import('./components/marketing/SignUpFlow').then(m => ({ default: m.SignUpFlow })));
@@ -42,7 +42,6 @@ import { useModals } from './hooks/useModals';
 import { useAgents } from './hooks/useAgents';
 import { useAppHandlers } from './hooks/useAppHandlers';
 import { useChurchSettings } from './hooks/useChurchSettings';
-import { useCurrentMember } from './hooks/useCurrentMember';
 import { usePastoralCare } from './hooks/usePastoralCare';
 import { useAnnouncements } from './hooks/useAnnouncements';
 import { useDiscipleship } from './hooks/useDiscipleship';
@@ -151,7 +150,7 @@ function App() {
   const pastoralCare = usePastoralCare();
   const announcementData = useAnnouncements(churchId);
   const discipleshipData = useDiscipleship(people, churchId);
-  const { settings: churchSettings, churchSlug, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
+  const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
   const [showTutorialPicker, setShowTutorialPicker] = useState(false);
 
@@ -281,15 +280,52 @@ function App() {
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
   const selectedPerson = selectedPersonId ? personMap.get(selectedPersonId) : undefined;
 
-  // Check if we're accessing the standalone member portal
-  const isPortalRoute = window.location.pathname === '/portal' || window.location.hash === '#portal';
+  // Check if we're accessing the standalone GRACE Mobile app (staff-gated)
+  const isMobileRoute = window.location.pathname === '/mobile' || window.location.hash === '#mobile';
 
-  // Resolve the signed-in user to their CRM person record (member identity).
-  const { member: currentDbMember } = useCurrentMember(dbPeople, isDemo);
-  const currentMember = useMemo(
-    () => (currentDbMember ? personMap.get(currentDbMember.id) ?? toPersonLegacy(currentDbMember) : null),
-    [currentDbMember, personMap]
-  );
+  // Signed-in staff identity, shown in the GRACE Mobile header.
+  const mobileUserName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || undefined;
+  const mobileRoleLabel = user?.role
+    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+    : undefined;
+
+  // Renders an admin View. Shared by the classic shell and the GRACE Mobile
+  // preview/route (so curated mobile tabs reuse the same hub components).
+  // `renderMobileView` is threaded back in so the preview can embed live hubs.
+  function renderAdminView(v: View, sv: (next: View) => void): ReactNode {
+    return (
+      <ViewRenderer
+        view={v}
+        setView={sv}
+        churchId={churchId}
+        people={people}
+        tasks={tasks}
+        interactions={interactions}
+        groups={groups}
+        prayers={prayers}
+        events={events}
+        giving={giving}
+        attendanceRecords={[...attendanceFromDb, ...attendanceRecords]}
+        rsvps={rsvps}
+        volunteerAssignments={volunteerAssignments}
+        selectedPerson={selectedPerson}
+        selectedPersonId={selectedPersonId}
+        setSelectedPersonId={setSelectedPersonId}
+        handlers={handlers}
+        collectionMgmt={collectionMgmt}
+        charityBasketMgmt={charityBasketMgmt}
+        agents={agents}
+        announcementData={announcementData}
+        discipleshipData={discipleshipData}
+        pastoralCare={pastoralCare}
+        onOpenEmailSidebar={modals.openEmailSidebar}
+        onReopenWizard={reopenWizard}
+        userName={mobileUserName}
+        roleLabel={mobileRoleLabel}
+        renderMobileView={renderAdminView}
+      />
+    );
+  }
 
   // Public marketing routes — flagged early; rendered after all hooks
   // run (below) to satisfy rules-of-hooks. The marketing pages don't
@@ -328,13 +364,13 @@ function App() {
 
   // Show tutorial picker after wizard completion (one-time)
   useEffect(() => {
-    if (!settingsLoading && !isPortalRoute && churchSettings &&
+    if (!settingsLoading && !isMobileRoute && churchSettings &&
         churchSettings.onboarding?.wizardCompleted &&
         !churchSettings.onboarding?.tutorialPickerShown &&
         !showWizard) {
       setShowTutorialPicker(true);
     }
-  }, [settingsLoading, isPortalRoute, churchSettings, showWizard]);
+  }, [settingsLoading, isMobileRoute, churchSettings, showWizard]);
 
   if (isPricingRoute) {
     return (
@@ -433,36 +469,37 @@ function App() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
-            {isPortalRoute ? 'Loading Member Portal...' : 'Loading GRACE CRM...'}
+            {isMobileRoute ? 'Loading GRACE Mobile...' : 'Loading GRACE CRM...'}
           </p>
         </div>
       </div>
     );
   }
 
-  // Standalone Member Portal (no admin sidebar/layout)
-  if (isPortalRoute) {
-    const churchName = churchSettings?.profile?.name || 'Grace Church';
+  // Standalone GRACE Mobile (no admin sidebar/layout, staff-gated)
+  if (isMobileRoute) {
+    const churchName = churchSettings?.profile?.name || 'GRACE';
     const branding = churchSettings?.branding;
-    const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-    // Members must sign in when real auth is configured. Demo mode keeps
-    // the portal open with a demo member identity.
+    // Staff must sign in when real auth is configured. Demo mode keeps it open.
     if (isClerkConfigured && !isSignedIn) {
+      return <SignInPage />;
+    }
+
+    // Only back-end staff roles (admin/pastor/staff) may use GRACE Mobile.
+    if (isSignedIn && user && !isStaffRole(user.role)) {
       return (
-        <ErrorBoundary>
-          <Suspense fallback={
-            <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            </div>
-          }>
-            <MemberSignIn
-              churchName={churchName}
-              primaryColor={branding?.primaryColor}
-              logoUrl={branding?.logoUrl}
-            />
-          </Suspense>
-        </ErrorBoundary>
+        <div className="h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center p-6">
+          <div className="max-w-sm text-center">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-dark-100 mb-2">
+              Staff access required
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-dark-400">
+              GRACE Mobile is the back-end CRM for church staff. Your account doesn't have admin,
+              pastor, or staff access. Please contact an administrator.
+            </p>
+          </div>
+        </div>
       );
     }
 
@@ -470,35 +507,24 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={
           <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
           </div>
         }>
           <div className="h-screen">
-          <MemberPortal
-            people={people}
-            events={events}
-            giving={giving}
-            attendance={[...attendanceFromDb, ...attendanceRecords]}
-            rsvps={rsvps}
-            currentMember={currentMember}
-            churchName={churchName}
-            churchProfile={churchSettings?.profile}
-            branding={branding}
-            churchSlug={churchSlug}
-            churchId={churchId}
-            announcements={announcementData.activeAnnouncements}
-            prayers={prayers}
-            groups={groups}
-            onRSVP={handlers.rsvp}
-            onCheckIn={handlers.checkIn}
-            leaders={pastoralCare.leaders}
-            onCreateHelpRequest={pastoralCare.createHelpRequest}
-            conversations={pastoralCare.conversations}
-            activeConversation={pastoralCare.activeConversation}
-            onSendMessage={pastoralCare.sendMessage}
-            helpRequests={pastoralCare.helpRequests}
-            milestones={discipleshipData.milestones}
-          />
+            <GraceMobile
+              view={view}
+              onNavigate={setView}
+              renderView={(v) => renderAdminView(v, setView)}
+              churchName={churchName}
+              branding={branding}
+              userName={mobileUserName}
+              roleLabel={mobileRoleLabel}
+              people={people}
+              tasks={tasks}
+              giving={giving}
+              events={events}
+              prayers={prayers}
+            />
           </div>
           <PWAInstallPrompt />
         </Suspense>
@@ -620,33 +646,7 @@ function App() {
         })()}
       >
         <ErrorBoundary>
-          <ViewRenderer
-            view={view}
-            setView={setView}
-            churchId={churchId}
-            people={people}
-            tasks={tasks}
-            interactions={interactions}
-            groups={groups}
-            prayers={prayers}
-            events={events}
-            giving={giving}
-            attendanceRecords={[...attendanceFromDb, ...attendanceRecords]}
-            rsvps={rsvps}
-            volunteerAssignments={volunteerAssignments}
-            selectedPerson={selectedPerson}
-            selectedPersonId={selectedPersonId}
-            setSelectedPersonId={setSelectedPersonId}
-            handlers={handlers}
-            collectionMgmt={collectionMgmt}
-            charityBasketMgmt={charityBasketMgmt}
-            agents={agents}
-            announcementData={announcementData}
-            discipleshipData={discipleshipData}
-            pastoralCare={pastoralCare}
-            onOpenEmailSidebar={modals.openEmailSidebar}
-            onReopenWizard={reopenWizard}
-          />
+          {renderAdminView(view, setView)}
         </ErrorBoundary>
       </Layout>
 

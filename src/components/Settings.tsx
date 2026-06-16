@@ -54,6 +54,8 @@ interface SettingsProps {
   onNavigate?: (view: 'email-templates' | 'forms' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
   onRunWizard?: () => void;
   onOpenTutorials?: () => void;
+  /** When true, hide page title (used inside Settings hub). */
+  embedded?: boolean;
 }
 
 export function Settings({
@@ -66,6 +68,7 @@ export function Settings({
   onNavigate,
   onRunWizard,
   onOpenTutorials,
+  embedded = false,
 }: SettingsProps) {
   const { status, saveIntegrations } = useIntegrations();
   const { settings: accessibilitySettings, setFontSize, setHighContrast, setReduceMotion } = useAccessibility();
@@ -183,16 +186,18 @@ export function Settings({
   const headerMeta = getViewHeaderMeta('settings');
 
   return (
-    <div className="p-8">
+    <div className={embedded ? 'px-6 pt-4 pb-8' : 'p-8'}>
       <div className="max-w-5xl mx-auto">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle="Manage your GRACE CRM configuration"
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        className="mb-8"
-      />
+      {!embedded && (
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle="Manage your GRACE CRM configuration"
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          className="mb-8"
+        />
+      )}
 
       {/* Run Setup Wizard */}
       {onRunWizard && (

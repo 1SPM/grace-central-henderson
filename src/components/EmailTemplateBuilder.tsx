@@ -66,6 +66,7 @@ interface EmailTemplate {
 interface EmailTemplateBuilderProps {
   onBack?: () => void;
   onSave?: (template: EmailTemplate) => void;
+  embedded?: boolean;
 }
 
 const DEFAULT_STYLES = {
@@ -144,7 +145,7 @@ const MERGE_TAGS = [
   { tag: '{{event_time}}', label: 'Event Time' },
 ];
 
-export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderProps) {
+export function EmailTemplateBuilder({ onBack, onSave, embedded = false }: EmailTemplateBuilderProps) {
   const { churchId } = useAuthContext();
   const [template, setTemplate] = useState<EmailTemplate>({
     id: `tpl-${Date.now()}`,
@@ -672,12 +673,12 @@ export function EmailTemplateBuilder({ onBack, onSave }: EmailTemplateBuilderPro
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-100 dark:bg-dark-900">
+    <div className={embedded ? 'min-h-[70vh] flex flex-col bg-gray-100 dark:bg-dark-900' : 'h-[calc(100vh-64px)] flex flex-col bg-gray-100 dark:bg-dark-900'}>
       {/* Header */}
       <div className="bg-stone-100 dark:bg-dark-850 border-b border-gray-200 dark:border-dark-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {onBack && (
+            {onBack && !embedded && (
               <button
                 onClick={onBack}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg"

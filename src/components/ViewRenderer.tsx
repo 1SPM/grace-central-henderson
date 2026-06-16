@@ -4,9 +4,13 @@ import { Dashboard } from './Dashboard';
 import { ActionCenter } from './ActionCenter';
 import { LeadershipPage } from './leadership/LeadershipPage';
 import { Congregation } from './Congregation';
+import { SettingsHub } from './settings/SettingsHub';
 import { SundayPage } from './SundayPage';
 import { navigateView } from '../lib/actionCenterNav';
 import { openSunday, type SundayTab } from '../lib/sundayNav';
+import type { SettingsTab } from '../lib/settingsNav';
+import { settingsTabFromView } from '../lib/settingsNav';
+import type { CongregationTab } from '../lib/congregationNav';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
 import { NotFound } from './NotFound';
@@ -26,22 +30,14 @@ const OnlineGivingForm = lazy(() => import('./OnlineGivingForm').then(m => ({ de
 const BatchEntry = lazy(() => import('./BatchEntry').then(m => ({ default: m.BatchEntry })));
 const PledgeManager = lazy(() => import('./PledgeManager').then(m => ({ default: m.PledgeManager })));
 const GivingStatements = lazy(() => import('./GivingStatements').then(m => ({ default: m.GivingStatements })));
-const Settings = lazy(() => import('./Settings').then(m => ({ default: m.Settings })));
 const VisitorPipeline = lazy(() => import('./VisitorPipeline').then(m => ({ default: m.VisitorPipeline })));
 const VolunteerScheduling = lazy(() => import('./VolunteerScheduling').then(m => ({ default: m.VolunteerScheduling })));
-const TagsManager = lazy(() => import('./TagsManager').then(m => ({ default: m.TagsManager })));
-const PrintableReports = lazy(() => import('./PrintableReports').then(m => ({ default: m.PrintableReports })));
-const BirthdayCalendar = lazy(() => import('./BirthdayCalendar').then(m => ({ default: m.BirthdayCalendar })));
 const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ default: m.CharityBaskets })));
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
 const ConnectCard = lazy(() => import('./ConnectCard').then(m => ({ default: m.ConnectCard })));
 const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ default: m.MemberDirectory })));
-const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m.ChildCheckIn })));
-const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
-const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
-const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
-const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
+const GraceMobilePreview = lazy(() => import('./mobile/GraceMobilePreview').then(m => ({ default: m.GraceMobilePreview })));
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
 const CrisisCenterDispatch = lazy(() =>
@@ -56,7 +52,6 @@ const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
-const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -105,6 +100,11 @@ interface ViewRendererProps {
   setSelectedPersonId?: (id: string | null) => void;
   onOpenEmailSidebar?: (recipients?: string[], groupId?: string) => void;
   onReopenWizard?: () => void;
+  /** Staff member name/role for GRACE Mobile preview header. */
+  userName?: string;
+  roleLabel?: string;
+  /** Renders an arbitrary admin View — used by the GRACE Mobile preview to embed live hubs. */
+  renderMobileView?: (view: View, setView: (v: View) => void) => ReactNode;
   handlers: {
     viewPerson: (id: string) => void;
     backToPeople: () => void;
@@ -215,7 +215,8 @@ interface ViewRendererProps {
 export function ViewRenderer(props: ViewRendererProps) {
   const { view, setView, churchId, people, tasks, interactions, giving, groups, prayers, events,
     attendanceRecords, rsvps, volunteerAssignments, selectedPerson, selectedPersonId, setSelectedPersonId, handlers,
-    collectionMgmt, charityBasketMgmt, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard } = props;
+    collectionMgmt, charityBasketMgmt, announcementData, discipleshipData, pastoralCare, onOpenEmailSidebar, onReopenWizard,
+    userName, roleLabel, renderMobileView } = props;
 
   const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
@@ -253,6 +254,54 @@ export function ViewRenderer(props: ViewRendererProps) {
     />
   );
 
+  const renderCongregation = (defaultTab?: CongregationTab) => (
+    <Congregation
+      people={people}
+      groups={groups}
+      churchId={churchId}
+      onViewPerson={handlers.viewPerson}
+      onAddPerson={handlers.addPerson}
+      onBulkUpdateStatus={handlers.bulkUpdateStatus}
+      onBulkAddTag={handlers.bulkAddTag}
+      onImportCSV={handlers.importCSV}
+      onCreateGroup={handlers.createGroup}
+      onAddMember={handlers.addGroupMember}
+      onRemoveMember={handlers.removeGroupMember}
+      onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+      onUpdatePerson={handlers.savePerson}
+      defaultTab={defaultTab}
+    />
+  );
+
+  const renderActionCenter = (defaultTab?: 'followups' | 'mail' | 'birthdays') => (
+    <ActionCenter
+      people={people}
+      tasks={tasks}
+      prayers={prayers}
+      onToggleTask={handlers.toggleTask}
+      onSelectPerson={handlers.viewPerson}
+      defaultTab={defaultTab}
+    />
+  );
+
+  const renderSettingsHub = (defaultTab?: SettingsTab) => (
+    <SettingsHub
+      people={people}
+      tasks={tasks}
+      events={events}
+      giving={giving}
+      groups={groups}
+      prayers={prayers}
+      interactions={interactions}
+      onNavigate={(subView) => setView(subView)}
+      onRunWizard={onReopenWizard}
+      onOpenTutorials={openTutorialPicker}
+      onUpdatePersonTags={handlers.updatePersonTags}
+      onViewPerson={handlers.viewPerson}
+      defaultTab={defaultTab}
+    />
+  );
+
   // Core views (not lazy loaded for instant response)
   switch (view) {
     case 'dashboard':
@@ -273,7 +322,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           onViewInactive={() => setView('people')}
           onViewActions={() => setView('feed')}
           onViewCalendar={() => navigateView('calendar', setView)}
-          onViewAnalytics={() => setView('analytics')}
+          onViewAnalytics={() => navigateView('analytics', setView)}
           churchSettings={settings}
           onNavigate={(v) => navigateView(v, setView)}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
@@ -288,27 +337,13 @@ export function ViewRenderer(props: ViewRendererProps) {
       );
 
     case 'feed':
-      return (
-        <ActionCenter
-          people={people}
-          tasks={tasks}
-          prayers={prayers}
-          onToggleTask={handlers.toggleTask}
-          onSelectPerson={handlers.viewPerson}
-        />
-      );
+      return renderActionCenter();
 
     case 'mail':
-      return (
-        <ActionCenter
-          people={people}
-          tasks={tasks}
-          prayers={prayers}
-          onToggleTask={handlers.toggleTask}
-          onSelectPerson={handlers.viewPerson}
-          defaultTab="mail"
-        />
-      );
+      return renderActionCenter('mail');
+
+    case 'birthdays':
+      return renderActionCenter('birthdays');
 
     case 'leadership':
     case 'grace':
@@ -330,60 +365,16 @@ export function ViewRenderer(props: ViewRendererProps) {
       );
 
     case 'people':
-      return (
-        <Congregation
-          people={people}
-          groups={groups}
-          churchId={churchId}
-          onViewPerson={handlers.viewPerson}
-          onAddPerson={handlers.addPerson}
-          onBulkUpdateStatus={handlers.bulkUpdateStatus}
-          onBulkAddTag={handlers.bulkAddTag}
-          onImportCSV={handlers.importCSV}
-          onCreateGroup={handlers.createGroup}
-          onAddMember={handlers.addGroupMember}
-          onRemoveMember={handlers.removeGroupMember}
-          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
-        />
-      );
+      return renderCongregation();
 
     case 'groups':
-      return (
-        <Congregation
-          people={people}
-          groups={groups}
-          churchId={churchId}
-          onViewPerson={handlers.viewPerson}
-          onAddPerson={handlers.addPerson}
-          onBulkUpdateStatus={handlers.bulkUpdateStatus}
-          onBulkAddTag={handlers.bulkAddTag}
-          onImportCSV={handlers.importCSV}
-          onCreateGroup={handlers.createGroup}
-          onAddMember={handlers.addGroupMember}
-          onRemoveMember={handlers.removeGroupMember}
-          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
-          defaultTab="groups"
-        />
-      );
+      return renderCongregation('groups');
 
     case 'skills':
-      return (
-        <Congregation
-          people={people}
-          groups={groups}
-          churchId={churchId}
-          onViewPerson={handlers.viewPerson}
-          onAddPerson={handlers.addPerson}
-          onBulkUpdateStatus={handlers.bulkUpdateStatus}
-          onBulkAddTag={handlers.bulkAddTag}
-          onImportCSV={handlers.importCSV}
-          onCreateGroup={handlers.createGroup}
-          onAddMember={handlers.addGroupMember}
-          onRemoveMember={handlers.removeGroupMember}
-          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
-          defaultTab="skills"
-        />
-      );
+      return renderCongregation('skills');
+
+    case 'families':
+      return renderCongregation('families');
 
     case 'sunday-prep':
       return renderSundayPage();
@@ -436,6 +427,20 @@ export function ViewRenderer(props: ViewRendererProps) {
     case 'tasks':
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
 
+    case 'settings':
+      return renderSettingsHub();
+
+    case 'forms':
+    case 'email-templates':
+    case 'reports':
+    case 'tags':
+    case 'analytics':
+      return renderSettingsHub(settingsTabFromView(view) ?? 'general');
+
+    case 'child-checkin':
+      openSunday('attendance', setView);
+      return null;
+
     case 'agents':
     case 'reminders':
     case 'financial-hub':
@@ -466,15 +471,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             onAssign={handlers.assignVolunteer}
             onUpdateStatus={handlers.updateVolunteerStatus}
             onRemove={handlers.removeVolunteer}
-          />
-        );
-
-      case 'families':
-        return (
-          <Families
-            people={people}
-            onSelectPerson={handlers.viewPerson}
-            onUpdatePerson={handlers.savePerson}
           />
         );
 
@@ -571,12 +567,6 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'member-stats':
         return <MemberDonationStats people={people} giving={giving} onViewPerson={handlers.viewPerson} onBack={() => setView('giving')} />;
 
-      case 'tags':
-        return <TagsManager people={people} onUpdatePersonTags={handlers.updatePersonTags} />;
-
-      case 'reports':
-        return <PrintableReports people={people} tasks={tasks} prayers={prayers} giving={giving} />;
-
       case 'wallets':
         return (
           <WalletsView
@@ -586,24 +576,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             initialPersonId={selectedPersonId}
             onViewPortalActivity={() => setView('discipleship-engagement')}
             onNavigate={setView}
-          />
-        );
-
-      case 'birthdays':
-        return <BirthdayCalendar people={people} onViewPerson={handlers.viewPerson} />;
-
-      case 'settings':
-        return (
-          <Settings
-            people={people}
-            tasks={tasks}
-            events={events}
-            giving={giving}
-            groups={groups}
-            prayers={prayers}
-            onNavigate={(subView) => setView(subView)}
-            onRunWizard={onReopenWizard}
-            onOpenTutorials={openTutorialPicker}
           />
         );
 
@@ -626,51 +598,22 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
 
-      case 'child-checkin':
-        return <ChildCheckIn people={people} onBack={() => openSunday('attendance', setView)} />;
-
-      case 'forms':
-        return <FormBuilder onBack={() => setView('settings')} />;
-
-      case 'email-templates':
-        return <EmailTemplateBuilder onBack={() => setView('settings')} />;
-
-      case 'member-portal':
-      case 'member-directory':
-      case 'member-giving':
-      case 'member-events':
-      case 'member-checkin':
+      case 'grace-mobile':
         return (
-          <MemberPortalPreview
-            people={people}
-            events={events}
-            giving={giving}
-            attendance={attendanceRecords}
-            rsvps={rsvps}
+          <GraceMobilePreview
             churchName={churchName}
-            churchProfile={settings?.profile}
-            announcements={announcementData.activeAnnouncements}
+            branding={settings?.branding}
+            userName={userName}
+            roleLabel={roleLabel}
+            people={people}
+            tasks={tasks}
+            giving={giving}
+            events={events}
             prayers={prayers}
-            groups={groups}
-            churchId={churchId}
-            milestones={discipleshipData.milestones}
-            initialTab={
-              view === 'member-directory' ? 'directory' :
-              view === 'member-giving' ? 'giving' :
-              view === 'member-events' ? 'events' :
-              view === 'member-checkin' ? 'checkin' :
-              'home'
+            renderView={
+              renderMobileView ?? ((v, sv) => <ViewRenderer {...props} view={v} setView={sv} />)
             }
             onBack={() => setView('dashboard')}
-            onRSVP={handlers.rsvp}
-            onCheckIn={handlers.checkIn}
-            onPastorSignup={pastoralCare.addLeader}
-            leaders={pastoralCare.leaders}
-            onCreateHelpRequest={pastoralCare.createHelpRequest}
-            conversations={pastoralCare.conversations}
-            activeConversation={pastoralCare.activeConversation}
-            onSendMessage={pastoralCare.sendMessage}
-            helpRequests={pastoralCare.helpRequests}
           />
         );
 
@@ -761,21 +704,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             onViewPerson={handlers.viewPerson}
             onBack={() => setView('life-services')}
           />
-        );
-
-      case 'analytics':
-        return (
-          <div className="p-6 max-w-7xl mx-auto">
-            <Analytics
-              people={people}
-              tasks={tasks}
-              giving={giving}
-              prayers={prayers}
-              events={events}
-              interactions={interactions}
-              onViewPerson={handlers.viewPerson}
-            />
-          </div>
         );
 
       default:

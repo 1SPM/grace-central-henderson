@@ -29,6 +29,7 @@ interface AnalyticsProps {
   events: CalendarEvent[];
   interactions: Interaction[];
   onViewPerson?: (id: string) => void;
+  embedded?: boolean;
 }
 
 type TimeRange = '7d' | '30d' | '90d' | 'all';
@@ -106,7 +107,7 @@ const activityIconMap: Record<string, { icon: typeof UserPlus; color: string; bg
   giving: { icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
 };
 
-export function Analytics({ people, tasks, giving, prayers, events, interactions, onViewPerson }: AnalyticsProps) {
+export function Analytics({ people, tasks, giving, prayers, events, interactions, onViewPerson, embedded = false }: AnalyticsProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
 
   const personMap = useMemo(() => new Map(people.map(p => [p.id, p])), [people]);
@@ -282,32 +283,41 @@ export function Analytics({ people, tasks, giving, prayers, events, interactions
 
   const headerMeta = getViewHeaderMeta('analytics');
 
+  const timeRangeControl = (
+    <div className="flex bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
+      {([['7d', '7 Days'], ['30d', '30 Days'], ['90d', '90 Days'], ['all', 'All Time']] as const).map(([value, label]) => (
+        <button
+          key={value}
+          onClick={() => setTimeRange(value)}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+            timeRange === value
+              ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div data-tutorial="analytics-overview" className="space-y-6">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle="Insights into your congregation's health and growth"
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        trailing={
-          <div className="flex bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
-            {([['7d', '7 Days'], ['30d', '30 Days'], ['90d', '90 Days'], ['all', 'All Time']] as const).map(([value, label]) => (
-              <button
-                key={value}
-                onClick={() => setTimeRange(value)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  timeRange === value
-                    ? 'bg-stone-100 dark:bg-dark-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      {embedded ? (
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-sm text-gray-500 dark:text-dark-400">Insights into your congregation&apos;s health and growth</p>
+          {timeRangeControl}
+        </div>
+      ) : (
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle="Insights into your congregation's health and growth"
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          trailing={timeRangeControl}
+        />
+      )}
 
       {/* Congregation Health Score */}
       <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl p-6 text-white relative overflow-hidden">

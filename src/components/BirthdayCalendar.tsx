@@ -5,9 +5,10 @@ import { Person } from '../types';
 interface BirthdayCalendarProps {
   people: Person[];
   onViewPerson: (id: string) => void;
+  embedded?: boolean;
 }
 
-export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps) {
+export function BirthdayCalendar({ people, onViewPerson, embedded = false }: BirthdayCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const currentMonth = currentDate.getMonth();
@@ -71,13 +72,15 @@ export function BirthdayCalendar({ people, onViewPerson }: BirthdayCalendarProps
   });
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Birthdays & Celebrations</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">
-          Never miss a birthday - {birthdaysThisMonth.length} this month
-        </p>
-      </div>
+    <div className={embedded ? 'px-6 pt-4 pb-8 max-w-6xl mx-auto' : 'p-8'}>
+      {!embedded && (
+        <div className="mb-8">
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Birthdays & Celebrations</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">
+            Never miss a birthday - {birthdaysThisMonth.length} this month
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar View */}

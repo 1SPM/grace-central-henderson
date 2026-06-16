@@ -43,11 +43,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   'child-checkin': 'child-checkin',
   forms: 'forms',
   'email-templates': 'email-templates',
-  'member-portal': 'member-portal',
-  'member-directory': 'member-directory',
-  'member-giving': 'member-giving',
-  'member-events': 'member-events',
-  'member-checkin': 'member-checkin',
+  'grace-mobile': 'grace-mobile',
   'sunday-prep': 'sunday-prep',
   'live-service': 'live-service',
   'event-registration': 'event-registration',
@@ -101,9 +97,34 @@ function parseHash(): { view: View; personId: string | null } {
   }
 
   // Legacy routes → Congregation hub
-  if (basePath === 'skills') {
-    window.history.replaceState(null, '', '#/people?tab=skills');
+  if (basePath === 'skills' || basePath === 'families' || basePath === 'groups') {
+    const tab = basePath === 'groups' ? 'groups' : basePath === 'skills' ? 'skills' : 'families';
+    window.history.replaceState(null, '', `#/people?tab=${tab}`);
     return { view: 'people', personId: null };
+  }
+
+  // Legacy routes → Action Center hub
+  if (basePath === 'birthdays') {
+    window.history.replaceState(null, '', '#/actions?tab=birthdays');
+    return { view: 'feed', personId: null };
+  }
+
+  // Legacy routes → Settings hub
+  if (['forms', 'email-templates', 'reports', 'tags', 'analytics'].includes(basePath)) {
+    window.history.replaceState(null, '', `#/settings?tab=${basePath}`);
+    return { view: 'settings', personId: null };
+  }
+
+  // Removed child check-in → Sunday attendance
+  if (basePath === 'child-checkin') {
+    window.history.replaceState(null, '', '#/sunday-prep?tab=attendance');
+    return { view: 'sunday-prep', personId: null };
+  }
+
+  // Legacy member-portal preview routes → GRACE Mobile preview
+  if (['member-portal', 'member-directory', 'member-giving', 'member-events', 'member-checkin'].includes(basePath)) {
+    window.history.replaceState(null, '', '#/grace-mobile');
+    return { view: 'grace-mobile', personId: null };
   }
 
   // Legacy routes → Leadership hub
@@ -111,7 +132,7 @@ function parseHash(): { view: View; personId: string | null } {
     return { view: 'leadership', personId: null };
   }
 
-  // Legacy routes → Discipleship & Engagement hub
+  // Legacy routes → Growth & Engagement hub
   if (basePath === 'discipleship' || basePath === 'portal-activity') {
     window.history.replaceState(null, '', '#/discipleship-engagement');
     return { view: 'discipleship-engagement', personId: null };

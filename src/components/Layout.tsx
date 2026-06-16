@@ -13,22 +13,13 @@ import {
   PanelLeft,
   ChevronRight,
   ChevronDown,
-  FileText,
   Church,
   X,
-  Globe,
-  Home,
+  Smartphone,
   Heart,
-  BarChart3,
   TrendingUp,
   UserCheck,
-  Baby,
   MoreHorizontal,
-  Tag,
-  Workflow,
-  Mail,
-  ClipboardList,
-  Cake,
   Sparkles,
   Wallet,
 } from 'lucide-react';
@@ -73,10 +64,11 @@ const navSections: NavSection[] = [
       { view: 'leadership', label: 'Leadership', icon: <Crown size={16} />, tone: 'violet' },
       { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
-      { view: 'wallets', label: 'Impact Card Accounts', icon: <Wallet size={16} />, tone: 'indigo' },
       { view: 'sunday-prep', label: 'Sunday Service Tools', icon: <Church size={16} />, tone: 'emerald' },
+      { view: 'wallets', label: 'Impact Card Accounts', icon: <Wallet size={16} />, tone: 'indigo' },
       { view: 'giving', label: 'Impact Campaigns', icon: <DollarSign size={16} />, tone: 'emerald' },
       { view: 'pastoral-care', label: 'Crisis Center Dispatch', icon: <Heart size={16} />, tone: 'rose' },
+      { view: 'discipleship-engagement', label: 'Growth & Engagement', icon: <TrendingUp size={16} />, tone: 'sky' },
     ],
   },
 ];
@@ -84,27 +76,18 @@ const navSections: NavSection[] = [
 // Power-user views tucked behind "More…" to keep the primary nav clean.
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
-  { view: 'discipleship-engagement', label: 'Discipleship & Engagement', icon: <TrendingUp size={18} /> },
-  { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-  { view: 'families', label: 'Families', icon: <Home size={18} /> },
-  { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
   { view: 'life-services', label: 'Life services', icon: <Heart size={18} /> },
-  { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
-  { view: 'pipeline', label: 'Pipeline', icon: <Workflow size={18} /> },
-  { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
-  { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
-  { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
-  { view: 'email-templates', label: 'Email templates', icon: <Mail size={18} /> },
-  { view: 'member-portal', label: 'Member Portal', icon: <Globe size={18} /> },
+  { view: 'grace-mobile', label: 'GRACE Mobile', icon: <Smartphone size={18} /> },
 ];
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
-const peopleSubViews = ['person', 'groups', 'skills'];
+const peopleSubViews = ['person', 'groups', 'skills', 'families'];
 const sundaySubViews = ['calendar', 'event-registration', 'live-service', 'attendance', 'announcements'];
 const leadershipSubViews = ['grace', 'leader-management'];
 const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
-const actionCenterSubViews = ['mail', 'tasks'];
+const actionCenterSubViews = ['mail', 'tasks', 'birthdays'];
+const settingsSubViews = ['settings', 'forms', 'email-templates', 'reports', 'tags', 'analytics'];
 
 // View labels for breadcrumbs
 const viewLabels: Record<View, string> = {
@@ -139,11 +122,7 @@ const viewLabels: Record<View, string> = {
   directory: 'Directory',
   'child-checkin': 'Child Check-In',
   forms: 'Forms',
-  'member-portal': 'Member Portal',
-  'member-directory': 'Member Directory',
-  'member-giving': 'Member Giving',
-  'member-events': 'Member Events',
-  'member-checkin': 'Member Check-In',
+  'grace-mobile': 'GRACE Mobile',
   'sunday-prep': 'Sunday Service Tools',
   'live-service': 'Live Service',
   families: 'Families',
@@ -161,7 +140,7 @@ const viewLabels: Record<View, string> = {
   'leader-management': 'Leader Management',
   analytics: 'Analytics',
   announcements: 'Announcements',
-  'discipleship-engagement': 'Discipleship & Engagement',
+  'discipleship-engagement': 'Growth & Engagement',
   leadership: 'Leadership',
   grace: 'Leadership',
   mail: 'Mail',
@@ -283,6 +262,9 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
         { label: 'Sunday Service Tools', view: 'sunday-prep' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
+    }
+    if (settingsSubViews.includes(currentView)) {
+      return [{ label: 'Settings', view: 'settings' as View }];
     }
     return [{ label: viewLabels[currentView], view: currentView }];
   };
@@ -514,8 +496,12 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
           <button
             onClick={() => handleNavClick('settings')}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors group relative ${
               sidebarCollapsed ? 'lg:justify-center' : ''
+            } ${
+              settingsSubViews.includes(currentView)
+                ? 'bg-gray-100/90 dark:bg-white/5 text-gray-900 dark:text-gray-100 font-medium'
+                : 'text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800'
             }`}
             title={sidebarCollapsed ? 'Settings' : undefined}
             aria-label="Settings"

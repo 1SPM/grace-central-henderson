@@ -1,6 +1,6 @@
 import type { View } from '../types';
 
-export type CongregationTab = 'directory' | 'groups' | 'skills';
+export type CongregationTab = 'directory' | 'groups' | 'skills' | 'families';
 
 export function parseCongregationTab(): CongregationTab {
   if (typeof window === 'undefined') return 'directory';
@@ -10,12 +10,14 @@ export function parseCongregationTab(): CongregationTab {
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
   if (tab === 'groups') return 'groups';
   if (tab === 'skills') return 'skills';
+  if (tab === 'families') return 'families';
   return 'directory';
 }
 
 export function congregationHash(tab: CongregationTab = 'directory'): string {
   if (tab === 'groups') return '#/people?tab=groups';
   if (tab === 'skills') return '#/people?tab=skills';
+  if (tab === 'families') return '#/people?tab=families';
   return '#/people';
 }
 

@@ -8,11 +8,12 @@ interface PrintableReportsProps {
   tasks: Task[];
   prayers: PrayerRequest[];
   giving: Giving[];
+  embedded?: boolean;
 }
 
 type ReportType = 'directory' | 'attendance' | 'giving' | 'prayer' | 'tasks' | 'birthdays';
 
-export function PrintableReports({ people, tasks, prayers, giving }: PrintableReportsProps) {
+export function PrintableReports({ people, tasks, prayers, giving, embedded = false }: PrintableReportsProps) {
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -311,11 +312,13 @@ export function PrintableReports({ people, tasks, prayers, giving }: PrintableRe
   };
 
   return (
-    <div data-tutorial="reports-export" className="p-8">
-      <div className="mb-8">
-        <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Reports</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">Generate and print reports</p>
-      </div>
+    <div data-tutorial="reports-export" className={embedded ? 'px-6 pt-4 pb-8' : 'p-8'}>
+      {!embedded && (
+        <div className="mb-8">
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Reports</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">Generate and print reports</p>
+        </div>
+      )}
 
       {/* Report Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

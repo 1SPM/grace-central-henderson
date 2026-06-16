@@ -1,14 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListTodo, Mail, Zap } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react';
+import { Cake, ListTodo, Mail, Zap } from 'lucide-react';
 import { ActionFeed } from './ActionFeed';
 import { MailInbox } from './MailInbox';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
+import { ListSkeleton } from './ui/ViewSkeleton';
 import {
   actionCenterHash,
   parseActionCenterTab,
   type ActionCenterTab,
 } from '../lib/actionCenterNav';
 import type { Person, PrayerRequest, Task } from '../types';
+
+const BirthdayCalendar = lazy(() => import('./BirthdayCalendar').then(m => ({ default: m.BirthdayCalendar })));
+
+function birthdaysWithinDays(birthDate: string | undefined, days: number, now = new Date()): boolean {
+  if (!birthDate) return false;
+  const bday = new Date(birthDate);
+  const year = now.getFullYear();
+  let next = new Date(year, bday.getMonth(), bday.getDate());
+  if (next < now) next = new Date(year + 1, bday.getMonth(), bday.getDate());
+  const diff = Math.ceil((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff >= 0 && diff <= days;
+}
 
 interface ActionCenterProps {
   people: Person[];
@@ -22,6 +35,7 @@ interface ActionCenterProps {
 const TABS: { id: ActionCenterTab; label: string; icon: typeof ListTodo }[] = [
   { id: 'followups', label: 'Tasks & follow-ups', icon: ListTodo },
   { id: 'mail', label: 'Mail', icon: Mail },
+  { id: 'birthdays', label: 'Birthdays', icon: Cake },
 ];
 
 export function ActionCenter({
@@ -36,14 +50,18 @@ export function ActionCenter({
   const [tab, setTab] = useState<ActionCenterTab>(initial);
   const mailStats = useMailInboxStats();
   const mailBadge = mailStats.needsReview + mailStats.flagged;
+  const birthdayBadge = useMemo(
+    () => people.filter(p => birthdaysWithinDays(p.birthDate, 7)).length,
+    [people],
+  );
 
   useEffect(() => {
     if (defaultTab) setTab(defaultTab);
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'mail') {
-      window.history.replaceState(null, '', actionCenterHash('mail'));
+    if (defaultTab === 'mail' || defaultTab === 'birthdays') {
+      window.history.replaceState(null, '', actionCenterHash(defaultTab));
     }
   }, [defaultTab]);
 
@@ -78,7 +96,7 @@ export function ActionCenter({
                 Action Center
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Tasks, follow-ups, and inbound mail — one place to stay on top of pastoral work.
+                Tasks, follow-ups, mail, and birthdays — one place to stay on top of pastoral work.
               </p>
             </div>
           </div>
@@ -106,6 +124,11 @@ export function ActionCenter({
                     {mailBadge}
                   </span>
                 )}
+                {id === 'birthdays' && birthdayBadge > 0 && (
+                  <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-pink-100 dark:bg-pink-500/20 text-pink-700 dark:text-pink-300">
+                    {birthdayBadge}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -113,7 +136,7 @@ export function ActionCenter({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {tab === 'followups' ? (
+        {tab === 'followups' && (
           <ActionFeed
             people={people}
             tasks={tasks}
@@ -121,8 +144,14 @@ export function ActionCenter({
             onSelectPerson={onSelectPerson}
             embedded
           />
-        ) : (
+        )}
+        {tab === 'mail' && (
           <MailInbox embedded people={people} tasks={tasks} prayers={prayers} />
+        )}
+        {tab === 'birthdays' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <BirthdayCalendar embedded people={people} onViewPerson={onSelectPerson} />
+          </Suspense>
         )}
       </div>
     </div>

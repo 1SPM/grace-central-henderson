@@ -22,6 +22,7 @@ import {
 
 interface FormBuilderProps {
   onBack?: () => void;
+  embedded?: boolean;
 }
 
 type FieldType = 'text' | 'email' | 'phone' | 'date' | 'select' | 'checkbox' | 'textarea' | 'number';
@@ -95,7 +96,7 @@ function generateId(): string {
   return `field-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function FormBuilder({ onBack }: FormBuilderProps) {
+export function FormBuilder({ onBack, embedded = false }: FormBuilderProps) {
   const [forms, setForms] = useState<FormDefinition[]>([]);
   const [editingForm, setEditingForm] = useState<FormDefinition | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -183,25 +184,28 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
   // Form list view
   if (!editingForm) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            {onBack && (
-              <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
-                <ArrowLeft className="w-5 h-5 text-gray-500" />
-              </button>
-            )}
-            <div>
-              <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none flex items-center gap-2">
-                <FormInput className="w-6 h-6 text-indigo-600" />
-                Forms Builder
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                Create custom forms for events, signups, and more
-              </p>
+      <div className={embedded ? 'px-6 pt-4 pb-8 max-w-5xl mx-auto' : 'p-6 max-w-5xl mx-auto'}>
+        <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
+          {!embedded ? (
+            <div className="flex items-center gap-4">
+              {onBack && (
+                <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                  <ArrowLeft className="w-5 h-5 text-gray-500" />
+                </button>
+              )}
+              <div>
+                <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none flex items-center gap-2">
+                  <FormInput className="w-6 h-6 text-indigo-600" />
+                  Forms Builder
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  Create custom forms for events, signups, and more
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-dark-400">Create custom forms for events, signups, and more</p>
+          )}
           <button
             onClick={() => setShowTemplates(true)}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
