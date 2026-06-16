@@ -49,6 +49,7 @@ interface VolunteerSchedulingProps {
   events: CalendarEvent[];
   assignments: VolunteerAssignment[];
   churchName?: string;
+  embedded?: boolean;
   onAssign: (eventId: string, roleId: string, personId: string) => void;
   onUpdateStatus: (assignmentId: string, status: VolunteerAssignment['status']) => void;
   onRemove: (assignmentId: string) => void;
@@ -98,6 +99,7 @@ export function VolunteerScheduling({
   events,
   assignments,
   churchName = 'Our Church',
+  embedded = false,
   onAssign,
   onUpdateStatus: _onUpdateStatus,
   onRemove,
@@ -247,11 +249,13 @@ export function VolunteerScheduling({
   };
 
   return (
-    <div data-tutorial="volunteer-schedule" className="p-8">
-      <div className="mb-8">
-        <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Volunteer Scheduling</h1>
-        <p className="text-gray-500 dark:text-dark-400 mt-1">Manage volunteer assignments for services and events</p>
-      </div>
+    <div data-tutorial="volunteer-schedule" className={embedded ? 'px-4 sm:px-6 pt-4 pb-6' : 'p-8'}>
+      {!embedded && (
+        <div className="mb-8">
+          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Volunteer Scheduling</h1>
+          <p className="text-gray-500 dark:text-dark-400 mt-1">Manage volunteer assignments for services and events</p>
+        </div>
+      )}
 
       {/* Week Navigation */}
       <div className="flex items-center justify-between mb-6 bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4">

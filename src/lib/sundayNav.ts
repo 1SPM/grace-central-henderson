@@ -1,6 +1,6 @@
 import type { View } from '../types';
 
-export type SundayTab = 'prep' | 'calendar' | 'live' | 'attendance' | 'announcements';
+export type SundayTab = 'prep' | 'calendar' | 'attendance' | 'announcements';
 
 export function parseSundayTab(): SundayTab {
   if (typeof window === 'undefined') return 'prep';
@@ -9,7 +9,6 @@ export function parseSundayTab(): SundayTab {
   if (qIndex < 0) return 'prep';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
   if (tab === 'calendar') return 'calendar';
-  if (tab === 'live') return 'live';
   if (tab === 'attendance') return 'attendance';
   if (tab === 'announcements') return 'announcements';
   return 'prep';
@@ -17,7 +16,6 @@ export function parseSundayTab(): SundayTab {
 
 export function sundayHash(tab: SundayTab = 'prep'): string {
   if (tab === 'calendar') return '#/sunday-prep?tab=calendar';
-  if (tab === 'live') return '#/sunday-prep?tab=live';
   if (tab === 'attendance') return '#/sunday-prep?tab=attendance';
   if (tab === 'announcements') return '#/sunday-prep?tab=announcements';
   return '#/sunday-prep';

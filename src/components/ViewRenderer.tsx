@@ -7,6 +7,7 @@ import { Congregation } from './Congregation';
 import { SettingsHub } from './settings/SettingsHub';
 import { SundayPage } from './SundayPage';
 import { navigateView } from '../lib/actionCenterNav';
+import type { ActionCenterTab } from '../lib/actionCenterNav';
 import { openSunday, type SundayTab } from '../lib/sundayNav';
 import type { SettingsTab } from '../lib/settingsNav';
 import { settingsTabFromView } from '../lib/settingsNav';
@@ -31,7 +32,6 @@ const BatchEntry = lazy(() => import('./BatchEntry').then(m => ({ default: m.Bat
 const PledgeManager = lazy(() => import('./PledgeManager').then(m => ({ default: m.PledgeManager })));
 const GivingStatements = lazy(() => import('./GivingStatements').then(m => ({ default: m.GivingStatements })));
 const VisitorPipeline = lazy(() => import('./VisitorPipeline').then(m => ({ default: m.VisitorPipeline })));
-const VolunteerScheduling = lazy(() => import('./VolunteerScheduling').then(m => ({ default: m.VolunteerScheduling })));
 const CharityBaskets = lazy(() => import('./CharityBaskets').then(m => ({ default: m.CharityBaskets })));
 const MemberDonationStats = lazy(() => import('./MemberDonationStats').then(m => ({ default: m.MemberDonationStats })));
 const DonationTracker = lazy(() => import('./DonationTracker').then(m => ({ default: m.DonationTracker })));
@@ -273,13 +273,22 @@ export function ViewRenderer(props: ViewRendererProps) {
     />
   );
 
-  const renderActionCenter = (defaultTab?: 'followups' | 'mail' | 'birthdays') => (
+  const renderActionCenter = (defaultTab?: ActionCenterTab) => (
     <ActionCenter
+      churchId={churchId}
+      churchName={churchName}
+      churchProfile={settings?.profile}
+      timezone={settings?.timezone}
       people={people}
       tasks={tasks}
       prayers={prayers}
+      events={events}
+      assignments={volunteerAssignments}
       onToggleTask={handlers.toggleTask}
       onSelectPerson={handlers.viewPerson}
+      onAssignVolunteer={handlers.assignVolunteer}
+      onUpdateVolunteerStatus={handlers.updateVolunteerStatus}
+      onRemoveVolunteer={handlers.removeVolunteer}
       defaultTab={defaultTab}
     />
   );
@@ -345,6 +354,12 @@ export function ViewRenderer(props: ViewRendererProps) {
     case 'birthdays':
       return renderActionCenter('birthdays');
 
+    case 'live-service':
+      return renderActionCenter('live');
+
+    case 'volunteers':
+      return renderActionCenter('volunteers');
+
     case 'leadership':
     case 'grace':
     case 'leader-management':
@@ -381,9 +396,6 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'calendar':
       return renderSundayPage('calendar');
-
-    case 'live-service':
-      return renderSundayPage('live');
 
     case 'attendance':
       return renderSundayPage('attendance');
@@ -461,18 +473,6 @@ export function ViewRenderer(props: ViewRendererProps) {
     switch (view) {
       case 'pipeline':
         return <VisitorPipeline people={people} onViewPerson={handlers.viewPerson} />;
-
-      case 'volunteers':
-        return (
-          <VolunteerScheduling
-            people={people}
-            events={events}
-            assignments={volunteerAssignments}
-            onAssign={handlers.assignVolunteer}
-            onUpdateStatus={handlers.updateVolunteerStatus}
-            onRemove={handlers.removeVolunteer}
-          />
-        );
 
       case 'prayer':
         return <Prayer prayers={prayers} people={people} onMarkAnswered={handlers.markPrayerAnswered} />;

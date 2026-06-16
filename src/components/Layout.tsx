@@ -18,7 +18,6 @@ import {
   Smartphone,
   Heart,
   TrendingUp,
-  UserCheck,
   MoreHorizontal,
   Sparkles,
   Wallet,
@@ -77,16 +76,15 @@ const navSections: NavSection[] = [
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'life-services', label: 'Life services', icon: <Heart size={18} /> },
-  { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
   { view: 'grace-mobile', label: 'GRACE Mobile', icon: <Smartphone size={18} /> },
 ];
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
 const peopleSubViews = ['person', 'groups', 'skills', 'families'];
-const sundaySubViews = ['calendar', 'event-registration', 'live-service', 'attendance', 'announcements'];
+const sundaySubViews = ['calendar', 'event-registration', 'attendance', 'announcements'];
 const leadershipSubViews = ['grace', 'leader-management'];
 const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
-const actionCenterSubViews = ['mail', 'tasks', 'birthdays'];
+const actionCenterSubViews = ['mail', 'tasks', 'birthdays', 'live-service', 'volunteers'];
 const settingsSubViews = ['settings', 'forms', 'email-templates', 'reports', 'tags', 'analytics'];
 
 // View labels for breadcrumbs
@@ -253,6 +251,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
     if (lifeServicesSubViews.includes(currentView)) {
       return [
         { label: 'Life Services', view: 'life-services' as View },
+        { label: viewLabels[currentView], view: currentView },
+      ];
+    }
+    // Sub-pages under Action Center
+    if (actionCenterSubViews.includes(currentView)) {
+      return [
+        { label: 'Action Center', view: 'feed' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
     }

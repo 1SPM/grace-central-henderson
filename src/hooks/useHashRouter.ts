@@ -109,6 +109,27 @@ function parseHash(): { view: View; personId: string | null } {
     return { view: 'feed', personId: null };
   }
 
+  if (basePath === 'live-service') {
+    window.history.replaceState(null, '', '#/actions?tab=live');
+    return { view: 'feed', personId: null };
+  }
+
+  if (basePath === 'volunteers') {
+    window.history.replaceState(null, '', '#/actions?tab=volunteers');
+    return { view: 'feed', personId: null };
+  }
+
+  if (basePath === 'sunday-prep') {
+    const qIndex = hash.indexOf('?');
+    if (qIndex >= 0) {
+      const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
+      if (tab === 'live') {
+        window.history.replaceState(null, '', '#/actions?tab=live');
+        return { view: 'feed', personId: null };
+      }
+    }
+  }
+
   // Legacy routes → Settings hub
   if (['forms', 'email-templates', 'reports', 'tags', 'analytics'].includes(basePath)) {
     window.history.replaceState(null, '', `#/settings?tab=${basePath}`);

@@ -4,7 +4,7 @@ import { openSunday } from './sundayNav';
 import { openLeadership } from './leadershipNav';
 import { openSettings, type SettingsTab } from './settingsNav';
 
-export type ActionCenterTab = 'followups' | 'mail' | 'birthdays';
+export type ActionCenterTab = 'followups' | 'mail' | 'birthdays' | 'live' | 'volunteers';
 
 export function parseActionCenterTab(): ActionCenterTab {
   if (typeof window === 'undefined') return 'followups';
@@ -14,12 +14,16 @@ export function parseActionCenterTab(): ActionCenterTab {
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
   if (tab === 'mail') return 'mail';
   if (tab === 'birthdays') return 'birthdays';
+  if (tab === 'live') return 'live';
+  if (tab === 'volunteers') return 'volunteers';
   return 'followups';
 }
 
 export function actionCenterHash(tab: ActionCenterTab = 'followups'): string {
   if (tab === 'mail') return '#/actions?tab=mail';
   if (tab === 'birthdays') return '#/actions?tab=birthdays';
+  if (tab === 'live') return '#/actions?tab=live';
+  if (tab === 'volunteers') return '#/actions?tab=volunteers';
   return '#/actions';
 }
 
@@ -47,6 +51,14 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
     openActionCenter('birthdays', setView);
     return;
   }
+  if (view === 'live-service') {
+    openActionCenter('live', setView);
+    return;
+  }
+  if (view === 'volunteers') {
+    openActionCenter('volunteers', setView);
+    return;
+  }
   if (view === 'groups') {
     openCongregation('groups', setView);
     return;
@@ -69,10 +81,6 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
   }
   if (view === 'calendar') {
     openSunday('calendar', setView);
-    return;
-  }
-  if (view === 'live-service') {
-    openSunday('live', setView);
     return;
   }
   if (view === 'grace' || view === 'leader-management') {

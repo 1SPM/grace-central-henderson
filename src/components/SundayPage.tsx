@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar as CalendarIcon, Church, Megaphone, Radio, UserCheck } from 'lucide-react';
+import { Calendar as CalendarIcon, Church, Megaphone, UserCheck } from 'lucide-react';
 import { SundayPrep } from './SundayPrep';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { parseSundayTab, sundayHash, type SundayTab } from '../lib/sundayNav';
@@ -8,9 +8,6 @@ import type { Announcement, AnnouncementCategory, Attendance, CalendarEvent, Per
 import type { RSVP } from './calendar/CalendarConstants';
 
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
-const LiveServiceDashboard = lazy(() =>
-  import('./live-service/LiveServiceDashboard').then(m => ({ default: m.LiveServiceDashboard })),
-);
 const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
 const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
 
@@ -50,18 +47,17 @@ const TABS: { id: SundayTab; label: string; icon: typeof Church }[] = [
   { id: 'attendance', label: 'Attendance', icon: UserCheck },
   { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
-  { id: 'live', label: 'Live Service', icon: Radio },
 ];
 
 export function SundayPage({
-  churchId,
+  churchId: _churchId,
   people,
   prayers,
   events,
   rsvps,
   churchName = 'Church',
-  churchProfile,
-  timezone,
+  churchProfile: _churchProfile,
+  timezone: _timezone,
   onViewPerson,
   onRSVP,
   onAddEvent,
@@ -92,7 +88,7 @@ export function SundayPage({
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'calendar' || defaultTab === 'live' || defaultTab === 'attendance' || defaultTab === 'announcements') {
+    if (defaultTab === 'calendar' || defaultTab === 'attendance' || defaultTab === 'announcements') {
       window.history.replaceState(null, '', sundayHash(defaultTab));
     }
   }, [defaultTab]);
@@ -100,10 +96,7 @@ export function SundayPage({
   useEffect(() => {
     const hash = window.location.hash.replace(/^#\/?/, '');
     const base = hash.split('?')[0].split('/')[0];
-    if (base === 'live-service') {
-      window.history.replaceState(null, '', sundayHash('live'));
-      setTab('live');
-    } else if (base === 'attendance') {
+    if (base === 'attendance') {
       window.history.replaceState(null, '', sundayHash('attendance'));
       setTab('attendance');
     } else if (base === 'announcements') {
@@ -143,7 +136,7 @@ export function SundayPage({
                 Sunday Service Tools
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Prep, attendance, announcements, calendar & live service · {upcomingCount} upcoming events
+                Prep, attendance, announcements & calendar · {upcomingCount} upcoming events
               </p>
             </div>
           </div>
@@ -222,19 +215,6 @@ export function SundayPage({
               onAddEvent={onAddEvent}
               onUpdateEvent={onUpdateEvent}
               onDeleteEvent={onDeleteEvent}
-              onViewPerson={onViewPerson}
-            />
-          </Suspense>
-        )}
-        {tab === 'live' && (
-          <Suspense fallback={<ListSkeleton />}>
-            <LiveServiceDashboard
-              embedded
-              churchId={churchId}
-              churchName={churchName}
-              churchProfile={churchProfile}
-              timezone={timezone}
-              people={people}
               onViewPerson={onViewPerson}
             />
           </Suspense>
