@@ -20,7 +20,6 @@ import {
   Home,
   Heart,
   BarChart3,
-  Megaphone,
   TrendingUp,
   UserCheck,
   Baby,
@@ -31,7 +30,6 @@ import {
   ClipboardList,
   Cake,
   Sparkles,
-  Smartphone,
   Wallet,
 } from 'lucide-react';
 import { View } from '../types';
@@ -86,12 +84,9 @@ const navSections: NavSection[] = [
 // Power-user views tucked behind "More…" to keep the primary nav clean.
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
-  { view: 'discipleship', label: 'Discipleship', icon: <TrendingUp size={18} /> },
-  { view: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
+  { view: 'discipleship-engagement', label: 'Discipleship & Engagement', icon: <TrendingUp size={18} /> },
   { view: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-  { view: 'portal-activity', label: 'Portal Activity', icon: <Smartphone size={18} /> },
   { view: 'families', label: 'Families', icon: <Home size={18} /> },
-  { view: 'attendance', label: 'Attendance', icon: <UserCheck size={18} /> },
   { view: 'child-checkin', label: 'Child check-in', icon: <Baby size={18} /> },
   { view: 'life-services', label: 'Life services', icon: <Heart size={18} /> },
   { view: 'reports', label: 'Reports', icon: <FileText size={18} /> },
@@ -107,7 +102,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
 const peopleSubViews = ['person', 'groups'];
-const sundaySubViews = ['calendar', 'event-registration', 'live-service'];
+const sundaySubViews = ['calendar', 'event-registration', 'live-service', 'attendance', 'announcements'];
 const leadershipSubViews = ['grace', 'leader-management'];
 const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
 const actionCenterSubViews = ['mail', 'tasks'];
@@ -167,12 +162,11 @@ const viewLabels: Record<View, string> = {
   'leader-management': 'Leader Management',
   analytics: 'Analytics',
   announcements: 'Announcements',
-  discipleship: 'Discipleship',
+  'discipleship-engagement': 'Discipleship & Engagement',
   leadership: 'Leadership',
   grace: 'Leadership',
   mail: 'Mail',
   'financial-hub': 'Home',
-  'portal-activity': 'Portal Activity',
   wallets: 'Impact Card Accounts',
 };
 
@@ -261,8 +255,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
   const isMoreItemActive = (view: View) => currentView === view ||
     (view === 'life-services' && lifeServicesSubViews.includes(currentView)) ||
-    (view === 'skills' && currentView === 'skills') ||
-    (view === 'portal-activity' && currentView === 'portal-activity');
+    (view === 'skills' && currentView === 'skills');
 
   // Breadcrumb paths
   const getBreadcrumbs = () => {

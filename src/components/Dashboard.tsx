@@ -207,7 +207,7 @@ export function Dashboard({
         onViewPeople={onViewPeople}
         onViewGiving={onViewGiving}
         onViewPastoralCare={() => onNavigate?.('pastoral-care')}
-        onViewPortalActivity={() => onNavigate?.('portal-activity')}
+        onViewPortalActivity={() => onNavigate?.('discipleship-engagement')}
       />
 
       <DashboardDetails

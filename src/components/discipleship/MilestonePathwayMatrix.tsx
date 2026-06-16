@@ -8,25 +8,14 @@ import {
   Crown,
   Check,
   Search,
-  TrendingUp,
   Smartphone,
   MapPin,
   Star,
 } from 'lucide-react';
-import type { Person, DiscipleshipMilestone, MilestoneType } from '../types';
-import { HubPageHeader } from './ui/HubPageHeader';
-import { getViewHeaderMeta } from '../lib/viewHeaderMeta';
-import { DEFAULT_MILESTONE_DEFINITIONS } from '../types';
-import { usePortalActivity } from '../hooks/usePortalActivity';
-
-interface DiscipleshipDashboardProps {
-  people: Person[];
-  milestones: DiscipleshipMilestone[];
-  churchId?: string;
-  onAddMilestone: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string }) => void;
-  onRemoveMilestone: (id: string) => void;
-  onViewPerson?: (id: string) => void;
-}
+import type { Person, DiscipleshipMilestone, MilestoneType } from '../../types';
+import { DEFAULT_MILESTONE_DEFINITIONS } from '../../types';
+import type { MemberEngagementRow } from '../../hooks/usePortalActivity';
+import type { MemberActivityEvent } from '../../lib/database.types';
 
 const MILESTONE_ICONS: Record<MilestoneType, typeof DoorOpen> = {
   first_visit: DoorOpen,
@@ -48,17 +37,33 @@ const MILESTONE_COLORS: Record<MilestoneType, string> = {
 
 type FilterStatus = 'all' | MilestoneType;
 
-export function DiscipleshipDashboard({ people, milestones, churchId = '', onAddMilestone, onRemoveMilestone, onViewPerson }: DiscipleshipDashboardProps) {
+interface MilestonePathwayMatrixProps {
+  people: Person[];
+  milestones: DiscipleshipMilestone[];
+  memberRollup: MemberEngagementRow[];
+  portalEvents: MemberActivityEvent[];
+  onAddMilestone: (data: { personId: string; milestoneType: MilestoneType; completedAt?: string }) => void;
+  onRemoveMilestone: (id: string) => void;
+  onViewPerson?: (id: string) => void;
+}
+
+export function MilestonePathwayMatrix({
+  people,
+  milestones,
+  memberRollup,
+  portalEvents,
+  onAddMilestone,
+  onRemoveMilestone,
+  onViewPerson,
+}: MilestonePathwayMatrixProps) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
-  // Portal activity data for the "Portal Signals" column
-  const { memberRollup, events: portalEvents } = usePortalActivity(churchId);
+  const engagementMap = useMemo(
+    () => new Map(memberRollup.map(r => [r.personId, r])),
+    [memberRollup],
+  );
 
-  // Build lookup: personId -> engagement row
-  const engagementMap = useMemo(() => new Map(memberRollup.map(r => [r.personId, r])), [memberRollup]);
-
-  // Build lookup: personId -> Set of milestone types they've requested via My Journey
   const stepRequestsByPerson = useMemo(() => {
     const map = new Map<string, Set<string>>();
     portalEvents
@@ -72,7 +77,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
     return map;
   }, [portalEvents]);
 
-  // Build milestone lookup: personId -> Set of milestoneTypes
   const milestonesByPerson = useMemo(() => {
     const map = new Map<string, Map<MilestoneType, DiscipleshipMilestone>>();
     milestones.forEach(m => {
@@ -82,7 +86,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
     return map;
   }, [milestones]);
 
-  // Stats
   const stats = useMemo(() => {
     const totalPeople = people.length;
     return DEFAULT_MILESTONE_DEFINITIONS.map(def => {
@@ -95,7 +98,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
     });
   }, [people, milestonesByPerson]);
 
-  // Filtered people
   const filteredPeople = useMemo(() => {
     let list = people;
 
@@ -103,15 +105,12 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
       const q = search.toLowerCase();
       list = list.filter(p =>
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(q) ||
-        p.email?.toLowerCase().includes(q)
+        p.email?.toLowerCase().includes(q),
       );
     }
 
     if (filterStatus !== 'all') {
-      list = list.filter(p => {
-        const personMilestones = milestonesByPerson.get(p.id);
-        return personMilestones?.has(filterStatus);
-      });
+      list = list.filter(p => milestonesByPerson.get(p.id)?.has(filterStatus));
     }
 
     return list.sort((a, b) => {
@@ -132,20 +131,8 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
     }
   };
 
-  const headerMeta = getViewHeaderMeta('discipleship');
-
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle="Track spiritual growth across your congregation"
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        className="mb-6"
-      />
-
-      {/* Stats Bar */}
+    <div>
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         {stats.map(s => {
           const Icon = MILESTONE_ICONS[s.type];
@@ -168,7 +155,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
         })}
       </div>
 
-      {/* Search */}
       <div className="mb-4">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -182,7 +168,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
         </div>
       </div>
 
-      {/* Matrix Table */}
       <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -268,7 +253,6 @@ export function DiscipleshipDashboard({ people, milestones, churchId = '', onAdd
                           </td>
                         );
                       })}
-                      {/* Portal Signals column */}
                       <td className="px-3 py-3 text-center">
                         {engagement ? (
                           <div className="flex flex-col items-center gap-0.5">

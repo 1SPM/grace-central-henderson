@@ -6,6 +6,7 @@ import { LeadershipPage } from './leadership/LeadershipPage';
 import { Congregation } from './Congregation';
 import { SundayPage } from './SundayPage';
 import { navigateView } from '../lib/actionCenterNav';
+import { openSunday, type SundayTab } from '../lib/sundayNav';
 import { PersonProfile } from './PersonProfile';
 import { Tasks } from './Tasks';
 import { NotFound } from './NotFound';
@@ -27,7 +28,6 @@ const PledgeManager = lazy(() => import('./PledgeManager').then(m => ({ default:
 const GivingStatements = lazy(() => import('./GivingStatements').then(m => ({ default: m.GivingStatements })));
 const Settings = lazy(() => import('./Settings').then(m => ({ default: m.Settings })));
 const VisitorPipeline = lazy(() => import('./VisitorPipeline').then(m => ({ default: m.VisitorPipeline })));
-const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
 const VolunteerScheduling = lazy(() => import('./VolunteerScheduling').then(m => ({ default: m.VolunteerScheduling })));
 const TagsManager = lazy(() => import('./TagsManager').then(m => ({ default: m.TagsManager })));
 const PrintableReports = lazy(() => import('./PrintableReports').then(m => ({ default: m.PrintableReports })));
@@ -50,14 +50,14 @@ const CrisisCenterDispatch = lazy(() =>
     default: m.CrisisCenterDispatch,
   })),
 );
-const PortalActivity = lazy(() => import('./PortalActivity').then(m => ({ default: m.PortalActivity })));
+const DiscipleshipEngagementHub = lazy(() =>
+  import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
+);
 const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const Analytics = lazy(() => import('./Analytics').then(m => ({ default: m.Analytics })));
-const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
-const DiscipleshipDashboard = lazy(() => import('./DiscipleshipDashboard').then(m => ({ default: m.DiscipleshipDashboard })));
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -229,6 +229,31 @@ export function ViewRenderer(props: ViewRendererProps) {
     return <AccessDenied message={blockedMessage} />;
   }
 
+  const renderSundayPage = (defaultTab?: SundayTab) => (
+    <SundayPage
+      churchId={churchId}
+      people={people}
+      prayers={prayers}
+      events={events}
+      rsvps={rsvps}
+      churchName={churchName}
+      churchProfile={settings?.profile}
+      timezone={settings?.timezone}
+      onViewPerson={handlers.viewPerson}
+      onRSVP={handlers.rsvp}
+      onAddEvent={handlers.addEvent}
+      onUpdateEvent={handlers.updateEvent}
+      onDeleteEvent={handlers.deleteEvent}
+      defaultTab={defaultTab}
+      attendanceRecords={attendanceRecords}
+      onCheckIn={handlers.checkIn}
+      announcements={announcementData.announcements}
+      onAddAnnouncement={announcementData.addAnnouncement}
+      onUpdateAnnouncement={announcementData.updateAnnouncement}
+      onDeleteAnnouncement={announcementData.deleteAnnouncement}
+    />
+  );
+
   // Core views (not lazy loaded for instant response)
   switch (view) {
     case 'dashboard':
@@ -343,63 +368,19 @@ export function ViewRenderer(props: ViewRendererProps) {
       );
 
     case 'sunday-prep':
-      return (
-        <SundayPage
-          churchId={churchId}
-          people={people}
-          prayers={prayers}
-          events={events}
-          rsvps={rsvps}
-          churchName={churchName}
-          churchProfile={settings?.profile}
-          timezone={settings?.timezone}
-          onViewPerson={handlers.viewPerson}
-          onRSVP={handlers.rsvp}
-          onAddEvent={handlers.addEvent}
-          onUpdateEvent={handlers.updateEvent}
-          onDeleteEvent={handlers.deleteEvent}
-        />
-      );
+      return renderSundayPage();
 
     case 'calendar':
-      return (
-        <SundayPage
-          churchId={churchId}
-          people={people}
-          prayers={prayers}
-          events={events}
-          rsvps={rsvps}
-          churchName={churchName}
-          churchProfile={settings?.profile}
-          timezone={settings?.timezone}
-          onViewPerson={handlers.viewPerson}
-          onRSVP={handlers.rsvp}
-          onAddEvent={handlers.addEvent}
-          onUpdateEvent={handlers.updateEvent}
-          onDeleteEvent={handlers.deleteEvent}
-          defaultTab="calendar"
-        />
-      );
+      return renderSundayPage('calendar');
 
     case 'live-service':
-      return (
-        <SundayPage
-          churchId={churchId}
-          people={people}
-          prayers={prayers}
-          events={events}
-          rsvps={rsvps}
-          churchName={churchName}
-          churchProfile={settings?.profile}
-          timezone={settings?.timezone}
-          onViewPerson={handlers.viewPerson}
-          onRSVP={handlers.rsvp}
-          onAddEvent={handlers.addEvent}
-          onUpdateEvent={handlers.updateEvent}
-          onDeleteEvent={handlers.deleteEvent}
-          defaultTab="live"
-        />
-      );
+      return renderSundayPage('live');
+
+    case 'attendance':
+      return renderSundayPage('attendance');
+
+    case 'announcements':
+      return renderSundayPage('announcements');
 
     case 'person':
       if (!selectedPerson) {
@@ -457,9 +438,6 @@ export function ViewRenderer(props: ViewRendererProps) {
     switch (view) {
       case 'pipeline':
         return <VisitorPipeline people={people} onViewPerson={handlers.viewPerson} />;
-
-      case 'attendance':
-        return <AttendanceCheckIn people={people} attendance={attendanceRecords} onCheckIn={handlers.checkIn} />;
 
       case 'volunteers':
         return (
@@ -596,7 +574,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             giving={giving}
             churchName={churchName}
             initialPersonId={selectedPersonId}
-            onViewPortalActivity={() => setView('portal-activity')}
+            onViewPortalActivity={() => setView('discipleship-engagement')}
             onNavigate={setView}
           />
         );
@@ -622,14 +600,24 @@ export function ViewRenderer(props: ViewRendererProps) {
       case 'connect-card':
         return <ConnectCard churchId={churchId} churchName={churchName} />;
 
-      case 'portal-activity':
-        return <PortalActivity churchId={churchId} people={people} groups={groups} onViewPerson={handlers.viewPerson} />;
+      case 'discipleship-engagement':
+        return (
+          <DiscipleshipEngagementHub
+            people={people}
+            milestones={discipleshipData.milestones}
+            churchId={churchId}
+            groups={groups}
+            onAddMilestone={discipleshipData.addMilestone}
+            onRemoveMilestone={discipleshipData.removeMilestone}
+            onViewPerson={handlers.viewPerson}
+          />
+        );
 
       case 'directory':
         return <MemberDirectory people={people} onBack={() => setView('people')} onViewPerson={handlers.viewPerson} />;
 
       case 'child-checkin':
-        return <ChildCheckIn people={people} onBack={() => setView('attendance')} />;
+        return <ChildCheckIn people={people} onBack={() => openSunday('attendance', setView)} />;
 
       case 'forms':
         return <FormBuilder onBack={() => setView('settings')} />;
@@ -698,7 +686,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             churchName={churchName}
             churchId={churchId}
             onCheckIn={handlers.checkIn}
-            onBack={() => setView('attendance')}
+            onBack={() => openSunday('attendance', setView)}
           />
         );
 
@@ -775,32 +763,9 @@ export function ViewRenderer(props: ViewRendererProps) {
               prayers={prayers}
               events={events}
               interactions={interactions}
-              milestones={discipleshipData.milestones}
               onViewPerson={handlers.viewPerson}
             />
           </div>
-        );
-
-      case 'announcements':
-        return (
-          <AnnouncementManager
-            announcements={announcementData.announcements}
-            onAdd={announcementData.addAnnouncement}
-            onUpdate={announcementData.updateAnnouncement}
-            onDelete={announcementData.deleteAnnouncement}
-          />
-        );
-
-      case 'discipleship':
-        return (
-          <DiscipleshipDashboard
-            people={people}
-            milestones={discipleshipData.milestones}
-            churchId={churchId}
-            onAddMilestone={discipleshipData.addMilestone}
-            onRemoveMilestone={discipleshipData.removeMilestone}
-            onViewPerson={handlers.viewPerson}
-          />
         );
 
       default:

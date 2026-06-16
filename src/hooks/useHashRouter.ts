@@ -63,12 +63,11 @@ const VIEW_TO_PATH: Record<View, string> = {
   'leader-management': 'leader-management',
   analytics: 'analytics',
   announcements: 'announcements',
-  discipleship: 'discipleship',
+  'discipleship-engagement': 'discipleship-engagement',
   leadership: 'leadership',
   grace: 'grace',
   mail: 'mail',
   'financial-hub': 'financial-hub',
-  'portal-activity': 'portal-activity',
   wallets: 'wallets',
 };
 
@@ -104,6 +103,12 @@ function parseHash(): { view: View; personId: string | null } {
   // Legacy routes → Leadership hub
   if (basePath === 'grace' || basePath === 'leader-management') {
     return { view: 'leadership', personId: null };
+  }
+
+  // Legacy routes → Discipleship & Engagement hub
+  if (basePath === 'discipleship' || basePath === 'portal-activity') {
+    window.history.replaceState(null, '', '#/discipleship-engagement');
+    return { view: 'discipleship-engagement', personId: null };
   }
 
   // Removed feature routes → Home. Keeps old bookmarks from landing on NotFound.

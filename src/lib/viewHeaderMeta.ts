@@ -8,7 +8,6 @@ import {
   Home,
   Megaphone,
   Settings,
-  Smartphone,
   TrendingUp,
   Users,
   Wallet,
@@ -59,20 +58,15 @@ export const viewHeaderMeta = {
     iconBoxClassName: 'bg-rose-600',
     title: 'Crisis Center Dispatch',
   },
-  'portal-activity': {
-    icon: Smartphone,
-    iconBoxClassName: 'bg-indigo-600',
-    title: 'Portal Activity',
-  },
   analytics: {
     icon: BarChart3,
     iconBoxClassName: 'bg-slate-900',
     title: 'Analytics',
   },
-  discipleship: {
+  'discipleship-engagement': {
     icon: TrendingUp,
     iconBoxClassName: 'bg-blue-600',
-    title: 'Discipleship Pathways',
+    title: 'Discipleship & Engagement',
   },
   announcements: {
     icon: Megaphone,
