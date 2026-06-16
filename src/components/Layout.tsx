@@ -66,7 +66,7 @@ const navSections: NavSection[] = [
       { view: 'sunday-prep', label: 'Sunday Service Tools', icon: <Church size={16} />, tone: 'emerald' },
       { view: 'wallets', label: 'Impact Card Accounts', icon: <Wallet size={16} />, tone: 'indigo' },
       { view: 'giving', label: 'Impact Campaigns', icon: <DollarSign size={16} />, tone: 'emerald' },
-      { view: 'pastoral-care', label: 'Crisis Center Dispatch', icon: <Heart size={16} />, tone: 'rose' },
+      { view: 'pastoral-care', label: 'Pastoral Care', icon: <Heart size={16} />, tone: 'rose' },
       { view: 'discipleship-engagement', label: 'Growth & Engagement', icon: <TrendingUp size={16} />, tone: 'sky' },
     ],
   },
@@ -75,7 +75,6 @@ const navSections: NavSection[] = [
 // Power-user views tucked behind "More…" to keep the primary nav clean.
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
-  { view: 'life-services', label: 'Life services', icon: <Heart size={18} /> },
   { view: 'grace-mobile', label: 'GRACE Mobile', icon: <Smartphone size={18} /> },
 ];
 
@@ -84,6 +83,7 @@ const peopleSubViews = ['person', 'groups', 'skills', 'families'];
 const sundaySubViews = ['calendar', 'event-registration', 'attendance', 'announcements'];
 const leadershipSubViews = ['grace', 'leader-management'];
 const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
+const pastoralCareSubViews = ['life-services', ...lifeServicesSubViews];
 const actionCenterSubViews = ['mail', 'tasks', 'birthdays', 'live-service', 'volunteers'];
 const settingsSubViews = ['settings', 'forms', 'email-templates', 'reports', 'tags', 'analytics'];
 
@@ -130,7 +130,7 @@ const viewLabels: Record<View, string> = {
   'reminders': 'Home',
   'planning-center-import': 'Home',
   'qr-checkin': 'QR Check-In',
-  'pastoral-care': 'Crisis Center Dispatch',
+  'pastoral-care': 'Pastoral Care',
   'life-services': 'Life Services',
   'wedding-services': 'Weddings',
   'funeral-services': 'Funerals',
@@ -229,8 +229,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
     setMoreOpen(o => !o);
   };
 
-  const isMoreItemActive = (view: View) => currentView === view ||
-    (view === 'life-services' && lifeServicesSubViews.includes(currentView));
+  const isMoreItemActive = (view: View) => currentView === view;
 
   // Breadcrumb paths
   const getBreadcrumbs = () => {
@@ -250,7 +249,14 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
     // Sub-pages under Life Services
     if (lifeServicesSubViews.includes(currentView)) {
       return [
+        { label: 'Pastoral Care', view: 'pastoral-care' as View },
         { label: 'Life Services', view: 'life-services' as View },
+        { label: viewLabels[currentView], view: currentView },
+      ];
+    }
+    if (currentView === 'life-services') {
+      return [
+        { label: 'Pastoral Care', view: 'pastoral-care' as View },
         { label: viewLabels[currentView], view: currentView },
       ];
     }
@@ -355,7 +361,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                     (item.view === 'giving' && givingSubViews.includes(currentView)) ||
                     (item.view === 'people' && peopleSubViews.includes(currentView)) ||
                     (item.view === 'sunday-prep' && sundaySubViews.includes(currentView)) ||
-                    (item.view === 'leadership' && leadershipSubViews.includes(currentView));
+                    (item.view === 'leadership' && leadershipSubViews.includes(currentView)) ||
+                    (item.view === 'pastoral-care' && pastoralCareSubViews.includes(currentView));
 
                   return (
                     <button

@@ -1012,7 +1012,107 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
     allDay: false,
     location: 'Fellowship Hall',
     category: 'event'
-  }
+  },
+  // Milestones & varied categories (this week / near-term)
+  {
+    id: '13',
+    title: 'Baby Dedication',
+    startDate: `${getNextDayOfWeek(0)}T11:45:00`,
+    endDate: `${getNextDayOfWeek(0)}T12:00:00`,
+    allDay: false,
+    location: 'Main Sanctuary',
+    category: 'dedication'
+  },
+  {
+    id: '14',
+    title: 'Wednesday Bible Study',
+    startDate: `${getNextDayOfWeek(3)}T18:30:00`,
+    endDate: `${getNextDayOfWeek(3)}T20:00:00`,
+    allDay: false,
+    location: 'Room 201',
+    category: 'class'
+  },
+  {
+    id: '15',
+    title: 'Food Pantry Distribution',
+    startDate: `${getNextDayOfWeek(4)}T10:00:00`,
+    endDate: `${getNextDayOfWeek(4)}T13:00:00`,
+    allDay: false,
+    location: 'Fellowship Hall',
+    category: 'outreach'
+  },
+  {
+    id: '16',
+    title: 'Choir Rehearsal',
+    startDate: `${getNextDayOfWeek(4)}T18:00:00`,
+    endDate: `${getNextDayOfWeek(4)}T19:30:00`,
+    allDay: false,
+    location: 'Worship Center',
+    category: 'rehearsal'
+  },
+  {
+    id: '17',
+    title: 'Baptism Class',
+    startDate: `${getNextDayOfWeek(6)}T09:30:00`,
+    endDate: `${getNextDayOfWeek(6)}T11:00:00`,
+    allDay: false,
+    location: 'Room 105',
+    category: 'class'
+  },
+  {
+    id: '18',
+    title: 'Pastoral Care Appointment',
+    startDate: `${getNextDayOfWeek(2)}T14:00:00`,
+    endDate: `${getNextDayOfWeek(2)}T15:00:00`,
+    allDay: false,
+    location: 'Pastor\'s Office',
+    category: 'counseling'
+  },
+  {
+    id: '19',
+    title: 'Community Block Party',
+    startDate: `${getNextDayOfWeek(6, 1)}T16:00:00`,
+    endDate: `${getNextDayOfWeek(6, 1)}T20:00:00`,
+    allDay: false,
+    location: 'Parking Lot',
+    category: 'outreach'
+  },
+  {
+    id: '20',
+    title: 'Wedding Rehearsal — Martinez',
+    startDate: `${getNextDayOfWeek(5, 1)}T17:00:00`,
+    endDate: `${getNextDayOfWeek(5, 1)}T18:30:00`,
+    allDay: false,
+    location: 'Main Sanctuary',
+    category: 'rehearsal'
+  },
+  {
+    id: '21',
+    title: 'New Member Celebration',
+    startDate: `${getNextDayOfWeek(0, 1)}T12:30:00`,
+    endDate: `${getNextDayOfWeek(0, 1)}T13:30:00`,
+    allDay: false,
+    location: 'Fellowship Hall',
+    category: 'ceremony'
+  },
+  {
+    id: '22',
+    title: 'Baptism Sunday',
+    startDate: `${getNextDayOfWeek(0, 2)}T10:45:00`,
+    endDate: `${getNextDayOfWeek(0, 2)}T11:15:00`,
+    allDay: false,
+    location: 'Baptistry',
+    category: 'baptism'
+  },
+  {
+    id: '23',
+    title: 'Leadership Team Huddle',
+    startDate: `${getNextDayOfWeek(1, 1)}T07:30:00`,
+    endDate: `${getNextDayOfWeek(1, 1)}T08:30:00`,
+    allDay: false,
+    location: 'Conference Room',
+    category: 'meeting'
+  },
 ];
 
 export const STATUS_COLORS: Record<string, string> = {

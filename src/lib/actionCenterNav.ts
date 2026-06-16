@@ -2,6 +2,7 @@ import type { View } from '../types';
 import { openCongregation } from './congregationNav';
 import { openSunday } from './sundayNav';
 import { openLeadership } from './leadershipNav';
+import { openCare } from './careNav';
 import { openSettings, type SettingsTab } from './settingsNav';
 
 export type ActionCenterTab = 'followups' | 'mail' | 'birthdays' | 'live' | 'volunteers';
@@ -57,6 +58,10 @@ export function navigateView(view: View | string, setView: (v: View) => void): v
   }
   if (view === 'volunteers') {
     openActionCenter('volunteers', setView);
+    return;
+  }
+  if (view === 'life-services') {
+    openCare('life-services', setView);
     return;
   }
   if (view === 'groups') {

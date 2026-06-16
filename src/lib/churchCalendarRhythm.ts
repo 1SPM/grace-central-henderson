@@ -137,6 +137,25 @@ export function buildChurchRhythmEvents(year: number): CalendarEvent[] {
     rhythm(`${year}-christmas-blessing`, 'Christmas Blessing Drive', new Date(year, 11, 1), 'event', { description: 'Family hampers, toy drives, community dinners' }),
     rhythm(`${year}-ascension`, 'Ascension Sunday', ascension, 'holiday', { location: 'Main Sanctuary' }),
     rhythm(`${year}-pentecost`, 'Pentecost Sunday', pentecost, 'holiday', { location: 'Main Sanctuary' }),
+
+    // —— Additional ministry milestones & recurring emphases ——
+    rhythm(`${year}-missions`, 'Missions Sunday', nthWeekdayOfMonth(year, 10, 0, 2), 'ceremony', { location: 'Main Sanctuary', description: 'Global partners spotlight & sending prayer' }),
+    rhythm(`${year}-youth-sun`, 'Youth Sunday', nthWeekdayOfMonth(year, 5, 0, 3), 'ceremony', { location: 'Main Sanctuary', description: 'Students lead worship & share testimonies' }),
+    rhythm(`${year}-communion`, 'World Communion Sunday', nthWeekdayOfMonth(year, 10, 0, 1), 'ceremony', { location: 'Main Sanctuary' }),
+    rhythm(`${year}-sanctity-life`, 'Sanctity of Life Sunday', nthWeekdayOfMonth(year, 1, 0, 3), 'ceremony', { description: 'Prayer & advocacy for life ministries' }),
+    rhythm(`${year}-church-anniv`, 'Church Anniversary Weekend', nthWeekdayOfMonth(year, 4, 6, 2), 'ceremony', { location: 'Main Sanctuary', description: 'Founding celebration & heritage stories' }),
+    rhythm(`${year}-leadership-retreat`, 'Leadership Retreat', nthWeekdayOfMonth(year, 2, 5, 3), 'meeting', { location: 'Retreat Center', description: 'Elders, deacons & ministry directors — Fri–Sat' }),
+    rhythm(`${year}-baby-dedication`, 'Baby Dedication Sunday', nthWeekdayOfMonth(year, 4, 0, 4), 'dedication', { location: 'Main Sanctuary' }),
+    rhythm(`${year}-new-members`, 'New Members Celebration', nthWeekdayOfMonth(year, 6, 0, 2), 'ceremony', { location: 'Fellowship Hall', description: 'Welcome lunch for recent joiners' }),
+    rhythm(`${year}-mens-breakfast`, "Men's Breakfast & Serve Day", nthWeekdayOfMonth(year, 3, 6, 1), 'outreach', { location: 'Fellowship Hall', hour: 8, allDay: false, description: 'Community yard-work teams after breakfast' }),
+    rhythm(`${year}-womens-retreat`, "Women's Retreat", nthWeekdayOfMonth(year, 4, 5, 3), 'event', { location: 'Camp Cedar', description: 'Fri evening through Sat afternoon' }),
+    rhythm(`${year}-work-day`, 'All-Church Work Day', nthWeekdayOfMonth(year, 8, 6, 1), 'outreach', { location: 'Church Campus', hour: 9, allDay: false, description: 'Grounds, painting & facility projects' }),
+    rhythm(`${year}-caroling`, 'Christmas Caroling Outreach', new Date(year, 11, 15), 'outreach', { location: 'Neighborhood Routes', hour: 18, allDay: false }),
+    rhythm(`${year}-lent`, 'Lent Begins', addDays(ashWednesday, -7), 'holiday', { description: 'Ash Wednesday week — prayer & fasting emphasis' }),
+    rhythm(`${year}-holy-week`, 'Holy Week Services', palmSunday, 'service', { location: 'Main Sanctuary', description: 'Daily chapel & evening gatherings Mon–Thu' }),
+    rhythm(`${year}-communion-sun`, 'Communion Sunday', nthWeekdayOfMonth(year, 3, 0, 1), 'service', { location: 'Main Sanctuary' }),
+    rhythm(`${year}-bible-study-launch`, 'Fall Bible Study Launch', nthWeekdayOfMonth(year, 9, 2, 1), 'class', { location: 'Room 201', hour: 18, minute: 30, allDay: false }),
+    rhythm(`${year}-deacon-ord`, 'Deacon Ordination', nthWeekdayOfMonth(year, 8, 0, 4), 'ceremony', { location: 'Main Sanctuary' }),
   ];
 }
 

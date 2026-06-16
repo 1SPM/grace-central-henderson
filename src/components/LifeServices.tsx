@@ -31,6 +31,7 @@ interface LifeServicesProps {
   onNavigate: (view: View) => void;
   events?: CalendarEvent[];
   people?: Person[];
+  embedded?: boolean;
 }
 
 // Mock data for demonstration
@@ -171,7 +172,7 @@ const getStatusIcon = (status: ServiceRequestStatus) => {
   }
 };
 
-export function LifeServices({ onNavigate, events = [], people = [] }: LifeServicesProps) {
+export function LifeServices({ onNavigate, events = [], people = [], embedded = false }: LifeServicesProps) {
   const [viewMode, setViewMode] = useState<'cards' | 'pipeline' | 'list'>('cards');
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
@@ -193,61 +194,114 @@ export function LifeServices({ onNavigate, events = [], people = [] }: LifeServi
   const headerMeta = getViewHeaderMeta('life-services');
 
   return (
-    <div data-tutorial="life-services-list" className="p-6 space-y-6 max-w-7xl mx-auto">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle="Manage weddings, funerals, baptisms, and legacy giving"
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        trailing={
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
+    <div
+      data-tutorial="life-services-list"
+      className={embedded ? 'px-4 sm:px-6 pt-4 pb-6 space-y-6 max-w-7xl mx-auto' : 'p-6 space-y-6 max-w-7xl mx-auto'}
+    >
+      {!embedded && (
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle="Manage weddings, funerals, baptisms, and legacy giving"
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          trailing={
+            <div className="flex items-center gap-3">
+              <div className="flex items-center bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'cards'
+                      ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                      : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+                  }`}
+                  title="Cards view"
+                >
+                  <LayoutGrid size={18} className="text-gray-600 dark:text-dark-400" />
+                </button>
+                <button
+                  onClick={() => setViewMode('pipeline')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'pipeline'
+                      ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                      : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+                  }`}
+                  title="Pipeline view"
+                >
+                  <Filter size={18} className="text-gray-600 dark:text-dark-400" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                      : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+                  }`}
+                  title="List view"
+                >
+                  <List size={18} className="text-gray-600 dark:text-dark-400" />
+                </button>
+              </div>
+
               <button
-                onClick={() => setViewMode('cards')}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'cards'
-                    ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
-                    : 'hover:bg-gray-200 dark:hover:bg-dark-700'
-                }`}
-                title="Cards view"
+                onClick={() => setShowRequestForm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
               >
-                <LayoutGrid size={18} className="text-gray-600 dark:text-dark-400" />
-              </button>
-              <button
-                onClick={() => setViewMode('pipeline')}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'pipeline'
-                    ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
-                    : 'hover:bg-gray-200 dark:hover:bg-dark-700'
-                }`}
-                title="Pipeline view"
-              >
-                <Filter size={18} className="text-gray-600 dark:text-dark-400" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
-                    : 'hover:bg-gray-200 dark:hover:bg-dark-700'
-                }`}
-                title="List view"
-              >
-                <List size={18} className="text-gray-600 dark:text-dark-400" />
+                <Plus size={18} />
+                <span>New Request</span>
               </button>
             </div>
+          }
+        />
+      )}
 
+      {embedded && (
+        <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center bg-gray-100 dark:bg-dark-800 rounded-lg p-1">
             <button
-              onClick={() => setShowRequestForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+              onClick={() => setViewMode('cards')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'cards'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                  : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+              }`}
+              title="Cards view"
             >
-              <Plus size={18} />
-              <span>New Request</span>
+              <LayoutGrid size={18} className="text-gray-600 dark:text-dark-400" />
+            </button>
+            <button
+              onClick={() => setViewMode('pipeline')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'pipeline'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                  : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+              }`}
+              title="Pipeline view"
+            >
+              <Filter size={18} className="text-gray-600 dark:text-dark-400" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-stone-100 dark:bg-dark-700 shadow-sm'
+                  : 'hover:bg-gray-200 dark:hover:bg-dark-700'
+              }`}
+              title="List view"
+            >
+              <List size={18} className="text-gray-600 dark:text-dark-400" />
             </button>
           </div>
-        }
-      />
+
+          <button
+            onClick={() => setShowRequestForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+          >
+            <Plus size={18} />
+            <span>New Request</span>
+          </button>
+        </div>
+      )}
 
       {/* Cards View - Service Categories */}
       {viewMode === 'cards' && (

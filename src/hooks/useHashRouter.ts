@@ -130,6 +130,11 @@ function parseHash(): { view: View; personId: string | null } {
     }
   }
 
+  if (basePath === 'life-services') {
+    window.history.replaceState(null, '', '#/pastoral-care?tab=life-services');
+    return { view: 'pastoral-care', personId: null };
+  }
+
   // Legacy routes → Settings hub
   if (['forms', 'email-templates', 'reports', 'tags', 'analytics'].includes(basePath)) {
     window.history.replaceState(null, '', `#/settings?tab=${basePath}`);

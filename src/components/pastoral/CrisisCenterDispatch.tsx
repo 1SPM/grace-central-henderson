@@ -29,6 +29,8 @@ interface CrisisCenterDispatchProps {
   onToggleLeaderAvailability?: (leaderId: string) => void;
   onBack?: () => void;
   churchName?: string;
+  /** When true, hide page title (used inside Pastoral Care hub). */
+  embedded?: boolean;
 }
 
 export function CrisisCenterDispatch({
@@ -42,6 +44,7 @@ export function CrisisCenterDispatch({
   onEscalateConversation,
   onSetActiveConversation,
   onBack,
+  embedded = false,
 }: CrisisCenterDispatchProps) {
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -64,21 +67,46 @@ export function CrisisCenterDispatch({
   const headerMeta = getViewHeaderMeta('pastoral-care');
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle="24-hour receiving line for member help requests — AI triage, crisis escalation, live handoff"
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        leading={
-          onBack ? (
-            <button onClick={onBack} className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg">
-              <ChevronLeft size={20} className="text-gray-500" />
+    <div className={`max-w-7xl mx-auto space-y-6 ${embedded ? 'px-4 sm:px-6 pt-4 pb-6' : 'p-6'}`}>
+      {!embedded && (
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle="24-hour receiving line for member help requests — AI triage, crisis escalation, live handoff"
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          leading={
+            onBack ? (
+              <button onClick={onBack} className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg">
+                <ChevronLeft size={20} className="text-gray-500" />
+              </button>
+            ) : undefined
+          }
+          trailing={
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}${window.location.pathname}?portal=pastor-signup`;
+                navigator.clipboard.writeText(url).then(() => {
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                });
+              }}
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors border ${
+                linkCopied
+                  ? 'border-emerald-300 dark:border-emerald-600 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700'
+              }`}
+              title="Copy pastor signup link to share"
+            >
+              {linkCopied ? <Check size={16} /> : <Link2 size={16} />}
+              {linkCopied ? 'Copied!' : 'Signup Link'}
             </button>
-          ) : undefined
-        }
-        trailing={
+          }
+        />
+      )}
+
+      {embedded && (
+        <div className="flex justify-end">
           <button
             onClick={() => {
               const url = `${window.location.origin}${window.location.pathname}?portal=pastor-signup`;
@@ -97,8 +125,8 @@ export function CrisisCenterDispatch({
             {linkCopied ? <Check size={16} /> : <Link2 size={16} />}
             {linkCopied ? 'Copied!' : 'Signup Link'}
           </button>
-        }
-      />
+        </div>
+      )}
 
       <CareDispatch
         conversations={conversations}

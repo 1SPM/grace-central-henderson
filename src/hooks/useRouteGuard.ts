@@ -8,9 +8,14 @@
 import { useAuthContext } from '../contexts/AuthContext';
 import type { View } from '../types';
 
-// Views that require admin role
-const ADMIN_VIEWS = new Set<View>([
+// Views that require settings management permission
+const SETTINGS_VIEWS = new Set<View>([
   'settings',
+  'forms',
+  'email-templates',
+  'reports',
+  'tags',
+  'analytics',
 ]);
 
 // Views that require at least staff role
@@ -27,11 +32,11 @@ export function useRouteGuard() {
   const role = user?.role || 'volunteer';
 
   function canAccess(view: View): boolean {
-    if (ADMIN_VIEWS.has(view)) {
-      return role === 'admin';
+    if (SETTINGS_VIEWS.has(view)) {
+      return permissions?.canManageSettings ?? false;
     }
     if (STAFF_VIEWS.has(view)) {
-      return role === 'admin' || role === 'staff';
+      return role === 'admin' || role === 'staff' || role === 'pastor';
     }
     // All other views are accessible to authenticated users
     return true;
@@ -39,8 +44,8 @@ export function useRouteGuard() {
 
   function getBlockedMessage(view: View): string | null {
     if (!canAccess(view)) {
-      if (ADMIN_VIEWS.has(view)) {
-        return 'This page requires administrator access.';
+      if (SETTINGS_VIEWS.has(view)) {
+        return 'This page requires administrator or pastor access.';
       }
       return 'This page requires staff-level access.';
     }

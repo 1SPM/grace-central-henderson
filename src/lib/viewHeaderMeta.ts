@@ -56,7 +56,7 @@ export const viewHeaderMeta = {
   'pastoral-care': {
     icon: Heart,
     iconBoxClassName: 'bg-rose-600',
-    title: 'Crisis Center Dispatch',
+    title: 'Pastoral Care',
   },
   analytics: {
     icon: BarChart3,

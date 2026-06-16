@@ -6,8 +6,11 @@ import { LeadershipPage } from './leadership/LeadershipPage';
 import { Congregation } from './Congregation';
 import { SettingsHub } from './settings/SettingsHub';
 import { SundayPage } from './SundayPage';
+import { CareHub } from './care/CareHub';
 import { navigateView } from '../lib/actionCenterNav';
 import type { ActionCenterTab } from '../lib/actionCenterNav';
+import type { CareTab } from '../lib/careNav';
+import { openCare } from '../lib/careNav';
 import { openSunday, type SundayTab } from '../lib/sundayNav';
 import type { SettingsTab } from '../lib/settingsNav';
 import { settingsTabFromView } from '../lib/settingsNav';
@@ -48,10 +51,9 @@ const CrisisCenterDispatch = lazy(() =>
 const DiscipleshipEngagementHub = lazy(() =>
   import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
 );
-const LifeServices = lazy(() => import('./LifeServices').then(m => ({ default: m.LifeServices })));
+const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
-const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 
 /**
  * Wraps lazy-loaded views with both Suspense (for loading) and
@@ -311,6 +313,31 @@ export function ViewRenderer(props: ViewRendererProps) {
     />
   );
 
+  const renderCareHub = (defaultTab?: CareTab) => (
+    <CareHub
+      leaders={pastoralCare.leaders}
+      helpRequests={pastoralCare.helpRequests}
+      conversations={pastoralCare.conversations}
+      activeConversation={pastoralCare.activeConversation}
+      activeLeader={pastoralCare.activeLeader}
+      activeConversationId={pastoralCare.activeConversationId}
+      onCreateHelpRequest={pastoralCare.createHelpRequest}
+      onSendMessage={pastoralCare.sendMessage}
+      onResolveConversation={pastoralCare.resolveConversation}
+      onEscalateConversation={pastoralCare.escalateConversation}
+      onSetActiveConversation={pastoralCare.setActiveConversationId}
+      onAddLeader={pastoralCare.addLeader}
+      onUpdateLeader={pastoralCare.updateLeader}
+      onDeleteLeader={pastoralCare.deleteLeader}
+      onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
+      churchName={churchName}
+      events={events}
+      people={people}
+      onNavigate={(v) => navigateView(v, setView)}
+      defaultTab={defaultTab}
+    />
+  );
+
   // Core views (not lazy loaded for instant response)
   switch (view) {
     case 'dashboard':
@@ -402,6 +429,12 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'announcements':
       return renderSundayPage('announcements');
+
+    case 'pastoral-care':
+      return renderCareHub();
+
+    case 'life-services':
+      return renderCareHub('life-services');
 
     case 'person':
       if (!selectedPerson) {
@@ -643,38 +676,6 @@ export function ViewRenderer(props: ViewRendererProps) {
           />
         );
 
-      case 'pastoral-care':
-        return (
-          <CrisisCenterDispatch
-            leaders={pastoralCare.leaders}
-            helpRequests={pastoralCare.helpRequests}
-            conversations={pastoralCare.conversations}
-            activeConversation={pastoralCare.activeConversation}
-            activeLeader={pastoralCare.activeLeader}
-            activeConversationId={pastoralCare.activeConversationId}
-            onCreateHelpRequest={pastoralCare.createHelpRequest}
-            onSendMessage={pastoralCare.sendMessage}
-            onResolveConversation={pastoralCare.resolveConversation}
-            onEscalateConversation={pastoralCare.escalateConversation}
-            onSetActiveConversation={pastoralCare.setActiveConversationId}
-            onAddLeader={pastoralCare.addLeader}
-            onUpdateLeader={pastoralCare.updateLeader}
-            onDeleteLeader={pastoralCare.deleteLeader}
-            onToggleLeaderAvailability={pastoralCare.toggleLeaderAvailability}
-            onBack={() => setView('dashboard')}
-            churchName={churchName}
-          />
-        );
-
-      case 'life-services':
-        return (
-          <LifeServices
-            onNavigate={(v) => navigateView(v, setView)}
-            events={events}
-            people={people}
-          />
-        );
-
       case 'wedding-services':
         return (
           <WeddingServices
@@ -682,7 +683,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             events={events}
             onAddEvent={handlers.addEvent}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('life-services')}
+            onBack={() => openCare('life-services', setView)}
           />
         );
 
@@ -693,7 +694,7 @@ export function ViewRenderer(props: ViewRendererProps) {
             events={events}
             onAddEvent={handlers.addEvent}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('life-services')}
+            onBack={() => openCare('life-services', setView)}
           />
         );
 
@@ -702,7 +703,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           <EstatePlanning
             people={people}
             onViewPerson={handlers.viewPerson}
-            onBack={() => setView('life-services')}
+            onBack={() => openCare('life-services', setView)}
           />
         );
 

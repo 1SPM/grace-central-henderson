@@ -6,27 +6,54 @@ import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
 
 const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const CATEGORY_TONE: Record<string, { label: string; dot: string; bg: string; text: string }> = {
-  service: { label: 'Service', dot: 'bg-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-300' },
-  worship: { label: 'Worship', dot: 'bg-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-300' },
-  meeting: { label: 'Meeting', dot: 'bg-slate-500', bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-700 dark:text-slate-300' },
-  outreach: { label: 'Outreach', dot: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300' },
-  class: { label: 'Class', dot: 'bg-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300' },
-  event: { label: 'Event', dot: 'bg-sky-500', bg: 'bg-sky-50 dark:bg-sky-500/10', text: 'text-sky-700 dark:text-sky-300' },
-  'small-group': { label: 'Group', dot: 'bg-teal-500', bg: 'bg-teal-50 dark:bg-teal-500/10', text: 'text-teal-700 dark:text-teal-300' },
-  holiday: { label: 'Holiday', dot: 'bg-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
-  wedding: { label: 'Wedding', dot: 'bg-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
-  funeral: { label: 'Funeral', dot: 'bg-stone-500', bg: 'bg-stone-100 dark:bg-stone-500/10', text: 'text-stone-700 dark:text-stone-300' },
-  baptism: { label: 'Baptism', dot: 'bg-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-300' },
-  dedication: { label: 'Dedication', dot: 'bg-violet-500', bg: 'bg-violet-50 dark:bg-violet-500/10', text: 'text-violet-700 dark:text-violet-300' },
-  ceremony: { label: 'Milestone', dot: 'bg-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300' },
-  counseling: { label: 'Care', dot: 'bg-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300' },
-  rehearsal: { label: 'Rehearsal', dot: 'bg-purple-500', bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-700 dark:text-purple-300' },
-  other: { label: 'Other', dot: 'bg-gray-500', bg: 'bg-gray-50 dark:bg-gray-500/10', text: 'text-gray-700 dark:text-gray-300' },
+const CATEGORY_TONE: Record<string, { label: string; dot: string; border: string; bg: string; text: string }> = {
+  service: { label: 'Service', dot: 'bg-indigo-500', border: 'border-l-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-300' },
+  worship: { label: 'Worship', dot: 'bg-indigo-500', border: 'border-l-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-300' },
+  meeting: { label: 'Meeting', dot: 'bg-slate-500', border: 'border-l-slate-500', bg: 'bg-slate-50 dark:bg-slate-500/10', text: 'text-slate-700 dark:text-slate-300' },
+  outreach: { label: 'Outreach', dot: 'bg-emerald-500', border: 'border-l-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300' },
+  class: { label: 'Class', dot: 'bg-blue-500', border: 'border-l-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300' },
+  event: { label: 'Event', dot: 'bg-sky-500', border: 'border-l-sky-500', bg: 'bg-sky-50 dark:bg-sky-500/10', text: 'text-sky-700 dark:text-sky-300' },
+  'small-group': { label: 'Group', dot: 'bg-teal-500', border: 'border-l-teal-500', bg: 'bg-teal-50 dark:bg-teal-500/10', text: 'text-teal-700 dark:text-teal-300' },
+  holiday: { label: 'Holiday', dot: 'bg-rose-500', border: 'border-l-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
+  wedding: { label: 'Wedding', dot: 'bg-rose-500', border: 'border-l-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
+  funeral: { label: 'Funeral', dot: 'bg-stone-500', border: 'border-l-stone-500', bg: 'bg-stone-100 dark:bg-stone-500/10', text: 'text-stone-700 dark:text-stone-300' },
+  baptism: { label: 'Baptism', dot: 'bg-cyan-500', border: 'border-l-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-300' },
+  dedication: { label: 'Dedication', dot: 'bg-violet-500', border: 'border-l-violet-500', bg: 'bg-violet-50 dark:bg-violet-500/10', text: 'text-violet-700 dark:text-violet-300' },
+  ceremony: { label: 'Milestone', dot: 'bg-amber-500', border: 'border-l-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300' },
+  counseling: { label: 'Care', dot: 'bg-amber-500', border: 'border-l-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300' },
+  rehearsal: { label: 'Rehearsal', dot: 'bg-purple-500', border: 'border-l-purple-500', bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-700 dark:text-purple-300' },
+  other: { label: 'Other', dot: 'bg-gray-500', border: 'border-l-gray-500', bg: 'bg-gray-50 dark:bg-gray-500/10', text: 'text-gray-700 dark:text-gray-300' },
 };
 
 function eventTone(category: string) {
   return CATEGORY_TONE[category] ?? CATEGORY_TONE.other;
+}
+
+/** Up to 3 distinct category dot classes for a day's events. */
+function dayCategoryDots(dayEvents: DayAgendaEvent[], max = 3): string[] {
+  const seen = new Set<string>();
+  const dots: string[] = [];
+  for (const e of dayEvents) {
+    if (seen.has(e.category)) continue;
+    seen.add(e.category);
+    dots.push(eventTone(e.category).dot);
+    if (dots.length >= max) break;
+  }
+  return dots;
+}
+
+const LEGEND_GROUPS: { label: string; categories: string[] }[] = [
+  { label: 'Holiday', categories: ['holiday'] },
+  { label: 'Milestone', categories: ['ceremony', 'baptism', 'dedication', 'wedding', 'funeral'] },
+  { label: 'Service', categories: ['service', 'worship'] },
+  { label: 'Outreach', categories: ['outreach'] },
+  { label: 'Class', categories: ['class'] },
+  { label: 'Group', categories: ['small-group', 'meeting'] },
+  { label: 'Event', categories: ['event', 'rehearsal', 'counseling', 'other'] },
+];
+
+function legendTone(group: (typeof LEGEND_GROUPS)[number]) {
+  return eventTone(group.categories[0]);
 }
 
 function parseDayKey(key: string): Date {
@@ -58,7 +85,6 @@ export function ClockCalendarBanner({
   const [selected, setSelected] = useState<Date>(() => new Date(churchToday));
   const [railTab, setRailTab] = useState<'today' | 'itinerary'>(() => (actionStrip ? 'today' : 'itinerary'));
 
-  const eventSet = useMemo(() => new Set(eventDays), [eventDays]);
   const month = viewMonth.getMonth();
   const viewYear = viewMonth.getFullYear();
   const first = new Date(viewYear, month, 1);
@@ -103,7 +129,7 @@ export function ClockCalendarBanner({
 
   const upcomingInMonth = useMemo(() => {
     const todayStart = new Date(churchToday.getFullYear(), churchToday.getMonth(), churchToday.getDate()).getTime();
-    return monthEntries.filter(({ day }) => day.getTime() >= todayStart).slice(0, 8);
+    return monthEntries.filter(({ day }) => day.getTime() >= todayStart).slice(0, 12);
   }, [churchToday, monthEntries]);
 
   const itineraryEntries = selectedDayEntries.length > 0 ? selectedDayEntries : upcomingInMonth;
@@ -124,7 +150,7 @@ export function ClockCalendarBanner({
         monthLabel={monthLabel}
         cells={cells}
         month={month}
-        eventSet={eventSet}
+        eventsByDay={eventsByDay}
         selKey={selKey}
         selected={selected}
         agenda={agenda}
@@ -169,7 +195,9 @@ export function ClockCalendarBanner({
             {cells.map((d, i) => {
               const inMonth = d.getMonth() === month;
               const key = calendarDayKey(d);
-              const count = (eventsByDay[key] ?? []).length;
+              const dayEvents = eventsByDay[key] ?? [];
+              const count = dayEvents.length;
+              const dots = dayCategoryDots(dayEvents);
               const sel = key === selKey;
               const today = isToday(d);
               return (
@@ -194,15 +222,33 @@ export function ClockCalendarBanner({
                   aria-label={inMonth ? `${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}${count > 0 ? `, ${count} event${count === 1 ? '' : 's'}` : ''}` : undefined}
                 >
                   {inMonth ? d.getDate() : ''}
-                  {inMonth && count > 0 && (
-                    <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${today ? 'bg-white dark:bg-dark-900' : 'bg-indigo-500'}`} />
+                  {inMonth && dots.length > 0 && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-px">
+                      {dots.map((dot, idx) => (
+                        <span
+                          key={idx}
+                          className={`w-1 h-1 rounded-full ${today ? 'bg-white/90 dark:bg-dark-900' : dot}`}
+                        />
+                      ))}
+                    </span>
                   )}
                 </button>
               );
             })}
           </div>
 
-          <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-3">
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
+            {LEGEND_GROUPS.map((group) => {
+              const tone = legendTone(group);
+              return (
+                <span key={group.label} className="inline-flex items-center gap-1 text-[10px] text-gray-500 dark:text-dark-400">
+                  <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`} />
+                  {group.label}
+                </span>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-2">
             {monthEntries.length} item{monthEntries.length === 1 ? '' : 's'} this month · holidays, milestones & scheduled events
           </p>
         </div>
@@ -270,7 +316,7 @@ export function ClockCalendarBanner({
                         setViewMonth(new Date(day.getFullYear(), day.getMonth(), 1));
                       }
                     }}
-                    className="w-full p-3 rounded-xl border border-stone-200 dark:border-dark-700 bg-stone-50 dark:bg-dark-800 hover:border-indigo-200 dark:hover:border-indigo-500/40 transition-colors text-left"
+                    className={`w-full p-3 rounded-xl border border-stone-200 dark:border-dark-700 bg-stone-50 dark:bg-dark-800 hover:border-indigo-200 dark:hover:border-indigo-500/40 transition-colors text-left border-l-4 ${tone.border}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-11 rounded-lg bg-white dark:bg-dark-850 border border-stone-200 dark:border-dark-700 px-2 py-1.5 text-center flex-shrink-0">
@@ -325,7 +371,7 @@ function RedesignClockCalendar({
   monthLabel,
   cells,
   month,
-  eventSet,
+  eventsByDay,
   selKey,
   selected,
   agenda,
@@ -341,7 +387,7 @@ function RedesignClockCalendar({
   monthLabel: string;
   cells: Date[];
   month: number;
-  eventSet: Set<string>;
+  eventsByDay: Record<string, DayAgendaEvent[]>;
   selKey: string;
   selected: Date;
   agenda: DayAgendaEvent[];
@@ -401,7 +447,10 @@ function RedesignClockCalendar({
           {MC_DOW.map((d, i) => <div key={i} className="mc-dow">{d}</div>)}
           {cells.map((d, i) => {
             const inMonth = d.getMonth() === month;
-            const hasEvent = eventSet.has(calendarDayKey(d));
+            const key = calendarDayKey(d);
+            const dayEvents = eventsByDay[key] ?? [];
+            const dots = dayCategoryDots(dayEvents);
+            const hasEvent = dayEvents.length > 0;
             const sel = calendarDayKey(d) === selKey;
             return (
               <button
@@ -411,7 +460,13 @@ function RedesignClockCalendar({
                 onClick={() => setSelected(new Date(d.getFullYear(), d.getMonth(), d.getDate()))}
               >
                 <span>{d.getDate()}</span>
-                {hasEvent && <i className="mc-dot" />}
+                {hasEvent && (
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-px">
+                    {dots.map((dot, idx) => (
+                      <i key={idx} className={`mc-dot ${dot}`} style={{ position: 'static' }} />
+                    ))}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -423,13 +478,15 @@ function RedesignClockCalendar({
         </div>
         {agenda.length > 0 ? (
           <div className="col" style={{ gap: 8 }}>
-            {agenda.map((e, i) => (
+            {agenda.map((e, i) => {
+              const tone = eventTone(e.category);
+              return (
               <div key={i} className="cc-agenda-item">
-                <i className="mc-dot" style={{ position: 'static' }} />
+                <i className={`mc-dot ${tone.dot}`} style={{ position: 'static' }} />
                 <span className="cc-agenda-title">{e.title}</span>
                 <span className="mute" style={{ fontSize: 11.5 }}>{e.time}</span>
               </div>
-            ))}
+            );})}
             {onOpenCalendar && <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', marginTop: 2 }} onClick={onOpenCalendar}>Open calendar →</button>}
           </div>
         ) : (
