@@ -3,6 +3,7 @@ import { MessageCircle, X, Star, Clock, Globe, Heart } from 'lucide-react';
 import type { LeaderProfile } from '../../types';
 import { CENTRAL_HENDERSON_LEADERS } from '../../config/centralHendersonLeaders';
 import { getLeaderHubStats } from '../pastoral/leadersHub/demoLeadersHub';
+import { LeaderAvatar } from '../pastoral/leadersHub/LeaderAvatar';
 
 interface PastoralStoriesProps {
   leaders?: LeaderProfile[];
@@ -143,9 +144,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheetProps) {
-  const initials = leader.displayName
-    .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-
   return (
     <div className="absolute inset-0 z-[60] flex items-end justify-center">
       {/* Backdrop */}
@@ -169,17 +167,7 @@ function PastorProfileSheet({ leader, onClose, onStartChat }: PastorProfileSheet
         {/* Avatar + name */}
         <div className="flex flex-col items-center pt-2 pb-3 px-5">
           <div className="relative mb-2">
-            {leader.photo ? (
-              <img
-                src={leader.photo}
-                alt={leader.displayName}
-                className="w-20 h-20 rounded-full object-cover ring-3 ring-white dark:ring-dark-850 shadow-md"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
-                {initials}
-              </div>
-            )}
+            <LeaderAvatar leader={leader} size="lg" showVerified={false} />
 
             {leader.isAvailable && (
               <div className="absolute bottom-0.5 right-0.5 w-4.5 h-4.5 rounded-full bg-emerald-500 border-[2.5px] border-white dark:border-dark-850" />

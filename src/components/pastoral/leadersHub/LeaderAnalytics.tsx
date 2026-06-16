@@ -3,6 +3,7 @@ import type { LeaderProfile } from '../../../types';
 import type { LeadershipActivityData } from '../../../lib/services/leadershipApi';
 import { statsForLeader } from '../../../lib/services/leadershipApi';
 import { getLeaderHubStats } from './demoLeadersHub';
+import { LeaderAvatar } from './LeaderAvatar';
 
 interface LeaderAnalyticsProps {
   leaders: LeaderProfile[];
@@ -57,19 +58,16 @@ export function LeaderAnalytics({ leaders, activity, isLive }: LeaderAnalyticsPr
               <th className="px-3 py-2 font-medium text-right">AI</th>
               <th className="px-3 py-2 font-medium">AI share</th>
               <th className="px-3 py-2 font-medium text-right">Rating</th>
+              <th className="px-3 py-2 font-medium text-right">Blessings</th>
               <th className="px-5 py-2 font-medium">Last active</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ leader, conversations, human, ai, aiShare, rating, lastActive }) => {
-              const initials = leader.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-              return (
+            {rows.map(({ leader, conversations, human, ai, aiShare, rating, blessings, lastActive }) => (
                 <tr key={leader.id} className="border-b border-gray-100 dark:border-dark-700 last:border-0">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 dark:text-dark-300 flex-shrink-0">
-                        {initials}
-                      </div>
+                      <LeaderAvatar leader={leader} size="xs" />
                       <div className="min-w-0">
                         <p className="font-medium text-gray-900 dark:text-dark-100 truncate">{leader.displayName}</p>
                         <p className="text-[10px] text-gray-400 dark:text-dark-500 truncate">{leader.title}</p>
@@ -94,12 +92,14 @@ export function LeaderAnalytics({ leaders, activity, isLive }: LeaderAnalyticsPr
                       <Star size={11} className="text-amber-500" /> {rating.toFixed(1)}
                     </span>
                   </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-gray-700 dark:text-dark-300">
+                    {blessings}/28
+                  </td>
                   <td className="px-5 py-3 text-[11px] text-gray-500 dark:text-dark-400 whitespace-nowrap">
                     {formatLastActive(lastActive)}
                   </td>
                 </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
       </div>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ArrowLeft, Bot, Clock, HeartHandshake, MessageSquare, ShieldCheck, User } from 'lucide-react';
+import { ArrowLeft, Bot, Clock, HeartHandshake, MessageSquare, Star, User } from 'lucide-react';
 import type { LeaderProfile, View } from '../../../types';
 import type { LeadershipActivityData } from '../../../lib/services/leadershipApi';
 import { statsForLeader } from '../../../lib/services/leadershipApi';
 import { getLeaderHubStats } from './demoLeadersHub';
+import { LeaderAvatar } from './LeaderAvatar';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -18,10 +19,8 @@ export function LeaderProfileView({ leader, activity, onBack, onNavigate }: Lead
   const stats = getLeaderHubStats(leader);
   const live = statsForLeader(activity ?? null, leader.id);
   const [liveOverride, setLiveOverride] = useState(stats.liveOverride);
-  const initials = leader.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const hasAi = leader.hasAiCompanion !== false;
   const humanMsgs = live?.humanMessages ?? Math.round(stats.dms * (1 - stats.aiPct / 100));
-  const aiMsgs = live?.aiMessages ?? Math.round(stats.dms * (stats.aiPct / 100));
 
   const leaderEvents = (activity?.recentEvents ?? []).filter(
     ev => ev.leaderId === leader.id,
@@ -37,40 +36,38 @@ export function LeaderProfileView({ leader, activity, onBack, onNavigate }: Lead
         <ArrowLeft size={15} /> Team
       </button>
 
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-0">
+          <LeaderAvatar leader={leader} size="hero" rounded="xl" className="md:min-h-[240px]" showVerified />
+          <div className="p-5">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
+            <p className="text-sm text-gray-500 dark:text-dark-400">{leader.title}</p>
+            <div className="flex gap-1.5 mt-2 flex-wrap">
+              {leader.isAvailable ? (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                  Live
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                  AI on duty
+                </span>
+              )}
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                <User size={9} className="inline mr-0.5" /> Human
+              </span>
+              {hasAi && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                  <Bot size={9} className="inline mr-0.5" /> AI companion
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-dark-400 mt-3">{leader.bio}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="relative shrink-0">
-              {leader.photo ? (
-                <img src={leader.photo} alt={leader.displayName} className="w-14 h-14 rounded-full object-cover" />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-slate-200 dark:bg-dark-700 flex items-center justify-center text-base font-semibold text-slate-700 dark:text-dark-200">
-                  {initials}
-                </div>
-              )}
-              {leader.isVerified && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-amber-500 border-2 border-stone-100 dark:border-dark-800 flex items-center justify-center">
-                  <ShieldCheck size={11} className="text-white" />
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
-              <p className="text-xs text-gray-500 dark:text-dark-400">{leader.title}</p>
-              <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                  <User size={9} className="inline mr-0.5" /> Human
-                </span>
-                {hasAi && (
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                    <Bot size={9} className="inline mr-0.5" /> AI companion
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mb-4">{leader.bio}</p>
-
           <div className="space-y-3">
             <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
               <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 flex items-center gap-1 mb-1">
@@ -104,15 +101,19 @@ export function LeaderProfileView({ leader, activity, onBack, onNavigate }: Lead
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Conversations', value: live?.conversations ?? stats.sessions },
+              { label: 'Sessions', value: live?.conversations ?? stats.sessions },
+              { label: 'Rating', value: stats.rating.toFixed(1), star: true },
+              { label: 'Blessings', value: `${stats.blessings}/28` },
               { label: 'Human replies', value: humanMsgs },
-              { label: 'AI replies', value: aiMsgs },
             ].map(kpi => (
               <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
                 <p className="section-eyebrow">{kpi.label}</p>
-                <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1">{kpi.value}</p>
+                <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1 flex items-center gap-1">
+                  {kpi.star && <Star size={14} className="text-amber-500 fill-amber-500" />}
+                  {kpi.value}
+                </p>
               </div>
             ))}
           </div>

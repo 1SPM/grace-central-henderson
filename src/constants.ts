@@ -1,4 +1,5 @@
 import { Person, Task, SmallGroup, PrayerRequest, Interaction, Attendance, CalendarEvent, Giving } from './types';
+import { getLeaderPhotoByPersonId } from './config/centralHendersonLeaders';
 import type {
   AgentLog,
   AgentStats,
@@ -443,6 +444,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1972-03-14',
     tags: ['pastoral-staff', 'senior-pastor'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000101'),
     notes: 'Senior Pastor. AI companion deployed in Leadership.'
   },
   {
@@ -456,6 +458,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1978-07-22',
     tags: ['pastoral-staff', 'care-director'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000102'),
     notes: 'Pastoral Care Director.'
   },
   {
@@ -469,6 +472,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1985-11-08',
     tags: ['pastoral-staff', 'youth-family'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000103'),
     notes: 'Youth & Family Ministry.'
   },
   {
@@ -482,6 +486,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1968-04-30',
     tags: ['pastoral-staff', 'missions'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000104'),
     notes: 'Missions & Outreach Lead.'
   },
   {
@@ -495,6 +500,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1980-09-19',
     tags: ['pastoral-staff', 'womens-ministry'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000105'),
     notes: 'Women\'s Ministry Pastor.'
   },
   {
@@ -508,6 +514,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1983-01-12',
     tags: ['pastoral-staff', 'worship-arts'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000106'),
     notes: 'Worship & Arts Ministry.'
   },
   {
@@ -521,6 +528,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1976-12-05',
     tags: ['pastoral-staff', 'counseling'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000107'),
     notes: 'Family & Counseling Pastor.'
   },
   {
@@ -534,6 +542,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     birthDate: '1965-06-28',
     tags: ['pastoral-staff', 'prayer-ministry'],
     smallGroups: [],
+    photo: getLeaderPhotoByPersonId('00000000-0000-0000-0000-000000000108'),
     notes: 'Prayer Ministry Lead Elder.'
   }
 ];

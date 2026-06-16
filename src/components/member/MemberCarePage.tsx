@@ -16,6 +16,7 @@ import { HelpIntakeForm } from '../pastoral/HelpIntakeForm';
 import { ChatWindow } from '../pastoral/ChatWindow';
 import { CENTRAL_HENDERSON_LEADERS, getExpertiseDisplayTags, GRACE_AI_FAQ } from '../../config/centralHendersonLeaders';
 import { getLeaderHubStats } from '../pastoral/leadersHub/demoLeadersHub';
+import { LeaderAvatar } from '../pastoral/leadersHub/LeaderAvatar';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   'marriage': 'Marriage', 'addiction': 'Recovery', 'grief': 'Grief',
@@ -505,13 +506,7 @@ function LeaderCard({
     }`}>
       <div className="flex items-start gap-4">
         <div className="relative flex-shrink-0">
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg ${
-            leader.isAvailable
-              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 ring-2 ring-emerald-300/50'
-              : 'bg-gradient-to-br from-slate-500 to-slate-600'
-          }`}>
-            {leader.displayName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-          </div>
+          <LeaderAvatar leader={leader} size="lg" showVerified={false} />
           <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-dark-800 ${
             leader.isAvailable ? 'bg-emerald-500' : 'bg-amber-400'
           }`} />

@@ -44,12 +44,50 @@ export const CENTRAL_STAFF_PERSON_IDS = [
   '00000000-0000-0000-0000-000000000108',
 ] as const;
 
+/**
+ * Leader portraits — role-mapped from Central Henderson member portal `aiLeaders`.
+ * James Wilson uses the bundled asset; others use stable randomuser.me URLs from the portal roster.
+ */
+export const CENTRAL_HENDERSON_LEADER_PHOTOS: Record<string, string> = {
+  'ch-leader-james-wilson': '/leaders/james-wilson.jpg',
+  'ch-leader-marcus-collins': 'https://randomuser.me/api/portraits/women/44.jpg',
+  'ch-leader-maria-rodriguez': 'https://randomuser.me/api/portraits/women/65.jpg',
+  'ch-leader-thomas-grant': 'https://randomuser.me/api/portraits/men/22.jpg',
+  'ch-leader-sarah-chen': 'https://randomuser.me/api/portraits/women/28.jpg',
+  'ch-leader-david-okafor': 'https://randomuser.me/api/portraits/men/76.jpg',
+  'ch-leader-michael-hayes': 'https://randomuser.me/api/portraits/men/45.jpg',
+  'ch-leader-ruth-abramowitz': 'https://randomuser.me/api/portraits/women/33.jpg',
+};
+
+/** Photo URL for a canonical Central Henderson leader id. */
+export function getLeaderPhoto(leaderId: string): string | undefined {
+  return CENTRAL_HENDERSON_LEADER_PHOTOS[leaderId];
+}
+
+const PERSON_ID_TO_LEADER_ID: Record<string, string> = {
+  [CENTRAL_STAFF_PERSON_IDS[0]]: 'ch-leader-james-wilson',
+  [CENTRAL_STAFF_PERSON_IDS[1]]: 'ch-leader-marcus-collins',
+  [CENTRAL_STAFF_PERSON_IDS[2]]: 'ch-leader-maria-rodriguez',
+  [CENTRAL_STAFF_PERSON_IDS[3]]: 'ch-leader-thomas-grant',
+  [CENTRAL_STAFF_PERSON_IDS[4]]: 'ch-leader-sarah-chen',
+  [CENTRAL_STAFF_PERSON_IDS[5]]: 'ch-leader-david-okafor',
+  [CENTRAL_STAFF_PERSON_IDS[6]]: 'ch-leader-michael-hayes',
+  [CENTRAL_STAFF_PERSON_IDS[7]]: 'ch-leader-ruth-abramowitz',
+};
+
+/** Photo URL for a Central Staff person row (maps personId → leader roster). */
+export function getLeaderPhotoByPersonId(personId: string): string | undefined {
+  const leaderId = PERSON_ID_TO_LEADER_ID[personId];
+  return leaderId ? getLeaderPhoto(leaderId) : undefined;
+}
+
 export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
   {
     id: 'ch-leader-james-wilson',
     personId: CENTRAL_STAFF_PERSON_IDS[0],
     displayName: 'Pastor James Wilson',
     title: 'Senior Pastor',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-james-wilson'],
     bio: 'Over 22 years guiding families through faith, marriage, and life transitions. Grounded in scripture and practical pastoral care.',
     expertiseAreas: ['marriage', 'parenting', 'general', 'faith-questions'],
     credentials: ['M.Div — Fuller Seminary', 'Certified Biblical Counselor'],
@@ -71,6 +109,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[1],
     displayName: 'Deacon Marcus Collins',
     title: 'Pastoral Care Director',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-marcus-collins'],
     bio: 'Leads care dispatch and hospital visitation. Former hospice chaplain with deep crisis intervention experience.',
     expertiseAreas: ['grief', 'crisis', 'anxiety-depression', 'general'],
     credentials: ['Board Certified Chaplain', 'M.A. Pastoral Care'],
@@ -92,6 +131,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[2],
     displayName: 'Sister Maria Rodriguez',
     title: 'Youth & Family Ministry',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-maria-rodriguez'],
     bio: 'Passionate about walking with young adults and families through transitions and faith formation.',
     expertiseAreas: ['parenting', 'faith-questions', 'general'],
     credentials: ['M.A. Family Therapy', 'Youth Ministry Certificate'],
@@ -113,6 +153,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[3],
     displayName: 'Elder Thomas Grant',
     title: 'Missions & Outreach Lead',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-thomas-grant'],
     bio: 'Oversees missions partnerships and community outreach. Guides members in service and global engagement.',
     expertiseAreas: ['general', 'financial', 'faith-questions'],
     credentials: ['Elder — Central Henderson', 'Missions Leadership Certificate'],
@@ -134,6 +175,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[4],
     displayName: 'Pastor Sarah Chen',
     title: "Women's Ministry",
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-sarah-chen'],
     bio: 'Licensed counselor combining professional expertise with spiritual care for women facing anxiety, grief, and life stress.',
     expertiseAreas: ['anxiety-depression', 'grief', 'marriage', 'general'],
     credentials: ['Licensed Professional Counselor', 'M.A. Clinical Psychology'],
@@ -155,6 +197,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[5],
     displayName: 'Deacon David Okafor',
     title: 'Worship & Arts Ministry',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-david-okafor'],
     bio: 'Leads worship teams and creative arts. Helps members connect with God through music, prayer, and creative expression.',
     expertiseAreas: ['general', 'faith-questions'],
     credentials: ['Worship Leadership Certificate', 'Music Director — 15 years'],
@@ -176,6 +219,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[6],
     displayName: 'Pastor Michael Hayes',
     title: 'Family & Counseling',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-michael-hayes'],
     bio: 'Specializes in marriage counseling, family systems, and pre-marital guidance with a scripture-centered approach.',
     expertiseAreas: ['marriage', 'parenting', 'crisis', 'general'],
     credentials: ['M.Div', 'Certified Marriage & Family Therapist'],
@@ -197,6 +241,7 @@ export const CENTRAL_HENDERSON_LEADERS: LeaderProfile[] = [
     personId: CENTRAL_STAFF_PERSON_IDS[7],
     displayName: 'Elder Ruth Abramowitz',
     title: 'Prayer Ministry Lead',
+    photo: CENTRAL_HENDERSON_LEADER_PHOTOS['ch-leader-ruth-abramowitz'],
     bio: 'Coordinates intercessory prayer teams and daily blessings. Deep experience in grief support and hospital prayer visits.',
     expertiseAreas: ['grief', 'crisis', 'general', 'anxiety-depression'],
     credentials: ['Prayer Ministry Director', 'GriefShare Facilitator'],

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { LeaderProfile, Person } from '../types';
+import { getLeaderPhoto, getLeaderPhotoByPersonId } from '../config/centralHendersonLeaders';
 
 function isPastoralTitle(title: string): boolean {
   const t = title.toLowerCase();
@@ -17,6 +18,7 @@ function personToLeader(person: Person): LeaderProfile {
     displayName: name,
     title: titleFromTags ?? (person.status === 'leader' ? 'Church leader' : 'Staff'),
     bio: person.notes ?? 'Congregation leadership team member.',
+    photo: person.photo ?? getLeaderPhotoByPersonId(person.id),
     expertiseAreas: ['general'],
     credentials: [],
     personalityTraits: [],
@@ -49,6 +51,7 @@ export function useLeadershipRoster(
     const merged = [
       ...base.map(l => ({
         ...l,
+        photo: l.photo ?? getLeaderPhoto(l.id),
         hasAiCompanion: l.hasAiCompanion ?? (l.isActive && l.isVerified),
         leaderSource: l.leaderSource ?? ('roster' as const),
       })),
