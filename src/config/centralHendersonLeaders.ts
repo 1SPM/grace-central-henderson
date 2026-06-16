@@ -45,18 +45,18 @@ export const CENTRAL_STAFF_PERSON_IDS = [
 ] as const;
 
 /**
- * Leader portraits — role-mapped from Central Henderson member portal `aiLeaders`.
- * James Wilson uses the bundled asset; others use stable randomuser.me URLs from the portal roster.
+ * Leader portraits — official-style clergy headshots from churchofjesuschrist.org media library,
+ * bundled under /public/leaders for stable circular avatars (see General Authority portraits).
  */
 export const CENTRAL_HENDERSON_LEADER_PHOTOS: Record<string, string> = {
   'ch-leader-james-wilson': '/leaders/james-wilson.jpg',
-  'ch-leader-marcus-collins': 'https://randomuser.me/api/portraits/women/44.jpg',
-  'ch-leader-maria-rodriguez': 'https://randomuser.me/api/portraits/women/65.jpg',
-  'ch-leader-thomas-grant': 'https://randomuser.me/api/portraits/men/22.jpg',
-  'ch-leader-sarah-chen': 'https://randomuser.me/api/portraits/women/28.jpg',
-  'ch-leader-david-okafor': 'https://randomuser.me/api/portraits/men/76.jpg',
-  'ch-leader-michael-hayes': 'https://randomuser.me/api/portraits/men/45.jpg',
-  'ch-leader-ruth-abramowitz': 'https://randomuser.me/api/portraits/women/33.jpg',
+  'ch-leader-marcus-collins': '/leaders/marcus-collins.jpg',
+  'ch-leader-maria-rodriguez': '/leaders/maria-rodriguez.jpg',
+  'ch-leader-thomas-grant': '/leaders/thomas-grant.jpg',
+  'ch-leader-sarah-chen': '/leaders/sarah-chen.jpg',
+  'ch-leader-david-okafor': '/leaders/david-okafor.jpg',
+  'ch-leader-michael-hayes': '/leaders/michael-hayes.jpg',
+  'ch-leader-ruth-abramowitz': '/leaders/ruth-abramowitz.jpg',
 };
 
 /** Photo URL for a canonical Central Henderson leader id. */
