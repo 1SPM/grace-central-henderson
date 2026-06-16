@@ -93,7 +93,6 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'pipeline', label: 'Pipeline', icon: <Workflow size={18} /> },
   { view: 'birthdays', label: 'Birthdays', icon: <Cake size={18} /> },
   { view: 'volunteers', label: 'Volunteers', icon: <UserCheck size={18} /> },
-  { view: 'skills', label: 'Skills & talents', icon: <Sparkles size={18} /> },
   { view: 'tags', label: 'Tags', icon: <Tag size={18} /> },
   { view: 'forms', label: 'Forms', icon: <ClipboardList size={18} /> },
   { view: 'email-templates', label: 'Email templates', icon: <Mail size={18} /> },
@@ -101,7 +100,7 @@ const moreItems: { view: View; label: string; icon: ReactNode }[] = [
 ];
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
-const peopleSubViews = ['person', 'groups'];
+const peopleSubViews = ['person', 'groups', 'skills'];
 const sundaySubViews = ['calendar', 'event-registration', 'live-service', 'attendance', 'announcements'];
 const leadershipSubViews = ['grace', 'leader-management'];
 const lifeServicesSubViews = ['wedding-services', 'funeral-services', 'estate-planning'];
@@ -254,8 +253,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   };
 
   const isMoreItemActive = (view: View) => currentView === view ||
-    (view === 'life-services' && lifeServicesSubViews.includes(currentView)) ||
-    (view === 'skills' && currentView === 'skills');
+    (view === 'life-services' && lifeServicesSubViews.includes(currentView));
 
   // Breadcrumb paths
   const getBreadcrumbs = () => {

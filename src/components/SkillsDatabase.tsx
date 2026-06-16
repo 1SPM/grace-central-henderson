@@ -56,6 +56,8 @@ interface SkillsDatabaseProps {
   people: Person[];
   onViewPerson: (id: string) => void;
   onUpdatePersonSkills?: (personId: string, skills: PersonSkill[]) => Promise<void>;
+  /** When true, hide page title (used inside Congregation tab). */
+  embedded?: boolean;
 }
 
 const CATEGORY_CONFIG: Record<SkillCategory, { label: string; icon: React.ElementType; color: string }> = {
@@ -159,7 +161,7 @@ const savePersonSkills = (personId: string, skills: PersonSkill[]) => {
   localStorage.setItem(`skills-${personId}`, JSON.stringify(skills));
 };
 
-export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
+export function SkillsDatabase({ people, onViewPerson, embedded = false }: SkillsDatabaseProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | 'all'>('all');
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
@@ -247,19 +249,24 @@ export function SkillsDatabase({ people, onViewPerson }: SkillsDatabaseProps) {
   };
 
   return (
-    <div className="p-8">
+    <div className={embedded ? 'px-6 pt-4 pb-8' : 'p-8'}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Skills & Talents</h1>
-            <p className="text-gray-500 dark:text-dark-400 mt-1">
+        <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
+          {embedded ? (
+            <p className="text-sm text-gray-500 dark:text-dark-400">
               Track member abilities for ministry and volunteer matching
             </p>
-          </div>
+          ) : (
+            <div>
+              <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Skills & Talents</h1>
+              <p className="text-gray-500 dark:text-dark-400 mt-1">
+                Track member abilities for ministry and volunteer matching
+              </p>
+            </div>
+          )}
           <button
             onClick={() => alert('Custom skill creation coming soon!')}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shrink-0"
           >
             <Plus size={18} />
             Add Custom Skill

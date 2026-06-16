@@ -1,7 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Users, Users2 } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Sparkles, Users, Users2 } from 'lucide-react';
 import { PeopleList } from './PeopleList';
 import { Groups } from './Groups';
+import { ListSkeleton } from './ui/ViewSkeleton';
+
+const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 import {
   congregationHash,
   parseCongregationTab,
@@ -28,6 +31,7 @@ interface CongregationProps {
 const TABS: { id: CongregationTab; label: string; icon: typeof Users }[] = [
   { id: 'directory', label: 'Directory', icon: Users },
   { id: 'groups', label: 'Groups', icon: Users2 },
+  { id: 'skills', label: 'Skills & Talents', icon: Sparkles },
 ];
 
 export function Congregation({
@@ -54,8 +58,8 @@ export function Congregation({
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'groups') {
-      window.history.replaceState(null, '', congregationHash('groups'));
+    if (defaultTab === 'groups' || defaultTab === 'skills') {
+      window.history.replaceState(null, '', congregationHash(defaultTab));
     }
   }, [defaultTab]);
 
@@ -121,7 +125,7 @@ export function Congregation({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {tab === 'directory' ? (
+        {tab === 'directory' && (
           <PeopleList
             embedded
             people={people}
@@ -131,7 +135,8 @@ export function Congregation({
             onBulkAddTag={onBulkAddTag}
             onImportCSV={onImportCSV}
           />
-        ) : (
+        )}
+        {tab === 'groups' && (
           <Groups
             embedded
             groups={groups}
@@ -143,6 +148,11 @@ export function Congregation({
             onEmailGroup={onEmailGroup}
             onViewPerson={onViewPerson}
           />
+        )}
+        {tab === 'skills' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <SkillsDatabase embedded people={people} onViewPerson={onViewPerson} />
+          </Suspense>
         )}
       </div>
     </div>

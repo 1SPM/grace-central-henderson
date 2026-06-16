@@ -100,6 +100,12 @@ function parseHash(): { view: View; personId: string | null } {
     return { view: 'wallets', personId: parts[1] };
   }
 
+  // Legacy routes → Congregation hub
+  if (basePath === 'skills') {
+    window.history.replaceState(null, '', '#/people?tab=skills');
+    return { view: 'people', personId: null };
+  }
+
   // Legacy routes → Leadership hub
   if (basePath === 'grace' || basePath === 'leader-management') {
     return { view: 'leadership', personId: null };

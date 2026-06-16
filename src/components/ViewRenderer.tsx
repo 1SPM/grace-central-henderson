@@ -41,7 +41,6 @@ const ChildCheckIn = lazy(() => import('./ChildCheckIn').then(m => ({ default: m
 const FormBuilder = lazy(() => import('./FormBuilder').then(m => ({ default: m.FormBuilder })));
 const MemberPortalPreview = lazy(() => import('./member/MemberPortalPreview').then(m => ({ default: m.MemberPortalPreview })));
 const Families = lazy(() => import('./Families').then(m => ({ default: m.Families })));
-const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
 const EmailTemplateBuilder = lazy(() => import('./EmailTemplateBuilder').then(m => ({ default: m.EmailTemplateBuilder })));
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
@@ -367,6 +366,25 @@ export function ViewRenderer(props: ViewRendererProps) {
         />
       );
 
+    case 'skills':
+      return (
+        <Congregation
+          people={people}
+          groups={groups}
+          churchId={churchId}
+          onViewPerson={handlers.viewPerson}
+          onAddPerson={handlers.addPerson}
+          onBulkUpdateStatus={handlers.bulkUpdateStatus}
+          onBulkAddTag={handlers.bulkAddTag}
+          onImportCSV={handlers.importCSV}
+          onCreateGroup={handlers.createGroup}
+          onAddMember={handlers.addGroupMember}
+          onRemoveMember={handlers.removeGroupMember}
+          onEmailGroup={onOpenEmailSidebar ? (groupId: string) => onOpenEmailSidebar([], groupId) : undefined}
+          defaultTab="skills"
+        />
+      );
+
     case 'sunday-prep':
       return renderSundayPage();
 
@@ -457,14 +475,6 @@ export function ViewRenderer(props: ViewRendererProps) {
             people={people}
             onSelectPerson={handlers.viewPerson}
             onUpdatePerson={handlers.savePerson}
-          />
-        );
-
-      case 'skills':
-        return (
-          <SkillsDatabase
-            people={people}
-            onViewPerson={handlers.viewPerson}
           />
         );
 

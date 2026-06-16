@@ -1,6 +1,6 @@
 import type { View } from '../types';
 
-export type CongregationTab = 'directory' | 'groups';
+export type CongregationTab = 'directory' | 'groups' | 'skills';
 
 export function parseCongregationTab(): CongregationTab {
   if (typeof window === 'undefined') return 'directory';
@@ -8,11 +8,15 @@ export function parseCongregationTab(): CongregationTab {
   const qIndex = hash.indexOf('?');
   if (qIndex < 0) return 'directory';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
-  return tab === 'groups' ? 'groups' : 'directory';
+  if (tab === 'groups') return 'groups';
+  if (tab === 'skills') return 'skills';
+  return 'directory';
 }
 
 export function congregationHash(tab: CongregationTab = 'directory'): string {
-  return tab === 'groups' ? '#/people?tab=groups' : '#/people';
+  if (tab === 'groups') return '#/people?tab=groups';
+  if (tab === 'skills') return '#/people?tab=skills';
+  return '#/people';
 }
 
 /** Navigate to Congregation, optionally opening the Groups tab. */
