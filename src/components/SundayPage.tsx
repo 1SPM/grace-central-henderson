@@ -1,16 +1,18 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar as CalendarIcon, Church, Radio } from 'lucide-react';
+import { Calendar as CalendarIcon, Church, Megaphone, Radio, UserCheck } from 'lucide-react';
 import { SundayPrep } from './SundayPrep';
 import { ListSkeleton } from './ui/ViewSkeleton';
 import { parseSundayTab, sundayHash, type SundayTab } from '../lib/sundayNav';
 import type { ChurchProfile } from '../hooks/useChurchSettings';
-import type { CalendarEvent, Person, PrayerRequest } from '../types';
+import type { Announcement, AnnouncementCategory, Attendance, CalendarEvent, Person, PrayerRequest } from '../types';
 import type { RSVP } from './calendar/CalendarConstants';
 
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
 const LiveServiceDashboard = lazy(() =>
   import('./live-service/LiveServiceDashboard').then(m => ({ default: m.LiveServiceDashboard })),
 );
+const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
+const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
 
 interface SundayPageProps {
   churchId: string;
@@ -35,10 +37,18 @@ interface SundayPageProps {
   onUpdateEvent?: (eventId: string, updates: Partial<CalendarEvent>) => void;
   onDeleteEvent?: (eventId: string) => void;
   defaultTab?: SundayTab;
+  attendanceRecords?: Attendance[];
+  onCheckIn?: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
+  announcements?: Announcement[];
+  onAddAnnouncement?: (data: { title: string; body?: string; category: AnnouncementCategory; pinned: boolean; expiresAt?: string }) => void;
+  onUpdateAnnouncement?: (id: string, data: Partial<Omit<Announcement, 'id' | 'churchId' | 'createdAt'>>) => void;
+  onDeleteAnnouncement?: (id: string) => void;
 }
 
 const TABS: { id: SundayTab; label: string; icon: typeof Church }[] = [
   { id: 'prep', label: 'Sunday Prep', icon: Church },
+  { id: 'attendance', label: 'Attendance', icon: UserCheck },
+  { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
   { id: 'live', label: 'Live Service', icon: Radio },
 ];
@@ -58,20 +68,31 @@ export function SundayPage({
   onUpdateEvent,
   onDeleteEvent,
   defaultTab,
+  attendanceRecords = [],
+  onCheckIn,
+  announcements = [],
+  onAddAnnouncement,
+  onUpdateAnnouncement,
+  onDeleteAnnouncement,
 }: SundayPageProps) {
   const initial = useMemo(() => defaultTab ?? parseSundayTab(), [defaultTab]);
   const [tab, setTab] = useState<SundayTab>(initial);
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const upcomingCount = useMemo(() => {
     const now = new Date();
     return events.filter(e => new Date(e.startDate) >= now).length;
   }, [events]);
+  const todayAttendanceCount = useMemo(
+    () => attendanceRecords.filter(a => a.date === today && a.eventType === 'sunday').length,
+    [attendanceRecords, today],
+  );
 
   useEffect(() => {
     if (defaultTab) setTab(defaultTab);
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab === 'calendar' || defaultTab === 'live') {
+    if (defaultTab === 'calendar' || defaultTab === 'live' || defaultTab === 'attendance' || defaultTab === 'announcements') {
       window.history.replaceState(null, '', sundayHash(defaultTab));
     }
   }, [defaultTab]);
@@ -82,6 +103,12 @@ export function SundayPage({
     if (base === 'live-service') {
       window.history.replaceState(null, '', sundayHash('live'));
       setTab('live');
+    } else if (base === 'attendance') {
+      window.history.replaceState(null, '', sundayHash('attendance'));
+      setTab('attendance');
+    } else if (base === 'announcements') {
+      window.history.replaceState(null, '', sundayHash('announcements'));
+      setTab('announcements');
     }
   }, []);
 
@@ -116,7 +143,7 @@ export function SundayPage({
                 Sunday Service Tools
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Sermon prep, calendar, and live service · {upcomingCount} upcoming events
+                Prep, attendance, announcements, calendar & live service · {upcomingCount} upcoming events
               </p>
             </div>
           </div>
@@ -140,6 +167,16 @@ export function SundayPage({
                     {events.length}
                   </span>
                 )}
+                {id === 'attendance' && todayAttendanceCount > 0 && (
+                  <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300">
+                    {todayAttendanceCount}
+                  </span>
+                )}
+                {id === 'announcements' && announcements.length > 0 && (
+                  <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300">
+                    {announcements.length}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -151,6 +188,27 @@ export function SundayPage({
           <div className="p-6 max-w-6xl mx-auto">
             <SundayPrep embedded people={people} prayers={prayers} onViewPerson={onViewPerson} />
           </div>
+        )}
+        {tab === 'attendance' && onCheckIn && (
+          <Suspense fallback={<ListSkeleton />}>
+            <AttendanceCheckIn
+              embedded
+              people={people}
+              attendance={attendanceRecords}
+              onCheckIn={onCheckIn}
+            />
+          </Suspense>
+        )}
+        {tab === 'announcements' && onAddAnnouncement && onUpdateAnnouncement && onDeleteAnnouncement && (
+          <Suspense fallback={<ListSkeleton />}>
+            <AnnouncementManager
+              embedded
+              announcements={announcements}
+              onAdd={onAddAnnouncement}
+              onUpdate={onUpdateAnnouncement}
+              onDelete={onDeleteAnnouncement}
+            />
+          </Suspense>
         )}
         {tab === 'calendar' && (
           <Suspense fallback={<ListSkeleton />}>

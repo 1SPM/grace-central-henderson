@@ -29,9 +29,11 @@ interface AnnouncementManagerProps {
   onAdd: (data: { title: string; body?: string; category: AnnouncementCategory; pinned: boolean; expiresAt?: string }) => void;
   onUpdate: (id: string, data: Partial<Omit<Announcement, 'id' | 'churchId' | 'createdAt'>>) => void;
   onDelete: (id: string) => void;
+  /** When true, hide page title (used inside Sunday Service Tools). */
+  embedded?: boolean;
 }
 
-export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }: AnnouncementManagerProps) {
+export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete, embedded = false }: AnnouncementManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -91,15 +93,12 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
   const headerMeta = getViewHeaderMeta('announcements');
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <HubPageHeader
-        icon={headerMeta.icon}
-        title={headerMeta.title}
-        subtitle={`${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`}
-        iconBoxClassName={headerMeta.iconBoxClassName}
-        iconClassName={headerMeta.iconClassName}
-        className="mb-6"
-        trailing={
+    <div className={`max-w-4xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
+      {embedded ? (
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-gray-500 dark:text-dark-400">
+            {announcements.length} announcement{announcements.length !== 1 ? 's' : ''}
+          </p>
           <button
             onClick={() => { resetForm(); setShowForm(true); }}
             className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 flex items-center gap-2"
@@ -107,8 +106,26 @@ export function AnnouncementManager({ announcements, onAdd, onUpdate, onDelete }
             <Plus size={16} />
             New Announcement
           </button>
-        }
-      />
+        </div>
+      ) : (
+        <HubPageHeader
+          icon={headerMeta.icon}
+          title={headerMeta.title}
+          subtitle={`${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`}
+          iconBoxClassName={headerMeta.iconBoxClassName}
+          iconClassName={headerMeta.iconClassName}
+          className="mb-6"
+          trailing={
+            <button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              New Announcement
+            </button>
+          }
+        />
+      )}
 
       {/* Form */}
       {showForm && (

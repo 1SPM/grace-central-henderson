@@ -16,6 +16,8 @@ interface AttendanceCheckInProps {
   people: Person[];
   attendance: Attendance[];
   onCheckIn: (personId: string, eventType: Attendance['eventType'], eventName?: string) => void;
+  /** When true, hide page title (used inside Sunday Service Tools). */
+  embedded?: boolean;
 }
 
 type EventType = Attendance['eventType'];
@@ -34,7 +36,7 @@ const eventTypeColors: Record<EventType, string> = {
   special: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
 };
 
-export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceCheckInProps) {
+export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = false }: AttendanceCheckInProps) {
   const [search, setSearch] = useState('');
   const [selectedEventType, setSelectedEventType] = useState<EventType>('sunday');
   const [eventName, setEventName] = useState('');
@@ -114,16 +116,27 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Attendance</h1>
-          <p className="text-gray-500 dark:text-dark-400 mt-1">
-            Check in members for today's events
-          </p>
+    <div className={embedded ? 'px-6 pt-4 pb-8 max-w-6xl mx-auto' : 'p-8'}>
+      {!embedded && (
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="serif text-3xl text-slate-900 dark:text-dark-100 leading-none">Attendance</h1>
+            <p className="text-gray-500 dark:text-dark-400 mt-1">
+              Check in members for today's events
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-dark-400">
+            <Calendar size={16} />
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-dark-400">
+      )}
+      {embedded && (
+        <div className="flex items-center justify-end gap-2 text-sm text-gray-500 dark:text-dark-400 mb-6">
           <Calendar size={16} />
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
@@ -131,7 +144,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn }: AttendanceC
             day: 'numeric',
           })}
         </div>
-      </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
