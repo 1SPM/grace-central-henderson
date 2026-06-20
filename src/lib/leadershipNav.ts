@@ -1,8 +1,11 @@
 import type { View } from '../types';
+import { careHash } from './careNav';
 
 export type LeadershipHubTab = 'team' | 'faq';
 
-export type LeadershipWorkspaceTab = 'team' | 'activity' | 'companions' | 'analytics' | 'manage';
+export type LeadershipWorkspaceTab = 'team' | 'analytics' | 'manage';
+
+export type LeadershipProfileTab = 'overview' | 'contact' | 'companion';
 
 function hashParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -19,12 +22,9 @@ export function parseLeadershipHubTab(): LeadershipHubTab {
 
 export function parseLeadershipWorkspaceTab(): LeadershipWorkspaceTab {
   const tab = hashParams().get('tab');
-  if (tab === 'activity') return 'activity';
-  if (tab === 'companions' || tab === 'companion') return 'companions';
   if (tab === 'analytics') return 'analytics';
   if (tab === 'manage') return 'manage';
   if (tab === 'faq') return 'team';
-  // Legacy: clergy, roster
   return 'team';
 }
 
@@ -32,10 +32,18 @@ export function parseLeadershipLeaderId(): string | null {
   return hashParams().get('leader');
 }
 
+export function parseLeadershipProfileTab(): LeadershipProfileTab {
+  const tab = hashParams().get('profileTab');
+  if (tab === 'contact') return 'contact';
+  if (tab === 'companion') return 'companion';
+  return 'overview';
+}
+
 export function leadershipHash(
   hubTab: LeadershipHubTab = 'team',
   workspaceTab?: LeadershipWorkspaceTab,
   leaderId?: string | null,
+  profileTab?: LeadershipProfileTab,
 ): string {
   const params = new URLSearchParams();
   if (hubTab === 'faq') {
@@ -44,8 +52,35 @@ export function leadershipHash(
     params.set('tab', workspaceTab);
   }
   if (leaderId) params.set('leader', leaderId);
+  if (profileTab && profileTab !== 'overview') params.set('profileTab', profileTab);
   const qs = params.toString();
   return qs ? `#/leadership?${qs}` : '#/leadership';
+}
+
+/** Redirect legacy leadership workspace tabs removed from the hub. Returns true if redirected. */
+export function resolveLegacyLeadershipHash(
+  fallbackLeaderId?: string | null,
+  onNavigate?: (view: View | string) => void,
+): boolean {
+  if (typeof window === 'undefined') return false;
+  const tab = hashParams().get('tab');
+  if (tab === 'activity') {
+    onNavigate?.('pastoral-care');
+    window.history.replaceState(null, '', careHash('dispatch'));
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    return true;
+  }
+  if (tab === 'companions' || tab === 'companion') {
+    const leaderId = parseLeadershipLeaderId() ?? fallbackLeaderId ?? null;
+    window.history.replaceState(
+      null,
+      '',
+      leadershipHash('team', 'team', leaderId, 'companion'),
+    );
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    return true;
+  }
+  return false;
 }
 
 /** Navigate to Leadership hub, optionally opening a workspace tab. */
@@ -53,10 +88,11 @@ export function openLeadership(
   workspaceTab: LeadershipWorkspaceTab | LeadershipHubTab = 'team',
   setView: (view: View) => void,
   leaderId?: string | null,
+  profileTab?: LeadershipProfileTab,
 ): void {
   setView('leadership');
   const hubTab: LeadershipHubTab = workspaceTab === 'faq' ? 'faq' : 'team';
   const wsTab = workspaceTab === 'faq' ? undefined : (workspaceTab as LeadershipWorkspaceTab);
-  window.history.replaceState(null, '', leadershipHash(hubTab, wsTab, leaderId));
+  window.history.replaceState(null, '', leadershipHash(hubTab, wsTab, leaderId, profileTab));
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }

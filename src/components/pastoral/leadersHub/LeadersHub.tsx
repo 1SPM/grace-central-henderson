@@ -1,30 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Activity,
-  BarChart3,
-  Bot,
-  ChevronLeft,
-  Crown,
-  Settings2,
-  Users,
-} from 'lucide-react';
-import type { LeaderProfile, PastoralSession, View } from '../../../types';
+import { BarChart3, ChevronLeft, Crown, Settings2, Users } from 'lucide-react';
+import type { LeaderProfile, PastoralSession, Person, View } from '../../../types';
 import type { LeaderOnboardingData } from '../LeaderOnboardingWizard';
 import { LeaderManagement } from '../LeaderManagement';
 import { CENTRAL_HENDERSON_LEADERS } from '../../../config/centralHendersonLeaders';
 import { useLeadershipActivity } from '../../../hooks/useLeadershipActivity';
-import { leadershipHash, parseLeadershipWorkspaceTab, type LeadershipWorkspaceTab } from '../../../lib/leadershipNav';
+import {
+  leadershipHash,
+  parseLeadershipLeaderId,
+  parseLeadershipProfileTab,
+  parseLeadershipWorkspaceTab,
+  resolveLegacyLeadershipHash,
+  type LeadershipWorkspaceTab,
+} from '../../../lib/leadershipNav';
 import { countLeadershipBadges } from '../../../hooks/useLeadershipRoster';
 import { LeadersRoster } from './LeadersRoster';
 import { LeaderProfileView } from './LeaderProfileView';
-import { LeadershipActivityFeed } from './LeadershipActivityFeed';
-import { AICompanionConfig } from './AICompanionConfig';
 import { LeaderAnalytics } from './LeaderAnalytics';
 
 export type HubTab = LeadershipWorkspaceTab;
 
 export interface LeadersHubContentProps {
   leaders: LeaderProfile[];
+  people?: Person[];
   sessions: PastoralSession[];
   onAddLeader?: (data: LeaderOnboardingData) => void;
   onToggleLeaderAvailability?: (leaderId: string) => void;
@@ -39,6 +37,7 @@ export interface LeadersHubContentProps {
 
 export function LeadersHubContent({
   leaders,
+  people = [],
   sessions,
   onAddLeader,
   onToggleLeaderAvailability,
@@ -52,7 +51,15 @@ export function LeadersHubContent({
 }: LeadersHubContentProps) {
   const [tab, setTab] = useState<HubTab>(initialTab);
   const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(initialLeaderId);
-  const { data: activity, loading: activityLoading, isLive } = useLeadershipActivity();
+  const { data: activity, isLive } = useLeadershipActivity();
+
+  const roster = leaders.length > 0 ? leaders : CENTRAL_HENDERSON_LEADERS;
+  const fallbackLeaderId =
+    roster.find(l => l.hasAiCompanion !== false)?.id ?? roster[0]?.id ?? null;
+
+  useEffect(() => {
+    resolveLegacyLeadershipHash(fallbackLeaderId, onNavigate);
+  }, [fallbackLeaderId, onNavigate]);
 
   useEffect(() => {
     if (initialLeaderId) {
@@ -65,14 +72,15 @@ export function LeadersHubContent({
     if (initialTab) setTab(initialTab);
   }, [initialTab]);
 
-  const syncTabFromHash = useCallback(() => {
+  const syncFromHash = useCallback(() => {
     setTab(parseLeadershipWorkspaceTab());
+    setSelectedLeaderId(parseLeadershipLeaderId());
   }, []);
 
   useEffect(() => {
-    window.addEventListener('hashchange', syncTabFromHash);
-    return () => window.removeEventListener('hashchange', syncTabFromHash);
-  }, [syncTabFromHash]);
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, [syncFromHash]);
 
   const selectTab = (next: HubTab) => {
     setTab(next);
@@ -80,15 +88,22 @@ export function LeadersHubContent({
     window.history.replaceState(null, '', leadershipHash('team', next));
   };
 
-  const roster = leaders.length > 0 ? leaders : CENTRAL_HENDERSON_LEADERS;
+  const selectLeader = (id: string) => {
+    setSelectedLeaderId(id);
+    setTab('team');
+    window.history.replaceState(null, '', leadershipHash('team', 'team', id, parseLeadershipProfileTab()));
+  };
+
+  const clearLeader = () => {
+    setSelectedLeaderId(null);
+    window.history.replaceState(null, '', leadershipHash('team', tab));
+  };
+
   const selectedLeader = selectedLeaderId ? roster.find(l => l.id === selectedLeaderId) : null;
   const badges = countLeadershipBadges(roster);
-  const unassignedCount = activity?.summary.unassigned ?? 0;
 
-  const TABS: { id: HubTab; label: string; icon: typeof Users; badge?: number }[] = [
+  const TABS: { id: HubTab; label: string; icon: typeof Users }[] = [
     { id: 'team', label: 'Team', icon: Crown },
-    { id: 'activity', label: 'Activity', icon: Activity, badge: unassignedCount || undefined },
-    { id: 'companions', label: 'AI Companions', icon: Bot },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'manage', label: 'Manage', icon: Settings2 },
   ];
@@ -156,7 +171,7 @@ export function LeadersHubContent({
       )}
 
       <div className="flex items-center gap-1 border-b border-gray-200 dark:border-dark-700 mb-6 overflow-x-auto">
-        {TABS.map(({ id, label, icon: Icon, badge }) => (
+        {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
@@ -169,11 +184,6 @@ export function LeadersHubContent({
           >
             <Icon size={14} />
             {label}
-            {badge ? (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
-                {badge}
-              </span>
-            ) : null}
           </button>
         ))}
       </div>
@@ -182,26 +192,14 @@ export function LeadersHubContent({
         (selectedLeader ? (
           <LeaderProfileView
             leader={selectedLeader}
-            activity={activity}
-            onBack={() => setSelectedLeaderId(null)}
+            people={people}
+            churchName={churchName}
+            onBack={clearLeader}
             onNavigate={onNavigate}
           />
         ) : (
-          <LeadersRoster
-            leaders={roster}
-            activity={activity}
-            onSelectLeader={setSelectedLeaderId}
-          />
+          <LeadersRoster leaders={roster} activity={activity} onSelectLeader={selectLeader} />
         ))}
-      {tab === 'activity' && (
-        <LeadershipActivityFeed
-          activity={activity}
-          loading={activityLoading}
-          isLive={isLive}
-          onNavigate={onNavigate}
-        />
-      )}
-      {tab === 'companions' && <AICompanionConfig leaders={roster} />}
       {tab === 'analytics' && <LeaderAnalytics leaders={roster} activity={activity} isLive={isLive} />}
     </div>
   );

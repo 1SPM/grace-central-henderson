@@ -2,7 +2,7 @@
  * Central Henderson Church — canonical pastoral AI clergy roster.
  * Single source of truth for CRM Leadership hub, member portal, and People (Central Staff).
  */
-import type { HelpCategory, LeaderProfile } from '../types';
+import type { HelpCategory, LeaderProfile, Person } from '../types';
 
 export interface LeaderHubStats {
   sessions: number;
@@ -16,6 +16,8 @@ export interface LeaderHubStats {
   liveOverride: boolean;
   todaysBlessing: string;
   careAssignments: string[];
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export interface LeaderCompanionConfig {
@@ -23,6 +25,12 @@ export interface LeaderCompanionConfig {
   knowledgeBase: string[];
   boundaries: string[];
   voiceModel: string;
+  /** D-ID Agents embed — from studio.d-id.com share panel */
+  didAgentId?: string;
+  didClientKey?: string;
+  greeting?: string;
+  /** Fallback avatar session when D-ID keys are not configured */
+  divinityAvatarUrl?: string;
 }
 
 export interface GraceFaqItem {
@@ -274,6 +282,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"The Lord bless you and keep you; the Lord make his face shine on you." — Numbers 6:24-25. Praying strength over every family this week.',
     careAssignments: ['Prayer & guidance', 'Crisis triage', 'Sunday altar follow-up'],
+    contactPhone: '(702) 555-0101',
+    contactEmail: 'jwilson@centralhenderson.org',
   },
   'ch-leader-marcus-collins': {
     sessions: 45,
@@ -288,6 +298,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"Cast all your anxiety on him because he cares for you." — 1 Peter 5:7. You are not carrying this alone.',
     careAssignments: ['Care dispatch', 'Hospital visitation', 'Funerals (backup)'],
+    contactPhone: '(702) 555-0102',
+    contactEmail: 'mcollins@centralhenderson.org',
   },
   'ch-leader-maria-rodriguez': {
     sessions: 42,
@@ -381,6 +393,9 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Sermon archive (2019–2026)', 'Marriage course curriculum', 'Church statement of faith', 'Central Henderson service guide'],
     boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
     voiceModel: 'Cloned voice — approved 2026-03-12 (consent on file)',
+    greeting:
+      '"Good morning — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',
+    divinityAvatarUrl: 'https://link.divinityagi.com/james-wilson',
   },
   'ch-leader-marcus-collins': {
     persona:
@@ -553,4 +568,29 @@ export function isPastoralStaffTags(tags: string[]): boolean {
 
 export function isPastoralStaffRecord(personId: string, tags: string[]): boolean {
   return isPastoralStaffTags(tags) || isCentralStaffPerson(personId);
+}
+
+/** Resolved companion config with env fallbacks for demo leaders. */
+export function getLeaderCompanionConfig(leaderId: string): LeaderCompanionConfig | undefined {
+  const base = CENTRAL_HENDERSON_COMPANION_CONFIG[leaderId];
+  if (!base) return undefined;
+  const envAgentId = import.meta.env.VITE_DID_AGENT_ID as string | undefined;
+  const envClientKey = import.meta.env.VITE_DID_CLIENT_KEY as string | undefined;
+  return {
+    ...base,
+    didAgentId: base.didAgentId || envAgentId || undefined,
+    didClientKey: base.didClientKey || envClientKey || undefined,
+  };
+}
+
+export function resolveLeaderContact(
+  leader: LeaderProfile,
+  people: Person[] = [],
+): { phone: string; email: string } {
+  const stats = CENTRAL_HENDERSON_LEADER_STATS[leader.id];
+  const person = leader.personId ? people.find(p => p.id === leader.personId) : undefined;
+  return {
+    phone: person?.phone || stats?.contactPhone || '',
+    email: person?.email || stats?.contactEmail || '',
+  };
 }
