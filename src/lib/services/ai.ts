@@ -8,9 +8,8 @@ import { getClerkTokenProvider } from '../supabase';
 const log = createLogger('ai-service');
 
 /**
- * Attaches the Clerk session token when available so /api/ai/generate
- * can meter the call against the church's AI budget (Phase D gateway
- * routing). Unauthenticated calls (demo, marketing) stay unmetered.
+ * Attaches the Clerk session token. The backend requires a valid Bearer
+ * token on every request (TD-033) — calls without one receive a 401.
  */
 async function buildHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -19,7 +18,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     const token = provider ? await provider() : null;
     if (token) headers.Authorization = `Bearer ${token}`;
   } catch {
-    // Token retrieval is best-effort; the call proceeds unmetered.
+    // Token retrieval failed; backend will reject with 401.
   }
   return headers;
 }

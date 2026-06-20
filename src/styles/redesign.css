@@ -555,10 +555,14 @@
 .grace-v2 .cc-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; font-size: 11px; font-weight: 600; color: var(--ink-2); }
 .grace-v2 .mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
 .grace-v2 .mc-dow { text-align: center; font-size: 8.5px; font-weight: 600; color: var(--muted); padding-bottom: 1px; }
-.grace-v2 .mc-day { position: relative; height: 22px; display: grid; place-items: center; font-size: 10.5px; color: var(--ink); }
+.grace-v2 .mc-day { position: relative; height: 22px; display: grid; place-items: center; font-size: 10.5px; color: var(--ink); border-radius: 4px; }
 .grace-v2 .mc-day > span { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 999px; line-height: 1; }
 .grace-v2 .mc-day.other > span { color: color-mix(in oklab, var(--muted) 55%, transparent); }
 .grace-v2 .mc-day.today > span { background: var(--ink); color: #fff; font-weight: 600; }
+.grace-v2 .mc-day.mc-day--filled > span { width: 100%; height: 100%; border-radius: inherit; color: #fff; font-weight: 600; background: transparent; }
+.grace-v2 .mc-day.mc-day--filled.today > span { background: transparent; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9); }
+.grace-v2 .mc-day.mc-day--filled.sel > span { box-shadow: inset 0 0 0 2px var(--ink); }
+.grace-v2 .mc-day.mc-day--filled.today.sel > span { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95); }
 .grace-v2 .mc-dot { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 999px; background: var(--primary); }
 .grace-v2 .mc-day.today .mc-dot { background: #fff; }
 
@@ -616,6 +620,8 @@
 /* ---- interactive mini-calendar: selected day + agenda ---- */
 .grace-v2 .mc-day { border: 0; background: transparent; cursor: pointer; padding: 0; }
 .grace-v2 .mc-day:hover > span { background: var(--bg-2); }
+.grace-v2 .mc-day.mc-day--filled:hover { filter: brightness(0.92); }
+.grace-v2 .mc-day.mc-day--filled:hover > span { background: transparent; }
 .grace-v2 .mc-day.sel > span { box-shadow: 0 0 0 1.5px var(--primary); }
 .grace-v2 .mc-day.today.sel > span { box-shadow: none; }
 .grace-v2 .cc-agenda-head { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }

@@ -199,7 +199,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <GraceOrb size="xs" variant="blue" />
+          <GraceOrb size="xs" />
           <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
         </div>
         <div className="flex items-center gap-1">
@@ -775,8 +775,10 @@ export function GraceAdminSidePanel({
 }: GraceAdminSidePanelProps) {
   return (
     <div className="hidden sm:flex flex-col w-[220px] shrink-0 bg-gradient-to-b from-blue-900 to-blue-950 border-r border-blue-800/60 text-white">
-      <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b border-white/10">
-        <GraceOrb size="md" variant="blue" rings />
+      <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b border-white/10 overflow-visible">
+        <div className="overflow-visible p-2">
+          <GraceOrb size="md" rings />
+        </div>
         <p className="mt-4 text-sm font-semibold text-center leading-snug text-white">
           {salutation}
         </p>
@@ -882,7 +884,7 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
               className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 hover:opacity-90 transition-opacity"
               aria-label="Open Grace"
             >
-              <GraceOrb size="xs" variant="blue" />
+              <GraceOrb size="xs" />
             </button>
             <input
               type="text"

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders.js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
 import { checkBudget } from '../_lib/ai/budget.js';
@@ -12,32 +12,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const MODEL = 'gemini-2.5-flash';
 
-/**
- * Metering context (Phase D): when the caller sends a Clerk Bearer
- * token, this route runs through the AI gateway's budget pipeline —
- * checkBudget before the provider call, recordUsage after. Ask Grace
- * is the highest-volume inference path, so this is where the
- * per-tenant budget tracking matters most.
- *
- * Calls without a token (marketing site, demo mode) stay unmetered —
- * identical to the pre-Phase-D behavior.
- */
-interface Metering {
-  supabase: SupabaseClient;
-  churchId: string;
-  actorClerkId: string;
-}
-
-async function resolveMetering(req: VercelRequest): Promise<Metering | null> {
-  if (!req.headers.authorization || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
-  const auth = await requireClerkAuth(req);
-  if (!auth.ok) return null;
-  return {
-    supabase: createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } }),
-    churchId: auth.churchId,
-    actorClerkId: auth.clerkUserId,
-  };
-}
+/** Mandatory auth + metering (TD-033): every call must carry a valid Clerk JWT. */
 
 /** Rough fallback when the provider doesn't report token counts. */
 function estimateTokens(text: string): number {
@@ -99,13 +74,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const shouldStream = req.query.stream === '1' || req.query.stream === 'true';
 
-  // ---- AI gateway: budget check (Phase D) ----
-  const metering = await resolveMetering(req);
-  if (metering) {
-    const budget = await checkBudget(metering.supabase, metering.churchId);
+  // ---- Mandatory auth gate (TD-033) ----
+  const auth = await requireClerkAuth(req);
+  if (!auth.ok) {
+    return res.status(auth.status).json({ error: auth.error });
+  }
+
+  const supabaseForMetering = SUPABASE_URL && SUPABASE_SERVICE_KEY
+    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } })
+    : null;
+
+  if (supabaseForMetering) {
+    const budget = await checkBudget(supabaseForMetering, auth.churchId);
     if (budget.status !== 'ok') {
-      void recordUsage(metering.supabase, {
-        churchId: metering.churchId,
+      void recordUsage(supabaseForMetering, {
+        churchId: auth.churchId,
         provider: 'gemini',
         model: MODEL,
         feature: 'ask-grace',
@@ -114,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         success: false,
         errorCode: budget.status === 'hard_cut' ? 'budget_hard_cut' : 'budget_over_cap',
         latencyMs: 0,
-        actorClerkId: metering.actorClerkId,
+        actorClerkId: auth.clerkUserId,
       });
       return res.status(402).json({
         error: budget.status === 'hard_cut'
@@ -134,9 +117,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     errorCode?: string;
     latencyMs: number;
   }) => {
-    if (!metering) return;
-    void recordUsage(metering.supabase, {
-      churchId: metering.churchId,
+    if (!supabaseForMetering) return;
+    void recordUsage(supabaseForMetering, {
+      churchId: auth.churchId,
       provider: 'gemini',
       model: MODEL,
       feature: 'ask-grace',
@@ -145,7 +128,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: input.success,
       errorCode: input.errorCode,
       latencyMs: input.latencyMs,
-      actorClerkId: metering.actorClerkId,
+      actorClerkId: auth.clerkUserId,
     });
   };
 
