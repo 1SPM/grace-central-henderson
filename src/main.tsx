@@ -8,6 +8,7 @@ import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import './index.css';
+import './styles/grace-orb.css';
 
 // Init Sentry first so anything thrown during setup is captured.
 initSentry();
