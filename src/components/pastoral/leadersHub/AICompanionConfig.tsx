@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Activity, BookOpen, Brain, Mic, Radio, ShieldAlert, Zap } from 'lucide-react';
+import { Activity, BookOpen, Brain, Mic, Play, Radio, ShieldAlert, Zap } from 'lucide-react';
 import type { LeaderProfile } from '../../../types';
-import { CENTRAL_HENDERSON_COMPANION_CONFIG } from '../../../config/centralHendersonLeaders';
+import {
+  CENTRAL_HENDERSON_COMPANION_CONFIG,
+  getLeaderCompanionConfig,
+} from '../../../config/centralHendersonLeaders';
 import { demoCompanionConfig } from './demoLeadersHub';
+import { DidStudioModal } from './DidStudioModal';
 
 type ConfigTab = 'brain' | 'triggers' | 'channels' | 'activity';
 
@@ -14,20 +18,20 @@ const TABS: { id: ConfigTab; label: string; icon: typeof Brain }[] = [
 ];
 
 interface AICompanionConfigProps {
-  leaders?: LeaderProfile[];
+  leader: LeaderProfile;
+  embedded?: boolean;
 }
 
-export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
-  const activeLeaders = leaders.filter(l => l.isActive);
-  const [selectedLeaderId, setSelectedLeaderId] = useState(activeLeaders[0]?.id ?? '');
+export function AICompanionConfig({ leader, embedded = false }: AICompanionConfigProps) {
   const [tab, setTab] = useState<ConfigTab>('brain');
   const [triggers, setTriggers] = useState(demoCompanionConfig.triggers);
   const [channels, setChannels] = useState(demoCompanionConfig.channels);
+  const [studioOpen, setStudioOpen] = useState(false);
 
-  const selectedLeader = activeLeaders.find(l => l.id === selectedLeaderId) ?? activeLeaders[0];
+  const companion = useMemo(() => getLeaderCompanionConfig(leader.id), [leader.id]);
+
   const brain = useMemo(() => {
-    if (!selectedLeader) return demoCompanionConfig.brain;
-    const cfg = CENTRAL_HENDERSON_COMPANION_CONFIG[selectedLeader.id];
+    const cfg = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id];
     if (!cfg) return demoCompanionConfig.brain;
     return {
       persona: cfg.persona,
@@ -35,41 +39,50 @@ export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
       boundaries: cfg.boundaries,
       voiceModel: cfg.voiceModel,
     };
-  }, [selectedLeader]);
+  }, [companion, leader.id]);
+
+  if (!companion && !CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id]) {
+    return (
+      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+        <p className="text-sm text-gray-600 dark:text-dark-300">
+          No AI companion is configured for {leader.displayName}.
+        </p>
+      </div>
+    );
+  }
+
+  const resolvedCompanion = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id]!;
 
   return (
     <div className="space-y-4">
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">AI companion configuration</h2>
+            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">
+              {embedded ? `${leader.displayName} — AI companion` : 'AI companion configuration'}
+            </h2>
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-              Each verified leader has a digital twin. Configure persona, escalation triggers, and channels per leader.
+              Persona, escalation triggers, channels, and avatar session for this verified leader.
+            </p>
+            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
+              {leader.title} · {leader.isAvailable ? 'Live / reachable' : 'AI on duty'}
             </p>
           </div>
-          {activeLeaders.length > 0 && (
-            <select
-              value={selectedLeader?.id ?? ''}
-              onChange={e => setSelectedLeaderId(e.target.value)}
-              className="text-sm border border-gray-200 dark:border-dark-600 rounded-lg px-3 py-2 bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 min-w-[200px]"
-            >
-              {activeLeaders.map(l => (
-                <option key={l.id} value={l.id}>{l.displayName}</option>
-              ))}
-            </select>
-          )}
+          <button
+            type="button"
+            onClick={() => setStudioOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+          >
+            <Play size={14} /> Launch avatar conversation
+          </button>
         </div>
-        {selectedLeader && (
-          <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
-            {selectedLeader.title} · {selectedLeader.isAvailable ? 'Live / reachable' : 'AI on duty'}
-          </p>
-        )}
       </div>
 
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
+            type="button"
             onClick={() => setTab(id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
               tab === id
@@ -101,7 +114,10 @@ export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {brain.knowledgeBase.map(kb => (
-                  <span key={kb} className="text-[11px] px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
+                  <span
+                    key={kb}
+                    className="text-[11px] px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                  >
                     {kb}
                   </span>
                 ))}
@@ -184,7 +200,7 @@ export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
       {tab === 'activity' && (
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-4">
-            Session log — {selectedLeader?.displayName ?? 'Leader'}
+            Session log — {leader.displayName}
           </h3>
           <div className="space-y-3">
             {demoCompanionConfig.activity.map(entry => (
@@ -199,6 +215,13 @@ export function AICompanionConfig({ leaders = [] }: AICompanionConfigProps) {
           </div>
         </div>
       )}
+
+      <DidStudioModal
+        leader={leader}
+        companion={resolvedCompanion}
+        open={studioOpen}
+        onClose={() => setStudioOpen(false)}
+      />
     </div>
   );
 }

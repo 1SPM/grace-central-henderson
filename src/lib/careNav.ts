@@ -2,24 +2,39 @@ import type { View } from '../types';
 
 export type CareTab = 'dispatch' | 'life-services';
 
-export function parseCareTab(): CareTab {
-  if (typeof window === 'undefined') return 'dispatch';
+function hashParams(): URLSearchParams {
+  if (typeof window === 'undefined') return new URLSearchParams();
   const hash = window.location.hash;
   const qIndex = hash.indexOf('?');
-  if (qIndex < 0) return 'dispatch';
-  const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
+  if (qIndex < 0) return new URLSearchParams();
+  return new URLSearchParams(hash.slice(qIndex + 1));
+}
+
+export function parseCareTab(): CareTab {
+  const tab = hashParams().get('tab');
   if (tab === 'life-services') return 'life-services';
   return 'dispatch';
 }
 
-export function careHash(tab: CareTab = 'dispatch'): string {
-  if (tab === 'life-services') return '#/pastoral-care?tab=life-services';
-  return '#/pastoral-care';
+export function parseCareLeaderId(): string | null {
+  return hashParams().get('leader');
 }
 
-/** Navigate to Pastoral Care hub, optionally opening Life Services. */
-export function openCare(tab: CareTab, setView: (view: View) => void): void {
+export function careHash(tab: CareTab = 'dispatch', leaderId?: string | null): string {
+  const params = new URLSearchParams();
+  if (tab === 'life-services') params.set('tab', 'life-services');
+  if (leaderId) params.set('leader', leaderId);
+  const qs = params.toString();
+  return qs ? `#/pastoral-care?${qs}` : '#/pastoral-care';
+}
+
+/** Navigate to Pastoral Care hub, optionally opening Life Services or filtering by leader. */
+export function openCare(
+  tab: CareTab,
+  setView: (view: View) => void,
+  leaderId?: string | null,
+): void {
   setView('pastoral-care');
-  window.history.replaceState(null, '', careHash(tab));
+  window.history.replaceState(null, '', careHash(tab, leaderId));
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }

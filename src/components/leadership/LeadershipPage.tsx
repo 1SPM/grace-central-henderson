@@ -154,6 +154,7 @@ export function LeadershipPage({
             <LeadersHubContent
               embedded
               leaders={roster}
+              people={people}
               sessions={sessions}
               initialTab={initialWorkspace}
               initialLeaderId={initialLeaderId}
