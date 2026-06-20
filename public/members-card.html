@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="GRACE Central Henderson" />
+  <meta name="description" content="My GRACE Members Card — Central Henderson. Primary demo featuring Central Henderson branding, Grace Impact, Pulse, and Commitment." />
+  <title>GRACE Central Henderson Members Card</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="https://grace-crm.dev/previews/grace-central-theme.css">
+  <link rel="stylesheet" href="https://grace-crm.dev/previews/grace-typography.css">
+  <link rel="stylesheet" href="https://grace-crm.dev/previews/grace-orb.css">
+  <link rel="stylesheet" href="https://grace-crm.dev/previews/grace-companion.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--red:#C8102E;--dark:#1a1a1a;--gray:#f5f5f7;--white:#fff;--border:#e5e5ea;--text:#1d1d1f;--muted:#6e6e73;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif}
+    body{background:var(--gray);color:var(--text);min-height:100dvh}
+    .hub-header{background:#fff;border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+    .hub-logo{width:40px;height:40px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .hub-logo svg{width:24px;height:24px;fill:#fff}
+    .hub-brand h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+    .hub-brand p{font-size:13px;color:var(--muted)}
+    .hub-badge{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.5px}
+    .hub-main{max-width:1280px;margin:0 auto;padding:40px 32px 80px}
+    .hub-intro{margin-bottom:40px}
+    .hub-intro h2{font-size:32px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
+    .hub-intro p{font-size:16px;color:var(--muted);max-width:600px}
+    .section-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+    .featured-card{background:var(--dark);border-radius:20px;overflow:hidden;margin-bottom:32px;display:grid;grid-template-columns:1fr 1.4fr;min-height:400px;box-shadow:0 8px 40px rgba(0,0,0,.12)}
+    .featured-info{padding:48px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+    .featured-tag{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;width:fit-content}
+    .featured-info h3{font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2}
+    .featured-info p{color:rgba(255,255,255,.7);font-size:15px;line-height:1.6}
+    .featured-pills{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{background:rgba(255,255,255,.12);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.15);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px}
+    .featured-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-primary{background:var(--red);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:opacity .15s}
+    .btn-primary:hover{opacity:.9}
+    .btn-secondary{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.2);padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:background .15s}
+    .btn-secondary:hover{background:rgba(255,255,255,.18)}
+    .featured-preview{background:linear-gradient(135deg,#C8102E 0%,#8b0a1f 100%);display:flex;align-items:center;justify-content:center;padding:32px}
+    .preview-mockup{width:75%;max-width:420px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);transform:perspective(800px) rotateY(-5deg) rotateX(2deg)}
+    .preview-mockup-bar{background:var(--dark);height:36px;display:flex;align-items:center;padding:0 16px;gap:6px}
+    .mockup-dot{width:10px;height:10px;border-radius:50%}
+    .mockup-dot:nth-child(1){background:#ff5f57}
+    .mockup-dot:nth-child(2){background:#febc2e}
+    .mockup-dot:nth-child(3){background:#28c840}
+    .preview-mockup-screen{background:#f5f5f7;padding:20px;min-height:240px;display:flex;flex-direction:column;gap:12px}
+    .mock-nav{background:var(--dark);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+    .mock-nav-dot{width:28px;height:28px;border-radius:8px;background:var(--red)}
+    .mock-nav-text{flex:1}
+    .mock-nav-title{height:8px;background:rgba(255,255,255,.8);border-radius:4px;width:60%;margin-bottom:4px}
+    .mock-nav-sub{height:6px;background:rgba(255,255,255,.4);border-radius:3px;width:40%}
+    .mock-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .mock-stat{background:#fff;border-radius:8px;padding:10px}
+    .mock-stat-val{height:10px;background:var(--red);border-radius:4px;width:70%;margin-bottom:4px}
+    .mock-stat-lbl{height:6px;background:#e5e5ea;border-radius:3px;width:90%}
+    .mock-cards-row{display:flex;gap:8px}
+    .mock-card{flex:1;background:#fff;border-radius:8px;height:60px;padding:8px}
+    .mock-card-bar{height:8px;border-radius:3px;margin-bottom:4px}
+    .mock-card:nth-child(1) .mock-card-bar{background:#7c3aed;width:80%}
+    .mock-card:nth-child(2) .mock-card-bar{background:#f59e0b;width:65%}
+    .mock-card:nth-child(3) .mock-card-bar{background:#10b981;width:75%}
+    .mock-card:nth-child(4) .mock-card-bar{background:var(--red);width:70%}
+    .mock-card:nth-child(5) .mock-card-bar{background:#3b82f6;width:55%}
+    .mock-card-lbl{height:6px;background:#e5e5ea;border-radius:3px;width:60%}
+    .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px}
+    .exp-card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--border);display:flex;flex-direction:column;transition:box-shadow .2s,transform .2s;text-decoration:none;color:inherit}
+    .exp-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);transform:translateY(-2px)}
+    .exp-card-preview{height:180px;display:flex;align-items:center;justify-content:center;padding:24px}
+    .ios-bg{background:linear-gradient(160deg,#1a1a1a 0%,#2d1a1a 100%)}
+    .mobile-bg{background:linear-gradient(160deg,#0a0a14 0%,#1a1a2e 100%)}
+    .phone-frame{width:100px;background:#1c1c1e;border-radius:20px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+    .phone-screen{background:#000;border-radius:14px;height:140px;overflow:hidden;position:relative}
+    .phone-screen-content{padding:8px;display:flex;flex-direction:column;gap:5px}
+    .phone-bar{height:6px;border-radius:3px}
+    .phone-bottom-nav{position:absolute;bottom:0;left:0;right:0;height:28px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-around;padding:0 8px}
+    .nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red)}
+    .nav-dot.dim{background:rgba(255,255,255,.3)}
+    .exp-card-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:8px}
+    .exp-card-tag{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--red)}
+    .exp-card-title{font-size:17px;font-weight:700;letter-spacing:-.2px}
+    .exp-card-desc{font-size:13px;color:var(--muted);line-height:1.5;flex:1}
+    .exp-card-link{margin-top:4px;font-size:13px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:4px}
+    .grace-metrics{background:#fff;border-radius:16px;border:1px solid var(--border);padding:32px;margin-bottom:32px}
+    .grace-metrics h3{font-size:20px;font-weight:700;margin-bottom:6px}
+    .grace-metrics p{font-size:14px;color:var(--muted);margin-bottom:28px}
+    .metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+    .metric-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+    .metric-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+    .metric-icon.growth{background:#f0e6ff}
+    .metric-icon.resource{background:#fff3e0}
+    .metric-icon.assistance{background:#e8f5e9}
+    .metric-icon.community{background:#e3f2fd}
+    .metric-icon.engagement{background:#fce4ec}
+    .metric-label{font-size:13px;font-weight:700}
+    .metric-sub{font-size:11px;color:var(--muted)}
+    .crm-banner{background:linear-gradient(135deg,#6161FF 0%,#4040cc 100%);border-radius:16px;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:32px}
+    .crm-banner-text h4{font-size:20px;font-weight:700;color:#fff;margin-bottom:4px}
+    .crm-banner-text p{font-size:14px;color:rgba(255,255,255,.75)}
+    .btn-white{background:#fff;color:#6161FF;border:none;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;transition:opacity .15s}
+    .btn-white:hover{opacity:.92}
+    .hub-footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
+    .hub-footer strong{color:var(--text)}
+    @media(max-width:900px){.featured-card{grid-template-columns:1fr}.featured-preview{min-height:220px}.card-grid{grid-template-columns:1fr}.metrics-grid{grid-template-columns:repeat(3,1fr)}.hub-main{padding:24px 20px 60px}}
+    @media(max-width:600px){.hub-header{padding:16px 20px}.hub-intro h2{font-size:24px}.featured-info{padding:28px}.featured-info h3{font-size:22px}.metrics-grid{grid-template-columns:repeat(2,1fr)}.crm-banner{flex-direction:column;text-align:center}}
+  </style>
+</head>
+<body>
+  <header class="hub-header">
+    <div class="hub-logo">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="white">C</text></svg>
+    </div>
+    <div class="hub-brand">
+      <h1>Central Henderson &middot; GRACE</h1>
+      <p>Members Card Portal &amp; Mobile Experience</p>
+    </div>
+    <span class="hub-badge">LIVE DEMO</span>
+  </header>
+  <main class="hub-main">
+    <div class="hub-intro">
+      <h2>My GRACE Members Card</h2>
+      <p>Primary demo &mdash; Central Henderson branding featuring Grace Impact&trade;, Pulse&trade;, and Commitment&trade;. Merged desktop and iOS mobile experience.</p>
+    </div>
+    <p class="section-label">Primary Demo</p>
+    <div class="featured-card">
+      <div class="featured-info">
+        <span class="featured-tag">&#9733; Featured</span>
+        <h3>My GRACE Members Card (Desktop)</h3>
+        <p>The complete Central Henderson member experience &mdash; giving impact, pastoral leadership, care dispatch, community, and spiritual journey in one unified dashboard.</p>
+        <div class="featured-pills">
+          <span class="pill">Grace Impact&trade;</span>
+          <span class="pill">Pulse&trade;</span>
+          <span class="pill">Commitment&trade;</span>
+          <span class="pill">Central Henderson</span>
+        </div>
+        <div class="featured-actions">
+          <a href="https://grace-crm.dev/previews/grace_member_portal_central.html" class="btn-primary" target="_blank" rel="noopener">Open Desktop Demo &rarr;</a>
+          <a href="https://grace-crm-two.vercel.app/" class="btn-secondary" target="_blank" rel="noopener">GRACE CRM Admin</a>
+        </div>
+      </div>
+      <div class="featured-preview">
+        <div class="preview-mockup">
+          <div class="preview-mockup-bar">
+            <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+          </div>
+          <div class="preview-mockup-screen">
+            <div class="mock-nav"><div class="mock-nav-dot"></div><div class="mock-nav-text"><div class="mock-nav-title"></div><div class="mock-nav-sub"></div></div></div>
+            <div class="mock-stat-row"><div class="mock-stat"><div class="mock-stat-val"></div><div class="mock-stat-lbl"></div></div><div class="mock-stat"><div class="mock-stat-val"></div><div class="mock-stat-lbl"></div></div><div class="mock-stat"><div class="mock-stat-val"></div><div class="mock-stat-lbl"></div></div><div class="mock-stat"><div class="mock-stat-val"></div><div class="mock-stat-lbl"></div></div></div>
+            <div class="mock-cards-row"><div class="mock-card"><div class="mock-card-bar"></div><div class="mock-card-lbl"></div></div><div class="mock-card"><div class="mock-card-bar"></div><div class="mock-card-lbl"></div></div><div class="mock-card"><div class="mock-card-bar"></div><div class="mock-card-lbl"></div></div><div class="mock-card"><div class="mock-card-bar"></div><div class="mock-card-lbl"></div></div><div class="mock-card"><div class="mock-card-bar"></div><div class="mock-card-lbl"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="section-label">Mobile Experiences</p>
+    <div class="card-grid">
+      <a class="exp-card" href="https://grace-crm.dev/grace_central_henderson_members_card_ios_app.html" target="_blank" rel="noopener">
+        <div class="exp-card-preview ios-bg">
+          <div class="phone-frame"><div class="phone-screen"><div class="phone-screen-content"><div class="phone-bar" style="background:#C8102E;width:60%"></div><div class="phone-bar" style="background:rgba(255,255,255,.3);width:80%"></div><div class="phone-bar" style="background:rgba(255,255,255,.7);width:50%"></div><div class="phone-bar" style="height:4px;width:40%;background:rgba(255,255,255,.2)"></div></div><div class="phone-bottom-nav"><div class="nav-dot"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div></div></div></div>
+        </div>
+        <div class="exp-card-body">
+          <span class="exp-card-tag">New iOS App</span>
+          <div class="exp-card-title">New iOS Members Card App</div>
+          <p class="exp-card-desc">Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+          <span class="exp-card-link">Open iOS App Demo &rarr;</span>
+        </div>
+      </a>
+      <a class="exp-card" href="https://grace-crm.dev/previews/grace_mobile_ios-central.html?v=leaders-roster-v3" target="_blank" rel="noopener">
+        <div class="exp-card-preview mobile-bg">
+          <div class="phone-frame"><div class="phone-screen"><div class="phone-screen-content"><div class="phone-bar" style="background:#6161FF;width:50%"></div><div class="phone-bar" style="background:rgba(255,255,255,.3);width:80%"></div><div class="phone-bar" style="background:rgba(255,255,255,.5);width:65%"></div><div class="phone-bar" style="height:4px;width:40%;background:rgba(255,255,255,.2)"></div></div><div class="phone-bottom-nav"><div class="nav-dot" style="background:#6161FF"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div><div class="nav-dot dim"></div></div></div></div>
+        </div>
+        <div class="exp-card-body">
+          <span class="exp-card-tag">Mobile App</span>
+          <div class="exp-card-title">Mobile Member App</div>
+          <p class="exp-card-desc">iOS-style mobile prototype &mdash; complete member experience with leadership roster, giving flows, and community engagement for Central Henderson.</p>
+          <span class="exp-card-link">Open Mobile Demo &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div class="grace-metrics">
+      <h3>GRACE at Central Henderson</h3>
+      <p>Growth &middot; Resource &middot; Assistance &middot; Community &middot; Engagement &mdash; the five pillars of the member experience</p>
+      <div class="metrics-grid">
+        <div class="metric-item"><div class="metric-icon growth">&#128214;</div><div class="metric-label">Growth</div><div class="metric-sub">Journey &amp; Bible Study</div></div>
+        <div class="metric-item"><div class="metric-icon resource">&#128179;</div><div class="metric-label">Resource</div><div class="metric-sub">Grace Impact&trade; Card</div></div>
+        <div class="metric-item"><div class="metric-icon assistance">&#128591;</div><div class="metric-label">Assistance</div><div class="metric-sub">Pastoral Care 24/7</div></div>
+        <div class="metric-item"><div class="metric-icon community">&#129309;</div><div class="metric-label">Community</div><div class="metric-sub">Groups &amp; Events</div></div>
+        <div class="metric-item"><div class="metric-icon engagement">&#127919;</div><div class="metric-label">Engagement</div><div class="metric-sub">Pulse&trade; &amp; Commitment&trade;</div></div>
+      </div>
+    </div>
+    <div class="crm-banner">
+      <div class="crm-banner-text">
+        <h4>GRACE Church CRM &mdash; Admin Panel</h4>
+        <p>Full admin dashboard for Central Henderson &mdash; people, giving, pastoral care, and more</p>
+      </div>
+      <a href="https://grace-crm-two.vercel.app/" class="btn-white" target="_blank" rel="noopener">Open CRM &rarr;</a>
+    </div>
+  </main>
+  <footer class="hub-footer">
+    <p><strong>Central Henderson Church</strong> &middot; Powered by GRACE&trade; &middot; <a href="https://grace-crm-two.vercel.app/" style="color:inherit">grace-crm-two.vercel.app</a></p>
+    <p style="margin-top:6px">Grace Impact&trade; &middot; Pulse&trade; &middot; Commitment&trade; &mdash; Member Experience Suite</p>
+  </footer>
+  <script src="https://grace-crm.dev/previews/grace-impact-metrics.js" defer></script>
+  <script src="https://grace-crm.dev/previews/grace-duotone-icons.js" defer></script>
+</body>
+</html>
