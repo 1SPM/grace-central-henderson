@@ -72,8 +72,8 @@ export function GraceGettingStartedPanel({ churchName = 'Central Henderson Churc
 
         {/* Hero */}
         <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 mb-6">
-          <div className="flex justify-center sm:justify-start shrink-0">
-            <GraceOrb size="lg" variant="blue" rings />
+          <div className="flex justify-center sm:justify-start shrink-0 overflow-visible p-3.5">
+            <GraceOrb size="lg" rings />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">GRACE</h2>

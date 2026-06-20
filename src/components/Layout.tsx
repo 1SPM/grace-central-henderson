@@ -321,14 +321,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                   grace.openPanel();
                   setSidebarOpen(false);
                 }}
-                className="rounded-full flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 hover:opacity-90 transition-opacity"
+                className="rounded-full flex-shrink-0 overflow-visible p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 hover:opacity-90 transition-opacity"
                 title="Ask Grace"
                 aria-label="Ask Grace"
               >
                 <GraceOrb
-                  size={sidebarCollapsed ? 'sm' : 'md'}
+                  size={sidebarCollapsed ? 'sm' : 'sb'}
                   rings
-                  variant="blue"
                 />
               </button>
             )}
