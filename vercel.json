@@ -2,18 +2,22 @@
   "buildCommand": "rm -rf dist node_modules/.vite && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/[...path]?path=:path*" },
+  "redirects": [
     {
       "source": "/",
       "has": [{ "type": "host", "value": "gracecrm-centralhenderson.org" }],
-      "destination": "/members-card.html"
+      "destination": "/members-card.html",
+      "permanent": false
     },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "www.gracecrm-centralhenderson.org" }],
-      "destination": "/members-card.html"
-    },
+      "destination": "/members-card.html",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/[...path]?path=:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [
