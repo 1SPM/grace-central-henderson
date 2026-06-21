@@ -15,7 +15,6 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const PROFILE_TABS: { id: LeadershipProfileTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
-  { id: 'contact', label: 'Contact' },
   { id: 'companion', label: 'AI Companion' },
 ];
 
@@ -190,6 +189,12 @@ export function LeaderProfileView({
                   })}
                 </div>
               </div>
+              <LeaderContactTab
+                leader={leader}
+                people={people}
+                churchName={churchName}
+                onNavigate={onNavigate}
+              />
             </div>
           </div>
 
@@ -247,18 +252,6 @@ export function LeaderProfileView({
           </div>
         </div>
         </div>
-      )}
-
-      {profileTab === 'contact' && (
-        <>
-          {renderIdentityCard()}
-          <LeaderContactTab
-            leader={leader}
-            people={people}
-            churchName={churchName}
-            onNavigate={onNavigate}
-          />
-        </>
       )}
 
       {profileTab === 'companion' && hasAi && (

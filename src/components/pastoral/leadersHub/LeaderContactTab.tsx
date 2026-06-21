@@ -10,8 +10,6 @@ interface LeaderContactTabProps {
   people: Person[];
   churchName?: string;
   onNavigate?: (view: View | string) => void;
-}
-
 export function LeaderContactTab({ leader, people, churchName = 'Central Henderson Church', onNavigate }: LeaderContactTabProps) {
   const { sendSMS } = useIntegrations();
   const contact = resolveLeaderContact(leader, people);
