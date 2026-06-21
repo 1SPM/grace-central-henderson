@@ -29,6 +29,12 @@ export interface LeaderCompanionConfig {
   didAgentId?: string;
   didClientKey?: string;
   greeting?: string;
+  agentRole?: string;
+  personality?: string;
+  llm?: string;
+  knowledgeGrounding?: 'Ungrounded' | 'Grounded' | 'Hybrid';
+  creativity?: number;
+  knowledgeText?: string;
   /** Fallback avatar session when D-ID keys are not configured */
   divinityAvatarUrl?: string;
 }
@@ -394,7 +400,12 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
     voiceModel: 'Cloned voice — approved 2026-03-12 (consent on file)',
     greeting:
-      '"Good morning — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',
+      "Good morning Maya — I'm Pastor James. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Senior Pastor',
+    personality: 'Warm and Pastoral',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
     divinityAvatarUrl: 'https://link.divinityagi.com/james-wilson',
   },
   'ch-leader-marcus-collins': {
