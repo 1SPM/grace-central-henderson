@@ -55,6 +55,38 @@ export function LeaderProfileView({
 
   const visibleTabs = PROFILE_TABS.filter(t => t.id !== 'companion' || hasAi);
 
+  const identityCard = (
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+      <div className="flex flex-col items-center text-center max-w-lg mx-auto">
+        <div className="w-32 mb-4">
+          <LeaderAvatar leader={leader} size="hero" rounded="xl" />
+        </div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
+        <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">{leader.title}</p>
+        <div className="flex gap-1.5 mt-2 flex-wrap justify-center">
+          {leader.isAvailable ? (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+              Live
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+              AI on duty
+            </span>
+          )}
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+            <User size={9} className="inline mr-0.5" /> Human
+          </span>
+          {hasAi && (
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+              <Bot size={9} className="inline mr-0.5" /> AI companion
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-gray-500 dark:text-dark-400 mt-3 leading-relaxed">{leader.bio}</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <button
@@ -64,36 +96,6 @@ export function LeaderProfileView({
       >
         <ArrowLeft size={15} /> Team
       </button>
-
-      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-        <div className="flex items-start gap-4">
-          <LeaderAvatar leader={leader} size="lg" />
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
-            <p className="text-sm text-gray-500 dark:text-dark-400">{leader.title}</p>
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              {leader.isAvailable ? (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                  Live
-                </span>
-              ) : (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-                  AI on duty
-                </span>
-              )}
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                <User size={9} className="inline mr-0.5" /> Human
-              </span>
-              {hasAi && (
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                  <Bot size={9} className="inline mr-0.5" /> AI companion
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-500 dark:text-dark-400 mt-3">{leader.bio}</p>
-          </div>
-        </div>
-      </div>
 
       <div className="flex items-center gap-1 border-b border-gray-200 dark:border-dark-700 overflow-x-auto">
         {visibleTabs.map(({ id, label }) => (
@@ -111,6 +113,8 @@ export function LeaderProfileView({
           </button>
         ))}
       </div>
+
+      {identityCard}
 
       {profileTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
