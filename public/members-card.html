@@ -18,7 +18,7 @@
     .hub-logo svg { width: 24px; height: 24px; fill: #fff }
     .hub-brand h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px }
     .hub-brand p { font-size: 13px; color: var(--muted) }
-    main { max-width: 800px; margin: 0 auto; padding: 40px 24px 60px }
+    main { max-width: 960px; margin: 0 auto; padding: 40px 24px 60px }
     .hero { margin-bottom: 40px }
     .hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); margin-bottom: 8px }
     .hero h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px }
@@ -29,11 +29,37 @@
     .card-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--red); background: rgba(200,16,46,.08); border-radius: 6px; padding: 3px 8px; margin-bottom: 12px }
     .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px }
     .card p { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 20px }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0 }
     .tag { font-size: 11px; background: var(--gray); border-radius: 20px; padding: 4px 10px; border: 1px solid var(--border) }
     .card-footer { padding: 0 24px 20px }
-    .btn-primary { display: inline-flex; background: var(--red); color: #fff; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 10px; text-decoration: none }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--red); color: #fff; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer }
     .btn-primary:hover { opacity: .85 }
+    .card-featured .card-body { padding-bottom: 24px }
+    .card-split { display: grid; gap: 24px }
+    @media (min-width: 768px) {
+      .card-split { grid-template-columns: 1fr 320px; align-items: start }
+    }
+    .card-main .card-tags { margin-bottom: 0 }
+    .share-panel { display: flex; flex-direction: column; gap: 16px }
+    .share-block { background: var(--gray); border: 1px solid var(--border); border-radius: 16px; padding: 20px }
+    .share-block-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px }
+    .share-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+    .share-icon svg { width: 20px; height: 20px }
+    .share-icon-qr { background: rgba(200,16,46,.1); color: var(--red) }
+    .share-icon-link { background: rgba(16,185,129,.12); color: #059669 }
+    .share-block-header h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px }
+    .share-block-header p { font-size: 13px; color: var(--muted) }
+    .qr-wrap { display: flex; justify-content: center; padding: 16px; background: var(--white); border-radius: 12px; border: 1px solid var(--border) }
+    .qr-wrap img { width: 192px; height: 192px; display: block }
+    .share-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.45 }
+    .url-row { display: flex; gap: 8px }
+    .url-input { flex: 1; min-width: 0; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; color: var(--muted); font-family: inherit }
+    .btn-copy { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap }
+    .btn-copy:hover { background: #ebebed }
+    .btn-copy.copied { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.25) }
+    .btn-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; padding: 10px 16px; background: var(--red); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 600; text-decoration: none }
+    .btn-open:hover { opacity: .9 }
+    .share-note { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); line-height: 1.5 }
     .pillars { margin-top: 48px }
     .pillars-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 16px }
     .pillars-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px }
@@ -41,6 +67,10 @@
     .pillar-icon { font-size: 22px; margin-bottom: 6px }
     .pillar-name { font-size: 12px; font-weight: 700 }
     .pillar-desc { font-size: 10px; color: var(--muted) }
+    @media (max-width: 640px) {
+      .pillars-grid { grid-template-columns: repeat(2, 1fr) }
+      .url-row { flex-direction: column }
+    }
   </style>
 </head>
 <body>
@@ -60,20 +90,76 @@
       <p>Central Henderson branding featuring Grace Impact&trade;, Pulse&trade;, and Commitment&trade;.</p>
     </div>
     <div class="cards">
-      <div class="card">
+      <div class="card card-featured">
         <div class="card-body">
-          <span class="card-badge">New iOS App</span>
-          <h3>New iOS Members Card App</h3>
-          <p>Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
-          <div class="card-tags">
-            <span class="tag">iOS Native</span>
-            <span class="tag">Members Card</span>
-            <span class="tag">Giving</span>
-            <span class="tag">Central Henderson</span>
+          <div class="card-split">
+            <div class="card-main">
+              <span class="card-badge">New iOS App</span>
+              <h3>New iOS Members Card App</h3>
+              <p>Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+              <div class="card-tags">
+                <span class="tag">iOS Native</span>
+                <span class="tag">Members Card</span>
+                <span class="tag">Giving</span>
+                <span class="tag">Central Henderson</span>
+              </div>
+            </div>
+            <div class="share-panel">
+              <div class="share-block">
+                <div class="share-block-header">
+                  <div class="share-icon share-icon-qr" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1"/>
+                      <rect x="14" y="3" width="7" height="7" rx="1"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1"/>
+                      <path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M16 16h2v2"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4>Scan to Preview</h4>
+                    <p>Open on your mobile device</p>
+                  </div>
+                </div>
+                <div class="qr-wrap">
+                  <img id="ios-app-qr" alt="QR code for iOS Members Card app" width="192" height="192" loading="lazy" />
+                </div>
+                <p class="share-hint">Scan with your phone camera, then log in or sign up for your member account.</p>
+              </div>
+              <div class="share-block">
+                <div class="share-block-header">
+                  <div class="share-icon share-icon-link" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4>App URL</h4>
+                    <p>Share with members</p>
+                  </div>
+                </div>
+                <div class="url-row">
+                  <input id="ios-app-url" type="text" class="url-input" readonly aria-label="iOS Members Card app URL" />
+                  <button type="button" id="ios-app-copy" class="btn-copy" aria-label="Copy app URL">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span id="ios-app-copy-label">Copy</span>
+                  </button>
+                </div>
+                <a id="ios-app-open" class="btn-open" target="_blank" rel="noopener noreferrer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  Open in New Tab
+                </a>
+              </div>
+              <div class="share-note">Open on your phone to log in or sign up for the Members Card Portal.</div>
+            </div>
           </div>
-        </div>
-        <div class="card-footer">
-          <a href="https://grace-crm.dev/grace_central_henderson_members_card_ios_app.html" class="btn-primary" target="_blank">Open iOS App Demo &rarr;</a>
         </div>
       </div>
       <div class="card">
@@ -119,5 +205,41 @@
       </div>
     </div>
   </main>
+  <script>
+    (function () {
+      var IOS_APP_PATH = '/grace_central_henderson_members_card_ios_app.html';
+      var appUrl = window.location.origin + IOS_APP_PATH;
+      var urlInput = document.getElementById('ios-app-url');
+      var openLink = document.getElementById('ios-app-open');
+      var qrImg = document.getElementById('ios-app-qr');
+      var copyBtn = document.getElementById('ios-app-copy');
+      var copyLabel = document.getElementById('ios-app-copy-label');
+
+      urlInput.value = appUrl;
+      openLink.href = appUrl;
+      qrImg.src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+        encodeURIComponent(appUrl) +
+        '&bgcolor=ffffff&color=C8102E';
+
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(appUrl).then(function () {
+          copyBtn.classList.add('copied');
+          copyLabel.textContent = 'Copied!';
+          setTimeout(function () {
+            copyBtn.classList.remove('copied');
+            copyLabel.textContent = 'Copy';
+          }, 2000);
+        }).catch(function () {
+          urlInput.select();
+          document.execCommand('copy');
+          copyLabel.textContent = 'Copied!';
+          setTimeout(function () {
+            copyLabel.textContent = 'Copy';
+          }, 2000);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
