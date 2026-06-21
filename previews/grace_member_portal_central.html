@@ -1699,12 +1699,16 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-pillar--assistance{--pillar-accent:#e11d48}
 .dash-pillar--engagement{--pillar-accent:#EE2B37}
 .dash-pillar--community{--pillar-accent:#059669}
+.dash-hero-live-col{
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  flex-shrink:0;max-width:min(220px,100%);position:relative;z-index:2
+}
 .dash-hero-toast{
-  position:absolute;top:14px;right:14px;z-index:2;max-width:220px;
+  width:100%;max-width:220px;
   background:rgba(0,0,0,.78);color:#fff;font-size:11px;font-weight:600;line-height:1.35;
   padding:8px 12px;border-radius:10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.12);opacity:0;transform:translateY(-8px);
-  transition:opacity .45s ease,transform .45s ease;pointer-events:none
+  border:1px solid rgba(255,255,255,.12);opacity:0;transform:translateY(-6px);
+  transition:opacity .45s ease,transform .45s ease;pointer-events:none;text-align:right
 }
 .dash-hero-toast.show{opacity:1;transform:translateY(0);pointer-events:auto}
 .home-grace-route{font-size:11px;color:#888;text-align:center;padding:0 18px 14px;line-height:1.5}
@@ -1872,7 +1876,6 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div class="sec active" id="sec-home">
 
       <div class="dash-hero">
-        <div class="dash-hero-toast" id="dash-hero-toast" aria-live="polite">Michael T. gave <strong>$50</strong> · Missions</div>
         <div class="dash-hero-top">
           <div>
             <div class="dash-hero-greeting" id="home-hero-date">Sat, May 30 · Central Henderson</div>
@@ -1887,9 +1890,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="home-leader-strip-cta" id="home-leader-strip-cta">Open avatar →</div>
             </div>
           </div>
-          <button type="button" class="dash-live-pill" id="home-live-pill" onclick="openWatchLive()" aria-label="Watch Sunday service live">
-            <span class="dash-live-dot"></span> Sunday Service Live · 342 watching
-          </button>
+          <div class="dash-hero-live-col">
+            <button type="button" class="dash-live-pill" id="home-live-pill" onclick="openWatchLive()" aria-label="Watch Sunday service live">
+              <span class="dash-live-dot"></span> Sunday Service Live · 342 watching
+            </button>
+            <div class="dash-hero-toast" id="dash-hero-toast" aria-live="polite">Michael T. gave <strong>$50</strong> · Missions</div>
+          </div>
         </div>
         <div class="dash-kpis">
           <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-impact">$18.42</div><div class="dash-kpi-key">Card impact · routed this month</div></div>
