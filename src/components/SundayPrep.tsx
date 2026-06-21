@@ -36,7 +36,7 @@ import {
 } from '../lib/services/news';
 import { useAISettings } from '../hooks/useAISettings';
 import { SermonConnectSubjects } from './sunday/SermonConnectSubjects';
-import { SermonVideoReferenceCard } from './sunday/SermonVideoReferenceCard';
+import { SermonVideoGeneratorPanel } from './sunday/SermonVideoGeneratorPanel';
 import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
 
 interface SundayPrepProps {
@@ -586,14 +586,16 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         </div>
         )}
 
-        <SermonVideoReferenceCard />
+        <div className="space-y-4 no-print">
+          <SermonVideoGeneratorPanel sermonTitle={sermonTitle} sections={sections} />
 
-        <SermonConnectSubjects
-          onSelectTopic={handleConnectTopic}
-          onSelectScripture={handleConnectScripture}
-          onSelectIllustration={handleConnectIllustration}
-          onBrowseAll={kind => onBrowseArchive?.(kind)}
-        />
+          <SermonConnectSubjects
+            onSelectTopic={handleConnectTopic}
+            onSelectScripture={handleConnectScripture}
+            onSelectIllustration={handleConnectIllustration}
+            onBrowseAll={kind => onBrowseArchive?.(kind)}
+          />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Content Sources */}
