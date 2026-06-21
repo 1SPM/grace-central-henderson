@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createLogger } from '../utils/logger';
 
 const log = createLogger('sunday-prep');
 import {
   Church,
-  Newspaper,
-  Sparkles,
   Gift,
+  Sparkles,
   Heart,
   Users,
   Plus,
@@ -19,26 +18,20 @@ import {
   Quote,
   Target,
   Megaphone,
-  RefreshCw,
   ChevronUp,
   ChevronDown,
   FileText,
   Loader2,
-  AlertCircle,
 } from 'lucide-react';
 import { Person, PrayerRequest } from '../types';
 import { generateAIText } from '../lib/services/ai';
-import {
-  fetchCuratedNews,
-  hasNewsApiKey,
-  fallbackNewsItems,
-  CuratedNewsItem,
-} from '../lib/services/news';
 import { useAISettings } from '../hooks/useAISettings';
 import { SermonConnectSubjects } from './sunday/SermonConnectSubjects';
 import { SermonVideoGeneratorPanel } from './sunday/SermonVideoGeneratorPanel';
+import { GeneratedSermonArchive } from './sunday/GeneratedSermonArchive';
 import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
 import { DEMO_CHURCH_ID } from '../lib/demoLiveServiceData';
+import { saveSermonDraft, type ArchivedSermonSection } from '../lib/sermonDraftArchive';
 
 interface SundayPrepProps {
   people: Person[];
@@ -171,11 +164,10 @@ export function SundayPrep({
     return [];
   });
 
-  const [newsItems, setNewsItems] = useState<CuratedNewsItem[]>(fallbackNewsItems);
-  const [isLoadingNews, setIsLoadingNews] = useState(false);
   const [expandingSection, setExpandingSection] = useState<string | null>(null);
   const [isGeneratingFullSermon, setIsGeneratingFullSermon] = useState(false);
-  const [newsError, setNewsError] = useState<string | null>(null);
+  const [archiveRefreshKey, setArchiveRefreshKey] = useState(0);
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Save to localStorage
@@ -187,40 +179,16 @@ export function SundayPrep({
     localStorage.setItem('sermon-sections', JSON.stringify(sections));
   }, [sections]);
 
-  const refreshNews = useCallback(async () => {
-    // Skip AI news curation if disabled
-    if (!aiSettings.newsCuration) {
-      setNewsItems([...fallbackNewsItems].sort(() => Math.random() - 0.5));
-      return;
-    }
-
-    setIsLoadingNews(true);
-    setNewsError(null);
-
-    if (!hasNewsApiKey()) {
-      // Use fallback if no API key
-      setNewsItems([...fallbackNewsItems].sort(() => Math.random() - 0.5));
-      setIsLoadingNews(false);
-      return;
-    }
-
-    try {
-      const curatedNews = await fetchCuratedNews(5);
-      setNewsItems(curatedNews);
-    } catch (error) {
-      log.error('Failed to fetch news', error);
-      setNewsError(error instanceof Error ? error.message : 'Failed to fetch news');
-      // Fall back to default items
-      setNewsItems(fallbackNewsItems);
-    }
-
-    setIsLoadingNews(false);
-  }, [aiSettings.newsCuration]);
-
-  // Load news on mount and when AI settings change
-  useEffect(() => {
-    refreshNews();
-  }, [refreshNews]);
+  const loadArchivedSermon = (draft: { id: string; title: string; sections: ArchivedSermonSection[] }) => {
+    setSermonTitle(draft.title);
+    setSections(
+      draft.sections.map(section => ({
+        ...section,
+        type: section.type as SermonSection['type'],
+      })),
+    );
+    setActiveDraftId(draft.id);
+  };
 
   // Get upcoming birthdays (next 7 days)
   const upcomingBirthdays = people.filter(p => {
@@ -436,7 +404,21 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         }
 
         if (newSections.length > 0) {
+          let resolvedTitle = sermonTitle.trim();
+          if (titleMatch && titleMatch[1]?.trim() && !resolvedTitle) {
+            resolvedTitle = titleMatch[1].trim();
+            setSermonTitle(resolvedTitle);
+          }
+          if (!resolvedTitle) resolvedTitle = 'Untitled sermon';
+
           setSections(newSections);
+          const draft = saveSermonDraft(churchId, {
+            title: resolvedTitle,
+            sections: newSections,
+            source: 'ai',
+          });
+          setActiveDraftId(draft.id);
+          setArchiveRefreshKey(key => key + 1);
         }
       }
     } catch (error) {
@@ -459,6 +441,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
     if (confirm('Clear all sermon content? This cannot be undone.')) {
       setSermonTitle('');
       setSections([]);
+      setActiveDraftId(null);
     }
   };
 
@@ -601,68 +584,16 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
             <h3 className="text-sm font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider">
               Sermon Resources
             </h3>
-            <p className="text-xs text-gray-400 dark:text-dark-500 -mt-2">Click any item to add it to your sermon</p>
+            <p className="text-xs text-gray-400 dark:text-dark-500 -mt-2">
+              Reload generated sermons or add congregation items to your draft
+            </p>
 
-            {/* News & Trending */}
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-              <div className="bg-cyan-50 dark:bg-cyan-900/20 border-b border-cyan-100 dark:border-cyan-800/30 p-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Newspaper size={16} className="text-cyan-600 dark:text-cyan-400" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-dark-100">
-                      {aiSettings.newsCuration && hasNewsApiKey() ? 'Curated News' : 'Sermon Topics'}
-                    </span>
-                    {aiSettings.newsCuration && hasNewsApiKey() && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 rounded-full font-medium">
-                        AI
-                      </span>
-                    )}
-                  </div>
-                  {aiSettings.newsCuration && (
-                    <button
-                      onClick={refreshNews}
-                      disabled={isLoadingNews}
-                      className="p-1.5 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 rounded-lg transition-colors"
-                      title="Refresh news"
-                    >
-                      <RefreshCw size={14} className={`text-cyan-600 dark:text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Error message */}
-              {newsError && (
-                <div className="px-3 py-2 bg-red-50 dark:bg-red-500/10 border-b border-red-100 dark:border-red-500/20">
-                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <AlertCircle size={12} />
-                    {newsError}
-                  </p>
-                </div>
-              )}
-
-              <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
-                {isLoadingNews ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-dark-500">
-                    <Loader2 size={24} className="animate-spin mb-2" />
-                    <p className="text-xs">Fetching & curating news...</p>
-                  </div>
-                ) : newsItems.map(news => (
-                  <ClickableItem
-                    key={news.id}
-                    item={{
-                      type: 'news',
-                      id: news.id,
-                      title: news.headline,
-                      content: news.connection,
-                      imageUrl: news.imageUrl,
-                    }}
-                    icon={Lightbulb}
-                    color="cyan"
-                  />
-                ))}
-              </div>
-            </div>
+            <GeneratedSermonArchive
+              churchId={churchId}
+              refreshKey={archiveRefreshKey}
+              activeDraftId={activeDraftId}
+              onLoad={loadArchivedSermon}
+            />
 
             {/* Birthdays */}
             {upcomingBirthdays.length > 0 && (
