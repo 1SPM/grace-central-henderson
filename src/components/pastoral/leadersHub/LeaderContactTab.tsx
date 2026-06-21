@@ -8,11 +8,10 @@ import { useIntegrations } from '../../../contexts/IntegrationsContext';
 interface LeaderContactTabProps {
   leader: LeaderProfile;
   people: Person[];
-  churchName?: string;
   onNavigate?: (view: View | string) => void;
 }
 
-export function LeaderContactTab({ leader, people, churchName = 'Central Henderson Church', onNavigate }: LeaderContactTabProps) {
+export function LeaderContactTab({ leader, people, onNavigate }: LeaderContactTabProps) {
   const { sendSMS } = useIntegrations();
   const contact = resolveLeaderContact(leader, people);
   const [showSms, setShowSms] = useState(false);
@@ -51,11 +50,6 @@ export function LeaderContactTab({ leader, people, churchName = 'Central Henders
   return (
     <div className="space-y-4">
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-1">Reach {leader.displayName}</h3>
-        <p className="text-xs text-gray-500 dark:text-dark-400 mb-4">
-          Direct contact for {churchName} leadership — call, text, or open their queue in Crisis Dispatch.
-        </p>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg">
             <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 mb-1">Phone</p>

@@ -192,7 +192,6 @@ export function LeaderProfileView({
               <LeaderContactTab
                 leader={leader}
                 people={people}
-                churchName={churchName}
                 onNavigate={onNavigate}
               />
             </div>
