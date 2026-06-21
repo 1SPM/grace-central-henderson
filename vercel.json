@@ -54,6 +54,13 @@
       ]
     },
     {
+      "source": "/grace_central_henderson_members_card_ios_app.html",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self'" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
