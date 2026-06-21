@@ -39,7 +39,25 @@
     @media (min-width: 768px) {
       .card-split { grid-template-columns: 1fr 320px; align-items: start }
     }
+    .card-main { display: flex; flex-direction: column; gap: 20px; min-height: 100% }
     .card-main .card-tags { margin-bottom: 0 }
+    .phone-preview {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      background: linear-gradient(180deg, #f8f8fa 0%, #ececf0 100%);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      min-height: 320px;
+    }
+    .phone-preview img {
+      width: min(240px, 100%);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 16px 32px rgba(0, 0, 0, .14));
+    }
     .share-panel { display: flex; flex-direction: column; gap: 16px }
     .share-block { background: var(--gray); border: 1px solid var(--border); border-radius: 16px; padding: 20px }
     .share-block-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px }
@@ -102,6 +120,15 @@
                 <span class="tag">Members Card</span>
                 <span class="tag">Giving</span>
                 <span class="tag">Central Henderson</span>
+              </div>
+              <div class="phone-preview">
+                <img
+                  src="/previews/assets/ios-members-card-app-preview.png"
+                  alt="Central Church Members Card Portal on iPhone"
+                  width="480"
+                  height="960"
+                  loading="lazy"
+                />
               </div>
             </div>
             <div class="share-panel">
