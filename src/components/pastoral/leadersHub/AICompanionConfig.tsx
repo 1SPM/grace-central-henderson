@@ -20,13 +20,24 @@ const TABS: { id: ConfigTab; label: string; icon: typeof Brain }[] = [
 interface AICompanionConfigProps {
   leader: LeaderProfile;
   embedded?: boolean;
+  showHeader?: boolean;
+  studioOpen?: boolean;
+  onStudioOpenChange?: (open: boolean) => void;
 }
 
-export function AICompanionConfig({ leader, embedded = false }: AICompanionConfigProps) {
+export function AICompanionConfig({
+  leader,
+  embedded = false,
+  showHeader = true,
+  studioOpen: controlledStudioOpen,
+  onStudioOpenChange,
+}: AICompanionConfigProps) {
   const [tab, setTab] = useState<ConfigTab>('brain');
   const [triggers, setTriggers] = useState(demoCompanionConfig.triggers);
   const [channels, setChannels] = useState(demoCompanionConfig.channels);
-  const [studioOpen, setStudioOpen] = useState(false);
+  const [internalStudioOpen, setInternalStudioOpen] = useState(false);
+  const studioOpen = controlledStudioOpen ?? internalStudioOpen;
+  const setStudioOpen = onStudioOpenChange ?? setInternalStudioOpen;
 
   const companion = useMemo(() => getLeaderCompanionConfig(leader.id), [leader.id]);
 
@@ -55,28 +66,30 @@ export function AICompanionConfig({ leader, embedded = false }: AICompanionConfi
 
   return (
     <div className="space-y-4">
-      <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">
-              {embedded ? `${leader.displayName} — AI companion` : 'AI companion configuration'}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-              Persona, escalation triggers, channels, and avatar session for this verified leader.
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
-              {leader.title} · {leader.isAvailable ? 'Live / reachable' : 'AI on duty'}
-            </p>
+      {showHeader && (
+        <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">
+                {embedded ? `${leader.displayName} — AI companion` : 'AI companion configuration'}
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
+                Persona, escalation triggers, channels, and avatar session for this verified leader.
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-2">
+                {leader.title} · {leader.isAvailable ? 'Live / reachable' : 'AI on duty'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStudioOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+            >
+              <Play size={14} /> Launch avatar conversation
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setStudioOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
-          >
-            <Play size={14} /> Launch avatar conversation
-          </button>
         </div>
-      </div>
+      )}
 
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map(({ id, label, icon: Icon }) => (

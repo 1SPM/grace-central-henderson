@@ -33,8 +33,7 @@ export function parseLeadershipLeaderId(): string | null {
 
 export function parseLeadershipProfileTab(): LeadershipProfileTab {
   const tab = hashParams().get('profileTab');
-  if (tab === 'contact') return 'overview';
-  if (tab === 'companion') return 'companion';
+  if (tab === 'contact' || tab === 'companion') return 'overview';
   return 'overview';
 }
 
@@ -74,7 +73,7 @@ export function resolveLegacyLeadershipHash(
     window.history.replaceState(
       null,
       '',
-      leadershipHash('team', 'team', leaderId, 'companion'),
+      leadershipHash('team', 'team', leaderId, 'overview'),
     );
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     return true;
