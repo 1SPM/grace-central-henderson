@@ -1,6 +1,35 @@
-import { defineConfig, loadEnv } from 'vite';
+import fs from 'node:fs';
+import path from 'node:path';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+
+function copyDirSync(src: string, dest: string) {
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(src)) {
+    const from = path.join(src, name);
+    const to = path.join(dest, name);
+    if (fs.statSync(from).isDirectory()) copyDirSync(from, to);
+    else fs.copyFileSync(from, to);
+  }
+}
+
+/** Copy member-portal static demos into dist (Vite public/ does not include repo-root previews). */
+function copyMemberPortalDemos(): Plugin {
+  return {
+    name: 'copy-member-portal-demos',
+    closeBundle() {
+      const root = process.cwd();
+      const dist = path.join(root, 'dist');
+      const iosApp = path.join(root, 'grace_central_henderson_members_card_ios_app.html');
+      if (fs.existsSync(iosApp)) {
+        fs.copyFileSync(iosApp, path.join(dist, path.basename(iosApp)));
+      }
+      copyDirSync(path.join(root, 'previews'), path.join(dist, 'previews'));
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -58,6 +87,7 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
+      copyMemberPortalDemos(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'icons/*.svg'],
