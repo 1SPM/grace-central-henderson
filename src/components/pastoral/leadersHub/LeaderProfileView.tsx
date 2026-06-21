@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Bot, Clock, MessageSquare, Star, User } from 'lucide-react';
+import { ArrowLeft, Bot, Star, User } from 'lucide-react';
 import type { LeaderProfile, Person, View } from '../../../types';
 import {
   leadershipHash,
@@ -34,7 +34,6 @@ export function LeaderProfileView({
   onNavigate,
 }: LeaderProfileViewProps) {
   const stats = getLeaderHubStats(leader);
-  const [liveOverride, setLiveOverride] = useState(stats.liveOverride);
   const [profileTab, setProfileTab] = useState<LeadershipProfileTab>(() => parseLeadershipProfileTab());
   const hasAi = leader.hasAiCompanion !== false;
 
@@ -197,59 +196,22 @@ export function LeaderProfileView({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start">
-            <div className="space-y-3">
-              <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 flex items-center gap-1 mb-1">
-                  <MessageSquare size={11} /> DM threshold
-                </p>
-                <p className="text-xs text-gray-700 dark:text-dark-300">{stats.dmThreshold}</p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 flex items-center gap-1 mb-1">
-                  <Clock size={11} /> Hours
-                </p>
-                <p className="text-xs text-gray-700 dark:text-dark-300">{stats.hours}</p>
-              </div>
-              {hasAi && (
-                <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg cursor-pointer">
-                  <div>
-                    <p className="text-xs font-medium text-gray-900 dark:text-dark-100">Live override</p>
-                    <p className="text-[10px] text-gray-500 dark:text-dark-400">
-                      Route everything live, pause AI companion
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={liveOverride}
-                    onChange={e => setLiveOverride(e.target.checked)}
-                    className="w-4 h-4 accent-slate-900"
-                  />
-                </label>
-              )}
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Care assignments</h3>
+            <div className="space-y-2">
+              {stats.careAssignments.map(assignment => (
+                <div
+                  key={assignment}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg"
+                >
+                  <span className="text-sm text-gray-700 dark:text-dark-300">{assignment}</span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                    Active
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Care assignments</h3>
-              <div className="space-y-2">
-                {stats.careAssignments.map(assignment => (
-                  <div
-                    key={assignment}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-850 rounded-lg"
-                  >
-                    <span className="text-sm text-gray-700 dark:text-dark-300">{assignment}</span>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                      Active
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
         </div>
       )}
 
