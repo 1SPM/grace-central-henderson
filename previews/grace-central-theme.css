@@ -1,0 +1,67 @@
+/* Central Church — Central Henderson brand theme */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-body: "Poppins", Arial, sans-serif;
+  --font-heading: "Montserrat", Arial, sans-serif;
+  --accent: #EE2B37;
+  --text: #000000;
+  --bg: #FFFFFF;
+  --bg-muted: #F4F4F4;
+  --bg-dark: #000000;
+  --text-on-dark: #FFFFFF;
+  --accent-soft: #FFF0F1;
+  --border: #E5E5E5;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3, .card-title, .hero-name, .dash-pillar-name, .sb-church, .tb-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.accent { color: var(--accent); }
+.bg-dark { background: var(--bg-dark); color: var(--text-on-dark); }
+.bg-light { background: var(--bg); color: var(--text); }
+.bg-muted { background: var(--bg-muted); }
+.border-accent { border-color: var(--accent); }
+/* Duotone icon tiles */
+.grace-ic { display: block; flex-shrink: 0; }
+.grace-inline { display: inline-flex; align-items: center; gap: 6px; }
+.ic-tile {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--accent-soft, #FFF0F1);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.ic-row {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0;
+}
+.nb-ico, .tile-ico, .dash-hub-ico, .pf-mc-ico, .badge-circle,
+.post-av-icon, .tb-bell, .tb-search, .pf-qa-ico, .tx-ico, .pf-tx-ico,
+.central-action-ico, .video-play-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0; line-height: 0;
+}
+.badge-circle, .post-av-icon { background: var(--accent-soft, #FFF0F1) !important; }
+.pf-mc-ico { min-height: 28px; }
+.qcmd { display: inline-flex; align-items: center; gap: 6px; }
+/* Central Pulse */
+.pulse-live-dot{width:7px;height:7px;border-radius:50%;background:#EE2B37;animation:ld 1.4s infinite;flex-shrink:0}
+@keyframes ld{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse-card{background:#fff;border:1px solid #ece8e1;border-radius:14px;padding:16px}
+.pulse-score{font-size:22px;font-weight:700;color:#EE2B37;line-height:1}
+.pulse-sub{font-size:10px;color:#888;margin-top:4px}
+.pulse-activity{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pulse-act{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#555;line-height:1.4}
+.pulse-act strong{color:#1a1a1a;font-weight:600}
+.pulse-act-time{font-size:9px;color:#aaa;display:block;margin-top:2px}
+.sb-pulse-block{margin-top:10px;padding-top:10px;border-top:1px solid #ece8e1;width:100%}
+.sb-commitment{font-size:10px;font-weight:700;color:#C41E2A;text-align:center}

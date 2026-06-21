@@ -1,231 +1,111 @@
-# GRACE CRM
+# GRACE — Central Henderson Member Portal
 
-<div align="center">
-  <img src="https://img.shields.io/badge/React-18.2-61DAFB?style=flat-square&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind-3.3-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Vite-5.0-646CFF?style=flat-square&logo=vite" alt="Vite" />
-</div>
+Interactive HTML prototypes for the **GRACE** member experience at **Central Henderson**. Static HTML/CSS/JS — no build step.
 
-<br />
+## Live preview
 
-<div align="center">
-  <h3>🙏 Never lose a visitor again.</h3>
-  <p>A modern, simple CRM designed specifically for small-to-midsize churches.</p>
-</div>
+After GitHub Pages is enabled, share this link:
 
----
+**https://1spm.github.io/grace-central-henderson/**
 
-## What is GRACE?
+| Preview | Path |
+|--------|------|
+| **Prototype hub** | `/index.html` |
+| **iOS Members Card app (canonical)** | `/grace_central_henderson_members_card_ios_app.html` |
+| **Desktop member portal** | `/previews/grace_member_portal_central.html` |
+| **Mobile member app** | `/previews/grace_mobile_ios-central.html` |
+| **Members Card companion preview (compare only)** | `/previews/grace_central_henderson_members_card_ios_app.companion-preview.html` |
 
-**GRACE** stands for:
+## Local preview
 
-| Letter | Meaning | Feature |
-|--------|---------|---------|
-| **G** | Growth | Track congregation growth and visitor conversion |
-| **R** | Relationships | Manage member profiles, families, and interactions |
-| **A** | Attendance | Monitor service and event attendance patterns |
-| **C** | Community | Small groups, prayer requests, and fellowship |
-| **E** | Engagement | Follow-ups, tasks, and care management |
-
----
-
-## Why GRACE?
-
-**The Problem:** 82% of first-time church visitors never come back. Most churches have no systematic follow-up process—they rely on memory, sticky notes, or spreadsheets that get forgotten by Tuesday.
-
-**The Solution:** GRACE is a simple, affordable CRM that automates visitor follow-up and helps small-to-midsize churches (50-500 members) build lasting relationships with their community.
-
-### What Makes GRACE Different
-
-| Feature | GRACE | Legacy Church Software |
-|---------|-------|------------------------|
-| **Setup Time** | 5 minutes | Hours/Days |
-| **Learning Curve** | Intuitive | Training required |
-| **Price** | $29-149/mo | $75-400+/mo |
-| **Focus** | Visitor follow-up | Everything (overwhelming) |
-| **Mobile-First** | Yes | Often an afterthought |
-
----
-
-## Features
-
-### 📊 Dashboard
-- At-a-glance view of visitors, tasks, and members needing attention
-- Priority follow-ups with overdue detection
-- Inactive member alerts
-- **Analytics charts** with member distribution and conversion metrics
-- **Upcoming birthdays** widget (next 30 days)
-
-### ➕ Quick Actions
-- Floating action button for fast data entry
-- Quickly add people, tasks, or prayer requests from anywhere
-- Streamlined forms for on-the-go updates
-
-### 📈 Visitor Pipeline
-- **Kanban-style board** showing member journey
-- Visual stages: Visitor → Regular → Member → Leader
-- Track conversion progress at a glance
-- Click-through to individual profiles
-
-### 👥 People Management
-- Complete member profiles with contact info and notes
-- Status tracking: Visitor → Regular → Member → Leader
-- Tag system for organization
-- Interaction logging (calls, emails, visits, prayers)
-- Birthday tracking with automatic reminders
-
-### ✅ Follow-Up Tasks
-- Priority-based task management
-- Category filters: Follow-up, Care, Admin, Outreach
-- Overdue task alerts
-- Person-linked tasks
-
-### 📅 Calendar
-- Service schedules
-- Small group meetings
-- Church events
-
-### 🤝 Small Groups
-- Group management with leaders and members
-- Meeting schedules and locations
-- Member directory per group
-
-### 🙏 Prayer Requests
-- Public and private prayer tracking
-- Mark prayers as answered
-- Testimony recording
-
-### 💝 Giving Dashboard
-- Giving overview by fund
-- Recurring gift tracking
-- Transaction history
-
----
-
-## Quick Start
+From the repo root:
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/grace-crm.git
-cd grace-crm
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Open http://localhost:3000
+python3 -m http.server 8765
 ```
 
----
+Then open http://127.0.0.1:8765/index.html
 
-## Tech Stack
+Hard-refresh (**Cmd+Shift+R**) after pulling changes so fonts and CSS update.
 
-- **Frontend:** React 18 + TypeScript
-- **Styling:** Tailwind CSS
-- **Icons:** Lucide React
-- **Build:** Vite
-- **Dates:** date-fns
+## GRACE neural voice (ElevenLabs + Vercel)
 
----
+GRACE can speak with **ElevenLabs** neural TTS via a serverless proxy — the API key never ships to the browser.
 
-## Project Structure
+| Deploy target | Voice |
+|---------------|-------|
+| **GitHub Pages** | Browser `speechSynthesis` (automatic fallback) |
+| **Vercel** | ElevenLabs Rachel voice when `ELEVENLABS_API_KEY` is set |
 
-```
-grace-crm/
-├── src/
-│   ├── components/
-│   │   ├── Layout.tsx         # Sidebar navigation
-│   │   ├── Dashboard.tsx      # Main dashboard
-│   │   ├── DashboardCharts.tsx # Analytics charts
-│   │   ├── BirthdayWidget.tsx # Upcoming birthdays
-│   │   ├── VisitorPipeline.tsx # Kanban pipeline view
-│   │   ├── QuickActions.tsx   # Floating action button
-│   │   ├── QuickTaskForm.tsx  # Quick task modal
-│   │   ├── QuickPrayerForm.tsx # Quick prayer modal
-│   │   ├── PeopleList.tsx     # Congregation list
-│   │   ├── PersonProfile.tsx  # Individual profile
-│   │   ├── Tasks.tsx          # Follow-up management
-│   │   ├── Calendar.tsx       # Events calendar
-│   │   ├── Groups.tsx         # Small groups
-│   │   ├── Prayer.tsx         # Prayer requests
-│   │   ├── Giving.tsx         # Giving dashboard
-│   │   └── Settings.tsx       # Configuration
-│   ├── types.ts               # TypeScript interfaces
-│   ├── constants.ts           # Sample data
-│   ├── App.tsx                # Main application
-│   ├── main.tsx               # Entry point
-│   └── index.css              # Tailwind imports
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── vite.config.ts
+### Local dev with voice
+
+```bash
+cp .env.example .env.local
+# Add your ElevenLabs API key to .env.local
+
+npx vercel dev
 ```
 
----
+Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal_central.html), click the GRACE orb, and ask a question — she should reply with neural voice. The panel header shows **Neural voice** when ElevenLabs is active.
 
-## Roadmap
+### Vercel production
 
-### Phase 1: Core CRM ✅
-- [x] People management
-- [x] Task/follow-up system
-- [x] Prayer requests
-- [x] Small groups
-- [x] Giving overview
-- [x] Dark mode support
+1. Import this repo in [Vercel](https://vercel.com)
+2. Add environment variables (see [`.env.example`](.env.example)):
+   - `ELEVENLABS_API_KEY` (required)
+   - `ELEVENLABS_VOICE_ID` (optional, default Rachel)
+   - `ELEVENLABS_MODEL_ID` (optional, default `eleven_flash_v2_5`)
+3. Deploy — static previews and `/api/grace-tts` share the same origin
 
-### Phase 2: Enhanced UI ✅
-- [x] Quick Actions floating button
-- [x] Visitor Pipeline (kanban view)
-- [x] Dashboard analytics charts
-- [x] Birthday/anniversary widget
-- [x] Global search
+### API routes
 
-### Phase 3: Backend Integration (Current)
-- [x] Supabase database connection
-- [ ] User authentication (Clerk)
-- [ ] Multi-church support
-- [ ] Stripe payments
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/grace-tts` | POST | `{ "text": "..." }` → `audio/mpeg` |
+| `/api/grace-tts/health` | GET | Health probe for client auto-detect |
 
-### Phase 4: Automation
-- [ ] Automated visitor follow-up emails
-- [ ] Attendance tracking integration
-- [ ] Task reminder notifications
-- [ ] SMS messaging
-- [ ] Birthday auto-reminders
+## Key files
 
-### Phase 5: Community Layer
-- [ ] Member-facing app / portal
-- [ ] Prayer wall (public sharing)
-- [ ] Event RSVPs
-- [ ] Small group communication
-- [ ] Volunteer scheduling
+| Path | Description |
+|------|-------------|
+| `grace_central_henderson_members_card_ios_app.html` | Canonical iOS Members Card app (root URL) |
+| `previews/grace_central_henderson_members_card_ios_app.companion-preview.html` | Legacy companion-integrated build for side-by-side comparison |
+| `previews/grace_member_portal_central.html` | Desktop member portal — Home, Leadership, Give, Community, Profile |
+| `previews/grace_mobile_ios-central.html` | Mobile app prototype |
+| `previews/grace-central-theme.css` | Central brand theme (Poppins, Montserrat, `#EE2B37`) |
+| `previews/grace-messaging.js` | Canonical GRACE vs leader avatar messaging |
+| `previews/grace-companion.js` | Floating GRACE chat, memory, voice (ElevenLabs + browser fallback) |
+| `previews/grace-duotone-icons.js` | Red/pink duotone icon system |
+| `api/grace-tts.js` | Vercel serverless ElevenLabs TTS proxy |
+| `previews/assets/central-henderson-logo.png` | Central Henderson logo |
 
-### Phase 6: Advanced Features
-- [ ] Reporting & export (CSV/PDF)
-- [ ] Attendance check-in system
-- [ ] Giving trends & charts
-- [ ] Mobile PWA support
-- [ ] Offline mode
+## AI model
 
----
+GRACE uses a **two-tier** approach documented in [`previews/grace-messaging.js`](previews/grace-messaging.js):
 
-## Contributing
+- **GRACE** (Growth · Resource · Assistance · Community · Engagement) — Guides app navigation: giving, watch, groups, events, and care routing. For deeper conversation, connect with a leader avatar.
+- **Leader avatars (independent agents)** — Each verified leader has an isolated, grounded avatar profile (their pastoral essence captured per the church avatar program). Members confide with leader avatars, not GRACE. Conversations are siloed per leader and kept confidential if saved at all.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+All member preview HTML files load `grace-messaging.js` for shared copy.
 
----
+**GRACE** system identity on Home cards uses the animated **grace orb** ([`previews/grace-orb.css`](previews/grace-orb.css)) — not the church C mark. Leader avatars and GRACE Impact Card wallet branding still use church marks and photos.
+
+## Design notes
+
+- **Brand:** Black `#000000`, accent red `#EE2B37`, white `#FFFFFF`
+- **Fonts:** Poppins (body), Montserrat (headings)
+- **Content:** Placeholder data and demo portraits for review only
+
+## Sharing updates
+
+Push to `main` and GitHub Actions will redeploy the live site automatically.
+
+```bash
+git add .
+git commit -m "Your update message"
+git push origin main
+```
 
 ## License
 
-MIT License - feel free to use this for your church!
-
----
-
-<div align="center">
-  <p><strong>GRACE</strong> - Growth · Relationships · Attendance · Community · Engagement</p>
-  <p>Built with ❤️ for churches everywhere</p>
-</div>
+Prototype / internal use unless otherwise specified by Central Henderson.

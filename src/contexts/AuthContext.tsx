@@ -128,7 +128,23 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
             setUser(mappedUser);
             authService.setCurrentUser(mappedUser);
           } else {
-            // Create new user in database
+            // User has no `users` row yet. The church_id comes from
+            // publicMetadata set by POST /api/billing/create-church —
+            // it must already exist before we write a users row.
+            // If it's missing, the user hasn't finished onboarding;
+            // redirect to /signup rather than inserting a row with a
+            // wrong church (which RLS would reject anyway — the JWT
+            // carries no church_id claim until create-church runs).
+            const churchIdFromMeta = clerkUser.publicMetadata?.church_id as string | undefined;
+            if (!churchIdFromMeta) {
+              // Not yet onboarded — bounce to sign-up to complete church creation.
+              if (window.location.pathname !== '/signup') {
+                window.location.pathname = '/signup';
+              }
+              setIsLoading(false);
+              return;
+            }
+
             const { data: newUser, error: createError } = await supabase
               .from('users')
               .insert({
@@ -136,8 +152,8 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
                 email: clerkUser.emailAddresses[0]?.emailAddress || '',
                 first_name: clerkUser.firstName,
                 last_name: clerkUser.lastName,
-                role: 'staff', // Default role
-                church_id: DEFAULT_CHURCH_ID, // Default church
+                role: (clerkUser.publicMetadata?.role as string | undefined) || 'staff',
+                church_id: churchIdFromMeta,
               })
               .select()
               .single();

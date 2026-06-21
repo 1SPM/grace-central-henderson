@@ -1,0 +1,70 @@
+name: Deploy Central Henderson Pages
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify required HTML files
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f grace_central_henderson_members_card_ios_app.html
+          test -f previews/grace_member_portal_central.html
+          test -f previews/grace_mobile_ios-central.html
+          test -f previews/grace-central-theme.css
+          test -f previews/assets/central-henderson-logo.png
+
+      - name: Serve locally and check key routes
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/grace_server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID' EXIT
+          sleep 2
+          curl -fsS http://127.0.0.1:8080/index.html >/dev/null
+          curl -fsS http://127.0.0.1:8080/grace_central_henderson_members_card_ios_app.html >/dev/null
+          curl -fsS http://127.0.0.1:8080/previews/grace_member_portal_central.html >/dev/null
+          curl -fsS http://127.0.0.1:8080/previews/grace_mobile_ios-central.html >/dev/null
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

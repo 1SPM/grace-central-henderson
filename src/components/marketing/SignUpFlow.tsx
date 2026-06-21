@@ -100,6 +100,7 @@ export function SignUpFlow({ initialPlan = 'pro' }: SignUpFlowProps) {
     setError(null);
     setStep('redirecting');
     try {
+      const token = await getToken();
       const res = await fetch('/api/billing/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,6 +112,24 @@ export function SignUpFlow({ initialPlan = 'pro' }: SignUpFlowProps) {
         }),
       });
       const body = await res.json();
+
+      // When Stripe is not configured (dev / staging / demo environments),
+      // fall back to a direct trial activation and skip Stripe entirely.
+      if (res.status === 503 && body.error === 'stripe_not_configured') {
+        const trialRes = await fetch('/api/billing/activate-trial', {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (trialRes.ok) {
+          window.location.assign('/welcome');
+          return;
+        }
+        const trialBody = await trialRes.json().catch(() => ({}));
+        setError(trialBody.detail || 'Could not activate trial. Contact support@grace-crm.app.');
+        setStep('plan-confirm');
+        return;
+      }
+
       if (!res.ok) {
         setError(body.detail || body.error || 'Failed to start checkout.');
         setStep('plan-confirm');

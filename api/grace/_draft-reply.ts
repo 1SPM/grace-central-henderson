@@ -4,6 +4,9 @@ import { buildChurchContext, buildPersonContext, buildReplyPrompt } from '../_li
 import { generate } from '../_lib/ai/gateway.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { callGemini } from '../_lib/ai/adapters/gemini.js';
+import { requireClerkAuth } from '../_lib/auth-helper.js';
+
+const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -22,15 +25,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!GEMINI_API_KEY) return res.status(503).json({ error: 'AI not configured' });
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'Supabase not configured' });
 
+  // TD-014: mandatory auth gate — staff only
+  const auth = await requireClerkAuth(req, { allowedRoles: STAFF_ROLES });
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
   const { inbox_message_row_id } = (req.body || {}) as DraftReplyBody;
   if (!inbox_message_row_id) return res.status(400).json({ error: 'inbox_message_row_id required' });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
 
+  // Scope to caller's church — prevents reading another tenant's inbox messages
   const { data: row, error: rowErr } = await supabase
     .from('grace_inbox_messages')
     .select('id, church_id, person_id, from_email, subject, body_text, preview, created_at')
     .eq('id', inbox_message_row_id)
+    .eq('church_id', auth.churchId)
     .single();
   if (rowErr || !row) return res.status(404).json({ error: 'Inbox row not found' });
 

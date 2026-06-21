@@ -1,11 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { sendFresh } from '../_lib/agentmail-send.js';
+import { requireClerkAuth } from '../_lib/auth-helper.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AGENTMAIL_API_KEY = process.env.AGENTMAIL_API_KEY;
 const FROM_INBOX = process.env.AGENTMAIL_FROM_INBOX || 'askgrace@agentmail.to';
+
+const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
 interface SendBody {
   person_id?: string;
@@ -19,6 +22,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!AGENTMAIL_API_KEY) return res.status(503).json({ error: 'AgentMail not configured' });
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'Supabase not configured' });
 
+  // TD-014: mandatory auth gate — staff only
+  const auth = await requireClerkAuth(req, { allowedRoles: STAFF_ROLES });
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
   const { person_id, to, subject, text } = (req.body || {}) as SendBody;
   if (!subject?.trim() || !text?.trim()) {
     return res.status(400).json({ error: 'subject and text are required' });
@@ -28,8 +35,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
 
   // Resolve recipient: either an explicit address (with safety) or a Person id we look up.
+  // All lookups are scoped to auth.churchId — prevents cross-tenant email sends.
   let recipientEmail = to?.trim().toLowerCase();
-  let churchId: string | null = null;
   let resolvedPersonId: string | null = null;
 
   if (person_id) {
@@ -37,20 +44,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from('people')
       .select('id, church_id, email, first_name, last_name')
       .eq('id', person_id)
+      .eq('church_id', auth.churchId)
       .single();
     if (error || !person) return res.status(404).json({ error: 'Person not found' });
     if (!person.email) return res.status(400).json({ error: 'Person has no email on file' });
     recipientEmail = person.email;
-    churchId = person.church_id;
     resolvedPersonId = person.id;
   } else if (recipientEmail) {
     const { data: person } = await supabase
       .from('people')
-      .select('id, church_id')
+      .select('id')
+      .eq('church_id', auth.churchId)
       .ilike('email', recipientEmail)
       .limit(1)
       .single();
-    churchId = person?.church_id ?? null;
     resolvedPersonId = person?.id ?? null;
   } else {
     return res.status(400).json({ error: 'person_id or to is required' });
@@ -71,9 +78,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(502).json({ error: 'AgentMail rejected the send', detail: result.error });
   }
 
-  if (resolvedPersonId && churchId) {
+  if (resolvedPersonId) {
     await supabase.from('interactions').insert({
-      church_id: churchId,
+      church_id: auth.churchId,
       person_id: resolvedPersonId,
       type: 'email',
       content: `${subject.trim()}\n\n${text.trim()}`,
