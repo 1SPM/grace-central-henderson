@@ -55,10 +55,17 @@ export function LeaderProfileView({
 
   const visibleTabs = PROFILE_TABS.filter(t => t.id !== 'companion' || hasAi);
 
-  const identityCard = (
-    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-      <div className="flex flex-col items-center text-center max-w-lg mx-auto">
-        <div className="w-32 mb-4">
+  const kpiCards = [
+    { label: 'Sessions', value: stats.sessions },
+    { label: 'Rating', value: stats.rating.toFixed(1), star: true },
+    { label: 'Blessings', value: `${stats.blessings}/28` },
+    { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)) },
+  ] as const;
+
+  const renderIdentityCard = (compact = false) => (
+    <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start h-full">
+      <div className={`flex flex-col items-center text-center w-full ${compact ? '' : 'max-w-lg mx-auto'}`}>
+        <div className={`${compact ? 'w-28' : 'w-32'} mb-3`}>
           <LeaderAvatar leader={leader} size="hero" rounded="xl" />
         </div>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
@@ -84,6 +91,23 @@ export function LeaderProfileView({
         </div>
         <p className="text-xs text-gray-500 dark:text-dark-400 mt-3 leading-relaxed">{leader.bio}</p>
       </div>
+    </div>
+  );
+
+  const renderKpiGrid = (className = '') => (
+    <div className={`grid grid-cols-2 gap-3 ${className}`}>
+      {kpiCards.map(kpi => (
+        <div
+          key={kpi.label}
+          className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+        >
+          <p className="section-eyebrow">{kpi.label}</p>
+          <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1 flex items-center gap-1">
+            {'star' in kpi && kpi.star && <Star size={14} className="text-amber-500 fill-amber-500" />}
+            {kpi.value}
+          </p>
+        </div>
+      ))}
     </div>
   );
 
@@ -114,10 +138,14 @@ export function LeaderProfileView({
         ))}
       </div>
 
-      {identityCard}
-
       {profileTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+            <div className="lg:col-span-2">{renderIdentityCard(true)}</div>
+            <div className="lg:col-span-3">{renderKpiGrid('h-full')}</div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start">
             <div className="space-y-3">
               <div className="p-3 bg-gray-50 dark:bg-dark-850 rounded-lg">
@@ -152,26 +180,6 @@ export function LeaderProfileView({
           </div>
 
           <div className="lg:col-span-2 space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Sessions', value: stats.sessions },
-                { label: 'Rating', value: stats.rating.toFixed(1), star: true },
-                { label: 'Blessings', value: `${stats.blessings}/28` },
-                { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)) },
-              ].map(kpi => (
-                <div
-                  key={kpi.label}
-                  className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
-                >
-                  <p className="section-eyebrow">{kpi.label}</p>
-                  <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1 flex items-center gap-1">
-                    {kpi.star && <Star size={14} className="text-amber-500 fill-amber-500" />}
-                    {kpi.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
             <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Weekly availability</h3>
@@ -237,19 +245,26 @@ export function LeaderProfileView({
             </div>
           </div>
         </div>
+        </div>
       )}
 
       {profileTab === 'contact' && (
-        <LeaderContactTab
-          leader={leader}
-          people={people}
-          churchName={churchName}
-          onNavigate={onNavigate}
-        />
+        <>
+          {renderIdentityCard()}
+          <LeaderContactTab
+            leader={leader}
+            people={people}
+            churchName={churchName}
+            onNavigate={onNavigate}
+          />
+        </>
       )}
 
       {profileTab === 'companion' && hasAi && (
-        <AICompanionConfig leader={leader} embedded />
+        <>
+          {renderIdentityCard()}
+          <AICompanionConfig leader={leader} embedded />
+        </>
       )}
     </div>
   );
