@@ -142,7 +142,55 @@ export function LeaderProfileView({
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
             <div className="lg:col-span-2">{renderIdentityCard(true)}</div>
-            <div className="lg:col-span-3">{renderKpiGrid('h-full')}</div>
+            <div className="lg:col-span-3 space-y-4">
+              {renderKpiGrid()}
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Weekly availability</h3>
+                  <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-dark-400">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Live
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-violet-500" /> AI
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-dark-600" /> Off
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-7 gap-2">
+                  {DAYS.map((day, i) => {
+                    const mode = stats.availability[i];
+                    return (
+                      <div
+                        key={day}
+                        className={`rounded-lg p-2.5 text-center border ${
+                          mode === 'live'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/40'
+                            : mode === 'ai'
+                              ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800/40'
+                              : 'bg-gray-50 dark:bg-dark-850 border-gray-200 dark:border-dark-700 opacity-60'
+                        }`}
+                      >
+                        <p className="text-[10px] font-medium text-gray-500 dark:text-dark-400">{day}</p>
+                        <p
+                          className={`text-[10px] font-semibold mt-1 ${
+                            mode === 'live'
+                              ? 'text-emerald-700 dark:text-emerald-300'
+                              : mode === 'ai'
+                                ? 'text-violet-700 dark:text-violet-300'
+                                : 'text-gray-400 dark:text-dark-500'
+                          }`}
+                        >
+                          {mode === 'live' ? 'Live' : mode === 'ai' ? 'AI' : 'Off'}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -179,54 +227,7 @@ export function LeaderProfileView({
             </div>
           </div>
 
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Weekly availability</h3>
-                <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-dark-400">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> Live
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-violet-500" /> AI
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-dark-600" /> Off
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-7 gap-2">
-                {DAYS.map((day, i) => {
-                  const mode = stats.availability[i];
-                  return (
-                    <div
-                      key={day}
-                      className={`rounded-lg p-2.5 text-center border ${
-                        mode === 'live'
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/40'
-                          : mode === 'ai'
-                            ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800/40'
-                            : 'bg-gray-50 dark:bg-dark-850 border-gray-200 dark:border-dark-700 opacity-60'
-                      }`}
-                    >
-                      <p className="text-[10px] font-medium text-gray-500 dark:text-dark-400">{day}</p>
-                      <p
-                        className={`text-[10px] font-semibold mt-1 ${
-                          mode === 'live'
-                            ? 'text-emerald-700 dark:text-emerald-300'
-                            : mode === 'ai'
-                              ? 'text-violet-700 dark:text-violet-300'
-                              : 'text-gray-400 dark:text-dark-500'
-                        }`}
-                      >
-                        {mode === 'live' ? 'Live' : mode === 'ai' ? 'AI' : 'Off'}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
+          <div className="lg:col-span-2">
             <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
               <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Care assignments</h3>
               <div className="space-y-2">
