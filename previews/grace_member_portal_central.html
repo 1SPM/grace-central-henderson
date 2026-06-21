@@ -1711,6 +1711,37 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   transition:opacity .45s ease,transform .45s ease;pointer-events:none;text-align:right
 }
 .dash-hero-toast.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.mobile-link-page{max-width:920px;margin:0 auto;padding:24px 20px}
+.mobile-link-intro{margin-bottom:28px}
+.mobile-link-badge{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c0392b;margin-bottom:8px}
+.mobile-link-title{font-size:22px;font-weight:700;margin:0 0 8px;color:#111}
+.mobile-link-desc{font-size:14px;color:#555;margin:0 0 16px;line-height:1.5}
+.mobile-link-tags{display:flex;gap:8px;flex-wrap:wrap}
+.mobile-link-tag{font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444}
+.mobile-link-split{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.mobile-link-preview{flex:1;min-width:240px;display:flex;justify-content:center;align-items:center;padding:24px 16px;background:linear-gradient(180deg,#f8f8fa 0%,#ececf0 100%);border-radius:16px;border:1px solid #e8e8e8;min-height:320px}
+.mobile-share-panel{flex:1;min-width:280px;max-width:360px;display:flex;flex-direction:column;gap:16px}
+.mobile-share-block{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px}
+.mobile-share-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.mobile-share-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mobile-share-ico-qr{background:#fef2f2;color:#c0392b}
+.mobile-share-ico-link{background:#f0faf4;color:#27ae60}
+.mobile-share-head h4{font-size:15px;font-weight:600;margin:0 0 2px;color:#111}
+.mobile-share-head p{font-size:13px;margin:0;color:#888}
+.mobile-share-qr{background:#f9f9f9;border-radius:12px;padding:16px;display:flex;justify-content:center;border:1px solid #eee}
+.mobile-share-qr img{width:140px;height:140px;display:block}
+.mobile-share-hint{font-size:12px;color:#666;text-align:center;margin:12px 0 0;line-height:1.45}
+.mobile-share-url-row{display:flex;gap:8px;margin-bottom:10px}
+.mobile-share-url-row input{flex:1;min-width:0;font-size:11px;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;background:#f9f9f9;color:#555;outline:none;font-family:inherit}
+.mobile-share-copy{padding:10px 14px;background:#f2f2f2;border:1px solid #ddd;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.mobile-share-copy.copied{background:#ecfdf5;color:#059669;border-color:#a7f3d0}
+.mobile-share-open{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#c0392b;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box}
+.mobile-share-open:hover{opacity:.92}
+.mobile-share-note{font-size:12px;color:#888;text-align:center;margin:10px 0 0;line-height:1.45}
+.phone-device{--phone-scale:0.72;width:calc(375px * var(--phone-scale));background:#111;border-radius:36px;padding:10px;box-shadow:0 20px 50px rgba(0,0,0,.22);position:relative;flex-shrink:0}
+.phone-device-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:24px;background:#111;border-radius:0 0 14px 14px;z-index:2;pointer-events:none}
+.phone-device-screen{width:calc(375px * var(--phone-scale));height:calc(812px * var(--phone-scale));border-radius:28px;overflow:hidden;background:#000;position:relative}
+.phone-device-screen iframe{width:375px;height:812px;border:0;transform:scale(var(--phone-scale));transform-origin:top left;display:block;background:#000}
 .home-grace-route{font-size:11px;color:#888;text-align:center;padding:0 18px 14px;line-height:1.5}
 .home-grace-route strong{color:#1a1a1a}
 .impact-float{
@@ -2900,62 +2931,74 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     </div><!-- /sec-network -->
 
     <div class="sec" id="sec-mobile">
-      <div style="max-width:700px;margin:0 auto;padding:24px 20px;">
-        <div style="margin-bottom:28px;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c0392b;margin-bottom:8px;">NEW iOS APP</div>
-          <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;color:#111;">New iOS Members Card App</h2>
-          <p style="font-size:14px;color:#555;margin:0 0 16px;">Redesigned Central Henderson mobile experience &#8212; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">iOS Native</span>
-            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Members Card</span>
-            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Giving</span>
-            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Central Henderson</span>
+      <div class="mobile-link-page">
+        <div class="mobile-link-intro">
+          <div class="mobile-link-badge">New iOS App</div>
+          <h2 class="mobile-link-title">New iOS Members Card App</h2>
+          <p class="mobile-link-desc">Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+          <div class="mobile-link-tags">
+            <span class="mobile-link-tag">iOS Native</span>
+            <span class="mobile-link-tag">Members Card</span>
+            <span class="mobile-link-tag">Giving</span>
+            <span class="mobile-link-tag">Central Henderson</span>
           </div>
         </div>
-        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="flex:1;min-width:200px;background:#f5f5f7;border-radius:16px;padding:24px;display:flex;justify-content:center;align-items:center;">
-            <img src="/previews/assets/ios-members-card-app-preview.png" alt="Central Church Members Card Portal on iPhone" style="width:200px;height:auto;display:block;" />
-          </div>
-          <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:16px;">
-            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px;">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                <div style="width:36px;height:36px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M17 17h3v3M14 20h3"/></svg>
-                </div>
-                <div>
-                  <div style="font-weight:600;font-size:14px;color:#111;">Scan to Preview</div>
-                  <div style="font-size:12px;color:#888;">Open on your mobile device</div>
-                </div>
+        <div class="mobile-link-split">
+          <div class="mobile-link-preview">
+            <div class="phone-device" style="--phone-scale:0.72">
+              <div class="phone-device-notch" aria-hidden="true"></div>
+              <div class="phone-device-screen">
+                <iframe
+                  id="ios-app-embed"
+                  src="/grace_central_henderson_members_card_ios_app.html"
+                  title="Central Church Members Card Portal"
+                  loading="lazy"
+                  allow="clipboard-read; clipboard-write"
+                ></iframe>
               </div>
-              <div style="background:#f9f9f9;border-radius:12px;padding:16px;display:flex;justify-content:center;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fgrace-crm-two.vercel.app%2Fgrace_central_henderson_members_card_ios_app.html" alt="QR code for Members Card app" width="140" height="140" style="display:block;" />
-              </div>
-              <p style="font-size:12px;color:#666;text-align:center;margin:12px 0 0;">Scan with your phone camera, then log in or sign up for your member account.</p>
             </div>
-            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px;">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                <div style="width:36px;height:36px;background:#f0faf4;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div class="mobile-share-panel">
+            <div class="mobile-share-block">
+              <div class="mobile-share-head">
+                <div class="mobile-share-ico mobile-share-ico-qr" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M17 17h3v3M14 20h3"/></svg>
                 </div>
                 <div>
-                  <div style="font-weight:600;font-size:14px;color:#111;">App URL</div>
-                  <div style="font-size:12px;color:#888;">Open directly on your phone</div>
+                  <h4>Scan to Preview</h4>
+                  <p>Open on your mobile device</p>
                 </div>
               </div>
-              <div style="display:flex;gap:8px;margin-bottom:10px;">
-                <input type="text" value="https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html" readonly style="flex:1;font-size:11px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;background:#f9f9f9;color:#555;outline:none;min-width:0;" />
-                <button onclick="navigator.clipboard.writeText('https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);})" style="padding:8px 12px;background:#f2f2f2;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Copy</button>
+              <div class="mobile-share-qr">
+                <img id="mobile-ios-qr" alt="QR code for iOS Members Card app" width="140" height="140" loading="lazy" />
               </div>
-              <a href="https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#c0392b;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box;">
+              <p class="mobile-share-hint">Scan with your phone camera, then log in or sign up for your member account.</p>
+            </div>
+            <div class="mobile-share-block">
+              <div class="mobile-share-head">
+                <div class="mobile-share-ico mobile-share-ico-link" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <h4>App URL</h4>
+                  <p>Share with members</p>
+                </div>
+              </div>
+              <div class="mobile-share-url-row">
+                <input id="mobile-ios-url" type="text" readonly aria-label="iOS Members Card app URL" />
+                <button type="button" id="mobile-ios-copy" class="mobile-share-copy">Copy</button>
+              </div>
+              <a id="mobile-ios-open" class="mobile-share-open" target="_blank" rel="noopener noreferrer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Open in New Tab
               </a>
-              <p style="font-size:11px;color:#888;text-align:center;margin:10px 0 0;">Open on your phone to log in or sign up for the Members Card Portal.</p>
+              <p class="mobile-share-note">Open on your phone to log in or sign up for the Members Card Portal.</p>
             </div>
           </div>
         </div>
       </div>
     </div><!-- /sec-mobile -->
+
     <div class="pf-toast-container" id="pf-toast-container"></div>
 
     <!-- Wall lightbox -->
@@ -4244,7 +4287,33 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
 /* Divinity avatar sessions — per-leader didAvatarUrl overrides this fallback */
 const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
-const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:"Link to Mobile"};
+const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
+const IOS_APP_PATH='/grace_central_henderson_members_card_ios_app.html';
+function iosAppUrl(){return window.location.origin+IOS_APP_PATH;}
+function initMobileSharePanel(){
+  const appUrl=iosAppUrl();
+  const urlInput=document.getElementById('mobile-ios-url');
+  const openLink=document.getElementById('mobile-ios-open');
+  const qrImg=document.getElementById('mobile-ios-qr');
+  const copyBtn=document.getElementById('mobile-ios-copy');
+  if(urlInput)urlInput.value=appUrl;
+  if(openLink)openLink.href=appUrl;
+  if(qrImg)qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=C8102E';
+  if(copyBtn&&!copyBtn.dataset.wired){
+    copyBtn.dataset.wired='1';
+    copyBtn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(appUrl).then(()=>{
+        copyBtn.classList.add('copied');
+        copyBtn.textContent='Copied!';
+        setTimeout(()=>{copyBtn.classList.remove('copied');copyBtn.textContent='Copy';},2000);
+      }).catch(()=>{
+        if(urlInput){urlInput.select();document.execCommand('copy');}
+        copyBtn.textContent='Copied!';
+        setTimeout(()=>{copyBtn.textContent='Copy';},2000);
+      });
+    });
+  }
+}
 const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
 let watchLiveTimers=[];
 let watchViewerCount=342;
@@ -6433,6 +6502,7 @@ function goSection(s){
   if(s!=='home') dismissImpactFloat();
   if(s==='watch') initWatchLive();
   else stopWatchLive();
+  if(s==='mobile') initMobileSharePanel();
   if(typeof initGracePortalIcons==='function')initGracePortalIcons(document);
 }
 function formatMoney(value){
