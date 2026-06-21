@@ -12,7 +12,7 @@
 body{background:#FFFFFF;display:flex;height:100vh;overflow:hidden;font-size:13px}
 
 /* ── SIDEBAR ── */
-.sb{width:200px;background:#fff;border-right:1px solid #ece8e1;display:flex;flex-direction:column;flex-shrink:0;height:100vh}
+.sb{width:200px;background:#fff;border-right:1px soid #ece8e1;display:flex;flex-direction:column;flex-shrink:0;height:100vh}
 .sb-top{padding:16px 16px 14px;border-bottom:1px solid #ece8e1;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:visible}
 .sb-church{font-size:11px;font-weight:700;color:#000000;margin-bottom:10px;letter-spacing:.2px}
 .sb-av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:3px solid #EE2B37;margin-bottom:6px}
@@ -1827,6 +1827,9 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div class="nb" id="nav-profile" onclick="openProfileTab('overview')">
       <span class="nb-ico" data-grace-icon="profile" data-grace-size="20"></span><span class="nb-label">My Journey</span>
     </div>
+    <div class="nb" id="nav-mobile" onclick="goSection('mobile')">
+      <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="nb-label">Link to Mobile</span>
+    </div>
     <div class="sb-member">
       <img class="sb-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya Thompson">
       <div class="sb-name">Maya Thompson</div>
@@ -2896,6 +2899,63 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
     </div><!-- /sec-network -->
 
+    <div class="sec" id="sec-mobile">
+      <div style="max-width:700px;margin:0 auto;padding:24px 20px;">
+        <div style="margin-bottom:28px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c0392b;margin-bottom:8px;">NEW iOS APP</div>
+          <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;color:#111;">New iOS Members Card App</h2>
+          <p style="font-size:14px;color:#555;margin:0 0 16px;">Redesigned Central Henderson mobile experience &#8212; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">iOS Native</span>
+            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Members Card</span>
+            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Giving</span>
+            <span style="font-size:12px;padding:4px 12px;border:1px solid #ddd;border-radius:20px;color:#444;">Central Henderson</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;background:#f5f5f7;border-radius:16px;padding:24px;display:flex;justify-content:center;align-items:center;">
+            <img src="/previews/assets/ios-members-card-app-preview.png" alt="Central Church Members Card Portal on iPhone" style="width:200px;height:auto;display:block;" />
+          </div>
+          <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:36px;height:36px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M17 17h3v3M14 20h3"/></svg>
+                </div>
+                <div>
+                  <div style="font-weight:600;font-size:14px;color:#111;">Scan to Preview</div>
+                  <div style="font-size:12px;color:#888;">Open on your mobile device</div>
+                </div>
+              </div>
+              <div style="background:#f9f9f9;border-radius:12px;padding:16px;display:flex;justify-content:center;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fgrace-crm-two.vercel.app%2Fgrace_central_henderson_members_card_ios_app.html" alt="QR code for Members Card app" width="140" height="140" style="display:block;" />
+              </div>
+              <p style="font-size:12px;color:#666;text-align:center;margin:12px 0 0;">Scan with your phone camera, then log in or sign up for your member account.</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:36px;height:36px;background:#f0faf4;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div style="font-weight:600;font-size:14px;color:#111;">App URL</div>
+                  <div style="font-size:12px;color:#888;">Open directly on your phone</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <input type="text" value="https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html" readonly style="flex:1;font-size:11px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;background:#f9f9f9;color:#555;outline:none;min-width:0;" />
+                <button onclick="navigator.clipboard.writeText('https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);})" style="padding:8px 12px;background:#f2f2f2;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Copy</button>
+              </div>
+              <a href="https://grace-crm-two.vercel.app/grace_central_henderson_members_card_ios_app.html" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#c0392b;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Open in New Tab
+              </a>
+              <p style="font-size:11px;color:#888;text-align:center;margin:10px 0 0;">Open on your phone to log in or sign up for the Members Card Portal.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /sec-mobile -->
     <div class="pf-toast-container" id="pf-toast-container"></div>
 
     <!-- Wall lightbox -->
@@ -4184,7 +4244,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
 /* Divinity avatar sessions — per-leader didAvatarUrl overrides this fallback */
 const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
-const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey"};
+const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:"Link to Mobile"};
 const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
 let watchLiveTimers=[];
 let watchViewerCount=342;
