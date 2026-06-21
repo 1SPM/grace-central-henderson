@@ -1,8 +1,15 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar as CalendarIcon, Church, Megaphone, UserCheck } from 'lucide-react';
+import { BookOpen, Calendar as CalendarIcon, Church, Megaphone, UserCheck } from 'lucide-react';
 import { SundayPrep } from './SundayPrep';
 import { ListSkeleton } from './ui/ViewSkeleton';
-import { parseSundayTab, sundayHash, type SundayTab } from '../lib/sundayNav';
+import {
+  parseSundayArchiveFilter,
+  parseSundayTab,
+  sundayHash,
+  type SundayArchiveFilter,
+  type SundayTab,
+} from '../lib/sundayNav';
+import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
 import type { ChurchProfile } from '../hooks/useChurchSettings';
 import type { Announcement, AnnouncementCategory, Attendance, CalendarEvent, Person, PrayerRequest } from '../types';
 import type { RSVP } from './calendar/CalendarConstants';
@@ -10,6 +17,7 @@ import type { RSVP } from './calendar/CalendarConstants';
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
 const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
 const AnnouncementManager = lazy(() => import('./AnnouncementManager').then(m => ({ default: m.AnnouncementManager })));
+const SermonArchive = lazy(() => import('./sunday/SermonArchive').then(m => ({ default: m.SermonArchive })));
 
 interface SundayPageProps {
   churchId: string;
@@ -44,6 +52,7 @@ interface SundayPageProps {
 
 const TABS: { id: SundayTab; label: string; icon: typeof Church }[] = [
   { id: 'prep', label: 'Sunday Prep', icon: Church },
+  { id: 'archive', label: 'Archive', icon: BookOpen },
   { id: 'attendance', label: 'Attendance', icon: UserCheck },
   { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
@@ -73,6 +82,7 @@ export function SundayPage({
 }: SundayPageProps) {
   const initial = useMemo(() => defaultTab ?? parseSundayTab(), [defaultTab]);
   const [tab, setTab] = useState<SundayTab>(initial);
+  const [archiveFilter, setArchiveFilter] = useState<SundayArchiveFilter>(() => parseSundayArchiveFilter());
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const upcomingCount = useMemo(() => {
     const now = new Date();
@@ -107,6 +117,7 @@ export function SundayPage({
 
   const syncTabFromHash = useCallback(() => {
     setTab(parseSundayTab());
+    setArchiveFilter(parseSundayArchiveFilter());
   }, []);
 
   useEffect(() => {
@@ -118,9 +129,25 @@ export function SundayPage({
     };
   }, [syncTabFromHash]);
 
-  const selectTab = (next: SundayTab) => {
+  const selectTab = (next: SundayTab, filter?: SundayArchiveFilter) => {
     setTab(next);
-    window.history.replaceState(null, '', sundayHash(next));
+    if (next === 'archive') {
+      const nextFilter = filter ?? {};
+      setArchiveFilter(nextFilter);
+      window.history.replaceState(null, '', sundayHash(next, nextFilter));
+    } else {
+      setArchiveFilter({});
+      window.history.replaceState(null, '', sundayHash(next));
+    }
+  };
+
+  const browseArchive = (kind: ConnectSubjectKind) => {
+    selectTab('archive', { kind });
+  };
+
+  const clearArchiveFilter = () => {
+    setArchiveFilter({});
+    window.history.replaceState(null, '', sundayHash('archive'));
   };
 
   return (
@@ -136,7 +163,7 @@ export function SundayPage({
                 Sunday Service Tools
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Prep, attendance, announcements & calendar · {upcomingCount} upcoming events
+                Prep, archive, attendance, announcements & calendar · {upcomingCount} upcoming events
               </p>
             </div>
           </div>
@@ -179,8 +206,24 @@ export function SundayPage({
       <div className="flex-1 min-h-0 overflow-y-auto">
         {tab === 'prep' && (
           <div className="p-6 max-w-6xl mx-auto">
-            <SundayPrep embedded people={people} prayers={prayers} onViewPerson={onViewPerson} />
+            <SundayPrep
+              embedded
+              people={people}
+              prayers={prayers}
+              onViewPerson={onViewPerson}
+              onBrowseArchive={browseArchive}
+            />
           </div>
+        )}
+        {tab === 'archive' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <SermonArchive
+              churchId={_churchId}
+              initialKind={archiveFilter.kind}
+              initialFilter={archiveFilter.filter}
+              onClearFilter={clearArchiveFilter}
+            />
+          </Suspense>
         )}
         {tab === 'attendance' && onCheckIn && (
           <Suspense fallback={<ListSkeleton />}>

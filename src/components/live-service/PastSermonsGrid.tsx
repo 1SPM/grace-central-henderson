@@ -4,6 +4,7 @@ import { formatDuration, formatViewCount } from '../../lib/services/liveService'
 
 interface PastSermonsGridProps {
   sermons: WatchSermon[];
+  hideViewAll?: boolean;
 }
 
 function formatDate(iso?: string): string {
@@ -11,15 +12,17 @@ function formatDate(iso?: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function PastSermonsGrid({ sermons }: PastSermonsGridProps) {
+export function PastSermonsGrid({ sermons, hideViewAll = false }: PastSermonsGridProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-dark-100">Past sermons</h2>
-        <button type="button" className="text-sm font-semibold text-red-600 hover:text-red-700">
-          View all
-        </button>
-      </div>
+      {!hideViewAll && (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-100">Past sermons</h2>
+          <button type="button" className="text-sm font-semibold text-red-600 hover:text-red-700">
+            View all
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {sermons.map(sermon => (

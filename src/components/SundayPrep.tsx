@@ -35,6 +35,9 @@ import {
   CuratedNewsItem,
 } from '../lib/services/news';
 import { useAISettings } from '../hooks/useAISettings';
+import { SermonConnectSubjects } from './sunday/SermonConnectSubjects';
+import { SermonVideoReferenceCard } from './sunday/SermonVideoReferenceCard';
+import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
 
 interface SundayPrepProps {
   people: Person[];
@@ -42,6 +45,7 @@ interface SundayPrepProps {
   onViewPerson?: (id: string) => void;
   /** When true, hide hero header (used inside Sunday tab). */
   embedded?: boolean;
+  onBrowseArchive?: (kind: ConnectSubjectKind) => void;
 }
 
 interface SermonSection {
@@ -141,7 +145,7 @@ const sectionTypeConfig = {
   },
 };
 
-export function SundayPrep({ people, prayers, onViewPerson, embedded = false }: SundayPrepProps) {
+export function SundayPrep({ people, prayers, onViewPerson, embedded = false, onBrowseArchive }: SundayPrepProps) {
   const { settings: aiSettings } = useAISettings();
   const [sermonTitle, setSermonTitle] = useState(() =>
     localStorage.getItem('sermon-title') || ''
@@ -231,6 +235,34 @@ export function SundayPrep({ people, prayers, onViewPerson, embedded = false }: 
 
   // Get active prayer requests
   const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 5);
+
+  const addSectionWithContent = (
+    type: SermonSection['type'],
+    title: string,
+    content = '',
+  ) => {
+    const newSection: SermonSection = {
+      id: `section-${Date.now()}`,
+      type,
+      title,
+      content,
+      sourceType: 'manual',
+    };
+    setSections(prev => [...prev, newSection]);
+  };
+
+  const handleConnectTopic = (title: string) => {
+    setSermonTitle(title);
+    addSectionWithContent('point', title);
+  };
+
+  const handleConnectScripture = (ref: string) => {
+    addSectionWithContent('scripture', ref);
+  };
+
+  const handleConnectIllustration = (topic: string) => {
+    addSectionWithContent('illustration', topic);
+  };
 
   // Add item from sidebar to sermon builder
   const addItemAsSection = (item: DragItem) => {
@@ -553,6 +585,15 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
           </div>
         </div>
         )}
+
+        <SermonVideoReferenceCard />
+
+        <SermonConnectSubjects
+          onSelectTopic={handleConnectTopic}
+          onSelectScripture={handleConnectScripture}
+          onSelectIllustration={handleConnectIllustration}
+          onBrowseAll={kind => onBrowseArchive?.(kind)}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Content Sources */}

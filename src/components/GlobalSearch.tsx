@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
-  LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck,
+  LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, BookOpen,
   BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet,
   FileText, Tag, Settings, Smartphone, Mail,
 } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Person, Task, PrayerRequest, View } from '../types';
 import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { sundayHash, type SundayTab } from '../lib/sundayNav';
 
 interface GlobalSearchProps {
   people: Person[];
@@ -28,15 +29,17 @@ type SearchResult = {
   subtitle: string;
   icon: React.ReactNode;
   view?: View;
+  sundayTab?: SundayTab;
 };
 
 // Primary views exposed to the command palette. Lean, not all 52.
-const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode }[] = [
+const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode; sundayTab?: SundayTab }[] = [
   { view: 'dashboard', label: 'Home', subtitle: 'Today, KPIs & next actions', icon: <LayoutDashboard size={16} /> },
   { view: 'leadership', label: 'Leadership', subtitle: 'Pastors, clergy & AI companions', icon: <Crown size={16} /> },
   { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups, mail & birthdays', icon: <ListTodo size={16} /> },
   { view: 'people', label: 'Congregation', subtitle: 'Directory, groups, skills & families', icon: <Users size={16} /> },
-  { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, attendance, announcements & live service', icon: <Church size={16} /> },
+  { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, archive, attendance & announcements', icon: <Church size={16} /> },
+  { view: 'sunday-prep', label: 'Sermon Archive', subtitle: 'Sunday Service Tools · Past messages', icon: <BookOpen size={16} />, sundayTab: 'archive' },
   { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'i2c card program & member usage', icon: <Wallet size={16} /> },
   { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
   { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Crisis dispatch, weddings, funerals & legacy planning', icon: <Heart size={16} /> },
@@ -96,11 +99,12 @@ export function GlobalSearch({
     () =>
       NAV_ITEMS.slice(0, 8).map(item => ({
         type: 'view' as const,
-        id: item.view,
+        id: item.sundayTab ? `sunday-${item.sundayTab}` : item.view,
         title: item.label,
         subtitle: item.subtitle,
         icon: <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>,
         view: item.view,
+        sundayTab: item.sundayTab,
       })),
     []
   );
@@ -144,11 +148,12 @@ export function GlobalSearch({
       if (item.label.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q)) {
         searchResults.push({
           type: 'view',
-          id: item.view,
+          id: item.sundayTab ? `sunday-${item.sundayTab}` : item.view,
           title: item.label,
           subtitle: item.subtitle,
           icon: <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>,
           view: item.view,
+          sundayTab: item.sundayTab,
         });
       }
     });
@@ -210,7 +215,13 @@ export function GlobalSearch({
   const handleSelect = (result: SearchResult) => {
     switch (result.type) {
       case 'view':
-        if (result.view) onNavigate(result.view);
+        if (result.view) {
+          onNavigate(result.view);
+          if (result.sundayTab) {
+            window.history.replaceState(null, '', sundayHash(result.sundayTab));
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          }
+        }
         break;
       case 'person':
         onSelectPerson(result.id);
