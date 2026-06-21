@@ -320,6 +320,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"Let no one despise your youth, but set an example." — 1 Timothy 4:12. Cheering on every young person today!',
     careAssignments: ['Youth check-ins', 'Family transitions', 'College send-off prep'],
+    contactPhone: '(702) 555-0103',
+    contactEmail: 'mrodriguez@centralhenderson.org',
   },
   'ch-leader-thomas-grant': {
     sessions: 31,
@@ -334,6 +336,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"How beautiful are the feet of those who bring good news!" — Romans 10:15.',
     careAssignments: ['Missions intake', 'Volunteer outreach', 'Community partnerships'],
+    contactPhone: '(702) 555-0104',
+    contactEmail: 'tgrant@centralhenderson.org',
   },
   'ch-leader-sarah-chen': {
     sessions: 52,
@@ -348,6 +352,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"She is clothed with strength and dignity; she can laugh at the days to come." — Proverbs 31:25.',
     careAssignments: ["Women's Bible study", 'Grief support group', 'Anxiety & faith workshop'],
+    contactPhone: '(702) 555-0105',
+    contactEmail: 'schen@centralhenderson.org',
   },
   'ch-leader-david-okafor': {
     sessions: 38,
@@ -361,6 +367,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     liveOverride: false,
     todaysBlessing: '"Sing to the Lord a new song; sing to the Lord, all the earth." — Psalm 96:1.',
     careAssignments: ['Worship team care', 'Creative arts mentoring', 'Sunday prep prayer'],
+    contactPhone: '(702) 555-0106',
+    contactEmail: 'dokafor@centralhenderson.org',
   },
   'ch-leader-michael-hayes': {
     sessions: 47,
@@ -375,6 +383,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"Above all, love each other deeply, because love covers over a multitude of sins." — 1 Peter 4:8.',
     careAssignments: ['Marriage counseling queue', 'Pre-marital sessions', 'Family crisis triage'],
+    contactPhone: '(702) 555-0107',
+    contactEmail: 'mhayes@centralhenderson.org',
   },
   'ch-leader-ruth-abramowitz': {
     sessions: 19,
@@ -389,6 +399,8 @@ export const CENTRAL_HENDERSON_LEADER_STATS: Record<string, LeaderHubStats> = {
     todaysBlessing:
       '"The prayer of a righteous person is powerful and effective." — James 5:16. Holding your request before the Lord today.',
     careAssignments: ['Prayer chain', 'GriefShare facilitation', 'Hospital prayer visits'],
+    contactPhone: '(702) 555-0108',
+    contactEmail: 'rabramowitz@centralhenderson.org',
   },
 };
 
@@ -414,6 +426,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Crisis response playbook', 'Grief support resources', '988 & local crisis lines', 'Hospital visitation protocol'],
     boundaries: ['Always share 988 on crisis signals', 'No clinical diagnosis', 'Mandatory live escalation on abuse disclosure'],
     voiceModel: 'Standard pastoral voice — approved 2026-02-01',
+    greeting:
+      "Good morning — I'm Deacon Marcus. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Pastoral Care Director',
+    personality: 'Calm and Empathetic',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-maria-rodriguez': {
     persona:
@@ -421,6 +441,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Youth ministry curriculum', 'Parenting resources', 'Central Youth Apex schedule', 'College transition guide'],
     boundaries: ['Minor safety → mandatory live + log', 'No unsupervised youth contact off-platform', 'Escalate parental conflict to live'],
     voiceModel: 'Youth-friendly voice — approved 2026-01-15',
+    greeting:
+      "Good morning — I'm Sister Maria. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Youth & Family Ministry',
+    personality: 'Energetic and Relatable',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-thomas-grant': {
     persona:
@@ -428,6 +456,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Missions partner list', 'Volunteer opportunity catalog', 'Outreach event calendar', 'Global missions briefing'],
     boundaries: ['No commitment of church funds', 'Refer financial questions to benevolence team'],
     voiceModel: 'Standard pastoral voice',
+    greeting:
+      "Good morning — I'm Elder Thomas. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Missions & Outreach Lead',
+    personality: 'Direct and Practical',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-sarah-chen': {
     persona:
@@ -435,6 +471,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Women\'s ministry resources', 'Anxiety & faith workbook', 'Grief support curriculum', 'LPC scope guidelines'],
     boundaries: ['No clinical diagnosis', 'Crisis → page on-call within 5 min', 'Never replaces licensed therapy for ongoing care'],
     voiceModel: 'Warm counselor voice — approved 2026-02-20',
+    greeting:
+      "Good morning — I'm Pastor Sarah. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: "Women's Ministry",
+    personality: 'Calm and Empathetic',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-david-okafor': {
     persona:
@@ -442,6 +486,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Worship set archive', 'Team roster & schedules', 'Creative arts policy', 'Sunday prep run sheet'],
     boundaries: ['No scheduling changes without team lead approval', 'Technical issues → AV team'],
     voiceModel: 'Expressive worship leader voice',
+    greeting:
+      "Good morning — I'm Deacon David. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Worship & Arts Ministry',
+    personality: 'Friendly and Professional',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-michael-hayes': {
     persona:
@@ -449,6 +501,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Pre-marital curriculum', 'Marriage enrichment course', 'Family systems framework', 'Conflict resolution guide'],
     boundaries: ['No legal advice on divorce', 'Domestic violence → mandatory escalation', 'No couples counseling without both parties aware'],
     voiceModel: 'Calm counselor voice — approved 2026-01-30',
+    greeting:
+      "Good morning — I'm Pastor Michael. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Family & Counseling',
+    personality: 'Warm and Pastoral',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
   'ch-leader-ruth-abramowitz': {
     persona:
@@ -456,6 +516,14 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     knowledgeBase: ['Daily blessing archive', 'Prayer chain roster', 'GriefShare materials', 'Hospital prayer protocol'],
     boundaries: ['Crisis grief → connect to Marcus Collins team', 'No prophecy or predictive statements'],
     voiceModel: 'Gentle elder voice — approved 2026-02-10',
+    greeting:
+      "Good morning — I'm Elder Ruth. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Prayer Ministry Lead',
+    personality: 'Calm and Empathetic',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
 };
 

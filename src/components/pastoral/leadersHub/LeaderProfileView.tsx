@@ -171,6 +171,7 @@ export function LeaderProfileView({
 
         {hasAi && (
           <AICompanionConfig
+            key={leader.id}
             leader={leader}
             embedded
             showHeader={false}
