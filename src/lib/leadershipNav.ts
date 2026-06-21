@@ -3,7 +3,7 @@ import { careHash } from './careNav';
 
 export type LeadershipHubTab = 'team' | 'faq';
 
-export type LeadershipWorkspaceTab = 'team' | 'analytics' | 'manage';
+export type LeadershipWorkspaceTab = 'team' | 'manage';
 
 export type LeadershipProfileTab = 'overview' | 'contact' | 'companion';
 
@@ -22,9 +22,8 @@ export function parseLeadershipHubTab(): LeadershipHubTab {
 
 export function parseLeadershipWorkspaceTab(): LeadershipWorkspaceTab {
   const tab = hashParams().get('tab');
-  if (tab === 'analytics') return 'analytics';
   if (tab === 'manage') return 'manage';
-  if (tab === 'faq') return 'team';
+  if (tab === 'faq' || tab === 'analytics') return 'team';
   return 'team';
 }
 
@@ -34,7 +33,7 @@ export function parseLeadershipLeaderId(): string | null {
 
 export function parseLeadershipProfileTab(): LeadershipProfileTab {
   const tab = hashParams().get('profileTab');
-  if (tab === 'contact') return 'contact';
+  if (tab === 'contact') return 'overview';
   if (tab === 'companion') return 'companion';
   return 'overview';
 }
@@ -76,6 +75,15 @@ export function resolveLegacyLeadershipHash(
       null,
       '',
       leadershipHash('team', 'team', leaderId, 'companion'),
+    );
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    return true;
+  }
+  if (tab === 'analytics') {
+    window.history.replaceState(
+      null,
+      '',
+      leadershipHash('team', 'team', parseLeadershipLeaderId()),
     );
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     return true;

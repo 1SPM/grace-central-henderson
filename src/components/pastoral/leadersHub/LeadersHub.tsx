@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BarChart3, ChevronLeft, Crown, Settings2, Users } from 'lucide-react';
+import { ChevronLeft, Crown, Settings2 } from 'lucide-react';
 import type { LeaderProfile, PastoralSession, Person, View } from '../../../types';
 import type { LeaderOnboardingData } from '../LeaderOnboardingWizard';
 import { LeaderManagement } from '../LeaderManagement';
@@ -16,7 +16,6 @@ import {
 import { countLeadershipBadges } from '../../../hooks/useLeadershipRoster';
 import { LeadersRoster } from './LeadersRoster';
 import { LeaderProfileView } from './LeaderProfileView';
-import { LeaderAnalytics } from './LeaderAnalytics';
 
 export type HubTab = LeadershipWorkspaceTab;
 
@@ -51,7 +50,7 @@ export function LeadersHubContent({
 }: LeadersHubContentProps) {
   const [tab, setTab] = useState<HubTab>(initialTab);
   const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(initialLeaderId);
-  const { data: activity, isLive } = useLeadershipActivity();
+  const { data: activity } = useLeadershipActivity();
 
   const roster = leaders.length > 0 ? leaders : CENTRAL_HENDERSON_LEADERS;
   const fallbackLeaderId =
@@ -102,9 +101,8 @@ export function LeadersHubContent({
   const selectedLeader = selectedLeaderId ? roster.find(l => l.id === selectedLeaderId) : null;
   const badges = countLeadershipBadges(roster);
 
-  const TABS: { id: HubTab; label: string; icon: typeof Users }[] = [
+  const TABS: { id: HubTab; label: string; icon: typeof Crown }[] = [
     { id: 'team', label: 'Team', icon: Crown },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'manage', label: 'Manage', icon: Settings2 },
   ];
 
@@ -200,7 +198,6 @@ export function LeadersHubContent({
         ) : (
           <LeadersRoster leaders={roster} activity={activity} onSelectLeader={selectLeader} />
         ))}
-      {tab === 'analytics' && <LeaderAnalytics leaders={roster} activity={activity} isLive={isLive} />}
     </div>
   );
 }
