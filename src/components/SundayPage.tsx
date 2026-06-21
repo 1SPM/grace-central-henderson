@@ -208,6 +208,7 @@ export function SundayPage({
           <div className="p-6 max-w-6xl mx-auto">
             <SundayPrep
               embedded
+              churchId={_churchId}
               people={people}
               prayers={prayers}
               onViewPerson={onViewPerson}

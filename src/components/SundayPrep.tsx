@@ -38,10 +38,12 @@ import { useAISettings } from '../hooks/useAISettings';
 import { SermonConnectSubjects } from './sunday/SermonConnectSubjects';
 import { SermonVideoGeneratorPanel } from './sunday/SermonVideoGeneratorPanel';
 import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
+import { DEMO_CHURCH_ID } from '../lib/demoLiveServiceData';
 
 interface SundayPrepProps {
   people: Person[];
   prayers: PrayerRequest[];
+  churchId?: string;
   onViewPerson?: (id: string) => void;
   /** When true, hide hero header (used inside Sunday tab). */
   embedded?: boolean;
@@ -145,7 +147,14 @@ const sectionTypeConfig = {
   },
 };
 
-export function SundayPrep({ people, prayers, onViewPerson, embedded = false, onBrowseArchive }: SundayPrepProps) {
+export function SundayPrep({
+  people,
+  prayers,
+  churchId = DEMO_CHURCH_ID,
+  onViewPerson,
+  embedded = false,
+  onBrowseArchive,
+}: SundayPrepProps) {
   const { settings: aiSettings } = useAISettings();
   const [sermonTitle, setSermonTitle] = useState(() =>
     localStorage.getItem('sermon-title') || ''
@@ -586,17 +595,6 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         </div>
         )}
 
-        <div className="space-y-4 no-print">
-          <SermonVideoGeneratorPanel sermonTitle={sermonTitle} sections={sections} />
-
-          <SermonConnectSubjects
-            onSelectTopic={handleConnectTopic}
-            onSelectScripture={handleConnectScripture}
-            onSelectIllustration={handleConnectIllustration}
-            onBrowseAll={kind => onBrowseArchive?.(kind)}
-          />
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Content Sources */}
           <div className="lg:col-span-1 space-y-4 no-print">
@@ -893,6 +891,18 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
               )}
             </div>
           </div>
+        </div>
+
+        <div className="space-y-4 no-print">
+          <SermonVideoGeneratorPanel sermonTitle={sermonTitle} sections={sections} />
+
+          <SermonConnectSubjects
+            churchId={churchId}
+            onSelectTopic={handleConnectTopic}
+            onSelectScripture={handleConnectScripture}
+            onSelectIllustration={handleConnectIllustration}
+            onBrowseAll={kind => onBrowseArchive?.(kind)}
+          />
         </div>
       </div>
 
