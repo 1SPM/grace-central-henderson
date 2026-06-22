@@ -1738,10 +1738,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .mobile-share-open{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#c0392b;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box}
 .mobile-share-open:hover{opacity:.92}
 .mobile-share-note{font-size:12px;color:#888;text-align:center;margin:10px 0 0;line-height:1.45}
-.phone-device{--phone-scale:0.72;width:calc(375px * var(--phone-scale));background:#111;border-radius:36px;padding:10px;box-shadow:0 20px 50px rgba(0,0,0,.22);position:relative;flex-shrink:0}
-.phone-device-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:24px;background:#111;border-radius:0 0 14px 14px;z-index:2;pointer-events:none}
-.phone-device-screen{width:calc(375px * var(--phone-scale));height:calc(812px * var(--phone-scale));border-radius:28px;overflow:hidden;background:#000;position:relative}
-.phone-device-screen iframe{width:375px;height:812px;border:0;transform:scale(var(--phone-scale));transform-origin:top left;display:block;background:#000}
+.phone-preview-img,.mobile-preview-img{width:auto;height:auto;max-width:270px;display:block;filter:drop-shadow(0 20px 50px rgba(0,0,0,.22))}
 .home-grace-route{font-size:11px;color:#888;text-align:center;padding:0 18px 14px;line-height:1.5}
 .home-grace-route strong{color:#1a1a1a}
 .impact-float{
@@ -2945,17 +2942,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
         <div class="mobile-link-split">
           <div class="mobile-link-preview">
-            <div class="phone-device" style="--phone-scale:0.72">
-              <div class="phone-device-notch" aria-hidden="true"></div>
-              <div class="phone-device-screen">
-                <iframe
-                  id="ios-app-embed"
-                  src="/grace_central_henderson_members_card_ios_app.html?embed=1"
-                  title="Central Church Members Card Portal"
-                  allow="clipboard-read; clipboard-write"
-                ></iframe>
-              </div>
-            </div>
+            <img
+              class="mobile-preview-img"
+              src="/previews/assets/Memebers portal cell.png"
+              alt="Central Church Members Card Portal on iPhone"
+              width="270"
+              height="585"
+            />
           </div>
           <div class="mobile-share-panel">
             <div class="mobile-share-block">
@@ -4289,11 +4282,6 @@ const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
 const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
 const IOS_APP_PATH='/grace_central_henderson_members_card_ios_app.html';
 function iosAppUrl(){return window.location.origin+IOS_APP_PATH;}
-function iosAppEmbedUrl(){return iosAppUrl()+'?embed=1';}
-function resetMobileEmbed(){
-  const iframe=document.getElementById('ios-app-embed');
-  if(iframe) iframe.src=iosAppEmbedUrl();
-}
 function initMobileSharePanel(){
   const appUrl=iosAppUrl();
   const urlInput=document.getElementById('mobile-ios-url');
@@ -4317,7 +4305,6 @@ function initMobileSharePanel(){
       });
     });
   }
-  resetMobileEmbed();
 }
 const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
 let watchLiveTimers=[];
