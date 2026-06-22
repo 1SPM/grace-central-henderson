@@ -2232,6 +2232,10 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .device.landing-active .status-battery::after{background:rgba(255,255,255,.55)}
 .device.landing-active .status-battery span{background:#fff}
 .device.landing-active #impact-float{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(120%)}
+html.embed-preview #impact-float,
+html.embed-preview .dash-hero-toast,
+html.embed-preview .home-donate-toast,
+html.embed-preview .watch-donate-toast{display:none!important}
 </style>
 </head>
 <body>
@@ -4623,6 +4627,15 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 <script src="previews/grace-messaging.js"></script>
 <script src="previews/grace-companion.js"></script>
 <script>
+var IS_EMBED_PREVIEW = (function () {
+  try {
+    if (new URLSearchParams(location.search).get('embed') === '1') return true;
+    return window.self !== window.top;
+  } catch (e) {
+    return false;
+  }
+})();
+if (IS_EMBED_PREVIEW) document.documentElement.classList.add('embed-preview');
 const leaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'previews/assets/Pastor-James-Wilson-profile.jpg',profileFrame:'previews/assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · AI Companion',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
@@ -5385,8 +5398,10 @@ function enterApp(mode) {
   if (device) device.classList.remove('landing-active');
   landing.classList.add('is-hidden');
   landing.setAttribute('aria-hidden', 'true');
-  startHomeDonationDemo();
-  startImpactNotificationDemo();
+  if (!IS_EMBED_PREVIEW) {
+    startHomeDonationDemo();
+    startImpactNotificationDemo();
+  }
 }
 
 function showLandingScreen() {
@@ -5438,7 +5453,7 @@ function showScreen(name) {
   closeProfileGoalsSheet();
   closeCrisisSupport();
   closePush(true);
-  if (name === 'home') startHomeDonationDemo();
+  if (name === 'home' && !IS_EMBED_PREVIEW) startHomeDonationDemo();
   else stopHomeDonationDemo();
   if (name !== 'home') dismissImpactFloat();
   if (name !== 'community') closeSocialNotifications();
@@ -7114,7 +7129,7 @@ seedLeaderChat();
 renderImpactNotifications();
 updateImpactBadge();
 initSocialNotifications();
-startSocialNotificationDemo();
+if (!IS_EMBED_PREVIEW) startSocialNotificationDemo();
 hydrateMetrics();
 wireGiveFlow();
 initResHeroSlider();

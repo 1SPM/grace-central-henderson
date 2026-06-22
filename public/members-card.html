@@ -104,7 +104,7 @@
     .qr-wrap img { width: 192px; height: 192px; display: block }
     .share-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.45 }
     .url-row { display: flex; gap: 8px }
-    .url-input { flex: 1; min-width: 0; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; color: var(--muted); font-family: inherit }
+    .url-input { flex: 1; min-width: 0; padding: 10px 12px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 11px; color: var(--muted); font-family: inherit }
     .btn-copy { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap }
     .btn-copy:hover { background: #ebebed }
     .btn-copy.copied { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.25) }
@@ -160,9 +160,8 @@
                   <div class="phone-device-screen">
                     <iframe
                       id="ios-app-embed"
-                      src="/grace_central_henderson_members_card_ios_app.html"
+                      src="/grace_central_henderson_members_card_ios_app.html?embed=1"
                       title="Central Church Members Card Portal"
-                      loading="lazy"
                       allow="clipboard-read; clipboard-write"
                     ></iframe>
                   </div>
@@ -281,6 +280,7 @@
       var copyLabel = document.getElementById('ios-app-copy-label');
 
       urlInput.value = appUrl;
+      urlInput.title = appUrl;
       openLink.href = appUrl;
       qrImg.src =
         'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +

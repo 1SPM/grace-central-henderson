@@ -2950,9 +2950,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="phone-device-screen">
                 <iframe
                   id="ios-app-embed"
-                  src="/grace_central_henderson_members_card_ios_app.html"
+                  src="/grace_central_henderson_members_card_ios_app.html?embed=1"
                   title="Central Church Members Card Portal"
-                  loading="lazy"
                   allow="clipboard-read; clipboard-write"
                 ></iframe>
               </div>
@@ -4290,13 +4289,18 @@ const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
 const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
 const IOS_APP_PATH='/grace_central_henderson_members_card_ios_app.html';
 function iosAppUrl(){return window.location.origin+IOS_APP_PATH;}
+function iosAppEmbedUrl(){return iosAppUrl()+'?embed=1';}
+function resetMobileEmbed(){
+  const iframe=document.getElementById('ios-app-embed');
+  if(iframe) iframe.src=iosAppEmbedUrl();
+}
 function initMobileSharePanel(){
   const appUrl=iosAppUrl();
   const urlInput=document.getElementById('mobile-ios-url');
   const openLink=document.getElementById('mobile-ios-open');
   const qrImg=document.getElementById('mobile-ios-qr');
   const copyBtn=document.getElementById('mobile-ios-copy');
-  if(urlInput)urlInput.value=appUrl;
+  if(urlInput){urlInput.value=appUrl;urlInput.title=appUrl;}
   if(openLink)openLink.href=appUrl;
   if(qrImg)qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=C8102E';
   if(copyBtn&&!copyBtn.dataset.wired){
@@ -4313,6 +4317,7 @@ function initMobileSharePanel(){
       });
     });
   }
+  resetMobileEmbed();
 }
 const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
 let watchLiveTimers=[];
