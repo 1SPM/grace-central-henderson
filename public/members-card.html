@@ -52,44 +52,12 @@
       border: 1px solid var(--border);
       min-height: 320px;
     }
-    .phone-device {
-      --phone-scale: 0.72;
-      width: calc(375px * var(--phone-scale));
-      background: #111;
-      border-radius: 36px;
-      padding: 10px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, .22);
-      position: relative;
-      flex-shrink: 0;
-    }
-    .phone-device-notch {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90px;
-      height: 24px;
-      background: #111;
-      border-radius: 0 0 14px 14px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .phone-device-screen {
-      width: calc(375px * var(--phone-scale));
-      height: calc(812px * var(--phone-scale));
-      border-radius: 28px;
-      overflow: hidden;
-      background: #000;
-      position: relative;
-    }
-    .phone-device-screen iframe {
-      width: 375px;
-      height: 812px;
-      border: 0;
-      transform: scale(var(--phone-scale));
-      transform-origin: top left;
+    .phone-preview-img {
+      width: auto;
+      height: auto;
+      max-width: 270px;
       display: block;
-      background: #000;
+      filter: drop-shadow(0 20px 50px rgba(0, 0, 0, .22));
     }
     .share-panel { display: flex; flex-direction: column; gap: 16px }
     .share-block { background: var(--gray); border: 1px solid var(--border); border-radius: 16px; padding: 20px }
@@ -155,17 +123,13 @@
                 <span class="tag">Central Henderson</span>
               </div>
               <div class="phone-preview">
-                <div class="phone-device" style="--phone-scale:0.72">
-                  <div class="phone-device-notch" aria-hidden="true"></div>
-                  <div class="phone-device-screen">
-                    <iframe
-                      id="ios-app-embed"
-                      src="/grace_central_henderson_members_card_ios_app.html?embed=1"
-                      title="Central Church Members Card Portal"
-                      allow="clipboard-read; clipboard-write"
-                    ></iframe>
-                  </div>
-                </div>
+                <img
+                  class="phone-preview-img"
+                  src="/previews/assets/Memebers portal cell.png"
+                  alt="Central Church Members Card Portal on iPhone"
+                  width="270"
+                  height="585"
+                />
               </div>
             </div>
             <div class="share-panel">
