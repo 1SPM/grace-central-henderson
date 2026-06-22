@@ -5,6 +5,7 @@ import { ThemeProvider } from './ThemeContext';
 import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
 import { handleDemoEntryQuery } from './lib/demoEntry';
+import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import './index.css';
