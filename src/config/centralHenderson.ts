@@ -69,6 +69,16 @@ export const CENTRAL_HENDERSON_DEFAULT_SETTINGS: ChurchSettings = {
   },
 };
 
+/** Applied when a visitor enters the demo via marketing CTAs. */
+export const DEMO_ONBOARDING_SKIP = {
+  wizardCompleted: true,
+  wizardDismissed: true,
+  checklistDismissed: true,
+  tutorialPickerShown: true,
+  graceIntroDismissed: true,
+  completedSteps: ['profile', 'import', 'giving'],
+} as const;
+
 /** Short label for sidebar / compact UI (e.g. "Central Henderson"). */
 export function churchShortName(fullName: string): string {
   if (!fullName) return 'GRACE';

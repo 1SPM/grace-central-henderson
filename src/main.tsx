@@ -4,7 +4,7 @@ import App from './App';
 import { ThemeProvider } from './ThemeContext';
 import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
-import { checkEnvironment } from './utils/envCheck';
+import { handleDemoEntryQuery } from './lib/demoEntry';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import './index.css';
@@ -17,6 +17,7 @@ void initPosthog();
 
 // Surface missing config early instead of failing silently
 checkEnvironment();
+handleDemoEntryQuery();
 
 // Public routes that bypass auth entirely
 const isConnectRoute = window.location.pathname === '/connect';

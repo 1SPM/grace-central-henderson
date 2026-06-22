@@ -7,6 +7,8 @@
  * to keep client + server in sync without a deploy.
  */
 
+import { isDemoModeEnabled, navigateToDemoCrm } from '../../lib/demoEntry';
+
 type PlanGate = {
   financialHub: boolean;
   serverAgents: boolean;
@@ -89,6 +91,8 @@ export function PricingPage({ onStartTrial }: PricingPageProps) {
     }
     if (onStartTrial) {
       onStartTrial(slug);
+    } else if (isDemoModeEnabled) {
+      navigateToDemoCrm();
     } else {
       window.location.assign(`/signup?plan=${slug}`);
     }

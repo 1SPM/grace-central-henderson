@@ -17,8 +17,39 @@
  * don't trust SaaS pitches that sound like SaaS pitches.
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ArrowRight, ChevronDown, Heart, CreditCard, BarChart3, Check } from 'lucide-react';
+import { isDemoModeEnabled, navigateToDemoCrm } from '../../lib/demoEntry';
+
+function DemoCtaLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (isDemoModeEnabled) {
+    return (
+      <a
+        href="#"
+        className={className}
+        onClick={(e) => {
+          e.preventDefault();
+          navigateToDemoCrm();
+        }}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  );
+}
 
 export function LandingPage() {
   return (
@@ -56,13 +87,15 @@ function Header() {
           >
             Talk to sales
           </a>
-          <a href="/sign-in" className="text-sm text-gray-700 hover:text-gray-900">Sign in</a>
-          <a
+          <DemoCtaLink href="/sign-in" className="text-sm text-gray-700 hover:text-gray-900">
+            Sign in
+          </DemoCtaLink>
+          <DemoCtaLink
             href="/signup"
             className="px-4 py-1.5 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700"
           >
             Start trial
-          </a>
+          </DemoCtaLink>
         </div>
       </div>
     </nav>
@@ -84,12 +117,12 @@ function Hero() {
         and a financial dashboard that turns the conversation with your CFO into a five-minute meeting.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-        <a
+        <DemoCtaLink
           href="/signup?plan=pro"
           className="px-6 py-3 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 flex items-center gap-2"
         >
           Start free 14-day trial <ArrowRight size={16} />
-        </a>
+        </DemoCtaLink>
         <a
           href="/pricing"
           className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-white"
@@ -189,7 +222,7 @@ function PricingTeaser() {
             <div className="text-sm text-gray-500">{t.name}</div>
             <div className="text-3xl font-light text-gray-900 my-1">${t.price}<span className="text-base text-gray-500">/mo</span></div>
             <div className="text-xs text-gray-600 mb-4 min-h-[2.5rem]">{t.blurb}</div>
-            <a
+            <DemoCtaLink
               href={`/signup?plan=${t.name.toLowerCase()}`}
               className={[
                 'block text-center py-2 rounded-lg text-sm font-medium',
@@ -197,7 +230,7 @@ function PricingTeaser() {
               ].join(' ')}
             >
               Start free trial
-            </a>
+            </DemoCtaLink>
           </div>
         ))}
       </div>
@@ -319,8 +352,8 @@ function Footer() {
             <h4 className="text-xs uppercase tracking-wide text-gray-500 mb-3">Product</h4>
             <ul className="space-y-2 text-sm">
               <li><a href="/pricing" className="text-gray-700 hover:text-gray-900">Pricing</a></li>
-              <li><a href="/signup" className="text-gray-700 hover:text-gray-900">Start trial</a></li>
-              <li><a href="/sign-in" className="text-gray-700 hover:text-gray-900">Sign in</a></li>
+              <li><DemoCtaLink href="/signup" className="text-gray-700 hover:text-gray-900">Start trial</DemoCtaLink></li>
+              <li><DemoCtaLink href="/sign-in" className="text-gray-700 hover:text-gray-900">Sign in</DemoCtaLink></li>
             </ul>
           </div>
           <div>
