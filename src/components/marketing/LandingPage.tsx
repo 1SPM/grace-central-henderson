@@ -1,151 +1,95 @@
 /**
- * Public landing page at /. The front door for prospects.
- *
- * Replaces the Clerk-only sign-in page that previously greeted
- * unauthed visitors. The pitch lands BEFORE the auth gate.
- *
- * Structure:
- *   Hero        — headline + subhead + primary CTA + secondary CTA
- *   Trust row   — small social-proof line (placeholder until pilots)
- *   Features    — three pillars: AI care, Impact Campaigns, card program
- *   Plan teaser — three pricing tiles → /pricing
- *   How it works — three-step "what changes for your church"
- *   FAQ         — three most common questions
- *   Footer      — sign in + support links
- *
- * Brand voice: warm, plain-English, never marketing-jargon. Pastors
- * don't trust SaaS pitches that sound like SaaS pitches.
+ * Public landing page at /. Central Henderson brand — Poppins body,
+ * Montserrat/Gotham display, central-red accents, member-portal mockup.
  */
 
-import { useState, type ReactNode } from 'react';
-import { ArrowRight, ChevronDown, Heart, CreditCard, BarChart3, Check } from 'lucide-react';
-import { isDemoModeEnabled, navigateToDemoCrm } from '../../lib/demoEntry';
+import { useState } from 'react';
+import { ArrowRight, ChevronDown, Heart, CreditCard, BarChart3 } from 'lucide-react';
+import { DemoCtaLink } from './DemoCtaLink';
+import { MarketingShell } from './MarketingShell';
+import { MarketingHeader } from './MarketingHeader';
+import { MarketingFooter } from './MarketingFooter';
 
-function DemoCtaLink({
-  href,
-  className,
-  children,
-}: {
-  href: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  if (isDemoModeEnabled) {
-    return (
-      <a
-        href="#"
-        className={className}
-        onClick={(e) => {
-          e.preventDefault();
-          navigateToDemoCrm();
-        }}
-      >
-        {children}
-      </a>
-    );
-  }
-  return (
-    <a href={href} className={className}>
-      {children}
-    </a>
-  );
-}
+const MEMBER_PORTAL_MOCKUP = '/previews/assets/Memebers portal cell.png';
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-amber-50">
-      <Header />
+    <MarketingShell>
+      <MarketingHeader />
       <Hero />
       <TrustRow />
       <Features />
       <PricingTeaser />
       <HowItWorks />
       <Faq />
-      <Footer />
-    </div>
-  );
-}
-
-function Header() {
-  return (
-    <nav className="border-b border-amber-100 bg-white/80 backdrop-blur sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2 font-medium text-gray-900">
-          <span
-            className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 text-white text-sm font-bold flex items-center justify-center"
-            aria-hidden
-          >
-            G
-          </span>
-          <span style={{ fontFamily: 'Fraunces, serif' }}>GRACE</span>
-        </a>
-        <div className="flex items-center gap-2 sm:gap-6">
-          <a href="/pricing" className="text-sm text-gray-700 hover:text-gray-900">Pricing</a>
-          <a
-            href="mailto:sales@grace-crm.app?subject=GRACE demo request"
-            className="text-sm text-gray-700 hover:text-gray-900 hidden sm:inline"
-          >
-            Talk to sales
-          </a>
-          <DemoCtaLink href="/sign-in" className="text-sm text-gray-700 hover:text-gray-900">
-            Sign in
-          </DemoCtaLink>
-          <DemoCtaLink
-            href="/signup"
-            className="px-4 py-1.5 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700"
-          >
-            Start trial
-          </DemoCtaLink>
-        </div>
-      </div>
-    </nav>
+      <MarketingFooter />
+    </MarketingShell>
   );
 }
 
 function Hero() {
   return (
-    <section className="max-w-5xl mx-auto px-4 pt-16 sm:pt-24 pb-12 text-center">
-      <h1
-        className="text-4xl sm:text-6xl font-light text-gray-900 leading-tight mb-6"
-        style={{ fontFamily: 'Fraunces, serif' }}
-      >
-        Spend Sunday with your people.<br />
-        Let GRACE handle the rest.
-      </h1>
-      <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-        An AI-powered platform for churches — CRM, online giving, member care automation,
-        and a financial dashboard that turns the conversation with your CFO into a five-minute meeting.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-        <DemoCtaLink
-          href="/signup?plan=pro"
-          className="px-6 py-3 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 flex items-center gap-2"
-        >
-          Start free 14-day trial <ArrowRight size={16} />
-        </DemoCtaLink>
-        <a
-          href="/pricing"
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-white"
-        >
-          See pricing
-        </a>
+    <section className="central-container central-section pt-8 sm:pt-12 lg:pt-16">
+      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="text-center lg:text-left">
+          <h1 className="font-brand text-4xl sm:text-5xl lg:text-7xl font-bold text-central-black leading-[1.08] mb-6 marketing-reveal tracking-tight">
+            Spend Sunday with your people.
+            <br />
+            Let GRACE handle the rest.
+          </h1>
+          <p className="text-lg sm:text-xl text-central-grey max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed marketing-reveal marketing-reveal-delay-1 font-web">
+            An AI-powered platform for churches — CRM, online giving, member care automation,
+            and a financial dashboard that turns the conversation with your CFO into a five-minute meeting.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center marketing-reveal marketing-reveal-delay-2">
+            <DemoCtaLink href="/signup?plan=pro" className="central-btn-primary">
+              Start free 14-day trial <ArrowRight size={16} />
+            </DemoCtaLink>
+            <a href="/pricing" className="central-btn-secondary">
+              See pricing
+            </a>
+          </div>
+          <p className="text-sm text-central-grey mt-4 marketing-reveal marketing-reveal-delay-3 font-web">
+            No credit card required to start. Cancel anytime from your billing portal.
+          </p>
+        </div>
+
+        <div className="relative flex justify-center lg:justify-end marketing-reveal marketing-reveal-delay-4">
+          <div className="marketing-hero-glow" aria-hidden />
+          <div className="relative rotate-1 hover:rotate-0 transition-transform duration-500">
+            <div
+              className="p-3 sm:p-4 shadow-premium-lg border border-central-line bg-central-white"
+              style={{ borderRadius: 'var(--radius-card)' }}
+            >
+              <img
+                src={MEMBER_PORTAL_MOCKUP}
+                alt="GRACE Members Card Portal on iPhone — giving, care, and community at Central Henderson"
+                className="w-auto h-auto max-w-[270px] sm:max-w-[300px] block"
+                style={{ borderRadius: 'calc(var(--radius-card) - 2px)' }}
+                width={300}
+                height={650}
+                loading="eager"
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-gray-500 mt-4">
-        No credit card required to start. Cancel anytime from your billing portal.
-      </p>
+      <div className="mt-16 border-b border-central-line" aria-hidden />
     </section>
   );
 }
 
 function TrustRow() {
   return (
-    <section className="max-w-4xl mx-auto px-4 py-8 text-center">
-      <p className="text-sm uppercase tracking-wide text-gray-500 mb-3">
-        Built for the way ministry actually works
-      </p>
-      <p className="text-base text-gray-700 max-w-2xl mx-auto">
-        Designed alongside Central Henderson Church — not engineered in isolation from a Silicon Valley office.
-      </p>
+    <section className="bg-central-canvas border-y border-central-line py-12 sm:py-14">
+      <div className="central-container">
+        <p className="text-xs uppercase tracking-[0.2em] text-central-grey mb-4 font-brand font-semibold">
+          Built for the way ministry actually works
+        </p>
+        <blockquote className="marketing-pull-quote text-xl sm:text-2xl text-central-black leading-relaxed max-w-3xl font-web">
+          Designed alongside Central Henderson Church — not engineered in isolation from a Silicon Valley office.
+        </blockquote>
+      </div>
     </section>
   );
 }
@@ -153,42 +97,57 @@ function TrustRow() {
 function Features() {
   const features = [
     {
-      icon: <Heart className="w-6 h-6 text-amber-600" />,
+      icon: <Heart className="w-8 h-8 text-central-red" strokeWidth={1.5} />,
       title: 'AI care agents that never sleep',
       copy:
-        'Three agents quietly scan your church every morning. They flag the member who hasn\'t been to service in 30 days, the donor whose pattern just changed, the event next week with no leader assigned. The pastor sees the list. The platform doesn\'t pretend to do the visit.',
+        "Three agents quietly scan your church every morning. They flag the member who hasn't been to service in 30 days, the donor whose pattern just changed, the event next week with no leader assigned. The pastor sees the list. The platform doesn't pretend to do the visit.",
+      reverse: false,
     },
     {
-      icon: <CreditCard className="w-6 h-6 text-amber-600" />,
+      icon: <CreditCard className="w-8 h-8 text-central-red" strokeWidth={1.5} />,
       title: 'Banking as ministry',
       copy:
         'On Enterprise, members can carry a church-branded debit or credit card. Every grocery run, every tank of gas, every Amazon order generates interchange revenue that flows back to the church. The math is real: $40k–$200k per 1,000 members per year.',
+      reverse: true,
     },
     {
-      icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
+      icon: <BarChart3 className="w-8 h-8 text-central-red" strokeWidth={1.5} />,
       title: 'Impact Campaigns your CFO can read',
       copy:
         'Real-time interchange. MTD and YTD giving. Funds split by designation. Top givers with engagement signals. Append-only ledger that an auditor can trust. Zero spreadsheets.',
+      reverse: false,
     },
   ];
 
   return (
-    <section className="max-w-5xl mx-auto px-4 py-16">
-      <h2
-        className="text-3xl sm:text-4xl font-light text-gray-900 text-center mb-12"
-        style={{ fontFamily: 'Fraunces, serif' }}
-      >
-        Three platforms most churches use. One that's actually integrated.
+    <section className="central-container central-section">
+      <h2 className="font-brand text-3xl sm:text-4xl lg:text-5xl font-bold text-central-black mb-14 max-w-2xl leading-tight tracking-tight">
+        Three platforms most churches use. One that&apos;s actually integrated.
       </h2>
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="space-y-10 sm:space-y-14">
         {features.map((f) => (
-          <div key={f.title} className="bg-white rounded-2xl border border-gray-200 p-6">
-            <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
-              {f.icon}
+          <article
+            key={f.title}
+            className="grid md:grid-cols-2 gap-8 md:gap-12 items-center central-card p-6 sm:p-8"
+          >
+            <div className={f.reverse ? 'md:order-2' : 'md:order-1'}>
+              <h3 className="font-brand text-xl sm:text-2xl font-bold text-central-black mb-3">{f.title}</h3>
+              <p className="text-central-grey leading-relaxed font-web">{f.copy}</p>
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">{f.title}</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">{f.copy}</p>
-          </div>
+            <div
+              className={[
+                'flex items-center justify-center min-h-[140px] rounded-[var(--radius-card)] bg-central-canvas border border-central-line',
+                f.reverse ? 'md:order-1' : 'md:order-2',
+              ].join(' ')}
+            >
+              <div
+                className="w-16 h-16 flex items-center justify-center"
+                style={{ borderRadius: 'var(--radius-card)', background: 'var(--central-red-soft)' }}
+              >
+                {f.icon}
+              </div>
+            </div>
+          </article>
         ))}
       </div>
     </section>
@@ -201,41 +160,47 @@ function PricingTeaser() {
     { name: 'Pro', price: 199, blurb: 'Adds Impact Campaigns + AI care agents', highlight: true },
     { name: 'Enterprise', price: 499, blurb: 'Adds card program + custom domain' },
   ];
+
   return (
-    <section className="max-w-5xl mx-auto px-4 py-16">
-      <h2
-        className="text-3xl sm:text-4xl font-light text-gray-900 text-center mb-3"
-        style={{ fontFamily: 'Fraunces, serif' }}
-      >
+    <section className="central-container central-section">
+      <h2 className="font-brand text-3xl sm:text-4xl font-bold text-central-black mb-3 text-center tracking-tight">
         Pricing built for ministry, not enterprise.
       </h2>
-      <p className="text-center text-gray-600 mb-10">14-day free trial on every plan.</p>
-      <div className="grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      <p className="text-center text-central-grey mb-10 font-web">14-day free trial on every plan.</p>
+      <div className="grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto items-end">
         {tiers.map((t) => (
           <div
             key={t.name}
             className={[
-              'rounded-xl p-6 bg-white border',
-              t.highlight ? 'border-amber-400 shadow-md' : 'border-gray-200',
+              'central-card p-6 flex flex-col',
+              t.highlight ? 'shadow-premium-lg sm:-mt-2 sm:pb-8 relative overflow-hidden border-central-red' : '',
             ].join(' ')}
           >
-            <div className="text-sm text-gray-500">{t.name}</div>
-            <div className="text-3xl font-light text-gray-900 my-1">${t.price}<span className="text-base text-gray-500">/mo</span></div>
-            <div className="text-xs text-gray-600 mb-4 min-h-[2.5rem]">{t.blurb}</div>
+            {t.highlight && (
+              <>
+                <div className="absolute top-0 left-0 right-0 h-1 bg-central-red" aria-hidden />
+                <span className="text-xs font-brand font-semibold text-central-red uppercase tracking-wide mb-2">
+                  Most churches start here
+                </span>
+              </>
+            )}
+            <div className="text-sm text-central-grey font-web">{t.name}</div>
+            <div className="font-brand text-3xl font-bold text-central-black my-1">
+              ${t.price}
+              <span className="text-base text-central-grey font-web font-normal">/mo</span>
+            </div>
+            <div className="text-sm text-central-grey mb-4 min-h-[2.5rem] flex-grow font-web">{t.blurb}</div>
             <DemoCtaLink
               href={`/signup?plan=${t.name.toLowerCase()}`}
-              className={[
-                'block text-center py-2 rounded-lg text-sm font-medium',
-                t.highlight ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-              ].join(' ')}
+              className={t.highlight ? 'central-btn-primary block text-center !w-full' : 'central-btn-secondary block text-center !w-full'}
             >
               Start free trial
             </DemoCtaLink>
           </div>
         ))}
       </div>
-      <p className="text-center mt-6">
-        <a href="/pricing" className="text-amber-700 hover:text-amber-900 text-sm font-medium">
+      <p className="text-center mt-8">
+        <a href="/pricing" className="text-central-red hover:opacity-80 text-sm font-semibold font-web transition-opacity duration-[180ms]">
           See full plan comparison →
         </a>
       </p>
@@ -261,24 +226,25 @@ function HowItWorks() {
       copy: 'Member care, stewardship, and operations agents run daily. Each morning your team gets a focused list of three to ten things that need a human.',
     },
   ];
+
   return (
-    <section className="max-w-5xl mx-auto px-4 py-16">
-      <h2
-        className="text-3xl sm:text-4xl font-light text-gray-900 text-center mb-12"
-        style={{ fontFamily: 'Fraunces, serif' }}
-      >
+    <section className="central-container central-section">
+      <h2 className="font-brand text-3xl sm:text-4xl font-bold text-central-black text-center mb-14 tracking-tight">
         Onboarding takes 15 minutes.
       </h2>
-      <div className="grid md:grid-cols-3 gap-8">
-        {steps.map((s) => (
-          <div key={s.n} className="text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-amber-100 text-amber-800 text-xl font-medium flex items-center justify-center mb-4">
-              {s.n}
+      <div className="relative">
+        <div className="marketing-timeline-line hidden md:block" aria-hidden />
+        <div className="grid md:grid-cols-3 gap-10 md:gap-8">
+          {steps.map((s) => (
+            <div key={s.n} className="text-center relative">
+              <div className="w-12 h-12 mx-auto rounded-full border-2 border-central-red text-central-red text-lg font-brand font-bold flex items-center justify-center mb-4 bg-central-white">
+                {s.n}
+              </div>
+              <h3 className="font-brand text-lg font-bold text-central-black mb-2">{s.title}</h3>
+              <p className="text-sm text-central-grey leading-relaxed font-web">{s.copy}</p>
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">{s.title}</h3>
-            <p className="text-sm text-gray-600">{s.copy}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -292,23 +258,23 @@ function Faq() {
     },
     {
       q: 'How do you compare to Planning Center / Breeze / ChurchTrac?',
-      a: 'Those products are excellent CRMs. GRACE adds the financial layer they don\'t: real-time giving dashboard, AI care agents, and the member card program. We accept CSV imports from each of them.',
+      a: "Those products are excellent CRMs. GRACE adds the financial layer they don't: real-time giving dashboard, AI care agents, and the member card program. We accept CSV imports from each of them.",
     },
     {
       q: 'What about data ownership and exit?',
       a: 'Your data is yours. Our standard DPA gives you 90 days of read access after cancellation, and CSV export is available at any time from Settings → Data.',
     },
   ];
+
   return (
-    <section className="max-w-3xl mx-auto px-4 py-16">
-      <h2
-        className="text-3xl sm:text-4xl font-light text-gray-900 text-center mb-12"
-        style={{ fontFamily: 'Fraunces, serif' }}
-      >
+    <section className="central-container central-section max-w-3xl">
+      <h2 className="font-brand text-3xl sm:text-4xl font-bold text-central-black text-center mb-12 tracking-tight">
         Common questions
       </h2>
       <div className="space-y-3">
-        {items.map((item) => <FaqItem key={item.q} {...item} />)}
+        {items.map((item) => (
+          <FaqItem key={item.q} {...item} />
+        ))}
       </div>
     </section>
   );
@@ -317,63 +283,23 @@ function Faq() {
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className={['central-card overflow-hidden transition-colors', open ? 'bg-central-canvas' : ''].join(' ')}>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full px-5 py-4 text-left flex items-center justify-between hover:bg-gray-50"
+        className="w-full px-5 py-4 text-left flex items-center justify-between hover:bg-central-canvas/60 transition-[background] duration-[180ms] font-web"
       >
-        <span className="font-medium text-gray-900">{q}</span>
+        <span className="font-semibold text-central-black pr-4">{q}</span>
         <ChevronDown
           size={18}
-          className={['text-gray-500 transition-transform', open ? 'rotate-180' : ''].join(' ')}
+          className={['text-central-grey transition-transform flex-shrink-0', open ? 'rotate-180' : ''].join(' ')}
         />
       </button>
-      {open && <div className="px-5 pb-4 text-sm text-gray-700">{a}</div>}
+      {open && (
+        <div className="px-5 pb-4 text-sm text-central-black/80 leading-relaxed border-t border-central-line pt-3 font-web">
+          {a}
+        </div>
+      )}
     </div>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-amber-100 bg-white/60 backdrop-blur mt-8">
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <div className="grid sm:grid-cols-4 gap-8 mb-8">
-          <div className="sm:col-span-2">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-7 h-7 rounded-md bg-gradient-to-br from-amber-500 to-amber-700 text-white text-xs font-bold flex items-center justify-center">G</span>
-              <span className="font-medium" style={{ fontFamily: 'Fraunces, serif' }}>GRACE</span>
-            </div>
-            <p className="text-sm text-gray-600 max-w-sm">
-              The platform for churches that want to spend less time on paperwork
-              and more time with their people.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-xs uppercase tracking-wide text-gray-500 mb-3">Product</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="/pricing" className="text-gray-700 hover:text-gray-900">Pricing</a></li>
-              <li><DemoCtaLink href="/signup" className="text-gray-700 hover:text-gray-900">Start trial</DemoCtaLink></li>
-              <li><DemoCtaLink href="/sign-in" className="text-gray-700 hover:text-gray-900">Sign in</DemoCtaLink></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-xs uppercase tracking-wide text-gray-500 mb-3">Company</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="mailto:support@grace-crm.app" className="text-gray-700 hover:text-gray-900">Support</a></li>
-              <li><a href="mailto:sales@grace-crm.app" className="text-gray-700 hover:text-gray-900">Sales</a></li>
-              <li><a href="/terms" className="text-gray-700 hover:text-gray-900">Terms</a></li>
-              <li><a href="/privacy" className="text-gray-700 hover:text-gray-900">Privacy</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="pt-6 border-t border-amber-100 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-          <span>© {new Date().getFullYear()} Virtual Worship Solutions Inc.</span>
-          <span className="flex items-center gap-1">
-            <Check size={12} className="text-green-600" />
-            SOC 2 Type II in progress · GDPR DPA available on request
-          </span>
-        </div>
-      </div>
-    </footer>
   );
 }

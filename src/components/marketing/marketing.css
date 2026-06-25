@@ -1,0 +1,186 @@
+/* Central Henderson marketing surface */
+
+.marketing-page {
+  position: relative;
+  min-height: 100dvh;
+  background-color: var(--central-canvas);
+  color: var(--central-black);
+  font-family: var(--font-web);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 70% 0%, rgba(238, 43, 55, 0.06), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 100%, rgba(0, 0, 0, 0.03), transparent 50%);
+}
+
+.marketing-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.25;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+
+.marketing-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
+}
+
+.font-web {
+  font-family: var(--font-web);
+}
+
+.central-container {
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.central-section {
+  padding-top: var(--section-padding-mobile);
+  padding-bottom: var(--section-padding-mobile);
+}
+
+@media (min-width: 768px) {
+  .central-section {
+    padding-top: var(--section-padding-tablet);
+    padding-bottom: var(--section-padding-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .central-section {
+    padding-top: var(--section-padding-desktop);
+    padding-bottom: var(--section-padding-desktop);
+  }
+}
+
+.central-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--central-red);
+  color: var(--central-white);
+  border-radius: var(--radius-button);
+  font-family: var(--font-web);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(238, 43, 55, 0.15);
+}
+
+.central-btn-primary:hover {
+  background: var(--central-red-hover);
+}
+
+.central-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--central-white);
+  color: var(--central-black);
+  border: 1px solid var(--central-line);
+  border-radius: var(--radius-button);
+  font-family: var(--font-web);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.central-btn-secondary:hover {
+  background: var(--central-canvas);
+  border-color: var(--central-grey);
+}
+
+.central-card {
+  background: var(--central-card);
+  border: 1px solid var(--central-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.marketing-reveal {
+  animation: marketingFadeUp 0.7s ease-out both;
+}
+
+.marketing-reveal-delay-1 { animation-delay: 100ms; }
+.marketing-reveal-delay-2 { animation-delay: 200ms; }
+.marketing-reveal-delay-3 { animation-delay: 300ms; }
+.marketing-reveal-delay-4 { animation-delay: 400ms; }
+.marketing-reveal-delay-5 { animation-delay: 500ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-reveal,
+  .marketing-reveal-delay-1,
+  .marketing-reveal-delay-2,
+  .marketing-reveal-delay-3,
+  .marketing-reveal-delay-4,
+  .marketing-reveal-delay-5 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .central-btn-primary,
+  .central-btn-secondary {
+    transition: none;
+  }
+}
+
+@keyframes marketingFadeUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.marketing-hero-glow {
+  position: absolute;
+  inset: -20% -10% -10% -10%;
+  background: radial-gradient(ellipse 55% 45% at 60% 40%, rgba(238, 43, 55, 0.12), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.marketing-pull-quote::before {
+  content: '\201C';
+  display: block;
+  font-family: var(--font-brand);
+  font-size: 3.5rem;
+  line-height: 1;
+  color: rgba(238, 43, 55, 0.25);
+  margin-bottom: -0.5rem;
+}
+
+.marketing-timeline-line {
+  position: absolute;
+  top: 1.5rem;
+  left: calc(16.666% + 1.5rem);
+  right: calc(16.666% + 1.5rem);
+  height: 1px;
+  background: var(--central-line);
+}
+
+@media (max-width: 767px) {
+  .marketing-timeline-line {
+    display: none;
+  }
+}
+
+.text-central-grey {
+  color: var(--central-grey);
+}
+
+.text-central-red {
+  color: var(--central-red);
+}

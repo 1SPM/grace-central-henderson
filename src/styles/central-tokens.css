@@ -1,0 +1,46 @@
+/* Central Henderson brand tokens — shared across marketing, CRM, and member portal */
+
+:root {
+  /* Brand Colors */
+  --central-red: #EE2B37;
+  --central-red-hover: #d42530;
+  --central-black: #000000;
+  --central-white: #FFFFFF;
+  --central-grey: #A7A9AC;
+  --central-canvas: #f6f6f6;
+  --central-card: #ffffff;
+  --central-line: #e8e8e8;
+  --central-red-soft: #fff0f1;
+
+  /* Typography */
+  --font-brand: "Gotham", "Montserrat", "Arial", sans-serif;
+  --font-web: "Poppins", "Arial", sans-serif;
+
+  /* Layout */
+  --container-max: 1180px;
+  --section-padding-desktop: 96px;
+  --section-padding-tablet: 72px;
+  --section-padding-mobile: 48px;
+
+  /* Radius */
+  --radius-button: 999px;
+  --radius-card: 16px;
+
+  /* Motion */
+  --transition-fast: 180ms ease;
+
+  /* Legacy aliases (previews + iOS app) */
+  --font-body: var(--font-web);
+  --font-heading: var(--font-brand);
+  --accent: var(--central-red);
+  --text: var(--central-black);
+  --bg: var(--central-white);
+  --bg-muted: #f4f4f4;
+  --bg-dark: var(--central-black);
+  --text-on-dark: var(--central-white);
+  --accent-soft: var(--central-red-soft);
+  --border: var(--central-line);
+  --brand-accent: var(--central-red);
+  --brand-dark: var(--central-black);
+  --brand-soft: var(--central-red-soft);
+}
