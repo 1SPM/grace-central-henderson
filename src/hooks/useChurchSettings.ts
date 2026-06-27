@@ -96,7 +96,11 @@ function applyDemoOnboardingIfEntered(settings: ChurchSettings): ChurchSettings 
   if (!isDemoModeEnabled || !hasEnteredDemo()) return settings;
   return {
     ...settings,
-    onboarding: { ...settings.onboarding!, ...DEMO_ONBOARDING_SKIP },
+    onboarding: {
+      ...(settings.onboarding ?? {}),
+      ...DEMO_ONBOARDING_SKIP,
+      completedSteps: [...DEMO_ONBOARDING_SKIP.completedSteps],
+    },
   };
 }
 

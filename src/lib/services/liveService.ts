@@ -4,8 +4,8 @@
 
 import { supabase, isSupabaseConfigured } from '../supabase';
 import { createLogger } from '../../utils/logger';
-import type { ServiceTime } from '../hooks/useChurchSettings';
-import type { ZonedTimeParts } from '../hooks/useChurchClock';
+import type { ServiceTime } from '../../hooks/useChurchSettings';
+import type { ZonedTimeParts } from '../../hooks/useChurchClock';
 import type { MemberActivityEvent, WatchChatMessageRow, WatchSermonRow } from '../database.types';
 import {
   cloneDemoSermons,

@@ -11,7 +11,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
-    :root { --red: #C8102E; --gray: #f5f5f7; --white: #fff; --border: #e5e5ea; --text: #1d1d1f; --muted: #6e6e73; font-family: -apple-system, BlinkMacSystemFont, sans-serif }
+    :root { --red: #C8102E; --red-dark: #9f0d25; --gray: #f5f5f7; --white: #fff; --border: #e5e5ea; --text: #1d1d1f; --muted: #6e6e73; --focus: rgba(200,16,46,.34); --touch: 44px; font-family: -apple-system, BlinkMacSystemFont, sans-serif }
     body { background: var(--gray); color: var(--text); min-height: 100dvh }
     .hub-header { background: var(--white); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100 }
     .hub-logo { width: 40px; height: 40px; background: var(--red); border-radius: 10px; display: flex; align-items: center; justify-content: center }
@@ -23,6 +23,8 @@
     .hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); margin-bottom: 8px }
     .hero h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px }
     .hero p { font-size: 15px; color: var(--muted); line-height: 1.5 }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px }
+    .btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch); padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--white); color: var(--text); font-size: 14px; font-weight: 650; text-decoration: none }
     .cards { display: grid; gap: 16px }
     .card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); overflow: hidden }
     .card-body { padding: 24px 24px 20px }
@@ -32,8 +34,8 @@
     .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0 }
     .tag { font-size: 11px; background: var(--gray); border-radius: 20px; padding: 4px 10px; border: 1px solid var(--border) }
     .card-footer { padding: 0 24px 20px }
-    .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--red); color: #fff; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer }
-    .btn-primary:hover { opacity: .85 }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--touch); background: var(--red); color: #fff; font-size: 14px; font-weight: 650; padding: 10px 20px; border-radius: 12px; text-decoration: none; border: none; cursor: pointer; transition: background .16s ease, transform .16s ease, box-shadow .16s ease }
+    .btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(200,16,46,.2) }
     .card-featured .card-body { padding-bottom: 24px }
     .card-split { display: grid; gap: 24px }
     @media (min-width: 768px) {
@@ -71,13 +73,16 @@
     .qr-wrap { display: flex; justify-content: center; padding: 16px; background: var(--white); border-radius: 12px; border: 1px solid var(--border) }
     .qr-wrap img { width: 192px; height: 192px; display: block }
     .share-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.45 }
-    .url-row { display: flex; gap: 8px }
-    .url-input { flex: 1; min-width: 0; padding: 10px 12px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 11px; color: var(--muted); font-family: inherit }
-    .btn-copy { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap }
+    .url-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: stretch }
+    .url-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap }
+    .app-link-preview { min-width: 0; min-height: var(--touch); padding: 9px 12px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; gap: 1px }
+    .app-link-domain { font-size: 12px; font-weight: 700; color: var(--text); overflow-wrap: anywhere }
+    .app-link-path { font-size: 11px; color: var(--muted); line-height: 1.25; overflow-wrap: anywhere }
+    .btn-copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--touch); padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 650; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap }
     .btn-copy:hover { background: #ebebed }
     .btn-copy.copied { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.25) }
-    .btn-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; padding: 10px 16px; background: var(--red); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 600; text-decoration: none }
-    .btn-open:hover { opacity: .9 }
+    .btn-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: var(--touch); margin-top: 12px; padding: 10px 16px; background: var(--red); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 650; text-decoration: none; transition: background .16s ease, transform .16s ease, box-shadow .16s ease }
+    .btn-open:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(200,16,46,.2) }
     .share-note { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); line-height: 1.5 }
     .pillars { margin-bottom: 40px }
     .pillars-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 16px }
@@ -86,9 +91,33 @@
     .pillar-icon { font-size: 22px; margin-bottom: 6px }
     .pillar-name { font-size: 12px; font-weight: 700 }
     .pillar-desc { font-size: 10px; color: var(--muted) }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; box-shadow: 0 0 0 1px var(--red) }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important }
+    }
+    @media (max-width: 767px) {
+      .card-split { grid-template-columns: 1fr }
+      .phone-preview { min-height: 240px }
+      .phone-preview-img { max-width: 220px }
+    }
     @media (max-width: 640px) {
+      .hub-header { padding: 16px 18px; align-items: flex-start }
+      .hub-brand h1 { font-size: 16px }
+      .hub-brand p { font-size: 12px }
+      main { padding: 28px 16px 44px }
+      .hero { margin-bottom: 28px }
+      .hero h2 { font-size: 25px }
+      .hero-actions, .card-footer { display: grid }
+      .btn-primary, .btn-secondary { width: 100% }
+      .card-body { padding: 20px 18px 18px }
+      .card-footer { padding: 0 18px 18px }
       .pillars-grid { grid-template-columns: repeat(2, 1fr) }
-      .url-row { flex-direction: column }
+      .url-row { grid-template-columns: 1fr }
+      .btn-copy { width: 100% }
+    }
+    @media (max-width: 380px) {
+      .pillars-grid { grid-template-columns: 1fr }
+      .share-block { padding: 16px }
     }
   </style>
 </head>
@@ -106,7 +135,11 @@
     <div class="hero">
       <div class="hero-label">Primary Demo</div>
       <h2>My GRACE Members Card</h2>
-      <p>Central Henderson branding featuring Grace Impact&trade;, Pulse&trade;, and Commitment&trade;.</p>
+      <p>Central Henderson members can scan, sign in, and open the new iOS-style Members Card experience for giving, care, community, and daily next steps.</p>
+      <div class="hero-actions">
+        <a href="/grace_central_henderson_members_card_ios_app.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open New iOS App &rarr;</a>
+        <a href="#share-ios-app" class="btn-secondary">Scan QR Code</a>
+      </div>
     </div>
     <div class="pillars">
       <div class="pillars-title">GRACE at Central Henderson</div>
@@ -173,7 +206,7 @@
                 />
               </div>
             </div>
-            <div class="share-panel">
+            <div id="share-ios-app" class="share-panel">
               <div class="share-block">
                 <div class="share-block-header">
                   <div class="share-icon share-icon-qr" aria-hidden="true">
@@ -209,6 +242,10 @@
                 </div>
                 <div class="url-row">
                   <input id="ios-app-url" type="text" class="url-input" readonly aria-label="iOS Members Card app URL" />
+                  <div class="app-link-preview" aria-hidden="true">
+                    <span class="app-link-domain">gracecrm-centralhenderson.org</span>
+                    <span class="app-link-path">/grace_central_henderson_members_card_ios_app.html</span>
+                  </div>
                   <button type="button" id="ios-app-copy" class="btn-copy" aria-label="Copy app URL">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect x="9" y="9" width="13" height="13" rx="2"/>
@@ -226,7 +263,7 @@
                   Open in New Tab
                 </a>
               </div>
-              <div class="share-note">Open on your phone to log in or sign up for the Members Card Portal.</div>
+              <div class="share-note">Best for member rollout: scan the QR code, then log in or create a member account from your phone.</div>
             </div>
           </div>
         </div>

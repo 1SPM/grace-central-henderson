@@ -6,8 +6,8 @@ import {
   AlertCircle,
   Mail,
 } from 'lucide-react';
-import type { GroupCommunityStats } from '../../lib/services/community';
-import type { Person, SmallGroup } from '../../types';
+import type { GroupCommunityStats } from '../lib/services/community';
+import type { Person, SmallGroup } from '../types';
 
 interface GroupCommunityPanelProps {
   group: SmallGroup;
@@ -33,6 +33,7 @@ export function GroupCommunityPanel({
   onViewPerson,
   onEmailInactive,
 }: GroupCommunityPanelProps) {
+  void group;
   const personMap = new Map(people.map(p => [p.id, p]));
 
   return (
@@ -81,7 +82,7 @@ export function GroupCommunityPanel({
             Recent group posts
           </h4>
           <div className="space-y-2">
-            {stats.recentPosts.slice(0, 5).map(post => {
+            {stats.recentPosts.slice(0, 5).map((post: import('../types').CommunityPost) => {
               const author = personMap.get(post.authorPersonId);
               return (
                 <div
@@ -130,7 +131,7 @@ export function GroupCommunityPanel({
               </tr>
             </thead>
             <tbody>
-              {stats.memberEngagement.map(row => {
+              {stats.memberEngagement.map((row: GroupCommunityStats['memberEngagement'][number]) => {
                 const person = personMap.get(row.personId);
                 const isInactive = stats.inactiveMembers.includes(row.personId);
                 return (

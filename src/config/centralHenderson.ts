@@ -76,8 +76,8 @@ export const DEMO_ONBOARDING_SKIP = {
   checklistDismissed: true,
   tutorialPickerShown: true,
   graceIntroDismissed: true,
-  completedSteps: ['profile', 'import', 'giving'],
-} as const;
+  completedSteps: ['profile', 'import', 'giving'] as string[],
+};
 
 /** Short label for sidebar / compact UI (e.g. "Central Henderson"). */
 export function churchShortName(fullName: string): string {

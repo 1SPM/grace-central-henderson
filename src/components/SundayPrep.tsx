@@ -148,6 +148,7 @@ export function SundayPrep({
   embedded = false,
   onBrowseArchive,
 }: SundayPrepProps) {
+  void onViewPerson;
   const { settings: aiSettings } = useAISettings();
   const [sermonTitle, setSermonTitle] = useState(() =>
     localStorage.getItem('sermon-title') || ''

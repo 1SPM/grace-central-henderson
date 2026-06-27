@@ -73,6 +73,7 @@ export function ClockCalendarBanner({
   className = '',
   actionStrip,
 }: ClockCalendarBannerProps) {
+  void eventDays;
   const { zoned, format, churchToday, churchTodayKey } = useChurchClock(timezone);
   const [viewMonth, setViewMonth] = useState(() => new Date(churchToday.getFullYear(), churchToday.getMonth(), 1));
   const [selected, setSelected] = useState<Date>(() => new Date(churchToday));

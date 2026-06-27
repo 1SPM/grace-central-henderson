@@ -13,6 +13,7 @@ interface LeaderProfileViewProps {
   people?: Person[];
   onBack: () => void;
   onNavigate?: (view: View | string) => void;
+  churchName?: string;
 }
 
 export function LeaderProfileView({

@@ -341,9 +341,8 @@ function App() {
   const isPrivacyRoute = path === '/privacy' || path === '/privacy-policy';
   const isSignInRoute = path === '/sign-in';
   const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  // Treat the root as a public landing for unauthenticated visitors only.
-  // Signed-in users hitting `/` get the existing app dashboard.
-  const isLandingRoute = path === '/' && !isSignedIn;
+  // Root should resolve to the app shell so the deployed home page shows the dashboard.
+  const isLandingRoute = false;
   // /give/<church-slug> is a public donation page — no auth.
   const donateSlugMatch = path.match(/^\/give\/([a-z0-9-]+)\/?$/);
   const isDonateRoute = !!donateSlugMatch;

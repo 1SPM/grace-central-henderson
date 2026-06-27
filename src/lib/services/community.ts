@@ -491,7 +491,7 @@ export function getDemoCommunityDataForCRM(): {
 
 export function computeGroupCommunityStats(
   group: SmallGroup,
-  people: Person[],
+  _people: Person[],
   posts: CommunityPost[],
   activityEvents: Array<{ personId?: string | null; createdAt: string; eventType: string; metadata?: Record<string, unknown> }>,
   connections: MemberConnection[],

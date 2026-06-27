@@ -97,11 +97,9 @@ function useVoiceInput(onTranscript: (text: string) => void) {
       if (transcript) onTranscript(transcript);
     };
     rec.onend = () => setListening(false);
-    rec.onerror = (event) => {
+    rec.onerror = () => {
       setListening(false);
-      if (event.error === 'not-allowed') {
-        console.warn('[Ask Grace] Microphone blocked — allow mic in browser settings or check Permissions-Policy.');
-      }
+      console.warn('[Ask Grace] Speech recognition error — allow mic in browser settings or check Permissions-Policy.');
     };
     recognitionRef.current = rec;
     setListening(true);

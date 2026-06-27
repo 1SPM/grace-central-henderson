@@ -2,7 +2,7 @@
  * Demo data for Live Service dashboard — mirrors Central Henderson Watch page.
  */
 
-import type { WatchChatMessageRow, WatchSermonRow } from '../database.types';
+import type { WatchChatMessageRow, WatchSermonRow } from './database.types';
 
 export const DEMO_CHURCH_ID = 'demo-church';
 

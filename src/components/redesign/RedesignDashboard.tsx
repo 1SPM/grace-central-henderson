@@ -232,7 +232,7 @@ export function DashboardView({
       <ClockCalendarBanner
         variant="redesign"
         eventDays={d.eventDays}
-        eventsByDay={d.eventsByDay}
+        eventsByDay={d.eventsByDay as Record<string, import('../../lib/calendarEvents').DayAgendaEvent[]>}
         onOpenCalendar={onOpenCalendar}
         timezone={timezone}
       />

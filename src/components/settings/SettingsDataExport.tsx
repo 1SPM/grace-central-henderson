@@ -42,6 +42,7 @@ export function SettingsDataExport({
   prayers,
   onNavigate,
 }: SettingsDataExportProps) {
+  void onNavigate;
   return (
     <>
       <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
