@@ -66,7 +66,7 @@ jobs:
           # gitleaks needs full git history to scan all commits on a push.
           # On PRs the action scans only the diff regardless.
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
