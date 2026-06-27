@@ -1,10 +1,14 @@
 # Production deploy — grace-crm-two.vercel.app
 
-Production is served from the Vercel project **`spmmusicbiz-gmailcoms-projects/grace-crm`**, aliased to `https://grace-crm-two.vercel.app` and `https://gracecrm-centralhenderson.org`.
+Production is served from the Vercel project **`spmmusicbiz-gmailcoms-projects/grace-crm`**, aliased to:
+
+- `https://grace-crm-two.vercel.app`
+- `https://gracecrm-centralhenderson.org` (hub root redirects to `/members-card.html`)
+- `https://grace-crm.dev` (consolidated from the retired `grace-central-henderson` Vercel project)
 
 **Canonical git remote:** `origin` → `https://github.com/1SPM/grace-central-henderson.git` (branch `main`).
 
-Legacy remotes (`legacy-camgitt`, `legacy-grace-member-portal`) are kept for reference only — do not deploy from them.
+Legacy remotes (`legacy-camgitt`, `legacy-grace-member-portal`) are kept for reference only — do not deploy from them. `1SPM/GraceMemberPortal` is archived; point all work at this repo.
 
 GitHub pushes do **not** automatically update the Vercel alias unless the project is linked to this repo. After merging to `main`, deploy from the repo root:
 
