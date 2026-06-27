@@ -10,7 +10,9 @@ Production is served from the Vercel project **`spmmusicbiz-gmailcoms-projects/g
 
 Legacy remotes (`legacy-camgitt`, `legacy-grace-member-portal`) are kept for reference only — do not deploy from them. `1SPM/GraceMemberPortal` is archived; point all work at this repo.
 
-GitHub pushes do **not** automatically update the Vercel alias unless the project is linked to this repo. After merging to `main`, deploy from the repo root:
+**Vercel Git integration:** The `grace-crm` project is connected to `1SPM/grace-central-henderson`. Pushes to **`main`** trigger a production deployment automatically.
+
+Manual deploy (fallback or when testing locally before push):
 
 ```bash
 npx vercel deploy --prod --yes
