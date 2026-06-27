@@ -64,6 +64,7 @@ const FILTER_LABELS: Record<RosterFilter, string> = {
 };
 
 export function WalletsView({ people, giving = [], churchName = 'Grace Church', initialPersonId, onViewPortalActivity, onNavigate }: WalletsViewProps) {
+  void onNavigate;
   const program = useImpactCardProgram();
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(initialPersonId ?? null);

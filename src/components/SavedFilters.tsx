@@ -6,7 +6,7 @@ export interface SavedFilter {
   id: string;
   name: string;
   filters: {
-    status?: MemberStatus | 'all';
+    status?: MemberStatus | 'all' | 'central-staff';
     tag?: string;
     hasEmail?: boolean | null;
     hasPhone?: boolean | null;

@@ -2,7 +2,7 @@
  * useLiveServiceOps — real-time admin monitoring for Live Service dashboard.
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
 import { useChurchClock } from './useChurchClock';

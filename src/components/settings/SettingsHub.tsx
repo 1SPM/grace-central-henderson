@@ -41,7 +41,7 @@ interface SettingsHubProps {
   groups: SmallGroup[];
   prayers: PrayerRequest[];
   interactions: import('../../types').Interaction[];
-  onNavigate?: (view: 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
+  onNavigate?: (view: 'forms' | 'email-templates' | 'wedding-services' | 'funeral-services' | 'estate-planning') => void;
   onRunWizard?: () => void;
   onOpenTutorials?: () => void;
   onUpdatePersonTags: (personId: string, tags: string[]) => void;

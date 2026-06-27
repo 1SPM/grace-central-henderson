@@ -514,7 +514,7 @@ export function PeopleList({
                   ? 'All'
                   : status === 'central-staff'
                     ? 'Central Staff'
-                    : statusLabels[status as MemberStatus]} ({statusCounts[status]})
+                    : statusLabels[status as MemberStatus]} ({statusCounts[status as keyof typeof statusCounts]})
               </button>
             ))}
           </div>

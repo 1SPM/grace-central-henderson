@@ -94,7 +94,7 @@ interface CardProgramSectionProps {
 export function CardProgramSection({ program: programProp, embedded }: CardProgramSectionProps) {
   const internal = useImpactCardProgram();
   const program = programProp ?? internal;
-  const { data, state, gateMessage, errorMessage, refetch } = program;
+  const { data, state, gateMessage, refetch } = program;
 
   const [busyId, setBusyId] = useState<string | null>(null);
 

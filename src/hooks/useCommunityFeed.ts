@@ -14,7 +14,7 @@ import type {
   Person,
 } from '../types';
 
-function enrichPosts(posts: CommunityPost[], people: Person[], currentPersonId?: string): CommunityPost[] {
+function enrichPosts(posts: CommunityPost[], people: Person[]): CommunityPost[] {
   const personMap = new Map(people.map(p => [p.id, p]));
   return posts.map(p => {
     const author = personMap.get(p.authorPersonId);
@@ -48,7 +48,7 @@ export function useCommunityFeed(
       ...p,
       reactionCounts: reactionMap.get(p.id) ?? p.reactionCounts ?? { pray: 0, amen: 0, share: 0 },
     }));
-    setPosts(enrichPosts(withReactions, people, currentPersonId));
+    setPosts(enrichPosts(withReactions, people));
     setIsLoading(false);
   }, [churchId, filter, people, currentPersonId]);
 

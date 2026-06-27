@@ -191,11 +191,10 @@ export function LeadersHubContent({
           <LeaderProfileView
             leader={selectedLeader}
             people={people}
-            churchName={churchName}
             onBack={clearLeader}
             onNavigate={onNavigate}
           />
-        ) : (
+) : (
           <LeadersRoster leaders={roster} activity={activity} onSelectLeader={selectLeader} />
         ))}
     </div>

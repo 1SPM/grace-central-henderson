@@ -43,11 +43,6 @@ const MemberDirectory = lazy(() => import('./MemberDirectory').then(m => ({ defa
 const GraceMobilePreview = lazy(() => import('./mobile/GraceMobilePreview').then(m => ({ default: m.GraceMobilePreview })));
 const EventRegistration = lazy(() => import('./EventRegistration').then(m => ({ default: m.EventRegistration })));
 const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRCheckIn })));
-const CrisisCenterDispatch = lazy(() =>
-  import(/* webpackChunkName: "crisis-dispatch-v3" */ './pastoral/CrisisCenterDispatch').then(m => ({
-    default: m.CrisisCenterDispatch,
-  })),
-);
 const DiscipleshipEngagementHub = lazy(() =>
   import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
 );
