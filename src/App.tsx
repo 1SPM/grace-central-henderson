@@ -59,6 +59,7 @@ import {
   toAttendanceLegacy,
 } from './utils/typeConverters';
 import { useTutorial } from './contexts/TutorialContext';
+import { isDemoModeEnabled, navigateToDemoCrm } from './lib/demoEntry';
 
 /** Bridges the App-level showTutorialPicker state to the TutorialContext (which must be inside TutorialProvider) */
 function TutorialPickerAutoOpen({ show, onShown }: { show: boolean; onShown: () => void }) {
@@ -83,12 +84,12 @@ function MarketingLoading({ label }: { label: string }) {
   );
 }
 
-/** Demo mode is auto-signed-in — send /sign-in visitors to the app home. */
-function DemoSignInRedirect() {
+/** Demo mode — send /sign-in and /signup visitors straight into the CRM. */
+function DemoCrmRedirect() {
   useEffect(() => {
-    window.location.replace('/');
+    navigateToDemoCrm();
   }, []);
-  return <MarketingLoading label="Redirecting…" />;
+  return <MarketingLoading label="Loading demo…" />;
 }
 
 function App() {
@@ -340,6 +341,7 @@ function App() {
   const isPrivacyRoute = path === '/privacy' || path === '/privacy-policy';
   const isSignInRoute = path === '/sign-in';
   const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  // Root should resolve to the app shell so the deployed home page shows the dashboard.
   const isLandingRoute = false;
   // /give/<church-slug> is a public donation page — no auth.
   const donateSlugMatch = path.match(/^\/give\/([a-z0-9-]+)\/?$/);
@@ -379,6 +381,9 @@ function App() {
   }
 
   if (isSignUpRoute) {
+    if (isDemoModeEnabled) {
+      return <DemoCrmRedirect />;
+    }
     const params = new URLSearchParams(window.location.search);
     const planParam = params.get('plan');
     const initialPlan: 'starter' | 'pro' | 'enterprise' =
@@ -431,8 +436,8 @@ function App() {
   }
 
   if (isSignInRoute) {
-    if (!isClerkConfigured) {
-      return <DemoSignInRedirect />;
+    if (isDemoModeEnabled || !isClerkConfigured) {
+      return <DemoCrmRedirect />;
     }
     return <SignInPage />;
   }

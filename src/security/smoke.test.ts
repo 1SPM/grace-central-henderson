@@ -26,6 +26,16 @@ describe('security smoke checks', () => {
     expect(mode).toBe('blocked');
   });
 
+  it('prefers demo mode over clerk when demo mode is enabled', () => {
+    const mode = resolveAuthMode({
+      clerkPublishableKey: 'pk_test_xxx',
+      isProduction: true,
+      isDemoModeEnabled: true,
+    });
+
+    expect(mode).toBe('demo');
+  });
+
   it('adds CSRF header for state-changing requests', async () => {
     const fetchSpy = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
     global.fetch = fetchSpy;

@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Activity, BookOpen, Brain, Mic, Play, Radio, ShieldAlert, Zap } from 'lucide-react';
+import { Activity, Brain, Play, Radio, Zap } from 'lucide-react';
 import type { LeaderProfile } from '../../../types';
 import {
   CENTRAL_HENDERSON_COMPANION_CONFIG,
   getLeaderCompanionConfig,
 } from '../../../config/centralHendersonLeaders';
 import { demoCompanionConfig } from './demoLeadersHub';
+import { buildBrainState } from './companionBrainState';
+import { CompanionBrainPanel } from './CompanionBrainPanel';
 import { DidStudioModal } from './DidStudioModal';
 
 type ConfigTab = 'brain' | 'triggers' | 'channels' | 'activity';
@@ -40,19 +42,10 @@ export function AICompanionConfig({
   const setStudioOpen = onStudioOpenChange ?? setInternalStudioOpen;
 
   const companion = useMemo(() => getLeaderCompanionConfig(leader.id), [leader.id]);
+  const resolvedCompanion = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id];
+  const [brain, setBrain] = useState(() => buildBrainState(resolvedCompanion, leader));
 
-  const brain = useMemo(() => {
-    const cfg = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id];
-    if (!cfg) return demoCompanionConfig.brain;
-    return {
-      persona: cfg.persona,
-      knowledgeBase: cfg.knowledgeBase,
-      boundaries: cfg.boundaries,
-      voiceModel: cfg.voiceModel,
-    };
-  }, [companion, leader.id]);
-
-  if (!companion && !CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id]) {
+  if (!resolvedCompanion) {
     return (
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
         <p className="text-sm text-gray-600 dark:text-dark-300">
@@ -62,7 +55,7 @@ export function AICompanionConfig({
     );
   }
 
-  const resolvedCompanion = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id]!;
+  const studioGreeting = brain.greetings[0]?.trim() || resolvedCompanion.greeting;
 
   return (
     <div className="space-y-4">
@@ -109,47 +102,7 @@ export function AICompanionConfig({
       </div>
 
       {tab === 'brain' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2 flex items-center gap-1.5">
-              <Brain size={14} className="text-violet-500" /> Persona
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">{brain.persona}</p>
-            <div className="mt-4 p-3 bg-gray-50 dark:bg-dark-850 rounded-lg flex items-center gap-2.5">
-              <Mic size={14} className="text-gray-400 flex-shrink-0" />
-              <p className="text-[11px] text-gray-500 dark:text-dark-400">{brain.voiceModel}</p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3 flex items-center gap-1.5">
-                <BookOpen size={14} className="text-blue-500" /> Knowledge base
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {brain.knowledgeBase.map(kb => (
-                  <span
-                    key={kb}
-                    className="text-[11px] px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
-                  >
-                    {kb}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3 flex items-center gap-1.5">
-                <ShieldAlert size={14} className="text-rose-500" /> Boundaries
-              </h3>
-              <ul className="space-y-1.5">
-                {brain.boundaries.map(b => (
-                  <li key={b} className="text-xs text-gray-600 dark:text-dark-300 flex gap-2">
-                    <span className="text-rose-400 flex-shrink-0">•</span> {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <CompanionBrainPanel value={brain} onChange={setBrain} leader={leader} />
       )}
 
       {tab === 'triggers' && (
@@ -232,6 +185,7 @@ export function AICompanionConfig({
       <DidStudioModal
         leader={leader}
         companion={resolvedCompanion}
+        greeting={studioGreeting}
         open={studioOpen}
         onClose={() => setStudioOpen(false)}
       />

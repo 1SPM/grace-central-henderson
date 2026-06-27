@@ -9,6 +9,7 @@ interface DidStudioModalProps {
   leader: LeaderProfile;
   companion: LeaderCompanionConfig;
   open: boolean;
+  greeting?: string;
   prefill?: string;
   onClose: () => void;
 }
@@ -19,7 +20,7 @@ interface ChatMessage {
   text: string;
 }
 
-export function DidStudioModal({ leader, companion, open, prefill, onClose }: DidStudioModalProps) {
+export function DidStudioModal({ leader, companion, open, greeting, prefill, onClose }: DidStudioModalProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [agentMounted, setAgentMounted] = useState(false);
@@ -51,8 +52,9 @@ export function DidStudioModal({ leader, companion, open, prefill, onClose }: Di
       return;
     }
 
-    if (!seededRef.current && companion.greeting) {
-      setMessages([{ id: 'greeting', role: 'ai', text: companion.greeting }]);
+    const greetingText = greeting?.trim() || companion.greeting?.trim();
+    if (!seededRef.current && greetingText) {
+      setMessages([{ id: 'greeting', role: 'ai', text: greetingText }]);
       seededRef.current = true;
     }
 
@@ -61,7 +63,7 @@ export function DidStudioModal({ leader, companion, open, prefill, onClose }: Di
     if (prefill?.trim()) {
       setInput(prefill.trim());
     }
-  }, [open, companion.greeting, mountDidAgent, prefill]);
+  }, [open, greeting, companion.greeting, mountDidAgent, prefill]);
 
   useEffect(() => {
     if (!open) return;

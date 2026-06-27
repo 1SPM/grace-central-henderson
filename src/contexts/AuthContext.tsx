@@ -18,6 +18,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
+import { hasEnteredDemo, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
 
 // Default church ID for demo/fallback mode. When Supabase is configured but
 // Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
@@ -128,7 +129,23 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
             setUser(mappedUser);
             authService.setCurrentUser(mappedUser);
           } else {
-            // Create new user in database
+            // User has no `users` row yet. The church_id comes from
+            // publicMetadata set by POST /api/billing/create-church —
+            // it must already exist before we write a users row.
+            // If it's missing, the user hasn't finished onboarding;
+            // redirect to /signup rather than inserting a row with a
+            // wrong church (which RLS would reject anyway — the JWT
+            // carries no church_id claim until create-church runs).
+            const churchIdFromMeta = clerkUser.publicMetadata?.church_id as string | undefined;
+            if (!churchIdFromMeta) {
+              // Not yet onboarded — bounce to sign-up to complete church creation.
+              if (window.location.pathname !== '/signup') {
+                window.location.pathname = '/signup';
+              }
+              setIsLoading(false);
+              return;
+            }
+
             const { data: newUser, error: createError } = await supabase
               .from('users')
               .insert({
@@ -136,8 +153,8 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
                 email: clerkUser.emailAddresses[0]?.emailAddress || '',
                 first_name: clerkUser.firstName,
                 last_name: clerkUser.lastName,
-                role: 'staff', // Default role
-                church_id: DEFAULT_CHURCH_ID, // Default church
+                role: (clerkUser.publicMetadata?.role as string | undefined) || 'staff',
+                church_id: churchIdFromMeta,
               })
               .select()
               .single();
@@ -320,6 +337,14 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
 // SECURITY: Only enabled in development or when explicitly opted-in
 // Uses 'admin' role so demo users can explore all features (including Settings)
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
+  const [entered, setEntered] = useState(() => hasEnteredDemo());
+
+  useEffect(() => {
+    const sync = () => setEntered(hasEnteredDemo());
+    window.addEventListener(DEMO_ENTERED_EVENT, sync);
+    return () => window.removeEventListener(DEMO_ENTERED_EVENT, sync);
+  }, []);
+
   const demoUser: User = {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
@@ -333,19 +358,19 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     isLoaded: true,
-    isSignedIn: true,
-    user: demoUser,
+    isSignedIn: entered,
+    user: entered ? demoUser : null,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: ROLE_PERMISSIONS.pastor,
+    permissions: entered ? ROLE_PERMISSIONS.pastor : null,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => ROLE_PERMISSIONS.pastor[permission],
-    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
+    hasPermission: (permission) => entered && ROLE_PERMISSIONS.pastor[permission],
+    hasAnyPermission: (permissions) => entered && permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),
-    getOrganizationUsers: async () => ({ success: true, users: [demoUser] }),
+    getOrganizationUsers: async () => ({ success: true, users: entered ? [demoUser] : [] }),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

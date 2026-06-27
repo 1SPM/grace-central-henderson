@@ -11,6 +11,11 @@ export function resolveAuthMode({
   isProduction,
   isDemoModeEnabled,
 }: AuthModeInput): AuthMode {
+  // Demo deploy: marketing landing + click-through overrides Clerk.
+  if (isDemoModeEnabled) {
+    return 'demo';
+  }
+
   if (clerkPublishableKey) {
     return 'clerk';
   }

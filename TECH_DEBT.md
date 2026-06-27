@@ -50,10 +50,7 @@
 - **Resolution path:** AWS Secrets Manager (ADR-008). Vercel pulls at deploy time.
 
 ### TD-006 — No error monitoring
-- **Owner:** Sprint 0, Day 2
-- **Risk:** Production errors are invisible until a user reports them.
-- **Re-entry trigger:** Sprint 0 close.
-- **Resolution path:** Sentry on frontend and Express server. PII redaction in `beforeSend`. Source maps uploaded.
+- **Status:** **Resolved.** `@sentry/react` + `@sentry/node` + `@sentry/profiling-node` installed. Frontend: `src/lib/observability/sentry.ts` — `initSentry()` called first in `src/main.tsx`, `SentryErrorBoundary` wraps the root, PII scrubbed in `beforeSend` (headers, cookies, query strings, email/IP stripped from user context). Backend: `api/_lib/sentry.ts` loaded as the first import in `api/_server.ts`. No-op if `VITE_SENTRY_DSN` / `SENTRY_DSN` env vars are not set. `setSentryUser` called from `AuthContext` on every auth state change (opaque IDs only).
 
 ---
 
@@ -68,12 +65,14 @@
 - **Anomaly cron (Sprint 2 Part 3):** `api/cron/ai-anomaly.ts` runs hourly per `vercel.json` `crons` config. Compares last-hour spend per tenant to trailing 7-day hourly average; fires a Sentry warning when ratio ≥ 5× AND last-hour spend ≥ $0.10. Auth via `x-vercel-cron` header or `CRON_SECRET` bearer. `detectAnomaly` math extracted as a pure function with 9 unit tests.
 - **Remaining:** `api/ai/generate.ts` (Ask Grace entry) still calls Gemini directly because it has no auth and therefore no church_id resolution. Tracked as TD-033 below.
 
+### TD-036 — Sign-up flow dead-ends when Stripe is not configured
+- **Status:** **Resolved** (2026-06-18). Added `POST /api/billing/activate-trial` — sets `subscription_status = 'trial'` and `trial_ends_at = now + 14d` directly in Supabase. Safety gate: returns 501 when `STRIPE_SECRET_KEY` IS set (cannot be used in production to bypass payment). `SignUpFlow.tsx` now catches `create-checkout-session` 503 with `error: 'stripe_not_configured'` and calls `activate-trial` instead, then redirects to `/welcome`. In Stripe-enabled environments the path is unchanged. Route registered in `api/[...path].ts`.
+
+### TD-035 — `AuthContext` fell back to `DEFAULT_CHURCH_ID` on missing `users` row
+- **Status:** **Resolved** (2026-06-18). `AuthProviderInner`'s "create new user" branch previously inserted a row with `church_id: DEFAULT_CHURCH_ID`. With migration 011 RLS active this insert is rejected (JWT has no `church_id` claim before `create-church` runs), leaving the user in a loading state. Fixed: read `church_id` from `clerkUser.publicMetadata.church_id` (set by `POST /api/billing/create-church`). If missing, redirect to `/signup`. `role` also sourced from `publicMetadata.role` instead of hardcoded `'staff'`.
+
 ### TD-033 — `api/ai/generate.ts` has no auth / no per-tenant metering
-- **Severity:** P1
-- **Location:** `api/ai/generate.ts`
-- **Risk:** This route is the Ask Grace entry point and currently has only IP-based rate limiting (120 req/min). Without a verified Clerk JWT we can't resolve `church_id`, which means we can't bill the call to a tenant's budget — every call against this route is uncapped. A misconfigured client loop could burn unlimited budget on our card before the IP rate limit slows it (still 120 calls/min ≈ ~$10/hr at Gemini Flash rates).
-- **Re-entry trigger:** before this PR's gateway can claim full coverage of AI cost control; before any external customer hits this route.
-- **Resolution path:** Add Clerk JWT verification (mirror the pattern in `api/_middleware/auth.ts`) at the top of `api/ai/generate.ts`, extract `church_id` from `app_metadata` (requires the Clerk JWT template — see TD-001 + RB-011), then wire through `generate()` with `feature='ask-grace'`. Estimated 30 min once the JWT template is configured.
+- **Status:** **Resolved** (2026-06-18). `api/ai/_generate.ts` now calls `requireClerkAuth(req)` unconditionally before any AI call. Requests without a valid Clerk JWT receive 401. Budget check and `recordUsage` wired through `auth.churchId` / `auth.clerkUserId`. `src/lib/services/ai.ts` comment updated to reflect mandatory auth.
 
 ### TD-008 — No moderation pipeline on AI inputs/outputs
 - **Owner:** Sprint 2
@@ -136,10 +135,12 @@
 - **Resolution path:** apply per-IP and per-tenant limits to `/api/sms/*`, `/api/email/*`, `/api/giving/*`, `/api/auth/invite`. Back with Upstash Redis once provisioned.
 
 ### TD-014 — IDOR server-side checks pending
-- **Owner:** Auth/API
-- **Risk:** A staff user in tenant A can mutate a user record in tenant B via direct ID.
-- **Re-entry trigger:** Sprint 1 alongside RLS hardening.
-- **Resolution path:** every `/api/auth/users/:id*` handler must assert `user.church_id === req.session.church_id` before any DB write. RLS provides defense in depth.
+- **Status:** **Resolved** (2026-06-18). Full 28-route audit completed against `api/[...path].ts` dispatch table.
+  - **`api/agentmail/_send.ts`** — had no auth gate. Added `requireClerkAuth(req, { allowedRoles: STAFF_ROLES })`. Scoped `people` lookup to `auth.churchId`. `interactions` insert uses `auth.churchId` (no longer from person row). Blocks cross-tenant email sends.
+  - **`api/agentmail/_reply.ts`** — had no auth gate. Added `requireClerkAuth(req, { allowedRoles: STAFF_ROLES })`. Added `.eq('church_id', auth.churchId)` to `grace_inbox_messages` query. Blocks cross-tenant reply injection.
+  - **`api/grace/_draft-reply.ts`** — had no auth gate. Added `requireClerkAuth(req, { allowedRoles: STAFF_ROLES })`. Added `.eq('church_id', auth.churchId)` to inbox row fetch. Blocks PII read and AI budget drain across tenants.
+  - All 25 other routes were already correctly scoped via `auth.churchId` from `requireClerkAuth`.
+- **Defense in depth:** RLS migration 011 now enforces `church_id = public.get_church_id()` at the DB layer for all 28 tables.
 
 ---
 
@@ -224,17 +225,12 @@
 - **Re-entry trigger:** post-funding.
 
 ### TD-031 — Lint and test failures pre-existing on this branch
-- **Severity:** P3 (does not block; CI on `main` is currently green because these errors do not exist on `main`)
-- **Discovered:** Sprint 0, Day 2 — surfaced when adding Sentry/PostHog and running `npm run lint` + `npm run test:run`.
-- **Failures:**
-  - `src/lib/grace-chat/useGraceInbox.ts:48-51` — `react-hooks/refs` errors (4 instances). Refs are assigned during render; should move into `useEffect`.
-  - `src/App.tsx:329,336` — `@typescript-eslint/no-unused-expressions` (2 instances).
-  - `src/hooks/useChurchSettings.ts:156,192` — unused `_` variable (2 instances).
-  - `src/components/ViewToggle.test.tsx` — 2 tests assert `bg-white` class but the component renders `bg-stone-100`. Either the test or the component drifted.
-  - `src/contexts/GraceChatContext.tsx:218,223` — `react-hooks/exhaustive-deps` warnings (2 instances).
-- **Risk:** before any PR can merge to `main` with CI green, these need fixing. Sentry/PostHog work was verified not to introduce any of them (stashed-vs-applied diff).
-- **Re-entry trigger:** Sprint 0 Day 3, alongside CI hardening.
-- **Resolution path:** small dedicated PR. Move ref assignments inside an effect; fix `bg-white` vs `bg-stone-100` mismatch (likely a tailwind theme drift after the gold-accent change in commit `eccb4e3`).
+- **Status:** **Resolved.** All five issues verified fixed on current branch (2026-06-18 audit):
+  - `useGraceInbox.ts` — refs already moved into `useEffect`.
+  - `App.tsx` — `no-unused-expressions` no longer present.
+  - `useChurchSettings.ts` — unused `_` variable no longer present.
+  - `ViewToggle.test.tsx` — test updated to `bg-stone-100`, matches component.
+  - `GraceChatContext.tsx` — `exhaustive-deps` warnings suppressed with `eslint-disable-next-line`.
 
 ### TD-032 — npm audit findings (partial — see status)
 - **Severity:** P2

@@ -102,6 +102,14 @@ export const demoCompanionConfig = {
     knowledgeBase: ['Sermon archive (2019–2026)', 'Marriage course curriculum', 'Church statement of faith', 'Benevolence policy'],
     boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
     voiceModel: 'Cloned voice — approved 2026-03-12 (consent on file)',
+    greeting:
+      "Good morning Maya — I'm Pastor James. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Senior Pastor',
+    personality: 'Warm and Pastoral',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded' as const,
+    creativity: 50,
+    knowledgeText: '',
   },
   triggers: [
     { label: 'Self-harm or crisis language', action: 'Page on-call pastor + share 988 line', enabled: true },

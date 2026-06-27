@@ -4,11 +4,14 @@ import App from './App';
 import { ThemeProvider } from './ThemeContext';
 import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
+import { handleDemoEntryQuery } from './lib/demoEntry';
 import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import './index.css';
 import './styles/grace-orb.css';
+import './styles/central-tokens.css';
+import './components/marketing/marketing.css';
 
 // Init Sentry first so anything thrown during setup is captured.
 initSentry();
@@ -17,6 +20,7 @@ void initPosthog();
 
 // Surface missing config early instead of failing silently
 checkEnvironment();
+handleDemoEntryQuery();
 
 // Public routes that bypass auth entirely
 const isConnectRoute = window.location.pathname === '/connect';

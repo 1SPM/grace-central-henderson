@@ -9,6 +9,8 @@
 import { Router, Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders.js';
+import startVideoJob from '../ai/video/_start.js';
+import checkVideoJobStatus from '../ai/video/_status.js';
 
 const router = Router();
 
@@ -178,6 +180,18 @@ router.get('/health', (_req: Request, res: Response) => {
       hermes: getHermesConfig().configured,
     },
   });
+});
+
+router.post('/video/start', (req: Request, res: Response) => {
+  return startVideoJob(req as any, res as any);
+});
+
+router.get('/video/status', (req: Request, res: Response) => {
+  return checkVideoJobStatus(req as any, res as any);
+});
+
+router.post('/video/status', (req: Request, res: Response) => {
+  return checkVideoJobStatus(req as any, res as any);
 });
 
 export default router;

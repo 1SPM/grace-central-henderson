@@ -8,6 +8,8 @@ GitHub pushes to `camgitt/grace-crm` do **not** automatically update this alias 
 npx vercel deploy --prod --yes
 ```
 
+Do **not** run `vercel deploy --prod` with uncommitted changes to root `index.html` — a local prototype hub overwrite will replace the React CRM at `/`.
+
 ## Required production environment variables
 
 Set these in Vercel → Project → Settings → Environment Variables (Production):

@@ -4,6 +4,11 @@
   "framework": "vite",
   "redirects": [
     {
+      "source": "/previews/grace_central_henderson_members_card_ios_app.html",
+      "destination": "/grace_central_henderson_members_card_ios_app.html",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "gracecrm-centralhenderson.org" }],
       "destination": "/members-card.html",

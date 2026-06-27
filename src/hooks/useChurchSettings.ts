@@ -9,7 +9,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
-import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../config/centralHenderson';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, DEMO_ONBOARDING_SKIP } from '../config/centralHenderson';
+import { hasEnteredDemo, isDemoModeEnabled, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
 
 const log = createLogger('church-settings');
 const isProduction = import.meta.env.PROD;
@@ -91,6 +92,18 @@ export interface ChurchSettings {
 
 const DEFAULT_SETTINGS: ChurchSettings = CENTRAL_HENDERSON_DEFAULT_SETTINGS;
 
+function applyDemoOnboardingIfEntered(settings: ChurchSettings): ChurchSettings {
+  if (!isDemoModeEnabled || !hasEnteredDemo()) return settings;
+  return {
+    ...settings,
+    onboarding: {
+      ...(settings.onboarding ?? {}),
+      ...DEMO_ONBOARDING_SKIP,
+      completedSteps: [...DEMO_ONBOARDING_SKIP.completedSteps],
+    },
+  };
+}
+
 function normalizeSettings(raw: Record<string, unknown>): Partial<ChurchSettings> {
   const { grace_facts, ...rest } = raw;
   const merged = rest as Partial<ChurchSettings>;
@@ -104,7 +117,7 @@ function normalizeSettings(raw: Record<string, unknown>): Partial<ChurchSettings
  * like profile.serviceTimes, so merge each section against the defaults.
  */
 function mergeWithDefaults(partial: Partial<ChurchSettings>): ChurchSettings {
-  return {
+  return applyDemoOnboardingIfEntered({
     ...DEFAULT_SETTINGS,
     ...partial,
     profile: { ...DEFAULT_SETTINGS.profile, ...partial.profile },
@@ -112,7 +125,7 @@ function mergeWithDefaults(partial: Partial<ChurchSettings>): ChurchSettings {
     notifications: { ...DEFAULT_SETTINGS.notifications, ...partial.notifications },
     branding: { ...DEFAULT_SETTINGS.branding, ...partial.branding },
     onboarding: { ...DEFAULT_SETTINGS.onboarding!, ...partial.onboarding },
-  };
+  });
 }
 
 function settingsForStorage(settings: ChurchSettings): Record<string, unknown> {
@@ -135,7 +148,7 @@ export function useChurchSettings(churchId: string = 'demo-church') {
     if (!supabase) {
       // Demo mode fallback: avoid persistent browser storage in production
       if (isProduction) {
-        setSettings(DEFAULT_SETTINGS);
+        setSettings(applyDemoOnboardingIfEntered(DEFAULT_SETTINGS));
         setIsLoading(false);
         return;
       }
@@ -272,6 +285,13 @@ export function useChurchSettings(churchId: string = 'demo-church') {
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
+
+  // Re-apply onboarding skip when visitor enters demo mid-session
+  useEffect(() => {
+    const onDemoEntered = () => setSettings(prev => applyDemoOnboardingIfEntered(prev));
+    window.addEventListener(DEMO_ENTERED_EVENT, onDemoEntered);
+    return () => window.removeEventListener(DEMO_ENTERED_EVENT, onDemoEntered);
+  }, []);
 
   return {
     settings,

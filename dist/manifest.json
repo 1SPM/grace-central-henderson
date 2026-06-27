@@ -1,0 +1,48 @@
+{
+  "name": "GRACE Church CRM",
+  "short_name": "GRACE",
+  "description": "Church CRM for Growth, Relationships, Attendance, Community, and Engagement",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#18181b",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "description": "View your dashboard"
+    },
+    {
+      "name": "Add Person",
+      "url": "/?action=add-person",
+      "description": "Add a new person"
+    },
+    {
+      "name": "Tasks",
+      "url": "/?view=tasks",
+      "description": "View follow-up tasks"
+    }
+  ]
+}

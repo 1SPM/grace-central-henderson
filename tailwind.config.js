@@ -137,7 +137,17 @@ export default {
           900: '#7A1727',
           950: '#450A14',
         },
-        // Status: vivid Monday orange
+        // Central Henderson brand
+        central: {
+          red: '#EE2B37',
+          'red-hover': '#d42530',
+          black: '#000000',
+          white: '#FFFFFF',
+          grey: '#A7A9AC',
+          canvas: '#f6f6f6',
+          card: '#ffffff',
+          line: '#e8e8e8',
+        },
         amber: {
           50:  '#FFF6E8',
           100: '#FEEDD1',
@@ -158,6 +168,10 @@ export default {
         // Monday aesthetic: headings render as bold geometric sans (kept the
         // `serif` key so existing font-serif/.serif usages restyle globally)
         serif: ['Poppins', 'Figtree', '-apple-system', 'system-ui', 'sans-serif'],
+        editorial: ['Newsreader', 'Georgia', 'serif'],
+        fraunces: ['Fraunces', 'Georgia', 'serif'],
+        brand: ['Montserrat', 'Gotham', 'Arial', 'sans-serif'],
+        web: ['Poppins', 'Arial', 'sans-serif'],
       },
       transitionDuration: {
         '120': '120ms',
@@ -182,6 +196,14 @@ export default {
         'fade-in': 'fadeIn 0.2s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
+        'marketing-fade-up': 'marketingFadeUp 0.7s ease-out both',
+      },
+      animationDelay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '400': '400ms',
+        '500': '500ms',
       },
       keyframes: {
         fadeIn: {
@@ -195,6 +217,10 @@ export default {
         scaleIn: {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        marketingFadeUp: {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
