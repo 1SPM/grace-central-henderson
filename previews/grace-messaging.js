@@ -4,7 +4,7 @@
  * Leader avatars = independent, siloed agents where members confide.
  */
 (function (global) {
-  const DEFAULT_CHURCH = 'Central Henderson';
+  const DEFAULT_CHURCH = global.GRACE_PORTAL_CHURCH || 'Central Henderson';
   const GRACE_ACRONYM = 'Growth · Resource · Assistance · Community · Engagement';
 
   function leaderFirstName(name) {

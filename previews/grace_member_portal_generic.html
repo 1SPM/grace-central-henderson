@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My GRACE Members Card — Central Henderson</title>
-<link rel="stylesheet" href="grace-central-theme.css">
+<title>My GRACE Members Card — Faithful Church</title>
+<link rel="stylesheet" href="grace-faithful-theme.css">
+<link rel="stylesheet" href="grace-typography.css">
 <link rel="stylesheet" href="grace-orb.css">
 <link rel="stylesheet" href="grace-companion.css">
 <style>
@@ -39,10 +40,10 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .sb-foot{padding:14px 16px;border-top:1px solid #ece8e1}
 .token-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .token-label{font-size:10px;color:#aaa;font-weight:500}
-.token-val{font-size:12px;font-weight:700;color:#EE2B37}
+.token-val{font-size:12px;font-weight:700;color:var(--grace-sky-500)}
 .streak-row{display:flex;align-items:center;gap:6px}
 .streak-dot{width:8px;height:8px;border-radius:50%}
-.sd-on{background:#EE2B37}
+.sd-on{background:var(--grace-sky-500)}
 .sd-off{background:#e8e0d5}
 
 /* ── MAIN ── */
@@ -80,7 +81,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 /* ── BLESSING CARD ── */
 .blessing-card{background:linear-gradient(135deg,#FFF0F1,#F4F4F4);border:1px solid #F5C2C6;border-radius:14px;padding:18px 20px;margin-bottom:14px}
 .blessing-from{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.blessing-av{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid #EE2B37}
+.blessing-av{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--grace-sky-500)}
 .blessing-who{font-size:12px;font-weight:600;color:#000000}
 .blessing-role{font-size:10px;color:#C41E2A}
 .blessing-live{font-size:9px;font-weight:600;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;margin-left:auto}
@@ -88,8 +89,8 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .blessing-verse{font-size:11px;color:#C41E2A;font-weight:500}
 .blessing-actions{display:flex;gap:8px;margin-top:12px}
 .ba-btn{flex:1;padding:7px 0;border-radius:8px;border:none;font-size:11px;font-weight:600;cursor:pointer;text-align:center}
-.ba-primary{background:#EE2B37;color:#fff}
-.ba-outline{background:transparent;border:1px solid #EE2B37;color:#EE2B37}
+.ba-primary{background:var(--grace-sky-500);color:#fff}
+.ba-outline{background:transparent;border:1px solid var(--grace-sky-500);color:var(--grace-sky-500)}
 
 /* ── TWO COL ── */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -117,7 +118,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .give-amt{padding:10px 0;border-radius:10px;border:1px solid #e8e0d5;background:#fff;font-size:14px;font-weight:600;color:#555;cursor:pointer;text-align:center;transition:all .15s}
 .give-amt:hover,.give-amt.active{background:#000000;color:#fff;border-color:#000000}
 .give-input{width:100%;padding:12px 16px;border:1px solid #e8e0d5;border-radius:10px;font-size:16px;font-weight:600;color:#1a1a1a;background:#f7f5f2;outline:none;margin-bottom:12px;text-align:center}
-.give-input:focus{border-color:#EE2B37;background:#fff}
+.give-input:focus{border-color:var(--grace-sky-500);background:#fff}
 .give-select{width:100%;padding:11px 14px;border:1px solid #e8e0d5;border-radius:10px;font-size:13px;color:#555;background:#fff;outline:none;margin-bottom:12px;cursor:pointer}
 .give-btn{width:100%;padding:14px;border-radius:12px;border:none;background:#000000;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
 .give-btn:hover{background:#111111}
@@ -136,7 +137,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .lc-live{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;background:#16a34a;border:2px solid #fff}
 .lc-name{font-size:13px;font-weight:600;color:#1a1a1a}
 .lc-role{font-size:11px;color:#aaa;margin-top:2px}
-.lc-topic{font-size:11px;color:#EE2B37;margin-top:3px;font-weight:500}
+.lc-topic{font-size:11px;color:var(--grace-sky-500);margin-top:3px;font-weight:500}
 .lc-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
 .lc-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e8e0d5;background:#fff;color:#555}
 .lc-btn-ai{background:#000000;color:#fff;border-color:#000000}
@@ -166,17 +167,17 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}
 .badge-item{display:flex;flex-direction:column;align-items:center;text-align:center}
 .badge-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:6px;border:2px solid transparent}
-.bc-earned{border-color:#EE2B37;background:#FFF0F1}
+.bc-earned{border-color:var(--grace-sky-500);background:#FFF0F1}
 .bc-locked{background:#f3f0eb;opacity:.5}
 .badge-name{font-size:10px;font-weight:600;color:#555}
 .badge-sub{font-size:9px;color:#aaa;margin-top:1px}
 
 /* ── PROFILE ── */
 .prof-tier-card{background:linear-gradient(135deg,#000000,#111111);border-radius:14px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px}
-.pt-av{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #EE2B37}
+.pt-av{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid var(--grace-sky-500)}
 .pt-name{font-size:17px;font-weight:700;color:#fff}
 .pt-church{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
-.pt-tier-badge{display:inline-flex;align-items:center;gap:5px;background:#EE2B37;color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;margin-top:8px}
+.pt-tier-badge{display:inline-flex;align-items:center;gap:5px;background:var(--grace-sky-500);color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;margin-top:8px}
 
 /* ── AI HUB ── */
 .ai-shell{display:grid;grid-template-columns:1fr 320px;gap:16px;min-height:calc(100vh - 120px);align-items:stretch}
@@ -234,7 +235,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ai-hero-chatwrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:6px 8px 6px 12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .ai-hero-input{flex:1;border:none;background:transparent;color:#fff;font-size:13px;outline:none;min-width:0;font-family:inherit}
 .ai-hero-input::placeholder{color:rgba(255,255,255,.45)}
-.ai-hero-send{width:34px;height:34px;border-radius:50%;background:#EE2B37;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-hero-send{width:34px;height:34px;border-radius:50%;background:var(--grace-sky-500);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ai-hero-send:hover{background:#d92530}
 .ai-hero-begin{flex-shrink:0;padding:10px 16px;border-radius:12px;border:none;background:#fff;color:#1e3a5f;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.15)}
 .ai-hero-begin:hover{background:#f0f4ff}
@@ -271,7 +272,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ai-hero-dm:hover{background:rgba(255,255,255,.1)}
 .ai-dm-banner{display:none;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#eff6ff;border-bottom:1px solid #dbeafe;font-size:11px;color:#1e3a5f;line-height:1.4}
 .ai-dm-banner.open{display:flex}
-.ai-dm-banner button{background:none;border:none;color:#EE2B37;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit}
+.ai-dm-banner button{background:none;border:none;color:var(--grace-sky-500);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit}
 .ai-switch-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:8px;padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;z-index:1;white-space:nowrap;flex-shrink:0}
 .ai-switch-btn:hover{background:rgba(255,255,255,.14)}
 .av-live-dot.av-live-dot--hidden{display:none}
@@ -285,7 +286,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
   background:rgba(15,23,42,.92);border-bottom:1px solid rgba(255,255,255,.08)
 }
 .divinity-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.divinity-live-dot{width:9px;height:9px;border-radius:50%;background:#EE2B37;flex-shrink:0;box-shadow:0 0 0 4px rgba(238,43,55,.25)}
+.divinity-live-dot{width:9px;height:9px;border-radius:50%;background:var(--grace-sky-500);flex-shrink:0;box-shadow:0 0 0 4px rgba(238,43,55,.25)}
 .divinity-head-title{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .divinity-head-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .divinity-pill{
@@ -421,7 +422,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .leader-crisis-ad{display:block;padding:10px 12px 8px;border-top:1px solid #f3f0eb;flex-shrink:0;background:#fff;text-decoration:none}
 .leader-crisis-ad img{width:100%;height:auto;border-radius:12px;display:block;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .leader-crisis-ad:hover img{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.12)}
-.leader-crisis-ad:focus-visible{outline:2px solid #EE2B37;outline-offset:2px;border-radius:14px}
+.leader-crisis-ad:focus-visible{outline:2px solid var(--grace-sky-500);outline-offset:2px;border-radius:14px}
 .leader-crisis-outreach{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 14px;border-top:1px solid #f3f0eb;background:#fafafa}
 .lco-head{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px}
 .lco-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start;width:100%;padding:8px 10px;border:none;border-radius:10px;background:#fff;border:1px solid #ece8e1;text-align:left;font-family:inherit;cursor:pointer;text-decoration:none;color:inherit;margin-bottom:6px}
@@ -449,7 +450,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .lg-profile-btn{font-size:9px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid #e8e0d5;background:#fff;color:#000000;cursor:pointer;flex-shrink:0}
 .lg-profile-btn:hover{background:#000000;color:#fff;border-color:#000000}
 .lg-switch{font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid #e8e0d5;background:#fff;cursor:pointer;color:#555;flex-shrink:0}
-.lg-item.active-leader .lg-switch{background:#EE2B37;color:#fff;border-color:#EE2B37}
+.lg-item.active-leader .lg-switch{background:var(--grace-sky-500);color:#fff;border-color:var(--grace-sky-500)}
 /* Leader profile modal — dark hero card */
 .leader-profile-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px}
 .leader-profile-overlay.open{display:flex}
@@ -493,18 +494,18 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .lpm-btn{flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
 .lpm-btn-primary{background:#fff;color:#1e3a5f}
 .lpm-btn-primary:hover{background:#f0f4ff}
-.lpm-btn-gold{background:#EE2B37;color:#fff}
+.lpm-btn-gold{background:var(--grace-sky-500);color:#fff}
 .lpm-btn-gold:hover{background:#d92530}
 
 /* Bible study */
 .bible-card{background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.88)),url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80') center/cover;border-radius:14px;padding:18px;overflow:hidden}
 .bc-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .bc-verse{font-size:14px;font-weight:600;color:#fff;line-height:1.5;margin-bottom:4px;font-style:italic}
-.bc-ref{font-size:11px;color:#EE2B37;font-weight:600;margin-bottom:14px}
+.bc-ref{font-size:11px;color:var(--grace-sky-500);font-weight:600;margin-bottom:14px}
 .bc-topics{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
 .bc-topic{font-size:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);padding:3px 9px;border-radius:8px;cursor:pointer}
 .bc-topic:hover{background:rgba(238,43,55,.3);color:#fde68a}
-.bc-btn{width:100%;padding:9px;background:#EE2B37;border:none;color:#fff;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}
+.bc-btn{width:100%;padding:9px;background:var(--grace-sky-500);border:none;color:#fff;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}
 .bc-btn:hover{background:#b8862e}
 .ai-main-extras{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex-shrink:0}
 .leader-pastoral-care{flex-shrink:0;border:1px solid #ece8e1;border-radius:14px;background:#fff;padding:18px 20px 16px}
@@ -542,9 +543,9 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pcare-recent-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d;white-space:nowrap}
 .pcare-foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#aaa;text-align:center;padding-top:4px}
 .pulse-card{background:#fff;border:1px solid #ece8e1;border-radius:14px;padding:16px}
-.pulse-live-dot{width:7px;height:7px;border-radius:50%;background:#EE2B37;animation:ld 1.4s infinite;flex-shrink:0}
+.pulse-live-dot{width:7px;height:7px;border-radius:50%;background:var(--grace-sky-500);animation:ld 1.4s infinite;flex-shrink:0}
 @keyframes ld{0%,100%{opacity:1}50%{opacity:.35}}
-.pulse-score{font-size:22px;font-weight:700;color:#EE2B37;line-height:1}
+.pulse-score{font-size:22px;font-weight:700;color:var(--grace-sky-500);line-height:1}
 .pulse-sub{font-size:10px;color:#888;margin-top:4px}
 .pulse-activity{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .pulse-act{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#555;line-height:1.4}
@@ -572,7 +573,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .composer{background:#fff;border:1px solid #ece8e1;border-radius:14px;padding:14px 16px}
 .composer-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .composer-input{flex:1;background:#f7f5f2;border:1px solid #ece8e1;border-radius:20px;padding:10px 16px;font-size:13px;color:#1a1a1a;outline:none;cursor:pointer;transition:all .15s}
-.composer-input:focus{background:#fff;border-color:#EE2B37}
+.composer-input:focus{background:#fff;border-color:var(--grace-sky-500)}
 .composer-actions{display:flex;gap:6px;border-top:1px solid #f3f0eb;padding-top:10px}
 .comp-action{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:600;color:#6b7280;transition:background .12s}
 .comp-action:hover{background:#f7f5f2}
@@ -580,7 +581,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 /* Filter tabs */
 .feed-tabs{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap}
 .feed-tab{padding:6px 14px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;font-size:11px;font-weight:600;color:#555;cursor:pointer;transition:all .15s}
-.feed-tab:hover{border-color:#EE2B37;color:#EE2B37}
+.feed-tab:hover{border-color:var(--grace-sky-500);color:var(--grace-sky-500)}
 .feed-tab.active{background:#000000;color:#fff;border-color:#000000}
 
 /* Post card */
@@ -602,7 +603,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .cm-prayed{color:var(--gold,#b08d57);font-weight:700}
 .net-wall-stats span{cursor:pointer;transition:color .15s}
 .net-wall-stats span:hover{color:#000}
-.net-wall-stats span.wall-prayed{color:#EE2B37;font-weight:700}
+.net-wall-stats span.wall-prayed{color:var(--grace-sky-500);font-weight:700}
 .net-story-item,.net-fresh-card{cursor:pointer}
 .wall-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:24px}
 .wall-lightbox.open{display:flex;animation:fadeInPO .2s ease}
@@ -623,8 +624,8 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ptb-milestone{background:#dcfce7;color:#15803d}
 .ptb-event{background:#dbeafe;color:#1e40af}
 .ptb-group{background:#f3f0eb;color:#374151}
-.post-quote{background:#fef9f0;border-left:3px solid #EE2B37;border-radius:0 8px 8px 0;padding:10px 14px;margin:4px 0 8px;font-size:12px;color:#333333;font-style:italic;line-height:1.6}
-.post-verse{font-size:10px;font-weight:600;color:#EE2B37;margin-top:4px}
+.post-quote{background:#fef9f0;border-left:3px solid var(--grace-sky-500);border-radius:0 8px 8px 0;padding:10px 14px;margin:4px 0 8px;font-size:12px;color:#333333;font-style:italic;line-height:1.6}
+.post-verse{font-size:10px;font-weight:600;color:var(--grace-sky-500);margin-top:4px}
 .post-image{width:100%;border-radius:10px;margin:6px 0;object-fit:cover;max-height:200px}
 .post-event-card{background:#f7f5f2;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;margin:4px 0 8px;cursor:pointer;transition:background .12s}
 .post-event-card:hover{background:#f0ece6}
@@ -644,7 +645,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .post-actions{padding:4px 10px 8px;display:flex;border-top:1px solid #f3f0eb}
 .pact{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 0;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#6b7280;transition:all .15s}
 .pact:hover{background:#f7f5f2;color:#1a1a1a}
-.pact.prayed{color:#EE2B37;background:#fef9f0}
+.pact.prayed{color:var(--grace-sky-500);background:#fef9f0}
 .pact.amened{color:#7c3aed;background:#f5f3ff}
 .pact-count{font-size:11px;font-weight:600}
 .pact-ico{font-size:14px}
@@ -657,14 +658,14 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .comment-input-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-top:8px}
 .comment-av-sm{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .comment-input{flex:1;background:#f7f5f2;border:1px solid #ece8e1;border-radius:20px;padding:7px 14px;font-size:12px;outline:none;color:#1a1a1a}
-.comment-input:focus{border-color:#EE2B37;background:#fff}
+.comment-input:focus{border-color:var(--grace-sky-500);background:#fff}
 .comment-row{display:flex;gap:8px;margin-bottom:8px}
 .cm-bubble{background:#f7f5f2;border-radius:0 12px 12px 12px;padding:8px 12px;flex:1}
 .cm-name{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
 .cm-text{font-size:12px;color:#374151;line-height:1.5}
 .cm-meta{font-size:10px;color:#bbb;margin-top:4px;display:flex;gap:10px}
 .cm-reply{cursor:pointer;color:#6b7280}
-.cm-reply:hover{color:#EE2B37}
+.cm-reply:hover{color:var(--grace-sky-500)}
 
 /* Prayer Wall */
 .prayer-wall{display:flex;flex-direction:column;gap:10px}
@@ -685,7 +686,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pc-pray-btn:hover{background:#7c3aed;color:#fff}
 .pc-pray-btn.praying{background:#7c3aed;color:#fff}
 .pc-count{font-size:11px;color:#aaa;margin-left:4px}
-.pc-claim{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer;margin-left:auto}
+.pc-claim{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer;margin-left:auto}
 .pc-time{font-size:10px;color:#bbb}
 
 /* Right Panel */
@@ -693,7 +694,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .panel-card{background:#fff;border:1px solid #ece8e1;border-radius:14px;overflow:hidden}
 .panel-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f3f0eb}
 .panel-title{font-size:13px;font-weight:700;color:#1a1a1a}
-.panel-link{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer}
+.panel-link{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer}
 .conn-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:.5px solid #f7f5f2;cursor:pointer;transition:background .12s}
 .conn-row:last-child{border-bottom:none}
 .conn-row:hover{background:#faf8f5}
@@ -723,7 +724,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .rlb-rank{font-size:11px;color:#aaa;width:16px;text-align:center;flex-shrink:0}
 .rlb-av{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .rlb-name{font-size:11px;color:#374151;flex:1}
-.rlb-you{font-weight:700;color:#EE2B37}
+.rlb-you{font-weight:700;color:var(--grace-sky-500)}
 .rlb-pct{font-size:11px;font-weight:700;color:#1a1a1a}
 .rlb-bar{flex:1;background:#f3f0eb;border-radius:3px;height:5px;max-width:60px}
 .rlb-fill{height:5px;border-radius:3px}
@@ -742,9 +743,9 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pm-body{padding:16px 20px}
 .pm-type-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .pm-type{padding:10px;border-radius:10px;border:1.5px solid #ece8e1;background:#faf8f5;text-align:center;cursor:pointer;transition:all .15s;font-size:11px;font-weight:600;color:#555}
-.pm-type:hover,.pm-type.selected{border-color:#EE2B37;background:#fef9f0;color:#000000}
+.pm-type:hover,.pm-type.selected{border-color:var(--grace-sky-500);background:#fef9f0;color:#000000}
 .pm-textarea{width:100%;border:1.5px solid #ece8e1;border-radius:12px;padding:12px 14px;font-size:13px;color:#1a1a1a;outline:none;resize:none;height:100px;background:#faf8f5;font-family:inherit}
-.pm-textarea:focus{border-color:#EE2B37;background:#fff}
+.pm-textarea:focus{border-color:var(--grace-sky-500);background:#fff}
 .pm-footer{padding:12px 20px 18px;display:flex;gap:8px}
 .pm-post-btn{flex:1;background:#000000;color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer}
 .pm-post-btn:hover{background:#111111}
@@ -752,11 +753,11 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 
 /* ══ GIVING PORTFOLIO ══ */
 .ticker-bar-p{background:#000000;height:34px;display:flex;align-items:center;overflow:hidden;flex-shrink:0;border-radius:12px;margin-bottom:16px}
-.ticker-lbl-p{background:#EE2B37;color:#fff;font-size:10px;font-weight:700;padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap;letter-spacing:.4px;border-radius:12px 0 0 12px}
+.ticker-lbl-p{background:var(--grace-sky-500);color:#fff;font-size:10px;font-weight:700;padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap;letter-spacing:.4px;border-radius:12px 0 0 12px}
 .ticker-track-p{flex:1;overflow:hidden;position:relative;height:100%}
 .ticker-scroll-p{display:flex;align-items:center;height:100%;animation:pticker 50s linear infinite;white-space:nowrap}
 .ticker-item-p{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.8);margin-right:40px}
-.ticker-item-p strong{color:#EE2B37}
+.ticker-item-p strong{color:var(--grace-sky-500)}
 @keyframes pticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .plive{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;background:#dc2626;color:#fff;padding:2px 8px;border-radius:6px;margin-left:8px}
 .plive-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pblink 1.2s infinite}
@@ -796,8 +797,8 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 /* Merchant grid */
 .pf-merchant-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px}
 .pf-mc{background:#faf8f5;border:1.5px solid #ece8e1;border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s}
-.pf-mc:hover{border-color:#EE2B37;background:#fef9f0;transform:translateY(-2px)}
-.pf-mc.pf-mc-active{border-color:#EE2B37;background:#fef9f0;box-shadow:0 4px 12px rgba(238,43,55,.18)}
+.pf-mc:hover{border-color:var(--grace-sky-500);background:#fef9f0;transform:translateY(-2px)}
+.pf-mc.pf-mc-active{border-color:var(--grace-sky-500);background:#fef9f0;box-shadow:0 4px 12px rgba(238,43,55,.18)}
 .pf-mc-ico{font-size:20px;margin-bottom:5px}
 .pf-mc-store{font-size:10px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
 .pf-mc-cause{font-size:9px;color:#aaa;margin-bottom:4px}
@@ -818,7 +819,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-calc-input{flex:1;border:1px solid #86efac;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;outline:none;background:#fff;color:#1a1a1a}
 .pf-calc-result{background:#000000;color:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .pf-calc-result-lbl{font-size:10px;color:rgba(255,255,255,.55)}
-.pf-calc-result-val{font-size:17px;font-weight:800;color:#EE2B37}
+.pf-calc-result-val{font-size:17px;font-weight:800;color:var(--grace-sky-500)}
 .pf-calc-sim{width:100%;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s}
 .pf-calc-sim:hover{background:#15803d}
 
@@ -830,7 +831,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-fr-fill{height:22px;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .5s ease}
 .pf-fr-val{font-size:10px;font-weight:700;color:#fff}
 .pf-fr-av{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-.pf-fr-you .pf-fr-name{font-weight:700;color:#EE2B37}
+.pf-fr-you .pf-fr-name{font-weight:700;color:var(--grace-sky-500)}
 .pf-chal{font-size:9px;background:#F4F4F4;color:#000000;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;margin-left:4px;opacity:0;transition:opacity .15s}
 .pf-fr-row:hover .pf-chal{opacity:1}
 
@@ -863,7 +864,10 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#555}
 .pf-leg-dot{width:7px;height:7px;border-radius:50%}
 
-/* Central Church GRACE card — red physical card style */
+/* Faithful Church GRACE Impact Card */
+.pf-card-front--faithful{background:transparent;padding:0}
+.pf-faithful-card-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:18px}
+.pf-card-back{background:linear-gradient(160deg,var(--grace-navy-800) 0%,var(--grace-navy-950) 100%)}
 .pf-card-flip{perspective:1100px;cursor:pointer;width:100%;max-width:420px;margin:0 auto}
 .pf-card-inner{transform-style:preserve-3d;transition:transform .6s;position:relative;width:100%;aspect-ratio:1.586/1}
 .pf-card-inner.pf-flipped{transform:rotateY(180deg)}
@@ -874,10 +878,10 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
   box-shadow:0 12px 28px rgba(0,0,0,.2);
 }
 .pf-card-front{
-  background-color:#EE2B37;
+  background-color:var(--grace-sky-500);
   background-image:
     repeating-linear-gradient(118deg,transparent 0,transparent 28px,rgba(0,0,0,.07) 28px,rgba(0,0,0,.07) 30px),
-    linear-gradient(155deg,#ff4a54 0%,#EE2B37 42%,#c41e2a 100%);
+    linear-gradient(155deg,var(--grace-sky-500) 0%,var(--grace-sky-500) 42%,var(--grace-sky-500) 100%);
 }
 .pf-gc-front{
   position:relative;width:100%;height:100%;
@@ -930,7 +934,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wallet-toggle input{opacity:0;width:0;height:0;position:absolute}
 .wallet-toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:20px;cursor:pointer;transition:background .2s}
 .wallet-toggle-slider::before{content:'';position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.wallet-toggle input:checked+.wallet-toggle-slider{background:#EE2B37}
+.wallet-toggle input:checked+.wallet-toggle-slider{background:var(--grace-sky-500)}
 .wallet-toggle input:checked+.wallet-toggle-slider::before{transform:translateX(18px)}
 .wallet-toggle input:focus-visible+.wallet-toggle-slider{outline:2px solid #2563eb;outline-offset:2px}
 .wallet-balance-block{padding:16px 18px 14px;transition:opacity .2s}
@@ -945,7 +949,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wallet-act-btn:hover{border-color:#000;background:#f7f5f2}
 .wallet-act-primary{background:#000;color:#fff;border-color:#000}
 .wallet-act-primary:hover{background:#222;border-color:#222}
-.wallet-act-link{grid-column:1/-1;background:transparent;border:none;color:#EE2B37;font-size:11px;font-weight:600;padding:4px 0}
+.wallet-act-link{grid-column:1/-1;background:transparent;border:none;color:var(--grace-sky-500);font-size:11px;font-weight:600;padding:4px 0}
 .wallet-transfer-panel{border-top:1px solid #f3f0eb;padding:14px 18px 16px;background:#faf8f5}
 .wallet-transfer-panel[hidden]{display:none}
 .wallet-transfer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -954,7 +958,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wallet-field{margin-bottom:10px}
 .wallet-field label{display:block;font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
 .wallet-field input,.wallet-field select{width:100%;padding:10px 12px;border:1px solid #e8e0d5;border-radius:10px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit;outline:none}
-.wallet-field input:focus,.wallet-field select:focus{border-color:#EE2B37}
+.wallet-field input:focus,.wallet-field select:focus{border-color:var(--grace-sky-500)}
 .wallet-receive-details{background:#fff;border:1px solid #e8e0d5;border-radius:12px;padding:12px 14px;margin-bottom:10px}
 .wallet-receive-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f3f0eb;font-size:12px}
 .wallet-receive-row:last-child{border-bottom:none}
@@ -964,7 +968,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wallet-copy-btn:hover{background:#000;color:#fff;border-color:#000}
 .wallet-qr-box{background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:20px;text-align:center;margin-bottom:10px}
 .wallet-qr-placeholder{width:120px;height:120px;margin:0 auto 8px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888}
-.wallet-submit{width:100%;padding:12px;border:none;border-radius:10px;background:#EE2B37;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px}
+.wallet-submit{width:100%;padding:12px;border:none;border-radius:10px;background:var(--grace-sky-500);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px}
 .wallet-submit:hover{background:#d92530}
 .wallet-submit:disabled{background:#d1d5db;color:#888;cursor:not-allowed}
 .wallet-i2c-note{font-size:10px;color:#aaa;line-height:1.45;margin-top:8px;text-align:center}
@@ -979,7 +983,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-cs-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .pf-cs-name{font-size:11px;color:#374151;flex:1}
 .pf-cs-slider{-webkit-appearance:none;appearance:none;width:80px;height:4px;border-radius:2px;outline:none;cursor:pointer;background:#f3f0eb}
-.pf-cs-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#EE2B37;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.pf-cs-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--grace-sky-500);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .pf-cs-pct{font-size:11px;font-weight:700;color:#1a1a1a;width:28px;text-align:right}
 .pf-cs-save{width:100%;background:#000000;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;transition:background .15s}
 .pf-cs-save:hover{background:#111111}
@@ -989,12 +993,12 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-upgrade::before{content:'';position:absolute;top:-18px;right:-18px;width:70px;height:70px;border-radius:50%;background:rgba(238,43,55,.15)}
 .pf-up-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
 .pf-up-sub{font-size:10px;color:rgba(255,255,255,.55);margin-bottom:12px;line-height:1.5}
-.pf-up-btn{background:#EE2B37;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.pf-up-btn{background:var(--grace-sky-500);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
 .pf-up-btn:hover{background:#b8862e}
 
 /* Portfolio toast */
 .pf-toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999;pointer-events:none}
-.pf-toast{background:#000000;color:#fff;padding:12px 16px;border-radius:12px;font-size:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:pfToastIn .35s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;max-width:300px;border-left:3px solid #EE2B37}
+.pf-toast{background:#000000;color:#fff;padding:12px 16px;border-radius:12px;font-size:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:pfToastIn .35s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;max-width:300px;border-left:3px solid var(--grace-sky-500)}
 .pf-toast.pf-toast-success{border-left-color:#16a34a}
 .pf-toast.pf-toast-warn{border-left-color:#f59e0b}
 .wallet-account-card--home .wallet-freeze-row{display:none}
@@ -1026,8 +1030,8 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .cause-meter-live-dot{width:5px;height:5px;border-radius:50%;background:#16a34a;animation:ld 1.4s infinite}
 .cause-meter-live.urgent{color:#dc2626}
 .cause-meter-live.urgent .cause-meter-live-dot{background:#ef4444}
-.cause-meter-live.open{color:#EE2B37}
-.cause-meter-live.open .cause-meter-live-dot{background:#EE2B37}
+.cause-meter-live.open{color:var(--grace-sky-500)}
+.cause-meter-live.open .cause-meter-live-dot{background:var(--grace-sky-500)}
 .cause-meter-pct{font-size:12px;font-weight:800;color:#000000;font-variant-numeric:tabular-nums}
 .cause-meter-pct.urgent{color:#dc2626}
 .cause-meter-track{height:7px;background:#f3f0eb;border-radius:4px;overflow:hidden;position:relative}
@@ -1037,7 +1041,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .cause-meter-fill.meter-navy{background:linear-gradient(90deg,#000000,#111111)}
 .cause-meter-fill.meter-purple{background:linear-gradient(90deg,#6d28d9,#8b5cf6)}
 .cause-meter-fill.meter-green{background:linear-gradient(90deg,#15803d,#22c55e)}
-.cause-meter-fill.meter-gold{background:linear-gradient(90deg,#C41E2A,#EE2B37)}
+.cause-meter-fill.meter-gold{background:linear-gradient(90deg,#C41E2A,var(--grace-sky-500))}
 .cause-meter-fill.meter-red{background:linear-gradient(90deg,#b91c1c,#ef4444)}
 .cause-meter-fill.meter-emergency{background:linear-gradient(90deg,#ea580c,#dc2626)}
 .cause-meter-sub{font-size:10px;color:#888;margin-top:4px}
@@ -1047,11 +1051,11 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .cause-btn-give:hover{background:#111111}
 .cause-btn-route{flex:1;background:#F4F4F4;color:#000000;border:1px solid #e0c89a;border-radius:9px;padding:9px 0;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .cause-btn-route:hover{background:#e0c89a}
-.cause-btn-route.active-route{background:#EE2B37;color:#fff;border-color:#EE2B37}
+.cause-btn-route.active-route{background:var(--grace-sky-500);color:#fff;border-color:var(--grace-sky-500)}
 
 /* ── PROGRESS BAR ── */
 .prog-bar{background:#e8e0d5;border-radius:4px;height:6px;margin:6px 0 2px}
-.prog-fill{height:6px;border-radius:4px;background:linear-gradient(90deg,#EE2B37,#e8b84b)}
+.prog-fill{height:6px;border-radius:4px;background:linear-gradient(90deg,var(--grace-sky-500),#e8b84b)}
 
 /* ── STAT PILLS ── */
 .stat-pill-row{display:flex;gap:8px;padding:14px 18px;border-bottom:1px solid #f3f0eb}
@@ -1076,13 +1080,13 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .res-hero-content{position:relative;z-index:2}
 .res-hero-dots{position:absolute;bottom:12px;right:16px;z-index:3;display:flex;gap:6px;align-items:center}
 .res-hero-dot{width:7px;height:7px;border-radius:50%;border:none;padding:0;background:rgba(255,255,255,.35);cursor:pointer;transition:background .2s,transform .2s}
-.res-hero-dot.active{background:#EE2B37;transform:scale(1.15)}
+.res-hero-dot.active{background:var(--grace-sky-500);transform:scale(1.15)}
 .res-hero-dot:hover{background:rgba(255,255,255,.7)}
 .res-hero-caption{position:absolute;bottom:12px;left:16px;z-index:3;font-size:10px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.3px}
 .res-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .res-hero h2{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px}
 .res-hero p{font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;max-width:480px;line-height:1.5}
-.res-hero-badge{font-size:10px;font-weight:700;color:#EE2B37;background:rgba(238,43,55,.15);border:1px solid rgba(238,43,55,.25);padding:6px 12px;border-radius:20px;white-space:nowrap}
+.res-hero-badge{font-size:10px;font-weight:700;color:var(--grace-sky-500);background:rgba(238,43,55,.15);border:1px solid rgba(238,43,55,.25);padding:6px 12px;border-radius:20px;white-space:nowrap}
 .res-wallet-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 .res-wallet-row .card{margin-bottom:0}
 .res-section-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
@@ -1143,23 +1147,23 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wlt-grace-ctas button{flex:1;padding:11px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .wlt-grace-ctas .wlt-btn-primary{background:#000;color:#fff;border:none}
 .wlt-grace-ctas .wlt-btn-outline{background:#fff;color:#000;border:1px solid #e8e0d5}
-.wlt-wallet-actions-link{display:block;text-align:center;font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer;margin-top:4px}
+.wlt-wallet-actions-link{display:block;text-align:center;font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer;margin-top:4px}
 .wallet-account-card.wlt-wallet-detail{display:none;margin-top:14px;border-top:1px solid #f3f0eb;padding-top:14px}
 .wallet-account-card.wlt-wallet-detail.open{display:block}
 .wlt-recent-card{background:#fff;border:1px solid #ece8e1;border-radius:16px;margin-bottom:16px;overflow:hidden}
 .wlt-recent-card .card-head{display:flex;align-items:center;justify-content:space-between}
-.wlt-see-all{font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer}
+.wlt-see-all{font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer}
 .wlt-impact-flow{display:flex;flex-direction:column;gap:14px}
 .wlt-impact-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .wlt-impact-head h3{font-size:16px;font-weight:800;color:#1a1a1a;margin:0}
-.wlt-impact-link{font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
+.wlt-impact-link{font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
 .pf-grid--3{grid-template-columns:repeat(3,1fr)}
 .pf-sc--green{background:linear-gradient(135deg,#15803d,#22c55e)}
 .pf-sc--purple{background:linear-gradient(135deg,#5b21b6,#7c3aed)}
-.pf-sc--red{background:linear-gradient(135deg,#b91c1c,#EE2B37)}
+.pf-sc--red{background:linear-gradient(135deg,#b91c1c,var(--grace-sky-500))}
 .wlt-goal-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:14px 18px;color:#fff}
 .wlt-goal-cta strong{font-size:13px;font-weight:700}
-.wlt-goal-cta button{background:#EE2B37;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.wlt-goal-cta button{background:var(--grace-sky-500);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
 .wlt-live-impact .card-head{align-items:flex-start}
 .wlt-live-sub{font-size:11px;color:#888;font-weight:400;margin-top:2px}
 .wlt-live-feed{display:flex;flex-direction:column}
@@ -1191,7 +1195,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wlt-merchant-card .wlt-mc-store{font-size:11px;font-weight:700}
 .wlt-merchant-card .wlt-mc-cause{font-size:9px;color:#888;margin-top:2px}
 .wlt-merchant-card .wlt-mc-pct{font-size:12px;font-weight:800;color:#15803d;margin-top:6px}
-.wlt-manage-merchants{display:block;text-align:center;padding:0 16px 14px;font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer}
+.wlt-manage-merchants{display:block;text-align:center;padding:0 16px 14px;font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer}
 .pf-merchant-detail{display:none;border-top:1px solid #f3f0eb}
 .pf-merchant-detail.open{display:block}
 .give-layout--single{grid-template-columns:1fr}
@@ -1201,7 +1205,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wlt-kpi-note{display:block;font-size:10px;color:rgba(255,255,255,.55);margin-top:3px}
 .wlt-route-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;padding:10px 14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:11px;color:rgba(255,255,255,.9)}
 .wlt-route-bar strong{color:#fff}
-.wlt-route-bar button{background:#EE2B37;border:none;color:#fff;font-size:10px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;flex-shrink:0}
+.wlt-route-bar button{background:var(--grace-sky-500);border:none;color:#fff;font-size:10px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;flex-shrink:0}
 .wlt-route-bar button:hover{background:#d92530}
 .give-unified-body{padding:22px 24px 24px}
 .give-layout{display:grid;grid-template-columns:1fr 260px;gap:16px}
@@ -1209,11 +1213,11 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .give-step-lbl{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .give-fund-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
 .give-fund-chip{padding:7px 14px;border-radius:20px;border:1px solid #e8e0d5;background:#f7f5f2;font-size:12px;font-weight:600;color:#555;cursor:pointer;transition:all .15s}
-.give-fund-chip:hover,.give-fund-chip.active{background:#F4F4F4;border-color:#EE2B37;color:#000000}
+.give-fund-chip:hover,.give-fund-chip.active{background:#F4F4F4;border-color:var(--grace-sky-500);color:#000000}
 .give-options-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .give-opt{flex:1;min-width:160px;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#f7f5f2;border-radius:10px}
 .give-recent .tx-row{padding:9px 16px}
-.give-route-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(238,43,55,.2);color:#EE2B37;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;margin-top:10px}
+.give-route-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(238,43,55,.2);color:var(--grace-sky-500);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;margin-top:10px}
 .cause-grid-give{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .glt-section-hdr{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
 .glt-section-sub{font-size:12px;color:#888;margin-bottom:14px}
@@ -1226,7 +1230,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .net-hero-content{position:relative;z-index:2}
 .net-hero-topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .net-hero-logo{height:32px;width:auto;object-fit:contain;mix-blend-mode:lighten}
-.net-live-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;background:#EE2B37;color:#fff;padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s}
+.net-live-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;background:var(--grace-sky-500);color:#fff;padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s}
 .net-live-badge:hover{background:#d92530;transform:scale(1.02)}
 .net-live-badge .plive-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pblink 1.2s infinite}
 .net-hero h2{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;margin:0}
@@ -1234,35 +1238,35 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .net-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
 .net-kpi{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px}
 .net-kpi-val{display:block;font-size:22px;font-weight:800;color:#fff;line-height:1.1}
-.net-kpi-val.hot{color:#EE2B37}
+.net-kpi-val.hot{color:var(--grace-sky-500)}
 .net-kpi-key{display:block;font-size:9px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.45px;margin-top:4px}
 .net-community-flow{display:flex;flex-direction:column;gap:14px}
 .net-widgets-stack{display:flex;flex-direction:column;gap:12px}
 .net-composer-privacy{font-size:10px;color:#888;line-height:1.45;padding:8px 4px 0;border-top:1px solid #f3f0eb;margin-top:10px}
-.net-composer-privacy strong{color:#EE2B37;font-weight:600}
+.net-composer-privacy strong{color:var(--grace-sky-500);font-weight:600}
 .active-now--scroll{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
 .active-now--scroll .an-av-wrap{flex-shrink:0}
 .net-faith-moments,.net-fresh-today{background:#fff;border:1px solid #ece8e1;border-radius:14px;padding:14px 16px;margin-bottom:14px}
 .net-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .net-section-head h3{font-size:14px;font-weight:700;color:#1a1a1a;margin:0}
 .net-section-head span{font-size:11px;color:#888;line-height:1.4}
-.net-section-link{font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer}
+.net-section-link{font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer}
 .net-story-scroll,.net-fresh-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
 .net-story-item{flex:0 0 72px;scroll-snap-align:start;text-align:center;cursor:pointer}
-.net-story-ring{width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,#EE2B37,#f59e0b);margin:0 auto 6px}
+.net-story-ring{width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--grace-sky-500),#f59e0b);margin:0 auto 6px}
 .net-story-ring img,.net-story-ring .net-story-add{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #fff;background:#f7f5f2;display:flex;align-items:center;justify-content:center;font-size:22px;color:#888}
 .net-story-lbl{font-size:9px;color:#555;font-weight:600;line-height:1.2}
 .net-fresh-card{flex:0 0 100px;scroll-snap-align:start;border-radius:12px;overflow:hidden;position:relative;cursor:pointer}
 .net-fresh-card img{width:100%;height:120px;object-fit:cover;display:block}
 .net-fresh-card-lbl{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:9px;font-weight:700;color:#fff}
-.net-fresh-badge{position:absolute;top:6px;left:6px;font-size:8px;font-weight:700;background:#EE2B37;color:#fff;padding:2px 6px;border-radius:6px}
+.net-fresh-badge{position:absolute;top:6px;left:6px;font-size:8px;font-weight:700;background:var(--grace-sky-500);color:#fff;padding:2px 6px;border-radius:6px}
 .net-wall-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
 .net-wall-filters{display:flex;gap:6px;flex-wrap:wrap;flex:1}
 .net-wall-filter{padding:6px 14px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;font-size:11px;font-weight:600;color:#555;cursor:pointer;font-family:inherit}
 .net-wall-filter.active{background:#000;color:#fff;border-color:#000}
 .net-wall-create-row{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .net-wall-create-lbl{font-size:11px;color:#888;font-weight:600}
-.net-wall-create{background:#EE2B37;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.net-wall-create{background:var(--grace-sky-500);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .net-wall-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media (min-width:1100px){.net-wall-grid{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:640px){.net-wall-grid{grid-template-columns:1fr}}
@@ -1279,7 +1283,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .net-wall-role{font-size:10px;color:#888}
 .net-wall-caption{font-size:12px;color:#374151;line-height:1.45;margin-bottom:8px}
 .net-wall-stats{display:flex;gap:12px;font-size:10px;color:#888}
-.ge-hero--featured{background:linear-gradient(135deg,#EE2B37 0%,#7c2d3a 45%,#0a1628 100%);border-radius:16px;padding:20px 22px;margin-bottom:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden}
+.ge-hero--featured{background:linear-gradient(135deg,var(--grace-sky-500) 0%,#7c2d3a 45%,#0a1628 100%);border-radius:16px;padding:20px 22px;margin-bottom:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden}
 .ge-hero--featured::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.08),transparent 55%);pointer-events:none}
 .ge-hero--featured>div{position:relative;z-index:1}
 .ge-hero-eyebrow{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
@@ -1301,7 +1305,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ge-next-lbl{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.4px}
 .ge-next-name{font-size:14px;font-weight:700;color:#fff;margin-top:4px}
 .ge-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.ge-discover-toggle{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer}
+.ge-discover-toggle{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer}
 .group-chip{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f7f5f2;cursor:pointer;transition:background .12s}
 .group-chip:last-child{border-bottom:none}
 .group-chip:hover{background:#faf8f5}
@@ -1330,7 +1334,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .journey-partner-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:12px 18px;margin:14px 0 18px;font-size:12px;color:#555}
 .journey-partner-bar strong{color:#1a1a1a;font-weight:700}
 .journey-partner-links{display:flex;gap:14px;flex-wrap:wrap}
-.journey-partner-links a,.journey-partner-links button{font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
+.journey-partner-links a,.journey-partner-links button{font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
 .journey-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;position:sticky;top:0;z-index:5;background:linear-gradient(#f7f5f2 70%,transparent);padding:8px 0 12px}
 .journey-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;transition:all .15s}
 .journey-nav-btn:hover{border-color:#000;color:#1a1a1a;background:#faf8f5}
@@ -1343,11 +1347,11 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .journey-section-hdr p{font-size:13px;color:#888;margin-top:4px;max-width:520px;line-height:1.45}
 .journey-section-ico{width:44px;height:44px;border-radius:12px;background:#f7f5f2;border:1px solid #ece8e1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .journey-growth-bar{background:#f7f5f2;border-radius:8px;height:8px;margin-top:12px;overflow:hidden}
-.journey-growth-fill{height:100%;background:linear-gradient(90deg,#EE2B37,#f97316);border-radius:8px}
+.journey-growth-fill{height:100%;background:linear-gradient(90deg,var(--grace-sky-500),#f97316);border-radius:8px}
 .journey-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .journey-grow-list{display:flex;flex-direction:column;gap:8px;font-size:13px;color:#374151}
 .journey-grow-list li{display:flex;align-items:center;gap:8px}
-.journey-grow-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:#EE2B37;flex-shrink:0}
+.journey-grow-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--grace-sky-500);flex-shrink:0}
 .prof-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .prof-stat-box{background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:14px 16px}
 .prof-stat-box .ps-val{font-size:20px;font-weight:800;color:#000000}
@@ -1357,9 +1361,9 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .journey-jtab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;border:1px solid #e8e0d5;background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#555}
 .journey-jtab.active{background:#000;color:#fff;border-color:#000}
 .mood-chip{background:#f7f5f2;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;gap:6px}
-.mood-chip:hover,.mood-chip.selected{background:#fff;border-color:#EE2B37;box-shadow:0 0 0 1px rgba(238,43,55,.15)}
+.mood-chip:hover,.mood-chip.selected{background:#fff;border-color:var(--grace-sky-500);box-shadow:0 0 0 1px rgba(238,43,55,.15)}
 .mood-chip-lbl{font-size:10px;color:#555;font-weight:600}
-.badge-circle.bc-earned{display:flex;align-items:center;justify-content:center;background:#f7f5f2;border:2px solid #EE2B37}
+.badge-circle.bc-earned{display:flex;align-items:center;justify-content:center;background:#f7f5f2;border:2px solid var(--grace-sky-500)}
 .badge-circle.bc-earned .grace-ic{display:block}
 .goal-idea{display:flex;align-items:flex-start;gap:10px;background:#f7f5f2;border-radius:10px;padding:12px 14px;cursor:pointer;transition:background .12s;border:1px solid transparent}
 .goal-idea:hover{background:#fff;border-color:#e8e0d5}
@@ -1370,7 +1374,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .journey-activity-stat .sp-val{font-size:22px;font-weight:800;color:#1a1a1a}
 .journey-activity-stat .sp-key{font-size:11px;color:#888;margin-top:4px}
 .journey-goals-layout{display:grid;grid-template-columns:1fr 280px;gap:14px}
-.journey-browse-link{display:block;text-align:center;padding:12px;font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer}
+.journey-browse-link{display:block;text-align:center;padding:12px;font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer}
 .journey-hero-stats--four{grid-template-columns:repeat(4,1fr)}
 .study-stepper{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 .study-step-dot{flex:1;min-width:56px;text-align:center;padding:8px 4px;border-radius:10px;background:#f7f5f2;border:1px solid #ece8e1;font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.3px}
@@ -1386,14 +1390,14 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .study-step-actions{display:flex;flex-direction:column;gap:8px}
 .study-step-btn{background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .study-step-btn.secondary{background:#f7f5f2;border:1px solid #e8e0d5;color:#555}
-.study-step-btn.accent{background:#EE2B37}
+.study-step-btn.accent{background:var(--grace-sky-500)}
 .study-topic-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .study-topic-chip{font-size:11px;font-weight:600;padding:8px 14px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;color:#555;cursor:pointer;font-family:inherit}
-.study-topic-chip:hover{border-color:#EE2B37;color:#EE2B37}
+.study-topic-chip:hover{border-color:var(--grace-sky-500);color:var(--grace-sky-500)}
 .study-path-card{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f7f5f2;border:1px solid #ece8e1;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
-.study-path-card:hover{border-color:#EE2B37}
+.study-path-card:hover{border-color:var(--grace-sky-500)}
 .study-path-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:6px;background:#fff;border:1px solid #e8e0d5;color:#888;flex-shrink:0}
-.study-path-badge.sermon{background:#fef2f2;color:#EE2B37;border-color:#fecaca}
+.study-path-badge.sermon{background:#fef2f2;color:var(--grace-sky-500);border-color:#fecaca}
 .study-path-badge.realized{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
 .study-path-title{font-size:13px;font-weight:700;color:#1a1a1a}
 .study-path-meta{font-size:11px;color:#888;margin-top:3px}
@@ -1407,11 +1411,11 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .jy-goal-card-title{font-size:13px;font-weight:700;color:#1a1a1a}
 .jy-goal-card-sub{font-size:11px;color:#888;margin-top:2px}
 .jy-goal-progress{height:6px;background:#ece8e1;border-radius:4px;overflow:hidden}
-.jy-goal-progress-fill{height:100%;background:linear-gradient(90deg,#EE2B37,#f97316);border-radius:4px}
+.jy-goal-progress-fill{height:100%;background:linear-gradient(90deg,var(--grace-sky-500),#f97316);border-radius:4px}
 .jd-hist-row{padding:12px 0;border-bottom:1px solid #f3f0eb;font-size:12px;line-height:1.5;color:#374151}
 .jd-hist-row:last-child{border-bottom:none}
 .jd-hist-date{font-weight:700;color:#1a1a1a;display:block;margin-bottom:4px}
-.jd-hist-mood{font-size:10px;color:#EE2B37;font-weight:600;margin-bottom:4px;display:block}
+.jd-hist-mood{font-size:10px;color:var(--grace-sky-500);font-weight:600;margin-bottom:4px;display:block}
 .goal-idea.added{opacity:.55;pointer-events:none}
 .goal-idea.added .goal-idea-ico::after{content:'✓';position:absolute;font-size:10px;font-weight:700;color:#15803d}
 .goal-idea-ico{position:relative}
@@ -1462,7 +1466,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .watch-live-kpi{background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .watch-live-series{background:rgba(238,43,55,.85);color:#fff;font-size:10px;font-weight:700;padding:5px 10px;border-radius:8px}
 .watch-donate-stack{position:absolute;top:52px;right:64px;z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
-.watch-donate-toast{background:rgba(0,0,0,.82);color:#fff;font-size:11px;font-weight:600;padding:8px 12px;border-radius:10px;border-left:3px solid #EE2B37;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:watchDonateIn .45s ease;white-space:nowrap}
+.watch-donate-toast{background:rgba(0,0,0,.82);color:#fff;font-size:11px;font-weight:600;padding:8px 12px;border-radius:10px;border-left:3px solid var(--grace-sky-500);box-shadow:0 8px 24px rgba(0,0,0,.35);animation:watchDonateIn .45s ease;white-space:nowrap}
 @keyframes watchDonateIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
 .watch-live-rail{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:3}
 .watch-live-rail-btn{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#fff;cursor:pointer;background:transparent;border:none;font-family:inherit;padding:0}
@@ -1483,20 +1487,20 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .watch-chat-input{flex:1;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;font-size:12px;color:#fff;outline:none;font-family:inherit}
 .watch-chat-input::placeholder{color:rgba(255,255,255,.4)}
 .watch-chat-input:focus{border-color:rgba(238,43,55,.6);background:rgba(255,255,255,.12)}
-.watch-chat-send{background:#EE2B37;border:none;color:#fff;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.watch-chat-send{background:var(--grace-sky-500);border:none;color:#fff;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
 .watch-chat-send:hover{background:#d92530}
 .watch-sermons-section{margin-bottom:14px}
 .watch-sermons-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
 .watch-sermons-title{font-size:15px;font-weight:700;color:#1a1a1a}
-.watch-sermons-link{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer}
+.watch-sermons-link{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer}
 .watch-sermons-row{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .watch-sermon-card{flex:0 0 220px;scroll-snap-align:start;cursor:pointer;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #ece8e1;transition:border-color .15s,box-shadow .15s}
-.watch-sermon-card:hover{border-color:#EE2B37;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.watch-sermon-card:hover{border-color:var(--grace-sky-500);box-shadow:0 4px 14px rgba(0,0,0,.08)}
 .watch-sermon-thumb{aspect-ratio:16/9;position:relative;background:center/cover no-repeat}
 .watch-sermon-thumb::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.45) 100%)}
 .watch-sermon-dur{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.78);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
 .watch-sermon-body{padding:10px 12px 12px}
-.watch-sermon-series{font-size:9px;font-weight:700;color:#EE2B37;letter-spacing:.4px;margin-bottom:4px}
+.watch-sermon-series{font-size:9px;font-weight:700;color:var(--grace-sky-500);letter-spacing:.4px;margin-bottom:4px}
 .watch-sermon-title{font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .watch-sermon-meta{font-size:10px;color:#888;margin-top:6px}
 .watch-schedule-hero{height:88px;margin:0 16px 12px;border-radius:10px;background:center/cover no-repeat;position:relative;overflow:hidden}
@@ -1519,7 +1523,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-mod:hover{box-shadow:0 4px 16px rgba(27,42,74,.06)}
 .dash-mod-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f3f0eb}
 .dash-mod-title{font-size:13px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:8px}
-.dash-mod-link{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer}
+.dash-mod-link{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer}
 .dash-mod-body{padding:14px 16px 16px}
 .dash-mod-sub{font-size:11px;color:#888;margin-top:3px;font-weight:500;line-height:1.35}
 .dash-feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f7f5f2;font-size:12px}
@@ -1527,7 +1531,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-feed-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .dash-hub{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .dash-hub-card{background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:14px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:6px;min-height:88px}
-.dash-hub-card:hover{border-color:#EE2B37;background:#fefbf5;transform:translateY(-2px)}
+.dash-hub-card:hover{border-color:var(--grace-sky-500);background:#fefbf5;transform:translateY(-2px)}
 .dash-hub-ico{font-size:22px;line-height:1}
 .dash-hub-label{font-size:12px;font-weight:700;color:#1a1a1a}
 .dash-hub-sub{font-size:10px;color:#aaa;line-height:1.4;margin-top:auto}
@@ -1602,12 +1606,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .home-leader-strip-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.04em}
 .home-leader-strip-name{font-size:14px;font-weight:700;color:#1a1a1a;margin-top:2px}
 .home-leader-strip-sub{font-size:11px;color:#aaa;margin-top:2px}
-.home-leader-strip-cta{font-size:12px;font-weight:700;color:#EE2B37;flex-shrink:0}
+.home-leader-strip-cta{font-size:12px;font-weight:700;color:var(--grace-sky-500);flex-shrink:0}
 .av-ring-wrap--grace{margin-right:4px}
 .grace-faq-block{margin:20px 0 8px}
 .grace-faq-list{display:flex;flex-direction:column;gap:10px}
 .grace-faq-block .faq-card{background:#fff;border:1px solid #e8e4dc;border-radius:16px;overflow:hidden}
-.grace-faq-block .faq-card.open{border-color:#EE2B37;box-shadow:0 2px 12px rgba(238,43,55,.08)}
+.grace-faq-block .faq-card.open{border-color:var(--grace-sky-500);box-shadow:0 2px 12px rgba(238,43,55,.08)}
 .grace-faq-block .faq-card-head{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer}
 .grace-faq-block .faq-card-q{flex:1;font-size:14px;font-weight:700;color:#1a1a1a;line-height:1.35}
 .grace-faq-block .faq-toggle{width:28px;height:28px;border-radius:50%;background:#f7f5f2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1627,7 +1631,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-outreach-live-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;animation:ld 1.4s infinite}
 .dash-outreach-body{padding:14px 16px}
 .dash-outreach-assigned{background:linear-gradient(135deg,#FFF0F1,#F4F4F4);border:1px solid #F5C2C6;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px}
-.dash-outreach-assigned-av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #EE2B37;flex-shrink:0}
+.dash-outreach-assigned-av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--grace-sky-500);flex-shrink:0}
 .dash-outreach-assigned-name{font-size:13px;font-weight:700;color:#000000}
 .dash-outreach-assigned-role{font-size:11px;color:#C41E2A;margin-top:2px}
 .dash-outreach-assigned-msg{font-size:12px;color:#000000;font-style:italic;line-height:1.5;margin-top:8px}
@@ -1635,14 +1639,14 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-outreach-leaders-head{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
 .dash-leader-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .dash-leader-card{background:#f7f5f2;border:1px solid #ece8e1;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
-.dash-leader-card:hover{border-color:#EE2B37;background:#fefbf5;transform:translateY(-1px)}
+.dash-leader-card:hover{border-color:var(--grace-sky-500);background:#fefbf5;transform:translateY(-1px)}
 .dash-leader-card-av-wrap{position:relative;width:48px;height:48px;margin:0 auto 8px}
 .dash-leader-card-av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #e8e0d5}
 .dash-leader-card-live{position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;background:#16a34a;border:2px solid #f7f5f2}
 .dash-leader-card-live.off{background:#d1d5db}
 .dash-leader-card-name{font-size:11px;font-weight:700;color:#1a1a1a;line-height:1.3}
 .dash-leader-card-role{font-size:10px;color:#aaa;margin-top:3px;line-height:1.3}
-.dash-leader-card-topic{font-size:9px;color:#EE2B37;font-weight:600;margin-top:4px}
+.dash-leader-card-topic{font-size:9px;color:var(--grace-sky-500);font-weight:600;margin-top:4px}
 .dash-outreach-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .dash-outreach-care{background:#fff;border:1px solid #ece8e1;border-radius:12px;overflow:hidden}
 .dash-outreach-care-head{font-size:11px;font-weight:700;color:#1a1a1a;padding:10px 12px;border-bottom:1px solid #f3f0eb;background:#faf8f5}
@@ -1664,12 +1668,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .ai-mode-tag.live{background:rgba(22,163,74,.25);color:#86efac;border:1px solid rgba(22,163,74,.35)}
 .dash-daily-loop{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
 .dash-daily-item{background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .15s}
-.dash-daily-item:hover{border-color:#EE2B37;box-shadow:0 4px 14px rgba(27,42,74,.06)}
-.dash-daily-time{font-size:10px;font-weight:700;color:#EE2B37;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.dash-daily-item:hover{border-color:var(--grace-sky-500);box-shadow:0 4px 14px rgba(27,42,74,.06)}
+.dash-daily-time{font-size:10px;font-weight:700;color:var(--grace-sky-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .dash-daily-action{font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.4;margin-bottom:8px}
 .dash-daily-status{font-size:10px;color:#888}
 .dash-daily-status.done{color:#15803d;font-weight:600}
-.dash-daily-status.pending{color:#EE2B37;font-weight:600}
+.dash-daily-status.pending{color:var(--grace-sky-500);font-weight:600}
 .dash-impact-you{margin-bottom:16px}
 .dash-impact-tagline{font-size:12px;color:#666;line-height:1.5;padding:0 18px 12px;border-bottom:1px solid #f3f0eb}
 .dash-impact-tagline strong{color:#000000}
@@ -1684,11 +1688,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   cursor:pointer;transition:all .15s;text-align:left;position:relative;overflow:hidden;
   display:flex;flex-direction:column;min-height:118px
 }
-.dash-pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pillar-accent,#EE2B37);opacity:.85}
-.dash-pillar:hover{border-color:var(--pillar-accent,#EE2B37);background:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(27,42,74,.07)}
+.dash-pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pillar-accent,var(--grace-sky-500));opacity:.85}
+.dash-pillar:hover{border-color:var(--pillar-accent,var(--grace-sky-500));background:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(27,42,74,.07)}
 .dash-pillar-top{margin-bottom:8px}
 .dash-pillar-step{
-  font-size:18px;font-weight:800;color:var(--pillar-accent,#EE2B37);letter-spacing:-.02em;
+  font-size:18px;font-weight:800;color:var(--pillar-accent,var(--grace-sky-500));letter-spacing:-.02em;
   line-height:1;display:block
 }
 .dash-pillar-name{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:3px;line-height:1.2}
@@ -1697,7 +1701,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .dash-pillar--growth{--pillar-accent:#6366f1}
 .dash-pillar--resource{--pillar-accent:#d97706}
 .dash-pillar--assistance{--pillar-accent:#e11d48}
-.dash-pillar--engagement{--pillar-accent:#EE2B37}
+.dash-pillar--engagement{--pillar-accent:var(--grace-sky-500)}
 .dash-pillar--community{--pillar-accent:#059669}
 .dash-hero-live-col{
   display:flex;flex-direction:column;align-items:flex-end;gap:8px;
@@ -1762,7 +1766,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .home-prayer-reel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .home-prayer-reel-title{font-size:15px;font-weight:700;color:#1a1a1a}
 .home-prayer-reel-sub{font-size:11px;color:#aaa;margin-top:2px}
-.home-prayer-reel-link{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer;flex-shrink:0;padding-top:2px}
+.home-prayer-reel-link{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer;flex-shrink:0;padding-top:2px}
 .home-prayer-reel-stage{display:flex;gap:16px;align-items:flex-start}
 .home-prayer-reel-video{
   position:relative;flex:0 0 240px;aspect-ratio:9/16;max-height:420px;border-radius:16px;overflow:hidden;
@@ -1784,21 +1788,21 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .home-prayer-reel-hint{font-size:10px;color:#aaa;margin-top:10px}
 .home-prayer-reel-dots{display:flex;gap:6px;margin-top:8px}
 .home-prayer-reel-dot{width:6px;height:6px;border-radius:50%;background:#e8e0d5;cursor:pointer;transition:background .15s}
-.home-prayer-reel-dot.active{background:#EE2B37}
+.home-prayer-reel-dot.active{background:var(--grace-sky-500)}
 .home-prayer-reel-actions{display:flex;flex-direction:column;gap:14px;padding-top:8px}
 .home-prayer-reel-act{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#555;cursor:pointer}
 .home-prayer-reel-act-ico{
   width:40px;height:40px;border-radius:50%;background:#f7f5f2;border:1px solid #ece8e1;
   display:flex;align-items:center;justify-content:center
 }
-.home-prayer-reel-act:hover .home-prayer-reel-act-ico{border-color:#EE2B37;background:#fefbf5}
+.home-prayer-reel-act:hover .home-prayer-reel-act-ico{border-color:var(--grace-sky-500);background:#fefbf5}
 .home-prayer-impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;align-items:stretch}
 .home-prayer-impact-grid .home-prayer-reel{margin-bottom:0}
 .home-giving-impact{display:flex;flex-direction:column;height:100%}
 .home-giving-impact-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .home-giving-impact-title{font-size:15px;font-weight:700;color:#1a1a1a}
 .home-giving-impact-sub{font-size:11px;color:#aaa;margin-top:2px}
-.home-giving-impact-link{font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer;flex-shrink:0;padding-top:2px;border:none;background:none;font-family:inherit}
+.home-giving-impact-link{font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer;flex-shrink:0;padding-top:2px;border:none;background:none;font-family:inherit}
 .home-gi-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .home-gi-kpi{background:#f7f5f2;border:1px solid #ece8e1;border-radius:12px;padding:12px 14px}
 .home-gi-kpi-val{font-size:20px;font-weight:800;color:#1a1a1a;line-height:1.1}
@@ -1813,8 +1817,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .home-gi-alloc-top span:last-child{font-weight:700;color:#888;font-variant-numeric:tabular-nums;flex-shrink:0}
 .home-gi-alloc-bar{background:#f3f0eb;border-radius:4px;height:5px;overflow:hidden}
 .home-gi-alloc-fill{height:100%;border-radius:4px}
-.home-gi-cta{display:block;width:100%;margin-top:12px;padding:10px;border-radius:10px;background:#f7f5f2;border:1px solid #e8e0d5;font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer;font-family:inherit}
-.home-gi-cta:hover{background:#fefbf5;border-color:#EE2B37}
+.home-gi-cta{display:block;width:100%;margin-top:12px;padding:10px;border-radius:10px;background:#f7f5f2;border:1px solid #e8e0d5;font-size:11px;font-weight:700;color:var(--grace-sky-500);cursor:pointer;font-family:inherit}
+.home-gi-cta:hover{background:#fefbf5;border-color:var(--grace-sky-500)}
 @media (max-width:960px){.home-prayer-impact-grid{grid-template-columns:1fr}}
 @media (max-width: 1100px){
   body{overflow:auto;height:auto;min-height:100vh}
@@ -1871,7 +1875,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
     </div>
-    <div class="sb-church">Central Henderson</div>
+    <div class="sb-church">Faithful Church</div>
     <div style="font-size:10px;font-weight:600;color:#C41E2A">My GRACE Members Portal</div>
   </div>
   <div class="sb-scroll">
@@ -1927,7 +1931,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <img class="tb-church-mark" src="assets/central-henderson-logo.png" alt="">
+    <img class="tb-church-mark" src="assets/faithful-church-logo.png" alt="">
     <div>
       <div class="tb-title" id="tb-title">My GRACE Members Card</div>
       <div style="font-size:11px;color:#888;margin-top:2px;line-height:1.35" id="tb-subtitle"></div>
@@ -1945,7 +1949,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="dash-hero">
         <div class="dash-hero-top">
           <div>
-            <div class="dash-hero-greeting" id="home-hero-date">Sat, May 30 · Central Henderson</div>
+            <div class="dash-hero-greeting" id="home-hero-date">Sat, May 30 · Faithful Church</div>
             <div class="dash-hero-name" id="home-hero-greeting-name">Good morning, Maya</div>
             <div class="dash-hero-leader" id="home-leader-strip" onclick="goSection('ai')" role="button" tabindex="0" aria-label="Open your leader avatar">
               <img id="home-leader-strip-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
@@ -1975,7 +1979,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="dash-mod">
         <div class="dash-mod-head">
           <div>
-            <div class="dash-mod-title">GRACE at Central</div>
+            <div class="dash-mod-title">GRACE at Faithful Church</div>
             <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
           </div>
         </div>
@@ -2023,7 +2027,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
         <div style="padding:14px 18px">
           <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:6px" id="home-next-title">Review this month&apos;s impact for Food Pantry</div>
-          <div style="font-size:12px;color:#666;line-height:1.55;margin-bottom:12px" id="home-next-body">See your card-generated impact, then choose where Central Henderson should route it.</div>
+          <div style="font-size:12px;color:#666;line-height:1.55;margin-bottom:12px" id="home-next-body">See your card-generated impact, then choose where Faithful Church should route it.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="button" style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="openWalletTab('impact')">Review</button>
             <button type="button" style="background:#f7f5f2;border:1px solid #e4dcce;color:#555;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="openWalletGive()">Give directly</button>
@@ -2091,24 +2095,15 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div style="padding:6px 8px 0">
             <div class="pf-card-flip" onclick="pfFlipCard(this)">
               <div class="pf-card-inner">
-                <div class="pf-card-face pf-card-front">
-                  <div class="pf-gc-front">
-                    <div class="pf-gc-front-top">
-                      <div class="pf-gc-chip"><div class="pf-gc-chip-ico"></div></div>
-                      <img class="pf-gc-wordmark" src="assets/central-church-wordmark.png" alt="Central Church">
-                    </div>
-                    <div class="pf-gc-front-mid">
-                      <img class="pf-gc-cmark" src="assets/central-c-mark.png" alt="" aria-hidden="true">
-                    </div>
-                    <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834</div>
-                  </div>
+                <div class="pf-card-face pf-card-front pf-card-front--faithful">
+                  <img class="pf-faithful-card-img" src="assets/faithful-church-card.png" alt="Faithful Church NeoBanking debit card">
                 </div>
                 <div class="pf-card-face pf-card-back">
                   <div class="pf-gc-back">
-                    <img class="pf-gc-wordmark-back" src="assets/central-church-wordmark.png" alt="Central Church">
+                    <img class="pf-gc-wordmark-back" src="assets/faithful-church-logo-wht.png" alt="Faithful Church">
                     <div class="pf-card-back-stripe"></div>
                     <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
-                    <div class="pf-card-back-info">Issued by Central Henderson · Powered by GRACE<br>Qualified purchases can support church causes</div>
+                    <div class="pf-card-back-info">Issued by Faithful Church · Powered by GRACE<br>Qualified purchases can support church causes</div>
                   </div>
                 </div>
               </div>
@@ -2247,7 +2242,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   </div>
                   <div class="ai-hero-leader-identity">
                     <div class="ai-leader-name" id="ai-leader-name">Pastor James Wilson <span class="ai-mode-tag ai">Verified Avatar</span></div>
-                    <div class="ai-leader-role" id="ai-leader-role">Senior Pastor · Central Henderson · Verified Avatar · Human follow-up available</div>
+                    <div class="ai-leader-role" id="ai-leader-role">Senior Pastor · Faithful Church · Verified Avatar · Human follow-up available</div>
                     <div class="ai-status">
                       <div class="ai-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                       <span id="ai-status-txt">Listening for you, Maya...</span>
@@ -2313,7 +2308,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             </header>
             <div class="pcare-intro">
               <h3>How Can We Help?</h3>
-              <p>Central Henderson Church is here for you — 24/7, confidential support. Select what best describes your situation.</p>
+              <p>Faithful Church is here for you — 24/7, confidential support. Select what best describes your situation.</p>
             </div>
             <div class="pcare-grid" id="pcare-grid" role="list"></div>
             <div class="pcare-recent" id="pcare-recent" hidden></div>
@@ -2328,12 +2323,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Leader roster -->
           <div class="leader-gallery">
             <div class="lg-head">
-              <span>Central Henderson Leadership</span>
+              <span>Faithful Church Leadership</span>
               <span class="lg-count" id="leader-roster-count">18 verified</span>
             </div>
             <div class="leader-roster-scroll" id="leader-roster-list"></div>
-            <a class="leader-crisis-ad" href="#" onclick="openCrisisSupport();return false" aria-label="Are you in crisis? Get help now — Central 24-7">
-              <img src="assets/crisis-mode-ad.png" alt="Are you in crisis mode? Click for help — Central Church 24-7">
+            <a class="leader-crisis-ad" href="#" onclick="openCrisisSupport();return false" aria-label="Are you in crisis? Get help now — Faithful Church 24-7">
+              <img src="assets/crisis-mode-ad.png" alt="Are you in crisis mode? Click for help — Faithful Church 24-7">
             </a>
             <div class="leader-crisis-outreach" aria-label="Crisis outreach lines">
               <div class="lco-head">Crisis lines · 24/7 confidential</div>
@@ -2454,10 +2449,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="net-hero-overlay"></div>
           <div class="net-hero-content">
             <div class="net-hero-topbar">
-              <img class="net-hero-logo" src="assets/central-church-wordmark.png" alt="Central Church">
+              <img class="net-hero-logo" src="assets/faithful-church-logo-wht.png" alt="Faithful Church">
               <button type="button" class="net-live-badge" onclick="openWatchLive()" aria-label="Watch Sunday service live"><span class="plive-dot"></span>Live · 342 watching</button>
             </div>
-            <h2>Connect at Central</h2>
+            <h2>Connect at Faithful Church</h2>
             <p>Groups, events, prayer, and care with clear privacy boundaries.</p>
             <div class="net-kpi-grid" role="group" aria-label="Community summary">
               <div class="net-kpi"><span class="net-kpi-val" id="net-kpi-groups">2</span><span class="net-kpi-key">Groups</span></div>
@@ -2493,7 +2488,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Composer -->
           <div class="composer">
             <div class="composer-top">
-              <img src="https://randomuser.me/api/portraits/women/42.jpg" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #EE2B37" alt="Maya">
+              <img src="https://randomuser.me/api/portraits/women/42.jpg" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--grace-sky-500)" alt="Maya">
               <div class="composer-input" onclick="openPostOverlay()" tabindex="0">What's on your heart today?</div>
             </div>
             <div class="composer-actions">
@@ -2803,7 +2798,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div style="display:flex;gap:8px;justify-content:flex-end">
                 <button onclick="toggleAddEventForm()" style="background:none;border:none;font-size:11px;color:#888;cursor:pointer;font-weight:600">Cancel</button>
-                <button onclick="addNetEvent()" style="background:#EE2B37;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">Add event</button>
+                <button onclick="addNetEvent()" style="background:var(--grace-sky-500);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">Add event</button>
               </div>
             </div>
             <div style="padding:10px 18px 8px;display:flex;gap:6px;border-bottom:1px solid #f3f0eb;flex-wrap:wrap">
@@ -2839,9 +2834,9 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
               <div class="event-row" data-evcat="special">
-                <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:#EE2B37">28</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">Jun</div></div>
+                <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:var(--grace-sky-500)">28</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Summer BBQ Fellowship</div><div class="event-time">2:00 PM · Church grounds</div></div>
-                <button class="event-rsvp" style="background:#EE2B37;color:#000000;border-color:#EE2B37" onclick="rsvpEvent(this)">RSVP</button>
+                <button class="event-rsvp" style="background:var(--grace-sky-500);color:#000000;border-color:var(--grace-sky-500)" onclick="rsvpEvent(this)">RSVP</button>
               </div>
             </div>
           </div>
@@ -2872,7 +2867,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
           <div class="net-story-scroll">
             <div class="net-story-item" onclick="openMomentComposer()"><div class="net-story-ring"><div class="net-story-add">+</div></div><div class="net-story-lbl">Your moment</div></div>
-            <div class="net-story-item" onclick="openWallLightbox('assets/causes/food-pantry.jpg','Photos & recaps from serve days across Central')"><div class="net-story-ring"><img src="assets/causes/food-pantry.jpg" alt=""></div><div class="net-story-lbl">Photos/Recaps</div></div>
+            <div class="net-story-item" onclick="openWallLightbox('assets/causes/food-pantry.jpg','Photos & recaps from serve days across Faithful Church')"><div class="net-story-ring"><img src="assets/causes/food-pantry.jpg" alt=""></div><div class="net-story-lbl">Photos/Recaps</div></div>
             <div class="net-story-item" onclick="openWallLightbox('assets/watch/schedule-prayer.jpg','Worship night — the room was full 🔥')"><div class="net-story-ring"><img src="assets/watch/schedule-prayer.jpg" alt=""></div><div class="net-story-lbl">Worship</div></div>
             <div class="net-story-item" onclick="openWallLightbox('assets/wallet-hero/smiling-volunteers.jpg','Serve day crew — 227 pantry bags packed')"><div class="net-story-ring"><img src="assets/wallet-hero/smiling-volunteers.jpg" alt=""></div><div class="net-story-lbl">Serve day</div></div>
             <div class="net-story-item" onclick="openWallLightbox('assets/causes/youth-camp.jpg','Baptism Sunday — 4 members took the plunge 🤍')"><div class="net-story-ring"><img src="assets/causes/youth-camp.jpg" alt=""></div><div class="net-story-lbl">Baptism</div></div>
@@ -2897,7 +2892,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Group life</span><img src="assets/causes/youth-camp.jpg" alt=""></div>
             <div class="net-wall-body">
               <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/33.jpg" alt=""><div><div class="net-wall-name">David C.</div><div class="net-wall-role">Young Adults</div></div></div>
-              <div class="net-wall-caption">Game night — real talk about faith at Central 🙌</div>
+              <div class="net-wall-caption">Game night — real talk about faith at Faithful Church 🙌</div>
               <div class="net-wall-stats"><span>🙏 42</span><span>💬 18</span><span>↗ 6</span></div>
             </div>
           </article>
@@ -2968,12 +2963,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="mobile-link-intro">
           <div class="mobile-link-badge">New iOS App</div>
           <h2 class="mobile-link-title">New iOS Members Card App</h2>
-          <p class="mobile-link-desc">Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+          <p class="mobile-link-desc">Redesigned Faithful Church mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
           <div class="mobile-link-tags">
             <span class="mobile-link-tag">iOS Native</span>
             <span class="mobile-link-tag">Members Card</span>
             <span class="mobile-link-tag">Giving</span>
-            <span class="mobile-link-tag">Central Henderson</span>
+            <span class="mobile-link-tag">Faithful Church</span>
           </div>
         </div>
         <div class="mobile-link-split">
@@ -2981,7 +2976,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <img
               class="mobile-preview-img"
               src="/previews/assets/Memebers portal cell.png"
-              alt="Central Church Members Card Portal on iPhone"
+              alt="Faithful Church Members Card Portal on iPhone"
               width="270"
               height="585"
             />
@@ -3068,13 +3063,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="res-hero-bg res-hero-slides" aria-hidden="true">
             <div class="res-hero-slide active" data-caption="Card impact · qualified shopping" style="background-image:url('assets/wallet-hero/charity-shopping-checkout.jpg')"></div>
             <div class="res-hero-slide" data-caption="Groceries &amp; everyday purchases · routed impact" style="background-image:url('assets/wallet-hero/charity-grocery-aisle.jpg')"></div>
-            <div class="res-hero-slide" data-caption="Charity partners · Central Henderson" style="background-image:url('assets/wallet-hero/charity-volunteers.jpg')"></div>
+            <div class="res-hero-slide" data-caption="Charity partners · Faithful Church" style="background-image:url('assets/wallet-hero/charity-volunteers.jpg')"></div>
           </div>
           <div class="res-hero-overlay"></div>
           <div class="res-hero-content">
             <div class="res-hero-top">
               <h2>Give &amp; Impact</h2>
-              <p>Give directly, or route impact from your GRACE Impact Card to a ministry. Qualified purchases can create impact for Central.</p>
+              <p>Give directly, or route impact from your GRACE Impact Card to a ministry. Qualified purchases can create impact for Faithful Church.</p>
             </div>
             <div class="wlt-kpi-grid wlt-kpi-grid--3" role="group" aria-label="Wallet summary">
               <div class="wlt-kpi">
@@ -3194,24 +3189,15 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div style="padding:6px 8px 0">
               <div class="pf-card-flip" onclick="pfFlipCard(this)">
                 <div class="pf-card-inner" id="pf-grace-card-wallet">
-                  <div class="pf-card-face pf-card-front">
-                    <div class="pf-gc-front">
-                      <div class="pf-gc-front-top">
-                        <div class="pf-gc-chip"><div class="pf-gc-chip-ico"></div></div>
-                        <img class="pf-gc-wordmark" src="assets/central-church-wordmark.png" alt="Central Church">
-                      </div>
-                      <div class="pf-gc-front-mid">
-                        <img class="pf-gc-cmark" src="assets/central-c-mark.png" alt="" aria-hidden="true">
-                      </div>
-                      <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834</div>
-                    </div>
+                  <div class="pf-card-face pf-card-front pf-card-front--faithful">
+                    <img class="pf-faithful-card-img" src="assets/faithful-church-card.png" alt="Faithful Church NeoBanking debit card">
                   </div>
                   <div class="pf-card-face pf-card-back">
                     <div class="pf-gc-back">
-                      <img class="pf-gc-wordmark-back" src="assets/central-church-wordmark.png" alt="Central Church">
+                      <img class="pf-gc-wordmark-back" src="assets/faithful-church-logo-wht.png" alt="Faithful Church">
                       <div class="pf-card-back-stripe"></div>
                       <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
-                      <div class="pf-card-back-info">Issued by Central Henderson · Powered by GRACE<br>Qualified purchases can support church causes</div>
+                      <div class="pf-card-back-info">Issued by Faithful Church · Powered by GRACE<br>Qualified purchases can support church causes</div>
                     </div>
                   </div>
                 </div>
@@ -3271,7 +3257,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <button type="button" class="wallet-transfer-close" onclick="closeWalletTransfer()" aria-label="Close">×</button>
               </div>
               <div class="wallet-receive-details">
-                <div class="wallet-receive-row"><span>Account name</span><strong>Central Henderson · GRACE</strong></div>
+                <div class="wallet-receive-row"><span>Account name</span><strong>Faithful Church · GRACE</strong></div>
                 <div class="wallet-receive-row"><span>Account #</span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
                 <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">084009519</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
               </div>
@@ -3408,7 +3394,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div class="cause-meter">
                   <div class="cause-meter-head">
                     <span class="cause-meter-live open"><span class="cause-meter-live-dot"></span>Always open</span>
-                    <span class="cause-meter-pct" style="color:#EE2B37">●</span>
+                    <span class="cause-meter-pct" style="color:var(--grace-sky-500)">●</span>
                   </div>
                   <div class="cause-meter-track"><div class="cause-meter-fill meter-gold" style="width:100%"></div></div>
                   <div class="cause-meter-sub">Crisis support · accepting requests now</div>
@@ -3481,13 +3467,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="card" id="wlt-alloc-card">
             <div class="card-head">
               <div class="card-title">Your Impact Allocation</div>
-              <div style="font-size:11px;color:#EE2B37;font-weight:600;cursor:pointer" onclick="document.getElementById('pf-cause-edit').style.display=document.getElementById('pf-cause-edit').style.display==='none'?'block':'none'">Edit allocation →</div>
+              <div style="font-size:11px;color:var(--grace-sky-500);font-weight:600;cursor:pointer" onclick="document.getElementById('pf-cause-edit').style.display=document.getElementById('pf-cause-edit').style.display==='none'?'block':'none'">Edit allocation →</div>
             </div>
             <div style="padding:14px 16px;display:flex;align-items:center;gap:18px">
               <div class="pf-donut-wrap" onclick="pfFilterTx(null)">
                 <svg width="120" height="120" viewBox="0 0 120 120" id="pf-donut-svg">
                   <circle cx="60" cy="60" r="46" fill="none" stroke="#f3f0eb" stroke-width="13"/>
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#EE2B37" stroke-width="13" stroke-dasharray="0 290" stroke-dashoffset="73" transform="rotate(-90 60 60)" id="pfd-missions" class="pf-donut-arc" data-cause="Missions Fund" data-pct="40" style="transition:stroke-dasharray .6s ease,opacity .2s"/>
+                  <circle cx="60" cy="60" r="46" fill="none" stroke="var(--grace-sky-500)" stroke-width="13" stroke-dasharray="0 290" stroke-dashoffset="73" transform="rotate(-90 60 60)" id="pfd-missions" class="pf-donut-arc" data-cause="Missions Fund" data-pct="40" style="transition:stroke-dasharray .6s ease,opacity .2s"/>
                   <circle cx="60" cy="60" r="46" fill="none" stroke="#000000" stroke-width="13" stroke-dasharray="0 290" stroke-dashoffset="-43" transform="rotate(-90 60 60)" id="pfd-building" class="pf-donut-arc" data-cause="Building Fund" data-pct="25" style="transition:stroke-dasharray .6s ease,opacity .2s"/>
                   <circle cx="60" cy="60" r="46" fill="none" stroke="#7c3aed" stroke-width="13" stroke-dasharray="0 290" stroke-dashoffset="-116" transform="rotate(-90 60 60)" id="pfd-youth" class="pf-donut-arc" data-cause="Youth Ministry" data-pct="20" style="transition:stroke-dasharray .6s ease,opacity .2s"/>
                   <circle cx="60" cy="60" r="46" fill="none" stroke="#16a34a" stroke-width="13" stroke-dasharray="0 290" stroke-dashoffset="-174" transform="rotate(-90 60 60)" id="pfd-food" class="pf-donut-arc" data-cause="Food Pantry" data-pct="10" style="transition:stroke-dasharray .6s ease,opacity .2s"/>
@@ -3496,7 +3482,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div class="pf-donut-center"><div class="pf-dc-val">$<span id="pf-donut-val">18.42</span></div><div class="pf-dc-key">Impact · May</div></div>
               </div>
               <div style="flex:1">
-                <div class="pf-cause-item" onclick="pfFilterTx('Missions Fund')" data-cause="Missions Fund"><div class="pf-cl-dot" style="background:#EE2B37"></div><div class="pf-cl-name">Missions Fund</div><div class="pf-cl-bar"><div class="pf-cl-fill" style="width:80%;background:#EE2B37"></div></div><div class="pf-cl-pct">40%</div></div>
+                <div class="pf-cause-item" onclick="pfFilterTx('Missions Fund')" data-cause="Missions Fund"><div class="pf-cl-dot" style="background:var(--grace-sky-500)"></div><div class="pf-cl-name">Missions Fund</div><div class="pf-cl-bar"><div class="pf-cl-fill" style="width:80%;background:var(--grace-sky-500)"></div></div><div class="pf-cl-pct">40%</div></div>
                 <div class="pf-cause-item" onclick="pfFilterTx('Building Fund')" data-cause="Building Fund"><div class="pf-cl-dot" style="background:#000000"></div><div class="pf-cl-name">Building Fund</div><div class="pf-cl-bar"><div class="pf-cl-fill" style="width:50%;background:#000000"></div></div><div class="pf-cl-pct">25%</div></div>
                 <div class="pf-cause-item" onclick="pfFilterTx('Youth Ministry')" data-cause="Youth Ministry"><div class="pf-cl-dot" style="background:#7c3aed"></div><div class="pf-cl-name">Youth Ministry</div><div class="pf-cl-bar"><div class="pf-cl-fill" style="width:40%;background:#7c3aed"></div></div><div class="pf-cl-pct">20%</div></div>
                 <div class="pf-cause-item" onclick="pfFilterTx('Food Pantry')" data-cause="Food Pantry"><div class="pf-cl-dot" style="background:#16a34a"></div><div class="pf-cl-name">Food Pantry</div><div class="pf-cl-bar"><div class="pf-cl-fill" style="width:20%;background:#16a34a"></div></div><div class="pf-cl-pct">10%</div></div>
@@ -3506,7 +3492,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div id="pf-cause-edit" style="display:none;border-top:1px solid #f3f0eb">
               <div style="padding:14px 16px">
                 <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:10px">Adjust allocation — must total 100%</div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#EE2B37"></div><div class="pf-cs-name">Missions Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="40" oninput="pfUpdateAlloc(this,0)"><div class="pf-cs-pct" id="pf-cs-0">40%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:var(--grace-sky-500)"></div><div class="pf-cs-name">Missions Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="40" oninput="pfUpdateAlloc(this,0)"><div class="pf-cs-pct" id="pf-cs-0">40%</div></div>
                 <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#000000"></div><div class="pf-cs-name">Building Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="25" oninput="pfUpdateAlloc(this,1)"><div class="pf-cs-pct" id="pf-cs-1">25%</div></div>
                 <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#7c3aed"></div><div class="pf-cs-name">Youth Ministry</div><input type="range" class="pf-cs-slider" min="0" max="100" value="20" oninput="pfUpdateAlloc(this,2)"><div class="pf-cs-pct" id="pf-cs-2">20%</div></div>
                 <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#16a34a"></div><div class="pf-cs-name">Food Pantry</div><input type="range" class="pf-cs-slider" min="0" max="100" value="10" oninput="pfUpdateAlloc(this,3)"><div class="pf-cs-pct" id="pf-cs-3">10%</div></div>
@@ -3524,7 +3510,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             </div>
           </div>
           <div class="wlt-live-feed" id="wlt-live-feed"></div>
-          <div class="wlt-live-footer">This month from everyday spending: <strong id="wlt-live-month-total">$21.00</strong> to Central Henderson causes</div>
+          <div class="wlt-live-footer">This month from everyday spending: <strong id="wlt-live-month-total">$21.00</strong> to Faithful Church causes</div>
         </div>
 
         <div class="card" id="wlt-activity">
@@ -3561,7 +3547,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="pf-mc" onclick="pfOpenCalc(this,'Travel','Missions Fund',3.0)"><div class="pf-mc-ico">✈️</div><div class="pf-mc-store">Travel</div><div class="pf-mc-cause">→ Missions</div><div class="pf-mc-pct">3.0%</div><div class="pf-mc-lbl">to cause</div><div class="pf-mc-tog" onclick="event.stopPropagation();toggleMerchantRouting(this)"></div></div>
               <div class="pf-mc" onclick="pfOpenCalc(this,'Pharmacy','Care Fund',1.5)"><div class="pf-mc-ico">💊</div><div class="pf-mc-store">Pharmacy</div><div class="pf-mc-cause">→ Care</div><div class="pf-mc-pct">1.5%</div><div class="pf-mc-lbl">to cause</div><div class="pf-mc-tog" onclick="event.stopPropagation();toggleMerchantRouting(this)"></div></div>
               <div class="pf-mc" onclick="pfOpenCalc(this,'Fitness','Youth Ministry',2.5)"><div class="pf-mc-ico">🏋️</div><div class="pf-mc-store">Fitness</div><div class="pf-mc-cause">→ Youth</div><div class="pf-mc-pct">2.5%</div><div class="pf-mc-lbl">to cause</div><div class="pf-mc-tog" onclick="event.stopPropagation();toggleMerchantRouting(this)"></div></div>
-              <div class="pf-mc" style="border-style:dashed" onclick="pfToast('Submit a merchant partner request to GRACE admin.','✉️')"><div class="pf-mc-ico">+</div><div class="pf-mc-store" style="color:#EE2B37">Add Merchant</div><div class="pf-mc-cause">Partner request</div><div class="pf-mc-pct" style="color:#EE2B37">Custom</div></div>
+              <div class="pf-mc" style="border-style:dashed" onclick="pfToast('Submit a merchant partner request to GRACE admin.','✉️')"><div class="pf-mc-ico">+</div><div class="pf-mc-store" style="color:var(--grace-sky-500)">Add Merchant</div><div class="pf-mc-cause">Partner request</div><div class="pf-mc-pct" style="color:var(--grace-sky-500)">Custom</div></div>
             </div>
             <!-- Calculator -->
             <div class="pf-mc-calc" id="pf-mc-calc">
@@ -3616,7 +3602,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             </div>
             <div class="watch-live-meta-block">
               <div class="watch-live-title" id="watch-live-title">Honor Each Other</div>
-              <div class="watch-live-meta" id="watch-live-meta">Part 4 · Pastor James Wilson · Central Henderson · May 25, 2026</div>
+              <div class="watch-live-meta" id="watch-live-meta">Part 4 · Pastor James Wilson · Faithful Church · May 25, 2026</div>
             </div>
           </div>
           <aside class="watch-chat-panel">
@@ -3633,11 +3619,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="watch-study-banner" id="watch-study-banner" role="region" aria-label="Study this sermon">
         <div>
           <div style="font-size:13px;font-weight:700;color:#1a1a1a" id="watch-study-banner-title">Study this message</div>
-          <div style="font-size:11px;color:#888;margin-top:2px">Continue in Bible Study — guided by Central&apos;s core beliefs</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Continue in Bible Study — guided by Faithful Church&apos;s core beliefs</div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button type="button" onclick="dismissWatchStudyBanner()" style="background:none;border:1px solid #e8e0d5;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;color:#888;cursor:pointer;font-family:inherit">Dismiss</button>
-          <button type="button" onclick="startStudyFromPendingSermon()" style="background:#EE2B37;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Study this message →</button>
+          <button type="button" onclick="startStudyFromPendingSermon()" style="background:var(--grace-sky-500);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Study this message →</button>
         </div>
       </div>
 
@@ -3656,7 +3642,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="watch-schedule-hero" style="background-image:url('assets/watch/schedule-prayer.jpg')">
             <div class="watch-schedule-hero-txt">
               <strong>Join us online</strong>
-              <span>Saturday &amp; Sunday experiences · Central Henderson</span>
+              <span>Saturday &amp; Sunday experiences · Faithful Church</span>
             </div>
           </div>
           <div id="watch-schedule-body"></div>
@@ -3668,7 +3654,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="watch-action-tile" style="background-image:url('assets/watch/action-follow-jesus.jpg')">
           <div class="central-action-ico" data-grace-icon="cross" data-grace-size="26" data-grace-variant="inverse" style="margin-bottom:10px"></div>
           <h3>I Decided to Follow Jesus</h3>
-          <button type="button" style="background:#EE2B37;color:#fff" onclick="watchActionFollowJesus()">Let Us Know</button>
+          <button type="button" style="background:var(--grace-sky-500);color:#fff" onclick="watchActionFollowJesus()">Let Us Know</button>
         </div>
         <div class="watch-action-tile" style="background-image:url('assets/watch/action-groups.jpg')">
           <div class="central-action-ico" data-grace-icon="groups" data-grace-size="26" data-grace-variant="inverse" style="margin-bottom:10px"></div>
@@ -3697,11 +3683,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div style="font-size:11px;font-weight:700;color:#16a34a;letter-spacing:.4px;text-transform:uppercase">Available 24/7</div>
           </div>
           <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px">24-7 Resources</div>
-          <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:3px">Central Henderson · Connect with a leader · Submit care · Human follow-up available</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:3px">Faithful Church · Connect with a leader · Submit care · Human follow-up available</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:3px">Your assigned leader</div>
-          <div style="font-size:14px;font-weight:700;color:#EE2B37">Pastor James Wilson</div>
+          <div style="font-size:14px;font-weight:700;color:var(--grace-sky-500)">Pastor James Wilson</div>
           <div style="font-size:11px;color:#16a34a;font-weight:600;margin-top:3px">● Online now</div>
         </div>
       </div>
@@ -3720,7 +3706,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             </div>
             <div style="padding:4px 0">
               <div class="care-option" onclick="showPortalToast('Prayer request submitted — your leader\'s avatar is ready, human follow-up available','🙏')">
-                <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" fill="#000000" opacity=".2"/><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" stroke="#000000" stroke-width="1.2"/><path d="M6.5 11h5M9 8.7V11" stroke="#EE2B37" stroke-width="1" stroke-linecap="round"/></svg></div>
+                <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" fill="#000000" opacity=".2"/><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" stroke="#000000" stroke-width="1.2"/><path d="M6.5 11h5M9 8.7V11" stroke="var(--grace-sky-500)" stroke-width="1" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Prayer &amp; Guidance</div><div class="co-sub">Personal prayer, scripture, spiritual guidance</div></div>
                 <div class="co-arrow">›</div>
               </div>
@@ -3730,17 +3716,17 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div class="co-arrow">›</div>
               </div>
               <div class="care-option" onclick="showPortalToast('Grief support request received','🕯️')">
-                <div class="co-ico" style="background:#f5ece8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 3c-.7 1-1 2-.6 3S10 8 10 9.5c0 .9-.6 1.5-1 1.5" stroke="#EE2B37" stroke-width="1.2" stroke-linecap="round"/><path d="M6 16h6" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity=".4"/><rect x="7" y="13" width="4" height="3" rx="1" fill="#000000" opacity=".15"/></svg></div>
+                <div class="co-ico" style="background:#f5ece8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 3c-.7 1-1 2-.6 3S10 8 10 9.5c0 .9-.6 1.5-1 1.5" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M6 16h6" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity=".4"/><rect x="7" y="13" width="4" height="3" rx="1" fill="#000000" opacity=".15"/></svg></div>
                 <div><div class="co-name">Grief &amp; Bereavement</div><div class="co-sub">Support through loss, grief counselling</div></div>
                 <div class="co-arrow">›</div>
               </div>
               <div class="care-option" onclick="showPortalToast('Food pantry pickup scheduled','🍽️')">
-                <div class="co-ico" style="background:#f5f0e8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M3 14h12M5 14V8M13 14V8" stroke="#EE2B37" stroke-width="1.2" stroke-linecap="round"/><path d="M3 8h12l-1.5-5h-9L3 8z" fill="#EE2B37" opacity=".2"/><path d="M3 8h12l-1.5-5h-9L3 8z" stroke="#EE2B37" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+                <div class="co-ico" style="background:#f5f0e8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M3 14h12M5 14V8M13 14V8" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M3 8h12l-1.5-5h-9L3 8z" fill="var(--grace-sky-500)" opacity=".2"/><path d="M3 8h12l-1.5-5h-9L3 8z" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
                 <div><div class="co-name">Food Pantry</div><div class="co-sub">Schedule a pickup — pantry open weekly</div></div>
                 <div class="co-arrow">›</div>
               </div>
               <div class="care-option" onclick="showPortalToast('Counselling session request submitted','💍')">
-                <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><circle cx="6" cy="8" r="3" fill="#000000" opacity=".12"/><circle cx="6" cy="8" r="3" stroke="#000000" stroke-width="1.2"/><circle cx="12" cy="8" r="2.5" fill="#EE2B37" opacity=".2"/><circle cx="12" cy="8" r="2.5" stroke="#EE2B37" stroke-width="1.1"/><path d="M2 16c0-2.5 2-4 4-4s4 1.5 4 4" stroke="#000000" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+                <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><circle cx="6" cy="8" r="3" fill="#000000" opacity=".12"/><circle cx="6" cy="8" r="3" stroke="#000000" stroke-width="1.2"/><circle cx="12" cy="8" r="2.5" fill="var(--grace-sky-500)" opacity=".2"/><circle cx="12" cy="8" r="2.5" stroke="var(--grace-sky-500)" stroke-width="1.1"/><path d="M2 16c0-2.5 2-4 4-4s4 1.5 4 4" stroke="#000000" stroke-width="1.2" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Pre-Marital / Counselling</div><div class="co-sub">Book a session with Minister Grace Okafor</div></div>
                 <div class="co-arrow">›</div>
               </div>
@@ -3755,7 +3741,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Recent requests -->
           <div class="card">
             <div class="card-head"><div class="card-title">My recent requests</div></div>
-            <div class="tx-row"><div class="tx-ico" style="background:#e8edf8"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" fill="#000000" opacity=".2"/><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" stroke="#000000" stroke-width="1"/><path d="M5.5 9.5h5M8 7v2.5" stroke="#EE2B37" stroke-width=".9" stroke-linecap="round"/></svg></div><div><div class="tx-name">Prayer — Anxiety &amp; faith</div><div class="tx-sub">May 26 · Resolved · human follow-up offered</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Resolved</div></div>
+            <div class="tx-row"><div class="tx-ico" style="background:#e8edf8"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" fill="#000000" opacity=".2"/><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" stroke="#000000" stroke-width="1"/><path d="M5.5 9.5h5M8 7v2.5" stroke="var(--grace-sky-500)" stroke-width=".9" stroke-linecap="round"/></svg></div><div><div class="tx-name">Prayer — Anxiety &amp; faith</div><div class="tx-sub">May 26 · Resolved · human follow-up offered</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Resolved</div></div>
             <div class="tx-row"><div class="tx-ico" style="background:#e8f5ed"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="#16a34a" opacity=".12"/><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#16a34a" stroke-width="1.1"/><path d="M8 6v4M6 8h4" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/></svg></div><div><div class="tx-name">Hospital visit — Rm 214</div><div class="tx-sub">May 14 · Visit by Rev. Mitchell</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Complete</div></div>
           </div>
         </div>
@@ -3768,7 +3754,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <img class="blessing-av" src="assets/Pastor-James-Wilson-profile.jpg" alt="Pastor James Wilson">
               <div>
                 <div class="blessing-who">Pastor James Wilson — Your assigned leader</div>
-                <div class="blessing-role">Central Henderson · Verified Avatar · Human follow-up available</div>
+                <div class="blessing-role">Faithful Church · Verified Avatar · Human follow-up available</div>
               </div>
               <div class="blessing-live" style="background:#dcfce7;color:#15803d">● Live</div>
             </div>
@@ -3781,7 +3767,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
           <!-- All verified leaders -->
           <div class="card">
-            <div class="card-head"><div class="card-title">Verified leaders</div><span class="card-meta" style="font-size:11px;color:#aaa">5 active · CentralHenderson</span></div>
+            <div class="card-head"><div class="card-title">Verified leaders</div><span class="card-meta" style="font-size:11px;color:#aaa">5 active · Faithful ChurchHenderson</span></div>
             <div class="leader-card">
               <div style="position:relative"><img class="lc-av" src="assets/Pastor-James-Wilson-profile.jpg" alt=""><div class="lc-live"></div></div>
               <div><div class="lc-name">Pastor James Wilson</div><div class="lc-role">Senior Pastor</div><div class="lc-topic">Prayer · Scripture · Guidance</div></div>
@@ -3864,7 +3850,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="journey-hero-inner">
           <img class="journey-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya Thompson">
           <div class="journey-hero-copy">
-            <div class="journey-eyebrow">Central Henderson · Member since 2022</div>
+            <div class="journey-eyebrow">Faithful Church · Member since 2022</div>
             <h1 class="journey-title">Maya&apos;s Journey</h1>
             <p class="journey-sub">Reflect, set goals, and notice your daily rhythm.</p>
           </div>
@@ -3911,7 +3897,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div>
             <div id="jd-write">
               <div class="card" style="margin-bottom:14px">
-                <div class="card-head"><div class="card-title">Today&apos;s prompt</div><span style="font-size:11px;color:#EE2B37;font-weight:600">Gratitude</span></div>
+                <div class="card-head"><div class="card-title">Today&apos;s prompt</div><span style="font-size:11px;color:var(--grace-sky-500);font-weight:600">Gratitude</span></div>
                 <div style="padding:14px 18px;font-size:14px;color:#374151;line-height:1.6">What are three things I&apos;m grateful for today?</div>
                 <div style="padding:0 18px 14px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
                   <div class="mood-chip" onclick="selectMood(this)"><span data-grace-icon="sun" data-grace-size="22"></span><span class="mood-chip-lbl">Joyful</span></div>
@@ -3935,7 +3921,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div id="jd-history" style="display:none">
               <div class="jd-study-realize" id="jd-study-realize">
                 <span>Want to go deeper on what you wrote?</span>
-                <button type="button" onclick="startStudyFromLastJournal()" style="display:block;margin-top:8px;background:#EE2B37;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Turn this into a study path →</button>
+                <button type="button" onclick="startStudyFromLastJournal()" style="display:block;margin-top:8px;background:var(--grace-sky-500);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Turn this into a study path →</button>
               </div>
               <div class="card" id="jd-hist-empty"><div style="padding:40px;text-align:center;color:#bbb;font-size:14px">Your entries will appear here after your first reflection.</div></div>
               <div class="card" id="jd-hist-list" style="display:none">
@@ -3949,7 +3935,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="card-head"><div class="card-title">Reflection rhythm</div></div>
               <div style="padding:16px;text-align:center">
                 <div style="font-size:32px;font-weight:800;color:#000"><span id="jd-rhythm-val">0</span> days</div>
-                <div style="font-size:11px;color:#EE2B37;margin-top:8px;font-weight:600" id="jd-rhythm-hint">Write today to start</div>
+                <div style="font-size:11px;color:var(--grace-sky-500);margin-top:8px;font-weight:600" id="jd-rhythm-hint">Write today to start</div>
               </div>
             </div>
           </div>
@@ -3971,7 +3957,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="study-active-layout" id="study-active-layout" style="display:none">
             <div class="card" style="margin-bottom:0">
               <div style="padding:14px 16px 0">
-                <div style="font-size:11px;font-weight:700;color:#EE2B37;margin-bottom:4px" id="study-step-label">Receive</div>
+                <div style="font-size:11px;font-weight:700;color:var(--grace-sky-500);margin-bottom:4px" id="study-step-label">Receive</div>
                 <div class="study-scripture-block" id="study-scripture-block">
                   <div class="bc-verse" id="study-scripture-text"></div>
                   <div class="bc-ref" id="study-scripture-ref"></div>
@@ -4049,7 +4035,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <li>Set spiritual goals</li>
               </ul>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button type="button" style="background:#EE2B37;border:none;color:#fff;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="journeyTab('journal')">Start journaling</button>
+                <button type="button" style="background:var(--grace-sky-500);border:none;color:#fff;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="journeyTab('journal')">Start journaling</button>
                 <button type="button" style="background:#f7f5f2;border:1px solid #e4dcce;color:#555;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="journeyTab('goals')">Set a goal</button>
               </div>
             </div>
@@ -4105,7 +4091,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <p>Track prayer, scripture, giving, and group habits with simple milestones you can revisit.</p>
             </div>
           </div>
-          <button type="button" onclick="toggleGoalForm()" style="background:#EE2B37;border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">+ New goal</button>
+          <button type="button" onclick="toggleGoalForm()" style="background:var(--grace-sky-500);border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">+ New goal</button>
         </div>
         <div id="jy-goal-form" style="display:none;padding:12px 0 16px">
           <div style="display:grid;grid-template-columns:1fr 120px auto;gap:8px;align-items:center;background:#faf8f5;border:1px solid #ece8e1;border-radius:12px;padding:12px 14px">
@@ -4271,7 +4257,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <span class="crisis-hotline-desc">Teens helping teens · Evenings PT</span>
         <span class="crisis-hotline-action">1-800-866-8336</span>
       </a>
-      <div class="crisis-section-label">Central Henderson pastoral care</div>
+      <div class="crisis-section-label">Faithful Church pastoral care</div>
       <div class="crisis-pastoral-wrap">
         <button type="button" class="crisis-pastoral-btn" onclick="alertPastoralCare()"><span aria-hidden="true">♥</span> Alert on-call pastoral care</button>
       </div>
@@ -4307,6 +4293,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   </div>
 </div>
 
+<script>window.GRACE_PORTAL_CHURCH = 'Faithful Church';</script>
 <script src="grace-messaging.js"></script>
 <script src="grace-companion.js"></script>
 <script src="grace-duotone-icons.js"></script>
@@ -4315,7 +4302,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
 /* Divinity avatar sessions — per-leader didAvatarUrl overrides this fallback */
 const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
-const titles={home:'My Church',ai:'My Leadership',network:'Connect at Central',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
+const titles={home:'My Church',ai:'My Leadership',network:'Connect at Faithful Church',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
 const IOS_APP_PATH='/grace_central_henderson_members_card_ios_app.html';
 function iosAppUrl(){return window.location.origin+IOS_APP_PATH;}
 function initMobileSharePanel(){
@@ -4326,7 +4313,7 @@ function initMobileSharePanel(){
   const copyBtn=document.getElementById('mobile-ios-copy');
   if(urlInput){urlInput.value=appUrl;urlInput.title=appUrl;}
   if(openLink)openLink.href=appUrl;
-  if(qrImg)qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=C8102E';
+  if(qrImg)qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=449eca';
   if(copyBtn&&!copyBtn.dataset.wired){
     copyBtn.dataset.wired='1';
     copyBtn.addEventListener('click',()=>{
@@ -4380,7 +4367,7 @@ const watchLiveMessages=[
   {name:'Sarah J.',av:'https://randomuser.me/api/portraits/women/29.jpg',text:'Amen! This word is hitting home.'},
   {name:'James R.',av:'https://randomuser.me/api/portraits/men/41.jpg',text:'Praying for our city right now.'},
   {name:'Emily K.',av:'https://randomuser.me/api/portraits/women/17.jpg',text:'Watching from Women of Grace small group!'},
-  {name:'David M.',av:'https://randomuser.me/api/portraits/men/22.jpg',text:'So grateful for Central Henderson.'},
+  {name:'David M.',av:'https://randomuser.me/api/portraits/men/22.jpg',text:'So grateful for Faithful Church.'},
   {name:'Linda P.',av:'https://randomuser.me/api/portraits/women/33.jpg',text:'Praise God for this series.'},
   {name:'Marcus T.',av:'https://randomuser.me/api/portraits/men/54.jpg',text:'Honoring each other starts at home.'}
 ];
@@ -4405,7 +4392,7 @@ function syncWatchKpis(){
   set('watch-viewer-count',label);
   set('watch-live-series','Part '+s.part+' · '+s.series);
   set('watch-live-title',s.title);
-  set('watch-live-meta','Part '+s.part+' · '+s.speaker+' · Central Henderson · '+s.serviceDate);
+  set('watch-live-meta','Part '+s.part+' · '+s.speaker+' · Faithful Church · '+s.serviceDate);
   set('watch-chat-head','Live chat · '+label);
   set('watch-kpi-viewers',String(s.viewerCount));
   set('watch-kpi-series',s.series);
@@ -4603,7 +4590,7 @@ function setActiveNav(id){
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
   if(id) document.getElementById(id)?.classList.add('active');
 }
-const GRACE_MSG = GRACE_MESSAGING.getMessaging('Central Henderson');
+const GRACE_MSG = GRACE_MESSAGING.getMessaging('Faithful Church');
 function leaderNameHtml(name){return GRACE_MESSAGING.leaderNameHtml(name, GRACE_MSG);}
 function leaderFollowUpLine(leader){return GRACE_MESSAGING.leaderFollowUpLine(leader, GRACE_MSG);}
 function leaderChatPlaceholder(name){return GRACE_MSG.leaderAvatar.chatPlaceholder(name);}
@@ -5158,7 +5145,7 @@ const HOME_STATE={
   careLabel:'24/7 available',
   nextStep:{
     title:"Review this month's impact for Food Pantry",
-    body:'See your card-generated impact, then choose where Central Henderson should route it.',
+    body:'See your card-generated impact, then choose where Faithful Church should route it.',
     cause:'Food Pantry'
   },
   dailyLoop:[
@@ -5173,7 +5160,7 @@ function formatHomeDate(){
   const d=new Date();
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} · Central Henderson`;
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} · Faithful Church`;
 }
 function formatHomeGreeting(){
   const h=new Date().getHours();
@@ -5306,7 +5293,7 @@ const WALLET_STATE={
   ]
 };
 const IMPACT_ALLOC_DEF=[
-  {arcId:'pfd-missions',cause:'Missions Fund',color:'#EE2B37'},
+  {arcId:'pfd-missions',cause:'Missions Fund',color:'var(--grace-sky-500)'},
   {arcId:'pfd-building',cause:'Building Fund',color:'#000000'},
   {arcId:'pfd-youth',cause:'Youth Ministry',color:'#7c3aed'},
   {arcId:'pfd-food',cause:'Food Pantry',color:'#16a34a'},
@@ -5769,7 +5756,7 @@ function networkTab(tab){
 function openNetworkTab(tab){
   _origGoSection('network');
   setActiveNav('nav-community');
-  document.getElementById('tb-title').textContent=tab==='groups-events'?'Connect · Groups & Events':tab==='people'?'Connect · People':'Connect at Central';
+  document.getElementById('tb-title').textContent=tab==='groups-events'?'Connect · Groups & Events':tab==='people'?'Connect · People':'Connect at Faithful Church';
   setTimeout(()=>networkTab(tab||'community'),80);
 }
 function openNetworkGroups(){
@@ -5876,7 +5863,7 @@ function addNetEvent(){
   row.dataset.evcat='special';
   row.style.animation='txSlide .4s ease';
   row.innerHTML=`
-    <div class="event-date" style="background:#FFF0F1"><div class="event-date-day" style="color:#EE2B37">${day}</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">${mon}</div></div>
+    <div class="event-date" style="background:#FFF0F1"><div class="event-date-day" style="color:var(--grace-sky-500)">${day}</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">${mon}</div></div>
     <div style="flex:1"><div class="event-name"></div><div class="event-time">${timeTxt} · Added by you</div></div>
     <button class="event-rsvp going" onclick="rsvpEvent(this)">Going ✓</button>`;
   row.querySelector('.event-name').textContent=name;
@@ -5991,26 +5978,26 @@ setInterval(()=>{
 
 /* ── AI HUB LOGIC ── */
 const aiLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
-  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
-  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
-  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
-  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
-  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His avatar answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
-  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
-  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His avatar shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
-  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · Verified Avatar · Human follow-up available',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding the right next step of care."',online:true,bio:'Licensed clinician and ordained minister bridging faith and mental health. AI provides pastoral support; clinical care is referred to licensed partners.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
-  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer? I\'ve got you."',online:true,bio:'Minister Torres runs Iron Men groups, workplace ministry, and fatherhood workshops. His companion speaks plainly about integrity, work, and spiritual leadership at home.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
-  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her avatar is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
-  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · Verified Avatar · Human follow-up available',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story? I\'d love to help you take a next step."',online:false,bio:'Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
-  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or questions about legacy giving, I\'m honored to walk with you."',online:true,bio:'Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
-  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · Verified Avatar · Human follow-up available',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His avatar troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
-  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · Verified Avatar · Human follow-up available',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m so glad you\'re exploring Central Henderson."',online:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers “what’s next” questions and connects guests to groups and serving.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
-  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · Verified Avatar · Human follow-up available',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His avatar offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
-  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · Verified Avatar · Human follow-up available',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,bio:'Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Faithful Church · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Faithful Church with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Faithful Church · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
+  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Faithful Church · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Faithful Church · Verified Avatar · Human follow-up available',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
+  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Faithful Church · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
+  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Faithful Church · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His avatar answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
+  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
+  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Faithful Church · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His avatar shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
+  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Faithful Church · Verified Avatar · Human follow-up available',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding the right next step of care."',online:true,bio:'Licensed clinician and ordained minister bridging faith and mental health. AI provides pastoral support; clinical care is referred to licensed partners.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
+  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer? I\'ve got you."',online:true,bio:'Minister Torres runs Iron Men groups, workplace ministry, and fatherhood workshops. His companion speaks plainly about integrity, work, and spiritual leadership at home.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
+  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Faithful Church · Verified Avatar · Human follow-up available',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community? Let\'s chat."',online:true,bio:'Sis. Angela builds community for single adults 22–40 through dinners, serving teams, and discipleship. Her avatar is hope-filled and practical about dating with purpose.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
+  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Faithful Church · Verified Avatar · Human follow-up available',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story? I\'d love to help you take a next step."',online:false,bio:'Pastor Brooks organizes serve days, street outreach, and new believer follow-up. His companion equips members with simple gospel tools and local mission opportunities.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
+  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Faithful Church · Verified Avatar · Human follow-up available',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or questions about legacy giving, I\'m honored to walk with you."',online:true,bio:'Rev. Doyle leads the Golden Years fellowship, home communion visits, and senior care coordination. Her companion is patient, clear, and rich with scripture comfort.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
+  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Faithful Church · Verified Avatar · Human follow-up available',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or volunteering on Sunday tech?"',online:true,bio:'Bro. Kevin runs broadcast, social content, and the member app experience. His avatar troubleshoots watch-live, notifications, and serving on the media team.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
+  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Faithful Church · Verified Avatar · Human follow-up available',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m so glad you\'re exploring Faithful Church."',online:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant. Her companion answers “what’s next” questions and connects guests to groups and serving.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
+  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Faithful Church · Verified Avatar · Human follow-up available',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,bio:'Pastor Grant officiates funerals and long-term bereavement care. His avatar offers liturgy, grief scriptures, and coordination with care dispatch for families.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
+  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Faithful Church · Verified Avatar · Human follow-up available',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,bio:'Minister Santos leads Domingo en Español, ESL circles, and bilingual family resources. Her companion is fluent in pastoral Spanish and English formation content.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'},
 ];
-GRACE_MESSAGING.normalizeLeadersArray(aiLeaders, 'Central Henderson');
+GRACE_MESSAGING.normalizeLeadersArray(aiLeaders, 'Faithful Church');
 aiLeaders.forEach(l=>{if(l.humanLive===undefined)l.humanLive=!!l.online;});
 let currentLeader = 0;
 let profileLeaderIdx = null;
@@ -6941,7 +6928,7 @@ function openProfileStudy(topicOrPathId){
 }
 function buildStudyResponse(path,step,userText){
   const belief=getChurchBelief(path.beliefId);
-  const churchName=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS.church?.name||'Central Henderson':'Central Henderson';
+  const churchName=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS.church?.name||'Faithful Church':'Faithful Church';
   const ref=path.scripture?.ref||belief.anchor;
   const verse=path.scripture?.text||'';
   const sermonNote=path.source==='sermon'&&path.series?' Pastor James connected this in the '+path.series+' series.':'';
@@ -6993,7 +6980,7 @@ function renderStudyActive(){
     reflectInput.value=path.reflections.reflect||'';
   }
   const hint=document.getElementById('study-step-hint');
-  const hints=['Receive the passage and context','Learn through Central\'s core belief','Write what the Spirit is showing you','Choose one action this week','Connect with your church family'];
+  const hints=['Receive the passage and context','Learn through Faithful Church\'s core belief','Write what the Spirit is showing you','Choose one action this week','Connect with your church family'];
   if(hint)hint.textContent=hints[path.step]||'';
   const cta=document.getElementById('study-step-cta');
   if(cta){
@@ -7460,7 +7447,7 @@ function showPortalToast(msg, ico) {
     return d;
   })();
   const t = document.createElement('div');
-  t.style.cssText = 'background:#000000;color:#fff;padding:12px 16px;border-radius:12px;font-size:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:pfToastIn .35s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;max-width:320px;border-left:3px solid #EE2B37;min-width:220px';
+  t.style.cssText = 'background:#000000;color:#fff;padding:12px 16px;border-radius:12px;font-size:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:pfToastIn .35s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;max-width:320px;border-left:3px solid var(--grace-sky-500);min-width:220px';
   const toastIco = (typeof graceIcon === 'function' && ico && /^[a-z]+$/.test(ico))
     ? graceIcon(ico, {size:16, variant:'inverse'})
     : (ico ? `<span style="font-size:15px">${ico}</span>` : (typeof graceIcon === 'function' ? graceIcon('bell', {size:16, variant:'inverse'}) : ''));
