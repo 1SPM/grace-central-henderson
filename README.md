@@ -1,20 +1,17 @@
-# GRACE — Central Henderson Member Portal
+# GRACE — Church CRM & Member Portal
 
-Interactive HTML prototypes for the **GRACE** member experience at **Central Henderson**. Static HTML/CSS/JS — no build step.
+Unified portal for **GRACE** church CRM and member experiences. React CRM + static HTML member prototypes.
 
-## Live preview
+## Live links
 
-After GitHub Pages is enabled, share this link:
+See **[docs/LINKS.md](docs/LINKS.md)** for the full product URL tree (Central Henderson demo vs white-label SaaS).
 
-**https://1spm.github.io/grace-central-henderson/**
+| Lane | Hub | CRM |
+|------|-----|-----|
+| **Central Henderson demo** | [gracecrm-centralhenderson.org](https://gracecrm-centralhenderson.org/members-card.html) | [grace-central-henderson.vercel.app](https://grace-central-henderson.vercel.app/#/dashboard) |
+| **White-label SaaS** | [grace-crm-two.vercel.app](https://grace-crm-two.vercel.app/whitelabel-hub.html) | [grace-crm-two.vercel.app/#/dashboard](https://grace-crm-two.vercel.app/#/dashboard) |
 
-| Preview | Path |
-|--------|------|
-| **Prototype hub** | `/index.html` |
-| **iOS Members Card app (canonical)** | `/grace_central_henderson_members_card_ios_app.html` |
-| **Desktop member portal** | `/previews/grace_member_portal_central.html` |
-| **Mobile member app** | `/previews/grace_mobile_ios-central.html` |
-| **Members Card companion preview (compare only)** | `/previews/grace_central_henderson_members_card_ios_app.companion-preview.html` |
+GitHub Pages static preview: **https://1spm.github.io/grace-central-henderson/**
 
 ## Local preview
 

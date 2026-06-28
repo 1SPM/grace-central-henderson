@@ -9,6 +9,7 @@
   <meta name="description" content="My GRACE Members Card — Central Henderson." />
   <title>GRACE Central Henderson Members Card</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <script src="/grace-links.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
     :root { --red: #C8102E; --red-dark: #9f0d25; --gray: #f5f5f7; --white: #fff; --border: #e5e5ea; --text: #1d1d1f; --muted: #6e6e73; --focus: rgba(200,16,46,.34); --touch: 44px; font-family: -apple-system, BlinkMacSystemFont, sans-serif }
@@ -137,7 +138,7 @@
       <h2>My GRACE Members Card</h2>
       <p>Central Henderson members can scan, sign in, and open the new iOS-style Members Card experience for giving, care, community, and daily next steps.</p>
       <div class="hero-actions">
-        <a href="/grace_central_henderson_members_card_ios_app.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open New iOS App &rarr;</a>
+        <a id="hero-ios-app" href="/grace_central_henderson_members_card_ios_app.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open New iOS App &rarr;</a>
         <a href="#share-ios-app" class="btn-secondary">Scan QR Code</a>
       </div>
     </div>
@@ -154,17 +155,17 @@
     <div class="cards">
       <div class="card">
         <div class="card-body">
-          <span class="card-badge">Admin Panel</span>
-          <h3>GRACE Church CRM &mdash; Admin Panel</h3>
-          <p>Full admin dashboard for Central Henderson &mdash; people, giving, pastoral care, leadership, and more.</p>
+          <span class="card-badge">Demo CRM</span>
+          <h3>GRACE Church CRM &mdash; Central Henderson Demo</h3>
+          <p>Branded SaaS demo dashboard for Central Henderson &mdash; people, giving, pastoral care, leadership, and more.</p>
           <div class="card-tags">
+            <span class="tag">Demo</span>
             <span class="tag">CRM</span>
-            <span class="tag">Admin</span>
             <span class="tag">Central Henderson</span>
           </div>
         </div>
         <div class="card-footer">
-          <a href="https://grace-crm-two.vercel.app/#/dashboard" class="btn-primary" target="_blank">Open CRM &rarr;</a>
+          <a id="demo-crm-link" href="https://grace-central-henderson.vercel.app/#/dashboard" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Demo CRM &rarr;</a>
         </div>
       </div>
       <div class="card">
@@ -180,7 +181,7 @@
           </div>
         </div>
         <div class="card-footer">
-          <a href="/previews/grace_member_portal_central.html" class="btn-primary" target="_blank">Open Member Portal &rarr;</a>
+          <a id="demo-portal-link" href="/previews/grace_member_portal_central.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Member Portal &rarr;</a>
         </div>
       </div>
       <div class="card card-featured">
@@ -272,7 +273,17 @@
   </main>
   <script>
     (function () {
-      var IOS_APP_PATH = '/grace_central_henderson_members_card_ios_app.html';
+      var links = window.GRACE_LINKS && window.GRACE_LINKS.demo;
+      if (links) {
+        var crmLink = document.getElementById('demo-crm-link');
+        var portalLink = document.getElementById('demo-portal-link');
+        var heroIos = document.getElementById('hero-ios-app');
+        if (crmLink) crmLink.href = links.crm;
+        if (portalLink) portalLink.href = links.desktopPortal;
+        if (heroIos) heroIos.href = links.mobileApp;
+      }
+
+      var IOS_APP_PATH = (links && links.mobileApp) || '/grace_central_henderson_members_card_ios_app.html';
       var appUrl = window.location.origin + IOS_APP_PATH;
       var urlInput = document.getElementById('ios-app-url');
       var openLink = document.getElementById('ios-app-open');
