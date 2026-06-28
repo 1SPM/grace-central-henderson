@@ -6,10 +6,10 @@ Unified portal for **GRACE** church CRM and member experiences. React CRM + stat
 
 See **[docs/LINKS.md](docs/LINKS.md)** for the full product URL tree (Central Henderson demo vs white-label SaaS).
 
-| Lane | Hub | CRM |
-|------|-----|-----|
-| **Central Henderson demo** | [gracecrm-centralhenderson.org](https://gracecrm-centralhenderson.org/members-card.html) | [grace-central-henderson.vercel.app](https://grace-central-henderson.vercel.app/#/dashboard) |
-| **White-label SaaS** | [grace-crm-two.vercel.app](https://grace-crm-two.vercel.app/whitelabel-hub.html) | [grace-crm-two.vercel.app/#/dashboard](https://grace-crm-two.vercel.app/#/dashboard) |
+| Lane | Hub | CRM | Member portal |
+|------|-----|-----|---------------|
+| **Central Henderson demo** | [gracecrm-centralhenderson.org](https://gracecrm-centralhenderson.org/members-card.html) | [grace-central-henderson.vercel.app](https://grace-central-henderson.vercel.app/#/dashboard) | [Desktop portal](https://gracecrm-centralhenderson.org/previews/grace_member_portal_central.html) |
+| **White-label SaaS** | [grace-crm-two.vercel.app](https://grace-crm-two.vercel.app/whitelabel-hub.html) | [grace-crm-two.vercel.app/#/dashboard](https://grace-crm-two.vercel.app/#/dashboard) | [Generic portal](https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html) |
 
 GitHub Pages static preview: **https://1spm.github.io/grace-central-henderson/**
 
@@ -67,7 +67,8 @@ Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal
 |------|-------------|
 | `grace_central_henderson_members_card_ios_app.html` | Canonical iOS Members Card app (root URL) |
 | `previews/grace_central_henderson_members_card_ios_app.companion-preview.html` | Legacy companion-integrated build for side-by-side comparison |
-| `previews/grace_member_portal_central.html` | Desktop member portal — Home, Leadership, Give, Community, Profile |
+| `previews/grace_member_portal_central.html` | Desktop member portal (Central Henderson demo) |
+| `previews/grace_member_portal_generic.html` | Desktop member portal (white-label generic copy) |
 | `previews/grace_mobile_ios-central.html` | Mobile app prototype |
 | `previews/grace-central-theme.css` | Central brand theme (Poppins, Montserrat, `#EE2B37`) |
 | `previews/grace-messaging.js` | Canonical GRACE vs leader avatar messaging |

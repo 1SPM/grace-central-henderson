@@ -108,20 +108,6 @@
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(30, 41, 59, .18);
     }
-    .btn-disabled {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: var(--touch);
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: 1px dashed var(--border);
-      background: var(--gray);
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 650;
-      cursor: not-allowed;
-    }
     .cross-link {
       margin-top: 32px;
       padding: 16px 20px;
@@ -147,7 +133,7 @@
       main { padding: 28px 16px 44px }
       .hero h2 { font-size: 25px }
       .card-footer { display: grid }
-      .btn-primary, .btn-disabled { width: 100% }
+      .btn-primary { width: 100% }
       .card-body { padding: 20px 18px 18px }
       .card-footer { padding: 0 18px 18px }
     }
@@ -187,17 +173,18 @@
       </div>
       <div class="card">
         <div class="card-body">
-          <span class="card-badge">Coming Soon</span>
+          <span class="card-badge">Members Portal</span>
           <h3>Generic Members Portal</h3>
-          <p>White-label member portal for desktop and mobile — giving, care, community, and journey experiences without church-specific branding.</p>
+          <p>White-label member portal for desktop — giving, care, community, and journey experiences. Central Henderson branding for now; customize before go-live.</p>
           <div class="card-tags">
             <span class="tag">Members</span>
             <span class="tag">Portal</span>
-            <span class="tag">To Be Built</span>
+            <span class="tag">White Label</span>
+            <span class="tag">Desktop</span>
           </div>
         </div>
         <div class="card-footer">
-          <span class="btn-disabled" aria-disabled="true">Coming Soon</span>
+          <a id="wl-portal-link" href="/previews/grace_member_portal_generic.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Generic Members Portal &rarr;</a>
         </div>
       </div>
     </div>
@@ -212,7 +199,9 @@
       var demo = window.GRACE_LINKS && window.GRACE_LINKS.demo;
       if (wl) {
         var crmLink = document.getElementById('wl-crm-link');
+        var portalLink = document.getElementById('wl-portal-link');
         if (crmLink) crmLink.href = wl.crm;
+        if (portalLink && wl.memberPortal) portalLink.href = wl.memberPortal;
       }
       if (demo) {
         var demoHub = document.getElementById('demo-hub-link');

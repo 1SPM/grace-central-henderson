@@ -9,6 +9,6 @@ window.GRACE_LINKS = {
   whitelabel: {
     hub: 'https://grace-crm-two.vercel.app/whitelabel-hub.html',
     crm: 'https://grace-crm-two.vercel.app/#/dashboard',
-    memberPortal: null,
+    memberPortal: '/previews/grace_member_portal_generic.html',
   },
 };
