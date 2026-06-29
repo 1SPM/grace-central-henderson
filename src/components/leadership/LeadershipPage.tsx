@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Crown } from 'lucide-react';
 import { churchShortName } from '../../config/centralHenderson';
-import { getDefaultChurchName } from '../../config/tenant';
 import { HubPageHeader } from '../ui/HubPageHeader';
 import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';
@@ -32,7 +31,7 @@ interface LeadershipPageProps {
 }
 
 export function LeadershipPage({
-  churchName = getDefaultChurchName(),
+  churchName = 'Central Henderson Church',
   people,
   leaders,
   sessions,

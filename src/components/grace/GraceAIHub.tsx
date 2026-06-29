@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bot, HelpCircle } from 'lucide-react';
 import { churchShortName } from '../../config/centralHenderson';
-import { getDefaultChurchName } from '../../config/tenant';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';
 import { GraceAIFaq } from './GraceAIFaq';
 import type { LeaderProfile, PastoralSession } from '../../types';
@@ -32,7 +31,7 @@ interface GraceAIHubProps {
 }
 
 export function GraceAIHub({
-  churchName = getDefaultChurchName(),
+  churchName = 'Central Henderson Church',
   leaders,
   sessions,
   defaultTab,

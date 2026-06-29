@@ -3,7 +3,6 @@ import { X, Home, MessageCircle, Sparkles, Users, ArrowRight } from 'lucide-reac
 import { GraceOrb } from './GraceOrb';
 import { useGraceChat } from '../../contexts/GraceChatContext';
 import { churchShortName } from '../../config/centralHenderson';
-import { getDefaultChurchName } from '../../config/tenant';
 
 interface GraceGettingStartedPanelProps {
   churchName?: string;
@@ -33,7 +32,7 @@ const FEATURE_CARDS = [
   },
 ] as const;
 
-export function GraceGettingStartedPanel({ churchName = getDefaultChurchName(), onDismiss }: GraceGettingStartedPanelProps) {
+export function GraceGettingStartedPanel({ churchName = 'Central Henderson Church', onDismiss }: GraceGettingStartedPanelProps) {
   const grace = useGraceChat();
   const [query, setQuery] = useState('');
   const shortName = churchShortName(churchName);

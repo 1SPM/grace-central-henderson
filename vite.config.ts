@@ -33,18 +33,9 @@ function copyMemberPortalDemos(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const isFaithfulTenant = env.VITE_TENANT_DEFAULT === 'faithful';
   // Default 3010 — 3001/3002 are often taken by other local Vite instances
   const apiTarget = env.VITE_API_PROXY || 'http://127.0.0.1:3010';
   const BUILD_VERSION = Date.now().toString();
-
-  const faithfulHeadExtras = isFaithfulTenant
-    ? [
-        '    <link rel="preconnect" href="https://fonts.googleapis.com">',
-        '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-        '    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">',
-      ].join('\n')
-    : '';
 
   return {
     define: {
@@ -55,17 +46,7 @@ export default defineConfig(({ mode }) => {
       {
         name: 'inject-grace-build-version',
         transformIndexHtml(html) {
-          let out = html;
-          if (isFaithfulTenant) {
-            out = out.replace(
-              '<meta name="theme-color" content="#EE2B37" />',
-              '<meta name="theme-color" content="#449eca" />',
-            );
-            if (faithfulHeadExtras) {
-              out = out.replace('</head>', `${faithfulHeadExtras}\n  </head>`);
-            }
-          }
-          return out.replace(
+          return html.replace(
             '</head>',
             `    <meta name="grace-build" content="${BUILD_VERSION}" />\n  </head>`,
           );

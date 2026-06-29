@@ -10,7 +10,6 @@ import type {
   PastoralConversation,
 } from '../types';
 import type { ChurchSettings } from '../hooks/useChurchSettings';
-import { getDefaultChurchName } from '../config/tenant';
 import { TodayActionStrip } from './dashboard/TodayActionStrip';
 import { ClockCalendarBanner } from './dashboard/ClockCalendarBanner';
 import { DashboardCommandBar } from './dashboard/DashboardCommandBar';
@@ -84,7 +83,7 @@ export function Dashboard({
   const mailStats = useMailInboxStats();
   const portalActivity = usePortalActivity(churchId ?? '');
   const { user } = useAuthContext();
-  const churchName = churchSettings?.profile?.name || getDefaultChurchName();
+  const churchName = churchSettings?.profile?.name || 'Central Henderson Church';
   const timezone = churchSettings?.timezone || CENTRAL_HENDERSON_TIMEZONE;
   const { zoned, churchTodayKey } = useChurchClock(timezone);
   const greeting = greetingWord(zoned.hour24);

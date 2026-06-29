@@ -673,16 +673,3 @@ export function resolveLeaderContact(
     email: person?.email || stats?.contactEmail || '',
   };
 }
-
-/** Tenant-aware GRACE FAQ — Faithful Church copy when VITE_TENANT_DEFAULT=faithful */
-export function getGraceAiFaq(): GraceFaqItem[] {
-  if (import.meta.env.VITE_TENANT_DEFAULT !== 'faithful') return GRACE_AI_FAQ;
-  const church = 'Faithful Church';
-  return GRACE_AI_FAQ.map(item => ({
-    ...item,
-    answer: item.answer
-      .replace(/Central Henderson/g, church)
-      .replace(/Central Youth/g, 'Youth Ministry')
-      .replace(/Central Kids/g, "Children's Ministry"),
-  }));
-}

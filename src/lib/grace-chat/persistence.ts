@@ -1,11 +1,11 @@
 import type { GraceMessage, GraceData } from './types';
-import { getDefaultChurchName } from '../../config/tenant';
+import { CENTRAL_HENDERSON_DEFAULT_SETTINGS } from '../../config/centralHenderson';
 
 export const GRACE_MESSAGES_STORAGE_KEY = 'grace-chat-messages-v1';
 export const MESSAGES_PERSIST_LIMIT = 50;
 
 function greetingFallback(data: GraceData, salutation?: string): GraceMessage {
-  const churchName = data.churchName || getDefaultChurchName();
+  const churchName = data.churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
   const opener = salutation
     ? `${salutation}\n\nI'm GRACE — your admin assistant for ${churchName}.`
     : `Hi — I'm GRACE, your admin assistant for ${churchName}.`;
@@ -24,7 +24,7 @@ function greetingFallback(data: GraceData, salutation?: string): GraceMessage {
  */
 export function buildGreeting(data: GraceData, salutation?: string): GraceMessage {
   const { people, tasks, events, prayers, attendance } = data;
-  const churchName = data.churchName || getDefaultChurchName();
+  const churchName = data.churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400_000);
