@@ -188,15 +188,16 @@ textarea {
 .ba-primary,
 .home-live-pill,
 .pilot-next-btn {
-  background: var(--grace-navy-800);
+  background: var(--grace-sky-500);
   color: var(--grace-white);
   border-radius: var(--radius-button);
   transition: background var(--transition-fast);
 }
 
 .ba-primary:hover,
-.home-live-pill:hover {
-  background: var(--grace-navy-950);
+.home-live-pill:hover,
+.pilot-next-btn:hover {
+  background: var(--central-red-hover);
 }
 
 .co { padding-bottom: var(--section-padding-mobile); }
@@ -291,6 +292,119 @@ textarea {
   width: auto;
   max-width: 160px;
   object-fit: contain;
+}
+
+/* Sidebar nav — sky icons, soft active state */
+.nb:hover {
+  background: var(--central-red-soft);
+}
+
+.nb.active {
+  background: var(--central-red-soft);
+  box-shadow: inset 3px 0 0 var(--grace-sky-500);
+}
+
+.nb .nb-ico svg {
+  color: var(--grace-sky-500);
+}
+
+.nb.active .nb-ico svg {
+  color: var(--grace-navy-800);
+}
+
+/* Primary actions — sky blue instead of black */
+.give-amt:hover,
+.give-amt.active,
+.give-btn,
+.lc-btn-ai,
+.ai-send,
+.pcare-new-btn,
+.feed-tab.active,
+.pec-date,
+.conn-action:hover,
+.req-accept,
+.pm-post-btn,
+.pf-cs-save,
+.cause-ftab.active,
+.cause-btn-give,
+.wlt-tab.active,
+.wlt-grace-ctas .wlt-btn-primary,
+.wlt-act-tab.active,
+.net-wall-filter.active,
+.net-tab.active,
+.event-filter-pill.active,
+.journey-nav-btn.active,
+.journey-jtab.active,
+.study-step-dot.active,
+.study-step-btn,
+.grace-faq-block .faq-card.open .faq-toggle,
+.wallet-act-primary,
+.lg-profile-btn:hover,
+.wallet-copy-btn:hover {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.give-btn:hover,
+.pcare-new-btn:hover,
+.pm-post-btn:hover,
+.pf-cs-save:hover,
+.cause-btn-give:hover,
+.study-step-btn:hover {
+  background: var(--central-red-hover) !important;
+  border-color: var(--central-red-hover) !important;
+}
+
+.pf-qa:hover .pf-qa-ico {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.hero-card {
+  background: linear-gradient(135deg, var(--grace-navy-800) 0%, var(--grace-navy-950) 60%, var(--grace-navy-800) 100%) !important;
+}
+
+.hero-card::before {
+  background: rgba(68, 158, 202, 0.18) !important;
+}
+
+.pf-calc-result {
+  background: linear-gradient(135deg, var(--grace-navy-800), var(--grace-navy-950)) !important;
+}
+
+button[style*="background:#000"],
+button[style*="background: #000"],
+button[style*="background:#000000"],
+button[style*="background: #000000"] {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.blessing-card,
+.dash-blessing-compact,
+.dash-outreach-assigned {
+  background: linear-gradient(135deg, var(--central-red-soft), var(--grace-off-white)) !important;
+  border-color: #c5e3f2 !important;
+}
+
+.blessing-role,
+.blessing-verse,
+.crisis-hotline-action,
+.lco-row-action,
+.dash-outreach-assigned-role {
+  color: var(--grace-sky-500) !important;
+}
+
+.tile:hover {
+  background: var(--central-red-soft) !important;
+  border-color: #c5e3f2 !important;
+}
+
+.dash-hero-leader .home-leader-strip-cta {
+  color: #a8daf0 !important;
 }
 
 @media (min-width: 768px) {
