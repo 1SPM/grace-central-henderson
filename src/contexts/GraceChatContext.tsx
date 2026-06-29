@@ -10,7 +10,7 @@ import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
-import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { getDefaultChurchSettings } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
@@ -101,7 +101,7 @@ function buildDataContext(data: GraceData): string {
   const totalGiving = recentGiving.reduce((s, g) => s + g.amount, 0);
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
-  const resolvedChurch = churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
+  const resolvedChurch = churchName || getDefaultChurchSettings().profile.name;
   const profileLines: string[] = [];
   if (churchProfile) {
     const p = churchProfile;
@@ -229,7 +229,7 @@ function computeSalutation(data: GraceData, hour24: number): string {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
-  const tz = data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE;
+  const tz = data.churchTimezone || getDefaultChurchSettings().timezone || 'America/Los_Angeles';
   const { zoned } = useChurchClock(tz);
   const salutation = useMemo(
     () => computeSalutation(data, zoned.hour24),
@@ -239,7 +239,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
     const stored = loadStoredMessages();
     if (stored) return stored;
-    return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE)))];
+    return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || getDefaultChurchSettings().timezone || 'America/Los_Angeles')))];
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);

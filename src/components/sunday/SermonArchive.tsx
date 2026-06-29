@@ -4,6 +4,8 @@ import { PastSermonsGrid } from '../live-service/PastSermonsGrid';
 import { fetchWatchSermons, type WatchSermon } from '../../lib/services/liveService';
 import type { ConnectSubjectKind } from '../../config/sermonConnectSubjects';
 import { browseAllLabels } from '../../config/sermonConnectSubjects';
+import { churchShortName } from '../../config/centralHenderson';
+import { getDefaultChurchName } from '../../config/tenant';
 
 interface SermonArchiveProps {
   churchId: string;
@@ -60,7 +62,7 @@ export function SermonArchive({
       <div>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Sermon archive</h2>
         <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-          Past messages from Central Henderson — search by title, series, or speaker.
+          Past messages from {churchShortName(getDefaultChurchName())} — search by title, series, or speaker.
         </p>
       </div>
 

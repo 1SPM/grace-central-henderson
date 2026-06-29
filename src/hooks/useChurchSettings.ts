@@ -10,6 +10,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
 import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, DEMO_ONBOARDING_SKIP } from '../config/centralHenderson';
+import { isFaithfulTenant } from '../config/tenant';
+import { FAITHFUL_CHURCH_DEFAULT_SETTINGS } from '../config/faithfulChurch';
 import { hasEnteredDemo, isDemoModeEnabled, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
 
 const log = createLogger('church-settings');
@@ -90,7 +92,9 @@ export interface ChurchSettings {
   onboarding?: OnboardingState;
 }
 
-const DEFAULT_SETTINGS: ChurchSettings = CENTRAL_HENDERSON_DEFAULT_SETTINGS;
+const DEFAULT_SETTINGS: ChurchSettings = isFaithfulTenant
+  ? FAITHFUL_CHURCH_DEFAULT_SETTINGS
+  : CENTRAL_HENDERSON_DEFAULT_SETTINGS;
 
 function applyDemoOnboardingIfEntered(settings: ChurchSettings): ChurchSettings {
   if (!isDemoModeEnabled || !hasEnteredDemo()) return settings;

@@ -1,0 +1,54 @@
+/* Faithful Church — white-label CRM theme (grace-crm-two.vercel.app) */
+
+html[data-tenant='faithful'] {
+  /* GRACE navy palette */
+  --grace-navy-950: #0c1929;
+  --grace-navy-800: #1e3a5f;
+  --grace-sky-500: #449eca;
+  --grace-off-white: #f8f9fb;
+
+  /* Replace Monday purple primary */
+  --color-primary: 68 158 202;
+  --color-primary-dark: 58 138 181;
+  --gold: #449eca;
+  --gold-soft: #a8daf0;
+  --gold-line: #c5e3f2;
+
+  /* Central token aliases (marketing + shared surfaces) */
+  --central-red: var(--grace-sky-500);
+  --central-red-hover: #3a8ab5;
+  --central-black: var(--grace-navy-950);
+  --central-white: #ffffff;
+  --central-grey: #64748b;
+  --central-canvas: var(--grace-off-white);
+  --central-card: #ffffff;
+  --central-line: #e2e8f0;
+  --central-red-soft: #e8f4fa;
+  --brand-accent: var(--grace-sky-500);
+  --brand-dark: var(--grace-navy-950);
+  --brand-soft: #e8f4fa;
+}
+
+html[data-tenant='faithful'] body {
+  font-family: 'Inter', 'Figtree', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--grace-navy-950);
+}
+
+html[data-tenant='faithful'] .stat-number,
+html[data-tenant='faithful'] .serif {
+  font-family: 'Playfair Display', 'Poppins', Georgia, serif;
+}
+
+html[data-tenant='faithful'] h1,
+html[data-tenant='faithful'] h2,
+html[data-tenant='faithful'] h3,
+html[data-tenant='faithful'] .font-display,
+html[data-tenant='faithful'] .font-brand {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--grace-navy-950);
+}
+
+/* Focus rings — sky instead of purple */
+html[data-tenant='faithful'] *:focus-visible {
+  outline-color: rgba(68, 158, 202, 0.45);
+}

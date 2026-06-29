@@ -44,6 +44,7 @@ Generic-oriented production settings on `grace-crm-two.vercel.app`:
 | `SUPABASE_URL` | Same URL for API routes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase |
 | `VITE_DEFAULT_CHURCH_ID` | Default tenant church UUID |
+| `VITE_TENANT_DEFAULT` | Set to `faithful` for Faithful Church white-label CRM theme + defaults |
 | `VITE_ENABLE_DEMO_MODE` | Usually `false` for white-label |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Staff sign-in |
 | `CLERK_SECRET_KEY` | API JWT verification |
@@ -57,6 +58,8 @@ Central Henderson demo CRM on `grace-central-henderson.vercel.app`:
 | Same Supabase / Clerk vars as above | Shared backend |
 | `VITE_ENABLE_DEMO_MODE` | `true` for sandbox admin without Clerk |
 | `VITE_DEFAULT_CHURCH_ID` | Central Henderson church UUID |
+
+Leave `VITE_TENANT_DEFAULT` **unset** on this project so the demo keeps Central Henderson / Monday purple branding.
 
 Impact Card Accounts (`#/wallets`) calls `GET /api/neobank?resource=admin`. Without `SUPABASE_SERVICE_ROLE_KEY`, the page shows a configuration error instead of the monitoring dashboard.
 

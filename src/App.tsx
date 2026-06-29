@@ -21,6 +21,7 @@ import { GraceChatProvider } from './contexts/GraceChatContext';
 import { TutorialProvider } from './contexts/TutorialContext';
 import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
 import { TutorialPickerModal } from './components/tutorial/TutorialPickerModal';
+import { applyBrandingPrimaryColor } from './config/tenant';
 
 // Lazy load GRACE Mobile (standalone staff-gated mobile CRM at /mobile)
 const GraceMobile = lazy(() => import('./components/mobile/GraceMobile').then(m => ({ default: m.GraceMobile })));
@@ -154,6 +155,10 @@ function App() {
   const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
   const [showTutorialPicker, setShowTutorialPicker] = useState(false);
+
+  useEffect(() => {
+    applyBrandingPrimaryColor(churchSettings?.branding?.primaryColor);
+  }, [churchSettings?.branding?.primaryColor]);
 
   const reopenWizard = useCallback(() => {
     setShowWizard(true);

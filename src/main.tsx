@@ -8,10 +8,16 @@ import { handleDemoEntryQuery } from './lib/demoEntry';
 import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
+import { isFaithfulTenant } from './config/tenant';
 import './index.css';
 import './styles/grace-orb.css';
 import './styles/central-tokens.css';
+import './styles/faithful-crm-theme.css';
 import './components/marketing/marketing.css';
+
+if (isFaithfulTenant) {
+  document.documentElement.dataset.tenant = 'faithful';
+}
 
 // Init Sentry first so anything thrown during setup is captured.
 initSentry();

@@ -8,6 +8,11 @@ interface ImportMetaEnv {
   // Fallback church UUID when Clerk isn't configured (single-tenant interim)
   readonly VITE_DEFAULT_CHURCH_ID?: string;
 
+  /** Tenant preset: `faithful` for white-label CRM on grace-crm-two */
+  readonly VITE_TENANT_DEFAULT?: string;
+
+  readonly VITE_ENABLE_DEMO_MODE?: string;
+
   // Clerk (Authentication)
   readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 

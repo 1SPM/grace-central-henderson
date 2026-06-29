@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { GRACE_AI_FAQ } from '../../config/centralHendersonLeaders';
+import { getGraceAiFaq } from '../../config/centralHendersonLeaders';
 
 interface GraceAIFaqProps {
   audience?: 'admin' | 'member' | 'both';
 }
 
 export function GraceAIFaq({ audience = 'admin' }: GraceAIFaqProps) {
-  const items = GRACE_AI_FAQ.filter(
+  const items = getGraceAiFaq().filter(
     item => !item.audience || item.audience === audience || item.audience === 'both',
   );
   const [openId, setOpenId] = useState<string>(items[0]?.id ?? '');

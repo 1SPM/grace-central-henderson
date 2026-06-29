@@ -27,6 +27,7 @@ import { TrialBanner } from './TrialBanner';
 import { NotificationCenter } from './NotificationCenter';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
 import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHenderson';
+import { getDefaultChurchName } from '../config/tenant';
 import { GraceOrb } from './grace/GraceOrb';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -175,7 +176,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const grace = useGraceChat();
   const { user } = useAuthContext();
   const addressee = resolveAddressee(user?.firstName, user?.role);
-  const displayChurch = churchShortName(churchName || 'Central Henderson Church');
+  const displayChurch = churchShortName(churchName || getDefaultChurchName());
   const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
   const logoUrl = branding?.logoUrl;
   const [sidebarOpen, setSidebarOpen] = useState(false);

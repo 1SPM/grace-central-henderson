@@ -1,4 +1,56 @@
 /** @type {import('tailwindcss').Config} */
+const isFaithfulTenant = process.env.VITE_TENANT_DEFAULT === 'faithful';
+
+const indigoPalette = isFaithfulTenant
+  ? {
+      50: '#e8f4fa',
+      100: '#d4ebf6',
+      200: '#a8daf0',
+      300: '#7dc8e8',
+      400: '#5aabda',
+      500: '#449eca',
+      600: '#3a8ab5',
+      700: '#1e3a5f',
+      800: '#152a45',
+      900: '#0c1929',
+      950: '#081220',
+    }
+  : {
+      50: '#F3F3FF',
+      100: '#EDEDFF',
+      200: '#DCDCFF',
+      300: '#C2C2FF',
+      400: '#9595FF',
+      500: '#6161FF',
+      600: '#5151D5',
+      700: '#4338B8',
+      800: '#36309A',
+      900: '#2D2A78',
+      950: '#1B1850',
+    };
+
+const centralPalette = isFaithfulTenant
+  ? {
+      red: '#449eca',
+      'red-hover': '#3a8ab5',
+      black: '#0c1929',
+      white: '#FFFFFF',
+      grey: '#64748b',
+      canvas: '#f8f9fb',
+      card: '#ffffff',
+      line: '#e2e8f0',
+    }
+  : {
+      red: '#EE2B37',
+      'red-hover': '#d42530',
+      black: '#000000',
+      white: '#FFFFFF',
+      grey: '#A7A9AC',
+      canvas: '#f6f6f6',
+      card: '#ffffff',
+      line: '#e8e8e8',
+    };
+
 export default {
   content: [
     "./index.html",
@@ -82,20 +134,8 @@ export default {
           900: '#1F2027',
           950: '#121319',
         },
-        // Brand: Monday purple (#6161FF) — nav active states, logo, focus
-        indigo: {
-          50:  '#F3F3FF',
-          100: '#EDEDFF',
-          200: '#DCDCFF',
-          300: '#C2C2FF',
-          400: '#9595FF',
-          500: '#6161FF',
-          600: '#5151D5',
-          700: '#4338B8',
-          800: '#36309A',
-          900: '#2D2A78',
-          950: '#1B1850',
-        },
+        // Brand: Monday purple or Faithful sky (build-time tenant)
+        indigo: indigoPalette,
         // Status: vivid Monday green
         emerald: {
           50:  '#E6FAF1',
@@ -137,17 +177,8 @@ export default {
           900: '#7A1727',
           950: '#450A14',
         },
-        // Central Henderson brand
-        central: {
-          red: '#EE2B37',
-          'red-hover': '#d42530',
-          black: '#000000',
-          white: '#FFFFFF',
-          grey: '#A7A9AC',
-          canvas: '#f6f6f6',
-          card: '#ffffff',
-          line: '#e8e8e8',
-        },
+        // Central Henderson / Faithful Church brand tokens
+        central: centralPalette,
         amber: {
           50:  '#FFF6E8',
           100: '#FEEDD1',
@@ -162,17 +193,25 @@ export default {
           950: '#472A08',
         },
       },
-      fontFamily: {
-        sans: ['Figtree', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'Figtree', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        // Monday aesthetic: headings render as bold geometric sans (kept the
-        // `serif` key so existing font-serif/.serif usages restyle globally)
-        serif: ['Poppins', 'Figtree', '-apple-system', 'system-ui', 'sans-serif'],
-        editorial: ['Newsreader', 'Georgia', 'serif'],
-        fraunces: ['Fraunces', 'Georgia', 'serif'],
-        brand: ['Montserrat', 'Gotham', 'Arial', 'sans-serif'],
-        web: ['Poppins', 'Arial', 'sans-serif'],
-      },
+      fontFamily: isFaithfulTenant
+        ? {
+            sans: ['Inter', 'Figtree', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            display: ['Playfair Display', 'Georgia', 'serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+            editorial: ['Playfair Display', 'Georgia', 'serif'],
+            fraunces: ['Playfair Display', 'Georgia', 'serif'],
+            brand: ['Playfair Display', 'Georgia', 'serif'],
+            web: ['Inter', 'Figtree', 'Arial', 'sans-serif'],
+          }
+        : {
+            sans: ['Figtree', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            display: ['Poppins', 'Figtree', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            serif: ['Poppins', 'Figtree', '-apple-system', 'system-ui', 'sans-serif'],
+            editorial: ['Newsreader', 'Georgia', 'serif'],
+            fraunces: ['Fraunces', 'Georgia', 'serif'],
+            brand: ['Montserrat', 'Gotham', 'Arial', 'sans-serif'],
+            web: ['Poppins', 'Arial', 'sans-serif'],
+          },
       transitionDuration: {
         '120': '120ms',
       },
