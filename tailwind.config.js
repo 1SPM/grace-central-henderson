@@ -1,8 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const isFaithfulTenant =
-  process.env.VITE_TENANT_DEFAULT === 'faithful' ||
-  (process.env.VITE_TENANT_DEFAULT !== 'central' &&
-    process.env.VITE_ENABLE_DEMO_MODE !== 'true');
+const isFaithfulTenant = process.env.VITE_TENANT_DEFAULT === 'faithful';
 
 const indigoPalette = isFaithfulTenant
   ? {

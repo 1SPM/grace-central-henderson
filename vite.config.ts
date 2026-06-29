@@ -33,10 +33,7 @@ function copyMemberPortalDemos(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const isFaithfulTenant =
-    env.VITE_TENANT_DEFAULT === 'faithful' ||
-    (env.VITE_TENANT_DEFAULT !== 'central' &&
-      env.VITE_ENABLE_DEMO_MODE !== 'true');
+  const isFaithfulTenant = env.VITE_TENANT_DEFAULT === 'faithful';
   // Default 3010 — 3001/3002 are often taken by other local Vite instances
   const apiTarget = env.VITE_API_PROXY || 'http://127.0.0.1:3010';
   const BUILD_VERSION = Date.now().toString();
