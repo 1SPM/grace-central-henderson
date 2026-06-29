@@ -19,18 +19,6 @@
       "has": [{ "type": "host", "value": "www.gracecrm-centralhenderson.org" }],
       "destination": "/members-card.html",
       "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "grace-crm-two.vercel.app" }],
-      "destination": "/whitelabel-hub.html",
-      "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "grace-crm.dev" }],
-      "destination": "/whitelabel-hub.html",
-      "permanent": false
     }
   ],
   "rewrites": [

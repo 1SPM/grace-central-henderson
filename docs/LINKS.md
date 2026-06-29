@@ -23,7 +23,7 @@ Root on `gracecrm-centralhenderson.org` redirects to `/members-card.html`.
 | **White-label CRM** | https://grace-crm-two.vercel.app/#/dashboard |
 | **Generic member portal** | https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html |
 
-Root on `grace-crm-two.vercel.app` and `grace-crm.dev` redirects to `/whitelabel-hub.html`.
+Root on `grace-crm-two.vercel.app` and `grace-crm.dev` serves the white-label CRM; hub is at `/whitelabel-hub.html`.
 
 ## Vercel projects
 
