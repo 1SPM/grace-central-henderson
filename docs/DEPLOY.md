@@ -13,11 +13,11 @@ Both projects have Git auto-deploy on **`main`**.
 
 ### Host-based entry points (grace-crm project)
 
-| Host | `/` redirects to |
+| Host | `/` behavior |
 |------|------------------|
-| `gracecrm-centralhenderson.org` | `/members-card.html` (Central Henderson demo hub) |
-| `grace-crm-two.vercel.app` | `/whitelabel-hub.html` |
-| `grace-crm.dev` | `/whitelabel-hub.html` |
+| `gracecrm-centralhenderson.org` | Redirects to `/members-card.html` (Central Henderson demo hub) |
+| `grace-crm-two.vercel.app` | Serves React CRM SPA; hub at `/whitelabel-hub.html` |
+| `grace-crm.dev` | Serves React CRM SPA; hub at `/whitelabel-hub.html` |
 
 **Canonical git remote:** `origin` → `https://github.com/1SPM/grace-central-henderson.git`
 
