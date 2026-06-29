@@ -674,9 +674,13 @@ export function resolveLeaderContact(
   };
 }
 
-/** Tenant-aware GRACE FAQ — Faithful Church copy when VITE_TENANT_DEFAULT=faithful */
+/** Tenant-aware GRACE FAQ — Faithful Church copy when white-label tenant */
 export function getGraceAiFaq(): GraceFaqItem[] {
-  if (import.meta.env.VITE_TENANT_DEFAULT !== 'faithful') return GRACE_AI_FAQ;
+  const isFaithful =
+    import.meta.env.VITE_TENANT_DEFAULT === 'faithful' ||
+    (import.meta.env.VITE_TENANT_DEFAULT !== 'central' &&
+      import.meta.env.VITE_ENABLE_DEMO_MODE !== 'true');
+  if (!isFaithful) return GRACE_AI_FAQ;
   const church = 'Faithful Church';
   return GRACE_AI_FAQ.map(item => ({
     ...item,

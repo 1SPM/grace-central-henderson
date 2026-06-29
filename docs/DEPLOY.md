@@ -44,7 +44,7 @@ Generic-oriented production settings on `grace-crm-two.vercel.app`:
 | `SUPABASE_URL` | Same URL for API routes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase |
 | `VITE_DEFAULT_CHURCH_ID` | Default tenant church UUID |
-| `VITE_TENANT_DEFAULT` | Set to `faithful` for Faithful Church white-label CRM theme + defaults |
+| `VITE_TENANT_DEFAULT` | Optional override: `faithful` (explicit) or `central`. When unset, **grace-crm** auto-selects Faithful because `VITE_ENABLE_DEMO_MODE` is `false`; **grace-central-henderson** stays Central Henderson because demo mode is `true`. |
 | `VITE_ENABLE_DEMO_MODE` | Usually `false` for white-label |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Staff sign-in |
 | `CLERK_SECRET_KEY` | API JWT verification |

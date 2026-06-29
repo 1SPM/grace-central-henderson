@@ -4,7 +4,9 @@ import { FAITHFUL_CHURCH_DEFAULT_SETTINGS } from './faithfulChurch';
 
 /** White-label Faithful Church tenant (grace-crm Vercel project). */
 export const isFaithfulTenant =
-  import.meta.env.VITE_TENANT_DEFAULT === 'faithful';
+  import.meta.env.VITE_TENANT_DEFAULT === 'faithful' ||
+  (import.meta.env.VITE_TENANT_DEFAULT !== 'central' &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE !== 'true');
 
 export function getDefaultChurchSettings(): ChurchSettings {
   return isFaithfulTenant
