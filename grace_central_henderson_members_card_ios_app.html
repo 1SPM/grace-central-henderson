@@ -3404,32 +3404,32 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <button type="button" class="cn-ev-filter" onclick="filterCnEvents('special',this)">Special</button>
             </div>
             <div id="cn-event-list">
-              <div class="cn-event-row" data-evcat="service">
+              <div class="cn-event-row" data-evcat="service" data-ev-weekday="0" data-ev-week="0">
                 <div class="cn-event-date" style="background:linear-gradient(135deg,#000,#111);color:#fff"><strong>1</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Sunday Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="group">
+              <div class="cn-event-row" data-evcat="group" data-ev-weekday="2" data-ev-week="0">
                 <div class="cn-event-date" style="background:#f5e8f0;color:#7a3a6a"><strong>2</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Women of Grace</div><div style="font-size:11px;color:var(--ios-muted)">6:00 PM · Room 204</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night">
+              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night" data-ev-weekday="4" data-ev-week="0">
                 <div class="cn-event-date" style="background:#FFF0F1;color:#000"><strong>4</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Prayer Night</div><div style="font-size:11px;color:var(--ios-muted)">7:00 PM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="1">
                 <div class="cn-event-date" style="background:#fee2e2;color:#991b1b"><strong>7</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Pentecost Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Baptism Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="2">
                 <div class="cn-event-date" style="background:#e8f5ed;color:#15803d"><strong>21</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Father's Day Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Family Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="3">
                 <div class="cn-event-date" style="background:#000;color:#EE2B37"><strong>28</strong><span style="color:rgba(238,43,55,.7)">Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Summer BBQ Fellowship</div><div style="font-size:11px;color:var(--ios-muted)">2:00 PM · Church grounds</div></div>
                 <button type="button" class="cn-rsvp urgent" onclick="cnRsvp(this)">RSVP</button>
@@ -7172,6 +7172,18 @@ initDrawerMenuIcons();
   document.querySelectorAll('.js-next-sunday').forEach(function (el) { el.textContent = 'Sunday Service · ' + label; });
   document.querySelectorAll('.js-next-sunday-time').forEach(function (el) { el.textContent = 'Sunday Service · ' + label + ' · 9:45 AM'; });
   document.querySelectorAll('.js-calendar-eyebrow').forEach(function (el) { el.textContent = 'Church calendar · ' + monthsFull[d.getMonth()] + ' ' + d.getFullYear(); });
+  // demoClock: event rows carry data-ev-weekday/data-ev-week — compute real
+  // future dates so demo events are never in the past.
+  document.querySelectorAll('.cn-event-row[data-ev-weekday]').forEach(function (row) {
+    var wd = Number(row.getAttribute('data-ev-weekday'));
+    var wk = Number(row.getAttribute('data-ev-week') || 0);
+    var ev = new Date();
+    ev.setDate(ev.getDate() + ((wd - ev.getDay() + 7) % 7) + wk * 7);
+    var dayEl = row.querySelector('.cn-event-date strong');
+    var monEl = row.querySelector('.cn-event-date span');
+    if (dayEl) dayEl.textContent = String(ev.getDate());
+    if (monEl) monEl.textContent = months[ev.getMonth()];
+  });
 })();
 renderLeader();
 seedLeaderChat();

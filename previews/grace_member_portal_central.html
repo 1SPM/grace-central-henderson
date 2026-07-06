@@ -2813,32 +2813,32 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="event-filter-pill" onclick="filterNetEvents('special',this)">Special</div>
             </div>
             <div id="net-event-list">
-              <div class="event-row" data-evcat="service">
+              <div class="event-row" data-evcat="service" data-ev-weekday="0" data-ev-week="0">
                 <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:#fff">1</div><div class="event-date-mon" style="color:rgba(255,255,255,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Sunday Service</div><div class="event-time">10:00 AM · Sanctuary</div></div>
                 <button class="event-rsvp going" onclick="rsvpEvent(this)">Going ✓</button>
               </div>
-              <div class="event-row" data-evcat="group">
+              <div class="event-row" data-evcat="group" data-ev-weekday="2" data-ev-week="0">
                 <div class="event-date" style="background:#f5e8f0"><div class="event-date-day" style="color:#7a3a6a">2</div><div class="event-date-mon" style="color:rgba(122,58,106,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Women of Grace</div><div class="event-time">6:00 PM · Room 204</div></div>
                 <button class="event-rsvp going" onclick="rsvpEvent(this)">Going ✓</button>
               </div>
-              <div class="event-row" data-evcat="service">
+              <div class="event-row" data-evcat="service" data-ev-weekday="4" data-ev-week="0">
                 <div class="event-date" style="background:#FFF0F1"><div class="event-date-day" style="color:#000000">4</div><div class="event-date-mon" style="color:rgba(122,79,26,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Prayer Night</div><div class="event-time">7:00 PM · Sanctuary</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="1">
                 <div class="event-date" style="background:#fee2e2"><div class="event-date-day" style="color:#991b1b">7</div><div class="event-date-mon" style="color:rgba(153,27,27,.6)">Jun</div></div>
-                <div style="flex:1"><div class="event-name">Pentecost Sunday</div><div class="event-time">10:00 AM · Special service</div></div>
+                <div style="flex:1"><div class="event-name">Baptism Sunday</div><div class="event-time">10:00 AM · Special service</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="2">
                 <div class="event-date" style="background:#e8f5ed"><div class="event-date-day" style="color:#15803d">21</div><div class="event-date-mon" style="color:rgba(21,128,61,.6)">Jun</div></div>
-                <div style="flex:1"><div class="event-name">Father's Day Service</div><div class="event-time">10:00 AM · Bring family</div></div>
+                <div style="flex:1"><div class="event-name">Family Sunday</div><div class="event-time">10:00 AM · Bring family</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="3">
                 <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:#EE2B37">28</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Summer BBQ Fellowship</div><div class="event-time">2:00 PM · Church grounds</div></div>
                 <button class="event-rsvp" style="background:#EE2B37;color:#000000;border-color:#EE2B37" onclick="rsvpEvent(this)">RSVP</button>
@@ -5186,6 +5186,24 @@ function formatHomeDate(){
   const monthsFull=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const now=new Date();
   document.querySelectorAll('.js-calendar-eyebrow').forEach(el=>{el.textContent='Church calendar · '+monthsFull[now.getMonth()]+' '+now.getFullYear();});
+  // demoClock: event rows carry data-ev-weekday/data-ev-week — compute real
+  // future dates so demo events are never in the past (UX review 2026-07-06).
+  document.querySelectorAll('.event-row[data-ev-weekday]').forEach(row=>{
+    const wd=Number(row.dataset.evWeekday),wk=Number(row.dataset.evWeek||0);
+    const ev=new Date();
+    ev.setDate(ev.getDate()+((wd-ev.getDay()+7)%7)+wk*7);
+    const dayEl=row.querySelector('.event-date-day'),monEl=row.querySelector('.event-date-mon');
+    if(dayEl)dayEl.textContent=String(ev.getDate());
+    if(monEl)monEl.textContent=months[ev.getMonth()];
+  });
+  // Community feed "attending" card: next Sunday +3 weeks (Summer BBQ seed).
+  (function(){
+    const day=document.querySelector('.post-event-card .pec-day'),mon=document.querySelector('.post-event-card .pec-mon');
+    if(!day||!mon)return;
+    const ev=new Date();
+    ev.setDate(ev.getDate()+((7-ev.getDay())%7)+21);
+    day.textContent=String(ev.getDate());mon.textContent=months[ev.getMonth()];
+  })();
 })();
 function formatHomeGreeting(){
   const h=new Date().getHours();
