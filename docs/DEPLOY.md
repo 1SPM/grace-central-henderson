@@ -56,3 +56,13 @@ Impact Card Accounts (`#/wallets`) calls `GET /api/neobank?resource=admin`. With
 ## PWA cache
 
 After deploy, staff may need a hard refresh (Cmd+Shift+R) once. The app auto-reloads when `grace-build` meta changes.
+
+## Verifying git ↔ Vercel sync
+
+Vercel builds from source (`vercel.json` `buildCommand`), not committed `dist/`. After pushing to `main`:
+
+1. GitHub **main** commit SHA should match your local `git rev-parse HEAD`.
+2. Vercel **Deployments** → Production should show the same short SHA (refresh if the overview lags).
+3. Live check: `curl -sL https://grace-crm-two.vercel.app/ | grep grace-build` — build id updates on each deploy.
+
+GitHub Actions **CI** and **Deploy Central Henderson Pages** are separate from Vercel auto-deploy; fix those for green checks, not for Vercel propagation.

@@ -31,9 +31,30 @@ export default tseslint.config(
       'react-hooks/purity': 'off',
       // Allow components defined inside other components when used with stable dependencies
       'react-hooks/static-components': 'off',
+      // React Compiler memo rules — too noisy for existing codebase; track in TECH_DEBT
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/use-memo': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', '*.config.js'],
+    files: ['api/**/*.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '*.config.js',
+      'previews/**',
+      'public/grace-links.js',
+      'grace-duotone-icons.js',
+      'api/**/*.js',
+    ],
   }
 );

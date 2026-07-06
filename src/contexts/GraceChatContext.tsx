@@ -278,7 +278,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       if (m.length !== 1 || m[0].id !== 'greet') return m;
       return [buildGreeting(data, salutation)];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length, salutation]);
 
   // Portal engagement + Impact Card aggregates (Phase D) — lets admins
@@ -288,7 +288,6 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   // Memoize context so we're not rebuilding this on every keystroke.
   // Depend on the specific fields we read so re-computation tracks the
   // actual inputs, not every new wrapper object identity.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataContext = useMemo(() => {
     const base = buildDataContext(data);
     return opsContext ? `${base}\n${opsContext}` : base;
@@ -299,7 +298,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     opsContext,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const suggestions = useMemo(() => buildSuggestions(data), [
     data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);
@@ -317,7 +316,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       // Defer to next tick so panel renders before we send
       setTimeout(() => void sendMessage(seed), 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
