@@ -26,7 +26,7 @@ import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
 import { NotificationCenter } from './NotificationCenter';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
-import { CENTRAL_HENDERSON_TIMEZONE, churchShortName } from '../config/centralHenderson';
+import { TENANT_TIMEZONE, churchShortName } from '../config/tenant';
 import { GraceOrb } from './grace/GraceOrb';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -580,7 +580,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           </nav>
 
           {/* Live clock + search */}
-          <LiveClockDisplay timezone={timezone || CENTRAL_HENDERSON_TIMEZONE} className="mr-2" />
+          <LiveClockDisplay timezone={timezone || TENANT_TIMEZONE} className="mr-2" />
           {onOpenSearch && (
             <>
               <button

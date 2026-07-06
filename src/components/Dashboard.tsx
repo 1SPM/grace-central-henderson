@@ -30,7 +30,7 @@ import {
   countDetailSections,
   findNextEventLabel,
 } from '../lib/dashboardSummary';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../config/tenant';
 
 interface DashboardProps {
   churchId?: string;
@@ -84,7 +84,7 @@ export function Dashboard({
   const portalActivity = usePortalActivity(churchId ?? '');
   const { user } = useAuthContext();
   const churchName = churchSettings?.profile?.name || 'Central Henderson Church';
-  const timezone = churchSettings?.timezone || CENTRAL_HENDERSON_TIMEZONE;
+  const timezone = churchSettings?.timezone || TENANT_TIMEZONE;
   const { zoned, churchTodayKey } = useChurchClock(timezone);
   const greeting = greetingWord(zoned.hour24);
   const addressee = resolveAddressee(user?.firstName, user?.role);

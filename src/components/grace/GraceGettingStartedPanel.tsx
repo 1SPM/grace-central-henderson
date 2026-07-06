@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react';
 import { X, Home, MessageCircle, Sparkles, Users, ArrowRight } from 'lucide-react';
 import { GraceOrb } from './GraceOrb';
 import { useGraceChat } from '../../contexts/GraceChatContext';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 
 interface GraceGettingStartedPanelProps {
   churchName?: string;

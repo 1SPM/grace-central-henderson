@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Crown } from 'lucide-react';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 import { HubPageHeader } from '../ui/HubPageHeader';
 import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';

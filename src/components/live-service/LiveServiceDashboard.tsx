@@ -2,7 +2,7 @@ import { Radio, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useLiveServiceOps } from '../../hooks/useLiveServiceOps';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { Person } from '../../types';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../../config/tenant';
 import { LiveServiceStatsBar } from './LiveServiceStatsBar';
 import { LiveStreamMonitor } from './LiveStreamMonitor';
 import { LiveChatModerationPanel } from './LiveChatModerationPanel';
@@ -25,7 +25,7 @@ export function LiveServiceDashboard({
   churchId,
   churchName,
   churchProfile,
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   people,
   onViewPerson,
   embedded = false,

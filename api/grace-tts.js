@@ -16,7 +16,9 @@ function corsHeaders(origin) {
     /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin) ||
     /\.vercel\.app$/i.test(origin) ||
     /github\.io$/i.test(origin) ||
-    /1spm\.github\.io$/i.test(origin);
+    /1spm\.github\.io$/i.test(origin) ||
+    /^https:\/\/(www\.)?gracecrm-centralhenderson\.org$/i.test(origin) ||
+    /^https:\/\/(www\.)?grace-crm\.dev$/i.test(origin);
   return {
     'Access-Control-Allow-Origin': allowed && origin ? origin : '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

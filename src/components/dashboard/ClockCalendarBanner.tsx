@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin, Plus } from 'lucide-react';
 import { useChurchClock } from '../../hooks/useChurchClock';
 import { calendarDayKey, type DayAgendaEvent } from '../../lib/calendarEvents';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../../config/tenant';
 
 const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -68,7 +68,7 @@ export function ClockCalendarBanner({
   eventDays,
   eventsByDay,
   onOpenCalendar,
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   variant = 'classic',
   className = '',
   actionStrip,
@@ -481,7 +481,7 @@ function RedesignClockCalendar({
 }
 
 export function LiveClockDisplay({
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   variant = 'classic',
   className = '',
 }: {

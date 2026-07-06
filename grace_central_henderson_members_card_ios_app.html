@@ -3352,7 +3352,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('groups-events')">
             <div class="cn-widget-head"><strong>Groups &amp; Events</strong><span>Open →</span></div>
-            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> Sunday Service · Jun 1</p>
+            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> <span class="js-next-sunday">Sunday Service</span></p>
           </div>
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('people')">
             <div class="cn-widget-head"><strong>People</strong><span>24 connected →</span></div>
@@ -3363,14 +3363,14 @@ html.embed-preview .watch-donate-toast{display:none!important}
         <!-- Groups & Events -->
         <div class="cn-panel" id="cn-panel-groups-events">
           <div class="cn-ge-hero">
-            <div class="cn-ge-eyebrow"><i></i> Church calendar · June 2026</div>
+            <div class="cn-ge-eyebrow"><i></i> <span class="js-calendar-eyebrow">Church calendar</span></div>
             <div>
               <h2>Groups &amp; Events</h2>
               <p>Your small groups and church calendar in one place</p>
             </div>
             <div class="cn-ge-next">
               <div class="cn-ge-next-lbl">Up next</div>
-              <div class="cn-ge-next-name">Sunday Service · Jun 1 · 10 AM</div>
+              <div class="cn-ge-next-name js-next-sunday-time">Sunday Service · 9:45 AM</div>
               <button type="button" class="cn-rsvp going" style="margin-top:8px;border:none" onclick="event.stopPropagation()">Going ✓</button>
             </div>
           </div>
@@ -7159,6 +7159,19 @@ initDrawerMenuIcons();
   document.querySelectorAll('.js-live-pill').forEach(function (pill) {
     pill.innerHTML = '<i></i> Watch · Sunday replay';
   });
+})();
+// Fill "next Sunday" markers and calendar eyebrow with real upcoming dates
+// (were hardcoded "Jun 1" / "June 2026").
+(function () {
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var d = new Date();
+  var sun = new Date(d);
+  sun.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+  var label = months[sun.getMonth()] + ' ' + sun.getDate();
+  document.querySelectorAll('.js-next-sunday').forEach(function (el) { el.textContent = 'Sunday Service · ' + label; });
+  document.querySelectorAll('.js-next-sunday-time').forEach(function (el) { el.textContent = 'Sunday Service · ' + label + ' · 9:45 AM'; });
+  document.querySelectorAll('.js-calendar-eyebrow').forEach(function (el) { el.textContent = 'Church calendar · ' + monthsFull[d.getMonth()] + ' ' + d.getFullYear(); });
 })();
 renderLeader();
 seedLeaderChat();

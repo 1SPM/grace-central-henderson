@@ -12,7 +12,23 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const MODEL = 'gemini-2.5-flash';
 
-/** Mandatory auth + metering (TD-033): every call must carry a valid Clerk JWT. */
+/**
+ * Mandatory auth + metering (TD-033): every call must carry a valid Clerk JWT.
+ *
+ * Exception — public demo (opt-in, default OFF): when DEMO_AI_ACCESS=true is
+ * set on the deployment, unauthenticated requests are served as the demo
+ * tenant with a much stricter per-IP rate limit and a hard output-token cap.
+ * Usage is metered against the demo church, so the monthly budget guard
+ * still applies. Never enable this on a deployment with real tenant data
+ * flowing through prompts.
+ */
+const DEMO_AI_ACCESS = process.env.DEMO_AI_ACCESS === 'true';
+const DEMO_CHURCH_ID =
+  process.env.DEMO_CHURCH_ID ||
+  process.env.VITE_DEFAULT_CHURCH_ID ||
+  '11111111-1111-1111-1111-111111111111';
+const DEMO_RATE_LIMIT = 10; // requests per minute per IP
+const DEMO_MAX_OUTPUT_TOKENS = 512;
 
 /** Rough fallback when the provider doesn't report token counts. */
 function estimateTokens(text: string): number {
@@ -24,7 +40,7 @@ const requestCounts = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 120; // requests per minute
 const RATE_WINDOW = 60 * 1000; // 1 minute
 
-function isRateLimited(ip: string): boolean {
+function isRateLimited(ip: string, limit: number = RATE_LIMIT): boolean {
   const now = Date.now();
   const record = requestCounts.get(ip);
 
@@ -33,7 +49,7 @@ function isRateLimited(ip: string): boolean {
     return false;
   }
 
-  if (record.count >= RATE_LIMIT) {
+  if (record.count >= limit) {
     return true;
   }
 
@@ -76,7 +92,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // ---- Mandatory auth gate (TD-033) ----
   const auth = await requireClerkAuth(req);
-  if (!auth.ok) {
+  let churchId: string;
+  let actorClerkId: string;
+  let isDemoRequest = false;
+  if (auth.ok) {
+    churchId = auth.churchId;
+    actorClerkId = auth.clerkUserId;
+  } else if (DEMO_AI_ACCESS) {
+    // Public demo lane: no token required, but tighter per-IP throttle and
+    // capped output. Metered against the demo tenant below.
+    if (isRateLimited(`demo:${clientIp}`, DEMO_RATE_LIMIT)) {
+      return res.status(429).json({ error: 'Demo rate limit reached. Please try again in a minute.' });
+    }
+    churchId = DEMO_CHURCH_ID;
+    actorClerkId = 'demo-visitor';
+    isDemoRequest = true;
+  } else {
     return res.status(auth.status).json({ error: auth.error });
   }
 
@@ -85,10 +116,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : null;
 
   if (supabaseForMetering) {
-    const budget = await checkBudget(supabaseForMetering, auth.churchId);
+    const budget = await checkBudget(supabaseForMetering, churchId);
     if (budget.status !== 'ok') {
       void recordUsage(supabaseForMetering, {
-        churchId: auth.churchId,
+        churchId,
         provider: 'gemini',
         model: MODEL,
         feature: 'ask-grace',
@@ -97,7 +128,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         success: false,
         errorCode: budget.status === 'hard_cut' ? 'budget_hard_cut' : 'budget_over_cap',
         latencyMs: 0,
-        actorClerkId: auth.clerkUserId,
+        actorClerkId,
       });
       return res.status(402).json({
         error: budget.status === 'hard_cut'
@@ -119,16 +150,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }) => {
     if (!supabaseForMetering) return;
     void recordUsage(supabaseForMetering, {
-      churchId: auth.churchId,
+      churchId,
       provider: 'gemini',
       model: MODEL,
-      feature: 'ask-grace',
+      feature: isDemoRequest ? 'ask-grace-demo' : 'ask-grace',
       promptTokens: input.promptTokens ?? estimateTokens(fullPrompt),
       completionTokens: input.completionTokens ?? 0,
       success: input.success,
       errorCode: input.errorCode,
       latencyMs: input.latencyMs,
-      actorClerkId: auth.clerkUserId,
+      actorClerkId,
     });
   };
 
@@ -155,7 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     const config = {
-      maxOutputTokens: Math.min(maxTokens || 1024, 4096),
+      maxOutputTokens: Math.min(maxTokens || 1024, isDemoRequest ? DEMO_MAX_OUTPUT_TOKENS : 4096),
       temperature: 0.7,
       // gemini-2.5-flash enables "thinking" by default, and thinking tokens
       // count against maxOutputTokens — which truncated chat replies to a few
