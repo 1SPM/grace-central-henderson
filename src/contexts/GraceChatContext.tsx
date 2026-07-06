@@ -15,6 +15,19 @@ import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
 
+/**
+ * Map any backend/transport failure to a graceful assistant reply.
+ * Raw error strings ("Not found", "401", HTML error bodies) must never
+ * render as if Grace said them (see UX review 2026-07-06, P0-1).
+ */
+function friendlyAIFailure(error?: string): string {
+  const e = (error || '').toLowerCase();
+  if (e.includes('401') || e.includes('unauthorized') || e.includes('session')) {
+    return "I couldn't verify your session just now. Everything on your dashboard still works — try signing out and back in, or ask me again in a moment.";
+  }
+  return "I couldn't reach my knowledge service just now. While I reconnect, the starters on the left — Overdue tasks, New visitors, Needs care — work offline, or try me again in a moment.";
+}
+
 export type { PendingAction } from '../lib/grace-actions';
 export type ActionInstance = ChatActionInstance;
 export type GraceMessage = ChatMessage;
@@ -412,15 +425,17 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       });
 
       if (streamResult.error) {
+        // Never surface raw API/transport errors (e.g. "Not found", "401") as
+        // if Grace said them — always reply with a graceful, actionable line.
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: streamResult.error! } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(streamResult.error) } : msg
         ));
       } else if (!streamed) {
         // Fallback to non-streaming when the server didn't honor stream mode
         const result = await generateAIText({ prompt, maxTokens: 1200 });
         const text = result.success && result.text
           ? result.text
-          : result.error || 'Sorry, I couldn\'t answer that. Try rephrasing.';
+          : friendlyAIFailure(result.error);
         setMessages(m => m.map(msg =>
           msg.id === assistantMsgId ? { ...msg, content: text } : msg
         ));

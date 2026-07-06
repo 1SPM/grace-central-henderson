@@ -38,6 +38,19 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   width:393px;height:852px;background:#fff;border-radius:54px;overflow:hidden;position:relative;
   box-shadow:0 0 0 8px #111,0 0 0 12px #232323,0 40px 90px rgba(0,0,0,.34);
 }
+/* Short desktop viewports: scale the frame so the landing Log In / Sign Up
+   controls are always reachable (page itself does not scroll). */
+@media (min-width:501px) and (max-height:920px){.device{transform:scale(.92);transform-origin:center center}}
+@media (min-width:501px) and (max-height:840px){.device{transform:scale(.84)}}
+@media (min-width:501px) and (max-height:770px){.device{transform:scale(.76)}}
+@media (min-width:501px) and (max-height:700px){.device{transform:scale(.68)}}
+@media (min-width:501px) and (max-height:620px){.device{transform:scale(.60)}}
+/* Real phones (QR rollout path): drop the bezel mockup and go full-bleed so
+   it feels like the actual app instead of a phone-in-a-phone. */
+@media (max-width:500px){
+  .device{width:100vw;height:100dvh;border-radius:0;box-shadow:none}
+  .island{display:none}
+}
 .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:15}
 .status{
   height:var(--ios-safe-top);padding:0 28px 10px;display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:10
@@ -2284,7 +2297,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <p class="home-hero-tagline">Your guide to growth, resources, and community at Central Henderson.</p>
             </div>
             <div class="home-hero-top-right">
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
               <div class="home-donate-stack" id="home-donate-stack" aria-live="polite"></div>
             </div>
           </div>
@@ -3143,7 +3156,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-hero-brand">
                 <img class="cn-hero-logo" src="previews/assets/CCC_Central_Church-invert.png" alt="Central Church iBanc">
               </div>
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
             </div>
             <div class="cn-hero-copy">
               <h2>Connect at Central</h2>
@@ -5684,6 +5697,9 @@ function showImpactFloat(item) {
   if (!document.getElementById('screen-home')?.classList.contains('active')) return;
   text.textContent = item.merchant + ': +' + formatMoney(item.impact) + ' to ' + item.cause;
   float.classList.add('show');
+  // Auto-dismiss so the pill never sits over content indefinitely (UX review 2026-07-06).
+  clearTimeout(showImpactFloat.timer);
+  showImpactFloat.timer = setTimeout(dismissImpactFloat, 6000);
 }
 
 function dismissImpactFloat() {
@@ -7124,6 +7140,26 @@ function toggleGraceFaq(i) {
 }
 GRACE_MESSAGING.renderFaqHtml(GRACE_MSG.faq, 'ios-faq-list', 'toggleGraceFaq');
 initDrawerMenuIcons();
+// Live hero date — was hardcoded "Sat, May 30", which made every demo look stale.
+(function () {
+  var el = document.getElementById('home-hero-date');
+  if (!el) return;
+  var d = new Date();
+  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  el.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ' · Central Henderson';
+})();
+// Live pill honesty — only claim "Live" during actual service windows
+// (Sat 5 PM, Sun 9:45 AM–12:30 PM); otherwise offer the replay.
+(function () {
+  var d = new Date();
+  var day = d.getDay(), mins = d.getHours() * 60 + d.getMinutes();
+  var isLive = (day === 0 && mins >= 585 && mins <= 750) || (day === 6 && mins >= 1020 && mins <= 1110);
+  if (isLive) return;
+  document.querySelectorAll('.js-live-pill').forEach(function (pill) {
+    pill.innerHTML = '<i></i> Watch · Sunday replay';
+  });
+})();
 renderLeader();
 seedLeaderChat();
 renderImpactNotifications();
