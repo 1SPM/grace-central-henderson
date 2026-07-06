@@ -1,6 +1,6 @@
 /**
  * Demo marketing entry — gate CRM access until a visitor clicks a CTA.
- * Used when VITE_ENABLE_DEMO_MODE=true (Central Henderson demo deploy on grace-central-henderson.vercel.app).
+ * Used when VITE_ENABLE_DEMO_MODE=true (Central Henderson demo lane on the grace-crm Vercel project).
  */
 
 import { TENANT_DEMO_ONBOARDING_SKIP } from '../config/tenant';

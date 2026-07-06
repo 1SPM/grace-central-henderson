@@ -9,11 +9,11 @@ Single reference for product URLs, hubs, and Vercel project ownership.
 | Surface | URL |
 |---------|-----|
 | **Demo hub** | https://gracecrm-centralhenderson.org/members-card.html |
-| **Demo CRM** | https://grace-central-henderson.vercel.app/#/dashboard |
+| **Demo CRM** | https://gracecrm-centralhenderson.org/app#/dashboard |
 | **Desktop member portal** | https://gracecrm-centralhenderson.org/previews/grace_member_portal_central.html |
 | **Mobile iOS app** | https://gracecrm-centralhenderson.org/grace_central_henderson_members_card_ios_app.html |
 
-Root on `gracecrm-centralhenderson.org` redirects to `/members-card.html`.
+Root on `gracecrm-centralhenderson.org` redirects to `/members-card.html`; the CRM SPA is served at any non-reserved path (canonically `/app`).
 
 ### White-label SaaS (pre-branded generic)
 
@@ -29,10 +29,9 @@ Root on `grace-crm-two.vercel.app` and `grace-crm.dev` serves the white-label CR
 
 | Project | Domains | Git auto-deploy | Role |
 |---------|---------|-----------------|------|
-| **grace-crm** | `grace-crm-two.vercel.app`, `gracecrm-centralhenderson.org`, `grace-crm.dev` | Yes (`main`) | White-label deploy + static hubs/member assets |
-| **grace-central-henderson** | `grace-central-henderson.vercel.app` | Yes (`main`) | Central Henderson demo CRM |
+| **grace-crm** | `gracecrm-centralhenderson.org`, `grace-crm-two.vercel.app`, `grace-crm.dev` | Yes (`main`) | **The single project of record** — demo lane, white-label lane, static hubs, member assets, all API functions |
 
-Both projects build from `1SPM/grace-central-henderson`. Environment variables differ per project (see [DEPLOY.md](./DEPLOY.md)).
+> ⚠️ **One repo → one Vercel project.** A duplicate project (`grace-central-henderson`, serving grace-central-henderson.vercel.app) previously auto-deployed from this same repo with divergent env vars — it served a broken copy of the app and caused the Ask Grace "Not found" confusion (see UX review 2026-07-06). It was removed on consolidation. Never attach a second Vercel project to this repo.
 
 ## Shared config
 

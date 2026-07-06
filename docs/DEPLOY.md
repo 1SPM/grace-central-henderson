@@ -1,27 +1,28 @@
 # Production deploy
 
-Two Vercel projects build from the same repo (`1SPM/grace-central-henderson`, branch `main`). See [LINKS.md](./LINKS.md) for the full URL tree.
+**One repo → one Vercel project.** `1SPM/grace-central-henderson` (branch `main`) deploys to the single Vercel project **`grace-crm`**. See [LINKS.md](./LINKS.md) for the full URL tree.
 
-## Vercel projects
+> History note (2026-07-06): a duplicate Vercel project (`grace-central-henderson`) used to build from this same repo with divergent env vars, serving a broken copy of the app at grace-central-henderson.vercel.app. It was deleted during infrastructure consolidation. Do not re-create a second project against this repo.
+
+## The Vercel project
 
 | Project | Domains | Hub root `/` | Role |
 |---------|---------|--------------|------|
-| **grace-crm** | `grace-crm-two.vercel.app`, `gracecrm-centralhenderson.org`, `grace-crm.dev` | White-label hub or demo hub (host-based) | White-label CRM + static member assets |
-| **grace-central-henderson** | `grace-central-henderson.vercel.app` | React CRM SPA | Central Henderson demo CRM |
+| **grace-crm** | `gracecrm-centralhenderson.org`, `grace-crm-two.vercel.app`, `grace-crm.dev` | Host-based (below) | Demo lane + white-label lane + static member assets + all API functions |
 
-Both projects have Git auto-deploy on **`main`**.
+Git auto-deploy on **`main`** = production. Every PR gets a preview URL.
 
-### Host-based entry points (grace-crm project)
+### Host-based entry points
 
 | Host | `/` behavior |
 |------|------------------|
-| `gracecrm-centralhenderson.org` | Redirects to `/members-card.html` (Central Henderson demo hub) |
+| `gracecrm-centralhenderson.org` | Redirects to `/members-card.html` (Central Henderson demo hub); CRM SPA at `/app` |
 | `grace-crm-two.vercel.app` | Serves React CRM SPA; hub at `/whitelabel-hub.html` |
 | `grace-crm.dev` | Serves React CRM SPA; hub at `/whitelabel-hub.html` |
 
 **Canonical git remote:** `origin` → `https://github.com/1SPM/grace-central-henderson.git`
 
-Legacy remotes (`legacy-camgitt`, `legacy-grace-member-portal`) are kept for reference only. `1SPM/GraceMemberPortal` is archived.
+Legacy remotes (`legacy-camgitt`, `legacy-grace-member-portal`) are kept for reference only. `1SPM/GraceMemberPortal` is deprecated/archived.
 
 Manual deploy (fallback):
 
@@ -31,32 +32,24 @@ npx vercel deploy --prod --yes
 
 Do **not** run `vercel deploy --prod` with uncommitted changes to root `index.html` — a local prototype hub overwrite will replace the React CRM at `/`.
 
-## Environment variables by project
+## Environment variables (single project, per-environment)
 
-### grace-crm (white-label lane)
+All env vars live on the **grace-crm** project. Use Vercel's Production/Preview split rather than separate projects.
 
-Generic-oriented production settings on `grace-crm-two.vercel.app`:
+| Variable | Purpose | Production | Preview |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` / `SUPABASE_URL` | Supabase URL (frontend / API) | prod project | prod project |
+| `VITE_SUPABASE_ANON_KEY` | Frontend Supabase anon key | ✓ | ✓ |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase | ✓ | ✓ |
+| `VITE_DEFAULT_CHURCH_ID` | Default tenant church UUID | Central Henderson | Central Henderson |
+| `VITE_ENABLE_DEMO_MODE` | Sandbox admin without Clerk | `true` while demoing; revisit at Beta | `true` |
+| `DEMO_AI_ACCESS` | Unauthenticated demo lane on `/api/ai/generate` (rate-limited, token-capped) | `true` while demoing | `true` |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Staff sign-in | prod instance (Beta Phase 2) | dev instance |
+| `CLERK_SECRET_KEY` | API JWT verification | prod instance (Beta Phase 2) | dev instance |
+| `GEMINI_API_KEY` | Ask Grace / companion AI | ✓ | ✓ |
+| `ELEVENLABS_API_KEY` / `GRACE_TTS_UPSTREAM_URL` | GRACE voice | ✓ | ✓ |
 
-| Variable | Purpose |
-|---|---|
-| `VITE_SUPABASE_URL` | Frontend Supabase URL |
-| `VITE_SUPABASE_ANON_KEY` | Frontend Supabase anon key |
-| `SUPABASE_URL` | Same URL for API routes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase |
-| `VITE_DEFAULT_CHURCH_ID` | Default tenant church UUID |
-| `VITE_ENABLE_DEMO_MODE` | Usually `false` for white-label |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Staff sign-in |
-| `CLERK_SECRET_KEY` | API JWT verification |
-
-### grace-central-henderson (demo lane)
-
-Central Henderson demo CRM on `grace-central-henderson.vercel.app`:
-
-| Variable | Purpose |
-|---|---|
-| Same Supabase / Clerk vars as above | Shared backend |
-| `VITE_ENABLE_DEMO_MODE` | `true` for sandbox admin without Clerk |
-| `VITE_DEFAULT_CHURCH_ID` | Central Henderson church UUID |
+`VITE_TENANT` (optional) selects the tenant config from `src/config/tenant.ts`; unset = Central Henderson.
 
 Impact Card Accounts (`#/wallets`) calls `GET /api/neobank?resource=admin`. Without `SUPABASE_SERVICE_ROLE_KEY`, the page shows a configuration error instead of the monitoring dashboard.
 

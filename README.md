@@ -8,7 +8,7 @@ See **[docs/LINKS.md](docs/LINKS.md)** for the full product URL tree (Central He
 
 | Lane | Hub | CRM | Member portal |
 |------|-----|-----|---------------|
-| **Central Henderson demo** | [gracecrm-centralhenderson.org](https://gracecrm-centralhenderson.org/members-card.html) | [grace-central-henderson.vercel.app](https://grace-central-henderson.vercel.app/#/dashboard) | [Desktop portal](https://gracecrm-centralhenderson.org/previews/grace_member_portal_central.html) |
+| **Central Henderson demo** | [gracecrm-centralhenderson.org](https://gracecrm-centralhenderson.org/members-card.html) | [Demo CRM](https://gracecrm-centralhenderson.org/app#/dashboard) | [Desktop portal](https://gracecrm-centralhenderson.org/previews/grace_member_portal_central.html) |
 | **White-label SaaS** | [grace-crm-two.vercel.app](https://grace-crm-two.vercel.app/whitelabel-hub.html) | [grace-crm-two.vercel.app/#/dashboard](https://grace-crm-two.vercel.app/#/dashboard) | [Generic portal](https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html) |
 
 GitHub Pages static preview: **https://1spm.github.io/grace-central-henderson/**
