@@ -8,6 +8,20 @@
   --color-primary-dark: 81 81 213; /* #5151D5 — hover */
   --color-accent: 103 104 121;     /* #676879 — Monday neutral text */
 
+  /* Tailwind indigo palette (RGB triplets) — tenant-swappable at runtime.
+     Faithful overrides live in styles/faithful-crm-theme.css. */
+  --twc-indigo-50:  243 243 255;
+  --twc-indigo-100: 237 237 255;
+  --twc-indigo-200: 220 220 255;
+  --twc-indigo-300: 194 194 255;
+  --twc-indigo-400: 149 149 255;
+  --twc-indigo-500: 97 97 255;
+  --twc-indigo-600: 81 81 213;
+  --twc-indigo-700: 67 56 184;
+  --twc-indigo-800: 54 48 154;
+  --twc-indigo-900: 45 42 120;
+  --twc-indigo-950: 27 24 80;
+
   /* Accent highlights — Monday purple tones (formerly gold) */
   --gold:         #6161FF;
   --gold-soft:    #9595FF;

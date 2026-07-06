@@ -8,10 +8,24 @@ import { handleDemoEntryQuery } from './lib/demoEntry';
 import { checkEnvironment } from './utils/envCheck';
 import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
+import { getTenant } from './config/tenant';
 import './index.css';
 import './styles/grace-orb.css';
 import './styles/central-tokens.css';
+import './styles/faithful-crm-theme.css';
 import './components/marketing/marketing.css';
+
+// Tenant theming — resolved at RUNTIME (hostname map / VITE_TENANT) so one
+// build can serve differently-branded hosts. The stylesheet above is fully
+// scoped to html[data-tenant='faithful']; Central renders untouched.
+const ACTIVE_TENANT = getTenant();
+if (ACTIVE_TENANT.id !== 'centralHenderson') {
+  document.documentElement.dataset.tenant = ACTIVE_TENANT.id;
+  const brand = ACTIVE_TENANT.defaultSettings.branding?.primaryColor;
+  if (brand) {
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', brand);
+  }
+}
 
 // Init Sentry first so anything thrown during setup is captured.
 initSentry();

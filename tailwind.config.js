@@ -82,19 +82,23 @@ export default {
           900: '#1F2027',
           950: '#121319',
         },
-        // Brand: Monday purple (#6161FF) — nav active states, logo, focus
+        // Brand accent — CSS-variable driven so tenants can retheme at
+        // RUNTIME (html[data-tenant] scope). Defaults (Monday purple
+        // #6161FF) live in src/index.css :root; Faithful navy/sky overrides
+        // in src/styles/faithful-crm-theme.css. Never fork this palette at
+        // build time (see June 2026 Faithful regression).
         indigo: {
-          50:  '#F3F3FF',
-          100: '#EDEDFF',
-          200: '#DCDCFF',
-          300: '#C2C2FF',
-          400: '#9595FF',
-          500: '#6161FF',
-          600: '#5151D5',
-          700: '#4338B8',
-          800: '#36309A',
-          900: '#2D2A78',
-          950: '#1B1850',
+          50:  'rgb(var(--twc-indigo-50) / <alpha-value>)',
+          100: 'rgb(var(--twc-indigo-100) / <alpha-value>)',
+          200: 'rgb(var(--twc-indigo-200) / <alpha-value>)',
+          300: 'rgb(var(--twc-indigo-300) / <alpha-value>)',
+          400: 'rgb(var(--twc-indigo-400) / <alpha-value>)',
+          500: 'rgb(var(--twc-indigo-500) / <alpha-value>)',
+          600: 'rgb(var(--twc-indigo-600) / <alpha-value>)',
+          700: 'rgb(var(--twc-indigo-700) / <alpha-value>)',
+          800: 'rgb(var(--twc-indigo-800) / <alpha-value>)',
+          900: 'rgb(var(--twc-indigo-900) / <alpha-value>)',
+          950: 'rgb(var(--twc-indigo-950) / <alpha-value>)',
         },
         // Status: vivid Monday green
         emerald: {

@@ -8,6 +8,12 @@ interface ImportMetaEnv {
   // Fallback church UUID when Clerk isn't configured (single-tenant interim)
   readonly VITE_DEFAULT_CHURCH_ID?: string;
 
+  /** Explicit tenant override (see src/config/tenant.ts). Usually unset —
+   * white-label demo hosts resolve via the runtime hostname map. */
+  readonly VITE_TENANT?: string;
+
+  readonly VITE_ENABLE_DEMO_MODE?: string;
+
   // Clerk (Authentication)
   readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 
