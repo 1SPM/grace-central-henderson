@@ -2,9 +2,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  DEFAULT_STABILITY,
+  DEFAULT_STYLE,
   DEFAULT_VOICE_ID,
+  MAX_TTS_TEXT_LEN,
   isTtsConfigured,
   ttsHealthPayload,
+  voiceSettings,
 } from './grace-tts.js';
 
 describe('grace-tts', () => {
@@ -44,6 +48,46 @@ describe('grace-tts', () => {
     process.env.ELEVENLABS_API_KEY = 'test-key';
     process.env.ELEVENLABS_VOICE_ID = 'custom-voice-id';
     expect(ttsHealthPayload().voice).toBe('custom-voice-id');
+  });
+
+  it('allows long-form speech chunks up to 1200 chars', () => {
+    expect(MAX_TTS_TEXT_LEN).toBe(1200);
+  });
+});
+
+describe('grace-tts voice settings', () => {
+  const envBackup = { ...process.env };
+
+  beforeEach(() => {
+    delete process.env.ELEVENLABS_STABILITY;
+    delete process.env.ELEVENLABS_STYLE;
+  });
+
+  afterEach(() => {
+    process.env = { ...envBackup };
+  });
+
+  it('defaults to the natural-delivery tuning', () => {
+    const settings = voiceSettings();
+    expect(settings.stability).toBe(DEFAULT_STABILITY);
+    expect(settings.style).toBe(DEFAULT_STYLE);
+    expect(settings.use_speaker_boost).toBe(true);
+  });
+
+  it('honors env overrides', () => {
+    process.env.ELEVENLABS_STABILITY = '0.6';
+    process.env.ELEVENLABS_STYLE = '0.2';
+    const settings = voiceSettings();
+    expect(settings.stability).toBe(0.6);
+    expect(settings.style).toBe(0.2);
+  });
+
+  it('clamps env overrides to 0–1 and ignores garbage', () => {
+    process.env.ELEVENLABS_STABILITY = '5';
+    process.env.ELEVENLABS_STYLE = 'not-a-number';
+    const settings = voiceSettings();
+    expect(settings.stability).toBe(1);
+    expect(settings.style).toBe(DEFAULT_STYLE);
   });
 });
 

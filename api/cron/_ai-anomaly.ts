@@ -1,7 +1,7 @@
 /**
- * Hourly AI burn-rate anomaly cron.
+ * Daily AI burn-rate anomaly cron.
  *
- * Scheduled in vercel.json: `0 * * * *` (top of every hour).
+ * Scheduled in vercel.json: `0 5 * * *` (05:00 UTC daily).
  *
  * For each tenant with usage in the last 24h:
  *   1. Sum last hour's cost_micro_usd from token_usage.
@@ -20,6 +20,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { detectAnomaly } from '../_lib/ai/anomaly.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -132,6 +133,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     rows = await fetchUsageSince(supabase, trailingSince.toISOString());
   } catch (err) {
     console.error('[ai-anomaly cron]', err);
+    await recordCronRun(supabase, 'ai-anomaly', {
+      ok: false,
+      durationMs: Date.now() - now.getTime(),
+      summary: { error: 'usage_read_failed' },
+    });
     return res.status(500).json({ error: 'usage_read_failed' });
   }
 
@@ -159,6 +165,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await reportToSentry(entry);
     }
   }
+
+  await recordCronRun(supabase, 'ai-anomaly', {
+    ok: true,
+    durationMs: Date.now() - now.getTime(),
+    summary: { checked: summary.length, alerted },
+  });
 
   return res.status(200).json({
     ok: true,

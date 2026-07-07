@@ -183,6 +183,7 @@ function App() {
   // Bridge: useAppHandlers is created before useAgents, so route status-change
   // events through a ref that the agents hook fills in below.
   const personStatusChangeRef = useRef<((personId: string, previousStatus: string, newStatus: string) => void) | null>(null);
+  const newDonationRef = useRef<((donation: { id: string; personId?: string; amount: number; fund: string; date: string; method: string; isRecurring: boolean }) => void) | null>(null);
 
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
@@ -209,6 +210,7 @@ function App() {
     closePersonForm: modals.closePersonForm,
     onPersonStatusChange: (personId, previousStatus, newStatus) =>
       personStatusChangeRef.current?.(personId, previousStatus, newStatus),
+    onNewDonation: (donation) => newDonationRef.current?.(donation),
   });
 
   // Agent task creation callback
@@ -276,6 +278,16 @@ function App() {
     };
     return () => { personStatusChangeRef.current = null; };
   }, [agentHandleNewMember]);
+
+  // When a donation is recorded, let the Donation Processing Agent react
+  // (first-time and large-gift thank-you flow).
+  const agentHandleNewDonation = agents.handleNewDonation;
+  useEffect(() => {
+    newDonationRef.current = (donation) => {
+      void agentHandleNewDonation(donation);
+    };
+    return () => { newDonationRef.current = null; };
+  }, [agentHandleNewDonation]);
 
   // Keyboard shortcuts
   useEffect(() => {

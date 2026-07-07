@@ -292,6 +292,7 @@ export function ViewRenderer(props: ViewRendererProps) {
 
   const renderSettingsHub = (defaultTab?: SettingsTab) => (
     <SettingsHub
+      churchId={churchId}
       people={people}
       tasks={tasks}
       events={events}

@@ -4,7 +4,8 @@
  * Drains the email_outbox. Picks up to 50 queued/failed-but-retriable
  * emails per run, sends via Resend, marks each row sent | failed | skipped.
  *
- * Vercel cron schedule: every 5 minutes. Per-email retry is bounded
+ * Vercel cron schedule: `0 8 * * *` (08:00 UTC daily, an hour after the
+ * agents cron queues messaging emails). Per-email retry is bounded
  * to 5 attempts; after that the row stays 'failed' permanently with
  * last_error populated so an operator can inspect via Supabase Studio.
  *
@@ -22,6 +23,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { drainOutbox } from '../_lib/email/queue.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -41,11 +43,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const limit = Math.min(Math.max(Number(req.query.limit ?? 50), 1), 500);
+  const startedAt = Date.now();
 
   try {
     const result = await drainOutbox(supabase, limit);
+    await recordCronRun(supabase, 'send-pending-emails', {
+      ok: true,
+      durationMs: Date.now() - startedAt,
+      summary: result as unknown as Record<string, unknown>,
+    });
     return res.status(200).json({ ok: true, ...result });
   } catch (err) {
+    await recordCronRun(supabase, 'send-pending-emails', {
+      ok: false,
+      durationMs: Date.now() - startedAt,
+      summary: { error: err instanceof Error ? err.message : 'unknown' },
+    });
     return res.status(500).json({
       error: 'drain_failed',
       detail: err instanceof Error ? err.message : 'unknown',

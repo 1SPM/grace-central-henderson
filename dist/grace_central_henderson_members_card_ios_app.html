@@ -38,6 +38,19 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   width:393px;height:852px;background:#fff;border-radius:54px;overflow:hidden;position:relative;
   box-shadow:0 0 0 8px #111,0 0 0 12px #232323,0 40px 90px rgba(0,0,0,.34);
 }
+/* Short desktop viewports: scale the frame so the landing Log In / Sign Up
+   controls are always reachable (page itself does not scroll). */
+@media (min-width:501px) and (max-height:920px){.device{transform:scale(.92);transform-origin:center center}}
+@media (min-width:501px) and (max-height:840px){.device{transform:scale(.84)}}
+@media (min-width:501px) and (max-height:770px){.device{transform:scale(.76)}}
+@media (min-width:501px) and (max-height:700px){.device{transform:scale(.68)}}
+@media (min-width:501px) and (max-height:620px){.device{transform:scale(.60)}}
+/* Real phones (QR rollout path): drop the bezel mockup and go full-bleed so
+   it feels like the actual app instead of a phone-in-a-phone. */
+@media (max-width:500px){
+  .device{width:100vw;height:100dvh;border-radius:0;box-shadow:none}
+  .island{display:none}
+}
 .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:15}
 .status{
   height:var(--ios-safe-top);padding:0 28px 10px;display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:10
@@ -2284,7 +2297,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <p class="home-hero-tagline">Your guide to growth, resources, and community at Central Henderson.</p>
             </div>
             <div class="home-hero-top-right">
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
               <div class="home-donate-stack" id="home-donate-stack" aria-live="polite"></div>
             </div>
           </div>
@@ -3143,7 +3156,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-hero-brand">
                 <img class="cn-hero-logo" src="previews/assets/CCC_Central_Church-invert.png" alt="Central Church iBanc">
               </div>
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
             </div>
             <div class="cn-hero-copy">
               <h2>Connect at Central</h2>
@@ -3339,7 +3352,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('groups-events')">
             <div class="cn-widget-head"><strong>Groups &amp; Events</strong><span>Open →</span></div>
-            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> Sunday Service · Jun 1</p>
+            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> <span class="js-next-sunday">Sunday Service</span></p>
           </div>
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('people')">
             <div class="cn-widget-head"><strong>People</strong><span>24 connected →</span></div>
@@ -3350,14 +3363,14 @@ html.embed-preview .watch-donate-toast{display:none!important}
         <!-- Groups & Events -->
         <div class="cn-panel" id="cn-panel-groups-events">
           <div class="cn-ge-hero">
-            <div class="cn-ge-eyebrow"><i></i> Church calendar · June 2026</div>
+            <div class="cn-ge-eyebrow"><i></i> <span class="js-calendar-eyebrow">Church calendar</span></div>
             <div>
               <h2>Groups &amp; Events</h2>
               <p>Your small groups and church calendar in one place</p>
             </div>
             <div class="cn-ge-next">
               <div class="cn-ge-next-lbl">Up next</div>
-              <div class="cn-ge-next-name">Sunday Service · Jun 1 · 10 AM</div>
+              <div class="cn-ge-next-name js-next-sunday-time">Sunday Service · 9:45 AM</div>
               <button type="button" class="cn-rsvp going" style="margin-top:8px;border:none" onclick="event.stopPropagation()">Going ✓</button>
             </div>
           </div>
@@ -3391,32 +3404,32 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <button type="button" class="cn-ev-filter" onclick="filterCnEvents('special',this)">Special</button>
             </div>
             <div id="cn-event-list">
-              <div class="cn-event-row" data-evcat="service">
+              <div class="cn-event-row" data-evcat="service" data-ev-weekday="0" data-ev-week="0">
                 <div class="cn-event-date" style="background:linear-gradient(135deg,#000,#111);color:#fff"><strong>1</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Sunday Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="group">
+              <div class="cn-event-row" data-evcat="group" data-ev-weekday="2" data-ev-week="0">
                 <div class="cn-event-date" style="background:#f5e8f0;color:#7a3a6a"><strong>2</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Women of Grace</div><div style="font-size:11px;color:var(--ios-muted)">6:00 PM · Room 204</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night">
+              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night" data-ev-weekday="4" data-ev-week="0">
                 <div class="cn-event-date" style="background:#FFF0F1;color:#000"><strong>4</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Prayer Night</div><div style="font-size:11px;color:var(--ios-muted)">7:00 PM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="1">
                 <div class="cn-event-date" style="background:#fee2e2;color:#991b1b"><strong>7</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Pentecost Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Baptism Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="2">
                 <div class="cn-event-date" style="background:#e8f5ed;color:#15803d"><strong>21</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Father's Day Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Family Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="3">
                 <div class="cn-event-date" style="background:#000;color:#EE2B37"><strong>28</strong><span style="color:rgba(238,43,55,.7)">Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Summer BBQ Fellowship</div><div style="font-size:11px;color:var(--ios-muted)">2:00 PM · Church grounds</div></div>
                 <button type="button" class="cn-rsvp urgent" onclick="cnRsvp(this)">RSVP</button>
@@ -5684,6 +5697,9 @@ function showImpactFloat(item) {
   if (!document.getElementById('screen-home')?.classList.contains('active')) return;
   text.textContent = item.merchant + ': +' + formatMoney(item.impact) + ' to ' + item.cause;
   float.classList.add('show');
+  // Auto-dismiss so the pill never sits over content indefinitely (UX review 2026-07-06).
+  clearTimeout(showImpactFloat.timer);
+  showImpactFloat.timer = setTimeout(dismissImpactFloat, 6000);
 }
 
 function dismissImpactFloat() {
@@ -7124,6 +7140,51 @@ function toggleGraceFaq(i) {
 }
 GRACE_MESSAGING.renderFaqHtml(GRACE_MSG.faq, 'ios-faq-list', 'toggleGraceFaq');
 initDrawerMenuIcons();
+// Live hero date — was hardcoded "Sat, May 30", which made every demo look stale.
+(function () {
+  var el = document.getElementById('home-hero-date');
+  if (!el) return;
+  var d = new Date();
+  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  el.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ' · Central Henderson';
+})();
+// Live pill honesty — only claim "Live" during actual service windows
+// (Sat 5 PM, Sun 9:45 AM–12:30 PM); otherwise offer the replay.
+(function () {
+  var d = new Date();
+  var day = d.getDay(), mins = d.getHours() * 60 + d.getMinutes();
+  var isLive = (day === 0 && mins >= 585 && mins <= 750) || (day === 6 && mins >= 1020 && mins <= 1110);
+  if (isLive) return;
+  document.querySelectorAll('.js-live-pill').forEach(function (pill) {
+    pill.innerHTML = '<i></i> Watch · Sunday replay';
+  });
+})();
+// Fill "next Sunday" markers and calendar eyebrow with real upcoming dates
+// (were hardcoded "Jun 1" / "June 2026").
+(function () {
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var d = new Date();
+  var sun = new Date(d);
+  sun.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+  var label = months[sun.getMonth()] + ' ' + sun.getDate();
+  document.querySelectorAll('.js-next-sunday').forEach(function (el) { el.textContent = 'Sunday Service · ' + label; });
+  document.querySelectorAll('.js-next-sunday-time').forEach(function (el) { el.textContent = 'Sunday Service · ' + label + ' · 9:45 AM'; });
+  document.querySelectorAll('.js-calendar-eyebrow').forEach(function (el) { el.textContent = 'Church calendar · ' + monthsFull[d.getMonth()] + ' ' + d.getFullYear(); });
+  // demoClock: event rows carry data-ev-weekday/data-ev-week — compute real
+  // future dates so demo events are never in the past.
+  document.querySelectorAll('.cn-event-row[data-ev-weekday]').forEach(function (row) {
+    var wd = Number(row.getAttribute('data-ev-weekday'));
+    var wk = Number(row.getAttribute('data-ev-week') || 0);
+    var ev = new Date();
+    ev.setDate(ev.getDate() + ((wd - ev.getDay() + 7) % 7) + wk * 7);
+    var dayEl = row.querySelector('.cn-event-date strong');
+    var monEl = row.querySelector('.cn-event-date span');
+    if (dayEl) dayEl.textContent = String(ev.getDate());
+    if (monEl) monEl.textContent = months[ev.getMonth()];
+  });
+})();
 renderLeader();
 seedLeaderChat();
 renderImpactNotifications();
@@ -7159,7 +7220,7 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       zIndex: 480,
       voiceProvider: 'elevenlabs',
       autoDetectVoice: true,
-      ttsUrl: '/api/grace-tts',
+      ttsUrl: '/api/grace/tts',
       messaging: graceMsg,
       memberName: 'Maya',
       orbs: ['.drawer-grace .grace-orb', '.home-grace-card .grace-orb'],

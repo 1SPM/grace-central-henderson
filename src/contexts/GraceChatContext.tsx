@@ -10,6 +10,7 @@ import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
+import { useAISettings } from '../hooks/useAISettings';
 import { TENANT_DEFAULT_SETTINGS, TENANT_TIMEZONE } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
@@ -58,7 +59,7 @@ interface GraceChatContextValue {
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
-function buildDataContext(data: GraceData): string {
+function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName, churchProfile, graceFacts, userFirstName, userRole } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -141,6 +142,7 @@ function buildDataContext(data: GraceData): string {
     userRole,
     profileBlock,
     factsBlock,
+    voiceMode,
   });
 
   return `${personaHeader}
@@ -285,17 +287,22 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   // ask GRACE about member-portal activity and the card program.
   const opsContext = useGraceOpsAggregates(data.churchId);
 
+  // Voice read-back preference shapes prompt guidance (flowing sentences
+  // over bullet stacks when replies will be spoken aloud).
+  const { settings: aiSettings } = useAISettings();
+  const voiceMode = aiSettings.voiceReadback;
+
   // Memoize context so we're not rebuilding this on every keystroke.
   // Depend on the specific fields we read so re-computation tracks the
   // actual inputs, not every new wrapper object identity.
   const dataContext = useMemo(() => {
-    const base = buildDataContext(data);
+    const base = buildDataContext(data, voiceMode);
     return opsContext ? `${base}\n${opsContext}` : base;
   }, [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
     data.churchProfile, data.graceFacts, data.userFirstName, data.userRole, data.churchTimezone,
-    opsContext,
+    opsContext, voiceMode,
   ]);
 
    

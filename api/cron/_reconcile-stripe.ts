@@ -16,6 +16,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { bucketLedgerRows, detectReconciliationAnomalies } from '../_lib/webhooks/reconcile.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -100,6 +101,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     rows = await fetchLedgerRows(supabase, trailingStart.toISOString());
   } catch (err) {
     console.error('[reconcile-stripe]', err);
+    await recordCronRun(supabase, 'reconcile-stripe', {
+      ok: false,
+      durationMs: Date.now() - now.getTime(),
+      summary: { error: 'ledger_read_failed' },
+    });
     return res.status(500).json({ error: 'ledger_read_failed' });
   }
 
@@ -124,6 +130,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       trailingAvgUsd: a.trailingAvgMicroUsd / 1_000_000,
     });
   }
+
+  await recordCronRun(supabase, 'reconcile-stripe', {
+    ok: true,
+    durationMs: Date.now() - now.getTime(),
+    summary: { anomalies_detected: anomalies.length, yesterday_buckets: yesterdayBuckets.length },
+  });
 
   return res.status(200).json({
     ok: true,

@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { memberCareAgent } from './member-care.js';
 import { stewardshipAgent } from './stewardship.js';
 import { operationsAgent } from './operations.js';
+import { listChurchesWithAgents } from './runner.js';
 import { DEFAULT_AGENT_SETTINGS, type AgentInput } from './types.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const NOW = new Date('2026-05-25T12:00:00Z');
 
@@ -293,5 +295,59 @@ describe('agents — invariants', () => {
       expect(['info', 'attention', 'urgent']).toContain(o.severity);
       expect(['task', 'interaction', 'log_only']).toContain(o.outputSink);
     }
+  });
+});
+
+// ============================================
+// CHURCH FILTER (listChurchesWithAgents)
+// ============================================
+function mockSupabase(settingsRows: Array<Record<string, unknown>>, churchIds: string[]): SupabaseClient {
+  return {
+    from(table: string) {
+      if (table === 'church_agent_settings') {
+        return { select: () => Promise.resolve({ data: settingsRows, error: null }) };
+      }
+      return {
+        select: () => ({
+          limit: () => Promise.resolve({ data: churchIds.map((id) => ({ id })), error: null }),
+        }),
+      };
+    },
+  } as unknown as SupabaseClient;
+}
+
+describe('agents/listChurchesWithAgents', () => {
+  const allOff = {
+    member_care_enabled: false,
+    stewardship_enabled: false,
+    operations_enabled: false,
+    portal_engagement_enabled: false,
+    card_ops_enabled: false,
+    crisis_escalation_enabled: false,
+  };
+
+  it('includes a church with only the newer flags enabled (portal/card/crisis)', async () => {
+    const rows = [{ church_id: 'c1', ...allOff, crisis_escalation_enabled: true }];
+    const out = await listChurchesWithAgents(mockSupabase(rows, ['c1']));
+    expect(out).toContain('c1');
+  });
+
+  it('excludes a church with every flag disabled', async () => {
+    const rows = [{ church_id: 'c1', ...allOff }];
+    const out = await listChurchesWithAgents(mockSupabase(rows, ['c1', 'c2']));
+    expect(out).not.toContain('c1');
+    expect(out).toContain('c2'); // no settings row → defaults enabled
+  });
+
+  it('treats missing newer columns as enabled (pre-migration rows)', async () => {
+    const rows = [{
+      church_id: 'c1',
+      member_care_enabled: false,
+      stewardship_enabled: false,
+      operations_enabled: false,
+      // portal/card/crisis columns absent — legacy row
+    }];
+    const out = await listChurchesWithAgents(mockSupabase(rows, ['c1']));
+    expect(out).toContain('c1');
   });
 });

@@ -29,6 +29,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'ai/health': () => import('./ai/_health.js'),
   'ai/video/start': () => import('./ai/video/_start.js'),
   'ai/video/status': () => import('./ai/video/_status.js'),
+  'automation/status': () => import('./automation/_status.js'),
   'health': () => import('./_health.js'),
   'billing/activate-trial': () => import('./billing/_activate-trial.js'),
   'billing/connect-onboarding': () => import('./billing/_connect-onboarding.js'),

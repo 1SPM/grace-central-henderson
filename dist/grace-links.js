@@ -2,7 +2,7 @@
 window.GRACE_LINKS = {
   demo: {
     hub: 'https://gracecrm-centralhenderson.org/members-card.html',
-    crm: 'https://grace-central-henderson.vercel.app/#/dashboard',
+    crm: 'https://gracecrm-centralhenderson.org/app#/dashboard',
     desktopPortal: '/previews/grace_member_portal_central.html',
     mobileApp: '/grace_central_henderson_members_card_ios_app.html',
   },

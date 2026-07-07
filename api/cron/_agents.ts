@@ -16,6 +16,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { listChurchesWithAgents, runAgentsForChurch, type RunResult } from '../_lib/agents/runner.js';
 import { runMessagingAgentsForChurch, type MessagingRunResult } from '../_lib/agents/messaging.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,6 +41,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     churches = await listChurchesWithAgents(supabase);
   } catch (err) {
     console.error('[agents cron] listChurches failed', err);
+    await recordCronRun(supabase, 'agents', {
+      ok: false,
+      durationMs: Date.now() - startedAt.getTime(),
+      summary: { error: 'list_churches_failed' },
+    });
     return res.status(500).json({ error: 'list_churches_failed' });
   }
 
@@ -72,6 +78,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       messagingResults.push({ churchId, error: msg });
     }
   }
+
+  await recordCronRun(supabase, 'agents', {
+    ok: failed === 0,
+    durationMs: Date.now() - startedAt.getTime(),
+    summary: {
+      churches_processed: churches.length,
+      churches_succeeded: succeeded,
+      churches_failed: failed,
+      observations_written: results.reduce((n, r) => n + ('observationsWritten' in r ? r.observationsWritten : 0), 0),
+    },
+  });
 
   return res.status(200).json({
     ok: true,

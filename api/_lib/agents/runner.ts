@@ -440,19 +440,29 @@ export async function runAgentsForChurch(
 export async function listChurchesWithAgents(supabase: SupabaseClient): Promise<string[]> {
   // Two ways: settings table OR fall back to ALL churches if no settings rows
   // exist yet (defaults are all-enabled). We do both: union the two lists.
+  type SettingsRow = {
+    church_id: string;
+    member_care_enabled: boolean;
+    stewardship_enabled: boolean;
+    operations_enabled: boolean;
+    portal_engagement_enabled?: boolean | null;
+    card_ops_enabled?: boolean | null;
+    crisis_escalation_enabled?: boolean | null;
+  };
+  // select('*') so the newer flags (portal/card/crisis) are included when the
+  // columns exist, without erroring where the migration hasn't run yet.
   const { data: settingsRows } = await supabase
     .from('church_agent_settings')
-    .select('church_id, member_care_enabled, stewardship_enabled, operations_enabled');
-  const enabledByRow = new Set(
-    ((settingsRows as Array<{ church_id: string; member_care_enabled: boolean; stewardship_enabled: boolean; operations_enabled: boolean }> | null) ?? [])
-      .filter((r) => r.member_care_enabled || r.stewardship_enabled || r.operations_enabled)
-      .map((r) => r.church_id),
-  );
-  const disabledByRow = new Set(
-    ((settingsRows as Array<{ church_id: string; member_care_enabled: boolean; stewardship_enabled: boolean; operations_enabled: boolean }> | null) ?? [])
-      .filter((r) => !r.member_care_enabled && !r.stewardship_enabled && !r.operations_enabled)
-      .map((r) => r.church_id),
-  );
+    .select('*');
+  const rows = (settingsRows as SettingsRow[] | null) ?? [];
+  // Newer flags default to enabled when absent (mirrors loadAgentSettings).
+  const anyEnabled = (r: SettingsRow) =>
+    r.member_care_enabled || r.stewardship_enabled || r.operations_enabled
+    || r.portal_engagement_enabled !== false
+    || r.card_ops_enabled !== false
+    || r.crisis_escalation_enabled !== false;
+  const enabledByRow = new Set(rows.filter(anyEnabled).map((r) => r.church_id));
+  const disabledByRow = new Set(rows.filter((r) => !anyEnabled(r)).map((r) => r.church_id));
 
   const { data: allChurches } = await supabase.from('churches').select('id').limit(5000);
   const out = new Set<string>(enabledByRow);
