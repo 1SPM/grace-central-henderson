@@ -22,7 +22,7 @@
  *     currentPage: fn() -> 'home'|'wallet'|'watch'|...,  // for page briefings
  *     onUnknown: fn(entry),           // unknown question flagged for admin
  *     voiceProvider: 'elevenlabs' | 'browser',
- *     ttsUrl: '/api/grace-tts',
+ *     ttsUrl: '/api/grace/tts',
  *     autoDetectVoice: true
  *   });
  *   GRACE_COMPANION.open(); GRACE_COMPANION.ask('How do I give?');
@@ -126,7 +126,7 @@
     init(adapter) {
       const preferred = adapter.voiceProvider || 'browser';
       this.provider = preferred === 'elevenlabs' ? 'elevenlabs' : 'browser';
-      this.ttsUrl = adapter.ttsUrl || '/api/grace-tts';
+      this.ttsUrl = adapter.ttsUrl || '/api/grace/tts';
       this.autoDetect = adapter.autoDetectVoice !== false;
       if (this.browserSupported) this.pick();
     },

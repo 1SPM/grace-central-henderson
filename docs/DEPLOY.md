@@ -66,3 +66,27 @@ Vercel builds from source (`vercel.json` `buildCommand`), not committed `dist/`.
 3. Live check: `curl -sL https://grace-crm-two.vercel.app/ | grep grace-build` — build id updates on each deploy.
 
 GitHub Actions **CI** and **Deploy Central Henderson Pages** are separate from Vercel auto-deploy; fix those for green checks, not for Vercel propagation.
+
+## GRACE neural voice (post-deploy checklist)
+
+GRACE uses **ElevenLabs** on Vercel via server-side proxy routes. Without `ELEVENLABS_API_KEY`, clients fall back to browser `speechSynthesis` (robotic voice).
+
+**Required:** `ELEVENLABS_API_KEY` on Production **and** Preview. Prefer the key over `GRACE_TTS_UPSTREAM_URL` — the upstream fallback is for local dev only.
+
+After each production deploy, verify:
+
+```bash
+curl -s https://grace-crm-two.vercel.app/api/grace/tts/health
+# expect: {"ok":true,"provider":"elevenlabs","voice":"21m00Tcm4TlvDq8ikWAM"}
+
+curl -s https://grace-crm-two.vercel.app/api/grace-tts/health
+# legacy alias — same ok:true response
+```
+
+Manual UX checks:
+
+1. **CRM** — `#/dashboard` → Ask Grace → speak icon → smooth Rachel voice; header shows **Neural voice**
+2. **Member portal** — open GRACE companion orb → panel header shows **Neural voice**
+3. **GitHub Pages** — browser voice only (no API); expected
+
+If health returns `"ok":false`, set or rotate `ELEVENLABS_API_KEY` in Vercel → Settings → Environment Variables, then redeploy.

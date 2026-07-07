@@ -52,14 +52,16 @@ Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal
    - `ELEVENLABS_API_KEY` (required)
    - `ELEVENLABS_VOICE_ID` (optional, default Rachel)
    - `ELEVENLABS_MODEL_ID` (optional, default `eleven_flash_v2_5`)
-3. Deploy — static previews and `/api/grace-tts` share the same origin
+3. Deploy — static previews and `/api/grace/tts` share the same origin
 
 ### API routes
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/grace-tts` | POST | `{ "text": "..." }` → `audio/mpeg` |
-| `/api/grace-tts/health` | GET | Health probe for client auto-detect |
+| `/api/grace/tts` | POST | `{ "text": "..." }` → `audio/mpeg` |
+| `/api/grace/tts/health` | GET | Health probe for client auto-detect |
+| `/api/grace-tts` | POST | Legacy alias (same handler) |
+| `/api/grace-tts/health` | GET | Legacy alias (same handler) |
 
 ## Key files
 
@@ -74,7 +76,7 @@ Open the desktop portal (e.g. http://localhost:3000/previews/grace_member_portal
 | `previews/grace-messaging.js` | Canonical GRACE vs leader avatar messaging |
 | `previews/grace-companion.js` | Floating GRACE chat, memory, voice (ElevenLabs + browser fallback) |
 | `previews/grace-duotone-icons.js` | Red/pink duotone icon system |
-| `api/grace-tts.js` | Vercel serverless ElevenLabs TTS proxy |
+| `api/_lib/grace-tts.ts` | Shared ElevenLabs TTS proxy (Vercel + local dev) |
 | `previews/assets/central-henderson-logo.png` | Central Henderson logo |
 
 ## AI model

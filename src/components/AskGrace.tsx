@@ -117,7 +117,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
-  const { speak, stop, speakingId, supported: speechSupported } = useGraceSpeech();
+  const { speak, stop, speakingId, supported: speechSupported, provider } = useGraceSpeech();
   const [input, setInput] = useState('');
   const [listenPromptId, setListenPromptId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -198,7 +198,14 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
           <GraceOrb size="xs" />
-          <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
+          <div className="flex flex-col leading-tight">
+            <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
+            {speechSupported && provider !== 'none' && (
+              <span className="text-[10px] text-gray-400 dark:text-dark-500">
+                {provider === 'elevenlabs' ? 'Neural voice' : 'Browser voice'}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {chat.messages.length > 1 && (
