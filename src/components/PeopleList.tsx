@@ -302,7 +302,7 @@ export function PeopleList({
   };
 
   return (
-    <div className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
+    <div data-tutorial="people-directory" className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
       <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
         {!embedded ? (
           <div>
@@ -581,7 +581,7 @@ export function PeopleList({
 
       {/* People List */}
       {viewMode === 'card' ? (
-        <div data-tutorial="people-directory" className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {/* Select All Header */}
           {paginatedPeople.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
             <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 dark:text-dark-400">

@@ -218,7 +218,7 @@ export function ViewRenderer(props: ViewRendererProps) {
   const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
   const { getBlockedMessage } = useRouteGuard();
-  const { openPicker: openTutorialPicker } = useTutorial();
+  const { openPicker: openTutorialPicker, startPastorTour } = useTutorial();
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -357,6 +357,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           churchSettings={settings}
           onNavigate={(v) => navigateView(v, setView)}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
+          onStartPastorTour={startPastorTour}
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}
           onViewLeaders={() => {

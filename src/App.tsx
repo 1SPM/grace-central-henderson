@@ -58,19 +58,39 @@ import {
   toGivingLegacy,
   toAttendanceLegacy,
 } from './utils/typeConverters';
-import { useTutorial } from './contexts/TutorialContext';
+import { useTutorial, PASTOR_CRM_TOUR_ID } from './contexts/TutorialContext';
 import { isDemoModeEnabled, navigateToDemoCrm } from './lib/demoEntry';
 
-/** Bridges the App-level showTutorialPicker state to the TutorialContext (which must be inside TutorialProvider) */
-function TutorialPickerAutoOpen({ show, onShown }: { show: boolean; onShown: () => void }) {
-  const { openPicker } = useTutorial();
+/** Auto-start the pastor CRM overview tour once after setup wizard (pastor/admin only). */
+function PastorTourAutoStart({ show, onShown }: { show: boolean; onShown: () => void }) {
+  const { startPastorTour } = useTutorial();
   useEffect(() => {
     if (show) {
-      openPicker();
+      startPastorTour();
       onShown();
     }
-  }, [show, openPicker, onShown]);
+  }, [show, startPastorTour, onShown]);
   return null;
+}
+
+/** Sidebar checklist with tour launch wired to TutorialContext. */
+function SidebarSetupChecklist(props: {
+  churchSettings: import('./hooks/useChurchSettings').ChurchSettings;
+  peopleCount: number;
+  groupsCount: number;
+  eventsCount: number;
+  onNavigate: (view: string) => void;
+  onDismiss: () => void;
+  onReopenWizard: () => void;
+}) {
+  const { startPastorTour } = useTutorial();
+  return (
+    <SetupChecklist
+      {...props}
+      compact
+      onOpenTutorials={startPastorTour}
+    />
+  );
 }
 
 function MarketingLoading({ label }: { label: string }) {
@@ -153,7 +173,8 @@ function App() {
   const discipleshipData = useDiscipleship(people, churchId);
   const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
-  const [showTutorialPicker, setShowTutorialPicker] = useState(false);
+  const [showPastorTourAutoStart, setShowPastorTourAutoStart] = useState(false);
+  const pastorTourAutoStartRef = useRef(false);
 
   const reopenWizard = useCallback(() => {
     setShowWizard(true);
@@ -362,15 +383,24 @@ function App() {
   //   }
   // }, [settingsLoading, isPortalRoute, churchSettings]);
 
-  // Show tutorial picker after wizard completion (one-time)
+  // Auto-start pastor CRM overview once after wizard (pastor/admin, tour not yet completed)
   useEffect(() => {
-    if (!settingsLoading && !isMobileRoute && churchSettings &&
-        churchSettings.onboarding?.wizardCompleted &&
-        !churchSettings.onboarding?.tutorialPickerShown &&
-        !showWizard) {
-      setShowTutorialPicker(true);
+    const role = user?.role;
+    const pastorTourDone = churchSettings?.onboarding?.completedTutorials?.includes(PASTOR_CRM_TOUR_ID);
+    if (
+      !settingsLoading &&
+      !isMobileRoute &&
+      !isDemo &&
+      !pastorTourAutoStartRef.current &&
+      churchSettings?.onboarding?.wizardCompleted &&
+      !showWizard &&
+      (role === 'pastor' || role === 'admin') &&
+      !pastorTourDone
+    ) {
+      pastorTourAutoStartRef.current = true;
+      setShowPastorTourAutoStart(true);
     }
-  }, [settingsLoading, isMobileRoute, churchSettings, showWizard]);
+  }, [settingsLoading, isMobileRoute, isDemo, churchSettings, showWizard, user?.role]);
 
   if (isPricingRoute) {
     return (
@@ -635,7 +665,7 @@ function App() {
           if (!firstSeen) { firstSeen = String(Date.now()); localStorage.setItem(key, firstSeen); }
           if (Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000) return null;
           return (
-            <SetupChecklist
+            <SidebarSetupChecklist
               churchSettings={churchSettings}
               peopleCount={people.length}
               groupsCount={groups.length}
@@ -643,7 +673,6 @@ function App() {
               onNavigate={(v) => navigateView(v as View, setView)}
               onDismiss={() => saveOnboarding({ checklistDismissed: true })}
               onReopenWizard={reopenWizard}
-              compact
             />
           ) as ReactNode;
         })()}
@@ -712,7 +741,7 @@ function App() {
 
       <TutorialPickerModal />
       <TutorialOverlay />
-      <TutorialPickerAutoOpen show={showTutorialPicker} onShown={() => setShowTutorialPicker(false)} />
+      <PastorTourAutoStart show={showPastorTourAutoStart} onShown={() => setShowPastorTourAutoStart(false)} />
       </GraceChatProvider>
       </TutorialProvider>
     </ErrorBoundary>

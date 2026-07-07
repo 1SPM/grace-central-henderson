@@ -52,6 +52,7 @@ interface DashboardProps {
   churchSettings?: ChurchSettings;
   onNavigate?: (view: string) => void;
   onDismissGraceIntro?: () => void;
+  onStartPastorTour?: () => void;
   onOpenTutorials?: () => void;
   leaders?: LeaderProfile[];
   onViewLeaders?: () => void;
@@ -76,6 +77,7 @@ export function Dashboard({
   churchSettings,
   onNavigate,
   onDismissGraceIntro,
+  onStartPastorTour,
   onOpenTutorials,
   careConversations = [],
 }: DashboardProps) {
@@ -164,6 +166,7 @@ export function Dashboard({
         onWorkQueue={workQueue}
         onMail={() => onNavigate?.('mail')}
         onSundayPrep={() => onNavigate?.('sunday-prep')}
+        onStartPastorTour={onStartPastorTour}
         onOpenTutorials={onOpenTutorials}
       />
 

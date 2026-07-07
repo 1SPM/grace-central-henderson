@@ -104,7 +104,7 @@ export function CareHub({
   const inConversation = tab === 'dispatch' && !!activeConversationId && !!activeConversation;
 
   return (
-    <div className="flex flex-col min-h-full bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900">
+    <div data-tutorial="pastoral-care-hub" className="flex flex-col min-h-full bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900">
       {!inConversation && (
         <div className="shrink-0 border-b border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/90 backdrop-blur-sm px-4 sm:px-6 pt-4 pb-0">
           <div className="max-w-7xl mx-auto">

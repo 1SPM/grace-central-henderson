@@ -90,6 +90,10 @@ All member preview HTML files load `grace-messaging.js` for shared copy.
 
 **GRACE** system identity on Home cards uses the animated **grace orb** ([`previews/grace-orb.css`](previews/grace-orb.css)) — not the church C mark. Leader avatars and GRACE Impact Card wallet branding still use church marks and photos.
 
+## Pastor CRM tour
+
+On the **Home** dashboard, pastors click **Take a Tour** for an 11-step overview of GRACE Admin (Ask Grace, Action Center, congregation, leadership, pastoral care, and giving). **More tours** opens scenario-based walkthroughs (Sunday Game Day, Monday Follow-Up, etc.). Replay anytime via **Settings → General → Run Tutorials**.
+
 ## Design notes
 
 - **Brand:** Black `#000000`, accent red `#EE2B37`, white `#FFFFFF`

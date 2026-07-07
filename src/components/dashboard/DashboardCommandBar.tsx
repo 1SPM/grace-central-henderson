@@ -13,6 +13,7 @@ interface DashboardCommandBarProps {
   onWorkQueue: () => void;
   onMail?: () => void;
   onSundayPrep?: () => void;
+  onStartPastorTour?: () => void;
   onOpenTutorials?: () => void;
 }
 
@@ -29,10 +30,14 @@ export function DashboardCommandBar({
   onWorkQueue,
   onMail,
   onSundayPrep,
+  onStartPastorTour,
   onOpenTutorials,
 }: DashboardCommandBarProps) {
   return (
-    <div className="mb-6 px-5 sm:px-6 py-5 rounded-2xl bg-gradient-to-br from-white via-stone-50 to-amber-50/50 dark:from-dark-800 dark:via-dark-800 dark:to-amber-950/20 border border-stone-200 dark:border-dark-700">
+    <div
+      data-tutorial="dashboard-command-bar"
+      className="mb-6 px-5 sm:px-6 py-5 rounded-2xl bg-gradient-to-br from-white via-stone-50 to-amber-50/50 dark:from-dark-800 dark:via-dark-800 dark:to-amber-950/20 border border-stone-200 dark:border-dark-700"
+    >
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
@@ -60,6 +65,7 @@ export function DashboardCommandBar({
           </button>
           <button
             type="button"
+            data-tutorial="dashboard-ask-grace"
             onClick={onAskGrace}
             className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-slate-900 hover:bg-slate-950 text-white rounded-lg transition-colors"
           >
@@ -78,6 +84,7 @@ export function DashboardCommandBar({
           )}
           <button
             type="button"
+            data-tutorial="dashboard-work-queue"
             onClick={onWorkQueue}
             className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-white dark:bg-dark-700 hover:bg-stone-100 dark:hover:bg-dark-600 text-slate-800 dark:text-dark-100 border border-stone-300 dark:border-dark-600 rounded-lg transition-colors"
           >
@@ -118,14 +125,23 @@ export function DashboardCommandBar({
             Sunday Service Tools
           </button>
         )}
-        {onOpenTutorials && (
+        {onStartPastorTour && (
           <button
             type="button"
-            onClick={onOpenTutorials}
+            onClick={onStartPastorTour}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 dark:text-dark-300 hover:bg-stone-200/60 dark:hover:bg-dark-700 transition-all ml-auto"
           >
             <BookOpen size={14} />
             Take a Tour
+          </button>
+        )}
+        {onOpenTutorials && (
+          <button
+            type="button"
+            onClick={onOpenTutorials}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-gray-500 dark:text-dark-400 hover:bg-stone-200/60 dark:hover:bg-dark-700 transition-all"
+          >
+            More tours
           </button>
         )}
       </div>

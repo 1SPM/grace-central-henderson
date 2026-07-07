@@ -342,7 +342,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           </div>
         </div>
         {/* Navigation */}
-        <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+        <nav className={`flex-1 px-3 py-2 overflow-y-auto ${sidebarCollapsed ? 'lg:px-2' : ''}`} data-tutorial="sidebar-main-nav">
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className={sectionIdx > 0 ? 'mt-4' : ''}>
               {section.label && !sidebarCollapsed && (
