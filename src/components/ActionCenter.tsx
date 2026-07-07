@@ -10,7 +10,9 @@ import {
   type ActionCenterTab,
 } from '../lib/actionCenterNav';
 import type { ChurchProfile } from '../hooks/useChurchSettings';
-import type { CalendarEvent, Person, PrayerRequest, Task } from '../types';
+import type { CalendarEvent, Person, PrayerRequest, Task, View } from '../types';
+import { openCongregation } from '../lib/congregationNav';
+import { openSunday } from '../lib/sundayNav';
 
 const BirthdayCalendar = lazy(() => import('./BirthdayCalendar').then(m => ({ default: m.BirthdayCalendar })));
 const LiveServiceDashboard = lazy(() =>
@@ -51,6 +53,7 @@ interface ActionCenterProps {
   onAssignVolunteer: (eventId: string, roleId: string, personId: string) => void;
   onUpdateVolunteerStatus: (assignmentId: string, status: VolunteerAssignment['status']) => void;
   onRemoveVolunteer: (assignmentId: string) => void;
+  onNavigate?: (view: View) => void;
   defaultTab?: ActionCenterTab;
 }
 
@@ -77,6 +80,7 @@ export function ActionCenter({
   onAssignVolunteer,
   onUpdateVolunteerStatus,
   onRemoveVolunteer,
+  onNavigate,
   defaultTab,
 }: ActionCenterProps) {
   const initial = useMemo(() => defaultTab ?? parseActionCenterTab(), [defaultTab]);
@@ -188,7 +192,7 @@ export function ActionCenter({
           />
         )}
         {tab === 'mail' && (
-          <MailInbox embedded people={people} tasks={tasks} prayers={prayers} />
+          <MailInbox embedded people={people} tasks={tasks} prayers={prayers} onSelectPerson={onSelectPerson} />
         )}
         {tab === 'birthdays' && (
           <Suspense fallback={<ListSkeleton />}>
@@ -205,6 +209,16 @@ export function ActionCenter({
               timezone={timezone}
               people={people}
               onViewPerson={onSelectPerson}
+              onOpenSundayArchive={onNavigate ? () => openSunday('archive', onNavigate) : undefined}
+              onCtaNavigate={
+                onNavigate
+                  ? cta => {
+                      if (cta === 'followJesus') onNavigate('connect-card');
+                      else if (cta === 'getConnected') openCongregation('groups', onNavigate);
+                      else if (cta === 'giveOnline') onNavigate('giving');
+                    }
+                  : undefined
+              }
             />
           </Suspense>
         )}
@@ -219,6 +233,7 @@ export function ActionCenter({
               onAssign={onAssignVolunteer}
               onUpdateStatus={onUpdateVolunteerStatus}
               onRemove={onRemoveVolunteer}
+              onViewPerson={onSelectPerson}
             />
           </Suspense>
         )}

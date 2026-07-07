@@ -27,6 +27,7 @@ import { generateAIText } from '../lib/services/ai';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useAISettings } from '../hooks/useAISettings';
 import { ComposeModal } from './action-feed/ComposeModal';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 interface ActionFeedProps {
   people: Person[];
@@ -525,6 +526,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-dark-100">{item.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-dark-400 flex items-center gap-1.5 mt-0.5">
+                  {item.person && <MemberAvatar person={item.person} size="sm" />}
                   {item.type === 'task' && item.dueDate && <Clock size={12} />}
                   {item.type === 'birthday' && <Calendar size={12} />}
                   {item.subtitle}

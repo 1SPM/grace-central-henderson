@@ -1,14 +1,15 @@
-import { Radio, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { ExternalLink, Radio, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useLiveServiceOps } from '../../hooks/useLiveServiceOps';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { Person } from '../../types';
 import { TENANT_TIMEZONE } from '../../config/tenant';
+import { MEMBER_WATCH_PREVIEW_PATH } from '../../lib/watchCatalog';
 import { LiveServiceStatsBar } from './LiveServiceStatsBar';
 import { LiveStreamMonitor } from './LiveStreamMonitor';
 import { LiveChatModerationPanel } from './LiveChatModerationPanel';
 import { PastSermonsGrid } from './PastSermonsGrid';
 import { OnlineSchedulePanel } from './OnlineSchedulePanel';
-import { LiveServiceCTAPanel } from './LiveServiceCTAPanel';
+import { LiveServiceCTAPanel, type LiveServiceCtaKey } from './LiveServiceCTAPanel';
 
 interface LiveServiceDashboardProps {
   churchId: string;
@@ -17,6 +18,9 @@ interface LiveServiceDashboardProps {
   timezone?: string;
   people: Person[];
   onViewPerson?: (id: string) => void;
+  onOpenSundayArchive?: () => void;
+  onCtaNavigate?: (cta: LiveServiceCtaKey) => void;
+  memberWatchUrl?: string;
   /** When true, hide page title (used inside Sunday tab). */
   embedded?: boolean;
 }
@@ -28,6 +32,9 @@ export function LiveServiceDashboard({
   timezone = TENANT_TIMEZONE,
   people,
   onViewPerson,
+  onOpenSundayArchive,
+  onCtaNavigate,
+  memberWatchUrl = MEMBER_WATCH_PREVIEW_PATH,
   embedded = false,
 }: LiveServiceDashboardProps) {
   const {
@@ -76,6 +83,15 @@ export function LiveServiceDashboard({
               Growth, resources, and community engagement at {churchName}.
             </p>
           )}
+          <a
+            href={memberWatchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+          >
+            Open member Watch page
+            <ExternalLink size={12} />
+          </a>
         </div>
         <button
           type="button"
@@ -108,6 +124,7 @@ export function LiveServiceDashboard({
           <LiveChatModerationPanel
             chat={chat}
             watchingNow={stats.watchingNow}
+            people={people}
             onHideMessage={id => void hideMessage(id)}
             onViewPerson={onViewPerson}
           />
@@ -115,7 +132,7 @@ export function LiveServiceDashboard({
       </div>
 
       {/* Past sermons */}
-      <PastSermonsGrid sermons={sermons} />
+      <PastSermonsGrid sermons={sermons} onViewAll={onOpenSundayArchive} />
 
       {/* Schedule */}
       <OnlineSchedulePanel
@@ -125,7 +142,7 @@ export function LiveServiceDashboard({
       />
 
       {/* CTAs */}
-      <LiveServiceCTAPanel ctaCounts={ctaCounts} />
+      <LiveServiceCTAPanel ctaCounts={ctaCounts} onNavigate={onCtaNavigate} />
     </div>
   );
 }

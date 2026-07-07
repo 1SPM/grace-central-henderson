@@ -1,9 +1,12 @@
 import { EyeOff, MessageCircle } from 'lucide-react';
 import type { WatchChatMessage } from '../../lib/services/liveService';
+import type { Person } from '../../types';
+import { MemberAvatar } from '../ui/MemberAvatar';
 
 interface LiveChatModerationPanelProps {
   chat: WatchChatMessage[];
   watchingNow: number;
+  people?: Person[];
   onHideMessage: (id: string) => void;
   onViewPerson?: (id: string) => void;
 }
@@ -16,14 +19,17 @@ function timeLabel(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-function avatarInitials(name: string): string {
-  const parts = name.replace(/\./g, '').split(/\s+/);
-  return parts.slice(0, 2).map(p => p[0]?.toUpperCase() ?? '').join('');
+function chatAuthorPerson(msg: WatchChatMessage, people: Person[]): Person | undefined {
+  if (msg.personId) {
+    return people.find(p => p.id === msg.personId);
+  }
+  return undefined;
 }
 
 export function LiveChatModerationPanel({
   chat,
   watchingNow,
+  people = [],
   onHideMessage,
   onViewPerson,
 }: LiveChatModerationPanelProps) {
@@ -41,42 +47,55 @@ export function LiveChatModerationPanel({
         {chat.length === 0 ? (
           <p className="text-gray-500 text-xs text-center py-8">No chat messages yet.</p>
         ) : (
-          chat.map(msg => (
-            <div
-              key={msg.id}
-              className={`group flex gap-2.5 ${msg.isHidden ? 'opacity-40' : ''}`}
-            >
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-300 shrink-0">
-                {avatarInitials(msg.authorName)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => msg.personId && onViewPerson?.(msg.personId)}
-                    className="text-xs font-semibold text-white hover:text-red-400 transition-colors"
-                  >
-                    {msg.authorName}
-                  </button>
-                  <span className="text-[10px] text-gray-500">{timeLabel(msg.createdAt)}</span>
-                  {msg.isHidden && (
-                    <span className="text-[9px] uppercase tracking-wider text-amber-500 font-semibold">Hidden</span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-300 mt-0.5 break-words">{msg.body}</p>
-              </div>
-              {!msg.isHidden && (
+          chat.map(msg => {
+            const person = chatAuthorPerson(msg, people);
+            const avatarPerson = person ?? {
+              firstName: msg.authorName.replace(/\./g, '').split(/\s+/)[0] ?? '?',
+              lastName: msg.authorName.replace(/\./g, '').split(/\s+/)[1] ?? '',
+            };
+
+            return (
+              <div
+                key={msg.id}
+                className={`group flex gap-2.5 ${msg.isHidden ? 'opacity-40' : ''}`}
+              >
                 <button
                   type="button"
-                  onClick={() => onHideMessage(msg.id)}
-                  title="Hide message"
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-gray-500 hover:text-amber-400 hover:bg-gray-800 transition-all shrink-0"
+                  onClick={() => msg.personId && onViewPerson?.(msg.personId)}
+                  className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                  disabled={!msg.personId}
                 >
-                  <EyeOff size={14} />
+                  <MemberAvatar person={avatarPerson} size="md" />
                 </button>
-              )}
-            </div>
-          ))
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => msg.personId && onViewPerson?.(msg.personId)}
+                      className="text-xs font-semibold text-white hover:text-red-400 transition-colors"
+                    >
+                      {person ? `${person.firstName} ${person.lastName[0]}.` : msg.authorName}
+                    </button>
+                    <span className="text-[10px] text-gray-500">{timeLabel(msg.createdAt)}</span>
+                    {msg.isHidden && (
+                      <span className="text-[9px] uppercase tracking-wider text-amber-500 font-semibold">Hidden</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-300 mt-0.5 break-words">{msg.body}</p>
+                </div>
+                {!msg.isHidden && (
+                  <button
+                    type="button"
+                    onClick={() => onHideMessage(msg.id)}
+                    title="Hide message"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-gray-500 hover:text-amber-400 hover:bg-gray-800 transition-all shrink-0"
+                  >
+                    <EyeOff size={14} />
+                  </button>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
 

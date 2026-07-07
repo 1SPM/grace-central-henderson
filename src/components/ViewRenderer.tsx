@@ -286,6 +286,7 @@ export function ViewRenderer(props: ViewRendererProps) {
       onAssignVolunteer={handlers.assignVolunteer}
       onUpdateVolunteerStatus={handlers.updateVolunteerStatus}
       onRemoveVolunteer={handlers.removeVolunteer}
+      onNavigate={setView}
       defaultTab={defaultTab}
     />
   );

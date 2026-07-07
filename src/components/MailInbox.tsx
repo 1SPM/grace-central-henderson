@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { validateAction, hydrateAction, type PendingAction } from '../lib/grace-actions';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import type { Person, Task, PrayerRequest } from '../types';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 interface MailRow {
   id: string;
@@ -29,6 +30,7 @@ interface MailInboxProps {
   prayers: PrayerRequest[];
   /** When true, hide the page header (used inside Action Center tab). */
   embedded?: boolean;
+  onSelectPerson?: (personId: string) => void;
 }
 
 type FilterKey = 'all' | 'review' | 'auto' | 'crisis';
@@ -44,7 +46,7 @@ function formatRelativeTime(iso: string): string {
   return `${d}d ago`;
 }
 
-export function MailInbox({ people, tasks, prayers, embedded = false }: MailInboxProps) {
+export function MailInbox({ people, tasks, prayers, embedded = false, onSelectPerson }: MailInboxProps) {
   const [rows, setRows] = useState<MailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -282,6 +284,18 @@ export function MailInbox({ people, tasks, prayers, embedded = false }: MailInbo
                 }}
                 className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-stone-50/60 dark:hover:bg-dark-800/40"
               >
+                {senderPerson && (
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onSelectPerson?.(senderPerson.id);
+                    }}
+                    className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                  >
+                    <MemberAvatar person={senderPerson} size="lg" />
+                  </button>
+                )}
                 <div className="flex flex-col items-start gap-1 min-w-[120px] shrink-0">
                   <span className={`text-sm ${isUnseen ? 'font-semibold text-slate-900 dark:text-dark-100' : 'text-gray-700 dark:text-dark-300'}`}>
                     {senderName}

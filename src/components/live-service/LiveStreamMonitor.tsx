@@ -2,6 +2,7 @@ import { Radio, DollarSign } from 'lucide-react';
 import type { GiftTickerItem } from '../../lib/services/liveService';
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { ActiveServiceSlot } from '../../lib/services/liveService';
+import { isDirectVideoStreamUrl } from '../../lib/watchCatalog';
 
 interface LiveStreamMonitorProps {
   churchProfile?: ChurchProfile;
@@ -25,6 +26,7 @@ export function LiveStreamMonitor({
   const series = churchProfile?.currentSeries;
   const streamUrl = churchProfile?.liveStreamUrl;
   const latestGift = giftTicker[0];
+  const useVideo = streamUrl ? isDirectVideoStreamUrl(streamUrl) : false;
 
   const overlayTitle = series?.title ?? 'Live Service';
   const overlaySubtitle = [
@@ -36,7 +38,17 @@ export function LiveStreamMonitor({
 
   return (
     <div className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-video min-h-[280px]">
-      {streamUrl ? (
+      {streamUrl && useVideo ? (
+        <video
+          src={streamUrl}
+          className="absolute inset-0 w-full h-full object-cover"
+          controls
+          playsInline
+          autoPlay
+          muted
+          loop
+        />
+      ) : streamUrl ? (
         <iframe
           src={streamUrl}
           title="Live stream"
@@ -47,7 +59,7 @@ export function LiveStreamMonitor({
       ) : (
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&h=675&fit=crop)' }}
+          style={{ backgroundImage: 'url(/previews/assets/watch/ondemand-rooted.jpg)' }}
         />
       )}
 

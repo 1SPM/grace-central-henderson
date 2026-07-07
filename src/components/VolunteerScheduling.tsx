@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Person, CalendarEvent } from '../types';
 import { sendSingleReminder, type ReminderResult } from '../lib/services/volunteerReminders';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 // Skill types (matching SkillsDatabase)
 interface PersonSkill {
@@ -53,6 +54,7 @@ interface VolunteerSchedulingProps {
   onAssign: (eventId: string, roleId: string, personId: string) => void;
   onUpdateStatus: (assignmentId: string, status: VolunteerAssignment['status']) => void;
   onRemove: (assignmentId: string) => void;
+  onViewPerson?: (personId: string) => void;
 }
 
 // Default volunteer roles with skill mappings
@@ -103,6 +105,7 @@ export function VolunteerScheduling({
   onAssign,
   onUpdateStatus: _onUpdateStatus,
   onRemove,
+  onViewPerson,
 }: VolunteerSchedulingProps) {
   // Note: _onUpdateStatus is available for future use to confirm/decline volunteer assignments
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -400,14 +403,16 @@ export function VolunteerScheduling({
                                   key={assignment.id}
                                   className="flex items-center justify-between text-sm bg-stone-100 dark:bg-dark-800 rounded-lg px-2 py-1.5 border border-gray-100 dark:border-dark-700"
                                 >
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                                      {person.firstName[0]}
-                                    </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => onViewPerson?.(person.id)}
+                                    className="flex items-center gap-2 min-w-0 text-left hover:text-indigo-600 dark:hover:text-indigo-400"
+                                  >
+                                    <MemberAvatar person={person} size="sm" />
                                     <span className="text-gray-700 dark:text-dark-300 truncate max-w-[100px]">
                                       {person.firstName} {person.lastName[0]}.
                                     </span>
-                                  </div>
+                                  </button>
                                   <div className="flex items-center gap-1">
                                     {getStatusIcon(assignment.status)}
                                     <button
@@ -528,9 +533,7 @@ export function VolunteerScheduling({
                                     assignPerson === person.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
                                   }`}
                                 >
-                                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
-                                    {person.firstName[0]}{person.lastName[0]}
-                                  </div>
+                                  <MemberAvatar person={person} size="md" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
                                       {person.firstName} {person.lastName}
@@ -567,9 +570,7 @@ export function VolunteerScheduling({
                                     assignPerson === person.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
                                   }`}
                                 >
-                                  <div className="w-8 h-8 bg-gray-300 dark:bg-dark-600 rounded-full flex items-center justify-center text-gray-600 dark:text-dark-300 text-xs font-medium flex-shrink-0">
-                                    {person.firstName[0]}{person.lastName[0]}
-                                  </div>
+                                  <MemberAvatar person={person} size="md" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
                                       {person.firstName} {person.lastName}
