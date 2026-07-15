@@ -215,20 +215,33 @@ export async function loadPermissionKeys(
   userId: string,
   churchId: string,
 ): Promise<Set<string>> {
-  const { data, error } = await supabase
+  // Two explicit hops rather than a single nested PostgREST embed:
+  // user_roles and role_permissions both reference `roles` independently —
+  // there is no direct foreign key between user_roles and role_permissions,
+  // so a `user_roles -> role_permissions` embed cannot be resolved by
+  // PostgREST (it silently returns no rows). Verified against the real
+  // production schema; a hand-rolled test mock had been masking this.
+  const { data: grants, error: grantsErr } = await supabase
     .from('user_roles')
-    .select('role_permissions:role_permissions(permissions:permissions(key))')
+    .select('role_id')
     .eq('user_id', userId)
     .eq('church_id', churchId)
     .is('revoked_at', null);
 
-  if (error || !data) return new Set();
+  if (grantsErr || !grants || grants.length === 0) return new Set();
+
+  const roleIds = [...new Set(grants.map(g => g.role_id as string))];
+
+  const { data: rows, error: permsErr } = await supabase
+    .from('role_permissions')
+    .select('permissions(key)')
+    .in('role_id', roleIds);
+
+  if (permsErr || !rows) return new Set();
 
   const keys = new Set<string>();
-  for (const row of data as unknown as { role_permissions: { permissions: { key: string } | null }[] }[]) {
-    for (const rp of row.role_permissions ?? []) {
-      if (rp.permissions?.key) keys.add(rp.permissions.key);
-    }
+  for (const row of rows as unknown as { permissions: { key: string } | null }[]) {
+    if (row.permissions?.key) keys.add(row.permissions.key);
   }
   return keys;
 }

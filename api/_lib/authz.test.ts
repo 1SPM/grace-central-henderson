@@ -109,11 +109,11 @@ describe('resolveStaffActor / requirePermission — role access', () => {
     return createMockSupabase({
       tables: {
         users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
-        user_roles: () => ({
-          data: [
-            { role_permissions: permissionKeys.map(key => ({ permissions: { key } })) },
-          ],
-        }),
+        // loadPermissionKeys does two hops (no direct FK between user_roles
+        // and role_permissions — both only reference `roles`): first the
+        // caller's granted role_ids, then the permissions for those roles.
+        user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
+        role_permissions: () => ({ data: permissionKeys.map(key => ({ permissions: { key } })) }),
       },
     });
   }
@@ -280,8 +280,14 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
         roles: () => ({ data: { id: 'sysadmin-role-id' } }),
         // Same table, two call shapes: the "existing grant?" check uses
         // .maybeSingle() (truthy on a non-empty array works fine), and
-        // loadPermissionKeys iterates the array directly (no .single()).
-        user_roles: () => ({ data: [{ id: 'grant-1', role_permissions: [{ permissions: { key: 'work_orders.manage' } }, { permissions: { key: 'approvals.decide' } }] }] }),
+        // loadPermissionKeys's first hop reads the array directly (no .single()).
+        user_roles: () => ({ data: [{ id: 'grant-1', role_id: 'sysadmin-role-id' }] }),
+        // loadPermissionKeys's second hop — role_permissions has no direct
+        // FK to user_roles (both only reference `roles`), so it's queried
+        // separately by role_id, not nested under user_roles. This mock
+        // shape matches the real, FK-valid PostgREST embed
+        // (role_permissions.permission_id -> permissions.id).
+        role_permissions: () => ({ data: [{ permissions: { key: 'work_orders.manage' } }, { permissions: { key: 'approvals.decide' } }] }),
       },
     });
     const res = makeRes();
