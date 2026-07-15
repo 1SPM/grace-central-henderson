@@ -1,6 +1,7 @@
 import { Bot, PhoneCall, Radio } from 'lucide-react';
 import type { LeaderProfile, HelpCategory, PastoralConversation } from '../../../types';
 import { demoCareLog, demoDispatchMatrix, type CareLogEntry } from './demoLeadersHub';
+import { SampleDataNotice } from '../../SampleDataNotice';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   marriage: 'Marriage',
@@ -92,6 +93,7 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[

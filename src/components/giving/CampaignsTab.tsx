@@ -22,7 +22,7 @@ interface CampaignsTabProps {
   onGoToTab: (tab: GivingHubTab) => void;
 }
 
-function CampaignCard({ campaign }: { campaign: HubCampaign }) {
+function CampaignCard({ campaign, isSample }: { campaign: HubCampaign; isSample: boolean }) {
   const style = KIND_STYLE[campaign.kind];
   const Icon = ICONS[campaign.icon];
   const pct = Math.min(Math.round((campaign.raised / campaign.goal) * 100), 100);
@@ -33,7 +33,14 @@ function CampaignCard({ campaign }: { campaign: HubCampaign }) {
         <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-dark-850 border border-gray-200 dark:border-dark-700 flex items-center justify-center text-gray-600 dark:text-dark-300">
           <Icon size={18} />
         </div>
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${style.pill}`}>{style.label}</span>
+        <div className="flex items-center gap-1.5">
+          {isSample && (
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+              Sample
+            </span>
+          )}
+          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${style.pill}`}>{style.label}</span>
+        </div>
       </div>
       <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">{campaign.name}</h3>
       {campaign.submittedBy && (
@@ -102,6 +109,7 @@ export function CampaignsTab({ campaigns, pledges, onGoToTab }: CampaignsTabProp
     })
     .filter(c => c.goal > 0);
 
+  const sampleIds = new Set(demoCampaigns.map(c => c.id));
   const all = [...realCards, ...demoCampaigns];
 
   return (
@@ -119,7 +127,7 @@ export function CampaignsTab({ campaigns, pledges, onGoToTab }: CampaignsTabProp
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {all.map(c => (
-          <CampaignCard key={c.id} campaign={c} />
+          <CampaignCard key={c.id} campaign={c} isSample={sampleIds.has(c.id)} />
         ))}
       </div>
     </div>

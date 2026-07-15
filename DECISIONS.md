@@ -202,4 +202,42 @@ Per-tenant monthly budget cap defaults to $50. At 100% the gateway returns 402; 
 **Consequences.**
 - Two paid services; estimated combined cost <$50/month at current scale.
 - Adds two SDKs to the client bundle; offset by lazy-loading PostHog.
+
+---
+
+## ADR-011 — Shared backend foundation: RBAC table model over role-string checks
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+
+**Context.** The existing `users.role` column (`admin`/`pastor`/`staff`/`volunteer`/`member`) is a coarse, five-value model. The WorkOS shared-platform requirement calls for 13 distinct roles with module/action/sensitivity-scoped permissions, enforceable server-side, never via hidden UI — a role string alone can't express "Finance sees giving but not care" and "Pastoral Care sees care but not giving."
+
+**Decision.** Add a full RBAC table set (`roles`, `permissions`, `role_permissions`, `user_roles`) alongside — not replacing — the existing `users.role` column. `users.role` remains the coarse legacy signal (still read by pre-existing routes via `requireRole`); the new `permissions` model is what every new WorkOS route (`requirePermission()`) actually checks. Migration path for legacy routes to adopt the finer model is opt-in per route, not a forced cutover.
+
+**Consequences.**
+- Two authorization signals exist simultaneously for a transition period: `users.role` (legacy) and `user_roles`/`permissions` (new). Documented in `SHARED_BACKEND.md` "Known gaps."
+- No migration risk to existing routes — nothing about `users.role` changed.
+- New routes get real module/action/sensitivity granularity from day one.
+
+**Alternatives considered.**
+- *Widen `users.role` to 13 values* — rejected: a single-role-per-user column can't express "Ministry Leader for Youth AND Volunteer Coordinator," which the spec requires (`user_roles` supports multiple simultaneous role grants, optionally ministry-scoped).
+- *Rewrite existing routes to the new model immediately* — rejected as out of scope for a foundation-only phase; logged as a `TECH_DEBT.md` follow-up instead.
+
+---
+
+## ADR-012 — RLS as defense-in-depth on Work Orders/approvals only, not every new table
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+
+**Context.** ADR-003 established RLS as a second layer behind application-level tenant scoping, not the sole control — because the Clerk↔Supabase JWT wiring described in `TECH_DEBT.md` TD-001 is not confirmed complete in production. The new shared-platform tables inherit the same constraint: a `church_id`-only RLS policy is real (tenant isolation works whenever the JWT claim is present), but a *permission*-aware policy needs the JWT to carry enough to resolve a `users.id`, which is one hop further than `get_church_id()` alone.
+
+**Decision.** Give every new table tenant-only RLS (migrations 031–037), matching the existing pattern. Additionally give `work_orders` and `approvals` — the two tables where a leak has the highest consequence (internal-only by explicit product requirement) — permission-aware RLS via `public.user_has_permission()` (migration 038) as defense-in-depth, on top of the API-layer `requirePermission()` check that is the actual primary control. Do not extend permission-aware RLS to every table in this phase.
+
+**Consequences.**
+- `work_orders`/`approvals` are protected twice; a bug in either layer alone doesn't leak them.
+- `care_requests`, financial tables, and communications tables rely on the API layer alone for role-based restriction (tenant isolation via RLS still applies) — acceptable because the API layer is already the primary control everywhere per ADR-003, but logged as a `TECH_DEBT.md` follow-up to extend the pattern.
+
+**Alternatives considered.**
+- *Permission-aware RLS on every new table now* — rejected: meaningfully more migration surface for a foundation phase, and the marginal safety gain over the API-layer check is smaller for lower-consequence tables. Revisit if/when the Members Portal starts issuing its own Supabase-scoped requests instead of going through the API exclusively.
 - PII redaction must be configured in Sentry (`beforeSend`) before any production traffic.

@@ -46,6 +46,7 @@ const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRChe
 const DiscipleshipEngagementHub = lazy(() =>
   import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
 );
+const WorkOsHub = lazy(() => import('./workos/WorkOsHub').then(m => ({ default: m.WorkOsHub })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
@@ -469,6 +470,13 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'tasks':
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
+
+    case 'workos':
+      return (
+        <SafeView>
+          <WorkOsHub setView={setView} />
+        </SafeView>
+      );
 
     case 'settings':
       return renderSettingsHub();

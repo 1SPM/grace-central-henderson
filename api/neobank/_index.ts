@@ -271,9 +271,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         transactions = txns ?? [];
       }
 
+      // Member-facing 'me' resource: never return account_number_last4 or
+      // routing_number to the cardholder themselves (financial-safety brief
+      // explicitly prohibits exposing account numbers / routing details to
+      // members). Staff-facing resources ('account', 'admin' below) select
+      // the full row since staff legitimately need it for support.
       const { data: account } = await supabase
         .from('card_accounts')
-        .select('*')
+        .select('id, church_id, person_id, i2c_account_id, account_name, available_balance_micro_usd, status, last_synced_at, created_at')
         .eq('church_id', auth.churchId)
         .eq('person_id', person.id)
         .maybeSingle();
@@ -638,8 +643,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     case 'set_impact_route': {
-      if (!isStaff) return res.status(403).json({ error: 'forbidden' });
-      const personId = body.person_id;
+      // Staff may set any member's route (person_id in body). A non-staff
+      // caller may only set their OWN route — impact_routes.set_by already
+      // models 'member' as a valid setter, so this is a member self-service
+      // function, not a staff-only one, as long as the caller owns the
+      // person_id being updated.
+      let personId = body.person_id ?? null;
+      let setBy: 'member' | 'staff' = 'staff';
+      if (!isStaff) {
+        const me = await resolvePerson(supabase, auth);
+        if (!me) return res.status(403).json({ error: 'forbidden' });
+        if (personId && personId !== me.id) return res.status(403).json({ error: 'forbidden' });
+        personId = me.id;
+        setBy = 'member';
+      }
       if (!personId || !body.route_label) {
         return res.status(400).json({ error: 'person_id and route_label required' });
       }
@@ -651,7 +668,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           person_id: personId,
           route_label: body.route_label,
           route_fund: routeFund,
-          set_by: 'staff',
+          set_by: setBy,
           effective_at: new Date().toISOString(),
           metadata: { actor: auth.clerkUserId },
         }, { onConflict: 'church_id,person_id' })
@@ -662,7 +679,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await logActivity(supabase, auth.churchId, personId, 'impact_route_set', route.id, {
         route_label: body.route_label,
         route_fund: routeFund,
-        actor: 'staff',
+        actor: setBy,
       });
       return res.status(200).json({ impact_route: route });
     }

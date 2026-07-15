@@ -65,6 +65,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   mail: 'mail',
   'financial-hub': 'financial-hub',
   wallets: 'wallets',
+  workos: 'workos',
 };
 
 // Reverse map: path -> view

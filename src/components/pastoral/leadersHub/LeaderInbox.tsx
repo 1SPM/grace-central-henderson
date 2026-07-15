@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bot, Flag, Reply } from 'lucide-react';
 import { demoInbox, type InboxMessage } from './demoLeadersHub';
+import { SampleDataNotice } from '../../SampleDataNotice';
 
 type InboxFilter = 'all' | 'needs-you' | 'ai-replied' | 'flagged';
 
@@ -23,6 +24,7 @@ export function LeaderInbox() {
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
         {(

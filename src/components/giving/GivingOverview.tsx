@@ -13,6 +13,7 @@ import {
 import type { Giving, Person, Pledge, View } from '../../types';
 import type { GivingHubTab, GivingNavTarget } from './GivingHub';
 import { demoCampaigns, demoFundStreamSplits } from './demoGivingHub';
+import { SampleDataNotice } from '../SampleDataNotice';
 import { fmtImpactUsd, useImpactCardProgram } from '../../hooks/useImpactCardProgram';
 
 interface GivingOverviewProps {
@@ -73,6 +74,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice label="Fund-split, stream-summary, and campaign figures below are illustrative samples — not live" />
       {/* KPI hero cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-xl p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-900/10 border border-amber-200 dark:border-amber-800/40">

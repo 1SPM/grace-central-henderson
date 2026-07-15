@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BadgeCheck, Clock, ThumbsUp } from 'lucide-react';
 import { demoCauses, demoCauseStats, type CauseVerification } from './demoGivingHub';
+import { SampleDataNotice } from '../SampleDataNotice';
 
 const VERIFY_BADGE: Record<CauseVerification, { cls: string; label: string } | null> = {
   verified: {
@@ -36,6 +37,7 @@ export function MemberCauses() {
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">

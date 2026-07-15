@@ -2,7 +2,7 @@
  * Consolidated API dispatcher.
  *
  * Vercel's Hobby plan caps a deployment at 12 serverless functions, and
- * this app has ~36 routes. Every route handler lives in an underscore-
+ * this app has 45+ routes. Every route handler lives in an underscore-
  * prefixed file (which Vercel does not deploy as a function) and is
  * dispatched from this single catch-all instead.
  *
@@ -25,10 +25,14 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'agents/health': () => import('./agents/_health.js'),
   'agents/run': () => import('./agents/_run.js'),
   'agents/settings': () => import('./agents/_settings.js'),
+  'agents/workos-registry': () => import('./agents/_workos-registry.js'),
+  'agents/workos-run': () => import('./agents/_workos-run.js'),
   'ai/generate': () => import('./ai/_generate.js'),
   'ai/health': () => import('./ai/_health.js'),
   'ai/video/start': () => import('./ai/video/_start.js'),
   'ai/video/status': () => import('./ai/video/_status.js'),
+  'approvals': () => import('./approvals/_index.js'),
+  'audit/timeline': () => import('./audit/_timeline.js'),
   'automation/status': () => import('./automation/_status.js'),
   'health': () => import('./_health.js'),
   'billing/activate-trial': () => import('./billing/_activate-trial.js'),
@@ -41,7 +45,15 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'care/admin': () => import('./care/_admin.js'),
   'care/conversations': () => import('./care/_conversations.js'),
   'care/messages': () => import('./care/_messages.js'),
+  'care-requests': () => import('./care-requests/_index.js'),
+  'care-requests/assign': () => import('./care-requests/_assign.js'),
+  'care-requests/notes': () => import('./care-requests/_notes.js'),
+  'community/reports': () => import('./community/_reports.js'),
+  'community/blocks': () => import('./community/_blocks.js'),
+  'community/moderate': () => import('./community/_moderate.js'),
   'connect-card': () => import('./_connect-card.js'),
+  'consents': () => import('./consents/_index.js'),
+  'consents/data-requests': () => import('./consents/_data-requests.js'),
   'cron/agents': () => import('./cron/_agents.js'),
   'cron/ai-anomaly': () => import('./cron/_ai-anomaly.js'),
   'cron/reconcile-stripe': () => import('./cron/_reconcile-stripe.js'),
@@ -66,7 +78,33 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'members/invite': () => import('./members/_invite.js'),
   'neobank': () => import('./neobank/_index.js'),
   'news/headlines': () => import('./news/_headlines.js'),
+  'portal/home': () => import('./portal/_home.js'),
+  'portal/church': () => import('./portal/_church.js'),
+  'portal/profile': () => import('./portal/_profile.js'),
+  'portal/journey': () => import('./portal/_journey.js'),
+  'portal/groups': () => import('./portal/_groups.js'),
+  'portal/events': () => import('./portal/_events.js'),
+  'portal/volunteer': () => import('./portal/_volunteer.js'),
+  'portal/contact': () => import('./portal/_contact.js'),
+  'portal/requests': () => import('./portal/_requests.js'),
+  'portal/notifications': () => import('./portal/_notifications.js'),
+  'portal/care': () => import('./portal/_care.js'),
+  'portal/assistant': () => import('./portal/_assistant.js'),
+  'portal/giving': () => import('./portal/_giving.js'),
+  'portal/prayer': () => import('./portal/_prayer.js'),
+  'prayer-requests': () => import('./prayer-requests/_index.js'),
   'sms/send': () => import('./sms/_send.js'),
+  'impact-card/funnel-metrics': () => import('./impact-card/_funnel-metrics.js'),
+  'work-orders': () => import('./work-orders/_index.js'),
+  'work-orders/tasks': () => import('./work-orders/_tasks.js'),
+  'work-orders/dependencies': () => import('./work-orders/_dependencies.js'),
+  'work-orders/evidence': () => import('./work-orders/_evidence.js'),
+  'work-orders/request-approval': () => import('./work-orders/_request-approval.js'),
+  'work-orders/pilot-readiness': () => import('./work-orders/_pilot-readiness.js'),
+  'work-orders/create-from-template': () => import('./work-orders/_create-from-template.js'),
+  'work-orders/completion-report': () => import('./work-orders/_completion-report.js'),
+  'workos/permissions': () => import('./workos/_permissions.js'),
+  'workos/summary': () => import('./workos/_summary.js'),
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

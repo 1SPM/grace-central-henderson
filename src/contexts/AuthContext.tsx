@@ -38,6 +38,14 @@ interface AuthContextType {
   updateUserRole: (userId: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
   removeUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
   getOrganizationUsers: () => Promise<{ success: boolean; users?: User[]; error?: string }>;
+  /**
+   * Returns a Clerk session bearer token for calling the shared-platform
+   * WorkOS API routes (api/work-orders/*, api/approvals/*, etc.), or null
+   * when no real Clerk session exists (demo mode / auth not configured —
+   * those routes have their own demo-mode bootstrap server-side, see
+   * api/_lib/authz.ts). Never throws.
+   */
+  getAuthToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -262,6 +270,19 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     return authService.getOrganizationUsers();
   }, []);
 
+  const getAuthToken = useCallback(async (): Promise<string | null> => {
+    if (!clerkSignedIn) return null;
+    try {
+      return (await getToken({ template: 'supabase' })) ?? (await getToken());
+    } catch {
+      try {
+        return await getToken();
+      } catch {
+        return null;
+      }
+    }
+  }, [clerkSignedIn, getToken]);
+
   const value: AuthContextType = {
     isLoaded: clerkLoaded && !isLoading,
     isSignedIn: clerkSignedIn || false,
@@ -275,6 +296,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     updateUserRole,
     removeUser,
     getOrganizationUsers,
+    getAuthToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -328,6 +350,7 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
     updateUserRole: async () => ({ success: false, error: 'Authentication not configured' }),
     removeUser: async () => ({ success: false, error: 'Authentication not configured' }),
     getOrganizationUsers: async () => ({ success: false, error: 'Authentication not configured' }),
+    getAuthToken: async () => null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -371,6 +394,11 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),
     getOrganizationUsers: async () => ({ success: true, users: entered ? [demoUser] : [] }),
+    // No real Clerk session in demo mode — the WorkOS API routes recognize
+    // VITE_ENABLE_DEMO_MODE server-side and bootstrap their own actor
+    // (api/_lib/authz.ts resolveDemoStaffActor), so a null token here is
+    // expected and handled, not a bug.
+    getAuthToken: async () => null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

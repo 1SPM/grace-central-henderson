@@ -55,8 +55,14 @@ export interface CardAccountRecord {
   person_id: string;
   i2c_account_id: string;
   account_name: string;
-  account_number_last4: string;
-  routing_number: string | null;
+  /**
+   * Omitted on the member-facing /api/neobank?resource=me response by
+   * design — members never see their own account number or routing
+   * details from this API (financial-safety brief). Present when this
+   * record comes from a staff-facing resource (admin/account).
+   */
+  account_number_last4?: string;
+  routing_number?: string | null;
   available_balance_micro_usd: number;
   status: 'pending' | 'active' | 'frozen' | 'closed';
   last_synced_at: string | null;

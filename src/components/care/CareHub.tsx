@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Church, Heart } from 'lucide-react';
+import { Church, Heart, ClipboardList } from 'lucide-react';
 import { CrisisCenterDispatch } from '../pastoral/CrisisCenterDispatch';
+import { CareRequestsQueue } from './CareRequestsQueue';
 import { ListSkeleton } from '../ui/ViewSkeleton';
 import { careHash, parseCareTab, type CareTab } from '../../lib/careNav';
 import type { LeaderFormData } from '../pastoral/LeaderRegistrationForm';
@@ -41,6 +42,7 @@ interface CareHubProps {
 
 const TABS: { id: CareTab; label: string; icon: typeof Heart }[] = [
   { id: 'dispatch', label: 'Crisis Dispatch', icon: Heart },
+  { id: 'requests', label: 'Care Requests', icon: ClipboardList },
   { id: 'life-services', label: 'Life Services', icon: Church },
 ];
 
@@ -170,6 +172,7 @@ export function CareHub({
             churchName={churchName}
           />
         )}
+        {tab === 'requests' && <CareRequestsQueue />}
         {tab === 'life-services' && (
           <Suspense fallback={<ListSkeleton />}>
             <LifeServices embedded onNavigate={onNavigate} events={events} people={people} />

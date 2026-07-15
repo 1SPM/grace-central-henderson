@@ -21,6 +21,7 @@ import {
   MoreHorizontal,
   Sparkles,
   Wallet,
+  Workflow,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -60,6 +61,7 @@ const navSections: NavSection[] = [
     label: 'Main',
     items: [
       { view: 'dashboard', label: 'Home', icon: <LayoutDashboard size={16} />, tone: 'indigo' },
+      { view: 'workos', label: 'GRACE WorkOS', icon: <Workflow size={16} />, tone: 'violet' },
       { view: 'leadership', label: 'Leadership', icon: <Crown size={16} />, tone: 'violet' },
       { view: 'feed', label: 'Action Center', icon: <ListTodo size={16} />, tone: 'rose' },
       { view: 'people', label: 'Congregation', icon: <Users size={16} />, tone: 'sky' },
@@ -144,6 +146,7 @@ const viewLabels: Record<View, string> = {
   mail: 'Mail',
   'financial-hub': 'Home',
   wallets: 'Impact Card Accounts',
+  workos: 'GRACE WorkOS',
 };
 
 function adminRoleLabel(role?: string | null): string {

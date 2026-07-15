@@ -244,6 +244,138 @@
 
 ---
 
+## Shared backend foundation (2026-07-13) — see SHARED_BACKEND.md
+
+### TD-038 — Legacy routes don't call the new `requirePermission()` model
+- **Severity:** P1 (blocks finer-grained role separation from being real for existing features)
+- **Location:** `api/_middleware/auth.ts` (`requireAuth`/`requireRole`), used by Giving, Payments, Email, SMS, and other pre-existing routes.
+- **Risk:** "Financial data must not be exposed to care or communications users" is only actually enforced on the *new* WorkOS routes today. Existing Giving/Payments routes still gate on the coarse `admin`/`staff`/`volunteer` role, not the new 13-role permission model.
+- **Re-entry trigger:** the first time a real UI needs one of the new roles (e.g. Finance vs. Communications) to see materially different data on an *existing* screen.
+- **Resolution path:** migrate routes to `resolveStaffActor`/`requirePermission` (`api/_lib/authz.ts`) one at a time, same pattern as the new work-orders/approvals/consents routes.
+
+### TD-039 — Permission-aware RLS covers only `work_orders`/`approvals`
+- **Severity:** P2
+- **Location:** `supabase/migrations/038_shared_foundation_rls_hardening.sql`
+- **Risk:** `care_requests`, financial tables, and communications tables rely on tenant-only RLS + the API-layer check for role-based restriction. See DECISIONS.md ADR-012 for why this is an accepted tradeoff for this phase, not an oversight.
+- **Re-entry trigger:** before the Members Portal (or any other surface) queries Supabase directly with a user-scoped key instead of going through the API exclusively.
+- **Resolution path:** extend the `public.user_has_permission()` policy pattern from migration 038 to `care_requests` (`care.view`), `giving`/ledger tables (`giving_financial.view`), and communications tables.
+
+### TD-040 — `account_status` enforced only on the new WorkOS auth path
+- **Severity:** P2
+- **Location:** `api/_lib/authz.ts` (`resolveStaffActor`) enforces it; `api/_middleware/auth.ts` (`requireAuth`) does not.
+- **Risk:** A suspended/deactivated user with a valid Clerk session can still reach any pre-existing route.
+- **Re-entry trigger:** before SOC 2, or the first real account-suspension incident.
+- **Resolution path:** add the same `users.account_status !== 'active'` check to `requireAuth`/`requireRole` in `api/_middleware/auth.ts`.
+
+### TD-041 — No `care_requests`/`volunteer_interests` API routes yet
+- **Severity:** P3 (schema-only by design this phase)
+- **Location:** `supabase/migrations/037_care_volunteer_artifacts_metrics.sql` has the tables + RLS; no `api/care-requests/*` route exists.
+- **Re-entry trigger:** first Members-Portal-real or WorkOS-agent feature that needs to create/triage a `care_requests` row.
+- **Resolution path:** build `api/care-requests/*` following the exact pattern in `api/consents/_index.ts` (member self-service via `resolveMemberActor` + staff view via `requirePermission('care.view'/'care.manage')`).
+
+### TD-042 — `data_subject_requests` has no fulfillment automation
+- **Severity:** P2 (privacy/compliance-adjacent — relates to Phase 4 of `GRACE_Demo_Completion_and_Beta_Critical_Path.md`)
+- **Location:** `supabase/migrations/033_consent_communication_preferences.sql`
+- **Risk:** A member can submit a data-export or account-deactivation request; nothing automatically fulfills it. Status sits at `pending` until an operator manually processes and updates it.
+- **Re-entry trigger:** before marketing this as a real member-facing capability, or before any privacy-policy commitment references a turnaround time.
+- **Resolution path:** build the export pipeline (church-scoped data dump keyed by `person_id`) and the deactivation workflow (portal_enabled=false + Clerk account action) as their own Work Order type, dogfooding the Work Order model just added.
+
+## Admin Dashboard WorkOS (2026-07-13)
+
+### TD-043 — `resolveStaffActor` has a demo-mode bypass that grants System Administrator
+- **Severity:** P1 (must be confirmed disabled before any real tenant)
+- **Location:** `api/_lib/authz.ts` (`resolveDemoStaffActor`)
+- **Risk:** When `VITE_ENABLE_DEMO_MODE=true`, every caller to a WorkOS route is silently resolved to a real `users` row with the `system_administrator` role — full access to Work Orders, approvals, and (once wired) every other module. This exists so the Admin Dashboard WorkOS modules are actually clickable in the live Central Henderson demo, which has no production Clerk instance (see the current-state assessment). Same env var and same "explicit opt-in only" posture as the pre-existing demo-mode auth bypass in `api/_middleware/auth.ts` (formally waived for non-production use in `SECURITY_FINDINGS_STATUS.md` #3) — this is that same waiver extended to the new authz module, not a new risk category.
+- **Re-entry trigger:** before Clerk Production is configured for any real tenant (Beta Critical Path Phase 2). At that point `VITE_ENABLE_DEMO_MODE` must be confirmed unset/false in that environment's Vercel config.
+- **Resolution path:** no code change needed — this is an operational checklist item (confirm the env var is unset in the production Vercel project), same as the existing demo-mode waiver.
+
+### TD-044 — WorkOS route guard is role-based on the frontend, permission-based on the backend
+- **Severity:** P3
+- **Location:** `src/hooks/useRouteGuard.ts` gates the `'workos'` view by legacy `role` (admin/pastor/staff); the actual module-by-module visibility (Work Orders vs. Approvals vs. Agents vs. Audit) is enforced per-request by `requirePermission()` on each API call, using the new RBAC model from migration 032.
+- **Risk:** none functionally (the server is always the real gate — see `SHARED_BACKEND.md` "Authorization model"), but a staff user who can open the WorkOS hub may see empty/403'd panels rather than the hub being hidden entirely, which is a UX rough edge, not a security gap.
+- **Resolution path:** once `GET /api/workos/permissions` is established, teach `useRouteGuard` to read it (with a loading fallback) instead of the coarse role check, so panels the user can't use are hidden rather than shown-then-blocked.
+
+### TD-045 — Task reassignment can't clear an owner, only change it
+- **Severity:** P3
+- **Location:** `api/work-orders/_tasks.ts` PATCH; `src/hooks/useTaskBoard.ts` `reassignTask`
+- **Risk:** none (cosmetic limitation) — `api/_lib/validation.ts`'s `uuid_()` validator treats a JSON `null` the same as "field not provided," so `{ owner_user_id: null }` is silently dropped from the update rather than clearing the column. Reassigning to a different real user works fine.
+- **Re-entry trigger:** first real request for an "Unassign" action on the Task Board.
+- **Resolution path:** add an explicit `clearOwner: true` flag to the PATCH body handled separately from the validated schema, or extend the validator with a tri-state (absent / null-to-clear / value) mode.
+
+### TD-046 — Only 3 of 11 agents have a real workflow
+- **Severity:** P3 (explicitly in-scope to defer — see SHARED_BACKEND.md and this phase's completion notes)
+- **Location:** `api/_lib/agentWorkflows.ts` implements `grace`, `verity`, `sentinel`; the other 8 registry entries (`shepherd`, `welcome`, `gather`, `serve`, `impact`, `herald`, `steward`, `compass`) are registered with `implemented: false` and correctly show "Not yet implemented" in the Agent Command Centre rather than fabricated activity.
+- **Re-entry trigger:** each ministry module (Care, Volunteer, Communications, Finance) as it's built out — the natural next workflow to implement is the one covering the module just shipped.
+- **Resolution path:** follow the pattern in `api/_lib/agentWorkflows.ts` — a pure `(supabase, churchId) => AgentWorkflowResult` function reading real tables, no LLM calls required.
+
+### TD-047 — WorkOS demo-mode bootstrap writes a real row into `users`/`user_roles` on first use
+- **Severity:** P3
+- **Location:** `api/_lib/authz.ts` `resolveDemoStaffActor`
+- **Risk:** low — the demo admin user (`clerk_id = 'demo-workos-admin'`) is a real, identifiable, idempotent row (find-or-create), not a leak of real data. But it does mean a demo-mode church accumulates one persistent staff user that wouldn't exist in a from-scratch production tenant.
+- **Re-entry trigger:** before treating any demo-mode-seeded database as a template for real tenant provisioning.
+- **Resolution path:** none needed for now; if it ever matters, delete `users` rows where `clerk_id = 'demo-workos-admin'` as part of a tenant-reset script.
+
+## Care, prayer, and community safety (2026-07-14)
+
+### TD-048 — "Specific Care Team" for care_requests reuses care_assignments, not a per-request roster
+- **Severity:** P3
+- **Location:** migration 043 RLS policy "care_requests staff read"
+- **Risk:** none identified — a `specific_care_team` request is visible to whoever is assigned via `care_assignments` (already care.manage-gated to create) plus any `care.manage` holder for triage. This is intentionally the same mechanism as the general Work Order pattern, not a new one.
+- **Re-entry trigger:** if a church ever wants a *standing* care team (a fixed roster who sees every specific_care_team request without per-request assignment) rather than per-request assignment.
+- **Resolution path:** add a `care_team_members` table (church_id, user_id) and OR it into the RLS policy.
+
+### TD-049 — Community posting composer still disabled in the Members Portal
+- **Severity:** P3 (intentional, not an oversight)
+- **Location:** `src/portal/pages/PortalCommunity.tsx` — moderation_status, community_post_reports, member_blocks, and the full RLS policy set (migration 043) are real and tested, but no portal UI writes a `community_posts` row yet.
+- **Re-entry trigger:** first real request for member-authored community posts (blessings/praise reports) — the backend prerequisite work this phase's brief required is done; only the composer + moderation queue UI remain.
+- **Resolution path:** build a `usePortalCommunityPosts` hook + composer, defaulting every post to `moderation_status='pending'`; build a staff moderation queue UI consuming `api/community/_reports.ts` + `api/community/_moderate.ts` (both already built).
+
+### TD-050 — `detectCrisisLanguage` is keyword-based, not model-based, by deliberate choice
+- **Severity:** P2 (a real limitation, not a bug — see docs/AI_BOUNDARIES.md)
+- **Location:** `api/_lib/careSafety.ts`
+- **Risk:** false negatives are possible for crisis language that doesn't match the keyword pattern (e.g. non-English, indirect phrasing). This is the same tradeoff already accepted for the identical pattern in `previews/grace-companion.js`.
+- **Re-entry trigger:** a real missed-crisis incident, or a deliberate product decision to add a model-based second pass (with its own review — see AI_BOUNDARIES.md's stance that this tradeoff is a policy decision, not a silent upgrade).
+- **Resolution path:** if pursued, keep the keyword match as a fast-path/fallback and add a moderation-API-style second check, never replacing the deterministic path outright.
+
+### TD-051 — No staff-facing UI yet for community_post_reports / member_blocks
+- **Severity:** P3
+- **Location:** `api/community/_reports.ts` (GET), `api/community/_blocks.ts` — both real and tested at the API layer; no admin dashboard panel consumes the reports queue yet.
+- **Re-entry trigger:** same as TD-049 — lands naturally alongside the posting composer.
+- **Resolution path:** a small "Reported posts" panel in the Admin Dashboard, gated by `communications.manage`, calling the existing `GET /api/community/reports`.
+
+---
+
+## Giving and Impact Card (2026-07-14)
+
+### TD-052 — i2c live adapter is an unimplemented stub
+- **Severity:** P1
+- **Location:** `api/_lib/i2c/live-adapter.ts` throws on every call; `api/_lib/i2c/index.ts` only returns it when `I2C_LIVE=true` AND `I2C_API_KEY` is set. In every deployment today those are unset, so all `kyc_verifications`/`cards`/`interchange_events`/`card_accounts`/`impact_allocations` rows come from the deterministic mock adapter.
+- **Risk:** high if ever misrepresented — every Impact Card number in the Admin Dashboard and Members Portal (including the new adoption-funnel metrics) is mock-adapter data, not live money movement. This phase's UI copy and this TECH_DEBT entry are the guardrail; do not flip `I2C_LIVE=true` without implementing `live-adapter.ts` against real i2c sandbox/production endpoints first.
+- **Re-entry trigger:** a real i2c production contract + sandbox credentials become available.
+- **Resolution path:** implement `live-adapter.ts` against i2c's real API, add provider-sandbox tests against their test environment, then flip `I2C_LIVE=true` per-tenant only after a pilot review (see the "GRACE Impact Card Pilot Readiness" Work Order, `api/work-orders/_pilot-readiness.ts`).
+
+### TD-053 — `/api/neobank` does not use the portal's demo-bootstrap actor resolution
+- **Severity:** P2
+- **Location:** `api/neobank/_index.ts` uses `requireClerkAuth` directly for all member-scoped resources/actions (`resource=me`, `submit_kyc`, `set_impact_route`, etc.), unlike every other Members Portal route (`api/portal/*`), which uses `resolveMemberActor` (Clerk in production, a real demo `people` row when `VITE_ENABLE_DEMO_MODE=true`). Only the staff-facing `resource=admin` GET has a demo-mode bypass.
+- **Risk:** in demo mode, the new Members Portal "Give & Impact Card" page's Impact Card section always renders its "not available in demo mode" state (`fetchMyCard()` returns `null` by design — see `src/lib/services/impactCard.ts`) rather than showing real demo data, even though the rest of the portal (giving, care, prayer, community) works in demo mode. This is a demo/UX gap, not a security issue — production Clerk auth is unaffected.
+- **Re-entry trigger:** first real request for a fully-working demo-mode walkthrough of the Impact Card portal experience.
+- **Resolution path:** refactor `api/neobank/_index.ts`'s auth resolution to fall back to a demo member actor (mirroring `resolveDemoMemberActor` in `api/_lib/authz.ts`) for member-scoped resources/actions when `!auth.ok && DEMO_MODE`, threading a synthetic `{ok:true, clerkUserId, churchId, role:'member'}` through the existing `auth`-typed control flow. Sizeable enough (900+ line file, many call sites branch on `auth`) that it should be its own reviewed change, not folded into an unrelated phase.
+
+### TD-054 — No source table for "church program benefit"; Impact Card "campaign performance" is Work-Order-level only
+- **Severity:** P2
+- **Location:** `api/_lib/impactCardFunnelMetrics.ts` — `program_benefit` returns `value: null, source: 'not_yet_computed'`; `campaign_performance` measures onboarding-campaign Work Order completion rate, not per-recipient campaign response/enrollment.
+- **Risk:** none today (both are honestly labeled, never fabricated — see the metric's `calculation`/`assumptions` fields returned by `GET /api/impact-card/funnel-metrics`), but a stakeholder reading the Admin Dashboard panel without opening the info popover could assume `program_benefit` is "$0 benefit" rather than "not measured yet."
+- **Re-entry trigger:** a decision on what "church program benefit" concretely means (e.g. subsidized fees, a matching-funds table) and/or a request for per-recipient campaign attribution.
+- **Resolution path:** once a program-benefit definition and source table exist, wire it into `computeImpactCardFunnelMetrics`; for campaign performance, add a `campaign_recipients` (or similar) attribution table if member-level enrollment tracking becomes a requirement.
+
+### TD-055 — Giving statement download is unimplemented (no PDF provider)
+- **Severity:** P3 (intentional, not an oversight)
+- **Location:** `giving_statements` table (migration 002) exists with a `pdf_url` column, but nothing in the codebase ever generates a PDF or populates it. `api/portal/_giving.ts` reports this explicitly via its `unsupported_functions.download_statement` field rather than exposing a broken button.
+- **Re-entry trigger:** first real request for year-end tax statements.
+- **Resolution path:** pick a PDF generation approach (server-side render + a storage bucket, or a third-party statement provider), populate `pdf_url` on generation, then add the download function to `api/portal/_giving.ts` and the portal UI.
+
+---
+
 ## Process
 
 - **When you take a shortcut**, append an entry. Be honest about the risk.
