@@ -88,12 +88,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Fetch all active role grants for the church and filter to leadership
     // roles in JS — PostgREST's dot-notation filter on an embedded
     // resource column (`.in('roles.key', ...)`) is not reliable across
-    // supabase-js versions, so this avoids depending on it.
-    const { data: activeGrants } = await supabase
+    // supabase-js versions, so this avoids depending on it. user_roles has
+    // two FKs to users (user_id, granted_by), so the embed must name the
+    // constraint explicitly or PostgREST rejects the query as ambiguous.
+    const { data: activeGrants, error: grantsErr } = await supabase
       .from('user_roles')
-      .select('users(last_name), roles(key)')
+      .select('users!user_roles_user_id_fkey(last_name), roles(key)')
       .eq('church_id', actor.churchId)
       .is('revoked_at', null);
+    if (grantsErr) console.error('[related-party check] failed to load leadership grants', grantsErr.message);
 
     const leadershipLastNames = (activeGrants ?? [])
       .filter(g => LEADERSHIP_ROLE_KEYS.includes((g.roles as unknown as { key: string } | null)?.key ?? ''))
