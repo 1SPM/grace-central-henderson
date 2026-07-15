@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 import { buildFullPrompt, generateWithHermes, getHermesConfig, isGeminiQuotaError, sanitizePrompt } from '../_lib/aiProviders.js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { resolveDemoChurchId } from '../_lib/authz.js';
 import { checkBudget } from '../_lib/ai/budget.js';
 import { recordUsage } from '../_lib/ai/usage.js';
 
@@ -23,10 +24,21 @@ const MODEL = 'gemini-2.5-flash';
  * flowing through prompts.
  */
 const DEMO_AI_ACCESS = process.env.DEMO_AI_ACCESS === 'true';
-const DEMO_CHURCH_ID =
-  process.env.DEMO_CHURCH_ID ||
-  process.env.VITE_DEFAULT_CHURCH_ID ||
-  '11111111-1111-1111-1111-111111111111';
+
+/**
+ * Which church unauthenticated demo requests meter/generate against.
+ * Precedence: explicit DEMO_CHURCH_ID env override, then hostname-aware
+ * resolution (mirrors HOST_TENANTS in src/config/tenant.ts, so
+ * grace-crm-two.vercel.app / grace-crm.dev hit Faithful Church instead of
+ * Central Henderson), then a hardcoded fallback UUID.
+ */
+function resolveAiDemoChurchId(req: VercelRequest): string {
+  return (
+    process.env.DEMO_CHURCH_ID ||
+    resolveDemoChurchId(req) ||
+    '11111111-1111-1111-1111-111111111111'
+  );
+}
 const DEMO_RATE_LIMIT = 10; // requests per minute per IP
 const DEMO_MAX_OUTPUT_TOKENS = 512;
 
@@ -104,7 +116,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (isRateLimited(`demo:${clientIp}`, DEMO_RATE_LIMIT)) {
       return res.status(429).json({ error: 'Demo rate limit reached. Please try again in a minute.' });
     }
-    churchId = DEMO_CHURCH_ID;
+    churchId = resolveAiDemoChurchId(req);
     actorClerkId = 'demo-visitor';
     isDemoRequest = true;
   } else {

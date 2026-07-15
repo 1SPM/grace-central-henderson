@@ -43,7 +43,29 @@ import { requireClerkAuth } from './auth-helper.js';
 // TECH_DEBT.md (TD-043).
 const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
 const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
-const DEMO_CLERK_ID = 'demo-workos-admin';
+
+// Mirrors HOST_TENANTS in src/config/tenant.ts. Vercel env vars are
+// per-environment, not per-custom-domain, and this project deliberately
+// stays a single deployment (see docs/DEPLOY.md) — so which church the
+// demo bypass writes to has to be resolved from the request hostname,
+// not a shared env var, or every white-label host would silently share
+// Central Henderson's data.
+const HOST_CHURCH_IDS: Record<string, string> = {
+  'grace-crm-two.vercel.app': '22222222-2222-2222-2222-222222222222',
+  'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
+  'www.grace-crm.dev': '22222222-2222-2222-2222-222222222222',
+};
+
+/**
+ * Resolves which church the demo bypass should act as, based on the
+ * request's Host header. Unmapped hosts (including the real Central
+ * Henderson domain) fall back to VITE_DEFAULT_CHURCH_ID.
+ */
+export function resolveDemoChurchId(req: VercelRequest): string | undefined {
+  const host = req.headers.host;
+  if (host && HOST_CHURCH_IDS[host]) return HOST_CHURCH_IDS[host];
+  return DEMO_CHURCH_ID;
+}
 
 export interface StaffActor {
   kind: 'staff';
@@ -74,7 +96,7 @@ export async function resolveStaffActor(
   supabase: SupabaseClient,
 ): Promise<StaffActor | null> {
   if (DEMO_MODE) {
-    return resolveDemoStaffActor(res, supabase);
+    return resolveDemoStaffActor(req, res, supabase);
   }
 
   const auth = await requireClerkAuth(req);
@@ -125,29 +147,35 @@ export async function resolveStaffActor(
  * Clerk JWT verification.
  */
 async function resolveDemoStaffActor(
+  req: VercelRequest,
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<StaffActor | null> {
-  if (!DEMO_CHURCH_ID) {
+  const churchId = resolveDemoChurchId(req);
+  if (!churchId) {
     res.status(503).json({ error: 'demo_church_not_configured' });
     return null;
   }
 
-  const demoEmail = `demo-workos-admin+${DEMO_CHURCH_ID}@grace-crm.internal`;
+  // clerk_id is globally unique (users_clerk_id_key), not scoped per
+  // church — a bare 'demo-workos-admin' constant would collide the moment
+  // a second demo tenant's bootstrap ran. Scope it per church.
+  const demoClerkId = `demo-workos-admin+${churchId}`;
+  const demoEmail = `demo-workos-admin+${churchId}@grace-crm.internal`;
 
   let { data: userRow } = await supabase
     .from('users')
     .select('id, account_status')
-    .eq('clerk_id', DEMO_CLERK_ID)
-    .eq('church_id', DEMO_CHURCH_ID)
+    .eq('clerk_id', demoClerkId)
+    .eq('church_id', churchId)
     .maybeSingle();
 
   if (!userRow) {
     const { data: created, error: createErr } = await supabase
       .from('users')
       .insert({
-        clerk_id: DEMO_CLERK_ID,
-        church_id: DEMO_CHURCH_ID,
+        clerk_id: demoClerkId,
+        church_id: churchId,
         email: demoEmail,
         first_name: 'Demo',
         last_name: 'Administrator',
@@ -186,20 +214,20 @@ async function resolveDemoStaffActor(
 
     if (!existingGrant) {
       await supabase.from('user_roles').insert({
-        church_id: DEMO_CHURCH_ID,
+        church_id: churchId,
         user_id: userRow.id,
         role_id: sysAdminRole.id,
       });
     }
   }
 
-  const permissions = await loadPermissionKeys(supabase, userRow.id, DEMO_CHURCH_ID);
+  const permissions = await loadPermissionKeys(supabase, userRow.id, churchId);
 
   return {
     kind: 'staff',
     userId: userRow.id,
-    clerkUserId: DEMO_CLERK_ID,
-    churchId: DEMO_CHURCH_ID,
+    clerkUserId: demoClerkId,
+    churchId,
     accountStatus: userRow.account_status,
     role: 'admin',
     permissions,
@@ -279,7 +307,7 @@ export async function resolveMemberActor(
   supabase: SupabaseClient,
 ): Promise<MemberActor | null> {
   if (DEMO_MODE) {
-    return resolveDemoMemberActor(res, supabase);
+    return resolveDemoMemberActor(req, res, supabase);
   }
 
   const auth = await requireClerkAuth(req);
@@ -312,8 +340,6 @@ export async function resolveMemberActor(
   };
 }
 
-const DEMO_MEMBER_CLERK_ID = 'demo-portal-member';
-
 /**
  * Demo-mode member actor: find-or-create a real `people` row
  * (portal_enabled=true) so Members Portal writes are real database rows,
@@ -322,27 +348,34 @@ const DEMO_MEMBER_CLERK_ID = 'demo-portal-member';
  * both the staff and member demo bootstraps).
  */
 async function resolveDemoMemberActor(
+  req: VercelRequest,
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<MemberActor | null> {
-  if (!DEMO_CHURCH_ID) {
+  const churchId = resolveDemoChurchId(req);
+  if (!churchId) {
     res.status(503).json({ error: 'demo_church_not_configured' });
     return null;
   }
 
+  // clerk_user_id is globally unique (idx_people_clerk_user_id), not
+  // scoped per church — a bare 'demo-portal-member' constant would collide
+  // the moment a second demo tenant's bootstrap ran. Scope it per church.
+  const demoMemberClerkId = `demo-portal-member+${churchId}`;
+
   let { data: personRow } = await supabase
     .from('people')
     .select('id, portal_enabled')
-    .eq('clerk_user_id', DEMO_MEMBER_CLERK_ID)
-    .eq('church_id', DEMO_CHURCH_ID)
+    .eq('clerk_user_id', demoMemberClerkId)
+    .eq('church_id', churchId)
     .maybeSingle();
 
   if (!personRow) {
     const { data: created, error: createErr } = await supabase
       .from('people')
       .insert({
-        church_id: DEMO_CHURCH_ID,
-        clerk_user_id: DEMO_MEMBER_CLERK_ID,
+        church_id: churchId,
+        clerk_user_id: demoMemberClerkId,
         first_name: 'Demo',
         last_name: 'Member',
         status: 'member',
@@ -365,8 +398,8 @@ async function resolveDemoMemberActor(
   return {
     kind: 'member',
     personId: personRow.id,
-    clerkUserId: DEMO_MEMBER_CLERK_ID,
-    churchId: DEMO_CHURCH_ID,
+    clerkUserId: demoMemberClerkId,
+    churchId,
   };
 }
 

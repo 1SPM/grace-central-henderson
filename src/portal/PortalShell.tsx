@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Home, Church, Compass, Users, User, HeartHandshake, Gift, Sparkles } from 'lucide-react';
 import { parsePortalTab, navigatePortalTab, type PortalTab } from './portalNav';
+import { DemoEnvironmentBanner } from '../components/DemoEnvironmentBanner';
 
 const PortalHome = lazy(() => import('./pages/PortalHome').then(m => ({ default: m.PortalHome })));
 const PortalChurch = lazy(() => import('./pages/PortalChurch').then(m => ({ default: m.PortalChurch })));
@@ -47,7 +48,9 @@ export function PortalShell() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col sm:flex-row">
+    <div className="min-h-screen bg-stone-50 flex flex-col">
+      <DemoEnvironmentBanner />
+      <div className="flex-1 flex flex-col sm:flex-row">
       {/* Desktop sidebar */}
       <nav
         className="hidden sm:flex sm:flex-col sm:w-56 sm:shrink-0 sm:border-r sm:border-stone-200 sm:bg-white sm:py-6 sm:px-3"
@@ -89,6 +92,7 @@ export function PortalShell() {
           {tab === 'profile' && <PortalProfile />}
         </Suspense>
       </main>
+      </div>
 
       {/* Mobile bottom tab bar */}
       <nav

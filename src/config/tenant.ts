@@ -32,6 +32,8 @@ import {
 export interface TenantConfig {
   /** Stable key — also the valid value for VITE_TENANT. */
   id: string;
+  /** Real churches.id row this tenant's data lives under, if any. */
+  churchId?: string;
   defaultSettings: ChurchSettings;
   timezone: string;
   graceFacts: string;
@@ -41,6 +43,7 @@ export interface TenantConfig {
 const TENANTS: Record<string, TenantConfig> = {
   centralHenderson: {
     id: 'centralHenderson',
+    churchId: '11111111-1111-1111-1111-111111111111',
     defaultSettings: CENTRAL_HENDERSON_DEFAULT_SETTINGS,
     timezone: CENTRAL_HENDERSON_TIMEZONE,
     graceFacts: CENTRAL_HENDERSON_GRACE_FACTS,
@@ -48,6 +51,7 @@ const TENANTS: Record<string, TenantConfig> = {
   },
   faithful: {
     id: 'faithful',
+    churchId: '22222222-2222-2222-2222-222222222222',
     defaultSettings: FAITHFUL_CHURCH_DEFAULT_SETTINGS,
     timezone: FAITHFUL_CHURCH_TIMEZONE,
     graceFacts: FAITHFUL_CHURCH_GRACE_FACTS,

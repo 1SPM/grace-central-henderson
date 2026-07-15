@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
+import { DemoEnvironmentBanner } from './DemoEnvironmentBanner';
 import { NotificationCenter } from './NotificationCenter';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
 import { TENANT_TIMEZONE, churchShortName } from '../config/tenant';
@@ -607,6 +608,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           <NotificationCenter churchId={churchId} onNavigate={(v) => navigateView(v, setView)} />
         </header>
 
+        <DemoEnvironmentBanner />
         <TrialBanner />
         <main className="flex-1 overflow-auto">
           {children}

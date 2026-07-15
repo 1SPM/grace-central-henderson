@@ -25,6 +25,7 @@ import { requireClerkAuth, type AuthOk } from '../_lib/auth-helper.js';
 import { requirePlanGate } from '../_lib/billing/gates.js';
 import { readBody, str, int_ } from '../_lib/validation.js';
 import { getI2cAdapter } from '../_lib/i2c/index.js';
+import { resolveDemoChurchId } from '../_lib/authz.js';
 import {
   ensureCardAccount,
   syncAccountBalance,
@@ -34,7 +35,6 @@ import {
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
-const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
@@ -198,13 +198,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const auth = await requireClerkAuth(req);
   if (!auth.ok) {
+    const demoChurchId = resolveDemoChurchId(req);
     if (
       DEMO_MODE
-      && DEMO_CHURCH_ID
+      && demoChurchId
       && req.method === 'GET'
       && resource === 'admin'
     ) {
-      const gate = await requirePlanGate(DEMO_CHURCH_ID, 'cardProgram', supabase);
+      const gate = await requirePlanGate(demoChurchId, 'cardProgram', supabase);
       if (!gate.ok) {
         return res.status(gate.status).json({
           error: gate.error,
@@ -212,7 +213,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           required_plan: gate.required_plan,
         });
       }
-      const payload = await buildAdminCardProgramPayload(supabase, DEMO_CHURCH_ID, adapter);
+      const payload = await buildAdminCardProgramPayload(supabase, demoChurchId, adapter);
       return res.status(200).json(payload);
     }
     return res.status(auth.status).json({
