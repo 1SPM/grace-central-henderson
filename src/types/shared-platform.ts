@@ -273,6 +273,9 @@ export interface Approval {
   status: ApprovalStatus;
   requested_at: string;
   decided_at: string | null;
+  related_party_flagged: boolean;
+  related_party_reviewed_by_user_id: string | null;
+  related_party_reviewed_at: string | null;
 }
 
 // ============================================
@@ -503,4 +506,72 @@ export interface MetricDefinition {
   unit: string | null;
   calculation: string | null;
   sensitivity: Sensitivity;
+}
+
+// ============================================
+// Finance ledgers (gift-in-kind, expenses) — extracted from reviewing a
+// real church's audited financial statement, see docs history for
+// context. Both are minimal ledgers, not a general-ledger replacement.
+// ============================================
+
+export type GiftInKindCategory = 'food' | 'clothing' | 'toys' | 'household' | 'other';
+export type GiftInKindTransactionType = 'contribution' | 'distribution';
+
+export interface GiftInKindTransaction {
+  id: string;
+  category: GiftInKindCategory;
+  transaction_type: GiftInKindTransactionType;
+  description: string | null;
+  quantity: number | null;
+  quantity_unit: string | null;
+  estimated_value: number | null;
+  occurred_at: string;
+  created_at: string;
+}
+
+export type ExpenseFunctionalCategory = 'program' | 'g_and_a';
+
+export interface Expense {
+  id: string;
+  functional_category: ExpenseFunctionalCategory;
+  category: string;
+  amount: number;
+  fund: string | null;
+  expense_date: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface ExpenseRatio {
+  program_total: number;
+  g_and_a_total: number;
+  total: number;
+  program_ratio: number | null;
+}
+
+// ============================================
+// Configurable giving tiers / membership track — computed from
+// churches.settings, never stored as a score.
+// ============================================
+
+export interface GivingTierDefinition {
+  label: string;
+  weeklyThreshold: number;
+}
+
+export interface GivingTierResult {
+  label: string;
+  weeklyThreshold: number;
+}
+
+export interface MembershipTrackDefinition {
+  label: string;
+  requiredMilestoneTypes: string[];
+}
+
+export interface MembershipTrackStatus {
+  label: string;
+  required_count: number;
+  completed_count: number;
+  is_complete: boolean;
 }

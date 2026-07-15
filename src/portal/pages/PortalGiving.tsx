@@ -227,7 +227,14 @@ function RecurringSection({ giving }: { giving: ReturnType<typeof usePortalGivin
 
   return (
     <section aria-labelledby="portal-recurring" className="rounded-2xl border border-stone-200 bg-white p-4">
-      <h2 id="portal-recurring" className="text-sm font-semibold text-stone-900 mb-3 flex items-center gap-1.5"><Repeat size={16} /> Recurring gifts</h2>
+      <h2 id="portal-recurring" className="text-sm font-semibold text-stone-900 mb-3 flex items-center gap-1.5">
+        <Repeat size={16} /> Recurring gifts
+        {giving.data.giving_tier && (
+          <span className="ml-1 inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700" data-testid="giving-tier-badge">
+            {giving.data.giving_tier.label}
+          </span>
+        )}
+      </h2>
       <ul className="space-y-2">
         {giving.data.recurring_gifts.map(r => (
           <li key={r.id} className="flex items-center justify-between text-sm">

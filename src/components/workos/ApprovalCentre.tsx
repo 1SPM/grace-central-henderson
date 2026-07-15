@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, ClipboardCheck } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck, ShieldAlert } from 'lucide-react';
 import { useApprovals } from '../../hooks/useApprovals';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { EmptyState } from '../ui/EmptyState';
@@ -22,11 +22,12 @@ const RISK_VARIANT: Record<string, 'success' | 'info' | 'warning' | 'urgent'> = 
 };
 
 export function ApprovalCentre() {
-  const { approvals, isLoading, error, forbidden, list, decide } = useApprovals();
+  const { approvals, isLoading, error, forbidden, list, decide, markRelatedPartyReviewed } = useApprovals();
   const { has } = useWorkOsPermissions();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [statusFilter, setStatusFilter] = useState<'pending' | 'decided' | ''>('pending');
   const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
 
   const canDecide = has('approvals.decide');
 
@@ -41,6 +42,18 @@ export function ApprovalCentre() {
       await decide(id, decision, notes[id]);
     } catch (err) {
       setDecisionError(err instanceof Error ? err.message : 'Could not record the decision.');
+    }
+  }
+
+  async function handleMarkReviewed(id: string) {
+    setDecisionError(null);
+    setReviewingId(id);
+    try {
+      await markRelatedPartyReviewed(id);
+    } catch (err) {
+      setDecisionError(err instanceof Error ? err.message : 'Could not mark this reviewed.');
+    } finally {
+      setReviewingId(null);
     }
   }
 
@@ -95,11 +108,26 @@ export function ApprovalCentre() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <StatusBadge variant={RISK_VARIANT[a.risk_level] ?? 'default'}>Risk: {a.risk_level}</StatusBadge>
+                  {a.related_party_flagged && !a.related_party_reviewed_at && (
+                    <StatusBadge variant="warning"><ShieldAlert size={11} /> Related-party review needed</StatusBadge>
+                  )}
                   {a.status === 'decided' && (
                     <StatusBadge variant="success"><CheckCircle2 size={11} /> {a.decision}</StatusBadge>
                   )}
                 </div>
               </div>
+
+              {a.related_party_flagged && !a.related_party_reviewed_at && canDecide && (
+                <div className="mt-3">
+                  <button
+                    onClick={() => void handleMarkReviewed(a.id)}
+                    disabled={reviewingId === a.id}
+                    className="px-3 py-1.5 text-xs font-medium border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-50"
+                  >
+                    {reviewingId === a.id ? 'Marking reviewed…' : 'Mark related-party review as complete'}
+                  </button>
+                </div>
+              )}
 
               {a.status === 'pending' && canDecide && (
                 <div className="mt-3 space-y-2">

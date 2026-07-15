@@ -3,6 +3,9 @@ import { Info, ShieldAlert } from 'lucide-react';
 import { useWorkOsSummary } from '../../hooks/useWorkOsSummary';
 import { openWorkOs } from '../../lib/workosNav';
 import { ImpactCardFunnelPanel } from './ImpactCardFunnelPanel';
+import { GiftInKindPanel } from './GiftInKindPanel';
+import { ExpenseRatioPanel } from './ExpenseRatioPanel';
+import { MinistryImpactPanel } from './MinistryImpactPanel';
 import type { View } from '../../types';
 
 function formatTime(iso: string): string {
@@ -100,6 +103,9 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
       )}
 
       <ImpactCardFunnelPanel />
+      <MinistryImpactPanel />
+      <GiftInKindPanel />
+      <ExpenseRatioPanel />
     </div>
   );
 }

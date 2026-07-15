@@ -50,7 +50,11 @@ export type PlatformEventType =
   | 'prayer.request.submitted'
   | 'community.post.moderated'
   | 'giving.recurring_gift.cancelled'
-  | 'assistant.tool_invoked';
+  | 'assistant.tool_invoked'
+  | 'finance.gift_in_kind.recorded'
+  | 'finance.expense.recorded'
+  | 'approval.related_party_flagged'
+  | 'approval.related_party_reviewed';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 

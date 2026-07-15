@@ -36,6 +36,7 @@ import { resolveMemberActor } from '../_lib/authz.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
+import { computeGivingTier, type GivingTierDefinition } from '../_lib/givingTiers.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -56,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET') {
     const [{ data: church }, { data: gifts, error: giftsErr }, { data: recurring, error: recurringErr }] = await Promise.all([
-      supabase.from('churches').select('slug, name, stripe_connect_charges_enabled').eq('id', member.churchId).maybeSingle(),
+      supabase.from('churches').select('slug, name, stripe_connect_charges_enabled, settings').eq('id', member.churchId).maybeSingle(),
       supabase.from('giving')
         .select('id, amount, fund, date, method, is_recurring, note, created_at')
         .eq('church_id', member.churchId)
@@ -71,6 +72,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ]);
     if (giftsErr || recurringErr) return res.status(500).json({ error: 'read_failed' });
 
+    const givingTiers = ((church?.settings as { givingTiers?: GivingTierDefinition[] } | null)?.givingTiers) ?? [];
+    const givingTier = computeGivingTier(
+      (recurring ?? []).map(r => ({ amount: Number(r.amount), frequency: r.frequency, status: r.status })),
+      givingTiers,
+    );
+
     return res.status(200).json({
       giving_active: !!church?.stripe_connect_charges_enabled,
       person_id: member.personId,
@@ -78,6 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       church_name: church?.name ?? null,
       gift_history: gifts ?? [],
       recurring_gifts: recurring ?? [],
+      giving_tier: givingTier,
       // Documents which portal functions this endpoint intentionally does
       // NOT support, and why — so the frontend can render an honest
       // "not available" state instead of a broken button.

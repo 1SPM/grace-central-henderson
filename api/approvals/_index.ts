@@ -16,7 +16,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
-import { readBody, str } from '../_lib/validation.js';
+import { readBody, str, bool_ } from '../_lib/validation.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -26,6 +26,10 @@ const DECISIONS = ['approve', 'approve_with_changes', 'return_for_revision', 're
 const DECIDE_SCHEMA = {
   decision: str({ required: true, pattern: new RegExp(`^(${DECISIONS.join('|')})$`) }),
   decision_notes: str({ max: 5000 }),
+};
+
+const REVIEW_SCHEMA = {
+  mark_related_party_reviewed: bool_({ required: true }),
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -71,6 +75,61 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const id = typeof req.query.id === 'string' ? req.query.id : undefined;
     if (!id) return res.status(400).json({ error: 'missing_id' });
+
+    // Related-party review is a separate, narrower action (still gated on
+    // approvals.decide) from deciding the approval itself — a flagged
+    // approval can be reviewed and cleared for disclosure purposes
+    // independent of whether it's been approved/rejected yet.
+    if (req.body && typeof req.body === 'object' && 'mark_related_party_reviewed' in (req.body as Record<string, unknown>)) {
+      const reviewBody = readBody(req, res, REVIEW_SCHEMA);
+      if (!reviewBody) return;
+
+      const { data: existing, error: fetchErr } = await supabase
+        .from('approvals')
+        .select('*')
+        .eq('id', id)
+        .eq('church_id', actor.churchId)
+        .maybeSingle();
+      if (fetchErr) return res.status(500).json({ error: 'read_failed' });
+      if (!existing) return res.status(404).json({ error: 'not_found' });
+
+      const { data: approval, error } = await supabase
+        .from('approvals')
+        .update({
+          related_party_reviewed_by_user_id: actor.userId,
+          related_party_reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('church_id', actor.churchId)
+        .select()
+        .single();
+      if (error || !approval) return res.status(500).json({ error: 'update_failed' });
+
+      const { correlationId } = await emitPlatformEvent(supabase, {
+        churchId: actor.churchId,
+        eventType: 'approval.related_party_reviewed',
+        sourceApp: 'admin_dashboard',
+        actorUserId: actor.userId,
+        subjectType: 'approval',
+        subjectId: id,
+        payload: {},
+      });
+      await recordAudit(supabase, {
+        churchId: actor.churchId,
+        actorUserId: actor.userId,
+        actorClerkId: actor.clerkUserId,
+        action: 'update',
+        entityType: 'approval',
+        entityId: id,
+        before: existing,
+        after: approval,
+        correlationId,
+        route: '/api/approvals',
+        method: 'PATCH',
+      });
+
+      return res.status(200).json({ approval });
+    }
 
     const body = readBody(req, res, DECIDE_SCHEMA);
     if (!body) return;

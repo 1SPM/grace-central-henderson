@@ -88,6 +88,21 @@ export interface ChurchSettings {
   /** IANA timezone for clocks and scheduling display. */
   timezone?: string;
   onboarding?: OnboardingState;
+  /**
+   * Named recurring-giving tiers/badges (e.g. "Generosity Circle" at
+   * $25/week-equivalent). Empty/absent = feature inert. Sorted by
+   * weeklyThreshold is not required — computeGivingTier (api/_lib/
+   * givingTiers.ts) picks the highest threshold the giver qualifies for.
+   */
+  givingTiers?: { label: string; weeklyThreshold: number }[];
+  /**
+   * A church-defined formal membership track (e.g. salvation + baptism +
+   * a first-steps class) layered on top of the existing
+   * discipleship_milestones enum — computed at read time in
+   * api/portal/_journey.ts, never stored as a score. Absent = feature
+   * inert (no membership_track shown in the portal).
+   */
+  membershipTrack?: { label: string; requiredMilestoneTypes: string[] };
 }
 
 const DEFAULT_SETTINGS: ChurchSettings = TENANT_DEFAULT_SETTINGS;

@@ -54,6 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { data: rsvps },
       { data: items },
       { data: milestones },
+      { data: church },
     ] = await Promise.all([
       supabase.from('people').select('phone, address').eq('id', member.personId).maybeSingle(),
       supabase.from('consents').select('id').eq('person_id', member.personId).limit(1),
@@ -61,6 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       supabase.from('event_rsvps').select('id').eq('person_id', member.personId).limit(1),
       supabase.from('member_journey_items').select('*').eq('person_id', member.personId).order('created_at', { ascending: false }),
       supabase.from('discipleship_milestones').select('milestone_type, completed_at').eq('person_id', member.personId),
+      supabase.from('churches').select('settings').eq('id', member.churchId).maybeSingle(),
     ]);
 
     const steps = computeOnboardingSteps({
@@ -70,11 +72,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       hasEventRsvp: (rsvps ?? []).length > 0,
     });
 
+    // Computed, not stored — same "no scoring table" convention as the
+    // onboarding steps above. A church's membership track (e.g. "Ownership":
+    // salvation + baptism + a first-steps class) is defined in
+    // churches.settings.membershipTrack and evaluated here against the
+    // member's real discipleship_milestones rows.
+    const completedMilestones = milestones ?? [];
+    const track = (church?.settings as { membershipTrack?: { label: string; requiredMilestoneTypes: string[] } } | null)?.membershipTrack;
+    const membershipTrack = track
+      ? {
+          label: track.label,
+          required_count: track.requiredMilestoneTypes.length,
+          completed_count: track.requiredMilestoneTypes.filter(t => completedMilestones.some(m => m.milestone_type === t)).length,
+          is_complete: track.requiredMilestoneTypes.every(t => completedMilestones.some(m => m.milestone_type === t)),
+        }
+      : null;
+
     return res.status(200).json({
       onboarding: { steps, current_step: currentOnboardingStep(steps) },
       goals: (items ?? []).filter(i => i.item_type === 'goal'),
       saved_resources: (items ?? []).filter(i => i.item_type === 'saved_resource'),
-      completed_milestones: milestones ?? [],
+      completed_milestones: completedMilestones,
+      membership_track: membershipTrack,
     });
   }
 

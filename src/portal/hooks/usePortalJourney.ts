@@ -16,6 +16,7 @@ export interface PortalJourneyData {
   goals: JourneyItem[];
   saved_resources: JourneyItem[];
   completed_milestones: { milestone_type: string; completed_at: string }[];
+  membership_track: { label: string; required_count: number; completed_count: number; is_complete: boolean } | null;
 }
 
 export function usePortalJourney() {

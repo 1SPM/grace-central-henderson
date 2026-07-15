@@ -43,5 +43,14 @@ export function useApprovals() {
     return data.approval;
   }, [getAuthToken, list]);
 
-  return { approvals, isLoading, error, forbidden, list, decide };
+  const markRelatedPartyReviewed = useCallback(async (id: string) => {
+    const data = await workosFetch<DecideResponse>(`/api/approvals?id=${encodeURIComponent(id)}`, getAuthToken, {
+      method: 'PATCH',
+      body: JSON.stringify({ mark_related_party_reviewed: true }),
+    });
+    await list();
+    return data.approval;
+  }, [getAuthToken, list]);
+
+  return { approvals, isLoading, error, forbidden, list, decide, markRelatedPartyReviewed };
 }

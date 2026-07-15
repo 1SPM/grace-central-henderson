@@ -47,6 +47,20 @@ export function PortalJourney() {
         </ul>
       </section>
 
+      {data.membership_track && (
+        <section aria-labelledby="portal-journey-membership" className="rounded-2xl border border-stone-200 bg-white p-4" data-testid="membership-track-card">
+          <h2 id="portal-journey-membership" className="text-sm font-semibold text-stone-900 mb-2 flex items-center gap-2">
+            {data.membership_track.label}
+            {data.membership_track.is_complete && <CheckCircle2 size={16} className="text-emerald-500" />}
+          </h2>
+          <p className="text-sm text-stone-500">
+            {data.membership_track.is_complete
+              ? "You've completed every step in this track."
+              : `${data.membership_track.completed_count} of ${data.membership_track.required_count} steps complete.`}
+          </p>
+        </section>
+      )}
+
       <section aria-labelledby="portal-journey-goals" className="rounded-2xl border border-stone-200 bg-white p-4">
         <h2 id="portal-journey-goals" className="text-sm font-semibold text-stone-900 mb-3">Your goals</h2>
         {data.goals.length === 0 ? (

@@ -32,6 +32,7 @@ export interface PortalGivingData {
   church_name: string | null;
   gift_history: GiftHistoryEntry[];
   recurring_gifts: RecurringGiftEntry[];
+  giving_tier: { label: string } | null;
   unsupported_functions: Record<string, string>;
 }
 
