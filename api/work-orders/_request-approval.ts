@@ -85,14 +85,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // see api/_lib/relatedPartyCheck.ts.
   let flaggedApproval = approval;
   if (body.counterparty_name) {
-    const { data: leadershipGrants } = await supabase
+    // Fetch all active role grants for the church and filter to leadership
+    // roles in JS — PostgREST's dot-notation filter on an embedded
+    // resource column (`.in('roles.key', ...)`) is not reliable across
+    // supabase-js versions, so this avoids depending on it.
+    const { data: activeGrants } = await supabase
       .from('user_roles')
-      .select('users(last_name), roles!inner(key)')
+      .select('users(last_name), roles(key)')
       .eq('church_id', actor.churchId)
-      .is('revoked_at', null)
-      .in('roles.key', LEADERSHIP_ROLE_KEYS);
+      .is('revoked_at', null);
 
-    const leadershipLastNames = (leadershipGrants ?? [])
+    const leadershipLastNames = (activeGrants ?? [])
+      .filter(g => LEADERSHIP_ROLE_KEYS.includes((g.roles as unknown as { key: string } | null)?.key ?? ''))
       .map(g => (g.users as unknown as { last_name: string } | null)?.last_name)
       .filter((n): n is string => !!n);
 
