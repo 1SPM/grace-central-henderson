@@ -86,9 +86,90 @@ describe('getWorkflow("sentinel") — Privacy and Compliance', () => {
   });
 });
 
+describe('getWorkflow("shepherd") — Member Care', () => {
+  it('flags care requests still awaiting assignment or response', async () => {
+    const supabase = createMockSupabase({
+      tables: {
+        care_requests: () => ({
+          data: [
+            { id: 'cr1', category: 'grief', priority: 'high', status: 'submitted', crisis_flagged: false, created_at: '2026-07-10T00:00:00.000Z' },
+            { id: 'cr2', category: 'crisis', priority: 'crisis', status: 'triaged', crisis_flagged: true, created_at: '2026-07-11T00:00:00.000Z' },
+          ],
+        }),
+      },
+    });
+    const workflow = getWorkflow('shepherd')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings).toHaveLength(2);
+    expect(result.findings[0].action_type).toBe('flag_unassigned_care_request');
+    expect(result.findings.every(f => !('summary' in f.payload))).toBe(true);
+    expect(result.summary).toContain('2 care requests awaiting assignment or response');
+    expect(result.summary).toContain('1 crisis-flagged');
+  });
+
+  it('reports no findings when nothing is awaiting assignment', async () => {
+    const supabase = createMockSupabase({ tables: { care_requests: () => ({ data: [] }) } });
+    const workflow = getWorkflow('shepherd')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings).toHaveLength(0);
+    expect(result.summary).toMatch(/no care requests awaiting/i);
+  });
+});
+
+describe('getWorkflow("steward") — Financial Operations', () => {
+  // Dates are relative to real "now" (matching how the workflow itself
+  // computes "yesterday") rather than hardcoded calendar dates, so this
+  // test stays correct no matter when it actually runs.
+  const dayOffset = (daysAgo: number, hour = 12) => {
+    const d = new Date(Date.now() - daysAgo * 86_400_000);
+    d.setUTCHours(hour, 0, 0, 0);
+    return d.toISOString();
+  };
+
+  it('flags a reconciliation anomaly from a real ledger spike', async () => {
+    const steadyTrailingDays = [2, 3, 4, 5, 6, 7, 8].map(daysAgo => ({
+      church_id: FIXTURE_CHURCH_ID,
+      source: 'stripe',
+      kind: 'donation',
+      direction: 'credit' as const,
+      amount_micro_usd: 100_000_000, // $100/day, steady
+      occurred_at: dayOffset(daysAgo),
+    }));
+    const yesterdaySpike = {
+      church_id: FIXTURE_CHURCH_ID,
+      source: 'stripe',
+      kind: 'donation',
+      direction: 'credit' as const,
+      amount_micro_usd: 1_000_000_000, // $1000 — 10x the trailing average
+      occurred_at: dayOffset(1),
+    };
+
+    const supabase = createMockSupabase({
+      tables: { ledger_entries: () => ({ data: [...steadyTrailingDays, yesterdaySpike] }) },
+    });
+    const workflow = getWorkflow('steward')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings.length).toBeGreaterThan(0);
+    expect(result.findings[0].action_type).toBe('flag_reconciliation_anomaly');
+    expect(result.summary).toMatch(/reconciliation anomal/i);
+  });
+
+  it('reports no anomalies when the ledger is empty', async () => {
+    const supabase = createMockSupabase({ tables: { ledger_entries: () => ({ data: [] }) } });
+    const workflow = getWorkflow('steward')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings).toHaveLength(0);
+    expect(result.summary).toMatch(/no reconciliation anomalies/i);
+  });
+});
+
 describe('getWorkflow — unimplemented agents', () => {
   it('returns undefined for an agent with no real workflow (never fabricates one)', () => {
-    expect(getWorkflow('shepherd')).toBeUndefined();
     expect(getWorkflow('herald')).toBeUndefined();
+    expect(getWorkflow('welcome')).toBeUndefined();
   });
 });

@@ -29,7 +29,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     name: 'Shepherd',
     role: 'Member Care',
     description: 'Surfaces care requests awaiting assignment or response.',
-    implemented: false,
+    implemented: true,
   },
   {
     key: 'welcome',
@@ -71,7 +71,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     name: 'Steward',
     role: 'Financial Operations',
     description: 'Reviews giving-ledger reconciliation status.',
-    implemented: false,
+    implemented: true,
   },
   {
     key: 'compass',
