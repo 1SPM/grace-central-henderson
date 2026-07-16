@@ -22,6 +22,7 @@ import {
   Sparkles,
   Wallet,
   Workflow,
+  LogOut,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -177,7 +178,7 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
 
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
   const grace = useGraceChat();
-  const { user } = useAuthContext();
+  const { user, signOut } = useAuthContext();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
   const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
@@ -222,6 +223,11 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const handleNavClick = (view: View) => {
     navigateView(view, setView);
     setSidebarOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = '/sign-in';
   };
 
   const handleMoreToggle = () => {
@@ -526,6 +532,23 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             {sidebarCollapsed && (
               <span aria-hidden="true" className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
                 Settings
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={handleSignOut}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-gray-600 dark:text-dark-400 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group relative ${
+              sidebarCollapsed ? 'lg:justify-center' : ''
+            }`}
+            title={sidebarCollapsed ? 'Sign out' : undefined}
+            aria-label="Sign out"
+          >
+            <LogOut size={18} />
+            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Sign out</span>
+            {sidebarCollapsed && (
+              <span aria-hidden="true" className="hidden lg:group-hover:flex absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-dark-700 text-white text-xs rounded-md whitespace-nowrap z-50 shadow-lg">
+                Sign out
               </span>
             )}
           </button>

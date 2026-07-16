@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useChurchPlan } from '../../hooks/useChurchPlan';
 
 interface FirstStep {
@@ -49,7 +49,7 @@ const FIRST_STEPS: FirstStep[] = [
 
 export function WelcomePage() {
   const { plan, status, trialDaysRemaining, loading } = useChurchPlan();
-  const { getToken } = useAuth();
+  const { getAuthToken } = useAuthContext();
   const [showFallback, setShowFallback] = useState(false);
   const [seedBusy, setSeedBusy] = useState(false);
   const [seedResult, setSeedResult] = useState<null | { ok: boolean; people: number; giving: number; events: number; skipped?: string; error?: string }>(null);
@@ -58,7 +58,7 @@ export function WelcomePage() {
     setSeedBusy(true);
     setSeedResult(null);
     try {
-      const token = await getToken();
+      const token = await getAuthToken();
       const res = await fetch('/api/admin/seed-demo-data', {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
