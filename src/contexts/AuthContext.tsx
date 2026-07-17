@@ -15,7 +15,7 @@ import {
   ROLE_PERMISSIONS,
   InviteUserParams,
 } from '../lib/services/auth';
-import { supabase } from '../lib/supabase';
+import { supabase, setClerkTokenProvider } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
 import { hasEnteredDemo, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
@@ -77,31 +77,61 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
   // Register a Clerk-token provider with the Supabase client so every
   // Supabase request rides on the Clerk session JWT (enabling church-scoped
-  // RLS once Supabase third-party auth is configured — see src/lib/supabase.ts).
+  // RLS via Supabase third-party auth — see src/lib/supabase.ts).
+  //
+  // Registration is synchronous and this effect is declared BEFORE the
+  // syncUser effect below, so React's in-order effect execution guarantees
+  // the provider is in place before the first users-table query fires. The
+  // previous version awaited a dynamic import here, which raced syncUser:
+  // when syncUser's query won, it went out with the anon key, RLS returned
+  // zero rows, and the signed-in user was silently degraded to 'volunteer'.
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const { setClerkTokenProvider } = await import('../lib/supabase');
-      if (cancelled) return;
-      if (clerkSignedIn) {
-        // Use template if your Clerk dashboard has a "supabase" template;
-        // otherwise the default session token works for native third-party.
-        setClerkTokenProvider(async () => {
-          try {
-            return await getToken({ template: 'supabase' }) ?? await getToken();
-          } catch {
-            return await getToken();
-          }
-        });
-      } else {
-        setClerkTokenProvider(null);
-      }
-    })();
-    return () => { cancelled = true; };
+    if (clerkSignedIn) {
+      // Use template if your Clerk dashboard has a "supabase" template;
+      // otherwise the default session token works for native third-party.
+      setClerkTokenProvider(async () => {
+        try {
+          return await getToken({ template: 'supabase' }) ?? await getToken();
+        } catch {
+          return await getToken();
+        }
+      });
+    } else {
+      setClerkTokenProvider(null);
+    }
   }, [clerkSignedIn, getToken]);
 
   // Sync Clerk user with our database
   useEffect(() => {
+    /**
+     * Last-resort identity when the users-table read fails (RLS
+     * misconfiguration, transient network/Supabase issue): derive the
+     * user from Clerk publicMetadata instead of silently degrading a
+     * real staff member to 'volunteer'. publicMetadata is only writable
+     * server-side with the Clerk secret key (set during onboarding by
+     * POST /api/billing/create-church), so for DISPLAY-level gating
+     * it is exactly as trustworthy as the JWT claim derived from it.
+     * All real authorization stays server-side (requirePermission/RLS)
+     * — this only decides which pages the UI offers to render.
+     */
+    function clerkMetadataFallbackUser(u: NonNullable<typeof clerkUser>): User | null {
+      const metaChurchId = u.publicMetadata?.church_id as string | undefined;
+      const metaRole = u.publicMetadata?.role as string | undefined;
+      const validRoles: UserRole[] = ['admin', 'pastor', 'staff', 'volunteer', 'member'];
+      if (!metaChurchId || !metaRole || !validRoles.includes(metaRole as UserRole)) return null;
+      return {
+        id: u.id, // no DB row id available; Clerk id is stable and unique
+        clerkId: u.id,
+        email: u.emailAddresses[0]?.emailAddress || '',
+        firstName: u.firstName || '',
+        lastName: u.lastName || '',
+        imageUrl: u.imageUrl,
+        role: metaRole as UserRole,
+        churchId: metaChurchId,
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     async function syncUser() {
       if (!clerkLoaded) return;
 
@@ -181,6 +211,17 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
               };
               setUser(mappedUser);
               authService.setCurrentUser(mappedUser);
+            } else {
+              // The row may already exist but be invisible to this
+              // client (RLS reads returning zero rows also make the
+              // insert fail on the duplicate clerk_id). Don't strand a
+              // legitimately-onboarded user as 'volunteer' — fall back
+              // to their server-set Clerk metadata.
+              const fallbackUser = clerkMetadataFallbackUser(clerkUser);
+              if (fallbackUser) {
+                setUser(fallbackUser);
+                authService.setCurrentUser(fallbackUser);
+              }
             }
           }
         } else {
@@ -200,7 +241,14 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
           authService.setCurrentUser(mockUser);
         }
       } catch {
-        // User sync failed - will retry on next auth state change
+        // User sync threw (network/Supabase outage). Same reasoning as
+        // above: prefer the server-set Clerk metadata over degrading a
+        // real staff member to 'volunteer' until the next auth change.
+        const fallbackUser = clerkMetadataFallbackUser(clerkUser);
+        if (fallbackUser) {
+          setUser(fallbackUser);
+          authService.setCurrentUser(fallbackUser);
+        }
       }
 
       setIsLoading(false);
