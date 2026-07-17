@@ -14,6 +14,7 @@
  */
 import { createContext, useCallback, useContext, type ReactNode } from 'react';
 import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react';
+import { isDemoModeActive } from '../config/tenant';
 
 export interface PortalAuthContextValue {
   isLoaded: boolean;
@@ -32,7 +33,8 @@ export function usePortalAuth(): PortalAuthContextValue {
 }
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+// Hostname-derived, not a raw env var — see isDemoModeActive in config/tenant.ts.
+const isDemoModeEnabled = isDemoModeActive();
 
 function PortalAuthProviderInner({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useAuth();

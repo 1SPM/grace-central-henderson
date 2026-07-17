@@ -19,6 +19,7 @@ import { supabase, setClerkTokenProvider } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
 import { hasEnteredDemo, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
+import { isDemoModeActive } from '../config/tenant';
 
 // Default church ID for demo/fallback mode. When Supabase is configured but
 // Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
@@ -53,8 +54,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Get Clerk publishable key from environment
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if demo mode is explicitly enabled (security: fail closed)
-const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+// Demo mode is hostname-derived (see isDemoModeActive in config/tenant.ts) —
+// NOT a raw env var. A single shared env var toggled for the Faithful
+// Church demo tenant previously reopened the auth bypass for every other
+// domain this Vercel project serves, including real clients.
+const isDemoModeEnabled = isDemoModeActive();
 const isProduction = import.meta.env.PROD;
 
 // Hook to use auth context

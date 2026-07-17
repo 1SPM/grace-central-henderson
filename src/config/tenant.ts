@@ -103,3 +103,27 @@ export const TENANT_DEMO_ONBOARDING_SKIP = ACTIVE.demoOnboardingSkip;
 
 // Tenant-agnostic helper, re-exported so call sites need only this module.
 export { churchShortName };
+
+/**
+ * Whether the demo-mode auth bypass should be active for the current
+ * request. Derived from the resolved tenant (hostname-based, runtime),
+ * NOT read as a raw global env var — the earlier design used a single
+ * VITE_ENABLE_DEMO_MODE flag shared by every domain this one Vercel
+ * project serves, so turning it off to secure the real client
+ * (gracecrm-centralhenderson.org) also broke the Faithful Church demo
+ * tenant, and turning it back on for the demo tenant silently reopened
+ * the real client's auth bypass. Whoever edited the var last "won,"
+ * regardless of which tenant needed which behavior — a real production
+ * security incident, not a hypothetical.
+ *
+ * Demo mode is now permanently on for the known demo hosts (matching
+ * HOST_TENANTS below) and permanently off for every other production
+ * host, including any future real client domain — with no env var able
+ * to override that in production. VITE_ENABLE_DEMO_MODE is still
+ * honored for local development convenience only.
+ */
+export function isDemoModeActive(): boolean {
+  if (getTenant().id === 'faithful') return true;
+  if (import.meta.env.DEV) return import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+  return false;
+}
