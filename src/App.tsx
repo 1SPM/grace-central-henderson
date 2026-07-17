@@ -520,6 +520,7 @@ function App() {
       </div>
     );
   }
+  if (!isDemoModeEnabled && isClerkConfigured && !isSignedIn) { return <SignInPage />; }
 
   // Standalone GRACE Mobile (no admin sidebar/layout, staff-gated)
   if (isMobileRoute) {
