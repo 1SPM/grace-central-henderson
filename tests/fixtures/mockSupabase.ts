@@ -40,6 +40,7 @@ export function createMockSupabase(options: MockSupabaseOptions) {
       in: vi.fn(() => builder),
       is: vi.fn(() => builder),
       not: vi.fn(() => builder),
+      contains: vi.fn(() => builder),
       lt: vi.fn(() => builder),
       lte: vi.fn(() => builder),
       gt: vi.fn(() => builder),

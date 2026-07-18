@@ -58,7 +58,10 @@ export type PlatformEventType =
   | 'agent_finding.triaged'
   | 'agent_finding.dismissed'
   | 'agent_finding.resolved'
-  | 'agent_finding.converted';
+  | 'agent_finding.converted'
+  | 'tenant.hosts_updated'
+  | 'portal.member_provisioned'
+  | 'portal.demo_persona_seeded';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 

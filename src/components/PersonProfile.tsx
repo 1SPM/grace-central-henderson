@@ -21,6 +21,7 @@ import {
   X,
   Users,
   ExternalLink,
+  UserPlus,
 } from 'lucide-react';
 import { Person, Interaction, Task, Giving, SmallGroup, DiscipleshipMilestone, MilestoneType, CommunityPost } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
@@ -101,6 +102,28 @@ export function PersonProfile({
   const { has: hasWorkOsPermission } = useWorkOsPermissions();
   const [isPreviewLaunching, setIsPreviewLaunching] = useState(false);
   const [previewError, setPreviewError] = useState('');
+  const [showProvisionChoice, setShowProvisionChoice] = useState(false);
+  const [isProvisioning, setIsProvisioning] = useState(false);
+  const [provisionError, setProvisionError] = useState('');
+  const [provisionResult, setProvisionResult] = useState<{ mode: 'invite' | 'direct'; email: string } | null>(null);
+
+  const handleProvisionPortal = async (mode: 'invite' | 'direct') => {
+    setIsProvisioning(true);
+    setProvisionError('');
+    try {
+      const result = await workosFetch<{ mode: 'invite' | 'direct'; email: string }>(
+        '/api/people/provision-portal',
+        getAuthToken,
+        { method: 'POST', body: JSON.stringify({ person_id: person.id, mode }) },
+      );
+      setProvisionResult(result);
+      setShowProvisionChoice(false);
+    } catch (err) {
+      setProvisionError(err instanceof WorkOsApiError ? err.message : 'Could not set up the portal account.');
+    } finally {
+      setIsProvisioning(false);
+    }
+  };
 
   const handlePreviewPortal = async () => {
     setIsPreviewLaunching(true);
@@ -357,7 +380,7 @@ export function PersonProfile({
                 </div>
                 {/* Quick Communication Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {person.portalEnabled && hasWorkOsPermission('portal.preview_as_member') && (
+                  {(person.portalEnabled || !!provisionResult) && hasWorkOsPermission('portal.preview_as_member') && (
                     <button
                       onClick={handlePreviewPortal}
                       disabled={isPreviewLaunching}
@@ -367,6 +390,42 @@ export function PersonProfile({
                       {isPreviewLaunching ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
                       Preview Members Portal
                     </button>
+                  )}
+                  {!person.portalEnabled && !provisionResult && hasWorkOsPermission('portal.provision_member') && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowProvisionChoice(v => !v)}
+                        disabled={isProvisioning}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 disabled:opacity-60"
+                        title="Set up a Members Portal account for this person"
+                      >
+                        {isProvisioning ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+                        Set up portal account
+                      </button>
+                      {showProvisionChoice && (
+                        <div className="absolute z-10 top-full left-0 mt-1 w-64 rounded-lg border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 p-2 shadow-lg space-y-1">
+                          <button
+                            onClick={() => void handleProvisionPortal('invite')}
+                            disabled={isProvisioning || !person.email}
+                            className="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 disabled:opacity-50"
+                          >
+                            <span className="font-medium text-gray-900 dark:text-dark-100">Send invite email</span>
+                            <span className="block text-gray-500 dark:text-dark-400">They click a link to activate their own account.</span>
+                          </button>
+                          <button
+                            onClick={() => void handleProvisionPortal('direct')}
+                            disabled={isProvisioning || !person.email}
+                            className="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 disabled:opacity-50"
+                          >
+                            <span className="font-medium text-gray-900 dark:text-dark-100">Activate directly</span>
+                            <span className="block text-gray-500 dark:text-dark-400">Account is ready now; they sign in via "forgot password."</span>
+                          </button>
+                          {!person.email && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 px-2">Add an email address first.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                   {person.email && onSendEmail && (
                     <button
@@ -415,6 +474,16 @@ export function PersonProfile({
                 </div>
                 {previewError && (
                   <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{previewError}</p>
+                )}
+                {provisionError && (
+                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{provisionError}</p>
+                )}
+                {provisionResult && (
+                  <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-400">
+                    {provisionResult.mode === 'direct'
+                      ? <>Portal account ready for <strong>{provisionResult.email}</strong> — they sign in via "forgot password" on the sign-in page.</>
+                      : <>Invite sent to <strong>{provisionResult.email}</strong> — they'll activate their account from the link in that email.</>}
+                  </p>
                 )}
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">

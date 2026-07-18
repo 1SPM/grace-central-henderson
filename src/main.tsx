@@ -25,6 +25,25 @@ if (ACTIVE_TENANT.id !== 'centralHenderson') {
   if (brand) {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', brand);
   }
+} else if (typeof window !== 'undefined') {
+  // Unknown/unmapped host — check whether some church has registered it
+  // as a custom domain (Settings → Custom domains). Cosmetic only: this
+  // never changes which church's data a session can see (that's the JWT
+  // church_id claim on every authenticated route) — it only overlays
+  // branding for a host neither HOST_TENANTS nor the demo-bypass map
+  // knows about yet. Best-effort, never blocks render.
+  const host = window.location.hostname;
+  if (host !== 'localhost' && host !== '127.0.0.1') {
+    fetch(`/api/tenant/config?host=${encodeURIComponent(host)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { church_name?: string | null; branding?: { primaryColor?: string; logoUrl?: string } } | null) => {
+        const brand = data?.branding?.primaryColor;
+        if (brand) {
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', brand);
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 // Init Sentry first so anything thrown during setup is captured.
