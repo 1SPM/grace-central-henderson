@@ -33,11 +33,15 @@ describe('ExecutiveOverview (component test)', () => {
   afterEach(() => { vi.unstubAllGlobals(); });
 
   it('renders a real metric value, not a placeholder', async () => {
-    fetchMock.mockImplementation((url: string) =>
-      url.includes('/api/workos/summary')
-        ? Promise.resolve(jsonResponse({ generated_at: '2026-07-13T12:00:00.000Z', metrics: [SAMPLE_METRIC] }))
-        : Promise.resolve(jsonResponse({})),
-    );
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/workos/summary')) {
+        return Promise.resolve(jsonResponse({ generated_at: '2026-07-13T12:00:00.000Z', metrics: [SAMPLE_METRIC] }));
+      }
+      if (url.includes('/api/workos/decision-queue')) {
+        return Promise.resolve(jsonResponse({ items: [], counts: { total: 0, critical: 0, by_kind: {} } }));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
 
     render(<ExecutiveOverview setView={() => {}} />);
 
@@ -47,11 +51,15 @@ describe('ExecutiveOverview (component test)', () => {
   });
 
   it('reveals definition, period, source, and last-updated when the info icon is clicked', async () => {
-    fetchMock.mockImplementation((url: string) =>
-      url.includes('/api/workos/summary')
-        ? Promise.resolve(jsonResponse({ generated_at: '2026-07-13T12:00:00.000Z', metrics: [SAMPLE_METRIC] }))
-        : Promise.resolve(jsonResponse({})),
-    );
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/workos/summary')) {
+        return Promise.resolve(jsonResponse({ generated_at: '2026-07-13T12:00:00.000Z', metrics: [SAMPLE_METRIC] }));
+      }
+      if (url.includes('/api/workos/decision-queue')) {
+        return Promise.resolve(jsonResponse({ items: [], counts: { total: 0, critical: 0, by_kind: {} } }));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
 
     render(<ExecutiveOverview setView={() => {}} />);
 

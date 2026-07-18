@@ -109,6 +109,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'work-orders/completion-report': () => import('./work-orders/_completion-report.js'),
   'workos/permissions': () => import('./workos/_permissions.js'),
   'workos/summary': () => import('./workos/_summary.js'),
+  'workos/decision-queue': () => import('./workos/_decision-queue.js'),
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

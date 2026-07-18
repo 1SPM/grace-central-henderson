@@ -33,6 +33,7 @@ import { TENANT_TIMEZONE, churchShortName } from '../config/tenant';
 import { GraceOrb } from './grace/GraceOrb';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
+import { useDecisionQueue } from '../hooks/useDecisionQueue';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
 
@@ -179,6 +180,7 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
   const grace = useGraceChat();
   const { user, signOut } = useAuthContext();
+  const { counts: decisionQueueCounts } = useDecisionQueue();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
   const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
@@ -393,6 +395,17 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         {item.icon}
                       </span>
                       <span className={sidebarCollapsed ? 'lg:hidden' : ''}>{item.label}</span>
+                      {item.view === 'workos' && decisionQueueCounts.total > 0 && (
+                        <span
+                          className={`ml-auto text-[10.5px] px-1.5 py-0.5 rounded-full font-semibold ${sidebarCollapsed ? 'lg:hidden' : ''} ${
+                            decisionQueueCounts.critical > 0
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-gray-200 text-gray-700 dark:bg-dark-700 dark:text-dark-200'
+                          }`}
+                        >
+                          {decisionQueueCounts.total}
+                        </span>
+                      )}
 
                       {/* Tooltip for collapsed state */}
                       {sidebarCollapsed && (
