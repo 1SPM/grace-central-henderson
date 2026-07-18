@@ -404,3 +404,114 @@ describe('resolveMemberActor — tenant isolation', () => {
     expect(actor!.churchId).not.toBe(FIXTURE_OTHER_CHURCH_ID);
   });
 });
+
+function makePreviewReq(token: string, method: 'GET' | 'POST' = 'GET') {
+  return {
+    method,
+    headers: { authorization: `Bearer ${token}` },
+  } as unknown as import('@vercel/node').VercelRequest;
+}
+
+describe('resolveMemberActor — staff preview token (read-only)', () => {
+  it('rejects a non-GET request before ever touching the database', async () => {
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({ tables: {} });
+    const res = makeRes();
+
+    const actor = await resolveMemberActor(makePreviewReq('pvt_abc123', 'POST'), res, supabase as never);
+
+    expect(actor).toBeNull();
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'preview_mode_read_only' }));
+    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it('never attempts Clerk verification for a preview-prefixed bearer token', async () => {
+    const { verifyToken } = await import('@clerk/backend');
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        portal_preview_tokens: () => ({
+          data: { id: 'tok-1', church_id: FIXTURE_CHURCH_ID, person_id: FIXTURE_PERSON.id, expires_at: new Date(Date.now() + 60_000).toISOString(), use_count: 0 },
+        }),
+        people: () => ({ data: { id: FIXTURE_PERSON.id, clerk_user_id: FIXTURE_PERSON.clerk_user_id } }),
+      },
+    });
+
+    const callsBefore = (verifyToken as ReturnType<typeof vi.fn>).mock.calls.length;
+    await resolveMemberActor(makePreviewReq('pvt_abc123'), makeRes(), supabase as never);
+
+    // verifyToken's call count is shared across this whole test file (the
+    // mock isn't reset between tests) — assert it didn't grow, not that
+    // it's zero.
+    expect((verifyToken as ReturnType<typeof vi.fn>).mock.calls.length).toBe(callsBefore);
+  });
+
+  it('401s an expired preview token', async () => {
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        portal_preview_tokens: () => ({
+          data: { id: 'tok-1', church_id: FIXTURE_CHURCH_ID, person_id: FIXTURE_PERSON.id, expires_at: new Date(Date.now() - 60_000).toISOString(), use_count: 0 },
+        }),
+      },
+    });
+    const res = makeRes();
+
+    const actor = await resolveMemberActor(makePreviewReq('pvt_expired'), res, supabase as never);
+
+    expect(actor).toBeNull();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'preview_token_invalid_or_expired' }));
+  });
+
+  it('401s a token that does not exist', async () => {
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: { portal_preview_tokens: () => ({ data: null }) },
+    });
+    const res = makeRes();
+
+    const actor = await resolveMemberActor(makePreviewReq('pvt_nonexistent'), res, supabase as never);
+
+    expect(actor).toBeNull();
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('resolves a valid token to the target member, flagged isPreview', async () => {
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        portal_preview_tokens: () => ({
+          data: { id: 'tok-1', church_id: FIXTURE_CHURCH_ID, person_id: FIXTURE_PERSON.id, expires_at: new Date(Date.now() + 60_000).toISOString(), use_count: 0 },
+        }),
+        people: () => ({ data: { id: FIXTURE_PERSON.id, clerk_user_id: FIXTURE_PERSON.clerk_user_id } }),
+      },
+    });
+
+    const actor = await resolveMemberActor(makePreviewReq('pvt_valid'), makeRes(), supabase as never);
+
+    expect(actor).not.toBeNull();
+    expect(actor!.personId).toBe(FIXTURE_PERSON.id);
+    expect(actor!.churchId).toBe(FIXTURE_CHURCH_ID);
+    expect(actor!.isPreview).toBe(true);
+  });
+
+  it('stamps use_count/last_used_at on the token row when resolved', async () => {
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        portal_preview_tokens: () => ({
+          data: { id: 'tok-1', church_id: FIXTURE_CHURCH_ID, person_id: FIXTURE_PERSON.id, expires_at: new Date(Date.now() + 60_000).toISOString(), use_count: 2 },
+        }),
+        people: () => ({ data: { id: FIXTURE_PERSON.id, clerk_user_id: FIXTURE_PERSON.clerk_user_id } }),
+      },
+    });
+
+    await resolveMemberActor(makePreviewReq('pvt_valid'), makeRes(), supabase as never);
+
+    const updateCall = supabase.__calls.find(c => c.table === 'portal_preview_tokens' && c.op === 'update');
+    expect(updateCall).toBeDefined();
+    expect((updateCall!.payload as { use_count: number }).use_count).toBe(3);
+  });
+});

@@ -20,10 +20,14 @@ import {
   Check,
   X,
   Users,
+  ExternalLink,
 } from 'lucide-react';
 import { Person, Interaction, Task, Giving, SmallGroup, DiscipleshipMilestone, MilestoneType, CommunityPost } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useIntegrations } from '../contexts/IntegrationsContext';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
+import { workosFetch, WorkOsApiError } from '../lib/services/workos';
 import { PersonGivingHistory } from './PersonGivingHistory';
 import { DiscipleshipTimeline } from './DiscipleshipTimeline';
 import { escapeHtml } from '../utils/security';
@@ -93,6 +97,28 @@ export function PersonProfile({
   churchId,
 }: PersonProfileProps) {
   const { status: integrationStatus, sendEmail, sendSMS } = useIntegrations();
+  const { getAuthToken } = useAuthContext();
+  const { has: hasWorkOsPermission } = useWorkOsPermissions();
+  const [isPreviewLaunching, setIsPreviewLaunching] = useState(false);
+  const [previewError, setPreviewError] = useState('');
+
+  const handlePreviewPortal = async () => {
+    setIsPreviewLaunching(true);
+    setPreviewError('');
+    try {
+      const result = await workosFetch<{ portal_url: string }>(
+        '/api/people/preview-portal-token',
+        getAuthToken,
+        { method: 'POST', body: JSON.stringify({ person_id: person.id }) },
+      );
+      window.open(result.portal_url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setPreviewError(err instanceof WorkOsApiError ? err.message : 'Could not open the portal preview.');
+    } finally {
+      setIsPreviewLaunching(false);
+    }
+  };
+
   const impactCardProgram = useImpactCardProgram();
   const memberCards = impactCardProgram.data ? getMemberCards(impactCardProgram.data, person.id) : [];
   const liveCard = memberCards.find(c => c.status === 'active' || c.status === 'frozen');
@@ -331,6 +357,17 @@ export function PersonProfile({
                 </div>
                 {/* Quick Communication Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {person.portalEnabled && hasWorkOsPermission('portal.preview_as_member') && (
+                    <button
+                      onClick={handlePreviewPortal}
+                      disabled={isPreviewLaunching}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 disabled:opacity-60"
+                      title="Open a read-only preview of this member's Members Portal experience"
+                    >
+                      {isPreviewLaunching ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
+                      Preview Members Portal
+                    </button>
+                  )}
                   {person.email && onSendEmail && (
                     <button
                       onClick={onSendEmail}
@@ -376,6 +413,9 @@ export function PersonProfile({
                     </a>
                   )}
                 </div>
+                {previewError && (
+                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{previewError}</p>
+                )}
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 text-gray-600 dark:text-dark-300">

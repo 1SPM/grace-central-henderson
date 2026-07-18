@@ -20,6 +20,14 @@ export interface PortalAuthContextValue {
   isLoaded: boolean;
   isSignedIn: boolean;
   isDemo: boolean;
+  /** True when this session is a staff-issued, read-only portal preview
+   * (see api/people/_preview-portal-token.ts) rather than the member's
+   * own sign-in. The portal UI shows a persistent banner and every
+   * mutating request is rejected server-side regardless of what the UI
+   * does — this flag exists for UX (disabling write affordances), not
+   * as the security control. */
+  isPreview: boolean;
+  previewPersonName: string | null;
   memberFirstName: string | null;
   getAuthToken: () => Promise<string | null>;
 }
@@ -57,6 +65,8 @@ function PortalAuthProviderInner({ children }: { children: ReactNode }) {
     isLoaded,
     isSignedIn: !!isSignedIn,
     isDemo: false,
+    isPreview: false,
+    previewPersonName: null,
     memberFirstName: user?.firstName ?? null,
     getAuthToken,
   };
@@ -73,6 +83,8 @@ function PortalAuthProviderDemo({ children }: { children: ReactNode }) {
     isLoaded: true,
     isSignedIn: true,
     isDemo: true,
+    isPreview: false,
+    previewPersonName: null,
     memberFirstName: null, // resolved server-side from the demo person row instead
     getAuthToken: async () => null,
   };
@@ -84,13 +96,58 @@ function PortalAuthProviderBlocked({ children }: { children: ReactNode }) {
     isLoaded: true,
     isSignedIn: false,
     isDemo: false,
+    isPreview: false,
+    previewPersonName: null,
     memberFirstName: null,
     getAuthToken: async () => null,
   };
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
 }
 
+/** Staff-issued read-only preview session — no Clerk involved at all. The
+ * token itself is the credential; api/_lib/authz.ts's resolveMemberActor
+ * validates it server-side on every request and rejects anything but GET. */
+function PortalAuthProviderPreview({
+  token,
+  personName,
+  children,
+}: {
+  token: string;
+  personName: string | null;
+  children: ReactNode;
+}) {
+  const value: PortalAuthContextValue = {
+    isLoaded: true,
+    isSignedIn: true,
+    isDemo: false,
+    isPreview: true,
+    previewPersonName: personName,
+    memberFirstName: personName,
+    getAuthToken: async () => token,
+  };
+  return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
+}
+
+function getPreviewParamsFromUrl(): { token: string; personName: string | null } | null {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('preview_token');
+    if (!token) return null;
+    return { token, personName: params.get('preview_name') };
+  } catch {
+    return null;
+  }
+}
+
 export function PortalAuthProvider({ children }: { children: ReactNode }) {
+  const preview = getPreviewParamsFromUrl();
+  if (preview) {
+    return (
+      <PortalAuthProviderPreview token={preview.token} personName={preview.personName}>
+        {children}
+      </PortalAuthProviderPreview>
+    );
+  }
   if (isDemoModeEnabled) {
     return <PortalAuthProviderDemo>{children}</PortalAuthProviderDemo>;
   }

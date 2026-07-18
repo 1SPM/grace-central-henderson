@@ -19,6 +19,7 @@ export interface Person {
   tags: string[];
   smallGroups: string[];
   familyId?: string;
+  portalEnabled?: boolean;
 }
 
 export interface Interaction {

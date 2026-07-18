@@ -31,11 +31,28 @@ function PortalSignIn() {
   );
 }
 
+function PreviewBanner({ personName }: { personName: string | null }) {
+  return (
+    <div className="bg-amber-500 text-amber-950 text-sm font-medium text-center py-2 px-4 sticky top-0 z-50">
+      Staff Preview — viewing as {personName ?? 'this member'} (read-only)
+    </div>
+  );
+}
+
 function PortalGate() {
-  const { isLoaded, isSignedIn, isDemo } = usePortalAuth();
+  const { isLoaded, isSignedIn, isDemo, isPreview, previewPersonName } = usePortalAuth();
 
   if (!isLoaded) return <PortalLoading />;
   if (!isSignedIn && !isDemo) return <PortalSignIn />;
+
+  if (isPreview) {
+    return (
+      <>
+        <PreviewBanner personName={previewPersonName} />
+        <PortalShell />
+      </>
+    );
+  }
 
   return <PortalShell />;
 }

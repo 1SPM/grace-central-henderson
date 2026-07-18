@@ -82,6 +82,12 @@ export interface MemberActor {
   personId: string;
   clerkUserId: string;
   churchId: string;
+  /** True when this actor was resolved from a staff-issued preview token
+   * (see resolveMemberActor below) rather than the member's own Clerk
+   * session. resolveMemberActor already blocks non-GET requests for
+   * preview actors, but callers with additional side effects beyond a
+   * simple write (e.g. sending an email) should still check this. */
+  isPreview?: boolean;
 }
 
 /**
@@ -310,6 +316,13 @@ export async function resolveMemberActor(
     return resolveDemoMemberActor(req, res, supabase);
   }
 
+  const bearer = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice(7)
+    : null;
+  if (bearer?.startsWith(PREVIEW_TOKEN_PREFIX)) {
+    return resolvePreviewMemberActor(req, res, supabase, bearer);
+  }
+
   const auth = await requireClerkAuth(req);
   if (!auth.ok) {
     res.status(auth.status).json({ error: auth.error });
@@ -337,6 +350,74 @@ export async function resolveMemberActor(
     personId: personRow.id,
     clerkUserId: auth.clerkUserId,
     churchId: auth.churchId,
+  };
+}
+
+// Distinguishes staff-issued preview tokens (opaque random strings) from
+// real Clerk JWTs on sight, so resolveMemberActor doesn't waste a Clerk
+// verification round-trip on something that was never going to be one.
+export const PREVIEW_TOKEN_PREFIX = 'pvt_';
+
+/**
+ * Resolves a staff-issued "preview as member" token (see
+ * api/people/_preview-portal-token.ts) to the target member's actor.
+ * Read-only by design: any non-GET request is rejected here, before it
+ * ever reaches a route's mutation logic, so no portal route needs its
+ * own preview-mode check. Tokens are short-lived and scoped to one
+ * person; every successful resolution is stamped (first/last used,
+ * use_count) for the audit trail, but the token itself stays valid
+ * until it expires — a preview session makes many GET requests across
+ * several portal pages, not just one.
+ */
+async function resolvePreviewMemberActor(
+  req: VercelRequest,
+  res: VercelResponse,
+  supabase: SupabaseClient,
+  token: string,
+): Promise<MemberActor | null> {
+  if (req.method !== 'GET') {
+    res.status(403).json({ error: 'preview_mode_read_only' });
+    return null;
+  }
+
+  const { data: row } = await supabase
+    .from('portal_preview_tokens')
+    .select('id, church_id, person_id, expires_at, use_count')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (!row || new Date(row.expires_at as string) < new Date()) {
+    res.status(401).json({ error: 'preview_token_invalid_or_expired' });
+    return null;
+  }
+
+  const { data: person } = await supabase
+    .from('people')
+    .select('id, clerk_user_id')
+    .eq('id', row.person_id as string)
+    .eq('church_id', row.church_id as string)
+    .maybeSingle();
+  if (!person) {
+    res.status(404).json({ error: 'preview_target_not_found' });
+    return null;
+  }
+
+  const now = new Date().toISOString();
+  await supabase
+    .from('portal_preview_tokens')
+    .update({
+      last_used_at: now,
+      first_used_at: row.use_count === 0 ? now : undefined,
+      use_count: (row.use_count as number) + 1,
+    })
+    .eq('id', row.id as string);
+
+  return {
+    kind: 'member',
+    personId: person.id,
+    clerkUserId: (person.clerk_user_id as string) ?? '',
+    churchId: row.church_id as string,
+    isPreview: true,
   };
 }
 
