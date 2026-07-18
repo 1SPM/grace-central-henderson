@@ -147,7 +147,7 @@ function App() {
     deleteEvent,
     attendance: dbAttendance,
     checkIn,
-  } = useSupabaseData();
+  } = useSupabaseData(isLoaded);
 
   // Convert to legacy types for existing components (memoized)
   const people = useMemo(() => dbPeople.map(p => {
