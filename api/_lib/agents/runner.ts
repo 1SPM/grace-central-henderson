@@ -289,6 +289,46 @@ async function loadRecentDedupKeys(
   return keys;
 }
 
+/**
+ * Due-date horizon by severity: an urgent observation surfaces at the
+ * top of tomorrow's list, attention within a few days, info within a
+ * week. tasks.due_date is NOT NULL with no default (migration 001) —
+ * omitting it made every task-sink observation fail to persist, which
+ * went unnoticed for the entire life of this runner because the cron
+ * that drives it had never successfully fired (caught 2026-07-18, on
+ * the first real run after the cron-auth fix).
+ */
+export function taskDueDateForObservation(
+  severity: AgentObservation['severity'],
+  now: Date = new Date(),
+): string {
+  const days = severity === 'urgent' ? 1 : severity === 'attention' ? 3 : 7;
+  return new Date(now.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * tasks.category is CHECK-constrained to four canonical values
+ * (migration 001: follow-up | care | admin | outreach) — the previous
+ * `agent:<id>` value violated that constraint on every insert (same
+ * never-ran-cron blind spot as due_date above). Map each agent onto
+ * the closest canonical category; agent attribution still lives in
+ * agent_logs.metadata and the task description.
+ */
+export function taskCategoryForAgent(agentId: string): 'follow-up' | 'care' | 'admin' | 'outreach' {
+  switch (agentId) {
+    case 'member-care':
+    case 'crisis-escalation':
+      return 'care';
+    case 'portal-engagement':
+      return 'outreach';
+    case 'operations':
+    case 'card-ops':
+      return 'admin';
+    default:
+      return 'follow-up'; // stewardship + any future agent
+  }
+}
+
 async function persistObservation(
   supabase: SupabaseClient,
   churchId: string,
@@ -298,30 +338,37 @@ async function persistObservation(
     if (obs.outputSink === 'task') {
       // Schema mapping: prod tasks table uses `completed` (boolean) +
       // `category` text; no `status`, `source`, or `metadata` columns.
-      // We embed observation kind into category prefix so the existing
-      // task UI can filter by category. Dedup key still lives in
-      // agent_logs.metadata so dedup works regardless.
+      // Dedup key lives in agent_logs.metadata so dedup works regardless.
       const { error } = await supabase.from('tasks').insert({
         church_id: churchId,
         title: obs.title,
         description: obs.detail,
+        due_date: taskDueDateForObservation(obs.severity),
         priority: obs.severity === 'urgent' ? 'high' : obs.severity === 'attention' ? 'medium' : 'low',
-        category: `agent:${obs.agentId}`,
+        category: taskCategoryForAgent(obs.agentId),
         completed: false,
         person_id: obs.personId ?? null,
       });
       if (error) throw new Error(`tasks insert: ${error.message}`);
     } else if (obs.outputSink === 'interaction') {
-      // Schema mapping: prod interactions uses `content` not `notes`,
-      // no `metadata` column. Embed the full context into content.
-      const { error } = await supabase.from('interactions').insert({
-        church_id: churchId,
-        person_id: obs.personId ?? null,
-        type: 'agent_observation',
-        content: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
-        created_by_name: `agent:${obs.agentId}`,
-      });
-      if (error) throw new Error(`interactions insert: ${error.message}`);
+      // Schema mapping: prod interactions uses `content` not `notes`, no
+      // `metadata` column, person_id NOT NULL, and type CHECK-constrained
+      // to note|call|email|visit|text|prayer (migration 001) — the
+      // previous 'agent_observation' type violated that check on every
+      // insert. An agent observation is a note; attribution lives in
+      // created_by_name and the content prefix.
+      if (obs.personId) {
+        const { error } = await supabase.from('interactions').insert({
+          church_id: churchId,
+          person_id: obs.personId,
+          type: 'note',
+          content: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
+          created_by_name: `agent:${obs.agentId}`,
+        });
+        if (error) throw new Error(`interactions insert: ${error.message}`);
+      }
+      // No personId → nothing to attach an interaction to; the
+      // agent_logs entry below still records the observation.
     }
     // Always write the agent_log entry (the dedup index).
     await supabase.from('agent_logs').insert({

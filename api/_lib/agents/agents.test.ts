@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { memberCareAgent } from './member-care.js';
 import { stewardshipAgent } from './stewardship.js';
 import { operationsAgent } from './operations.js';
-import { listChurchesWithAgents } from './runner.js';
+import { listChurchesWithAgents, taskDueDateForObservation, taskCategoryForAgent } from './runner.js';
 import { DEFAULT_AGENT_SETTINGS, type AgentInput } from './types.js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -349,5 +349,54 @@ describe('agents/listChurchesWithAgents', () => {
     }];
     const out = await listChurchesWithAgents(mockSupabase(rows, ['c1']));
     expect(out).toContain('c1');
+  });
+});
+
+// ============================================
+// TASK SINK CONSTRAINT MAPPING
+// (tasks.due_date NOT NULL + tasks_category_check — regression tests
+// for the 100%-persist-failure caught on the first real cron run,
+// 2026-07-18)
+// ============================================
+
+describe('taskDueDateForObservation', () => {
+  it('urgent → 1 day out', () => {
+    expect(taskDueDateForObservation('urgent', NOW)).toBe('2026-05-26');
+  });
+
+  it('attention → 3 days out', () => {
+    expect(taskDueDateForObservation('attention', NOW)).toBe('2026-05-28');
+  });
+
+  it('info → 7 days out', () => {
+    expect(taskDueDateForObservation('info', NOW)).toBe('2026-06-01');
+  });
+
+  it('always returns a YYYY-MM-DD string — never null/undefined (due_date is NOT NULL)', () => {
+    for (const severity of ['urgent', 'attention', 'info'] as const) {
+      expect(taskDueDateForObservation(severity)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+});
+
+describe('taskCategoryForAgent', () => {
+  const ALLOWED = ['follow-up', 'care', 'admin', 'outreach'];
+
+  it('maps every known agent onto a tasks_category_check-allowed value', () => {
+    for (const agentId of ['member-care', 'stewardship', 'operations', 'portal-engagement', 'card-ops', 'crisis-escalation']) {
+      expect(ALLOWED).toContain(taskCategoryForAgent(agentId));
+    }
+  });
+
+  it('care agents map to care, ops agents to admin, portal to outreach', () => {
+    expect(taskCategoryForAgent('member-care')).toBe('care');
+    expect(taskCategoryForAgent('crisis-escalation')).toBe('care');
+    expect(taskCategoryForAgent('operations')).toBe('admin');
+    expect(taskCategoryForAgent('card-ops')).toBe('admin');
+    expect(taskCategoryForAgent('portal-engagement')).toBe('outreach');
+  });
+
+  it('an unknown/future agent falls back to follow-up rather than an invalid value', () => {
+    expect(taskCategoryForAgent('some-future-agent')).toBe('follow-up');
   });
 });
