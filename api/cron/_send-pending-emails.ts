@@ -9,7 +9,10 @@
  * to 5 attempts; after that the row stays 'failed' permanently with
  * last_error populated so an operator can inspect via Supabase Studio.
  *
- * Auth: CRON_SECRET header (matches the existing Sprint 2/3/5 crons).
+ * Auth: Bearer CRON_SECRET only — see api/_lib/cronAuth.ts for why the
+ * x-vercel-cron header is not trusted, and why a missing secret 503s
+ * instead of running unauthenticated (this route previously failed
+ * OPEN when CRON_SECRET was unset; fixed 2026-07-18 review).
  *
  * Idempotency: queueEmail() de-dups at insert time via the unique
  * index on idempotency_key. The drain itself is naturally idempotent —
@@ -24,21 +27,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { drainOutbox } from '../_lib/email/queue.js';
 import { recordCronRun } from '../_lib/cron-runs.js';
+import { requireCronAuth } from '../_lib/cronAuth.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (requireCronAuth(req, res) !== null) return;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'supabase_not_configured' });
-  }
-
-  // Cron auth — either Vercel's automated header or our CRON_SECRET match
-  const cronHeader = req.headers['x-vercel-cron'] ?? req.headers.authorization;
-  const expected = CRON_SECRET ? `Bearer ${CRON_SECRET}` : null;
-  if (expected && cronHeader !== expected && req.headers['x-vercel-cron'] !== '1') {
-    return res.status(401).json({ error: 'unauthorized' });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);

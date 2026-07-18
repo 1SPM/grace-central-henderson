@@ -12,8 +12,8 @@
  * user may get a duplicate digest, which is far preferable to silently
  * dropping a real event.
  *
- * Auth: x-vercel-cron header OR Bearer CRON_SECRET, same pattern as
- * api/cron/_agents.ts.
+ * Auth: Bearer CRON_SECRET only — see api/_lib/cronAuth.ts for why the
+ * x-vercel-cron header is not trusted.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -21,19 +21,12 @@ import { createClient } from '@supabase/supabase-js';
 import { groupEventsForDigest, type DigestEvent, type NotificationPref } from '../_lib/notificationDigest.js';
 import { sendViaResend } from '../_lib/email/resend.js';
 import { recordCronRun } from '../_lib/cron-runs.js';
+import { requireCronAuth } from '../_lib/cronAuth.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
 const CURSOR_JOB = 'notify';
 const MAX_EVENTS_PER_RUN = 2000;
-
-function isAuthorized(req: VercelRequest): boolean {
-  if (req.headers['x-vercel-cron']) return true;
-  const auth = req.headers.authorization;
-  if (CRON_SECRET && auth === `Bearer ${CRON_SECRET}`) return true;
-  return false;
-}
 
 function buildDigestEmail(events: DigestEvent[]): { subject: string; html: string } {
   const byCategory = new Map<string, number>();
@@ -51,7 +44,7 @@ function buildDigestEmail(events: DigestEvent[]): { subject: string; html: strin
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'unauthorized' });
+  if (requireCronAuth(req, res) !== null) return;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'supabase not configured' });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });

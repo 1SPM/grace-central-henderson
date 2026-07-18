@@ -8,8 +8,8 @@
  * pipeline and persists observations. Per-church failures are
  * captured into the summary; one bad church doesn't abort the run.
  *
- * Auth: x-vercel-cron header OR Bearer CRON_SECRET. Matches the
- * pattern from api/cron/ai-anomaly.ts and api/cron/reconcile-stripe.ts.
+ * Auth: Bearer CRON_SECRET only — see api/_lib/cronAuth.ts for why the
+ * x-vercel-cron header is not trusted.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -18,20 +18,13 @@ import { listChurchesWithAgents, runAgentsForChurch, type RunResult } from '../_
 import { runMessagingAgentsForChurch, type MessagingRunResult } from '../_lib/agents/messaging.js';
 import { snapshotHealthForChurch } from '../_lib/healthSnapshot.js';
 import { recordCronRun } from '../_lib/cron-runs.js';
+import { requireCronAuth } from '../_lib/cronAuth.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
-
-function isAuthorized(req: VercelRequest): boolean {
-  if (req.headers['x-vercel-cron']) return true;
-  const auth = req.headers.authorization;
-  if (CRON_SECRET && auth === `Bearer ${CRON_SECRET}`) return true;
-  return false;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'unauthorized' });
+  if (requireCronAuth(req, res) !== null) return;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'supabase not configured' });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
