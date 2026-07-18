@@ -158,4 +158,82 @@ describe('PUT /api/workos/notification-prefs', () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
   });
+
+  it('de-dups duplicate category:channel pairs in one payload, last entry wins, so the upsert never sees a repeat', async () => {
+    const handler = (await import('./_notification-prefs.js')).default;
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
+        user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
+        role_permissions: () => ({ data: [] }),
+        staff_notification_prefs: () => ({ data: [{ category: 'crisis', channel: 'email', enabled: true }] }),
+        platform_events: () => ({ data: { id: 'fixture-platform-event-id' } }),
+      },
+    });
+    const { createClient } = await import('@supabase/supabase-js');
+    vi.mocked(createClient).mockReturnValue(supabase as never);
+
+    const res = makeRes();
+    await handler(
+      makeReq('PUT', {
+        prefs: [
+          { category: 'crisis', channel: 'email', enabled: false },
+          { category: 'crisis', channel: 'email', enabled: true },
+        ],
+      }),
+      res,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const upsertCalls = supabase.__calls.filter(c => c.table === 'staff_notification_prefs' && c.op === 'upsert');
+    expect(upsertCalls).toHaveLength(1);
+    const payload = upsertCalls[0].payload as Array<Record<string, unknown>>;
+    expect(payload).toHaveLength(1);
+    expect(payload[0].enabled).toBe(true);
+  });
+
+  it('phone: null explicitly clears the stored phone', async () => {
+    const handler = (await import('./_notification-prefs.js')).default;
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
+        user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
+        role_permissions: () => ({ data: [] }),
+        staff_notification_prefs: () => ({ data: [{ category: 'crisis', channel: 'email', enabled: true }] }),
+        platform_events: () => ({ data: { id: 'fixture-platform-event-id' } }),
+      },
+    });
+    const { createClient } = await import('@supabase/supabase-js');
+    vi.mocked(createClient).mockReturnValue(supabase as never);
+
+    const res = makeRes();
+    await handler(makeReq('PUT', { prefs: [{ category: 'crisis', channel: 'email', enabled: true }], phone: null }), res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const userUpdateCalls = supabase.__calls.filter(c => c.table === 'users' && c.op === 'update');
+    expect(userUpdateCalls).toHaveLength(1);
+    expect(userUpdateCalls[0].payload).toEqual({ phone: null });
+  });
+
+  it('an absent phone field leaves the stored phone unchanged', async () => {
+    const handler = (await import('./_notification-prefs.js')).default;
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
+        user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
+        role_permissions: () => ({ data: [] }),
+        staff_notification_prefs: () => ({ data: [{ category: 'crisis', channel: 'email', enabled: true }] }),
+        platform_events: () => ({ data: { id: 'fixture-platform-event-id' } }),
+      },
+    });
+    const { createClient } = await import('@supabase/supabase-js');
+    vi.mocked(createClient).mockReturnValue(supabase as never);
+
+    const res = makeRes();
+    await handler(makeReq('PUT', { prefs: [{ category: 'crisis', channel: 'email', enabled: true }] }), res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const userUpdateCalls = supabase.__calls.filter(c => c.table === 'users' && c.op === 'update');
+    expect(userUpdateCalls).toHaveLength(0);
+  });
 });

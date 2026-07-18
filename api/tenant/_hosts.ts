@@ -51,6 +51,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!body) return;
 
     const hosts = (body.hosts ?? []).map(h => h.toLowerCase());
+    const HOSTNAME_SHAPE = /^[a-z0-9.-]+$/;
+    if (hosts.some(h => !HOSTNAME_SHAPE.test(h))) {
+      return res.status(400).json({ error: 'invalid_host_shape' });
+    }
+
+    if (hosts.length > 0) {
+      // Advisory only — two concurrent PUTs from different churches
+      // could still race between this check and the update below.
+      // Acceptable: the loser just needs to retry after the 409.
+      const { data: conflicts } = await supabase
+        .from('churches')
+        .select('id, hosts')
+        .neq('id', actor.churchId)
+        .overlaps('hosts', hosts);
+      if (conflicts && conflicts.length > 0) {
+        return res.status(409).json({ error: 'host_already_claimed' });
+      }
+    }
 
     const { data: existing } = await supabase
       .from('churches')

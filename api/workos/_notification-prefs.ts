@@ -89,14 +89,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!isValidPrefsArray(prefs)) {
       return res.status(400).json({ error: 'invalid_request', detail: 'prefs must be a non-empty array of { category, channel, enabled }' });
     }
-    if (body?.phone !== undefined && body.phone !== null) {
-      if (typeof body.phone !== 'string' || !isValidPhone(body.phone)) {
+    if (body?.phone !== undefined) {
+      if (body.phone === null) {
+        await supabase.from('users').update({ phone: null }).eq('id', actor.userId);
+      } else if (typeof body.phone === 'string' && isValidPhone(body.phone)) {
+        await supabase.from('users').update({ phone: body.phone }).eq('id', actor.userId);
+      } else {
         return res.status(400).json({ error: 'invalid_request', detail: 'phone must be a valid phone number' });
       }
-      await supabase.from('users').update({ phone: body.phone }).eq('id', actor.userId);
     }
 
-    const rows = prefs.map(p => ({
+    // De-dup by category:channel, last entry wins — a duplicate pair in
+    // one upsert is a Postgres error ("cannot affect row a second time")
+    // that would otherwise surface as an opaque 500.
+    const deduped = new Map<string, PrefRow>();
+    for (const p of prefs) deduped.set(`${p.category}:${p.channel}`, p);
+    const dedupedPrefs = Array.from(deduped.values());
+
+    const rows = dedupedPrefs.map(p => ({
       church_id: actor.churchId,
       user_id: actor.userId,
       category: p.category,
@@ -117,7 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       actorUserId: actor.userId,
       subjectType: 'user',
       subjectId: actor.userId,
-      payload: { updated_count: prefs.length },
+      payload: { updated_count: dedupedPrefs.length },
     });
     await recordAudit(supabase, {
       churchId: actor.churchId,
@@ -126,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       action: 'update',
       entityType: 'staff_notification_prefs',
       entityId: actor.userId,
-      after: { prefs },
+      after: { prefs: dedupedPrefs },
       correlationId,
       route: '/api/workos/notification-prefs',
       method: 'PUT',

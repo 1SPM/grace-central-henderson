@@ -41,6 +41,8 @@ export function createMockSupabase(options: MockSupabaseOptions) {
       is: vi.fn(() => builder),
       not: vi.fn(() => builder),
       contains: vi.fn(() => builder),
+      overlaps: vi.fn(() => builder),
+      filter: vi.fn(() => builder),
       lt: vi.fn(() => builder),
       lte: vi.fn(() => builder),
       gt: vi.fn(() => builder),
