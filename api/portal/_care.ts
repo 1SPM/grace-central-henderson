@@ -36,9 +36,13 @@ import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { detectCrisisLanguage, toCareMemberStatus } from '../_lib/careSafety.js';
 import { readBody, str, bool_ } from '../_lib/validation.js';
+import { notifyCrisisStaff } from '../_lib/crisisNotify.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const APP_URL = process.env.FRONTEND_URL || process.env.VERCEL_URL
+  ? (process.env.FRONTEND_URL || `https://${process.env.VERCEL_URL}`)
+  : 'http://localhost:3000';
 
 const CATEGORIES = ['marriage', 'addiction', 'grief', 'faith-questions', 'crisis', 'financial', 'anxiety-depression', 'parenting', 'general'];
 
@@ -134,6 +138,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (findingError) console.error('[portal/care] crisis finding insert failed', findingError);
       } catch (findingErr) {
         console.error('[portal/care] crisis finding insert failed', findingErr);
+      }
+
+      // Synchronous staff alert — a crisis needs to reach a real person
+      // within a minute, not wait for the 15-minute digest cron. Never
+      // fails the member's submission (try/catch); a send failure is
+      // only ever logged.
+      try {
+        await notifyCrisisStaff(supabase, member.churchId, APP_URL);
+      } catch (notifyErr) {
+        console.error('[portal/care] crisis notification failed', notifyErr);
       }
     }
 

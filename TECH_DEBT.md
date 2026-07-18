@@ -284,10 +284,11 @@
 
 ### TD-043 — `resolveStaffActor` has a demo-mode bypass that grants System Administrator
 - **Severity:** P1 (must be confirmed disabled before any real tenant)
-- **Location:** `api/_lib/authz.ts` (`resolveDemoStaffActor`)
-- **Risk:** When `VITE_ENABLE_DEMO_MODE=true`, every caller to a WorkOS route is silently resolved to a real `users` row with the `system_administrator` role — full access to Work Orders, approvals, and (once wired) every other module. This exists so the Admin Dashboard WorkOS modules are actually clickable in the live Central Henderson demo, which has no production Clerk instance (see the current-state assessment). Same env var and same "explicit opt-in only" posture as the pre-existing demo-mode auth bypass in `api/_middleware/auth.ts` (formally waived for non-production use in `SECURITY_FINDINGS_STATUS.md` #3) — this is that same waiver extended to the new authz module, not a new risk category.
-- **Re-entry trigger:** before Clerk Production is configured for any real tenant (Beta Critical Path Phase 2). At that point `VITE_ENABLE_DEMO_MODE` must be confirmed unset/false in that environment's Vercel config.
-- **Resolution path:** no code change needed — this is an operational checklist item (confirm the env var is unset in the production Vercel project), same as the existing demo-mode waiver.
+- **Location:** `api/_lib/authz.ts` (`resolveDemoStaffActor`, `isDemoModeActive`)
+- **Risk:** Every caller to a WorkOS route on a known demo host (`grace-crm-two.vercel.app`, `grace-crm.dev`, `www.grace-crm.dev`) is silently resolved to a real `users` row with the `system_administrator` role — full access to Work Orders, approvals, and every other module. Same "explicit opt-in only" posture as the pre-existing demo-mode auth bypass in `api/_middleware/auth.ts` (formally waived for non-production use in `SECURITY_FINDINGS_STATUS.md` #3).
+- **UPDATE (Stage 4 acceptance check, this session):** originally gated solely on the shared `VITE_ENABLE_DEMO_MODE` env var, which caused a real outage — turning that var off to secure `gracecrm-centralhenderson.org` (the correct call) also silently broke every WorkOS route's demo bypass for Faithful, since one Vercel deployment serves both hostnames and can't have the var "on" for one and "off" for the other. `isDemoModeActive(req)` now also auto-activates for the same known-demo hostnames `HOST_CHURCH_IDS` already carves out (mirroring the client-side fix already shipped in `src/config/tenant.ts`) — the env var remains a valid global override, but is no longer the *only* path in. This cannot reopen the bypass for `gracecrm-centralhenderson.org` or any other unlisted host; that hostname will never match `HOST_CHURCH_IDS`.
+- **Re-entry trigger:** before Clerk Production is configured for any *new* real tenant — confirm its hostname is never added to `HOST_CHURCH_IDS`/`HOST_TENANTS`.
+- **Resolution path:** no further code change needed. Operational checklist: keep `HOST_CHURCH_IDS` and `HOST_TENANTS` restricted to genuinely-demo hostnames only.
 
 ### TD-044 — WorkOS route guard is role-based on the frontend, permission-based on the backend
 - **Severity:** P3
@@ -373,6 +374,29 @@
 - **Location:** `giving_statements` table (migration 002) exists with a `pdf_url` column, but nothing in the codebase ever generates a PDF or populates it. `api/portal/_giving.ts` reports this explicitly via its `unsupported_functions.download_statement` field rather than exposing a broken button.
 - **Re-entry trigger:** first real request for year-end tax statements.
 - **Resolution path:** pick a PDF generation approach (server-side render + a storage bucket, or a third-party statement provider), populate `pdf_url` on generation, then add the download function to `api/portal/_giving.ts` and the portal UI.
+
+## Realtime + staff notifications (Stage 5, 2026-07-18)
+
+### TD-056 — Twilio SMS send logic now has 3 call sites, only 2 share the extracted helper
+- **Severity:** P3
+- **Location:** `api/_lib/sms/send.ts` (new, shared by `api/sms/_send.ts` and the crisis notification path `api/_lib/crisisNotify.ts`) vs. `api/_routes/sms.ts` (legacy Express route, still mounted by `api/_server.ts`), which duplicates the same Twilio REST call independently.
+- **Risk:** none today — both implementations are correct and independently tested — but a future Twilio behavior change (auth format, response shape) now needs updating in two places instead of one.
+- **Re-entry trigger:** next time `api/_routes/sms.ts` needs a change for any reason, or when the legacy Express server (`api/_server.ts`) is retired.
+- **Resolution path:** refactor `api/_routes/sms.ts` to call `sendSms()` from `api/_lib/sms/send.ts`, same pattern already used for `api/sms/_send.ts`.
+
+### TD-057 — Digest cron retries the whole batch on any single send failure
+- **Severity:** P3 (intentional tradeoff, not an oversight)
+- **Location:** `api/cron/_notify.ts` — `notification_cursors['notify']` only advances when every recipient in the current 15-minute batch sent successfully; a single Resend failure leaves the cursor where it was, so the next run re-sends the entire batch, including to recipients who already got it.
+- **Risk:** a recipient can receive a duplicate digest email during a partial-outage window. Deliberately chosen over the alternative (silently dropping the failed recipient's events) — a duplicate digest is a minor annoyance; a permanently-lost notification is not recoverable.
+- **Re-entry trigger:** if duplicate-digest complaints become frequent enough to matter.
+- **Resolution path:** track a per-recipient (not just per-job) cursor, or record which individual sends succeeded within a batch and only re-attempt the failed subset on retry.
+
+### TD-058 — `users.phone` is a free-text field with no verification step
+- **Severity:** P3
+- **Location:** `supabase/migrations/051_realtime_notifications.sql` adds `users.phone TEXT`, settable by any staff member for themselves via `PUT /api/workos/notification-prefs`. Format-validated (`isValidPhone`) but never confirmed as reachable (no SMS OTP verification loop).
+- **Risk:** low — self-service, self-scoped, staff-only, and only used to route the staff member's own opt-in crisis SMS alerts to a number they typed themselves. A typo just means they don't get texts, not that someone else's messages get misrouted.
+- **Re-entry trigger:** if `users.phone` is ever exposed beyond this one self-service use, or reused for anything security-sensitive (2FA, password reset).
+- **Resolution path:** add a one-time SMS verification code step before a phone number is considered "confirmed," if the risk profile ever changes.
 
 ---
 

@@ -93,13 +93,36 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     if (clerkSignedIn) {
       // Use template if your Clerk dashboard has a "supabase" template;
       // otherwise the default session token works for native third-party.
-      setClerkTokenProvider(async () => {
+      const fetchToken = async () => {
         try {
           return await getToken({ template: 'supabase' }) ?? await getToken();
         } catch {
           return await getToken();
         }
-      });
+      };
+      setClerkTokenProvider(fetchToken);
+
+      // Realtime's websocket connection carries its own auth, separate
+      // from the REST client's per-request Authorization header — a
+      // registered clerkAwareFetch provider alone does not cover
+      // postgres_changes subscriptions. Without this, platform_events'
+      // tenant-isolation RLS policy would reject every realtime message
+      // (the websocket would authenticate as anon, which the policy
+      // never matches), so the Decision Queue would silently never
+      // receive INSERT events.
+      const refreshRealtimeAuth = () => {
+        void fetchToken().then(token => {
+          if (token && supabase) supabase.realtime.setAuth(token);
+        });
+      };
+      refreshRealtimeAuth();
+      // Clerk session tokens are short-lived (~60s); the REST path
+      // re-fetches one on every request via clerkAwareFetch, but the
+      // websocket has no equivalent per-message hook, so it needs its
+      // own periodic refresh to avoid the connection silently going
+      // stale mid-session.
+      const intervalId = setInterval(refreshRealtimeAuth, 50_000);
+      return () => clearInterval(intervalId);
     } else {
       setClerkTokenProvider(null);
     }

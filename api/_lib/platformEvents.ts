@@ -61,7 +61,8 @@ export type PlatformEventType =
   | 'agent_finding.converted'
   | 'tenant.hosts_updated'
   | 'portal.member_provisioned'
-  | 'portal.demo_persona_seeded';
+  | 'portal.demo_persona_seeded'
+  | 'workos.notification_prefs_updated';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 

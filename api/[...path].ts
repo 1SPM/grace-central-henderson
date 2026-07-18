@@ -59,6 +59,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'cron/ai-anomaly': () => import('./cron/_ai-anomaly.js'),
   'cron/reconcile-stripe': () => import('./cron/_reconcile-stripe.js'),
   'cron/send-pending-emails': () => import('./cron/_send-pending-emails.js'),
+  'cron/notify': () => import('./cron/_notify.js'),
   'email/send': () => import('./email/_send.js'),
   'giving/create-payment-intent': () => import('./giving/_create-payment-intent.js'),
   'giving/create-subscription': () => import('./giving/_create-subscription.js'),
@@ -116,6 +117,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workos/permissions': () => import('./workos/_permissions.js'),
   'workos/summary': () => import('./workos/_summary.js'),
   'workos/decision-queue': () => import('./workos/_decision-queue.js'),
+  'workos/notification-prefs': () => import('./workos/_notification-prefs.js'),
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
