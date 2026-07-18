@@ -38,9 +38,20 @@ import { requireClerkAuth } from './auth-helper.js';
 // here to the WorkOS staff-actor path so the Admin Dashboard WorkOS
 // modules are actually operable in the live Central Henderson demo, which
 // runs without a production Clerk instance (see the current-state
-// assessment). NEVER active unless VITE_ENABLE_DEMO_MODE=true is set —
-// tracked as a P1 "confirm disabled before a real tenant" item in
-// TECH_DEBT.md (TD-043).
+// assessment).
+//
+// VITE_ENABLE_DEMO_MODE=true is a global opt-in (kept for local dev and
+// as an explicit kill-switch), but it must NOT be the only way in: this
+// project is a single shared Vercel deployment (docs/DEPLOY.md), so one
+// shared env var can't be "on" for the Faithful demo tenant and "off"
+// for the real Central Henderson tenant at the same time. Turning it off
+// to secure Central Henderson (the correct call — see the client-side
+// isDemoModeActive() history in src/config/tenant.ts, fixed for exactly
+// this reason) silently broke every WorkOS route's staff-actor bypass
+// for Faithful too. isDemoModeActive() below closes that gap by also
+// auto-enabling for the same known-demo hostnames HOST_CHURCH_IDS already
+// carves out — never for gracecrm-centralhenderson.org or any other
+// unlisted host, so this can't reopen the bypass for a real tenant.
 const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
 const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
@@ -55,6 +66,13 @@ const HOST_CHURCH_IDS: Record<string, string> = {
   'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
   'www.grace-crm.dev': '22222222-2222-2222-2222-222222222222',
 };
+
+/** True for the global env-var opt-in, or for a request whose Host header
+ * is one of the known demo hosts above. See the DEMO_MODE comment. */
+function isDemoModeActive(req: VercelRequest): boolean {
+  const host = req.headers.host;
+  return DEMO_MODE || (!!host && host in HOST_CHURCH_IDS);
+}
 
 /**
  * Resolves which church the demo bypass should act as, based on the
@@ -101,7 +119,7 @@ export async function resolveStaffActor(
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<StaffActor | null> {
-  if (DEMO_MODE) {
+  if (isDemoModeActive(req)) {
     return resolveDemoStaffActor(req, res, supabase);
   }
 
@@ -312,7 +330,7 @@ export async function resolveMemberActor(
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<MemberActor | null> {
-  if (DEMO_MODE) {
+  if (isDemoModeActive(req)) {
     return resolveDemoMemberActor(req, res, supabase);
   }
 

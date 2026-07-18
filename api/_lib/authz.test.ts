@@ -27,6 +27,10 @@ function makeReq(token: string | null = 'valid-token') {
   } as unknown as import('@vercel/node').VercelRequest;
 }
 
+function makeReqWithHost(host: string) {
+  return { headers: { host } } as unknown as import('@vercel/node').VercelRequest;
+}
+
 function makeRes() {
   const res: Record<string, unknown> = {};
   res.status = vi.fn(() => res);
@@ -317,6 +321,40 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
 
     expect(actor).toBeNull();
     expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it('auto-activates for a known demo host even with VITE_ENABLE_DEMO_MODE unset — no shared-var drift', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { resolveStaffActor } = await import('./authz.js');
+
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: 'demo-user-row-id', account_status: 'active' } }),
+        roles: () => ({ data: { id: 'sysadmin-role-id' } }),
+        user_roles: () => ({ data: [{ id: 'grant-1', role_id: 'sysadmin-role-id' }] }),
+        role_permissions: () => ({ data: [{ permissions: { key: 'work_orders.manage' } }] }),
+      },
+    });
+    const res = makeRes();
+
+    // No Authorization header, no env var — only a known demo Host header.
+    const actor = await resolveStaffActor(makeReqWithHost('grace-crm-two.vercel.app'), res, supabase as never);
+
+    expect(actor).not.toBeNull();
+    expect(actor!.churchId).toBe('22222222-2222-2222-2222-222222222222');
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  it('does NOT auto-activate for an unrecognized host (e.g. the real Central Henderson domain) — falls through to real Clerk auth and 401s with no token', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { resolveStaffActor } = await import('./authz.js');
+    const supabase = createMockSupabase({ tables: {} });
+    const res = makeRes();
+
+    const actor = await resolveStaffActor(makeReqWithHost('gracecrm-centralhenderson.org'), res, supabase as never);
+
+    expect(actor).toBeNull();
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 });
 
