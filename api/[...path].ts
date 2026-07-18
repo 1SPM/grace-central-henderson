@@ -96,6 +96,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'prayer-requests': () => import('./prayer-requests/_index.js'),
   'sms/send': () => import('./sms/_send.js'),
   'impact-card/funnel-metrics': () => import('./impact-card/_funnel-metrics.js'),
+  'impact/health': () => import('./impact/_health.js'),
   'impact/ministry-metrics': () => import('./impact/_ministry-metrics.js'),
   'finance/gift-in-kind': () => import('./finance/_gift-in-kind.js'),
   'finance/expenses': () => import('./finance/_expenses.js'),

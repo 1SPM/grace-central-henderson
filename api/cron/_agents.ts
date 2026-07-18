@@ -16,6 +16,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { listChurchesWithAgents, runAgentsForChurch, type RunResult } from '../_lib/agents/runner.js';
 import { runMessagingAgentsForChurch, type MessagingRunResult } from '../_lib/agents/messaging.js';
+import { snapshotHealthForChurch } from '../_lib/healthSnapshot.js';
 import { recordCronRun } from '../_lib/cron-runs.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -90,6 +91,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     },
   });
 
+  // Congregational Health snapshot: every church gets a daily snapshot,
+  // not just the ones with agents enabled — health metrics don't depend
+  // on agent settings. Same cron trigger, its own cron_runs job record.
+  const { data: allChurchRows } = await supabase.from('churches').select('id').limit(5000);
+  const allChurchIds = (allChurchRows as Array<{ id: string }> | null)?.map(c => c.id) ?? [];
+  let healthSucceeded = 0;
+  let healthFailed = 0;
+  for (const churchId of allChurchIds) {
+    try {
+      await snapshotHealthForChurch(supabase, churchId, startedAt);
+      healthSucceeded += 1;
+    } catch (err) {
+      console.error('[health cron] church failed', { churchId, err: err instanceof Error ? err.message : String(err) });
+      healthFailed += 1;
+    }
+  }
+  await recordCronRun(supabase, 'health', {
+    ok: healthFailed === 0,
+    durationMs: Date.now() - startedAt.getTime(),
+    summary: {
+      churches_processed: allChurchIds.length,
+      churches_succeeded: healthSucceeded,
+      churches_failed: healthFailed,
+    },
+  });
+
   return res.status(200).json({
     ok: true,
     started_at: startedAt.toISOString(),
@@ -99,5 +126,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     churches_failed: failed,
     results,
     messaging_results: messagingResults,
+    health_snapshot: { churches_processed: allChurchIds.length, succeeded: healthSucceeded, failed: healthFailed },
   });
 }

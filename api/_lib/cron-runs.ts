@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type CronJobName = 'agents' | 'ai-anomaly' | 'reconcile-stripe' | 'send-pending-emails';
+export type CronJobName = 'agents' | 'health' | 'ai-anomaly' | 'reconcile-stripe' | 'send-pending-emails';
 
 export async function recordCronRun(
   supabase: SupabaseClient,

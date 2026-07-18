@@ -3,6 +3,7 @@ import { Info, ShieldAlert } from 'lucide-react';
 import { useWorkOsSummary } from '../../hooks/useWorkOsSummary';
 import { openWorkOs } from '../../lib/workosNav';
 import { DecisionQueuePanel } from './DecisionQueuePanel';
+import { HealthScorecardPanel } from './HealthScorecardPanel';
 import { ImpactCardFunnelPanel } from './ImpactCardFunnelPanel';
 import { GiftInKindPanel } from './GiftInKindPanel';
 import { ExpenseRatioPanel } from './ExpenseRatioPanel';
@@ -41,6 +42,7 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
   return (
     <div className="p-4 sm:p-6">
       <DecisionQueuePanel />
+      <HealthScorecardPanel />
 
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-gray-500 dark:text-dark-400">
