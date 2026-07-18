@@ -361,6 +361,7 @@
 - **Risk:** in demo mode, the new Members Portal "Give & Impact Card" page's Impact Card section always renders its "not available in demo mode" state (`fetchMyCard()` returns `null` by design — see `src/lib/services/impactCard.ts`) rather than showing real demo data, even though the rest of the portal (giving, care, prayer, community) works in demo mode. This is a demo/UX gap, not a security issue — production Clerk auth is unaffected.
 - **Re-entry trigger:** first real request for a fully-working demo-mode walkthrough of the Impact Card portal experience.
 - **Resolution path:** refactor `api/neobank/_index.ts`'s auth resolution to fall back to a demo member actor (mirroring `resolveDemoMemberActor` in `api/_lib/authz.ts`) for member-scoped resources/actions when `!auth.ok && DEMO_MODE`, threading a synthetic `{ok:true, clerkUserId, churchId, role:'member'}` through the existing `auth`-typed control flow. Sizeable enough (900+ line file, many call sites branch on `auth`) that it should be its own reviewed change, not folded into an unrelated phase.
+- **Also still pending:** migration 046 (Stage 1, Mission Control build plan) added the granular `impact_card.operate` permission specifically so the Decision Queue could gate `kyc_review`/`failed_transfer` items on it, but `api/neobank/_index.ts` itself still gates on the coarse `STAFF_ROLES` role list rather than this key — migrating neobank's own gating to `impact_card.operate` was explicitly deferred at the time (see migration 046's comment) and remains future work, independent of the demo-bootstrap gap above.
 
 ### TD-054 — No source table for "church program benefit"; Impact Card "campaign performance" is Work-Order-level only
 - **Severity:** P2
@@ -397,6 +398,12 @@
 - **Risk:** low — self-service, self-scoped, staff-only, and only used to route the staff member's own opt-in crisis SMS alerts to a number they typed themselves. A typo just means they don't get texts, not that someone else's messages get misrouted.
 - **Re-entry trigger:** if `users.phone` is ever exposed beyond this one self-service use, or reused for anything security-sensitive (2FA, password reset).
 - **Resolution path:** add a one-time SMS verification code step before a phone number is considered "confirmed," if the risk profile ever changes.
+
+---
+
+## Resolved
+
+- **Members Portal wallet token-provider gap** (Stage 0, Mission Control build plan, commit `67f593d`) — the Portal's Impact Card page authenticated via the global Clerk token provider, which only the staff `AuthContext` ever registered; real portal-only members and preview sessions got a dead wallet page. `PortalAuthProviderInner` now registers the same provider the staff context does. Preview sessions (no real Clerk session) get an explicit "not available in staff preview" state instead of a silent failure.
 
 ---
 
