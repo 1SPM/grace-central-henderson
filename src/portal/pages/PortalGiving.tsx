@@ -305,6 +305,10 @@ function ImpactCardSection({ impactCard }: { impactCard: ReturnType<typeof usePo
         <p className="text-sm text-stone-500">{errorMessage || 'Impact Card is not available right now.'}</p>
       )}
 
+      {state === 'preview' && (
+        <p className="text-sm text-stone-500">Wallet is not available in staff preview.</p>
+      )}
+
       {state === 'ready' && data && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 text-sm">

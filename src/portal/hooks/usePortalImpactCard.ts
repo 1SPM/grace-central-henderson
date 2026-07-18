@@ -5,16 +5,29 @@ import {
   NeobankFetchError,
   type MyCardData,
 } from '../../lib/services/impactCard';
+import { usePortalAuth } from '../PortalAuthContext';
 
-export type PortalImpactCardState = 'loading' | 'ready' | 'unavailable' | 'signed_out';
+export type PortalImpactCardState = 'loading' | 'ready' | 'unavailable' | 'signed_out' | 'preview';
 
 export function usePortalImpactCard() {
+  const { isPreview } = usePortalAuth();
   const [data, setData] = useState<MyCardData | null>(null);
   const [state, setState] = useState<PortalImpactCardState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSavingRoute, setIsSavingRoute] = useState(false);
 
   const refresh = useCallback(async () => {
+    // A staff preview session carries a pvt_-prefixed token, not a real
+    // Clerk session — api/neobank authenticates via requireClerkAuth
+    // directly (it doesn't go through the preview-token path
+    // resolveMemberActor supports), so there is nothing to fetch here.
+    // Show an explicit state instead of attempting a call that can only
+    // fail.
+    if (isPreview) {
+      setData(null);
+      setState('preview');
+      return;
+    }
     setState('loading');
     setErrorMessage('');
     try {
@@ -36,7 +49,7 @@ export function usePortalImpactCard() {
       setData(null);
       setState('unavailable');
     }
-  }, []);
+  }, [isPreview]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 

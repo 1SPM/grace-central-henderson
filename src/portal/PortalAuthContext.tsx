@@ -12,9 +12,10 @@
  * Same three-mode shape as the staff AuthContext (real Clerk / demo /
  * blocked) for consistency, but resolving a *member* identity, not staff.
  */
-import { createContext, useCallback, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react';
 import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react';
 import { isDemoModeActive } from '../config/tenant';
+import { setClerkTokenProvider } from '../lib/supabase';
 
 export interface PortalAuthContextValue {
   isLoaded: boolean;
@@ -47,6 +48,29 @@ const isDemoModeEnabled = isDemoModeActive();
 function PortalAuthProviderInner({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
+
+  // Register the same global Clerk-token provider the staff AuthContext
+  // uses (src/lib/supabase.ts) — the Portal and staff CRM are mutually
+  // exclusive route trees (see isPortalRoute in main.tsx), so only one
+  // provider is ever active per page load. Without this, real portal
+  // members' Supabase requests other than the explicit portal API routes
+  // (e.g. api/neobank, called directly with the global provider) go out
+  // with the anon key and silently return nothing. Mirrors the ordering
+  // fix already applied to AuthContext.tsx: registration is synchronous
+  // and unconditional on identity resolution completing.
+  useEffect(() => {
+    if (isSignedIn) {
+      setClerkTokenProvider(async () => {
+        try {
+          return await getToken({ template: 'supabase' }) ?? await getToken();
+        } catch {
+          return await getToken();
+        }
+      });
+    } else {
+      setClerkTokenProvider(null);
+    }
+  }, [isSignedIn, getToken]);
 
   const getAuthToken = useCallback(async (): Promise<string | null> => {
     if (!isSignedIn) return null;
