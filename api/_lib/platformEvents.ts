@@ -54,7 +54,11 @@ export type PlatformEventType =
   | 'finance.gift_in_kind.recorded'
   | 'finance.expense.recorded'
   | 'approval.related_party_flagged'
-  | 'approval.related_party_reviewed';
+  | 'approval.related_party_reviewed'
+  | 'agent_finding.triaged'
+  | 'agent_finding.dismissed'
+  | 'agent_finding.resolved'
+  | 'agent_finding.converted';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 

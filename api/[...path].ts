@@ -22,6 +22,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'admin/webhooks/dlq': () => import('./admin/webhooks/_dlq.js'),
   'agentmail/reply': () => import('./agentmail/_reply.js'),
   'agentmail/send': () => import('./agentmail/_send.js'),
+  'agents/findings': () => import('./agents/_findings.js'),
   'agents/health': () => import('./agents/_health.js'),
   'agents/run': () => import('./agents/_run.js'),
   'agents/settings': () => import('./agents/_settings.js'),

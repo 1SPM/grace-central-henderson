@@ -3,7 +3,7 @@
  *
  * The unified Decision Queue — everything awaiting a human decision,
  * severity-ordered, across approvals, pastoral care, Impact Card
- * operations, stalled invitations, and agent-generated tasks.
+ * operations, stalled invitations, and open agent findings.
  *
  * Auth: any active staff user (resolveStaffActor). Each category is
  * only fetched — and only appears in the response — if the caller
@@ -21,7 +21,7 @@ import {
   type KycRow,
   type FailedTransferRow,
   type StalledInvitationRow,
-  type AgentTaskRow,
+  type AgentFindingRow,
 } from '../_lib/decisionQueue.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     kycRes,
     failedTransfersRes,
     stalledInvitationsRes,
-    agentTasksRes,
+    agentFindingsRes,
   ] = await Promise.all([
     has('approvals.view')
       ? supabase
@@ -92,13 +92,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .limit(200),
     has('agents.view')
       ? supabase
-          .from('tasks')
-          .select('id, title, created_at')
+          .from('agent_findings')
+          .select('id, title, severity, created_at')
           .eq('church_id', churchId)
-          .eq('completed', false)
-          .like('category', 'agent:%')
+          .eq('status', 'open')
           .limit(200)
-      : Promise.resolve({ data: [] as AgentTaskRow[] }),
+      : Promise.resolve({ data: [] as AgentFindingRow[] }),
   ]);
 
   const result = computeDecisionQueue(
@@ -108,7 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       kycVerifications: (kycRes.data ?? []) as KycRow[],
       failedTransfers: (failedTransfersRes.data ?? []) as FailedTransferRow[],
       stalledInvitations: (stalledInvitationsRes.data ?? []) as StalledInvitationRow[],
-      agentTasks: (agentTasksRes.data ?? []) as AgentTaskRow[],
+      agentFindings: (agentFindingsRes.data ?? []) as AgentFindingRow[],
     },
     new Date(),
   );

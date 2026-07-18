@@ -2,6 +2,7 @@ import { Bot } from 'lucide-react';
 import { useAgentCommandCentre } from '../../hooks/useAgentCommandCentre';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { StatusBadge } from '../ui/StatusBadge';
+import { AgentFindingsPanel } from './AgentFindingsPanel';
 
 const STATUS_LABEL: Record<string, string> = {
   not_implemented: 'Not yet implemented',
@@ -91,6 +92,8 @@ export function AgentCommandCentre() {
           </div>
         ))}
       </div>
+
+      <AgentFindingsPanel />
     </div>
   );
 }

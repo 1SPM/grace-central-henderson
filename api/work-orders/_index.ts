@@ -222,6 +222,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .single();
     if (error || !updated) return res.status(500).json({ error: 'update_failed' });
 
+    // Auto-resolve hook: any agent_finding this Work Order was converted
+    // from ('actioned' → linked via work_order_id) flips to 'resolved'
+    // without manual action once the Work Order itself completes.
+    if (body.status === 'completed') {
+      const { data: linkedFindings } = await supabase
+        .from('agent_findings')
+        .select('id')
+        .eq('work_order_id', id)
+        .eq('status', 'actioned');
+      if (linkedFindings && linkedFindings.length > 0) {
+        const resolvedAt = new Date().toISOString();
+        await supabase
+          .from('agent_findings')
+          .update({ status: 'resolved', resolved_at: resolvedAt, updated_at: resolvedAt })
+          .eq('work_order_id', id)
+          .eq('status', 'actioned');
+        for (const finding of linkedFindings) {
+          await emitPlatformEvent(supabase, {
+            churchId: actor.churchId,
+            eventType: 'agent_finding.resolved',
+            sourceApp: 'admin_dashboard',
+            actorUserId: actor.userId,
+            subjectType: 'agent_finding',
+            subjectId: finding.id,
+            payload: { work_order_id: id, trigger: 'work_order_completed' },
+          });
+        }
+      }
+    }
+
     let correlationId: string | undefined;
     if (body.status && body.status !== existing.status) {
       const emitted = await emitPlatformEvent(supabase, {

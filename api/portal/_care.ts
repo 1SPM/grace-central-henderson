@@ -109,6 +109,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'create_failed' });
     }
 
+    // Event-triggered finding: a crisis needs to reach the Decision
+    // Queue in seconds, not at the next cron/workflow pass. Never lets a
+    // finding-write failure fail the member's care submission — same
+    // resilience posture as the consent/audit writes below. No
+    // confidential summary text in title/detail (care_requests is
+    // confidential-tier — matches the crisis item convention in
+    // api/_lib/decisionQueue.ts).
+    if (crisisFlagged) {
+      try {
+        const { error: findingError } = await supabase.from('agent_findings').insert({
+          church_id: member.churchId,
+          agent_id: 'crisis-escalation',
+          source: 'event',
+          dedup_key: `crisis-escalation:event:${careRequest.id}`,
+          title: 'Crisis-flagged care request',
+          detail: `Priority: ${careRequest.priority}`,
+          severity: 'critical',
+          status: 'open',
+          subject_type: 'care_request',
+          subject_id: careRequest.id,
+          payload: { category: careRequest.category },
+        });
+        if (findingError) console.error('[portal/care] crisis finding insert failed', findingError);
+      } catch (findingErr) {
+        console.error('[portal/care] crisis finding insert failed', findingErr);
+      }
+    }
+
     // 1. Consent: a member actively submitting a care request that asks
     // for human follow-up is explicit, in-the-moment consent for that
     // specific pastoral contact — record it as such rather than blocking

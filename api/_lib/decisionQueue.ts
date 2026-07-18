@@ -20,7 +20,7 @@ export type DecisionQueueKind =
   | 'kyc_review'
   | 'failed_transfer'
   | 'invitation_stalled'
-  | 'agent_task';
+  | 'agent_finding';
 
 export interface DecisionQueueItem {
   id: string;
@@ -91,9 +91,10 @@ export interface StalledInvitationRow {
   created_at: string;
 }
 
-export interface AgentTaskRow {
+export interface AgentFindingRow {
   id: string;
   title: string;
+  severity: 'critical' | 'high' | 'normal' | 'info';
   created_at: string;
 }
 
@@ -103,7 +104,7 @@ export interface DecisionQueueInputs {
   kycVerifications?: KycRow[];
   failedTransfers?: FailedTransferRow[];
   stalledInvitations?: StalledInvitationRow[];
-  agentTasks?: AgentTaskRow[];
+  agentFindings?: AgentFindingRow[];
 }
 
 export interface DecisionQueueResult {
@@ -246,18 +247,20 @@ export function computeDecisionQueue(inputs: DecisionQueueInputs, now: Date): De
     });
   }
 
-  for (const task of inputs.agentTasks ?? []) {
+  // DecisionQueueItem has no 'info' tier — an info-severity finding still
+  // belongs in the queue, just at the lowest available tier.
+  for (const finding of inputs.agentFindings ?? []) {
     items.push({
-      id: task.id,
-      kind: 'agent_task',
-      title: task.title,
-      severity: 'normal',
-      created_at: task.created_at,
-      age_hours: ageHours(task.created_at, now),
+      id: finding.id,
+      kind: 'agent_finding',
+      title: finding.title,
+      severity: finding.severity === 'info' ? 'normal' : finding.severity,
+      created_at: finding.created_at,
+      age_hours: ageHours(finding.created_at, now),
       href: '#/workos?tab=agents',
       required_permission: 'agents.view',
-      subject_type: 'task',
-      subject_id: task.id,
+      subject_type: 'agent_finding',
+      subject_id: finding.id,
     });
   }
 

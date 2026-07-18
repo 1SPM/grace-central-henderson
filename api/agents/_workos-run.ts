@@ -18,6 +18,7 @@ import { getWorkflow } from '../_lib/agentWorkflows.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
+import { persistWorkflowFindings } from '../_lib/agentWorkflowFindings.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -78,6 +79,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           executed_at: new Date().toISOString(),
         })),
       );
+      // Additive: also persist each finding into the accountable
+      // agent_findings lifecycle (independent of the agent_actions log
+      // above, which is a run-history record, not a triage queue).
+      await persistWorkflowFindings(supabase, actor.churchId, body.agent_key, result.findings);
     }
 
     const finishedAt = new Date().toISOString();

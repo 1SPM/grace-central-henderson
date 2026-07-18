@@ -14,7 +14,7 @@ export type DecisionQueueKind =
   | 'kyc_review'
   | 'failed_transfer'
   | 'invitation_stalled'
-  | 'agent_task';
+  | 'agent_finding';
 
 export interface DecisionQueueItem {
   id: string;

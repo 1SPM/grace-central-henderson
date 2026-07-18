@@ -26,6 +26,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { shouldSkipFinding, type ExistingFindingForDedup } from '../agentFindingsDedup.js';
 import { memberCareAgent } from './member-care.js';
 import { stewardshipAgent } from './stewardship.js';
 import { operationsAgent } from './operations.js';
@@ -344,6 +345,77 @@ async function persistObservation(
   }
 }
 
+/**
+ * Maps an observation's own severity onto agent_findings' 4-tier scale.
+ * crisis-escalation observations are always 'critical' regardless of
+ * their own severity field — a crisis finding must never be triaged as
+ * merely 'high'. Everything else passes through: urgent -> high,
+ * attention -> normal, info -> info.
+ */
+function findingSeverityForObservation(obs: AgentObservation): 'critical' | 'high' | 'normal' | 'info' {
+  if (obs.agentId === 'crisis-escalation') return 'critical';
+  if (obs.severity === 'urgent') return 'high';
+  if (obs.severity === 'attention') return 'normal';
+  return 'info';
+}
+
+/**
+ * Batch-loads existing agent_findings rows for a set of dedup keys, one
+ * query per agent rather than one per observation.
+ */
+async function loadFindingsDedupState(
+  supabase: SupabaseClient,
+  churchId: string,
+  dedupKeys: string[],
+): Promise<Map<string, ExistingFindingForDedup[]>> {
+  const byKey = new Map<string, ExistingFindingForDedup[]>();
+  if (dedupKeys.length === 0) return byKey;
+  const { data } = await supabase
+    .from('agent_findings')
+    .select('dedup_key, status, suppress_until, created_at')
+    .eq('church_id', churchId)
+    .in('dedup_key', dedupKeys);
+  for (const row of (data as Array<ExistingFindingForDedup & { dedup_key: string }> | null) ?? []) {
+    const arr = byKey.get(row.dedup_key) ?? [];
+    arr.push(row);
+    byKey.set(row.dedup_key, arr);
+  }
+  return byKey;
+}
+
+/**
+ * Additive finding write — independent of the 24h agent_logs dedup that
+ * gates the task/interaction mirror sinks above. A finding uses its own
+ * lifecycle-aware dedup rule (shouldSkipFinding) so e.g. a resolved
+ * finding can get a fresh one even within the same 24h window a
+ * duplicate task write would have been suppressed.
+ */
+async function persistFinding(
+  supabase: SupabaseClient,
+  churchId: string,
+  obs: AgentObservation,
+  existingForKey: ExistingFindingForDedup[],
+  now: Date,
+): Promise<void> {
+  if (shouldSkipFinding(existingForKey, now)) return;
+  const { error } = await supabase.from('agent_findings').insert({
+    church_id: churchId,
+    agent_id: obs.agentId,
+    source: 'cron',
+    dedup_key: obs.dedupKey,
+    title: obs.title,
+    detail: obs.detail,
+    severity: findingSeverityForObservation(obs),
+    status: 'open',
+    subject_type: obs.personId ? 'person' : null,
+    subject_id: obs.personId ?? obs.relatedId ?? null,
+    payload: obs.metadata ?? {},
+  });
+  if (error) {
+    console.error('[agents] agent_findings insert failed', { dedupKey: obs.dedupKey, err: error.message });
+  }
+}
+
 export async function runAgentsForChurch(
   supabase: SupabaseClient,
   churchId: string,
@@ -399,21 +471,30 @@ export async function runAgentsForChurch(
     result.observationsGenerated += observations.length;
     result.byAgent[a.id].generated = observations.length;
 
+    // Batched once per agent, not per observation.
+    const findingsDedupState = await loadFindingsDedupState(
+      supabase, churchId, observations.map(o => o.dedupKey),
+    );
+
     for (const obs of observations) {
       if (dedup.has(obs.dedupKey)) {
         result.observationsSkippedDedup += 1;
         result.byAgent[a.id].skipped += 1;
-        continue;
+      } else {
+        const status = await persistObservation(supabase, churchId, obs);
+        if (status === 'written') {
+          result.observationsWritten += 1;
+          result.byAgent[a.id].written += 1;
+          dedup.add(obs.dedupKey);                     // local dedup within this run
+        } else if (status === 'failed') {
+          result.observationsFailed += 1;
+          result.byAgent[a.id].failed += 1;
+        }
       }
-      const status = await persistObservation(supabase, churchId, obs);
-      if (status === 'written') {
-        result.observationsWritten += 1;
-        result.byAgent[a.id].written += 1;
-        dedup.add(obs.dedupKey);                     // local dedup within this run
-      } else if (status === 'failed') {
-        result.observationsFailed += 1;
-        result.byAgent[a.id].failed += 1;
-      }
+
+      // Finding write uses its own lifecycle-aware dedup rule, independent
+      // of the 24h agent_logs dedup above (see persistFinding's comment).
+      await persistFinding(supabase, churchId, obs, findingsDedupState.get(obs.dedupKey) ?? [], now);
     }
   }
 
