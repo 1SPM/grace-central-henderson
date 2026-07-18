@@ -83,40 +83,42 @@ export function useDecisionQueue() {
   // Realtime: a new platform_events row is a "something changed" signal
   // only — never parsed for content, just triggers a debounced refetch
   // through the normal authenticated route (which re-applies every
-  // permission gate). Falls back to a 60s poll if the channel errors or
-  // Realtime isn't configured, so the queue never goes fully stale.
+  // permission gate).
+  //
+  // The 60s poll runs UNCONDITIONALLY alongside the subscription — it
+  // is the floor, not the mechanism. An RLS-filtered subscription
+  // reports a healthy SUBSCRIBED status while delivering nothing (the
+  // guaranteed state on the demo tenant, where no Clerk session means
+  // the websocket authenticates as anon and platform_events' tenant
+  // RLS blocks every message), so a poll gated on CHANNEL_ERROR never
+  // engages exactly when it's needed. Realtime, when it works, just
+  // makes updates arrive in ~5s instead of ≤60s.
   useEffect(() => {
     if (!isLoaded || !churchId) return;
 
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const triggerDebouncedRefresh = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => refreshRef.current(), REALTIME_DEBOUNCE_MS);
-    };
+    const pollId = setInterval(() => refreshRef.current(), FALLBACK_POLL_MS);
 
     if (!isSupabaseConfigured() || !supabase) {
-      const pollId = setInterval(() => refreshRef.current(), FALLBACK_POLL_MS);
       return () => clearInterval(pollId);
     }
 
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const sb = supabase;
-    let pollId: ReturnType<typeof setInterval> | null = null;
     const channel = sb
       .channel(`decision-queue-${churchId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'platform_events', filter: `church_id=eq.${churchId}` },
-        () => triggerDebouncedRefresh(),
+        () => {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => refreshRef.current(), REALTIME_DEBOUNCE_MS);
+        },
       )
-      .subscribe(status => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          if (!pollId) pollId = setInterval(() => refreshRef.current(), FALLBACK_POLL_MS);
-        }
-      });
+      .subscribe();
 
     return () => {
+      clearInterval(pollId);
       if (debounceTimer) clearTimeout(debounceTimer);
-      if (pollId) clearInterval(pollId);
       void sb.removeChannel(channel);
     };
   }, [isLoaded, churchId]);
