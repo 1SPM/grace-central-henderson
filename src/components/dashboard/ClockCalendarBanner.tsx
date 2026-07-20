@@ -202,22 +202,28 @@ export function ClockCalendarBanner({
                     if (inMonth) setSelected(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
                   }}
                   disabled={!inMonth}
-                  className={`relative aspect-square rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+                  className={`relative aspect-square rounded-lg text-sm font-medium transition-colors flex items-center justify-center tabular-nums ${
                     !inMonth
                       ? 'text-transparent pointer-events-none'
-                      : tone
-                        ? `${tone.cell} ${tone.cellText} hover:opacity-90${
-                            today ? ' ring-2 ring-inset ring-white/90 dark:ring-slate-900/90' : ''
-                          }${sel ? ' ring-2 ring-offset-2 ring-slate-900 dark:ring-white' : ''}`
-                        : today
-                          ? 'bg-slate-900 dark:bg-dark-100 text-white dark:text-dark-900'
-                          : sel
-                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300'
-                            : 'text-gray-700 dark:text-dark-200 hover:bg-stone-100 dark:hover:bg-dark-800'
+                      : today
+                        ? 'bg-slate-900 dark:bg-dark-100 text-white dark:text-dark-900'
+                        : sel
+                          ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 ring-1 ring-inset ring-indigo-300 dark:ring-indigo-500/40'
+                          : 'text-gray-700 dark:text-dark-200 hover:bg-stone-100 dark:hover:bg-dark-800'
                   }`}
                   aria-label={inMonth ? `${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}${count > 0 ? `, ${count} event${count === 1 ? '' : 's'}` : ''}` : undefined}
                 >
                   {inMonth ? d.getDate() : ''}
+                  {inMonth && count > 0 && tone && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                      {Array.from({ length: Math.min(count, 3) }).map((_, dotIdx) => (
+                        <span
+                          key={dotIdx}
+                          className={`w-1 h-1 rounded-full ${today ? 'bg-white/85 dark:bg-slate-900/70' : tone.dot}`}
+                        />
+                      ))}
+                    </span>
+                  )}
                 </button>
               );
             })}
