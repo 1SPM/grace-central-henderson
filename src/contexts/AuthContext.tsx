@@ -18,7 +18,6 @@ import {
 import { supabase, setClerkTokenProvider } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
-import { hasEnteredDemo, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
 import { isDemoModeActive } from '../config/tenant';
 
 // Default church ID for demo/fallback mode. When Supabase is configured but
@@ -434,15 +433,19 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
 // Demo auth provider for when Clerk is not configured
 // SECURITY: Only enabled in development or when explicitly opted-in
 // Uses 'admin' role so demo users can explore all features (including Settings)
+//
+// `entered` (hasEnteredDemo/sessionStorage) tracks whether the visitor has
+// clicked through the marketing CTA — it does NOT gate auth here. The
+// documented/shared demo CRM links (docs/LINKS.md) point straight at the
+// CRM shell with no `?enter=demo` param, and App.tsx already renders the
+// CRM for demo mode regardless of `entered` (see the isDemoModeEnabled
+// checks around SignInPage). Gating user/role/permissions on `entered` on
+// top of that left a fresh tab/session with `user: null` — role fell back
+// to 'volunteer' in useRouteGuard, so GRACE WorkOS (a STAFF_VIEW) rendered
+// "Restricted Area" for the demo, until the visitor happened to also hit a
+// `?enter=demo` link. Demo mode being active is itself the authorization;
+// once in, the demo user is always the full pastor/admin persona.
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
-  const [entered, setEntered] = useState(() => hasEnteredDemo());
-
-  useEffect(() => {
-    const sync = () => setEntered(hasEnteredDemo());
-    window.addEventListener(DEMO_ENTERED_EVENT, sync);
-    return () => window.removeEventListener(DEMO_ENTERED_EVENT, sync);
-  }, []);
-
   const demoUser: User = {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
@@ -456,19 +459,19 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     isLoaded: true,
-    isSignedIn: entered,
-    user: entered ? demoUser : null,
+    isSignedIn: true,
+    user: demoUser,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: entered ? ROLE_PERMISSIONS.pastor : null,
+    permissions: ROLE_PERMISSIONS.pastor,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => entered && ROLE_PERMISSIONS.pastor[permission],
-    hasAnyPermission: (permissions) => entered && permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
+    hasPermission: (permission) => ROLE_PERMISSIONS.pastor[permission],
+    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),
-    getOrganizationUsers: async () => ({ success: true, users: entered ? [demoUser] : [] }),
+    getOrganizationUsers: async () => ({ success: true, users: [demoUser] }),
     // No real Clerk session in demo mode — the WorkOS API routes recognize
     // VITE_ENABLE_DEMO_MODE server-side and bootstrap their own actor
     // (api/_lib/authz.ts resolveDemoStaffActor), so a null token here is

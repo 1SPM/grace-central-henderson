@@ -68,8 +68,13 @@ const HOST_CHURCH_IDS: Record<string, string> = {
 };
 
 /** True for the global env-var opt-in, or for a request whose Host header
- * is one of the known demo hosts above. See the DEMO_MODE comment. */
-function isDemoModeActive(req: VercelRequest): boolean {
+ * is one of the known demo hosts above. See the DEMO_MODE comment.
+ * Exported so every route's demo bootstrap (not just the WorkOS staff-actor
+ * path here) shares one hostname-aware check — a route rolling its own
+ * `process.env.VITE_ENABLE_DEMO_MODE === 'true'` copy silently loses the
+ * HOST_CHURCH_IDS fallback and 401s on the public demo hosts whenever that
+ * env var isn't set in the Vercel production environment (see api/neobank). */
+export function isDemoModeActive(req: VercelRequest): boolean {
   const host = req.headers.host;
   return DEMO_MODE || (!!host && host in HOST_CHURCH_IDS);
 }
