@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
+import { parseLocalDate } from '../utils/validation';
 import { generateAIText } from '../lib/services/ai';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useAISettings } from '../hooks/useAISettings';
@@ -204,7 +205,10 @@ export function ActionFeed({
       if (task.completed && !showCompleted) return;
       if (task.completed) return;
 
-      const dueDate = new Date(task.dueDate);
+      // parseLocalDate, not new Date(): task.dueDate is a bare YYYY-MM-DD
+      // string, which new Date() parses as UTC midnight — displaying a day
+      // early in any timezone west of UTC (see utils/validation.ts).
+      const dueDate = parseLocalDate(task.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       const timeGroup = getTimeGroup(dueDate, today, tomorrow, nextWeek);
       const person = task.personId ? personMap.get(task.personId) : undefined;
@@ -230,7 +234,10 @@ export function ActionFeed({
     people.forEach(person => {
       if (!person.birthDate) return;
 
-      const bday = new Date(person.birthDate);
+      // parseLocalDate: same UTC-midnight-vs-local-getters mismatch as
+      // task.dueDate above — new Date(person.birthDate) plus .getMonth()/
+      // .getDate() can read back the wrong calendar day west of UTC.
+      const bday = parseLocalDate(person.birthDate);
       const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
 
       if (thisYearBday < today) {

@@ -64,8 +64,15 @@ function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  // Calendar month-to-date, matching the Dashboard's "Impact MTD" tile
+  // (src/lib/dashboardSummary.ts) — kept separate from the rolling 30-day
+  // window below so Grace can answer "this month" questions with a figure
+  // that actually agrees with what the user sees on the Dashboard, instead
+  // of silently substituting the 30-day number for it.
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const recentGiving = giving.filter(g => new Date(g.date) >= thirtyDaysAgo);
+  const mtdGiving = giving.filter(g => new Date(g.date) >= monthStart);
   const totalsByPerson = new Map<string, number>();
   for (const g of recentGiving) {
     if (g.personId) totalsByPerson.set(g.personId, (totalsByPerson.get(g.personId) ?? 0) + g.amount);
@@ -113,6 +120,7 @@ function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   });
 
   const totalGiving = recentGiving.reduce((s, g) => s + g.amount, 0);
+  const mtdTotal = mtdGiving.reduce((s, g) => s + g.amount, 0);
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
   const resolvedChurch = churchName || TENANT_DEFAULT_SETTINGS.profile.name;
@@ -183,7 +191,8 @@ If user says "do tasks" / "do them" / "handle these" after seeing a task list, e
 
 Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
-Giving last 30d: $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
+Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
+Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
 Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}
 Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
