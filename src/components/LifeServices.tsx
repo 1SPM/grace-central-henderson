@@ -662,7 +662,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
         <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
-              <Heart size={20} className="text-rose-600 dark:text-rose-400" />
+              <Heart size={22} className="text-rose-600 dark:text-rose-400" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">24</div>
@@ -673,7 +673,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
         <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-slate-900/20 flex items-center justify-center">
-              <Flower2 size={20} className="text-slate-600 dark:text-slate-400" />
+              <Flower2 size={22} className="text-slate-600 dark:text-slate-400" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">8</div>
@@ -684,7 +684,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
         <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-              <Users size={20} className="text-blue-600 dark:text-blue-400" />
+              <Users size={22} className="text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">45</div>
@@ -695,7 +695,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
         <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
-              <Gift size={20} className="text-amber-600 dark:text-amber-400" />
+              <Gift size={22} className="text-amber-600 dark:text-amber-400" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">$125K</div>
