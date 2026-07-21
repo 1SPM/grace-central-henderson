@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Bot, Play, Star, User } from 'lucide-react';
 import type { LeaderProfile, Person, View } from '../../../types';
 import { getLeaderHubStats } from './demoLeadersHub';
+import { getLeaderCompanionConfig } from '../../../config/centralHendersonLeaders';
 import { LeaderAvatar } from './LeaderAvatar';
 import { LeaderContactTab } from './LeaderContactTab';
 import { AICompanionConfig } from './AICompanionConfig';
@@ -25,6 +26,8 @@ export function LeaderProfileView({
   const stats = getLeaderHubStats(leader);
   const [studioOpen, setStudioOpen] = useState(false);
   const hasAi = leader.hasAiCompanion !== false;
+  const companion = getLeaderCompanionConfig(leader.id);
+  const hasDidCredentials = Boolean(companion?.didAgentId && companion?.didClientKey);
 
   const kpiCards = [
     { label: 'Sessions', value: stats.sessions },
@@ -76,12 +79,23 @@ export function LeaderProfileView({
               </div>
             </div>
             {hasAi && (
+              // Same button for every leader used to imply the same real
+              // conversation regardless of whether a D-ID agent actually
+              // exists yet — clicking it for anyone but a credentialed
+              // leader opens a "not configured" placeholder with no
+              // warning beforehand. Preview-only leaders get a visibly
+              // different (outline, not filled) button and label so
+              // that's known before the click, not after.
               <button
                 type="button"
                 onClick={() => setStudioOpen(true)}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+                className={
+                  hasDidCredentials
+                    ? 'w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors'
+                    : 'w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-violet-200 dark:border-violet-500/30 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-sm font-medium transition-colors'
+                }
               >
-                <Play size={14} /> Launch avatar conversation
+                <Play size={14} /> {hasDidCredentials ? 'Launch avatar conversation' : 'Preview avatar conversation'}
               </button>
             )}
           </div>

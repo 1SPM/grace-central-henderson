@@ -59,7 +59,10 @@ export function LeaderContactTab({ leader, people, onNavigate }: LeaderContactTa
           </div>
           <div className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg">
             <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 mb-1">Email</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+            <p
+              className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate"
+              title={contact.email || undefined}
+            >
               {contact.email || 'Not on file'}
             </p>
           </div>
