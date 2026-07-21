@@ -399,13 +399,13 @@ export function LeaderManagement({
             const ratingDisplay = avgRating || demoStats.rating;
 
             return (
-              <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
+              <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">
                     <LeaderAvatar leader={leader} size="md" showVerified={false} />
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h4>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-dark-100">{leader.displayName}</h4>
                         {leader.isVerified && <VerifiedBadge size="sm" />}
                       </div>
                       <p className="text-xs text-gray-500 dark:text-dark-400">{leader.title}</p>
@@ -454,13 +454,13 @@ export function LeaderManagement({
 
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100 dark:border-dark-700">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-900 dark:text-dark-100 tabular-nums">{sessionsDisplay}</p>
+                    <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{sessionsDisplay}</p>
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Sessions</p>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <Star size={12} className="text-amber-400 fill-amber-400" />
-                      <p className="text-lg font-bold text-gray-900 dark:text-dark-100 tabular-nums">{ratingDisplay.toFixed(1)}</p>
+                    <div className="flex items-center justify-center gap-1">
+                      <Star size={14} className="text-amber-400 fill-amber-400" />
+                      <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{ratingDisplay.toFixed(1)}</p>
                     </div>
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Rating</p>
                   </div>

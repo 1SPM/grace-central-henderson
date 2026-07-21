@@ -70,12 +70,22 @@ time {
   font-variant-numeric: tabular-nums;
 }
 
-/* Display accent — KPIs, hero numbers, H1s (bold geometric sans, Monday style) */
-.stat-number,
+/* Display accent — H1s (bold geometric sans, Monday style) */
 .serif {
   font-family: 'Poppins', 'Figtree', -apple-system, system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+/* KPI / hero numerals — oversized, near-black weight. Split from .serif
+   (was one shared rule at font-weight 600) so numerals can push bolder
+   than page headings without dragging every H1 in the app along with
+   them. Size itself is still set per usage site (Tailwind text-*), this
+   just fixes the weight/spacing/family every one of those sites gets. */
+.stat-number {
+  font-family: 'Poppins', 'Figtree', -apple-system, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
