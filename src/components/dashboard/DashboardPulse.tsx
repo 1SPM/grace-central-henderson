@@ -65,7 +65,7 @@ export function DashboardPulse({
         <StatCard
           label="Members"
           value={peopleCount}
-          icon={<Users size={20} />}
+          icon={<Users size={22} />}
           change={visitorsCount > 0 ? Math.min(visitorsCount * 5, 20) : 0}
           changeLabel={`${visitorsCount} visitors in pipeline`}
           sparklineData={peopleSparkline}
@@ -75,7 +75,7 @@ export function DashboardPulse({
         <StatCard
           label="Impact MTD"
           value={`$${Math.round(givingMtd).toLocaleString()}`}
-          icon={<DollarSign size={20} />}
+          icon={<DollarSign size={22} />}
           change={goalPct}
           changeLabel="of monthly goal"
           accentColor="emerald"
@@ -84,7 +84,7 @@ export function DashboardPulse({
         <StatCard
           label="Open dispatch"
           value={openCare.length}
-          icon={<Heart size={20} />}
+          icon={<Heart size={22} />}
           change={crisisCount}
           changeLabel={openCare.length > 0 ? `${crisisCount} crisis` : 'all clear'}
           invertTrend
@@ -94,7 +94,7 @@ export function DashboardPulse({
         <StatCard
           label="Portal (7d)"
           value={portalActive7d ?? '—'}
-          icon={<Smartphone size={20} />}
+          icon={<Smartphone size={22} />}
           change={portalLogins7d ?? 0}
           changeLabel={portalLogins7d != null ? 'logins this week' : 'connect portal'}
           accentColor="violet"
