@@ -30,10 +30,10 @@ export function LeaderProfileView({
   const hasDidCredentials = Boolean(companion?.didAgentId && companion?.didClientKey);
 
   const kpiCards = [
-    { label: 'Sessions', value: stats.sessions },
-    { label: 'Rating', value: stats.rating.toFixed(1), star: true },
-    { label: 'Blessings', value: `${stats.blessings}/28` },
-    { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)) },
+    { label: 'Sessions', value: stats.sessions, accent: 'border-l-blue-600' },
+    { label: 'Rating', value: stats.rating.toFixed(1), star: true, accent: 'border-l-amber-500' },
+    { label: 'Blessings', value: `${stats.blessings}/28`, accent: 'border-l-rose-600' },
+    { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)), accent: 'border-l-emerald-600' },
   ] as const;
 
   return (
@@ -105,7 +105,7 @@ export function LeaderProfileView({
               {kpiCards.map(kpi => (
                 <div
                   key={kpi.label}
-                  className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5"
+                  className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}
                 >
                   <p className="section-eyebrow">{kpi.label}</p>
                   <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-1.5 flex items-center gap-1.5">

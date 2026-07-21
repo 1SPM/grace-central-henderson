@@ -30,13 +30,13 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Leaders', value: badges.staff, sub: 'All verified' },
-          { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty` },
-          { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed' },
-          { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%' },
-          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true },
+          { label: 'Leaders', value: badges.staff, sub: 'All verified', accent: 'border-l-rose-600' },
+          { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty`, accent: 'border-l-emerald-600' },
+          { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed', accent: 'border-l-violet-600' },
+          { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%', accent: 'border-l-blue-600' },
+          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true, accent: 'border-l-amber-500' },
         ].map(kpi => (
-          <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
+          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
             <p className="stat-number text-4xl text-slate-900 dark:text-dark-100 mt-2 flex items-center gap-1.5">
               {kpi.star && <Star size={26} className="text-amber-500 fill-amber-500" />}
