@@ -323,9 +323,13 @@ function ImpactCardSection({ impactCard }: { impactCard: ReturnType<typeof usePo
           </div>
 
           {data.account && (
-            <div className="flex items-center gap-1.5 text-sm text-stone-700">
-              <ShieldCheck size={14} className="text-emerald-600" />
-              Available balance: ${microUsdToDollars(data.account.available_balance_micro_usd).toFixed(2)}
+            <div className="rounded-xl bg-stone-50 border border-stone-200 p-4">
+              <p className="text-xs font-medium text-stone-500 flex items-center gap-1.5">
+                <ShieldCheck size={13} className="text-emerald-600" /> Available balance
+              </p>
+              <p className="stat-number text-3xl text-stone-900 mt-1.5">
+                ${microUsdToDollars(data.account.available_balance_micro_usd).toFixed(2)}
+              </p>
             </div>
           )}
 
