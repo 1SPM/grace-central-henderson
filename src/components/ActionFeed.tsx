@@ -706,7 +706,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {(['all', 'tasks', 'birthdays', 'visitors'] as FeedFilter[]).map(f => {
           const config = filterConfig[f];
           const Icon = config.icon;
@@ -746,11 +746,11 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`${colors.bg} ${colors.border} border rounded-xl p-4 text-left transition-all hover:shadow-md`}
+              className={`${colors.bg} ${colors.border} border rounded-2xl p-5 text-left transition-all hover:shadow-md`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <Icon size={20} className={colors.icon} />
-                <span className={`text-2xl font-bold ${colors.text}`}>{count}</span>
+              <div className="flex items-center justify-between mb-2.5">
+                <Icon size={22} className={colors.icon} />
+                <span className={`stat-number text-3xl ${colors.text}`}>{count}</span>
               </div>
               <p className={`text-sm font-medium ${colors.text}`}>
                 {f === 'all' ? 'All Actions' : f.charAt(0).toUpperCase() + f.slice(1)}

@@ -56,17 +56,17 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-xl bg-gray-100 dark:bg-dark-800 animate-pulse" />
+            <div key={i} className="h-28 rounded-2xl bg-gray-100 dark:bg-dark-800 animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {metrics.map(metric => (
             <div
               key={metric.key}
-              className="relative rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4"
+              className="relative rounded-2xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-5"
               data-testid={`metric-${metric.key}`}
             >
               <div className="flex items-start justify-between">
@@ -79,7 +79,7 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
                   <Info size={14} />
                 </button>
               </div>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-dark-100 mt-1">{metric.value}</p>
+              <p className="stat-number text-3xl text-gray-900 dark:text-dark-100 mt-1.5">{metric.value}</p>
               {metric.drilldown && (
                 <button
                   className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-2"

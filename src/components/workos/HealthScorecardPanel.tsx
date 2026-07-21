@@ -130,14 +130,14 @@ export function HealthScorecardPanel() {
               <div
                 key={tile.key}
                 data-testid={`health-tile-${tile.key}`}
-                className="rounded-lg border border-gray-200 dark:border-dark-700 p-3"
+                className="rounded-xl border border-gray-200 dark:border-dark-700 p-4"
               >
                 <p className="text-xs font-medium text-gray-500 dark:text-dark-400">{tile.label}</p>
                 {metric.source === 'not_yet_computed' ? (
                   <p className="text-sm text-gray-400 dark:text-dark-500 mt-1 italic">Needs more data</p>
                 ) : (
                   <>
-                    <p className="text-xl font-semibold text-gray-900 dark:text-dark-100 mt-0.5">
+                    <p className="stat-number text-2xl text-gray-900 dark:text-dark-100 mt-1">
                       {tile.format(metric.value as number)}
                     </p>
                     {points.length >= 2 ? (
