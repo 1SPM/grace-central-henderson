@@ -36,7 +36,7 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
           { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%', accent: 'border-l-blue-600' },
           { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true, accent: 'border-l-amber-500' },
         ].map(kpi => (
-          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
+          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
             <p className="stat-number text-4xl text-slate-900 dark:text-dark-100 mt-2 flex items-center gap-1.5">
               {kpi.star && <Star size={26} className="text-amber-500 fill-amber-500" />}

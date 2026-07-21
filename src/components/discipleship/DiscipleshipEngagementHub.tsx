@@ -113,7 +113,7 @@ export function DiscipleshipEngagementHub({
         {spiritualKpis.map(({ label, value, sub, highlight, accent }) => (
           <div
             key={label}
-            className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${accent} p-5`}
+            className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${accent} p-5`}
           >
             <p className={`stat-number text-3xl ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100'}`}>
               {value}
@@ -128,7 +128,7 @@ export function DiscipleshipEngagementHub({
         {portalKpis.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[3px] border-gray-200 dark:border-dark-700 border-l-indigo-500 p-4"
+            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[3px] border-gray-200 dark:border-dark-700 border-l-indigo-500 p-4"
           >
             <div className="flex items-center gap-2 mb-1.5">
               <Icon size={14} className="text-indigo-500" />

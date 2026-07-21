@@ -107,7 +107,7 @@ export function StatCard({
   return (
     <Component
       onClick={onClick}
-      className={`bg-white dark:bg-dark-850 border border-l-[5px] border-gray-200 dark:border-dark-700 ${colors.border} rounded-2xl ${
+      className={`bg-white dark:bg-dark-850 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${colors.border} rounded-2xl ${
         isLarge ? 'p-6 sm:p-7' : 'p-5'
       } text-left w-full relative transition-all duration-200 shadow-sm ${
         onClick

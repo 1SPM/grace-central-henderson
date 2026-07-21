@@ -122,7 +122,7 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
             accent: 'border-l-amber-500',
           },
         ].map(kpi => (
-          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
+          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
             <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{kpi.value}</p>
             <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>

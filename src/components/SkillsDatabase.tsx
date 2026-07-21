@@ -488,7 +488,7 @@ export function SkillsDatabase({ people, onViewPerson, embedded = false }: Skill
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 mt-6">
-              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600 p-5">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
                     <Users size={22} className="text-white" />
@@ -501,7 +501,7 @@ export function SkillsDatabase({ people, onViewPerson, embedded = false }: Skill
                   </div>
                 </div>
               </div>
-              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
                     <Heart size={22} className="text-white" />
@@ -514,7 +514,7 @@ export function SkillsDatabase({ people, onViewPerson, embedded = false }: Skill
                   </div>
                 </div>
               </div>
-              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-slate-500 p-5">
+              <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-slate-500 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-slate-700 dark:bg-slate-600 rounded-lg flex items-center justify-center shadow-sm">
                     <Award size={22} className="text-white" />

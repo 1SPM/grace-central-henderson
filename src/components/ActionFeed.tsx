@@ -750,7 +750,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`${colors.bg} ${colors.border} border border-l-[5px] ${colors.stripe} rounded-2xl p-5 text-left transition-all hover:shadow-md`}
+              className={`${colors.bg} ${colors.border} border-y border-r border-l-[5px] ${colors.stripe} rounded-2xl p-5 text-left transition-all hover:shadow-md`}
             >
               <div className="flex items-center justify-between mb-2.5">
                 <div className={`${colors.iconBg} rounded-lg p-2 shadow-sm`}>

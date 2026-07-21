@@ -77,7 +77,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
       <SampleDataNotice label="Fund-split, stream-summary, and campaign figures below are illustrative samples — not live" />
       {/* KPI hero cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <DollarSign size={13} className="text-amber-500" /> Total given
           </p>
@@ -88,7 +88,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
             {stats.gifts} gifts {stats.isMtd ? 'this month' : 'recorded'}
           </p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <Check size={13} className="text-blue-500" /> Average gift
           </p>
@@ -97,14 +97,14 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
           </p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">per gift</p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <LayoutGrid size={13} className="text-emerald-500" /> Funds
           </p>
           <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{stats.funds.length}</p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">active</p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <CreditCard size={13} className="text-indigo-500" /> Card interchange
           </p>
@@ -243,7 +243,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
         ].map(card => (
           <div
             key={card.label}
-            className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${card.accent} p-5`}
+            className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${card.accent} p-5`}
           >
             <p className="section-eyebrow">{card.label}</p>
             <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">{card.value}</p>

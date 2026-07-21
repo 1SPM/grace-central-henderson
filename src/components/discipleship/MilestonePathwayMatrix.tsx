@@ -149,7 +149,7 @@ export function MilestonePathwayMatrix({
             <button
               key={s.type}
               onClick={() => setFilterStatus(filterStatus === s.type ? 'all' : s.type)}
-              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[3px] p-4 text-center transition-all ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[3px] p-4 text-center transition-all ${
                 filterStatus === s.type
                   ? 'border-indigo-500 ring-1 ring-indigo-500'
                   : `border-gray-200 dark:border-dark-700 ${MILESTONE_BORDER_COLORS[s.type]} hover:border-gray-300 dark:hover:border-dark-600`

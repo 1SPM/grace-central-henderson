@@ -148,7 +148,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
               <UserCheck className="text-white" size={22} />
@@ -159,7 +159,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">checked in</p>
         </div>
 
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
               <Users className="text-white" size={22} />
@@ -170,7 +170,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">total attendance</p>
         </div>
 
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500 p-5">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-sm">
               <TrendingUp className="text-white" size={22} />

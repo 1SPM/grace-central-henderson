@@ -130,7 +130,7 @@ export function HealthScorecardPanel() {
               <div
                 key={tile.key}
                 data-testid={`health-tile-${tile.key}`}
-                className="rounded-xl border border-l-[3px] border-gray-200 dark:border-dark-700 border-l-rose-500 p-4"
+                className="rounded-xl border-y border-r border-l-[3px] border-gray-200 dark:border-dark-700 border-l-rose-500 p-4"
               >
                 <p className="text-xs font-medium text-gray-500 dark:text-dark-400">{tile.label}</p>
                 {metric.source === 'not_yet_computed' ? (

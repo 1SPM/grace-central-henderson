@@ -179,7 +179,7 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
           { label: 'Avg Rating', value: avgRating > 0 ? `${avgRating}/5` : '---', icon: Star, bg: 'bg-amber-500', border: 'border-l-amber-500' },
           { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, bg: 'bg-violet-600', border: 'border-l-violet-600' },
         ].map(stat => (
-          <div key={stat.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${stat.border} p-5`}>
+          <div key={stat.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${stat.border} p-5`}>
             <div className="flex items-center gap-2.5 mb-2.5">
               <div className={`p-2 rounded-lg ${stat.bg} shadow-sm`}>
                 <stat.icon size={16} className="text-white" />

@@ -233,25 +233,25 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 p-5">
               <p className="section-eyebrow">Active cards</p>
               <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {summary?.active_cards ?? 0}
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600 p-5">
               <p className="section-eyebrow">KYC approved</p>
               <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {kycApproved}<span className="text-sm text-gray-400 dark:text-dark-500"> / {withCards || people.length}</span>
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-slate-500 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-slate-500 p-5">
               <p className="section-eyebrow">Total float</p>
               <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {fmtImpactUsd(summary?.total_float_micro_usd ?? 0)}
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
               <p className="section-eyebrow">Interchange (MTD)</p>
               <p className="stat-number text-3xl text-emerald-700 dark:text-emerald-400 mt-2">
                 {fmtImpactUsd(summary?.interchange_mtd_micro_usd ?? 0)}

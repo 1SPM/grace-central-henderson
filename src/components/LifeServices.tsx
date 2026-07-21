@@ -324,7 +324,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
                 <button
                   key={card.id}
                   onClick={() => onNavigate(card.id as View)}
-                  className={`group bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 text-left shadow-sm hover:shadow-md transition-all border border-l-[5px] border-gray-100 dark:border-dark-700 ${stripeClass} hover:border-gray-200 dark:hover:border-dark-600`}
+                  className={`group bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 text-left shadow-sm hover:shadow-md transition-all border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 ${stripeClass} hover:border-gray-200 dark:hover:border-dark-600`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses} flex items-center justify-center shadow-sm`}>
@@ -664,7 +664,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
 
       {/* Stats Footer */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-rose-600">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-rose-600">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-rose-600 flex items-center justify-center shadow-sm">
               <Heart size={22} className="text-white" />
@@ -675,7 +675,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-slate-500">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-slate-500">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-slate-700 dark:bg-slate-600 flex items-center justify-center shadow-sm">
               <Flower2 size={22} className="text-white" />
@@ -686,7 +686,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-blue-600">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-blue-600">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
               <Users size={22} className="text-white" />
@@ -697,7 +697,7 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-amber-500">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-amber-500">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
               <Gift size={22} className="text-white" />

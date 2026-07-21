@@ -66,7 +66,7 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
           {metrics.map(metric => (
             <div
               key={metric.key}
-              className="relative rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 bg-white dark:bg-dark-850 p-5"
+              className="relative rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 bg-white dark:bg-dark-850 p-5"
               data-testid={`metric-${metric.key}`}
             >
               <div className="flex items-start justify-between">

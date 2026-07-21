@@ -105,7 +105,7 @@ export function LeaderProfileView({
               {kpiCards.map(kpi => (
                 <div
                   key={kpi.label}
-                  className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}
+                  className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}
                 >
                   <p className="section-eyebrow">{kpi.label}</p>
                   <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-1.5 flex items-center gap-1.5">
