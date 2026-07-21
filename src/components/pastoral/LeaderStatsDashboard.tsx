@@ -180,9 +180,9 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
           { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
         ].map(stat => (
           <div key={stat.label} className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className={`p-1.5 rounded-lg ${stat.bg}`}>
-                <stat.icon size={14} className={stat.color} />
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className={`p-2 rounded-lg ${stat.bg}`}>
+                <stat.icon size={16} className={stat.color} />
               </div>
               <span className="text-xs text-gray-500 dark:text-dark-400">{stat.label}</span>
             </div>

@@ -458,8 +458,8 @@ export function LeaderManagement({
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Sessions</p>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Star size={14} className="text-amber-400 fill-amber-400" />
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Star size={18} className="text-amber-400 fill-amber-400" />
                       <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{ratingDisplay.toFixed(1)}</p>
                     </div>
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Rating</p>
