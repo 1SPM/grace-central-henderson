@@ -77,7 +77,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
       <SampleDataNotice label="Fund-split, stream-summary, and campaign figures below are illustrative samples — not live" />
       {/* KPI hero cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <DollarSign size={13} className="text-amber-500" /> Total given
           </p>
@@ -88,7 +88,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
             {stats.gifts} gifts {stats.isMtd ? 'this month' : 'recorded'}
           </p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <Check size={13} className="text-blue-500" /> Average gift
           </p>
@@ -97,14 +97,14 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
           </p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">per gift</p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <LayoutGrid size={13} className="text-emerald-500" /> Funds
           </p>
           <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{stats.funds.length}</p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">active</p>
         </div>
-        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600">
           <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
             <CreditCard size={13} className="text-indigo-500" /> Card interchange
           </p>
@@ -236,14 +236,14 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
       {/* Stream summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Direct giving', value: '$51,400', sub: 'Card · Online · App', trend: '▲ 11% vs last period', accent: 'border-t-amber-500' },
-          { label: 'Points redeemed', value: '$3,840', sub: 'Toward tithe & causes', trend: '▲ 34% vs last period', accent: 'border-t-violet-600' },
-          { label: 'Campaign giving', value: '$24,870', sub: 'Admin + Seasonal', trend: '▲ 8% vs last period', accent: 'border-t-emerald-600' },
-          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-t-rose-500' },
+          { label: 'Direct giving', value: '$51,400', sub: 'Card · Online · App', trend: '▲ 11% vs last period', accent: 'border-l-amber-500' },
+          { label: 'Points redeemed', value: '$3,840', sub: 'Toward tithe & causes', trend: '▲ 34% vs last period', accent: 'border-l-violet-600' },
+          { label: 'Campaign giving', value: '$24,870', sub: 'Admin + Seasonal', trend: '▲ 8% vs last period', accent: 'border-l-emerald-600' },
+          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-l-rose-500' },
         ].map(card => (
           <div
             key={card.label}
-            className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 border-t-2 ${card.accent} p-5`}
+            className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${card.accent} p-5`}
           >
             <p className="section-eyebrow">{card.label}</p>
             <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">{card.value}</p>
