@@ -54,18 +54,24 @@ html[data-tenant='faithful'] body {
   color: var(--grace-navy-950);
 }
 
+/* Display serif reserved for true display moments — the hero name, big
+   KPI numerals, brand wordmarks — via explicit classes, NOT every h1-h3.
+   The old blanket `h1, h2, h3 { font-family: Playfair; color: navy }` rule
+   serif'd and navy-tinted every heading regardless of size or context,
+   including 18px calendar month labels, a 12px sidebar checklist title
+   ("Finish Setting Up"), and — worse — the white "GRACE" heading on the
+   dark onboarding panel: the theme's navy-ink override out-specificity'd
+   Tailwind's `text-white` on that component, rendering near-invisible
+   dark-navy-on-dark-panel text in production. Font-family and color are
+   independent concerns; every component using .serif already sets its
+   own text color via Tailwind (text-slate-900 dark:text-dark-100), so
+   this rule only carries family — components stay in control of color,
+   which is what makes it safe on both light and dark surfaces. */
 html[data-tenant='faithful'] .stat-number,
-html[data-tenant='faithful'] .serif {
-  font-family: 'Playfair Display', 'Poppins', Georgia, serif;
-}
-
-html[data-tenant='faithful'] h1,
-html[data-tenant='faithful'] h2,
-html[data-tenant='faithful'] h3,
+html[data-tenant='faithful'] .serif,
 html[data-tenant='faithful'] .font-display,
 html[data-tenant='faithful'] .font-brand {
-  font-family: 'Playfair Display', Georgia, serif;
-  color: var(--grace-navy-950);
+  font-family: 'Playfair Display', 'Poppins', Georgia, serif;
 }
 
 /* Focus rings — sky instead of purple */

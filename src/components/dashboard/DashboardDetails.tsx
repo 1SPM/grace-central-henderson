@@ -58,9 +58,6 @@ export function DashboardDetails({
       >
         <span className="text-sm font-medium text-slate-800 dark:text-dark-100">
           More on your church
-          <span className="text-gray-500 dark:text-dark-400 font-normal ml-2">
-            ({sectionCount} section{sectionCount === 1 ? '' : 's'})
-          </span>
         </span>
         <ChevronDown
           size={18}
@@ -88,25 +85,31 @@ export function DashboardDetails({
                 )}
               </div>
               <div className="space-y-2.5">
-                {fundTotalsMtd.map(({ fund, amount }) => {
+                {(() => {
+                  const total = fundTotalsMtd.reduce((sum, f) => sum + f.amount, 0) || 1;
                   const max = fundTotalsMtd[0].amount || 1;
-                  return (
+                  return fundTotalsMtd.map(({ fund, amount }) => (
                     <div key={fund}>
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-gray-600 dark:text-dark-300 capitalize">{fund}</span>
-                        <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
-                          ${amount.toLocaleString()}
+                        <span className="flex items-baseline gap-1.5">
+                          <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
+                            ${amount.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] text-gray-400 dark:text-dark-500 tabular-nums">
+                            {Math.round((amount / total) * 100)}%
+                          </span>
                         </span>
                       </div>
-                      <div className="h-1.5 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-gray-100 dark:bg-dark-700/60 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-600 rounded-full"
                           style={{ width: `${(amount / max) * 100}%` }}
                         />
                       </div>
                     </div>
-                  );
-                })}
+                  ));
+                })()}
               </div>
             </div>
           )}

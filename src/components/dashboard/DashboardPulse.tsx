@@ -28,6 +28,11 @@ export function DashboardPulse({
   onViewPortalActivity,
 }: DashboardPulseProps) {
   const { givingMtd, goalPct, openCare, crisisCount } = metrics;
+  // Rose only means something when it's true: a crisis in dispatch. Plain
+  // open items without a crisis get a calmer amber; "all clear" gets the
+  // same neutral slate every other tile uses, not an alarm color sitting
+  // idle at zero.
+  const dispatchAccent = crisisCount > 0 ? 'rose' : openCare.length > 0 ? 'amber' : 'slate';
 
   return (
     <div className="mb-6">
@@ -83,7 +88,7 @@ export function DashboardPulse({
           change={crisisCount}
           changeLabel={openCare.length > 0 ? `${crisisCount} crisis` : 'all clear'}
           invertTrend
-          accentColor="rose"
+          accentColor={dispatchAccent}
           onClick={onViewPastoralCare}
         />
         <StatCard

@@ -76,7 +76,7 @@ export function GraceGettingStartedPanel({ churchName = 'Central Henderson Churc
             <GraceOrb size="lg" rings />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">GRACE</h2>
+            <h2 className="serif text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">GRACE</h2>
             <p className="inline-block text-[11px] font-medium text-sky-200 bg-sky-500/15 border border-sky-400/25 rounded px-2 py-1 mb-3">
               Growth · Resource · Assistance · Community · Engagement
             </p>

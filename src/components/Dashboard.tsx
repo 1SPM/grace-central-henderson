@@ -152,7 +152,10 @@ export function Dashboard({
   const workQueue = onViewActions ?? onViewTasks;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    // pb-24: clears the floating "Ask Grace" dock (fixed bottom-6, ~56px
+    // tall) so it doesn't sit on top of the last card's content when
+    // scrolled to the bottom — see AskGrace.tsx.
+    <div className="p-6 pb-24 max-w-7xl mx-auto">
       <DashboardCommandBar
         greeting={greeting}
         addressee={addressee}
@@ -169,6 +172,29 @@ export function Dashboard({
         onStartPastorTour={onStartPastorTour}
         onOpenTutorials={onOpenTutorials}
       />
+
+      {/*
+        Pulse (people/money/care) leads, calendar follows. A pastor's first
+        read of the day is "how are we doing," not "what's the grid look
+        like" — the old order put a mostly-empty month grid above the one
+        row of numbers that actually answers that question.
+      */}
+      <DashboardPulse
+        metrics={metrics}
+        peopleCount={people.length}
+        visitorsCount={visitors.length}
+        peopleSparkline={peopleSparkline}
+        portalActive7d={portalActive7d}
+        portalLogins7d={portalLogins7d}
+        onViewPeople={onViewPeople}
+        onViewGiving={onViewGiving}
+        onViewPastoralCare={() => onNavigate?.('pastoral-care')}
+        onViewPortalActivity={() => onNavigate?.('discipleship-engagement')}
+      />
+
+      {!churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
+        <GraceGettingStartedPanel churchName={churchName} onDismiss={onDismissGraceIntro} />
+      )}
 
       <ClockCalendarBanner
         className="mb-6"
@@ -194,23 +220,6 @@ export function Dashboard({
             variant="embedded"
           />
         }
-      />
-
-      {!churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
-        <GraceGettingStartedPanel churchName={churchName} onDismiss={onDismissGraceIntro} />
-      )}
-
-      <DashboardPulse
-        metrics={metrics}
-        peopleCount={people.length}
-        visitorsCount={visitors.length}
-        peopleSparkline={peopleSparkline}
-        portalActive7d={portalActive7d}
-        portalLogins7d={portalLogins7d}
-        onViewPeople={onViewPeople}
-        onViewGiving={onViewGiving}
-        onViewPastoralCare={() => onNavigate?.('pastoral-care')}
-        onViewPortalActivity={() => onNavigate?.('discipleship-engagement')}
       />
 
       <DashboardDetails

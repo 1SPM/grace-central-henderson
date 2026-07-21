@@ -496,7 +496,9 @@ export function LiveClockDisplay({
   className?: string;
 }) {
   const { format, now } = useChurchClock(timezone);
-  const time = format({ hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  // No seconds — a ticking header clock is constant peripheral motion
+  // that pulls the eye off the page content it sits above.
+  const time = format({ hour: 'numeric', minute: '2-digit' });
   const date = format({ weekday: 'short', month: 'short', day: 'numeric' });
 
   if (variant === 'redesign') {

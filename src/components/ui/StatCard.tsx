@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Sparkline } from './Sparkline';
 
 interface StatCardProps {
@@ -16,54 +16,42 @@ interface StatCardProps {
   onClick?: () => void;
 }
 
+// Color lives only in the icon chip and sparkline now — every tile shares
+// the same neutral card surface (see the Component className below). Four
+// different pastel tile backgrounds read as template-default; a shared
+// surface with a small accent chip reads as one considered system, and
+// lets accentColor stay meaningful as a semantic signal (e.g. rose really
+// means "needs attention") instead of decoration repeated on every tile.
 const accentColors = {
   emerald: {
-    bg: 'bg-emerald-50/90 dark:bg-emerald-900/20',
-    border: 'border-emerald-200 dark:border-emerald-800/50',
     icon: 'text-emerald-600 dark:text-emerald-400',
-    iconBg: 'bg-white dark:bg-emerald-900/30',
+    iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
     sparkline: '#10b981',
-    glow: 'from-emerald-500/12',
   },
   amber: {
-    bg: 'bg-amber-50/90 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800/50',
     icon: 'text-amber-600 dark:text-amber-400',
-    iconBg: 'bg-white dark:bg-amber-900/30',
+    iconBg: 'bg-amber-50 dark:bg-amber-500/10',
     sparkline: '#f59e0b',
-    glow: 'from-amber-500/12',
   },
   rose: {
-    bg: 'bg-rose-50/90 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-800/50',
     icon: 'text-rose-600 dark:text-rose-400',
-    iconBg: 'bg-white dark:bg-rose-900/30',
+    iconBg: 'bg-rose-50 dark:bg-rose-500/10',
     sparkline: '#f43f5e',
-    glow: 'from-rose-500/12',
   },
   blue: {
-    bg: 'bg-blue-50/90 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800/50',
     icon: 'text-blue-600 dark:text-blue-400',
-    iconBg: 'bg-white dark:bg-blue-900/30',
+    iconBg: 'bg-blue-50 dark:bg-blue-500/10',
     sparkline: '#3b82f6',
-    glow: 'from-blue-500/12',
   },
   violet: {
-    bg: 'bg-slate-50/90 dark:bg-slate-900/20',
-    border: 'border-slate-200 dark:border-slate-800/50',
-    icon: 'text-slate-600 dark:text-slate-400',
-    iconBg: 'bg-white dark:bg-slate-900/30',
+    icon: 'text-violet-600 dark:text-violet-400',
+    iconBg: 'bg-violet-50 dark:bg-violet-500/10',
     sparkline: '#8b5cf6',
-    glow: 'from-slate-500/12',
   },
   slate: {
-    bg: 'bg-slate-50/90 dark:bg-slate-800/50',
-    border: 'border-slate-200 dark:border-slate-700',
-    icon: 'text-slate-600 dark:text-slate-400',
-    iconBg: 'bg-white dark:bg-slate-700',
+    icon: 'text-slate-500 dark:text-slate-400',
+    iconBg: 'bg-slate-100 dark:bg-slate-800',
     sparkline: '#64748b',
-    glow: 'from-slate-500/12',
   },
 };
 
@@ -85,31 +73,31 @@ export function StatCard({
   const renderChange = () => {
     if (change === undefined) return null;
 
-    const isNeutral = change === 0;
+    // A zero-value delta in a colored pill ("−0% logins this week") reads
+    // as a sad, pointless badge. Fold it into plain muted text instead —
+    // the changeLabel alone still carries the context.
+    if (change === 0) {
+      return (
+        <p className="mt-3 text-xs text-gray-500 dark:text-dark-400">{changeLabel}</p>
+      );
+    }
+
     const isGoodTrend = invertTrend ? change < 0 : change > 0;
 
     return (
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-            isNeutral
-              ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-              : isGoodTrend
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
-                : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium tabular-nums ${
+            isGoodTrend
+              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
+              : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
           }`}
         >
-          {isNeutral ? (
-            <Minus size={12} />
-          ) : change > 0 ? (
-            <TrendingUp size={12} />
-          ) : (
-            <TrendingDown size={12} />
-          )}
+          {change > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
           {change > 0 ? '+' : ''}
           {change}%
         </span>
-        <span className="text-xs text-slate-500 dark:text-slate-400">{changeLabel}</span>
+        <span className="text-xs text-gray-500 dark:text-dark-400">{changeLabel}</span>
       </div>
     );
   };
@@ -119,51 +107,47 @@ export function StatCard({
   return (
     <Component
       onClick={onClick}
-      className={`${colors.bg} border ${colors.border} rounded-2xl ${
+      className={`bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl ${
         isLarge ? 'p-5 sm:p-6' : 'p-4'
-      } relative overflow-hidden transition-all duration-300 shadow-sm ${
-        onClick ? 'hover:-translate-y-0.5 hover:shadow-md cursor-pointer' : ''
+      } text-left w-full relative transition-all duration-200 shadow-sm ${
+        onClick
+          ? 'hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-dark-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-900'
+          : ''
       }`}
     >
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${colors.glow} to-transparent`} />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent dark:via-white/10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-transparent to-white/35 dark:to-white/5" />
-
-      <div className={`relative flex items-start justify-between gap-4 ${isLarge ? 'mb-4' : 'mb-3'}`}>
+      <div className={`flex items-start justify-between gap-4 ${isLarge ? 'mb-4' : 'mb-3'}`}>
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {icon && (
             <div
-              className={`${isLarge ? 'w-11 h-11' : 'w-9 h-9'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/5`}
+              className={`${isLarge ? 'w-11 h-11' : 'w-9 h-9'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0`}
             >
               <span className={colors.icon}>{icon}</span>
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 truncate">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-dark-400 truncate">
               {label}
             </p>
             {isLarge && (
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Live at a glance</p>
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-dark-400">Live at a glance</p>
             )}
           </div>
         </div>
 
         {sparklineData && sparklineData.length > 1 && (
-          <div className="rounded-full bg-white/60 dark:bg-black/10 p-1 ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm">
-            <Sparkline
-              data={sparklineData}
-              color={colors.sparkline}
-              fillColor={colors.sparkline}
-              width={isLarge ? 108 : 84}
-              height={isLarge ? 34 : 26}
-            />
-          </div>
+          <Sparkline
+            data={sparklineData}
+            color={colors.sparkline}
+            fillColor={colors.sparkline}
+            width={isLarge ? 108 : 84}
+            height={isLarge ? 34 : 26}
+          />
         )}
       </div>
 
-      <div className="relative flex items-end justify-between gap-4">
+      <div className="flex items-end justify-between gap-4">
         <p
-          className={`font-semibold tracking-tight text-slate-900 dark:text-white tabular-nums leading-none ${
+          className={`font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums leading-none ${
             isLarge ? 'text-3xl sm:text-[2.15rem]' : 'text-2xl'
           }`}
         >
