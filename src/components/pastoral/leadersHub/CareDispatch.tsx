@@ -95,7 +95,7 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
     <div className="space-y-4">
       <SampleDataNotice />
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
             label: 'Care touches today',
@@ -118,10 +118,10 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
             sub: 'awaiting leader match',
           },
         ].map(kpi => (
-          <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
             <p className="section-eyebrow">{kpi.label}</p>
-            <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5">{kpi.value}</p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5">{kpi.sub}</p>
+            <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{kpi.value}</p>
+            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>
           </div>
         ))}
       </div>
