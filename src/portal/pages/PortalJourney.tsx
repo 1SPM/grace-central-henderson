@@ -49,15 +49,23 @@ export function PortalJourney() {
 
       {data.membership_track && (
         <section aria-labelledby="portal-journey-membership" className="rounded-2xl border border-stone-200 bg-white p-4" data-testid="membership-track-card">
-          <h2 id="portal-journey-membership" className="text-sm font-semibold text-stone-900 mb-2 flex items-center gap-2">
+          <h2 id="portal-journey-membership" className="text-sm font-semibold text-stone-900 mb-3 flex items-center gap-2">
             {data.membership_track.label}
             {data.membership_track.is_complete && <CheckCircle2 size={16} className="text-emerald-500" />}
           </h2>
-          <p className="text-sm text-stone-500">
-            {data.membership_track.is_complete
-              ? "You've completed every step in this track."
-              : `${data.membership_track.completed_count} of ${data.membership_track.required_count} steps complete.`}
-          </p>
+          <div className="flex items-baseline gap-2">
+            <span className="stat-number text-3xl text-stone-900">{data.membership_track.completed_count}</span>
+            <span className="text-sm text-stone-400">of {data.membership_track.required_count} steps</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-stone-100 mt-2.5 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-rose-600"
+              style={{ width: `${Math.min(100, Math.round((data.membership_track.completed_count / data.membership_track.required_count) * 100))}%` }}
+            />
+          </div>
+          {data.membership_track.is_complete && (
+            <p className="text-xs text-emerald-600 mt-2">You've completed every step in this track.</p>
+          )}
         </section>
       )}
 
