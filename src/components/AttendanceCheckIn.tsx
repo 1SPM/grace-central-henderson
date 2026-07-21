@@ -155,7 +155,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-dark-400">Today</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">{stats.today}</p>
+          <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">{stats.today}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">checked in</p>
         </div>
 
@@ -166,7 +166,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-dark-400">This Week</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-dark-100">{stats.thisWeek}</p>
+          <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">{stats.thisWeek}</p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">total attendance</p>
         </div>
 
@@ -177,7 +177,7 @@ export function AttendanceCheckIn({ people, attendance, onCheckIn, embedded = fa
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-dark-400">Trend</span>
           </div>
-          <p className={`text-3xl font-bold ${stats.trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          <p className={`stat-number text-3xl ${stats.trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {stats.trend >= 0 ? '+' : ''}{stats.trend}%
           </p>
           <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">vs last week</p>
