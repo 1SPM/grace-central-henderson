@@ -35,6 +35,15 @@ const MILESTONE_COLORS: Record<MilestoneType, string> = {
   leading: 'text-rose-500',
 };
 
+const MILESTONE_BORDER_COLORS: Record<MilestoneType, string> = {
+  first_visit: 'border-l-blue-500',
+  attended_class: 'border-l-slate-500',
+  baptized: 'border-l-cyan-500',
+  joined_group: 'border-l-green-500',
+  serving: 'border-l-amber-500',
+  leading: 'border-l-rose-500',
+};
+
 type FilterStatus = 'all' | MilestoneType;
 
 interface MilestonePathwayMatrixProps {
@@ -140,10 +149,10 @@ export function MilestonePathwayMatrix({
             <button
               key={s.type}
               onClick={() => setFilterStatus(filterStatus === s.type ? 'all' : s.type)}
-              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border p-4 text-center transition-all ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[3px] p-4 text-center transition-all ${
                 filterStatus === s.type
                   ? 'border-indigo-500 ring-1 ring-indigo-500'
-                  : 'border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600'
+                  : `border-gray-200 dark:border-dark-700 ${MILESTONE_BORDER_COLORS[s.type]} hover:border-gray-300 dark:hover:border-dark-600`
               }`}
             >
               <Icon size={18} className={`mx-auto mb-1.5 ${MILESTONE_COLORS[s.type]}`} />

@@ -314,12 +314,17 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
                 purple: 'from-slate-500 to-slate-600',
                 amber: 'from-amber-500 to-orange-600',
               }[card.color];
+              const stripeClass = {
+                rose: 'border-l-rose-600',
+                purple: 'border-l-slate-500',
+                amber: 'border-l-amber-500',
+              }[card.color];
 
               return (
                 <button
                   key={card.id}
                   onClick={() => onNavigate(card.id as View)}
-                  className="group bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 text-left shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-dark-700 hover:border-gray-200 dark:hover:border-dark-600"
+                  className={`group bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 text-left shadow-sm hover:shadow-md transition-all border border-l-[5px] border-gray-100 dark:border-dark-700 ${stripeClass} hover:border-gray-200 dark:hover:border-dark-600`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses} flex items-center justify-center shadow-sm`}>
@@ -659,10 +664,10 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
 
       {/* Stats Footer */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-rose-600">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
-              <Heart size={22} className="text-rose-600 dark:text-rose-400" />
+            <div className="w-11 h-11 rounded-lg bg-rose-600 flex items-center justify-center shadow-sm">
+              <Heart size={22} className="text-white" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">24</div>
@@ -670,10 +675,10 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-slate-500">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-slate-900/20 flex items-center justify-center">
-              <Flower2 size={22} className="text-slate-600 dark:text-slate-400" />
+            <div className="w-11 h-11 rounded-lg bg-slate-700 dark:bg-slate-600 flex items-center justify-center shadow-sm">
+              <Flower2 size={22} className="text-white" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">8</div>
@@ -681,10 +686,10 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-blue-600">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-              <Users size={22} className="text-blue-600 dark:text-blue-400" />
+            <div className="w-11 h-11 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+              <Users size={22} className="text-white" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">45</div>
@@ -692,10 +697,10 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             </div>
           </div>
         </div>
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-gray-100 dark:border-dark-700">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border border-l-[5px] border-gray-100 dark:border-dark-700 border-l-amber-500">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
-              <Gift size={22} className="text-amber-600 dark:text-amber-400" />
+            <div className="w-11 h-11 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
+              <Gift size={22} className="text-white" />
             </div>
             <div>
               <div className="stat-number text-2xl text-gray-900 dark:text-dark-100">$125K</div>

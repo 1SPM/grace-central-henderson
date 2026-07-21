@@ -76,9 +76,9 @@ export function DiscipleshipEngagementHub({
   const headerMeta = getViewHeaderMeta('discipleship-engagement');
 
   const spiritualKpis = [
-    { label: 'Step 3+', value: metrics.atStep3Plus, sub: 'Baptized or beyond' },
-    { label: 'Avg steps', value: metrics.avgMilestones, sub: 'Per active member' },
-    { label: 'Need follow-up', value: followUpPeople.length, sub: 'Growth opportunities', highlight: followUpPeople.length > 0 },
+    { label: 'Step 3+', value: metrics.atStep3Plus, sub: 'Baptized or beyond', accent: 'border-l-blue-600' },
+    { label: 'Avg steps', value: metrics.avgMilestones, sub: 'Per active member', accent: 'border-l-emerald-600' },
+    { label: 'Need follow-up', value: followUpPeople.length, sub: 'Growth opportunities', highlight: followUpPeople.length > 0, accent: 'border-l-amber-500' },
   ];
 
   const portalKpis = [
@@ -110,10 +110,10 @@ export function DiscipleshipEngagementHub({
       />
 
       <div className="grid grid-cols-3 gap-4 mb-4">
-        {spiritualKpis.map(({ label, value, sub, highlight }) => (
+        {spiritualKpis.map(({ label, value, sub, highlight, accent }) => (
           <div
             key={label}
-            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-5"
+            className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[5px] border-gray-200 dark:border-dark-700 ${accent} p-5`}
           >
             <p className={`stat-number text-3xl ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100'}`}>
               {value}
@@ -128,7 +128,7 @@ export function DiscipleshipEngagementHub({
         {portalKpis.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-4"
+            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-l-[3px] border-gray-200 dark:border-dark-700 border-l-indigo-500 p-4"
           >
             <div className="flex items-center gap-2 mb-1.5">
               <Icon size={14} className="text-indigo-500" />
