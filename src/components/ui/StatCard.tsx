@@ -16,41 +16,41 @@ interface StatCardProps {
   onClick?: () => void;
 }
 
-// Color lives only in the icon chip and sparkline now — every tile shares
-// the same neutral card surface (see the Component className below). Four
-// different pastel tile backgrounds read as template-default; a shared
-// surface with a small accent chip reads as one considered system, and
-// lets accentColor stay meaningful as a semantic signal (e.g. rose really
-// means "needs attention") instead of decoration repeated on every tile.
+// Color lives in the icon chip, the left border stripe, and the sparkline —
+// every tile still shares the same neutral white card surface, so this
+// reads as "one bold system" rather than four different pastel tile
+// backgrounds. Pushed further than the first bolder pass: icon chips are
+// now solid fills (white icon on saturated color, not a tinted badge), and
+// the accent stripe is a full 5px rather than a hairline.
 const accentColors = {
   emerald: {
-    icon: 'text-emerald-600 dark:text-emerald-400',
-    iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    iconBg: 'bg-emerald-600',
+    border: 'border-l-emerald-600',
     sparkline: '#10b981',
   },
   amber: {
-    icon: 'text-amber-600 dark:text-amber-400',
-    iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    iconBg: 'bg-amber-500',
+    border: 'border-l-amber-500',
     sparkline: '#f59e0b',
   },
   rose: {
-    icon: 'text-rose-600 dark:text-rose-400',
-    iconBg: 'bg-rose-50 dark:bg-rose-500/10',
+    iconBg: 'bg-rose-600',
+    border: 'border-l-rose-600',
     sparkline: '#f43f5e',
   },
   blue: {
-    icon: 'text-blue-600 dark:text-blue-400',
-    iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    iconBg: 'bg-blue-600',
+    border: 'border-l-blue-600',
     sparkline: '#3b82f6',
   },
   violet: {
-    icon: 'text-violet-600 dark:text-violet-400',
-    iconBg: 'bg-violet-50 dark:bg-violet-500/10',
+    iconBg: 'bg-violet-600',
+    border: 'border-l-violet-600',
     sparkline: '#8b5cf6',
   },
   slate: {
-    icon: 'text-slate-500 dark:text-slate-400',
-    iconBg: 'bg-slate-100 dark:bg-slate-800',
+    iconBg: 'bg-slate-700 dark:bg-slate-600',
+    border: 'border-l-gray-300 dark:border-l-dark-600',
     sparkline: '#64748b',
   },
 };
@@ -107,7 +107,7 @@ export function StatCard({
   return (
     <Component
       onClick={onClick}
-      className={`bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl ${
+      className={`bg-white dark:bg-dark-850 border border-l-[5px] border-gray-200 dark:border-dark-700 ${colors.border} rounded-2xl ${
         isLarge ? 'p-6 sm:p-7' : 'p-5'
       } text-left w-full relative transition-all duration-200 shadow-sm ${
         onClick
@@ -119,13 +119,13 @@ export function StatCard({
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {icon && (
             <div
-              className={`${isLarge ? 'w-12 h-12' : 'w-10 h-10'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0`}
+              className={`${isLarge ? 'w-14 h-14' : 'w-11 h-11'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0 shadow-sm`}
             >
-              <span className={colors.icon}>{icon}</span>
+              <span className="text-white">{icon}</span>
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-dark-400 truncate">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-dark-400 truncate">
               {label}
             </p>
             {isLarge && (
@@ -139,7 +139,7 @@ export function StatCard({
             data={sparklineData}
             color={colors.sparkline}
             fillColor={colors.sparkline}
-            width={isLarge ? 108 : 56}
+            width={isLarge ? 108 : 42}
             height={isLarge ? 34 : 26}
           />
         )}
@@ -148,7 +148,7 @@ export function StatCard({
       <div className="flex items-end justify-between gap-4">
         <p
           className={`stat-number text-gray-900 dark:text-white leading-none ${
-            isLarge ? 'text-4xl sm:text-5xl' : 'text-3xl'
+            isLarge ? 'text-5xl sm:text-6xl' : 'text-4xl'
           }`}
         >
           {value}
