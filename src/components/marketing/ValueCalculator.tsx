@@ -193,7 +193,6 @@ export function ValueCalculator() {
 
   useEffect(() => {
     if (ctaClicked) setCtaClicked(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan]);
 
   function handleScenario(s: Scenario) {
