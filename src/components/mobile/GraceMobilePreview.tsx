@@ -54,7 +54,7 @@ export function GraceMobilePreview({
     () =>
       `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
         mobileUrl,
-      )}&bgcolor=ffffff&color=e11d48`,
+      )}&bgcolor=ffffff&color=3B53BB`,
     [mobileUrl],
   );
 

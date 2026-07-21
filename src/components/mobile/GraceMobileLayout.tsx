@@ -44,7 +44,7 @@ const TABS: { id: GraceMobileTab; label: string; icon: typeof Home }[] = [
   { id: 'giving', label: 'Giving', icon: DollarSign },
 ];
 
-const DEFAULT_PRIMARY = '#e11d48'; // brand-600 — GRACE admin accent
+const DEFAULT_PRIMARY = '#3B53BB'; // brand-600 — GRACE Navy admin accent
 
 export function GraceMobileLayout({
   children,

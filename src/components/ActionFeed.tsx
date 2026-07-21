@@ -484,7 +484,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
   }), [allItems]);
 
   const filterConfig = {
-    all: { icon: Zap, color: 'violet' },
+    all: { icon: Zap, color: 'brand' },
     tasks: { icon: ListTodo, color: 'blue' },
     birthdays: { icon: Gift, color: 'pink' },
     visitors: { icon: Users, color: 'amber' },
@@ -713,34 +713,33 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
           const isActive = filter === f;
           const count = counts[f];
 
+          // Illustration-badge language (see StatCard): soft tint circle +
+          // outline icon, no solid fill, no left stripe. Active state reads
+          // through the border + text color, not a heavier chip.
           const colorClasses = {
-            violet: {
-              bg: isActive ? 'bg-slate-100 dark:bg-slate-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-slate-300 dark:border-slate-500/30' : 'border-gray-200 dark:border-dark-700',
-              stripe: 'border-l-slate-500',
-              iconBg: 'bg-slate-500',
-              text: isActive ? 'text-slate-700 dark:text-slate-400' : 'text-gray-900 dark:text-dark-100',
+            brand: {
+              border: isActive ? 'border-brand-300 dark:border-brand-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-brand-50 dark:bg-brand-500/10',
+              iconInk: 'text-brand-600 dark:text-brand-300',
+              text: isActive ? 'text-brand-700 dark:text-brand-300' : 'text-gray-900 dark:text-dark-100',
             },
             blue: {
-              bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-blue-300 dark:border-blue-500/30' : 'border-gray-200 dark:border-dark-700',
-              stripe: 'border-l-blue-600',
-              iconBg: 'bg-blue-600',
-              text: isActive ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-sky-300 dark:border-sky-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-sky-50 dark:bg-sky-500/10',
+              iconInk: 'text-sky-600 dark:text-sky-300',
+              text: isActive ? 'text-sky-700 dark:text-sky-300' : 'text-gray-900 dark:text-dark-100',
             },
             pink: {
-              bg: isActive ? 'bg-pink-100 dark:bg-pink-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-pink-300 dark:border-pink-500/30' : 'border-gray-200 dark:border-dark-700',
-              stripe: 'border-l-pink-600',
-              iconBg: 'bg-pink-600',
-              text: isActive ? 'text-pink-700 dark:text-pink-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-pink-300 dark:border-pink-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-pink-50 dark:bg-pink-500/10',
+              iconInk: 'text-pink-600 dark:text-pink-300',
+              text: isActive ? 'text-pink-700 dark:text-pink-300' : 'text-gray-900 dark:text-dark-100',
             },
             amber: {
-              bg: isActive ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-amber-300 dark:border-amber-500/30' : 'border-gray-200 dark:border-dark-700',
-              stripe: 'border-l-amber-500',
-              iconBg: 'bg-amber-500',
-              text: isActive ? 'text-amber-700 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-amber-300 dark:border-amber-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+              iconInk: 'text-amber-600 dark:text-amber-300',
+              text: isActive ? 'text-amber-700 dark:text-amber-300' : 'text-gray-900 dark:text-dark-100',
             },
           };
 
@@ -750,11 +749,11 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`${colors.bg} ${colors.border} border-y border-r border-l-[5px] ${colors.stripe} rounded-2xl p-5 text-left transition-all hover:shadow-md`}
+              className={`bg-white dark:bg-dark-850 border ${colors.border} rounded-2xl p-5 text-left transition-all hover:shadow-md`}
             >
               <div className="flex items-center justify-between mb-2.5">
-                <div className={`${colors.iconBg} rounded-lg p-2 shadow-sm`}>
-                  <Icon size={20} className="text-white" />
+                <div className={`${colors.iconBg} w-11 h-11 rounded-full flex items-center justify-center`}>
+                  <Icon size={20} className={`${colors.iconInk} stroke-[1.5]`} />
                 </div>
                 <span className={`stat-number text-3xl ${colors.text}`}>{count}</span>
               </div>
