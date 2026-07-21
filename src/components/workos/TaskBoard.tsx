@@ -14,7 +14,7 @@ const COLUMNS: { status: WorkOrderTaskStatus; label: string }[] = [
 
 function priorityDot(priority: string): string {
   switch (priority) {
-    case 'urgent': return 'bg-rose-500';
+    case 'urgent': return 'bg-brand-500';
     case 'high': return 'bg-amber-500';
     case 'medium': return 'bg-blue-400';
     default: return 'bg-gray-300 dark:bg-dark-600';
@@ -34,7 +34,7 @@ export function TaskBoard({ onOpenWorkOrder }: { onOpenWorkOrder: (id: string) =
     );
   }
   if (error) {
-    return <div className="p-6 text-sm text-rose-600 dark:text-rose-400">{error}</div>;
+    return <div className="p-6 text-sm text-brand-600 dark:text-brand-400">{error}</div>;
   }
   if (isLoading) {
     return <div className="p-6 text-sm text-gray-500 dark:text-dark-400">Loading task board…</div>;

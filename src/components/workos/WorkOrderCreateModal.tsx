@@ -114,7 +114,7 @@ export function WorkOrderCreateModal({ onClose, onCreate }: WorkOrderCreateModal
               placeholder="e.g. Youth, Worship, Impact Card Operations"
             />
           </div>
-          {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
+          {error && <p className="text-sm text-brand-600 dark:text-brand-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-300">
               Cancel

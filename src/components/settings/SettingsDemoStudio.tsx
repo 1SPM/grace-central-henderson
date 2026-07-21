@@ -70,7 +70,7 @@ export function SettingsDemoStudio() {
       </p>
 
       {!isDemoTenant && (
-        <div className="rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 text-xs px-3 py-2 mb-4 flex gap-2">
+        <div className="rounded-lg bg-brand-50 dark:bg-brand-500/10 text-brand-800 dark:text-brand-300 text-xs px-3 py-2 mb-4 flex gap-2">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span>
             This is a real tenant, not a demo tenant. Every row this creates will carry a demo tag, but it
@@ -79,7 +79,7 @@ export function SettingsDemoStudio() {
         </div>
       )}
 
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       {result && (
         <div className="rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-sm px-3 py-2 mb-4 space-y-1">
@@ -113,7 +113,7 @@ export function SettingsDemoStudio() {
           value={confirmName}
           onChange={e => setConfirmName(e.target.value)}
           placeholder="Type your church's exact name to confirm"
-          className="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-rose-300 dark:border-rose-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-dark-100"
+          className="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-brand-300 dark:border-brand-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-dark-100"
         />
       )}
 

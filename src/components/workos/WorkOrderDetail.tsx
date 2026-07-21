@@ -151,7 +151,7 @@ export function WorkOrderDetail({ workOrderId, onBack }: WorkOrderDetailProps) {
         <ProgressBar value={progressPercent} color={progressPercent === 100 ? 'emerald' : 'blue'} />
       </div>
 
-      {actionError && <p className="text-sm text-rose-600 dark:text-rose-400 mb-4">{actionError}</p>}
+      {actionError && <p className="text-sm text-brand-600 dark:text-brand-400 mb-4">{actionError}</p>}
 
       {canManage && (
         <div className="flex flex-wrap items-center gap-2 mb-6">

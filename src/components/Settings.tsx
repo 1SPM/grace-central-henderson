@@ -254,10 +254,10 @@ export function Settings({
 
       {/* Life Services Section - Quick Access */}
       {onNavigate && (
-        <div className="bg-gradient-to-r from-rose-50 to-emerald-50 dark:from-rose-900/20 dark:to-emerald-900/20 rounded-2xl border border-rose-200 dark:border-rose-800 p-6 mb-8">
+        <div className="bg-gradient-to-r from-brand-50 to-emerald-50 dark:from-brand-900/20 dark:to-emerald-900/20 rounded-2xl border border-brand-200 dark:border-brand-800 p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
-              <Heart className="text-rose-600 dark:text-rose-400" size={20} />
+            <div className="w-10 h-10 bg-brand-100 dark:bg-brand-500/10 rounded-xl flex items-center justify-center">
+              <Heart className="text-brand-600 dark:text-brand-400" size={20} />
             </div>
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-dark-100">Life Services</h2>
@@ -783,8 +783,8 @@ export function Settings({
         {/* Live Service */}
         <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
-              <Radio className="text-rose-600 dark:text-rose-400" size={20} />
+            <div className="w-10 h-10 bg-brand-100 dark:bg-brand-500/10 rounded-xl flex items-center justify-center">
+              <Radio className="text-brand-600 dark:text-brand-400" size={20} />
             </div>
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-dark-100">Live Service</h2>
@@ -801,7 +801,7 @@ export function Settings({
                 value={churchProfile.liveStreamUrl}
                 onChange={(e) => setChurchProfile({ ...churchProfile, liveStreamUrl: e.target.value })}
                 placeholder="https://www.youtube.com/embed/..."
-                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -817,7 +817,7 @@ export function Settings({
                     currentSeries: { ...churchProfile.currentSeries, title: e.target.value },
                   })}
                   placeholder="Honor Each Other"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
               <div>
@@ -832,7 +832,7 @@ export function Settings({
                     currentSeries: { ...churchProfile.currentSeries, part: e.target.value },
                   })}
                   placeholder="Part 4"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
               <div>
@@ -847,14 +847,14 @@ export function Settings({
                     currentSeries: { ...churchProfile.currentSeries, speaker: e.target.value },
                   })}
                   placeholder="Pastor James Wilson"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-850 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
             </div>
             <button
               onClick={handleSaveProfile}
               disabled={saving || settingsLoading}
-              className="w-full px-4 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-medium hover:bg-rose-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-medium hover:bg-brand-700 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {profileSaved ? (
                 <>

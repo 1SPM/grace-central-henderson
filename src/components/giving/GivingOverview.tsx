@@ -38,7 +38,7 @@ function StreamPill({ kind, children }: { kind: 'direct' | 'points' | 'campaign'
     points: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
     campaign: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
     card: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-    member: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+    member: 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300',
   };
   return (
     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap ${styles[kind]}`}>
@@ -239,7 +239,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
           { label: 'Direct giving', value: '$51,400', sub: 'Card · Online · App', trend: '▲ 11% vs last period', accent: 'border-l-amber-500' },
           { label: 'Points redeemed', value: '$3,840', sub: 'Toward tithe & causes', trend: '▲ 34% vs last period', accent: 'border-l-violet-600' },
           { label: 'Campaign giving', value: '$24,870', sub: 'Admin + Seasonal', trend: '▲ 8% vs last period', accent: 'border-l-emerald-600' },
-          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-l-rose-500' },
+          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-l-brand-500' },
         ].map(card => (
           <div
             key={card.label}

@@ -32,7 +32,7 @@ export function LeaderProfileView({
   const kpiCards = [
     { label: 'Sessions', value: stats.sessions, accent: 'border-l-blue-600' },
     { label: 'Rating', value: stats.rating.toFixed(1), star: true, accent: 'border-l-amber-500' },
-    { label: 'Blessings', value: `${stats.blessings}/28`, accent: 'border-l-rose-600' },
+    { label: 'Blessings', value: `${stats.blessings}/28`, accent: 'border-l-brand-600' },
     { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)), accent: 'border-l-emerald-600' },
   ] as const;
 

@@ -6,7 +6,7 @@ import { SampleDataNotice } from '../../SampleDataNotice';
 type InboxFilter = 'all' | 'needs-you' | 'ai-replied' | 'flagged';
 
 const STATE_BADGE: Record<InboxMessage['state'], { cls: string; label: string }> = {
-  flagged: { cls: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300', label: 'Flagged' },
+  flagged: { cls: 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300', label: 'Flagged' },
   'needs-you': { cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300', label: 'Needs you' },
   'ai-replied': { cls: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300', label: 'AI replied' },
 };
@@ -60,7 +60,7 @@ export function LeaderInbox() {
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
                     msg.state === 'flagged'
-                      ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300'
+                      ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
                       : 'bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-dark-300'
                   }`}
                 >

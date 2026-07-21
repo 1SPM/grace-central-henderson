@@ -29,7 +29,7 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
   if (error) {
     return (
       <div className="p-6">
-        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-sm mb-3">
+        <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-sm mb-3">
           <ShieldAlert size={16} /> {error}
         </div>
         <button onClick={() => void refresh()} className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
@@ -66,7 +66,7 @@ export function ExecutiveOverview({ setView }: { setView: (v: View) => void }) {
           {metrics.map(metric => (
             <div
               key={metric.key}
-              className="relative rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 bg-white dark:bg-dark-850 p-5"
+              className="relative rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-brand-600 bg-white dark:bg-dark-850 p-5"
               data-testid={`metric-${metric.key}`}
             >
               <div className="flex items-start justify-between">

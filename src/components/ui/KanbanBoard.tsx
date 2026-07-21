@@ -26,10 +26,10 @@ const columns: KanbanColumn[] = [
   {
     id: 'overdue',
     title: 'Overdue',
-    color: 'text-rose-600 dark:text-rose-400',
-    bgColor: 'bg-rose-50 dark:bg-rose-900/20',
-    borderColor: 'border-rose-200 dark:border-rose-800/30',
-    icon: <AlertCircle size={16} className="text-rose-500" />,
+    color: 'text-brand-600 dark:text-brand-400',
+    bgColor: 'bg-brand-50 dark:bg-brand-900/20',
+    borderColor: 'border-brand-200 dark:border-brand-800/30',
+    icon: <AlertCircle size={16} className="text-brand-500" />,
   },
   {
     id: 'today',

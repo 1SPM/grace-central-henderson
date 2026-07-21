@@ -39,10 +39,10 @@ export function DashboardPulse({
       {crisisCount > 0 && (
         <div
           data-tutorial="dashboard-care-alert"
-          className="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800/30"
+          className="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-50 dark:bg-brand-900/10 border border-brand-200 dark:border-brand-800/30"
         >
-          <AlertTriangle size={18} className="text-rose-600 dark:text-rose-400 shrink-0" />
-          <p className="text-sm text-rose-900 dark:text-rose-200">
+          <AlertTriangle size={18} className="text-brand-600 dark:text-brand-400 shrink-0" />
+          <p className="text-sm text-brand-900 dark:text-brand-200">
             <span className="font-semibold">{crisisCount} crisis dispatch{crisisCount === 1 ? '' : 'es'}</span>
             {' '}need immediate attention.
           </p>
@@ -50,7 +50,7 @@ export function DashboardPulse({
             <button
               type="button"
               onClick={onViewPastoralCare}
-              className="ml-auto text-xs font-medium text-rose-700 dark:text-rose-300 hover:underline shrink-0"
+              className="ml-auto text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline shrink-0"
             >
               Open dispatch
             </button>

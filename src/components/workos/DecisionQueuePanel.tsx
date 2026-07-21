@@ -14,7 +14,7 @@ function formatAge(hours: number): string {
 }
 
 const SEVERITY_STYLES: Record<DecisionQueueItem['severity'], { icon: typeof AlertTriangle; badge: string; dot: string }> = {
-  critical: { icon: AlertTriangle, badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400', dot: 'bg-rose-500' },
+  critical: { icon: AlertTriangle, badge: 'bg-brand-100 text-brand-700 dark:bg-brand-500/15 dark:text-brand-400', dot: 'bg-brand-500' },
   high: { icon: AlertCircle, badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400', dot: 'bg-amber-500' },
   normal: { icon: Circle, badge: 'bg-gray-100 text-gray-600 dark:bg-dark-700 dark:text-dark-300', dot: 'bg-gray-400' },
 };
@@ -52,7 +52,7 @@ export function DecisionQueuePanel() {
           {counts.total > 0 && (
             <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
               counts.critical > 0
-                ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400'
+                ? 'bg-brand-100 text-brand-700 dark:bg-brand-500/15 dark:text-brand-400'
                 : 'bg-gray-100 text-gray-600 dark:bg-dark-700 dark:text-dark-300'
             }`}>
               {counts.total}
@@ -69,7 +69,7 @@ export function DecisionQueuePanel() {
       </div>
 
       {error && (
-        <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+        <p className="text-sm text-brand-600 dark:text-brand-400">{error}</p>
       )}
 
       {!error && isLoading && items.length === 0 && (

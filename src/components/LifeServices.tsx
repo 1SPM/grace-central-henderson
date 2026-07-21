@@ -156,7 +156,7 @@ const getTypeIcon = (type: string) => {
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case 'wedding': return 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/20';
+    case 'wedding': return 'text-brand-600 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/20';
     case 'funeral': return 'text-slate-600 bg-slate-50 dark:text-slate-400 dark:bg-slate-900/20';
     case 'baptism': return 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20';
     case 'dedication': return 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20';
@@ -310,12 +310,12 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
             {serviceCards.map((card) => {
               const Icon = card.icon;
               const colorClasses = {
-                rose: 'from-rose-500 to-pink-600',
+                rose: 'from-brand-500 to-pink-600',
                 purple: 'from-slate-500 to-slate-600',
                 amber: 'from-amber-500 to-orange-600',
               }[card.color];
               const stripeClass = {
-                rose: 'border-l-rose-600',
+                rose: 'border-l-brand-600',
                 purple: 'border-l-slate-500',
                 amber: 'border-l-amber-500',
               }[card.color];
@@ -664,9 +664,9 @@ export function LifeServices({ onNavigate, events = [], people = [], embedded = 
 
       {/* Stats Footer */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-rose-600">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl p-5 border-y border-r border-l-[5px] border-gray-100 dark:border-dark-700 border-l-brand-600">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-rose-600 flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 rounded-lg bg-brand-600 flex items-center justify-center shadow-sm">
               <Heart size={22} className="text-white" />
             </div>
             <div>

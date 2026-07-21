@@ -159,7 +159,7 @@ export function ActionCenter({
                 {id === 'mail' && mailBadge > 0 && (
                   <span
                     className={`ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full ${
-                      mailStats.flagged > 0 ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
+                      mailStats.flagged > 0 ? 'bg-brand-500 text-white' : 'bg-amber-500 text-white'
                     }`}
                   >
                     {mailBadge}

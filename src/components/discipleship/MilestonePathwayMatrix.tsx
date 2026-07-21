@@ -32,7 +32,7 @@ const MILESTONE_COLORS: Record<MilestoneType, string> = {
   baptized: 'text-cyan-500',
   joined_group: 'text-green-500',
   serving: 'text-amber-500',
-  leading: 'text-rose-500',
+  leading: 'text-brand-500',
 };
 
 const MILESTONE_BORDER_COLORS: Record<MilestoneType, string> = {
@@ -41,7 +41,7 @@ const MILESTONE_BORDER_COLORS: Record<MilestoneType, string> = {
   baptized: 'border-l-cyan-500',
   joined_group: 'border-l-green-500',
   serving: 'border-l-amber-500',
-  leading: 'border-l-rose-500',
+  leading: 'border-l-brand-500',
 };
 
 type FilterStatus = 'all' | MilestoneType;

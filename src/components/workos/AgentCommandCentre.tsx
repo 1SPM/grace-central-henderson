@@ -41,7 +41,7 @@ export function AgentCommandCentre() {
       </div>
     );
   }
-  if (error) return <div className="p-6 text-sm text-rose-600 dark:text-rose-400">{error}</div>;
+  if (error) return <div className="p-6 text-sm text-brand-600 dark:text-brand-400">{error}</div>;
   if (isLoading) return <div className="p-6 text-sm text-gray-500 dark:text-dark-400">Loading agent registry…</div>;
 
   return (
@@ -72,7 +72,7 @@ export function AgentCommandCentre() {
               <div className="mt-3 text-xs text-gray-500 dark:text-dark-400 space-y-0.5">
                 <p>Last run: {formatTime(agent.latest_run.finished_at ?? agent.latest_run.started_at)}</p>
                 {agent.latest_run.output?.summary && <p className="text-gray-700 dark:text-dark-200">{agent.latest_run.output.summary}</p>}
-                {agent.latest_run.error && <p className="text-rose-600 dark:text-rose-400">{agent.latest_run.error}</p>}
+                {agent.latest_run.error && <p className="text-brand-600 dark:text-brand-400">{agent.latest_run.error}</p>}
               </div>
             ) : (
               <p className="mt-3 text-xs text-gray-400 dark:text-dark-500">

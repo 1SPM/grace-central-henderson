@@ -72,7 +72,7 @@ export function SettingsNotifications() {
         Choose how you're alerted about activity. Crisis alerts are sent the moment they happen; everything else arrives in a periodic digest.
       </p>
 
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-sm">

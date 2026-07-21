@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRACE SaaS — Back-End Brand Concept</title>
+<style>
+  :root {
+    /* ===== GRACE SaaS primitives (proposed) ===== */
+    --grace-50:  #EDF0FB;
+    --grace-100: #DBE2F7;
+    --grace-200: #B7C4EF;
+    --grace-300: #8FA3E4;
+    --grace-400: #6A84D9;
+    --grace-500: #4C68CD;
+    --grace-600: #3B53BB;
+    --grace-700: #2F4196;
+    --grace-800: #253374;
+    --grace-900: #1B2554;
+    --grace-950: #101637;
+    /* violet partner for gradients */
+    --grace-sky: #4E9BE8;
+    /* hue-biased neutrals (violet-cool, not zinc-flat) */
+    --n-ink: #171D33;
+    --n-soft: #525C74;
+    --n-mute: #8A92A6;
+    --n-line: #E2E7F0;
+    --n-canvas: #F5F7FB;
+    --n-card: #FFFFFF;
+    /* semantics — fixed across ALL tenants, never overridden */
+    --ok: #147A54;
+    --warn: #B45309;
+    --danger: #C42847;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E8EBF3; font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--n-ink); padding: 36px 16px 60px; }
+  .stage { max-width: 980px; margin: 0 auto; }
+  h1 { font-weight: 650; font-size: 21px; margin: 0 0 4px; }
+  .sub { color: var(--n-soft); margin: 0 0 24px; max-width: 62ch; }
+
+  /* ===== Mock admin shell ===== */
+  .shell { display: grid; grid-template-columns: 216px 1fr; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(22,18,58,.45); background: var(--n-canvas); min-height: 480px; }
+  .side { background: linear-gradient(178deg, var(--grace-950), var(--grace-900) 55%, var(--grace-800)); color: #fff; padding: 18px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .logo { display: flex; align-items: center; gap: 9px; padding: 4px 8px 14px; font-weight: 700; letter-spacing: .04em; }
+  .orb { width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #BFE3FF, #7FB9F0 38%, #4C68CD 72%, #253374); box-shadow: 0 0 0 2px rgba(255,255,255,.14), 0 2px 8px rgba(0,0,0,.35); }
+  /* tenant identity chip — the ONLY tenant-branded pixel in the chrome */
+  .tenant { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10); border-radius: 10px; padding: 8px 10px; margin-bottom: 12px; }
+  .tenant .mark { width: 22px; height: 22px; border-radius: 6px; background: #EE2B37; color: #fff; font-weight: 800; font-size: 12px; display: grid; place-items: center; }
+  .tenant .name { font-size: 12px; font-weight: 600; line-height: 1.2; }
+  .tenant .name small { display: block; font-weight: 400; font-size: 10px; color: var(--grace-200); }
+  .nav a { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 9px; color: var(--grace-100); text-decoration: none; font-size: 13px; }
+  .nav a.active { background: rgba(255,255,255,.14); color: #fff; font-weight: 600; }
+  .nav a:hover { background: rgba(255,255,255,.07); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+
+  .main { padding: 20px 22px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .topbar h2 { font-size: 16px; margin: 0; }
+  .cta { background: var(--grace-600); color: #fff; border: none; font: inherit; font-weight: 600; font-size: 13px; padding: 8px 16px; border-radius: 999px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: var(--n-card); border: 1px solid var(--n-line); border-radius: 14px; padding: 12px 14px; }
+  .kpi .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi .l { font-size: 11px; color: var(--n-mute); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .kpi .d { font-size: 11px; margin-top: 6px; font-weight: 600; }
+  .kpi .d.up { color: var(--ok); }
+  .kpi .d.warn { color: var(--warn); }
+  .kpi .d.down { color: var(--danger); }
+  .kpi.feature { background: linear-gradient(135deg, var(--grace-600), var(--grace-sky)); border: none; color: #fff; }
+  .kpi.feature .l, .kpi.feature .d { color: rgba(255,255,255,.85); }
+
+  .panel { background: var(--n-card); border: 1px solid var(--n-line); border-radius: 14px; padding: 14px 16px; }
+  .panel h3 { margin: 0 0 10px; font-size: 13px; }
+  .row { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--n-line); font-size: 13px; }
+  .row:first-of-type { border-top: none; }
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .pill.ok { background: #E3F4EC; color: var(--ok); }
+  .pill.warn { background: #FCEFDD; color: var(--warn); }
+  .pill.danger { background: #FBE3E9; color: var(--danger); }
+  .pill.brand { background: var(--grace-100); color: var(--grace-700); }
+
+  /* ===== Palette strip ===== */
+  .strip { display: grid; grid-template-columns: repeat(11, 1fr); border-radius: 12px; overflow: hidden; margin: 26px 0 8px; border: 1px solid var(--n-line); }
+  .strip div { height: 52px; display: flex; align-items: flex-end; justify-content: center; font-size: 9px; padding-bottom: 4px; color: #fff; font-family: ui-monospace, monospace; }
+  .strip div:nth-child(-n+4) { color: var(--grace-900); }
+  .cap { font-size: 12px; color: var(--n-soft); margin: 0 0 22px; }
+  .semrow { display: flex; gap: 10px; margin-top: 14px; }
+  .sem { flex: 1; border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <h1>GRACE SaaS — the back office wears the product's color</h1>
+  <p class="sub">One navy-blue system for every tenant's CRM. The church shows up as an identity chip and its own member-facing surfaces — never as the chrome. Semantic colors (green/amber/red) are fixed platform-wide, so "red" can mean <em>danger</em> again instead of <em>Central Henderson</em>.</p>
+
+  <div class="shell">
+    <aside class="side">
+      <div class="logo"><span class="orb"></span> GRACE</div>
+      <div class="tenant">
+        <span class="mark">C</span>
+        <span class="name">Central Henderson<small>Admin workspace</small></span>
+      </div>
+      <nav class="nav">
+        <a class="active"><span class="dot"></span> Home</a>
+        <a><span class="dot"></span> Congregation</a>
+        <a><span class="dot"></span> Action Center</a>
+        <a><span class="dot"></span> Impact Campaigns</a>
+        <a><span class="dot"></span> Pastoral Care</a>
+        <a><span class="dot"></span> Growth &amp; Engagement</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h2>Good afternoon, Pastor Nick</h2>
+        <button class="cta">Ask GRACE</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi feature"><div class="v">37</div><div class="l">Members</div><div class="d">+20% · 5 in pipeline</div></div>
+        <div class="kpi"><div class="v">$14,853</div><div class="l">Impact MTD</div><div class="d up">+15% of goal</div></div>
+        <div class="kpi"><div class="v">3</div><div class="l">Overdue tasks</div><div class="d warn">needs attention</div></div>
+        <div class="kpi"><div class="v">0</div><div class="l">Open dispatch</div><div class="d up">all clear</div></div>
+      </div>
+      <div class="panel">
+        <h3>Work queue</h3>
+        <div class="row"><span>Follow up with the Alvarez family</span><span class="pill warn">Due today</span></div>
+        <div class="row"><span>New visitor welcome — Jordan P.</span><span class="pill brand">Assigned to you</span></div>
+        <div class="row"><span>Benevolence request review</span><span class="pill danger">Overdue</span></div>
+        <div class="row"><span>Sunday volunteer roster</span><span class="pill ok">Confirmed</span></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="strip">
+    <div style="background:#EDF0FB">50</div><div style="background:#DBE2F7">100</div><div style="background:#B7C4EF">200</div><div style="background:#8FA3E4">300</div><div style="background:#6A84D9">400</div><div style="background:#4C68CD">500</div><div style="background:#3B53BB">600</div><div style="background:#2F4196">700</div><div style="background:#253374">800</div><div style="background:#1B2554">900</div><div style="background:#101637">950</div>
+  </div>
+  <p class="cap"><strong>GRACE Navy</strong> — primary 600 <code>#3B53BB</code>, chrome 900–950, gradient partner sky <code>#4E9BE8</code>. Neutrals are blue-biased (canvas <code>#F5F7FB</code>, ink <code>#171D33</code>) so even the greys feel owned.</p>
+  <div class="semrow">
+    <div class="sem" style="background:#147A54">Success #147A54</div>
+    <div class="sem" style="background:#B45309">Warning #B45309</div>
+    <div class="sem" style="background:#C42847">Danger #C42847 — no longer fights the brand</div>
+  </div>
+</div>
+</body>
+</html>

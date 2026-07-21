@@ -60,7 +60,7 @@ export function GiftInKindPanel() {
       </div>
       <p className="text-xs text-gray-500 dark:text-dark-400 mb-3">Donated food, clothing, toys, and household goods — balance is contributions minus distributions, valued at estimated fair market value.</p>
 
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -99,7 +99,7 @@ export function GiftInKindPanel() {
           {submitting ? 'Recording…' : 'Record'}
         </button>
       </form>
-      {submitError && <p className="text-xs text-rose-600 dark:text-rose-400 mt-2">{submitError}</p>}
+      {submitError && <p className="text-xs text-brand-600 dark:text-brand-400 mt-2">{submitError}</p>}
     </div>
   );
 }
