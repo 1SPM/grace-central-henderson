@@ -27,6 +27,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .nb{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:calc(var(--radius-card) - 4px);cursor:pointer;transition:background var(--transition-fast)}
 .nb:hover{background:var(--central-canvas)}
 .nb.active{background:var(--central-canvas)}
+.nb:focus-visible{outline:2px solid var(--central-red);outline-offset:-2px}
 .nb-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 .nb-label{font-size:13px;color:var(--central-grey);font-weight:400;line-height:1.3;font-family:var(--font-web)}
 .nb.active .nb-label{color:var(--central-black);font-weight:600}
@@ -1686,6 +1687,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 }
 .dash-pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pillar-accent,#EE2B37);opacity:.85}
 .dash-pillar:hover{border-color:var(--pillar-accent,#EE2B37);background:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(27,42,74,.07)}
+.dash-pillar:focus-visible{outline:2px solid var(--pillar-accent,#EE2B37);outline-offset:2px}
 .dash-pillar-top{margin-bottom:8px}
 .dash-pillar-step{
   font-size:18px;font-weight:800;color:var(--pillar-accent,#EE2B37);letter-spacing:-.02em;
@@ -1875,23 +1877,23 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div style="font-size:10px;font-weight:600;color:#C41E2A">My GRACE Members Portal</div>
   </div>
   <div class="sb-scroll">
-    <div class="nb active" id="nav-home" onclick="goSection('home')">
+    <div class="nb active" id="nav-home" onclick="goSection('home')" role="button" tabindex="0" aria-current="page">
       <span class="nb-ico" data-grace-icon="home" data-grace-size="20"></span><span class="nb-label">My Church</span>
     </div>
-    <div class="nb" id="nav-ai" onclick="goSection('ai')">
+    <div class="nb" id="nav-ai" onclick="goSection('ai')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="leadership" data-grace-size="20"></span><span class="nb-label">My Leadership</span>
     </div>
-    <div class="nb" id="nav-give" onclick="openWalletTab('give')">
+    <div class="nb" id="nav-give" onclick="openWalletTab('give')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="give" data-grace-size="20"></span><span class="nb-label">My GRACE Impact Card</span>
     </div>
-    <div class="nb" id="nav-community" onclick="openNetworkTab('community')">
+    <div class="nb" id="nav-community" onclick="openNetworkTab('community')" role="button" tabindex="0" aria-label="Connect, 5 new">
       <span class="nb-ico" data-grace-icon="people" data-grace-size="20"></span><span class="nb-label">Connect</span>
       <span class="nb-badge nb-badge-orange">5</span>
     </div>
-    <div class="nb" id="nav-profile" onclick="openProfileTab('overview')">
+    <div class="nb" id="nav-profile" onclick="openProfileTab('overview')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="profile" data-grace-size="20"></span><span class="nb-label">My Journey</span>
     </div>
-    <div class="nb" id="nav-mobile" onclick="goSection('mobile')">
+    <div class="nb" id="nav-mobile" onclick="goSection('mobile')" role="button" tabindex="0">
       <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="nb-label">Link to Mobile</span>
     </div>
     <div class="sb-member">
@@ -1981,31 +1983,31 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
         <div class="dash-mod-body">
           <div class="dash-pillars">
-            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')">
+            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
               <div class="dash-pillar-name">Journey</div>
               <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
               <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
             </div>
-            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')">
+            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
               <div class="dash-pillar-name">Impact</div>
               <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
               <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
             </div>
-            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')">
+            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
               <div class="dash-pillar-name">Care</div>
               <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
               <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
             </div>
-            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')">
+            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
               <div class="dash-pillar-name">Connect</div>
               <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
               <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
             </div>
-            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()">
+            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
               <div class="dash-pillar-name">Giving</div>
               <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
@@ -5715,6 +5717,20 @@ function openMomentComposer(){
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeWallLightbox();closeGuidelinesModal();}
+});
+/* Generic Enter/Space activation for any custom role="button" element
+   (sidebar nav, leader strip, composer input, leader tags, etc.) — a div
+   with role="button" is only keyboard-focusable via tabindex, native key
+   activation still has to be added by hand, and several of these already
+   had the role/tabindex pair without it. One delegated listener covers
+   every current and future onclick-div "button" instead of patching each
+   one's markup individually. */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const btn=e.target.closest('[role="button"]');
+  if(!btn)return;
+  e.preventDefault();
+  btn.click();
 });
 /* Wall card stats: 🙏 toggle, 💬 comment, ↗ share (delegated) */
 document.addEventListener('click',e=>{
