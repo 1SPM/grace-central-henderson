@@ -5,8 +5,7 @@
 
 import type { WatchSermonRow } from './database.types';
 
-export const WATCH_LIVE_VIDEO_URL =
-  'https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
+export const WATCH_LIVE_VIDEO_URL = '/previews/assets/watch/video/Church-Stage-video.mp4';
 
 export const WATCH_THUMBNAIL_BASE = '/previews/assets/watch';
 
