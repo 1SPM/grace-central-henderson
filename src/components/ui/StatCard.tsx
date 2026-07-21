@@ -108,18 +108,18 @@ export function StatCard({
     <Component
       onClick={onClick}
       className={`bg-white dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-2xl ${
-        isLarge ? 'p-5 sm:p-6' : 'p-4'
+        isLarge ? 'p-6 sm:p-7' : 'p-5'
       } text-left w-full relative transition-all duration-200 shadow-sm ${
         onClick
           ? 'hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-dark-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-900'
           : ''
       }`}
     >
-      <div className={`flex items-start justify-between gap-4 ${isLarge ? 'mb-4' : 'mb-3'}`}>
+      <div className={`flex items-start justify-between gap-2 ${isLarge ? 'mb-4' : 'mb-3'}`}>
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {icon && (
             <div
-              className={`${isLarge ? 'w-11 h-11' : 'w-9 h-9'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0`}
+              className={`${isLarge ? 'w-12 h-12' : 'w-10 h-10'} ${colors.iconBg} rounded-xl flex items-center justify-center shrink-0`}
             >
               <span className={colors.icon}>{icon}</span>
             </div>
@@ -139,7 +139,7 @@ export function StatCard({
             data={sparklineData}
             color={colors.sparkline}
             fillColor={colors.sparkline}
-            width={isLarge ? 108 : 84}
+            width={isLarge ? 108 : 56}
             height={isLarge ? 34 : 26}
           />
         )}
@@ -147,8 +147,8 @@ export function StatCard({
 
       <div className="flex items-end justify-between gap-4">
         <p
-          className={`font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums leading-none ${
-            isLarge ? 'text-3xl sm:text-[2.15rem]' : 'text-2xl'
+          className={`stat-number text-gray-900 dark:text-white leading-none ${
+            isLarge ? 'text-4xl sm:text-5xl' : 'text-3xl'
           }`}
         >
           {value}
