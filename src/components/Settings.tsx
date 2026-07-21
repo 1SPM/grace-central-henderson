@@ -31,6 +31,7 @@ import { useAccessibility, FontSize } from '../contexts/AccessibilityContext';
 import { useTheme } from '../ThemeContext';
 import { useChurchSettings, ServiceTime } from '../hooks/useChurchSettings';
 import { IntegrationCard, ConfigModal, PasswordInput } from './settings/SettingsUI';
+import { InviteTeamMemberModal } from './settings/InviteTeamMemberModal';
 import { SettingsDataExport } from './settings/SettingsDataExport';
 import { SettingsBilling } from './settings/SettingsBilling';
 import { SettingsCustomDomains } from './settings/SettingsCustomDomains';
@@ -127,6 +128,7 @@ export function Settings({
   const [showSmsConfig, setShowSmsConfig] = useState(false);
   const [showPaymentConfig, setShowPaymentConfig] = useState(false);
   const [showAuthConfig, setShowAuthConfig] = useState(false);
+  const [showInviteTeamMember, setShowInviteTeamMember] = useState(false);
 
   // Form states (only non-secret config; API keys managed via backend env vars)
   const [emailConfig, setEmailConfig] = useState({
@@ -883,7 +885,10 @@ export function Settings({
           </div>
           {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ? (
             <div className="space-y-2">
-              <button className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700">
+              <button
+                onClick={() => setShowInviteTeamMember(true)}
+                className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700"
+              >
                 Invite Team Member
               </button>
               <button className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-700 rounded-xl text-sm font-medium text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-800">
@@ -1125,6 +1130,10 @@ export function Settings({
           </a>
         </div>
       </ConfigModal>
+
+      {showInviteTeamMember && (
+        <InviteTeamMemberModal onClose={() => setShowInviteTeamMember(false)} />
+      )}
     </div>
   );
 }

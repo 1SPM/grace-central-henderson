@@ -104,6 +104,8 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'people/preview-portal-token': () => import('./people/_preview-portal-token.js'),
   'people/provision-portal': () => import('./people/_provision-portal.js'),
   'people/seed-demo-persona': () => import('./people/_seed-demo-persona.js'),
+  'team/invite': () => import('./team/_invite.js'),
+  'team/accept-invitation': () => import('./team/_accept-invitation.js'),
   'tenant/config': () => import('./tenant/_config.js'),
   'tenant/hosts': () => import('./tenant/_hosts.js'),
   'work-orders': () => import('./work-orders/_index.js'),

@@ -1,10 +1,18 @@
 /**
- * /welcome — landing page after Stripe Checkout success.
+ * /welcome — landing page after Stripe Checkout success, OR after a
+ * staff invitation is accepted (api/team/_invite.ts redirects here too).
  *
  * Stripe redirects here with ?session_id=cs_xxx after a successful
  * checkout. We don't validate the session_id (the webhook is the
  * source of truth) — we use the URL param only as a signal that this
  * is a fresh-payment landing, vs a returning user who navigated here.
+ *
+ * Team invitees land here signed in but with no church_id yet — Clerk
+ * copies the invitation's publicMetadata (church_id, role,
+ * grace_team_invite_token) onto the new user at signup, so we redeem
+ * the token against api/team/_accept-invitation.ts on mount, then do a
+ * full navigation into the app so the next JWT fetch picks up the
+ * freshly-written claims (avoids reasoning about Clerk's token cache).
  *
  * The goal of this page: tell the user they're in, then give them
  * three concrete first-week actions. The hardest part of new-tenant
@@ -13,6 +21,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useChurchPlan } from '../../hooks/useChurchPlan';
 
@@ -47,12 +56,76 @@ const FIRST_STEPS: FirstStep[] = [
   },
 ];
 
+type TeamInviteState = 'none' | 'redeeming' | 'redeemed' | 'error';
+type TeamInviteResult = { state: TeamInviteState; role?: string; error?: string };
+
+/**
+ * Owns the useUser() call for team-invite redemption. Split out from
+ * WelcomePage so the hook is only ever invoked by a component that's
+ * conditionally mounted behind the Clerk-configured check below —
+ * calling useUser() unconditionally in WelcomePage itself would throw
+ * whenever ClerkProvider isn't mounted (demo mode, Clerk not yet
+ * configured), and /welcome has no demo-mode route guard.
+ */
+function TeamInviteRedeemer({ getAuthToken, onChange }: {
+  getAuthToken: () => Promise<string | null>;
+  onChange: (result: TeamInviteResult) => void;
+}) {
+  const { user, isLoaded: userLoaded } = useUser();
+
+  useEffect(() => {
+    if (!userLoaded || !user) return;
+    const token = user.publicMetadata?.grace_team_invite_token;
+    if (typeof token !== 'string' || !token) return;
+
+    let cancelled = false;
+    onChange({ state: 'redeeming' });
+
+    (async () => {
+      try {
+        const authToken = await getAuthToken();
+        const res = await fetch('/api/team/accept-invitation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({ token }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+
+        if (!res.ok) {
+          onChange({ state: 'error', error: body.error || `Could not complete your invitation (HTTP ${res.status}).` });
+          return;
+        }
+
+        onChange({ state: 'redeemed', role: body.role });
+        await user.reload();
+        window.location.assign('/');
+      } catch (err) {
+        if (!cancelled) {
+          onChange({ state: 'error', error: err instanceof Error ? err.message : 'Network error.' });
+        }
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLoaded, user]);
+
+  return null;
+}
+
+const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
 export function WelcomePage() {
   const { plan, status, trialDaysRemaining, loading } = useChurchPlan();
   const { getAuthToken } = useAuthContext();
   const [showFallback, setShowFallback] = useState(false);
   const [seedBusy, setSeedBusy] = useState(false);
   const [seedResult, setSeedResult] = useState<null | { ok: boolean; people: number; giving: number; events: number; skipped?: string; error?: string }>(null);
+  const [teamInvite, setTeamInvite] = useState<TeamInviteResult>({ state: 'none' });
 
   const handleSeedDemo = async () => {
     setSeedBusy(true);
@@ -93,6 +166,9 @@ export function WelcomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4">
+      {isClerkConfigured && (
+        <TeamInviteRedeemer getAuthToken={getAuthToken} onChange={setTeamInvite} />
+      )}
       <div className="max-w-3xl mx-auto">
         <header className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mb-4">
@@ -103,7 +179,19 @@ export function WelcomePage() {
           <h1 className="text-4xl font-light text-gray-900 mb-2" style={{ fontFamily: 'Fraunces, serif' }}>
             Welcome to GRACE
           </h1>
-          {loading || (!isWebhookProcessed && !showFallback) ? (
+          {teamInvite.state === 'redeeming' ? (
+            <p className="text-sm text-gray-500">Setting up your team access…</p>
+          ) : teamInvite.state === 'redeemed' ? (
+            <p className="text-base text-gray-700">
+              You're in as <strong className="capitalize">{teamInvite.role}</strong>. Taking you to the dashboard…
+            </p>
+          ) : teamInvite.state === 'error' ? (
+            <div className="mt-2 mx-auto max-w-md rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700 text-left">
+              <strong>We couldn't finish setting up your invitation:</strong> {teamInvite.error}
+              <br />Ask whoever invited you to send a fresh invite, or write to{' '}
+              <a href="mailto:support@grace-crm.app" className="underline">support@grace-crm.app</a>.
+            </div>
+          ) : loading || (!isWebhookProcessed && !showFallback) ? (
             <p className="text-sm text-gray-500">Confirming your subscription…</p>
           ) : isWebhookProcessed ? (
             <p className="text-base text-gray-700">
