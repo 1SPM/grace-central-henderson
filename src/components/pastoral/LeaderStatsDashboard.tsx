@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { LeaderProfile, LeaderStats, PastoralSession, HelpCategory } from '../../types';
 import { VerifiedBadge } from './VerifiedBadge';
+import { LeaderAvatar } from './leadersHub/LeaderAvatar';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   'marriage': 'Marriage',
@@ -225,9 +226,13 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white text-sm font-bold">
-                          {stat.leaderName.charAt(0)}
-                        </div>
+                        {leader ? (
+                          <LeaderAvatar leader={leader} size="sm" showVerified={false} />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white text-sm font-bold">
+                            {stat.leaderName.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-medium text-gray-900 dark:text-dark-100">{stat.leaderName}</span>
@@ -273,13 +278,17 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                       )}
                     </td>
                     <td className="text-center px-3 py-3">
+                      {/* "Live" / "AI on duty" — same vocabulary as the
+                          Team and Manage tabs (was "Available" /
+                          "Unavailable" here, a third label for the same
+                          leader.isAvailable state). */}
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                         leader?.isAvailable
                           ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400'
+                          : 'bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${leader?.isAvailable ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                        {leader?.isAvailable ? 'Available' : 'Unavailable'}
+                        <span className={`w-1.5 h-1.5 rounded-full ${leader?.isAvailable ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        {leader?.isAvailable ? 'Live' : (leader?.hasAiCompanion !== false ? 'AI on duty' : 'Offline')}
                       </span>
                     </td>
                   </tr>
@@ -295,9 +304,13 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
-                {selectedStats.leaderName.charAt(0)}
-              </div>
+              {selectedLeader ? (
+                <LeaderAvatar leader={selectedLeader} size="md" showVerified={false} />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
+                  {selectedStats.leaderName.charAt(0)}
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100">{selectedStats.leaderName}</h3>
