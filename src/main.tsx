@@ -11,6 +11,7 @@ import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observabilit
 import { getTenant } from './config/tenant';
 import './index.css';
 import './styles/grace-orb.css';
+import './styles/grace-tokens.css';
 import './styles/central-tokens.css';
 import './styles/faithful-crm-theme.css';
 import './components/marketing/marketing.css';

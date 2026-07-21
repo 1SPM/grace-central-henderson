@@ -112,7 +112,7 @@ export function Groups({ groups, people, churchId, onCreateGroup, onAddMember, o
 
       {/* Community activity KPI bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 p-5 text-center">
+        <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-brand-600 p-5 text-center">
           <div className="stat-number text-3xl text-gray-900 dark:text-dark-100">{activeGroups.length}</div>
           <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-400 mt-1.5">Groups</div>
         </div>

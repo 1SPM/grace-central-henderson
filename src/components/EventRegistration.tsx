@@ -51,7 +51,7 @@ const CATEGORY_OPTIONS: { value: CalendarEvent['category']; label: string; color
   { value: 'meeting', label: 'Meeting', color: 'bg-amber-500' },
   { value: 'event', label: 'Event', color: 'bg-green-500' },
   { value: 'small-group', label: 'Small Group', color: 'bg-slate-500' },
-  { value: 'holiday', label: 'Holiday', color: 'bg-rose-500' },
+  { value: 'holiday', label: 'Holiday', color: 'bg-brand-500' },
   { value: 'other', label: 'Other', color: 'bg-gray-500' },
 ];
 

@@ -137,7 +137,7 @@ export function LeadershipActivityFeed({
                         ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
                         : isHuman
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                          : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                          : 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
                     }`}
                   >
                     {isAi ? <Bot size={16} /> : isHuman ? <User size={16} /> : <Flag size={16} />}
@@ -164,8 +164,8 @@ export function LeadershipActivityFeed({
         </div>
       </div>
 
-      <div className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/80 dark:bg-rose-950/20 p-4 flex items-start gap-3">
-        <Heart size={18} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+      <div className="rounded-xl border border-brand-200 dark:border-brand-900/40 bg-brand-50/80 dark:bg-brand-950/20 p-4 flex items-start gap-3">
+        <Heart size={18} className="text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-medium text-gray-900 dark:text-dark-100">Member conversations live in Care</p>
           <p className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">
@@ -174,7 +174,7 @@ export function LeadershipActivityFeed({
           <button
             type="button"
             onClick={goToCare}
-            className="mt-2 text-xs font-medium text-rose-700 dark:text-rose-300 hover:underline"
+            className="mt-2 text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
           >
             Crisis Center Dispatch
           </button>

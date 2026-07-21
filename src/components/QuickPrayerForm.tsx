@@ -31,8 +31,8 @@ export function QuickPrayerForm({ people, onSave, onClose }: QuickPrayerFormProp
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/20 rounded-xl flex items-center justify-center">
-              <Heart className="text-rose-600 dark:text-rose-400" size={20} />
+            <div className="w-10 h-10 bg-brand-100 dark:bg-brand-500/20 rounded-xl flex items-center justify-center">
+              <Heart className="text-brand-600 dark:text-brand-400" size={20} />
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">Prayer Request</h2>
           </div>
@@ -103,7 +103,7 @@ export function QuickPrayerForm({ people, onSave, onClose }: QuickPrayerFormProp
             <button
               type="submit"
               disabled={!content.trim() || !personId}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium hover:from-rose-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-pink-500 text-white rounded-xl font-medium hover:from-brand-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Add Prayer
             </button>

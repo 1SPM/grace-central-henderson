@@ -118,7 +118,7 @@ export function DashboardDetails({
             <div data-tutorial="dashboard-tasks" className="rounded-xl border border-gray-200 dark:border-dark-700 p-4 bg-stone-50/50 dark:bg-dark-800/50">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Heart size={15} className="text-rose-500" />
+                  <Heart size={15} className="text-brand-500" />
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Recent care requests</h2>
                 </div>
                 {onViewPastoralCare && (
@@ -149,7 +149,7 @@ export function DashboardDetails({
                         <span
                           className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                             conv.priority === 'crisis'
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                              ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
                               : conv.status === 'escalated'
                                 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                                 : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'

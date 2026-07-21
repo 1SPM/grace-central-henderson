@@ -54,7 +54,7 @@ export function ExpenseRatioPanel() {
       </div>
       <p className="text-xs text-gray-500 dark:text-dark-400 mb-3">The share of recorded expenses directly attributable to ministry programs, vs. general &amp; administrative overhead.</p>
 
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       {isLoading || !ratio ? (
         <div className="h-16 rounded-lg bg-gray-100 dark:bg-dark-800 animate-pulse mb-4" />
@@ -96,7 +96,7 @@ export function ExpenseRatioPanel() {
           {submitting ? 'Recording…' : 'Record'}
         </button>
       </form>
-      {submitError && <p className="text-xs text-rose-600 dark:text-rose-400 mt-2">{submitError}</p>}
+      {submitError && <p className="text-xs text-brand-600 dark:text-brand-400 mt-2">{submitError}</p>}
     </div>
   );
 }

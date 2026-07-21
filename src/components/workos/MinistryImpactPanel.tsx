@@ -31,7 +31,7 @@ export function MinistryImpactPanel() {
   if (error || isLoading || !metrics) {
     return (
       <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4 sm:p-6 mt-4">
-        {error ? <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p> : <div className="h-24 rounded-lg bg-gray-100 dark:bg-dark-800 animate-pulse" />}
+        {error ? <p className="text-sm text-brand-600 dark:text-brand-400">{error}</p> : <div className="h-24 rounded-lg bg-gray-100 dark:bg-dark-800 animate-pulse" />}
       </div>
     );
   }

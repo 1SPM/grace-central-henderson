@@ -264,7 +264,7 @@ export function AutomationPanel({ churchId }: { churchId: string }) {
                 {cron.last_run ? (
                   cron.last_run.ok
                     ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-                    : <XCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
+                    : <XCircle size={16} className="text-brand-500 shrink-0 mt-0.5" />
                 ) : (
                   <Circle size={16} className="text-gray-300 dark:text-dark-600 shrink-0 mt-0.5" />
                 )}

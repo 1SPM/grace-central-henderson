@@ -111,7 +111,6 @@ function TeamInviteRedeemer({ getAuthToken, onChange }: {
     })();
 
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLoaded, user]);
 
   return null;

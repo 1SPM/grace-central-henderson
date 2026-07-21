@@ -233,7 +233,7 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-rose-600 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-brand-600 p-5">
               <p className="section-eyebrow">Active cards</p>
               <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {summary?.active_cards ?? 0}

@@ -161,7 +161,7 @@ function adminRoleLabel(role?: string | null): string {
 
 function AdminUserAvatar({ name, initials }: { name: string; initials: string }) {
   const [failed, setFailed] = useState(false);
-  const cls = 'w-10 h-10 rounded-full ring-2 ring-rose-400 object-cover flex-shrink-0 bg-rose-50 flex items-center justify-center text-xs font-semibold text-rose-700';
+  const cls = 'w-10 h-10 rounded-full ring-2 ring-brand-400 object-cover flex-shrink-0 bg-brand-50 flex items-center justify-center text-xs font-semibold text-brand-700';
   if (failed || !name.trim()) {
     return <div className={cls}>{initials}</div>;
   }
@@ -307,7 +307,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-rose-600 dark:bg-rose-700 flex flex-col transform transition-all duration-200 ease-out border-r border-rose-700/50 dark:border-rose-900/50 ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-gradient-to-b from-brand-950 via-brand-900 to-brand-800 flex flex-col transform transition-all duration-200 ease-out border-r border-brand-900/50 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${sidebarCollapsed ? 'lg:w-16' : 'w-60'}`}
       >
@@ -347,7 +347,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               <h2 className="font-bold text-white text-base leading-snug">
                 {displayChurch}
               </h2>
-              <p className="text-xs font-semibold text-rose-100 mt-1 tracking-wide">
+              <p className="text-xs font-semibold text-brand-100 mt-1 tracking-wide">
                 My GRACE Admin Panel
               </p>
             </div>
@@ -358,7 +358,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className={sectionIdx > 0 ? 'mt-4' : ''}>
               {section.label && !sidebarCollapsed && (
-                <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-rose-200/70">
+                <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-brand-200/70">
                   {section.label}
                 </p>
               )}
@@ -383,14 +383,14 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         sidebarCollapsed ? 'lg:justify-center' : ''
                       } ${
                         isActive
-                          ? 'bg-white text-rose-700 font-bold shadow-sm'
-                          : 'text-rose-50 hover:bg-white/10 hover:text-white'
+                          ? 'bg-white text-brand-700 font-bold shadow-sm'
+                          : 'text-brand-50 hover:bg-white/10 hover:text-white'
                       }`}
                       aria-label={sidebarCollapsed ? item.label : undefined}
                       title={sidebarCollapsed ? item.label : undefined}
                     >
                       <span className={`flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 transition-colors ${
-                        isActive ? 'bg-rose-600 text-white shadow-sm' : 'bg-white/15 text-white'
+                        isActive ? 'bg-brand-600 text-white shadow-sm' : 'bg-white/15 text-white'
                       }`}>
                         {item.icon}
                       </span>
@@ -399,7 +399,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                         <span
                           className={`ml-auto text-[10.5px] px-1.5 py-0.5 rounded-full font-semibold ${sidebarCollapsed ? 'lg:hidden' : ''} ${
                             decisionQueueCounts.critical > 0
-                              ? 'bg-white text-rose-700'
+                              ? 'bg-white text-brand-700'
                               : 'bg-white/20 text-white'
                           }`}
                         >
@@ -429,17 +429,17 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               } ${
                 moreActive
                   ? 'bg-white/15 text-white font-semibold'
-                  : 'text-rose-100'
+                  : 'text-brand-100'
               }`}
               title={sidebarCollapsed ? 'Expand More views' : undefined}
               aria-label={sidebarCollapsed ? 'More views' : undefined}
               aria-expanded={moreOpen}
             >
-              <MoreHorizontal size={18} className={moreActive ? 'text-white' : 'text-rose-200'} />
+              <MoreHorizontal size={18} className={moreActive ? 'text-white' : 'text-brand-200'} />
               <span className={`flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>More</span>
               <ChevronDown
                 size={14}
-                className={`text-rose-200 transition-transform ${moreOpen ? 'rotate-180' : ''} ${sidebarCollapsed ? 'lg:hidden' : ''}`}
+                className={`text-brand-200 transition-transform ${moreOpen ? 'rotate-180' : ''} ${sidebarCollapsed ? 'lg:hidden' : ''}`}
               />
             </button>
             {sidebarCollapsed && (
@@ -458,10 +458,10 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                       className={`w-full flex items-center gap-2.5 pl-5 pr-2.5 py-1.5 rounded-xl text-sm transition-all duration-200 ${
                         isActive
                           ? 'bg-white/15 text-white font-semibold'
-                          : 'text-rose-100 hover:bg-white/10 hover:text-white'
+                          : 'text-brand-100 hover:bg-white/10 hover:text-white'
                       }`}
                     >
-                      <span className={isActive ? 'text-white' : 'text-rose-200'}>
+                      <span className={isActive ? 'text-white' : 'text-brand-200'}>
                         {item.icon}
                       </span>
                       <span>{item.label}</span>
@@ -518,7 +518,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           {/* Collapse toggle - desktop only */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`hidden lg:flex w-full items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-rose-100 hover:bg-white/10 hover:text-white transition-colors ${
+            className={`hidden lg:flex w-full items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-brand-100 hover:bg-white/10 hover:text-white transition-colors ${
               sidebarCollapsed ? 'justify-center' : ''
             }`}
             aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -534,8 +534,8 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               sidebarCollapsed ? 'lg:justify-center' : ''
             } ${
               settingsSubViews.includes(currentView)
-                ? 'bg-white text-rose-700 font-bold shadow-sm'
-                : 'text-rose-100 hover:bg-white/10 hover:text-white'
+                ? 'bg-white text-brand-700 font-bold shadow-sm'
+                : 'text-brand-100 hover:bg-white/10 hover:text-white'
             }`}
             title={sidebarCollapsed ? 'Settings' : undefined}
             aria-label="Settings"
@@ -551,7 +551,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
           <button
             onClick={handleSignOut}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-rose-100 hover:bg-white/10 hover:text-white transition-colors group relative ${
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-brand-100 hover:bg-white/10 hover:text-white transition-colors group relative ${
               sidebarCollapsed ? 'lg:justify-center' : ''
             }`}
             title={sidebarCollapsed ? 'Sign out' : undefined}

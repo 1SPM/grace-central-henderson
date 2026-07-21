@@ -279,7 +279,7 @@ export function GivingDashboard({
             </p>
             {analytics.yearOverYearChange !== 0 && (
               <span className={`text-xs font-medium tabular-nums ${
-                analytics.yearOverYearChange >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
+                analytics.yearOverYearChange >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-brand-700 dark:text-brand-400'
               }`}>
                 {analytics.yearOverYearChange >= 0 ? '+' : ''}{analytics.yearOverYearChange.toFixed(1)}%
               </span>

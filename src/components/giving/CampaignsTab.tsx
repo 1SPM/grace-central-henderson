@@ -73,7 +73,7 @@ function CampaignCard({ campaign, isSample }: { campaign: HubCampaign; isSample:
         <button className="flex-1 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-dark-300 border border-gray-200 dark:border-dark-600 rounded-md hover:bg-gray-50 dark:hover:bg-dark-850 transition-colors">
           Stats
         </button>
-        <button className="flex-1 px-2.5 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-md hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
+        <button className="flex-1 px-2.5 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-900/50 rounded-md hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
           Close
         </button>
       </div>

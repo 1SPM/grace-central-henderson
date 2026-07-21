@@ -88,7 +88,7 @@ export function HealthScorecardPanel() {
   if (error) {
     return (
       <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4 sm:p-6 mb-4">
-        <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+        <p className="text-sm text-brand-600 dark:text-brand-400">{error}</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export function HealthScorecardPanel() {
     <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4 sm:p-6 mb-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
-          <HeartPulse size={15} className="text-rose-500" /> Congregational Health
+          <HeartPulse size={15} className="text-brand-500" /> Congregational Health
         </h2>
         {!isLoading && current && (
           <button
@@ -130,7 +130,7 @@ export function HealthScorecardPanel() {
               <div
                 key={tile.key}
                 data-testid={`health-tile-${tile.key}`}
-                className="rounded-xl border-y border-r border-l-[3px] border-gray-200 dark:border-dark-700 border-l-rose-500 p-4"
+                className="rounded-xl border-y border-r border-l-[3px] border-gray-200 dark:border-dark-700 border-l-brand-500 p-4"
               >
                 <p className="text-xs font-medium text-gray-500 dark:text-dark-400">{tile.label}</p>
                 {metric.source === 'not_yet_computed' ? (

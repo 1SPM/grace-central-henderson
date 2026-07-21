@@ -111,7 +111,7 @@ export function CareHub({
         <div className="shrink-0 border-b border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/90 backdrop-blur-sm px-4 sm:px-6 pt-4 pb-0">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center">
                 <Heart className="text-white" size={20} />
               </div>
               <div>
@@ -139,7 +139,7 @@ export function CareHub({
                   <Icon size={14} />
                   {label}
                   {id === 'dispatch' && openRequests > 0 && (
-                    <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                    <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300">
                       {openRequests}
                     </span>
                   )}

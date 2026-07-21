@@ -76,7 +76,7 @@ export function SettingsCustomDomains() {
         change which church's data any session can see.
       </div>
 
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       {isLoading ? (
         <p className="text-sm text-gray-400 dark:text-dark-500">Loading…</p>
@@ -92,7 +92,7 @@ export function SettingsCustomDomains() {
                   <button
                     onClick={() => handleRemove(host)}
                     disabled={isSaving}
-                    className="text-gray-400 hover:text-rose-500 disabled:opacity-50"
+                    className="text-gray-400 hover:text-brand-500 disabled:opacity-50"
                     aria-label={`Remove ${host}`}
                   >
                     <X size={14} />

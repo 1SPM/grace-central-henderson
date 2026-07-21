@@ -68,7 +68,7 @@ export function ImpactCardFunnelPanel() {
   if (error) {
     return (
       <div className="p-4 sm:p-6">
-        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-sm mb-3">
+        <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-sm mb-3">
           <ShieldAlert size={16} /> {error}
         </div>
         <button onClick={() => void refresh()} className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Try again</button>

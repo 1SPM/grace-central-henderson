@@ -109,7 +109,7 @@ export function MobileHome({
       sub: tasksDueToday > 0 ? `${tasksDueToday} due` : undefined,
       icon: <CheckSquare size={18} />,
       view: 'feed' as View,
-      tone: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10',
+      tone: 'text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10',
     },
     {
       label: 'Birthdays',
@@ -184,7 +184,7 @@ export function MobileHome({
               onClick={() => onNavigate(a.view)}
               className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white dark:bg-dark-850 border border-gray-100 dark:border-dark-700 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
             >
-              <span className="text-rose-600 dark:text-rose-400">{a.icon}</span>
+              <span className="text-brand-600 dark:text-brand-400">{a.icon}</span>
               <span className="text-[10px] font-medium text-gray-600 dark:text-dark-300 text-center leading-tight">
                 {a.label}
               </span>
@@ -201,7 +201,7 @@ export function MobileHome({
           </h3>
           <button
             onClick={() => onNavigate('sunday-prep')}
-            className="text-xs font-medium text-rose-600 dark:text-rose-400 flex items-center gap-0.5"
+            className="text-xs font-medium text-brand-600 dark:text-brand-400 flex items-center gap-0.5"
           >
             Calendar <ChevronRight size={13} />
           </button>

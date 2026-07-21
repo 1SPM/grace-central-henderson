@@ -93,7 +93,7 @@ export function CareRequestsQueue() {
     return <div className="p-6 text-sm text-gray-500 dark:text-dark-400">Your role doesn't include care request access.</div>;
   }
   if (error) {
-    return <div className="p-6 text-sm text-rose-600 dark:text-rose-400">{error}</div>;
+    return <div className="p-6 text-sm text-brand-600 dark:text-brand-400">{error}</div>;
   }
   if (isLoading) {
     return <div className="p-6 text-sm text-gray-500 dark:text-dark-400">Loading care requests…</div>;
@@ -115,7 +115,7 @@ export function CareRequestsQueue() {
               </p>
             </div>
             {r.crisis_flagged && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-rose-700 bg-rose-100 dark:bg-rose-500/20 dark:text-rose-300 px-2 py-1 rounded-full shrink-0">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 bg-brand-100 dark:bg-brand-500/20 dark:text-brand-300 px-2 py-1 rounded-full shrink-0">
                 <AlertTriangle size={12} /> Crisis flagged
               </span>
             )}

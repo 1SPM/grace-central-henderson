@@ -113,7 +113,7 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
             label: 'Escalations',
             value: escalations,
             sub: 'crisis / live handoff',
-            accent: 'border-l-rose-600',
+            accent: 'border-l-brand-600',
           },
           {
             label: 'Unassigned',

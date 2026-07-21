@@ -105,8 +105,8 @@ export function WorkOrderList({ onOpen }: WorkOrderListProps) {
         )}
       </div>
 
-      {demoError && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{demoError}</p>}
-      {error && <p className="text-sm text-rose-600 dark:text-rose-400 mb-3">{error}</p>}
+      {demoError && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{demoError}</p>}
+      {error && <p className="text-sm text-brand-600 dark:text-brand-400 mb-3">{error}</p>}
 
       {isLoading ? (
         <div className="space-y-2">

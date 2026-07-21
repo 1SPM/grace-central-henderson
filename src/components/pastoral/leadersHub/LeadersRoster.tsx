@@ -30,7 +30,7 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Leaders', value: badges.staff, sub: 'All verified', accent: 'border-l-rose-600' },
+          { label: 'Leaders', value: badges.staff, sub: 'All verified', accent: 'border-l-brand-600' },
           { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty`, accent: 'border-l-emerald-600' },
           { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed', accent: 'border-l-violet-600' },
           { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%', accent: 'border-l-blue-600' },

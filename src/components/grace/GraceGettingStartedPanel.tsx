@@ -130,7 +130,7 @@ export function GraceGettingStartedPanel({ churchName = 'Central Henderson Churc
             />
             <button
               type="submit"
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500 hover:bg-rose-600 text-white shrink-0 transition-colors shadow-lg shadow-rose-500/25"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-500 hover:bg-brand-600 text-white shrink-0 transition-colors shadow-lg shadow-brand-500/25"
               aria-label="Send to GRACE"
             >
               <ArrowRight size={18} />

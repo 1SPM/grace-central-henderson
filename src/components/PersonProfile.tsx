@@ -473,10 +473,10 @@ export function PersonProfile({
                   )}
                 </div>
                 {previewError && (
-                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{previewError}</p>
+                  <p className="mt-2 text-sm text-brand-600 dark:text-brand-400">{previewError}</p>
                 )}
                 {provisionError && (
-                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{provisionError}</p>
+                  <p className="mt-2 text-sm text-brand-600 dark:text-brand-400">{provisionError}</p>
                 )}
                 {provisionResult && (
                   <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-400">

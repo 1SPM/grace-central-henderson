@@ -553,7 +553,7 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={
           <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
           </div>
         }>
           <div className="h-screen">
