@@ -347,10 +347,20 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 /* D-ID Studio modal */
 .did-studio-overlay{position:fixed;inset:0;background:rgba(10,22,40,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .did-studio-overlay.open{display:flex}
-.did-studio-modal{background:#fff;border-radius:18px;width:100%;max-width:920px;max-height:min(88vh,640px);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);position:relative}
+/* Portrait "phone frame" — matches the Leadership CRM's DidStudioModal:
+   the D-ID agent UI is mobile-first, so the modal is a phone-shaped card
+   on desktop and a full-screen sheet on small viewports. */
+.did-studio-modal{background:#fff;border-radius:22px;width:min(420px,100%);height:min(88vh,820px);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);position:relative}
 .did-studio-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:20px;cursor:pointer;z-index:10;line-height:1}
 .did-studio-close:hover{background:rgba(0,0,0,.65)}
-.ai-did-studio{display:grid;grid-template-columns:1.1fr 0.9fr;flex:1;min-height:0;height:min(72vh,560px)}
+.ai-did-title-bar{padding:14px 44px 14px 16px;font-size:14px;font-weight:600;color:#111827;border-bottom:1px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ai-did-title-bar>span{font-size:10px;font-weight:600;color:#16a34a;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.did-verified-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#15803d;background:#dcfce7;padding:3px 8px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.ai-did-studio{display:grid;grid-template-rows:minmax(240px,44%) 1fr;flex:1;min-height:0}
+/* Real D-ID agent mounted: its frame (video + own input/mic) is the whole
+   conversation surface — hide the preview stand-ins. */
+.ai-did-studio--live{grid-template-rows:1fr}
+.ai-did-studio--live .ai-did-chat-panel,.ai-did-studio--live .ai-did-prompts,.ai-did-studio--live .ai-did-controls{display:none}
 .ai-did-media{position:relative;background:#0f2744;min-height:240px;overflow:hidden}
 .ai-did-media-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.45) 0%,rgba(238,43,55,.15) 50%,rgba(30,58,95,.5) 100%),url('https://images.unsplash.com/photo-1544427920-c49cc3071b01?w=900&q=80') center/cover;opacity:.5}
 .ai-did-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:1}
@@ -363,16 +373,21 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ai-did-voice-dots{display:flex;gap:3px;align-items:center;height:18px}
 .ai-did-voice-dots span{width:3px;border-radius:2px;background:rgba(255,255,255,.75);animation:wave .8s ease-in-out infinite}
 .ai-did-agent-host{position:absolute;inset:0;z-index:2}
-.ai-did-chat-panel{display:flex;flex-direction:column;min-height:0;border-left:1px solid #e5e7eb;background:#fff}
+.ai-did-chat-panel{display:flex;flex-direction:column;min-height:0;border-top:1px solid #e5e7eb;background:#fff}
 .ai-did-chat-head{padding:14px 16px;font-size:14px;font-weight:600;color:#111827;border-bottom:1px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .ai-did-chat-head span{font-size:10px;font-weight:600;color:#16a34a;display:flex;align-items:center;gap:4px}
 .ai-did-studio .ai-chat-messages{flex:1;padding:16px;min-height:100px;overflow-y:auto}
 .ai-did-studio .ai-input-bar{border-top:1px solid #f3f0eb}
 @media (max-width:720px){
-  .ai-did-studio{grid-template-columns:1fr;grid-template-rows:minmax(200px,38vh) 1fr;height:auto;max-height:none}
-  .ai-did-chat-panel{border-left:none;border-top:1px solid #e5e7eb}
   .ai-hero-chatrow{flex-direction:column;align-items:stretch}
   .ai-hero-begin{width:100%;text-align:center}
+}
+/* Small screens: full-screen sheet, 100dvh so mobile Safari's collapsing
+   URL bar can't clip the agent's input bar off the bottom. */
+@media (max-width:640px){
+  .did-studio-overlay{padding:0}
+  .did-studio-modal{width:100%;height:100dvh;max-height:none;border-radius:0}
+  .ai-did-title-bar{padding-top:max(14px,env(safe-area-inset-top))}
 }
 
 /* Chat window */
@@ -4169,6 +4184,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <div class="did-studio-overlay" id="did-studio-overlay" onclick="if(event.target===this)closeDidStudio()" role="dialog" aria-modal="true" aria-labelledby="did-studio-title">
   <div class="did-studio-modal">
     <button type="button" class="did-studio-close" onclick="closeDidStudio()" aria-label="Close conversation">×</button>
+    <div class="ai-did-title-bar" id="did-studio-title"><div>Chat</div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
     <div class="ai-did-studio" id="ai-did-studio">
       <div class="ai-did-media">
         <div class="ai-did-media-bg" aria-hidden="true"></div>
@@ -4185,7 +4201,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
       <div class="ai-did-chat-panel">
-        <div class="ai-did-chat-head" id="did-studio-title">Chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
+        <div class="ai-did-chat-head">Preview chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> Preview</span></div>
         <div class="ai-chat-messages" id="did-chat-messages"></div>
         <div class="ai-input-bar">
           <button type="button" class="ai-mic" id="did-mic-btn" onclick="toggleDidMic()" title="Hold to speak">🎤</button>
@@ -4611,7 +4627,7 @@ function leaderFollowUpLine(leader){return GRACE_MESSAGING.leaderFollowUpLine(le
 function leaderChatPlaceholder(name){return GRACE_MSG.leaderAvatar.chatPlaceholder(name);}
 
 /* ══ HOME CHAT + D-ID STUDIO ══ */
-let didAgentMounted=false;
+let didAgentMountedFor=null;
 let graceFaqOpen=0;
 function toggleGraceFaq(i){
   const isOpen=graceFaqOpen===i;
@@ -4665,13 +4681,21 @@ function syncHomeLeaderStrip(){
   if(av)av.src=leader.img;
   if(name)name.textContent=leader.name;
 }
+function didLeaderCreds(leader){
+  return {
+    agentId:(leader&&leader.didAgentId)||DID_STUDIO_CONFIG.agentId,
+    clientKey:(leader&&leader.didClientKey)||DID_STUDIO_CONFIG.clientKey
+  };
+}
 function syncDidStudioLeader(){
   const leader=aiLeaders[currentLeader];
   if(!leader)return;
   const img=document.getElementById('did-avatar-img');
-  if(img){img.src=leader.img;img.style.opacity=didAgentMounted?'0':'1';}
+  if(img){img.src=leader.img;img.style.opacity=didAgentMountedFor===currentLeader?'0':'1';}
+  const creds=didLeaderCreds(leader);
+  const live=!!(creds.agentId&&creds.clientKey);
   const head=document.getElementById('did-studio-title');
-  if(head)head.innerHTML='Chat · '+leader.name+' <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span>';
+  if(head)head.innerHTML='<div>Chat · '+leader.name+'<span class="did-verified-badge">✓ Verified Leader</span></div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> '+(live?'D-ID Studio':'Preview')+'</span>';
 }
 function seedDidChat(){
   const box=document.getElementById('did-chat-messages');
@@ -4681,18 +4705,37 @@ function seedDidChat(){
   box.dataset.seeded='1';
 }
 function mountDidAgentEmbed(){
-  if(didAgentMounted||!DID_STUDIO_CONFIG.agentId||!DID_STUDIO_CONFIG.clientKey)return;
   const host=document.getElementById('did-agent-host');
-  if(!host)return;
+  const studio=document.getElementById('ai-did-studio');
+  if(!host||!studio)return;
+  const leader=aiLeaders[currentLeader];
+  const creds=didLeaderCreds(leader);
+  const img=document.getElementById('did-avatar-img');
+  if(!creds.agentId||!creds.clientKey){
+    // Preview mode — this leader has no D-ID agent yet. Tear down any
+    // agent left mounted from a previous leader so their video/session
+    // can't bleed into this conversation.
+    if(didAgentMountedFor!==null){host.innerHTML='';didAgentMountedFor=null;}
+    studio.classList.remove('ai-did-studio--live');
+    if(img)img.style.opacity='1';
+    return;
+  }
+  if(didAgentMountedFor===currentLeader)return;
+  host.innerHTML='';
   const s=document.createElement('script');
   s.type='module';
   s.src='https://agent.d-id.com/v2/index.js';
   s.setAttribute('data-mode','full');
-  s.setAttribute('data-agent-id',DID_STUDIO_CONFIG.agentId);
-  s.setAttribute('data-client-key',DID_STUDIO_CONFIG.clientKey);
+  s.setAttribute('data-agent-id',creds.agentId);
+  s.setAttribute('data-client-key',creds.clientKey);
+  s.setAttribute('data-name','did-agent');
+  s.setAttribute('data-monitor','true');
+  // Without data-target-id the widget ignores the host div and floats in
+  // its own placement — same fix as the CRM's DidStudioModal.
+  s.setAttribute('data-target-id','did-agent-host');
   host.appendChild(s);
-  didAgentMounted=true;
-  const img=document.getElementById('did-avatar-img');
+  didAgentMountedFor=currentLeader;
+  studio.classList.add('ai-did-studio--live');
   if(img)img.style.opacity='0';
 }
 function openDidStudio(prefill){
@@ -4868,6 +4911,16 @@ function openDivinityAvatar(idx){
   const i=(idx!==null&&idx!==undefined)?idx:currentLeader;
   const l=aiLeaders[i];
   if(!l)return;
+  // Leaders with their own D-ID Studio agent get the same portrait
+  // phone-frame conversation as the Leadership CRM (DidStudioModal).
+  // The Divinity session below stays as the fallback until each
+  // leader's agent is credentialed.
+  if(l.didAgentId&&l.didClientKey){
+    closeLeaderProfile();
+    currentLeader=i;
+    openDidStudio();
+    return;
+  }
   closeLeaderProfile();
   closeDidStudio();
   divinitySessionLeader=i;
@@ -6045,7 +6098,7 @@ setInterval(()=>{
 
 /* ── AI HUB LOGIC ── */
 const aiLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'assets/watch/video/Maya-welcome-to-Central.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',didAgentId:'v2_agt_nxzGwxew',didClientKey:'ck_cwyMiGIkm7BTZr1lrSmAO',introVideoUrl:'assets/watch/video/Maya-welcome-to-Central.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
   {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
