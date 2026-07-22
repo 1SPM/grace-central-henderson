@@ -122,7 +122,13 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
           ×
         </button>
         <div className="ai-did-title-bar" id="did-studio-title">
-          Chat · {leader.displayName}
+          {/* div, not span — .ai-did-title-bar span is the status-chip style */}
+          <div>
+            Chat · {leader.displayName}
+            {leader.isVerified && (
+              <span className="did-verified-badge">✓ Verified Leader</span>
+            )}
+          </div>
           <span>
             <span className="pulse-live-dot" />
             {hasDidCredentials ? 'D-ID Studio' : 'Preview'}
