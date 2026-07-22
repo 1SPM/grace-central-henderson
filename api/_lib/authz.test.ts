@@ -31,6 +31,10 @@ function makeReqWithHost(host: string) {
   return { headers: { host } } as unknown as import('@vercel/node').VercelRequest;
 }
 
+function makeReqWithHostAndToken(host: string, token: string) {
+  return { headers: { host, authorization: `Bearer ${token}` } } as unknown as import('@vercel/node').VercelRequest;
+}
+
 function makeRes() {
   const res: Record<string, unknown> = {};
   res.status = vi.fn(() => res);
@@ -345,16 +349,67 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it('does NOT auto-activate for an unrecognized host (e.g. the real Central Henderson domain) — falls through to real Clerk auth and 401s with no token', async () => {
+  it('auto-activates for gracecrm-centralhenderson.org (Central Henderson\'s own church_id) when no bearer token is present', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { resolveStaffActor } = await import('./authz.js');
+
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: 'demo-user-row-id', account_status: 'active' } }),
+        roles: () => ({ data: { id: 'sysadmin-role-id' } }),
+        user_roles: () => ({ data: [{ id: 'grant-1', role_id: 'sysadmin-role-id' }] }),
+        role_permissions: () => ({ data: [{ permissions: { key: 'work_orders.manage' } }] }),
+      },
+    });
+    const res = makeRes();
+
+    const actor = await resolveStaffActor(makeReqWithHost('gracecrm-centralhenderson.org'), res, supabase as never);
+
+    expect(actor).not.toBeNull();
+    expect(actor!.churchId).toBe('11111111-1111-1111-1111-111111111111');
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  it('does NOT auto-activate for a genuinely unmapped host — falls through to real Clerk auth and 401s with no token', async () => {
     delete process.env.VITE_ENABLE_DEMO_MODE;
     const { resolveStaffActor } = await import('./authz.js');
     const supabase = createMockSupabase({ tables: {} });
     const res = makeRes();
 
-    const actor = await resolveStaffActor(makeReqWithHost('gracecrm-centralhenderson.org'), res, supabase as never);
+    const actor = await resolveStaffActor(makeReqWithHost('some-other-church.example.com'), res, supabase as never);
 
     expect(actor).toBeNull();
     expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('a real bearer token on a known demo host is NEVER downgraded to the shared anonymous demo actor', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { verifyToken } = await import('@clerk/backend');
+    (verifyToken as ReturnType<typeof vi.fn>).mockResolvedValue({
+      sub: FIXTURE_STAFF_USER.clerk_id,
+      app_metadata: { church_id: FIXTURE_CHURCH_ID },
+    });
+    const { resolveStaffActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
+        user_roles: () => ({ data: [] }),
+      },
+    });
+    const res = makeRes();
+
+    // gracecrm-centralhenderson.org is a known demo host, but a real
+    // bearer token is present — this must resolve the caller's own real
+    // identity via requireClerkAuth, never the shared demo actor.
+    const actor = await resolveStaffActor(
+      makeReqWithHostAndToken('gracecrm-centralhenderson.org', 'valid-token'),
+      res,
+      supabase as never,
+    );
+
+    expect(actor).not.toBeNull();
+    expect(actor!.userId).toBe(FIXTURE_STAFF_USER.id);
+    expect(actor!.clerkUserId).toBe(FIXTURE_STAFF_USER.clerk_id);
   });
 });
 
@@ -416,6 +471,35 @@ describe('resolveMemberActor — demo-mode bootstrap (Members Portal)', () => {
 
     expect(actor).toBeNull();
     expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it('a real bearer token on a known demo host is NEVER downgraded to the shared anonymous demo member', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { verifyToken } = await import('@clerk/backend');
+    (verifyToken as ReturnType<typeof vi.fn>).mockResolvedValue({
+      sub: FIXTURE_PERSON.clerk_user_id,
+      app_metadata: { church_id: FIXTURE_CHURCH_ID },
+    });
+    const { resolveMemberActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        people: () => ({ data: { id: FIXTURE_PERSON.id, portal_enabled: true } }),
+      },
+    });
+    const res = makeRes();
+
+    // gracecrm-centralhenderson.org is a known demo host, but a real
+    // bearer token is present — this must resolve the caller's own real
+    // person record via requireClerkAuth, never the shared demo member.
+    const actor = await resolveMemberActor(
+      makeReqWithHostAndToken('gracecrm-centralhenderson.org', 'valid-token'),
+      res,
+      supabase as never,
+    );
+
+    expect(actor).not.toBeNull();
+    expect(actor!.personId).toBe(FIXTURE_PERSON.id);
+    expect(actor!.clerkUserId).toBe(FIXTURE_PERSON.clerk_user_id);
   });
 });
 

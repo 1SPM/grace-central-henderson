@@ -36,22 +36,25 @@ import { requireClerkAuth } from './auth-helper.js';
 // same env var, same "explicit opt-in only" posture (see
 // SECURITY_FINDINGS_STATUS.md #3's formal waiver for demo auth). Applied
 // here to the WorkOS staff-actor path so the Admin Dashboard WorkOS
-// modules are actually operable in the live Central Henderson demo, which
-// runs without a production Clerk instance (see the current-state
-// assessment).
+// modules are operable for a visitor with no backing Clerk session.
 //
 // VITE_ENABLE_DEMO_MODE=true is a global opt-in (kept for local dev and
 // as an explicit kill-switch), but it must NOT be the only way in: this
 // project is a single shared Vercel deployment (docs/DEPLOY.md), so one
-// shared env var can't be "on" for the Faithful demo tenant and "off"
-// for the real Central Henderson tenant at the same time. Turning it off
-// to secure Central Henderson (the correct call — see the client-side
-// isDemoModeActive() history in src/config/tenant.ts, fixed for exactly
-// this reason) silently broke every WorkOS route's staff-actor bypass
-// for Faithful too. isDemoModeActive() below closes that gap by also
-// auto-enabling for the same known-demo hostnames HOST_CHURCH_IDS already
-// carves out — never for gracecrm-centralhenderson.org or any other
-// unlisted host, so this can't reopen the bypass for a real tenant.
+// shared env var can't be "on" for one demo tenant and "off" for another
+// at the same time. isDemoModeActive() below closes that gap by also
+// auto-enabling for the known-demo hostnames in HOST_CHURCH_IDS.
+//
+// gracecrm-centralhenderson.org is in that map too (Central Henderson's
+// own church_id), so the public "Open Demo CRM" / "Open Member Portal"
+// links on members-card.html work for an anonymous visitor. That's safe
+// only because resolveStaffActor/resolveMemberActor additionally require
+// "no bearer token present" before taking the demo path (see
+// hasBearerToken below) — a request that already carries a real, valid
+// Clerk session is never downgraded to the shared anonymous demo actor.
+// isDemoModeActive() itself deliberately stays host/env-based only and
+// does NOT check for a bearer token, since api/neobank also consumes it
+// for an unrelated purpose.
 const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
 const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
@@ -65,6 +68,7 @@ const HOST_CHURCH_IDS: Record<string, string> = {
   'grace-crm-two.vercel.app': '22222222-2222-2222-2222-222222222222',
   'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
   'www.grace-crm.dev': '22222222-2222-2222-2222-222222222222',
+  'gracecrm-centralhenderson.org': '11111111-1111-1111-1111-111111111111',
 };
 
 /** True for the global env-var opt-in, or for a request whose Host header
@@ -81,8 +85,7 @@ export function isDemoModeActive(req: VercelRequest): boolean {
 
 /**
  * Resolves which church the demo bypass should act as, based on the
- * request's Host header. Unmapped hosts (including the real Central
- * Henderson domain) fall back to VITE_DEFAULT_CHURCH_ID.
+ * request's Host header. Unmapped hosts fall back to VITE_DEFAULT_CHURCH_ID.
  */
 export function resolveDemoChurchId(req: VercelRequest): string | undefined {
   const host = req.headers.host;
@@ -113,6 +116,16 @@ export interface MemberActor {
   isPreview?: boolean;
 }
 
+/** True when the request carries an Authorization: Bearer header. Used to
+ * make the demo-mode actor bypass yield to a real, already-authenticated
+ * session instead of unconditionally overriding it — matters once a real
+ * tenant's host (gracecrm-centralhenderson.org) is also in
+ * HOST_CHURCH_IDS: a signed-in staff member on that domain must resolve
+ * to their own identity, not the shared anonymous demo actor. */
+function hasBearerToken(req: VercelRequest): boolean {
+  return !!req.headers.authorization?.startsWith('Bearer ');
+}
+
 /**
  * Resolves the calling Clerk user to a `users` row and their effective
  * permission set. Returns null (and writes the HTTP response) on any
@@ -124,7 +137,7 @@ export async function resolveStaffActor(
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<StaffActor | null> {
-  if (isDemoModeActive(req)) {
+  if (isDemoModeActive(req) && !hasBearerToken(req)) {
     return resolveDemoStaffActor(req, res, supabase);
   }
 
@@ -335,7 +348,7 @@ export async function resolveMemberActor(
   res: VercelResponse,
   supabase: SupabaseClient,
 ): Promise<MemberActor | null> {
-  if (isDemoModeActive(req)) {
+  if (isDemoModeActive(req) && !hasBearerToken(req)) {
     return resolveDemoMemberActor(req, res, supabase);
   }
 
