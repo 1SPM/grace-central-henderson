@@ -391,6 +391,18 @@ export function PersonProfile({
                       Preview Members Portal
                     </button>
                   )}
+                  {person.tags.includes('portal-demo') && (
+                    <a
+                      href="/previews/grace_member_portal_central.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20"
+                      title="Open the static Members Portal preview mockup, styled to represent this demo account"
+                    >
+                      <ExternalLink size={16} />
+                      Preview Members Live Profile
+                    </a>
+                  )}
                   {!person.portalEnabled && !provisionResult && hasWorkOsPermission('portal.provision_member') && (
                     <div className="relative">
                       <button
