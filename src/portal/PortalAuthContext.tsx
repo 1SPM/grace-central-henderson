@@ -45,6 +45,23 @@ const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 // Hostname-derived, not a raw env var — see isDemoModeActive in config/tenant.ts.
 const isDemoModeEnabled = isDemoModeActive();
 
+// Anonymous member-portal access for a signed-out visitor on a known host.
+// Deliberately separate from isDemoModeEnabled above — that flag is
+// permanently host-locked with "no env var able to override that in
+// production" (see its own docstring) precisely because it ALSO drives
+// the staff app's auth mode (contexts/authMode.ts resolveAuthMode, checked
+// before Clerk config) — widening it to include
+// gracecrm-centralhenderson.org would silently switch the entire admin
+// CRM to the client-side demo bypass for every visitor on that domain,
+// not just unlock the portal preview link. This list only affects the
+// check below, and only while signed out — a real member or staff Clerk
+// session on this host always resolves to itself, never the demo actor.
+// Mirrors the server-side HOST_CHURCH_IDS allowlist in api/_lib/authz.ts
+// (resolveDemoMemberActor bootstraps the matching demo `people` row) —
+// keep both lists in sync.
+const PORTAL_DEMO_HOSTS = new Set<string>(['gracecrm-centralhenderson.org']);
+const isPortalDemoHost = typeof window !== 'undefined' && PORTAL_DEMO_HOSTS.has(window.location.hostname);
+
 function PortalAuthProviderInner({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
@@ -85,10 +102,18 @@ function PortalAuthProviderInner({ children }: { children: ReactNode }) {
     }
   }, [isSignedIn, getToken]);
 
+  // No real session on a known portal-demo host: behave like the demo
+  // provider (isDemo: true) instead of falling through to the sign-in
+  // wall below. A real session always wins — this only ever applies
+  // while Clerk reports signed-out, so it can't downgrade anyone's real
+  // identity. getAuthToken already returns null when !isSignedIn, which
+  // is exactly what the demo posture needs (see resolveDemoMemberActor).
+  const treatAsDemo = isLoaded && !isSignedIn && isPortalDemoHost;
+
   const value: PortalAuthContextValue = {
     isLoaded,
-    isSignedIn: !!isSignedIn,
-    isDemo: false,
+    isSignedIn: !!isSignedIn || treatAsDemo,
+    isDemo: treatAsDemo,
     isPreview: false,
     previewPersonName: null,
     memberFirstName: user?.firstName ?? null,
