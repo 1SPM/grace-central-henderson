@@ -140,6 +140,18 @@ const sectionTypeConfig = {
   },
 };
 
+// Sermon sections render as plain prose (see line ~857), so any markdown
+// the model produces despite the prompt's instructions shows up as literal
+// asterisks/hashes rather than styling. Belt-and-suspenders alongside the
+// "no markdown" prompt instruction below.
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .trim();
+}
+
 export function SundayPrep({
   people,
   prayers,
@@ -296,13 +308,14 @@ export function SundayPrep({
 Title: ${section.title}
 Current content: ${section.content || 'None yet'}
 
-Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and include relevant scripture if appropriate. Keep it under 200 words.`;
+Write 2-3 paragraphs that would work well in a sermon. Be warm, engaging, and include relevant scripture if appropriate. Keep it under 200 words. Plain prose only — no markdown formatting (no **, __, #, or bullet markers).`;
 
     try {
       const result = await generateAIText({ prompt, maxTokens: 400 });
       if (result.success && result.text) {
+        const expanded = stripMarkdown(result.text);
         updateSection(sectionId, {
-          content: section.content ? `${section.content}\n\n${result.text}` : result.text
+          content: section.content ? `${section.content}\n\n${expanded}` : expanded
         });
       }
     } catch {
@@ -364,7 +377,9 @@ Format your response EXACTLY like this, with these exact headers:
 
 ${upcomingBirthdays.length > 0 ? '\n[ANNOUNCEMENTS]\n(Mention the birthdays and any visitors to welcome)' : ''}
 
-Make the tone warm, pastoral, and engaging. Include relevant scripture references throughout.`;
+Make the tone warm, pastoral, and engaging. Include relevant scripture references throughout.
+
+Write every section as plain prose — no markdown formatting of any kind (no **, __, #, or bullet markers). This text is displayed as-is, not rendered from markdown.`;
 
     try {
       const result = await generateAIText({ prompt, maxTokens: 2000 });
@@ -375,7 +390,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         // Extract title if AI generated one
         const titleMatch = text.match(/\[TITLE\]\s*([\s\S]*?)(?=\[|$)/i);
         if (titleMatch && titleMatch[1]?.trim() && !sermonTitle.trim()) {
-          setSermonTitle(titleMatch[1].trim());
+          setSermonTitle(stripMarkdown(titleMatch[1].trim()));
         }
 
         // Parse the sections from the response
@@ -398,7 +413,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
               id: `section-${Date.now()}-${type}-${Math.random().toString(36).substr(2, 9)}`,
               type,
               title,
-              content: match[1].trim(),
+              content: stripMarkdown(match[1].trim()),
               sourceType: 'manual',
             });
           }
@@ -407,7 +422,7 @@ Make the tone warm, pastoral, and engaging. Include relevant scripture reference
         if (newSections.length > 0) {
           let resolvedTitle = sermonTitle.trim();
           if (titleMatch && titleMatch[1]?.trim() && !resolvedTitle) {
-            resolvedTitle = titleMatch[1].trim();
+            resolvedTitle = stripMarkdown(titleMatch[1].trim());
             setSermonTitle(resolvedTitle);
           }
           if (!resolvedTitle) resolvedTitle = 'Untitled sermon';

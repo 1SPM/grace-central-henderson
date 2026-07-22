@@ -46,7 +46,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     durationSeconds: 3134,
     viewCount: 1200,
     thumbnailFile: 'ondemand-forgiveness.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    videoUrl: null,
     memberPortalIndex: 0,
   },
   {
@@ -59,7 +59,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     durationSeconds: 2980,
     viewCount: 980,
     thumbnailFile: 'ondemand-serving.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    videoUrl: null,
     memberPortalIndex: 1,
   },
   {
@@ -72,7 +72,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     durationSeconds: 3050,
     viewCount: 1100,
     thumbnailFile: 'ondemand-gift.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    videoUrl: null,
   },
   {
     catalogId: 'rooted-grace',
@@ -84,7 +84,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     durationSeconds: 2890,
     viewCount: 870,
     thumbnailFile: 'ondemand-rooted.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    videoUrl: null,
     memberPortalIndex: 2,
   },
   {
@@ -96,8 +96,8 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     preachedAt: '2025-04-20',
     durationSeconds: 2760,
     viewCount: 740,
-    thumbnailFile: 'ondemand-serving.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    thumbnailFile: 'action-give.jpg',
+    videoUrl: null,
   },
   {
     catalogId: 'compassion-blessings',
@@ -108,8 +108,8 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     preachedAt: '2025-04-13',
     durationSeconds: 2820,
     viewCount: 810,
-    thumbnailFile: 'ondemand-gift.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    thumbnailFile: 'ondemand-forgiveness.jpg',
+    videoUrl: null,
   },
   {
     catalogId: 'living-faith-fruit',
@@ -120,8 +120,8 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     preachedAt: '2025-04-06',
     durationSeconds: 2950,
     viewCount: 920,
-    thumbnailFile: 'ondemand-rooted.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    thumbnailFile: 'ondemand-serving.jpg',
+    videoUrl: null,
   },
   {
     catalogId: 'living-faith-truth',
@@ -132,8 +132,8 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     preachedAt: '2025-03-30',
     durationSeconds: 3010,
     viewCount: 880,
-    thumbnailFile: 'ondemand-forgiveness.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    thumbnailFile: 'ondemand-gift.jpg',
+    videoUrl: null,
   },
   {
     catalogId: 'story-plot',
@@ -145,7 +145,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     durationSeconds: 2880,
     viewCount: 760,
     thumbnailFile: 'ondemand-rooted.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    videoUrl: null,
   },
   {
     catalogId: 'family-fathers-day',
@@ -156,8 +156,8 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     preachedAt: '2025-03-16',
     durationSeconds: 2700,
     viewCount: 690,
-    thumbnailFile: 'ondemand-serving.jpg',
-    videoUrl: WATCH_LIVE_VIDEO_URL,
+    thumbnailFile: 'action-give.jpg',
+    videoUrl: null,
   },
 ];
 
