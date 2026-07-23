@@ -159,13 +159,51 @@ export function buildChurchRhythmEvents(year: number): CalendarEvent[] {
   ];
 }
 
+function sundaysInYear(year: number): Date[] {
+  const dates: Date[] = [];
+  const d = new Date(year, 0, 1);
+  while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+  while (d.getFullYear() === year) {
+    dates.push(new Date(d));
+    d.setDate(d.getDate() + 7);
+  }
+  return dates;
+}
+
+/** Recurring weekly Sunday Service — one per Sunday of the year, 10 AM in the Main Sanctuary. */
+export function buildWeeklySundayServiceEvents(year: number): CalendarEvent[] {
+  return sundaysInYear(year).map(date =>
+    rhythm(
+      `sunday-service-${year}-${date.getMonth() + 1}-${date.getDate()}`,
+      'Sunday Service',
+      date,
+      'service',
+      { location: 'Main Sanctuary', hour: 10, minute: 0, allDay: false, description: 'Weekly worship gathering · 10:00 AM' },
+    ),
+  );
+}
+
 /** Merge staged CRM events with seasonal rhythm for dashboard / home calendar. */
 export function mergeCalendarWithRhythm(events: CalendarEvent[], years: number[]): CalendarEvent[] {
   const rhythm = years.flatMap(buildChurchRhythmEvents);
+  const weeklyServices = years.flatMap(buildWeeklySundayServiceEvents);
   const seen = new Set(events.map(e => e.id));
+  // A staged event already covering a given Sunday (e.g. a real "Sunday Worship
+  // Service" row from the DB) should win over the synthetic weekly filler —
+  // avoids stacking two service entries on the same day.
+  const servicedDays = new Set(
+    events.filter(e => e.category === 'service').map(e => new Date(e.startDate).toDateString()),
+  );
   const merged = [...events];
   for (const r of rhythm) {
     if (!seen.has(r.id)) merged.push(r);
+  }
+  for (const s of weeklyServices) {
+    if (seen.has(s.id)) continue;
+    const day = new Date(s.startDate).toDateString();
+    if (servicedDays.has(day)) continue;
+    merged.push(s);
+    servicedDays.add(day);
   }
   return merged;
 }

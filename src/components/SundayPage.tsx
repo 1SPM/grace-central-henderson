@@ -13,6 +13,7 @@ import type { ConnectSubjectKind } from '../config/sermonConnectSubjects';
 import type { ChurchProfile } from '../hooks/useChurchSettings';
 import type { Announcement, AnnouncementCategory, Attendance, CalendarEvent, Person, PrayerRequest } from '../types';
 import type { RSVP } from './calendar/CalendarConstants';
+import { mergeCalendarWithRhythm } from '../lib/churchCalendarRhythm';
 
 const Calendar = lazy(() => import('./Calendar').then(m => ({ default: m.Calendar })));
 const AttendanceCheckIn = lazy(() => import('./AttendanceCheckIn').then(m => ({ default: m.AttendanceCheckIn })));
@@ -92,6 +93,13 @@ export function SundayPage({
     () => attendanceRecords.filter(a => a.date === today && a.eventType === 'sunday').length,
     [attendanceRecords, today],
   );
+  // Fill in the recurring weekly Sunday Service so the Calendar tab reflects
+  // the church's actual rhythm even on weeks with no other staged event —
+  // same merge already used for the dashboard's home calendar widget.
+  const calendarTabEvents = useMemo(() => {
+    const year = new Date().getFullYear();
+    return mergeCalendarWithRhythm(events, [year - 1, year, year + 1]);
+  }, [events]);
 
   useEffect(() => {
     if (defaultTab) setTab(defaultTab);
@@ -251,7 +259,7 @@ export function SundayPage({
           <Suspense fallback={<ListSkeleton />}>
             <Calendar
               embedded
-              events={events}
+              events={calendarTabEvents}
               people={people}
               rsvps={rsvps}
               churchName={churchName}
