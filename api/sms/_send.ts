@@ -1,10 +1,19 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sendSms } from '../_lib/sms/send.js';
+import { requireClerkAuth } from '../_lib/auth-helper.js';
+
+const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Security fix: this route had no auth check at all — anyone on the
+  // open internet could send SMS via the org's Twilio number to any
+  // number. Same staff-only gate as api/agentmail/_send.ts (TD-014).
+  const auth = await requireClerkAuth(req, { allowedRoles: STAFF_ROLES });
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   const { to, message } = req.body;
   if (!to || !message) {
