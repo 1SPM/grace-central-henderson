@@ -317,6 +317,33 @@ export async function loadPermissionKeys(
 }
 
 /**
+ * RBAC permission keys that authorize Impact Card / neobank staff
+ * operations (KYC review, card management, money movement, admin roster).
+ * `impact_card.operate` (confidential) is the primary key; `impact_card.manage`
+ * (restricted, held by impact_card_operations) is accepted as an equivalent.
+ */
+export const IMPACT_CARD_STAFF_PERMISSIONS = ['impact_card.operate', 'impact_card.manage'] as const;
+
+/**
+ * Whether a caller may act as Impact Card staff.
+ *
+ * Authoritative source is the RBAC grant (impact_card.operate / .manage).
+ * During the `user_roles` backfill transition we fall back to the legacy
+ * coarse JWT role ONLY for callers who hold *no* RBAC grants at all (i.e.
+ * not yet migrated), so no existing card admin is locked out while the
+ * backfill is pending. This is monotonic: a caller who HAS been given any
+ * role but not a card permission is correctly denied.
+ *
+ * Set IMPACT_CARD_STRICT_RBAC=true to drop the fallback once the backfill
+ * is complete — then only the explicit card permissions grant access.
+ */
+export function hasImpactCardStaffAccess(permissions: Set<string>, coarseIsStaff: boolean): boolean {
+  if (IMPACT_CARD_STAFF_PERMISSIONS.some(k => permissions.has(k))) return true;
+  if (process.env.IMPACT_CARD_STRICT_RBAC === 'true') return false;
+  return permissions.size === 0 && coarseIsStaff;
+}
+
+/**
  * Convenience wrapper: resolve the actor AND require a specific
  * permission. Writes 403 and returns null if the actor lacks it.
  */
