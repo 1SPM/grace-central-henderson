@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './ThemeContext';
@@ -6,7 +6,6 @@ import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
 import { handleDemoEntryQuery } from './lib/demoEntry';
 import { checkEnvironment } from './utils/envCheck';
-import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
 import { getTenant } from './config/tenant';
 import './index.css';
@@ -71,32 +70,14 @@ const RedesignPreview = lazy(() => import('./components/redesign/RedesignPreview
 const PortalRoot = lazy(() => import('./portal/PortalRoot').then(m => ({ default: m.PortalRoot })));
 
 function PublicConnectPage() {
-  const [churchName, setChurchName] = useState('Our Church');
-  const [churchId, setChurchId] = useState('demo-church');
-
-  useEffect(() => {
-    async function loadChurch() {
-      if (!supabase) return;
-      try {
-        const { data } = await supabase
-          .from('churches')
-          .select('id, settings')
-          .limit(1)
-          .single();
-        if (data) {
-          setChurchId(data.id);
-          const settings = data.settings as Record<string, unknown> | null;
-          const profile = settings?.profile as Record<string, unknown> | null;
-          if (profile?.name && typeof profile.name === 'string') {
-            setChurchName(profile.name);
-          }
-        }
-      } catch {
-        // Use defaults
-      }
-    }
-    loadChurch();
-  }, []);
+  // Resolved from the same hostname-based tenant config every other part
+  // of the app uses (ACTIVE_TENANT above) — no network round-trip, and no
+  // client-driven church lookup. The server independently re-derives the
+  // real church_id from the request's own Host header when the form is
+  // submitted (api/_connect-card.ts) rather than trusting this value —
+  // it's display-only here.
+  const churchName = ACTIVE_TENANT.defaultSettings.profile?.name || 'Our Church';
+  const churchId = ACTIVE_TENANT.churchId || 'demo-church';
 
   return (
     <Suspense fallback={

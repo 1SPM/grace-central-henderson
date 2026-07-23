@@ -1,15 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { readBody, str, email_, uuid_, arrayOfStr } from './_lib/validation.js';
+import { readBody, str, email_, arrayOfStr } from './_lib/validation.js';
+import { resolveChurchIdForHost } from './_lib/resolveChurchByHost.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 // Hardened input schema. This route is PUBLIC and accepts traffic from
-// the open internet, so we cap field sizes + UUID-validate churchId +
-// constrain interest tags to an allowlist.
+// the open internet, so we cap field sizes + constrain interest tags to
+// an allowlist. Security fix: churchId is NOT accepted from the client
+// (see resolveChurchIdForHost) — it used to be, which let anyone inject
+// records into any real tenant by supplying that tenant's church_id in
+// the request body, with no verification of any relationship to it.
 const SCHEMA = {
-  churchId:      uuid_({ required: true }),
   firstName:     str({ required: true, max: 100 }),
   lastName:      str({ required: true, max: 100 }),
   email:         email_({ max: 320 }),
@@ -36,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Structured 400 on any malformed input — sets the response and returns null.
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
-  const { churchId, firstName, lastName, email, phone, howDidYouHear, prayerRequest, interestedIn } = body;
+  const { firstName, lastName, email, phone, howDidYouHear, prayerRequest, interestedIn } = body;
 
   try {
     // Build tags from interests and source
@@ -75,6 +78,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Resolve which church this submission is for from the request's own
+    // Host header — never from client input (see SCHEMA comment above).
+    const churchId = await resolveChurchIdForHost(req.headers.host, supabase);
+    if (!churchId) {
+      return res.status(404).json({ error: 'Connect card is not available on this domain' });
+    }
 
     // Insert person
     const { data: person, error: personError } = await supabase
