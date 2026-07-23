@@ -107,6 +107,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'people/seed-demo-persona': () => import('./people/_seed-demo-persona.js'),
   'team/invite': () => import('./team/_invite.js'),
   'team/accept-invitation': () => import('./team/_accept-invitation.js'),
+  'team/set-role': () => import('./team/_set-role.js'),
   'tenant/config': () => import('./tenant/_config.js'),
   'tenant/hosts': () => import('./tenant/_hosts.js'),
   'work-orders': () => import('./work-orders/_index.js'),

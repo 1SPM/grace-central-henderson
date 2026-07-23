@@ -370,12 +370,17 @@ class AuthService {
     }
 
     try {
-      const response = await secureFetch(`/api/auth/users/${userId}/role`, {
-        method: 'PATCH',
+      // Assigns the RBAC user_roles grant server-side (permission-checked,
+      // church-scoped, audited). Members aren't managed here.
+      if (role === 'member') {
+        return { success: false, error: 'Members are managed through the member portal, not team roles.' };
+      }
+      const response = await secureFetch('/api/team/set-role', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ user_id: userId, role }),
       });
 
       if (!response.ok) {
