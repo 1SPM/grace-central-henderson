@@ -13,6 +13,7 @@
  *   - api/agentmail/inbound.ts
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { checkDispatcherRateLimit } from './_lib/dispatcherRateLimit.js';
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown | Promise<unknown>;
 type RouteModule = { default: Handler };
@@ -122,6 +123,15 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workos/notification-prefs': () => import('./workos/_notification-prefs.js'),
 };
 
+// Generous, per-IP-per-route defaults — this is a defense-in-depth
+// backstop against runaway/automated abuse, not a precise per-user
+// quota. Deliberately loose enough to never throttle a real admin
+// session (e.g. a bulk message send iterating hundreds of recipients
+// with a 150ms pace, ~400 req/min in an extreme case) while still
+// meaningfully slowing a naive scripted flood. See dispatcherRateLimit.ts.
+const RATE_LIMIT_MAX_REQUESTS = 600;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const segments = req.query.path;
   const path = Array.isArray(segments) ? segments.join('/') : segments ?? '';
@@ -129,6 +139,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const load = routes[path];
   if (!load) {
     return res.status(404).json({ error: 'Not found' });
+  }
+
+  const { limited, retryAfterSeconds } = checkDispatcherRateLimit(
+    req,
+    path,
+    RATE_LIMIT_MAX_REQUESTS,
+    RATE_LIMIT_WINDOW_MS,
+  );
+  if (limited) {
+    res.setHeader('Retry-After', String(retryAfterSeconds));
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
   const mod = await load();

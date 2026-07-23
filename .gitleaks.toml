@@ -21,6 +21,11 @@ paths = [
   '''^.*\.md$''',
   '''^supabase/seed\.sql$''',
   '''^supabase/reset_and_seed\.sql$''',
+  # Fabricated JWTs (fake payload, literal "fakesignature") used to
+  # exercise the JWT-role-decode guard in api/calendar/_ical.ts — no
+  # real key ever lives here, just enough structure to trip gitleaks'
+  # generic jwt rule as a false positive.
+  '''^api/calendar/_ical\.test\.ts$''',
 ]
 
 # Common false-positive value patterns:
