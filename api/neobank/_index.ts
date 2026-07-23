@@ -25,7 +25,12 @@ import { requireClerkAuth, type AuthOk } from '../_lib/auth-helper.js';
 import { requirePlanGate } from '../_lib/billing/gates.js';
 import { readBody, str, int_ } from '../_lib/validation.js';
 import { getI2cAdapter } from '../_lib/i2c/index.js';
-import { resolveDemoChurchId, isDemoModeActive } from '../_lib/authz.js';
+import {
+  resolveDemoChurchId,
+  isDemoModeActive,
+  loadPermissionKeys,
+  hasImpactCardStaffAccess,
+} from '../_lib/authz.js';
 import {
   ensureCardAccount,
   syncAccountBalance,
@@ -35,7 +40,37 @@ import {
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Legacy coarse JWT-role bucket. Retained only as the backfill-transition
+// fallback inside hasImpactCardStaffAccess — the authoritative gate is now
+// the impact_card.operate / .manage RBAC permission (finding F2).
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
+
+/**
+ * Resolve the caller's Impact Card staff capability from RBAC.
+ * Looks up the app `users` row for this Clerk identity, loads its
+ * permission set, and applies hasImpactCardStaffAccess (which keeps
+ * un-migrated staff working until the user_roles backfill lands).
+ * A caller with no `users` row (pure portal member) is never staff.
+ */
+async function resolveImpactCardStaff(
+  supabase: Db,
+  clerkUserId: string,
+  churchId: string,
+  coarseRole: string,
+): Promise<boolean> {
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('id')
+    .eq('clerk_id', clerkUserId)
+    .eq('church_id', churchId)
+    .maybeSingle();
+
+  const permissions = userRow
+    ? await loadPermissionKeys(supabase, userRow.id, churchId)
+    : new Set<string>();
+
+  return hasImpactCardStaffAccess(permissions, STAFF_ROLES.includes(coarseRole));
+}
 
 const POST_SCHEMA = {
   action: str({ required: true, max: 30, pattern: /^[a-z_]+$/ }),
@@ -232,7 +267,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  const isStaff = STAFF_ROLES.includes(auth.role);
+  const isStaff = await resolveImpactCardStaff(supabase, auth.clerkUserId, auth.churchId, auth.role);
 
   // ---------- READS ----------
   if (req.method === 'GET') {
