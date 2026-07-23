@@ -64,12 +64,20 @@ create policy "donation_batches write" on public.donation_batches for all
   using      (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'))
   with check (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'));
 
+-- batch_items has NO church_id column — it inherits tenancy from its parent
+-- donation_batches (matching the parent-join its tenant_isolation policy used).
 drop policy if exists "tenant_isolation" on public.batch_items;
 create policy "batch_items read"  on public.batch_items for select
-  using (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.view'));
+  using (exists (select 1 from public.donation_batches db
+                 where db.id = batch_items.batch_id and db.church_id = get_church_id())
+         and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.view'));
 create policy "batch_items write" on public.batch_items for all
-  using      (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'))
-  with check (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'));
+  using      (exists (select 1 from public.donation_batches db
+                 where db.id = batch_items.batch_id and db.church_id = get_church_id())
+              and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'))
+  with check (exists (select 1 from public.donation_batches db
+                 where db.id = batch_items.batch_id and db.church_id = get_church_id())
+              and user_has_permission(get_app_user_id(), get_church_id(), 'giving_financial.manage'));
 
 drop policy if exists "tenant_isolation" on public.giving_statements;
 create policy "giving_statements read"  on public.giving_statements for select
@@ -109,12 +117,20 @@ create policy "households write" on public.households for all
   using      (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'))
   with check (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'));
 
+-- household_members has NO church_id column — it inherits tenancy from its
+-- parent households (matching the parent-join its tenant_isolation policy used).
 drop policy if exists "tenant_isolation" on public.household_members;
 create policy "household_members read"  on public.household_members for select
-  using (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'households.view'));
+  using (exists (select 1 from public.households h
+                 where h.id = household_members.household_id and h.church_id = get_church_id())
+         and user_has_permission(get_app_user_id(), get_church_id(), 'households.view'));
 create policy "household_members write" on public.household_members for all
-  using      (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'))
-  with check (church_id = get_church_id() and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'));
+  using      (exists (select 1 from public.households h
+                 where h.id = household_members.household_id and h.church_id = get_church_id())
+              and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'))
+  with check (exists (select 1 from public.households h
+                 where h.id = household_members.household_id and h.church_id = get_church_id())
+              and user_has_permission(get_app_user_id(), get_church_id(), 'households.manage'));
 
 -- ───────────── staff_profiles (people.view / admin.manage_settings) ─────────────
 drop policy if exists "tenant_isolation" on public.staff_profiles;
@@ -169,12 +185,13 @@ commit;
 --     using (church_id = get_church_id()) with check (church_id = get_church_id());
 -- commit;
 
--- ── batch_items ──
+-- ── batch_items (parent-join: no own church_id) ──
 -- begin;
 --   drop policy if exists "batch_items read"  on public.batch_items;
 --   drop policy if exists "batch_items write" on public.batch_items;
 --   create policy "tenant_isolation" on public.batch_items for all
---     using (church_id = get_church_id()) with check (church_id = get_church_id());
+--     using      (exists (select 1 from public.donation_batches db where db.id = batch_items.batch_id and db.church_id = get_church_id()))
+--     with check (exists (select 1 from public.donation_batches db where db.id = batch_items.batch_id and db.church_id = get_church_id()));
 -- commit;
 
 -- ── giving_statements ──
@@ -217,12 +234,13 @@ commit;
 --     using (church_id = get_church_id()) with check (church_id = get_church_id());
 -- commit;
 
--- ── household_members ──
+-- ── household_members (parent-join: no own church_id) ──
 -- begin;
 --   drop policy if exists "household_members read"  on public.household_members;
 --   drop policy if exists "household_members write" on public.household_members;
 --   create policy "tenant_isolation" on public.household_members for all
---     using (church_id = get_church_id()) with check (church_id = get_church_id());
+--     using      (exists (select 1 from public.households h where h.id = household_members.household_id and h.church_id = get_church_id()))
+--     with check (exists (select 1 from public.households h where h.id = household_members.household_id and h.church_id = get_church_id()));
 -- commit;
 
 -- ── staff_profiles ──
