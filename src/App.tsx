@@ -113,7 +113,7 @@ function DemoCrmRedirect() {
 }
 
 function App() {
-  const { churchId, isSignedIn, isLoaded, user } = useAuthContext();
+  const { churchId, isSignedIn, isLoaded, user, getAuthToken } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
@@ -594,20 +594,25 @@ function App() {
             addEvent: (e) => handlers.addEvent({ ...e, allDay: e.allDay }),
             sendMessage: async ({ channel, recipientIds, subject, body }) => {
               let sent = 0, failed = 0, skipped = 0;
+              // Both /api/agentmail/send and /api/sms/send require a staff
+              // bearer token — fetch it once for the whole batch.
+              const token = await getAuthToken();
+              const authHeaders: HeadersInit = { 'Content-Type': 'application/json' };
+              if (token) authHeaders.Authorization = `Bearer ${token}`;
               for (const id of recipientIds) {
                 const person = people.find(p => p.id === id);
                 try {
                   if (channel === 'email') {
                     if (!person?.email) { skipped++; continue; }
                     const r = await fetch('/api/agentmail/send', {
-                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      method: 'POST', headers: authHeaders,
                       body: JSON.stringify({ person_id: id, subject: subject || 'A note from your church', text: body }),
                     });
                     if (r.ok) sent++; else failed++;
                   } else {
                     if (!person?.phone) { skipped++; continue; }
                     const r = await fetch('/api/sms/send', {
-                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      method: 'POST', headers: authHeaders,
                       body: JSON.stringify({ to: person.phone, message: body }),
                     });
                     if (r.ok) sent++; else failed++;

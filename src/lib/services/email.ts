@@ -5,6 +5,8 @@
  * Includes templates for common CRM emails.
  */
 
+import { getClerkTokenProvider } from '../supabase';
+
 export interface EmailRecipient {
   email: string;
   name?: string;
@@ -231,11 +233,15 @@ class EmailService {
         r.name ? `${r.name} <${r.email}>` : r.email
       );
 
-      // Send via backend API proxy (no API key exposed in frontend)
+      // Send via backend API proxy (no API key exposed in frontend).
+      // /api/email/send requires a staff bearer token (TD-014 pattern).
+      const provider = getClerkTokenProvider();
+      const token = provider ? await provider() : null;
       const response = await fetch(`${this.apiBaseUrl}/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: 'same-origin',
         body: JSON.stringify({
