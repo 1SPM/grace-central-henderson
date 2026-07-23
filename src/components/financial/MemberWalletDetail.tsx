@@ -123,6 +123,24 @@ function DepositPanel({
   );
 }
 
+/** Mastercard brand mark — two overlapping circles in the official colors. */
+function MastercardMark() {
+  return (
+    <svg viewBox="0 0 48 30" className="w-11 h-auto" role="img" aria-label="Mastercard">
+      <defs>
+        <clipPath id="impact-mc-lens">
+          <circle cx="17" cy="15" r="14" />
+        </clipPath>
+      </defs>
+      <circle cx="17" cy="15" r="14" fill="#EB001B" />
+      <circle cx="31" cy="15" r="14" fill="#F79E1B" />
+      <g clipPath="url(#impact-mc-lens)">
+        <circle cx="31" cy="15" r="14" fill="#FF5F00" />
+      </g>
+    </svg>
+  );
+}
+
 function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: string | null }) {
   const isFrozen = card.status === 'frozen';
   return (
@@ -130,8 +148,24 @@ function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: strin
       className={`rounded-2xl p-4 text-white shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 ${isFrozen ? 'opacity-60' : ''}`}
     >
       <div className="flex items-center justify-between mb-6">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/60">GRACE Impact Card</span>
-        <span className="text-xs font-semibold italic text-white/80">VISA</span>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Logo PNG has a white background (no alpha) — the white chip makes that read as intentional. */}
+          <span className="w-7 h-7 rounded-full bg-white overflow-hidden flex-shrink-0 shadow">
+            <img
+              src="/previews/assets/central-henderson-logo.png"
+              alt="Central Henderson"
+              className="w-full h-full object-cover"
+            />
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 truncate">GRACE Impact Card</span>
+        </div>
+        <span
+          className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${
+            isFrozen ? 'bg-blue-200/30 text-blue-100' : 'bg-emerald-300/20 text-emerald-200'
+          }`}
+        >
+          {card.status}
+        </span>
       </div>
       <p className="text-base tracking-[0.2em] font-medium mb-4">{card.masked_pan}</p>
       <div className="flex items-end justify-between">
@@ -145,13 +179,7 @@ function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: strin
             </>
           )}
         </div>
-        <span
-          className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${
-            isFrozen ? 'bg-blue-200/30 text-blue-100' : 'bg-emerald-300/20 text-emerald-200'
-          }`}
-        >
-          {card.status}
-        </span>
+        <MastercardMark />
       </div>
     </div>
   );
