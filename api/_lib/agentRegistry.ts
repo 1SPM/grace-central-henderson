@@ -94,6 +94,41 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     description: 'Reviews data-quality signals: missing contact info, unassigned ownership.',
     implemented: true,
   },
+  {
+    key: 'steve',
+    name: 'Steve',
+    role: 'Platform Strategy Agent',
+    description: 'Evaluates proposed features, plans, and product decisions against the VWS platform strategy: platform coherence, commercial defensibility, privacy, and Central Church pilot readiness. Runs strategic reviews — not database scans.',
+    implemented: true,
+  },
+  {
+    key: 'charles',
+    name: 'Charles',
+    role: 'Engineering Agent',
+    description: 'Owns the GRACE backend: infrastructure, deployment, API routes, database schema, and engineering discipline across the platform.',
+    implemented: false,
+  },
+  {
+    key: 'marco',
+    name: 'Marco',
+    role: 'Interface Agent',
+    description: 'Owns member-facing UIs: Divinity, design systems, portal experience, and the visual layer of the VWS platform.',
+    implemented: false,
+  },
+  {
+    key: 'clarence',
+    name: 'Clarence',
+    role: 'Ministry Configuration Agent',
+    description: 'Owns workflow setup, ministry logic, leader tools, and configuration surfaces that let churches shape VWS to their operations.',
+    implemented: false,
+  },
+  {
+    key: 'marci',
+    name: 'Marci',
+    role: 'Data Agent',
+    description: 'Owns member intelligence, analytics, reporting, and the GRACE Impact measurement layer.',
+    implemented: false,
+  },
 ];
 
 export function getAgentDefinition(key: string): AgentDefinition | undefined {
