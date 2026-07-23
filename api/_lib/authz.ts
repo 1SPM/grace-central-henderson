@@ -64,7 +64,7 @@ const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 // demo bypass writes to has to be resolved from the request hostname,
 // not a shared env var, or every white-label host would silently share
 // Central Henderson's data.
-const HOST_CHURCH_IDS: Record<string, string> = {
+export const HOST_CHURCH_IDS: Record<string, string> = {
   'grace-crm-two.vercel.app': '22222222-2222-2222-2222-222222222222',
   'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
   'www.grace-crm.dev': '22222222-2222-2222-2222-222222222222',
