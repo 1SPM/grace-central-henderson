@@ -37,10 +37,23 @@ function cleanupExpired(now: number): void {
 }
 
 function clientKey(req: VercelRequest): string {
+  // Prefer x-real-ip: Vercel sets it to the actual edge-connecting client
+  // IP and it is a single, non-client-supplied value. x-forwarded-for's
+  // LEFTMOST entry is client-controllable on append-style proxies (a
+  // caller can send their own X-Forwarded-For and rotate it to get a
+  // fresh bucket per request), so it must not be the primary key. We
+  // fall back to XFF only when x-real-ip is absent (e.g. local dev), and
+  // then to the RIGHTMOST entry — the one added by the closest trusted
+  // proxy — rather than the spoofable leftmost.
+  const realIp = req.headers['x-real-ip'];
+  const realIpValue = Array.isArray(realIp) ? realIp[0] : realIp;
+  if (realIpValue?.trim()) return realIpValue.trim();
+
   const xff = req.headers['x-forwarded-for'];
-  const first = Array.isArray(xff) ? xff[0] : xff;
-  const ip = first?.split(',')[0]?.trim();
-  return ip || 'unknown';
+  const xffValue = Array.isArray(xff) ? xff[xff.length - 1] : xff;
+  const parts = xffValue?.split(',').map(p => p.trim()).filter(Boolean);
+  const rightmost = parts && parts.length > 0 ? parts[parts.length - 1] : undefined;
+  return rightmost || 'unknown';
 }
 
 export interface RateLimitCheck {

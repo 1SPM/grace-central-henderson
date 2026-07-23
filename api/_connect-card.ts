@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { readBody, str, email_, arrayOfStr } from './_lib/validation.js';
 import { resolveChurchIdForHost } from './_lib/resolveChurchByHost.js';
+import { requireClerkAuth } from './_lib/auth-helper.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -9,9 +10,10 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SU
 // Hardened input schema. This route is PUBLIC and accepts traffic from
 // the open internet, so we cap field sizes + constrain interest tags to
 // an allowlist. Security fix: churchId is NOT accepted from the client
-// (see resolveChurchIdForHost) — it used to be, which let anyone inject
-// records into any real tenant by supplying that tenant's church_id in
-// the request body, with no verification of any relationship to it.
+// (see the church resolution in the handler) — it used to be, which let
+// anyone inject records into any real tenant by supplying that tenant's
+// church_id in the request body, with no verification of any
+// relationship to it.
 const SCHEMA = {
   firstName:     str({ required: true, max: 100 }),
   lastName:      str({ required: true, max: 100 }),
@@ -23,10 +25,12 @@ const SCHEMA = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
+  // CORS headers. Authorization is allowed so the in-admin Connect Card
+  // (which posts with a staff bearer token) works; the public form sends
+  // no token and resolves its church from the request Host instead.
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -79,9 +83,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Resolve which church this submission is for from the request's own
-    // Host header — never from client input (see SCHEMA comment above).
-    const churchId = await resolveChurchIdForHost(req.headers.host, supabase);
+    // Resolve which church this submission is for. Two trusted paths,
+    // never the request body:
+    //   1. Authenticated (in-admin Connect Card): the church_id comes
+    //      from the verified Clerk JWT — works on any host, and is the
+    //      right signal when we actually know who the caller is.
+    //   2. Anonymous (public /connect form, no token): fall back to the
+    //      request's own Host header (see resolveChurchIdForHost).
+    // A present-but-invalid token is rejected outright rather than
+    // silently downgraded to the Host path.
+    let churchId: string | null;
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+      const auth = await requireClerkAuth(req);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+      churchId = auth.churchId;
+    } else {
+      churchId = await resolveChurchIdForHost(req.headers.host, supabase);
+    }
     if (!churchId) {
       return res.status(404).json({ error: 'Connect card is not available on this domain' });
     }

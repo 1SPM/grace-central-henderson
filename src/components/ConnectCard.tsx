@@ -4,6 +4,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import QRCodeLib from 'qrcode';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { escapeHtml } from '../utils/security';
+import { getClerkTokenProvider } from '../lib/supabase';
 
 interface ConnectCardProps {
   churchName?: string;
@@ -56,13 +57,22 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
     setLoading(true);
 
     try {
+      // In admin mode a staff session is present — send its bearer token
+      // so the server scopes the record to the authenticated church_id
+      // (works on any host). The public form has no session; the provider
+      // returns null and the server falls back to Host-based resolution.
+      const provider = getClerkTokenProvider();
+      const token = provider ? await provider() : null;
       const response = await fetch('/api/connect-card', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          churchId,
-          ...formData,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        // churchId is sent for backward compatibility but the server
+        // ignores it — the church is derived from the bearer token
+        // (admin) or the request Host (public form). See api/_connect-card.ts.
+        body: JSON.stringify({ churchId, ...formData }),
       });
 
       if (!response.ok) {
