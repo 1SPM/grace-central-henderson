@@ -48,6 +48,13 @@ function kycBadge(status: MemberAccountRow['kycStatus']) {
       </span>
     );
   }
+  if (status === 'rejected') {
+    return (
+      <span className="flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+        <AlertTriangle size={10} /> Rejected
+      </span>
+    );
+  }
   return (
     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 capitalize">
       KYC {status.replace('_', ' ')}
@@ -200,7 +207,7 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
             onViewPortalActivity={onViewPortalActivity}
           />
 
-          <CardProgramSection program={program} embedded />
+          <CardProgramSection program={program} embedded busyId={busyId} withBusy={withBusy} />
 
           <div className="mt-8 mb-6">
             <h2 className="serif text-xl text-slate-900 dark:text-dark-100 leading-none mb-4">Church-wide monitoring</h2>
