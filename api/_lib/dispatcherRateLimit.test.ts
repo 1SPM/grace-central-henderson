@@ -3,7 +3,7 @@ import type { VercelRequest } from '@vercel/node';
 import { checkDispatcherRateLimit } from './dispatcherRateLimit.js';
 
 function makeReq(ip: string): VercelRequest {
-  return { headers: { 'x-forwarded-for': ip } } as unknown as VercelRequest;
+  return { headers: { 'x-real-ip': ip } } as unknown as VercelRequest;
 }
 
 describe('checkDispatcherRateLimit', () => {
@@ -43,8 +43,31 @@ describe('checkDispatcherRateLimit', () => {
     expect(checkDispatcherRateLimit(reqB, 'shared-route', 3).limited).toBe(false);
   });
 
-  it('falls back to "unknown" without throwing when there is no x-forwarded-for header', () => {
+  it('falls back to "unknown" without throwing when there is no IP header at all', () => {
     const req = { headers: {} } as unknown as VercelRequest;
     expect(() => checkDispatcherRateLimit(req, 'no-ip-route', 5)).not.toThrow();
+  });
+
+  it('keys on x-real-ip and ignores a spoofed leftmost x-forwarded-for value', () => {
+    // Same real client (x-real-ip) rotating the client-controllable
+    // leftmost XFF entry must NOT get a fresh bucket each request —
+    // otherwise the limiter is trivially bypassable.
+    const mk = (spoofedXff: string) =>
+      ({ headers: { 'x-real-ip': '203.0.113.7', 'x-forwarded-for': `${spoofedXff}, 203.0.113.7` } }) as unknown as VercelRequest;
+    for (let i = 0; i < 3; i++) {
+      checkDispatcherRateLimit(mk(`spoof-${i}`), 'spoof-route', 3);
+    }
+    // 4th request, brand-new spoofed leftmost value, still same x-real-ip → blocked.
+    expect(checkDispatcherRateLimit(mk('spoof-brand-new'), 'spoof-route', 3).limited).toBe(true);
+  });
+
+  it('falls back to the rightmost (trusted-proxy-added) x-forwarded-for entry when x-real-ip is absent', () => {
+    const mk = (spoofedLeftmost: string) =>
+      ({ headers: { 'x-forwarded-for': `${spoofedLeftmost}, 198.51.100.9` } }) as unknown as VercelRequest;
+    for (let i = 0; i < 3; i++) {
+      checkDispatcherRateLimit(mk(`x-${i}`), 'xff-fallback-route', 3);
+    }
+    // Rotating only the leftmost while the rightmost (real) IP is constant → still blocked.
+    expect(checkDispatcherRateLimit(mk('x-new'), 'xff-fallback-route', 3).limited).toBe(true);
   });
 });

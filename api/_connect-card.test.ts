@@ -6,6 +6,11 @@ vi.mock('./_lib/resolveChurchByHost.js', () => ({
   resolveChurchIdForHost: resolveChurchIdForHostMock,
 }));
 
+const requireClerkAuthMock = vi.fn();
+vi.mock('./_lib/auth-helper.js', () => ({
+  requireClerkAuth: requireClerkAuthMock,
+}));
+
 const insertedRows: Record<string, unknown[]> = { people: [], prayer_requests: [], tasks: [] };
 
 function makeSupabaseMock() {
@@ -55,6 +60,7 @@ describe('POST /api/connect-card', () => {
     process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
     resolveChurchIdForHostMock.mockReset();
+    requireClerkAuthMock.mockReset();
     insertedRows.people = [];
     insertedRows.prayer_requests = [];
     insertedRows.tasks = [];
@@ -108,5 +114,36 @@ describe('POST /api/connect-card', () => {
 
     expect(res.statusCode).toBe(400);
     expect(resolveChurchIdForHostMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the authenticated churchId (JWT) when a bearer token is present — works on any host, no Host lookup', async () => {
+    requireClerkAuthMock.mockResolvedValue({ ok: true, churchId: '33333333-3333-3333-3333-333333333333', clerkUserId: 'u1', role: 'admin', sessionId: 's1' });
+    const { default: handler } = await import('./_connect-card.js');
+    const res = mockRes();
+    // Host would resolve to null (unregistered), but the authed path wins.
+    await handler(
+      mockReq({
+        headers: { host: 'brand-new-tenant-no-custom-domain.example', authorization: 'Bearer real-staff-token' },
+      }),
+      res,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(insertedRows.people[0]).toMatchObject({ church_id: '33333333-3333-3333-3333-333333333333' });
+    expect(resolveChurchIdForHostMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a present-but-invalid bearer token rather than silently falling back to the Host path', async () => {
+    requireClerkAuthMock.mockResolvedValue({ ok: false, status: 401, error: 'invalid token' });
+    const { default: handler } = await import('./_connect-card.js');
+    const res = mockRes();
+    await handler(
+      mockReq({ headers: { host: 'gracecrm-centralhenderson.org', authorization: 'Bearer tampered' } }),
+      res,
+    );
+
+    expect(res.statusCode).toBe(401);
+    expect(resolveChurchIdForHostMock).not.toHaveBeenCalled();
+    expect(insertedRows.people).toHaveLength(0);
   });
 });
