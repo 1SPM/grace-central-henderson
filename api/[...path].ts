@@ -142,7 +142,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ error: 'Not found' });
   }
 
-  const { limited, retryAfterSeconds } = checkDispatcherRateLimit(
+  const { limited, retryAfterSeconds } = await checkDispatcherRateLimit(
     req,
     path,
     RATE_LIMIT_MAX_REQUESTS,
