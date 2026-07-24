@@ -31,6 +31,8 @@ import { VerifiedBadge } from './VerifiedBadge';
 import { LeaderOnboardingWizard } from './LeaderOnboardingWizard';
 import type { LeaderOnboardingData } from './LeaderOnboardingWizard';
 import { LeaderStatsDashboard } from './LeaderStatsDashboard';
+import { LeaderAvatar } from './leadersHub/LeaderAvatar';
+import { getLeaderHubStats } from './leadersHub/demoLeadersHub';
 
 type ManagementTab = 'active' | 'applications' | 'stats';
 
@@ -386,17 +388,24 @@ export function LeaderManagement({
             const completedCount = leaderSessions.filter(s => s.status === 'completed').length;
             const rated = leaderSessions.filter(s => s.rating != null);
             const avgRating = rated.length > 0 ? Math.round(rated.reduce((s, r) => s + (r.rating || 0), 0) / rated.length * 10) / 10 : 0;
+            // Fall back to the same demo roster stats the Team tab uses
+            // (getLeaderHubStats/LeadersRoster.tsx) once no real pastoral
+            // sessions exist yet — otherwise this card showed "0
+            // Sessions / --- Rating" for every leader while the Team tab,
+            // one click away, showed real-looking numbers for the exact
+            // same person.
+            const demoStats = getLeaderHubStats(leader);
+            const sessionsDisplay = completedCount || demoStats.sessions;
+            const ratingDisplay = avgRating || demoStats.rating;
 
             return (
-              <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
+              <div key={leader.id} className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
-                      {leader.displayName.charAt(0)}
-                    </div>
+                    <LeaderAvatar leader={leader} size="md" showVerified={false} />
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h4>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-dark-100">{leader.displayName}</h4>
                         {leader.isVerified && <VerifiedBadge size="sm" />}
                       </div>
                       <p className="text-xs text-gray-500 dark:text-dark-400">{leader.title}</p>
@@ -445,24 +454,30 @@ export function LeaderManagement({
 
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100 dark:border-dark-700">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-900 dark:text-dark-100">{completedCount}</p>
+                    <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{sessionsDisplay}</p>
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Sessions</p>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <Star size={12} className="text-amber-400 fill-amber-400" />
-                      <p className="text-lg font-bold text-gray-900 dark:text-dark-100">{avgRating || '---'}</p>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Star size={18} className="text-amber-400 fill-amber-400" />
+                      <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{ratingDisplay.toFixed(1)}</p>
                     </div>
                     <p className="text-[10px] text-gray-500 dark:text-dark-400">Rating</p>
                   </div>
                   <div className="text-center">
+                    {/* Same "Live" / "AI on duty" vocabulary as the Team
+                        tab (LeadersRoster.tsx) — this used to say "Online"
+                        / "Offline" instead, which read as "nothing is
+                        available" for a leader whose AI companion is
+                        actually still on duty when they're not personally
+                        live. */}
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
                       leader.isAvailable
                         ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400'
+                        : 'bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${leader.isAvailable ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                      {leader.isAvailable ? 'Online' : 'Offline'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${leader.isAvailable ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                      {leader.isAvailable ? 'Live' : (leader.hasAiCompanion !== false ? 'AI on duty' : 'Offline')}
                     </span>
                   </div>
                 </div>

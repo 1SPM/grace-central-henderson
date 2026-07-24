@@ -1,0 +1,80 @@
+/* Faithful Church — white-label CRM theme.
+   Activated at runtime by html[data-tenant='faithful'] (set in main.tsx from
+   src/config/tenant.ts). Imported unconditionally — every rule is scoped to
+   the data-tenant attribute, so Central Henderson is untouched.
+   Restored from reverted commit b005b5e; fonts moved from build-time head
+   injection to a runtime-safe @import. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+html[data-tenant='faithful'] {
+  /* GRACE navy palette */
+  --grace-navy-950: #0c1929;
+  --grace-navy-800: #1e3a5f;
+  --grace-sky-500: #449eca;
+  --grace-off-white: #f8f9fb;
+
+  /* Replace Monday purple primary */
+  --color-primary: 68 158 202;
+  --color-primary-dark: 58 138 181;
+  --gold: #449eca;
+  --gold-soft: #a8daf0;
+  --gold-line: #c5e3f2;
+
+  /* Tailwind indigo palette → navy/sky (RGB triplets, see tailwind.config.js) */
+  --twc-indigo-50:  232 244 250;
+  --twc-indigo-100: 212 235 246;
+  --twc-indigo-200: 168 218 240;
+  --twc-indigo-300: 125 200 232;
+  --twc-indigo-400: 90 171 218;
+  --twc-indigo-500: 68 158 202;
+  --twc-indigo-600: 58 138 181;
+  --twc-indigo-700: 30 58 95;
+  --twc-indigo-800: 21 42 69;
+  --twc-indigo-900: 12 25 41;
+  --twc-indigo-950: 8 18 32;
+
+  /* Central token aliases (marketing + shared surfaces) */
+  --central-red: var(--grace-sky-500);
+  --central-red-hover: #3a8ab5;
+  --central-black: var(--grace-navy-950);
+  --central-white: #ffffff;
+  --central-grey: #64748b;
+  --central-canvas: var(--grace-off-white);
+  --central-card: #ffffff;
+  --central-line: #e2e8f0;
+  --central-red-soft: #e8f4fa;
+  --brand-accent: var(--grace-sky-500);
+  --brand-dark: var(--grace-navy-950);
+  --brand-soft: #e8f4fa;
+}
+
+html[data-tenant='faithful'] body {
+  font-family: 'Inter', 'Figtree', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--grace-navy-950);
+}
+
+/* Display serif reserved for true display moments — the hero name, big
+   KPI numerals, brand wordmarks — via explicit classes, NOT every h1-h3.
+   The old blanket `h1, h2, h3 { font-family: Playfair; color: navy }` rule
+   serif'd and navy-tinted every heading regardless of size or context,
+   including 18px calendar month labels, a 12px sidebar checklist title
+   ("Finish Setting Up"), and — worse — the white "GRACE" heading on the
+   dark onboarding panel: the theme's navy-ink override out-specificity'd
+   Tailwind's `text-white` on that component, rendering near-invisible
+   dark-navy-on-dark-panel text in production. Font-family and color are
+   independent concerns; every component using .serif already sets its
+   own text color via Tailwind (text-slate-900 dark:text-dark-100), so
+   this rule only carries family — components stay in control of color,
+   which is what makes it safe on both light and dark surfaces. */
+html[data-tenant='faithful'] .stat-number,
+html[data-tenant='faithful'] .serif,
+html[data-tenant='faithful'] .font-display,
+html[data-tenant='faithful'] .font-brand {
+  font-family: 'Playfair Display', 'Poppins', Georgia, serif;
+}
+
+/* Focus rings — sky instead of purple */
+html[data-tenant='faithful'] *:focus-visible {
+  outline-color: rgba(68, 158, 202, 0.45);
+}

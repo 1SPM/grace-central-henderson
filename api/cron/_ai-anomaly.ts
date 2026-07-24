@@ -1,7 +1,7 @@
 /**
- * Hourly AI burn-rate anomaly cron.
+ * Daily AI burn-rate anomaly cron.
  *
- * Scheduled in vercel.json: `0 * * * *` (top of every hour).
+ * Scheduled in vercel.json: `0 5 * * *` (05:00 UTC daily).
  *
  * For each tenant with usage in the last 24h:
  *   1. Sum last hour's cost_micro_usd from token_usage.
@@ -11,19 +11,19 @@
  *
  * Returns a summary JSON for observability (Vercel logs / dashboards).
  *
- * Auth: Vercel cron requests carry the `x-vercel-cron` header. We also
- * accept a CRON_SECRET bearer token for ad-hoc operator triggers. Other
- * requests are rejected with 401 — this endpoint must NOT be public.
+ * Auth: Bearer CRON_SECRET only — see api/_lib/cronAuth.ts for why the
+ * x-vercel-cron header is not trusted.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { detectAnomaly } from '../_lib/ai/anomaly.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
+import { requireCronAuth } from '../_lib/cronAuth.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
 
 const LOOKBACK_HOURS = 168;             // 7 days
 
@@ -34,13 +34,6 @@ interface SummaryEntry {
   ratio: number;
   anomalous: boolean;
   reason?: string;
-}
-
-function isAuthorized(req: VercelRequest): boolean {
-  if (req.headers['x-vercel-cron']) return true;
-  const auth = req.headers.authorization;
-  if (CRON_SECRET && auth === `Bearer ${CRON_SECRET}`) return true;
-  return false;
 }
 
 interface UsageAggRow {
@@ -118,7 +111,7 @@ async function reportToSentry(entry: SummaryEntry): Promise<void> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'unauthorized' });
+  if (requireCronAuth(req, res) !== null) return;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'supabase not configured' });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -132,6 +125,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     rows = await fetchUsageSince(supabase, trailingSince.toISOString());
   } catch (err) {
     console.error('[ai-anomaly cron]', err);
+    await recordCronRun(supabase, 'ai-anomaly', {
+      ok: false,
+      durationMs: Date.now() - now.getTime(),
+      summary: { error: 'usage_read_failed' },
+    });
     return res.status(500).json({ error: 'usage_read_failed' });
   }
 
@@ -159,6 +157,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await reportToSentry(entry);
     }
   }
+
+  await recordCronRun(supabase, 'ai-anomaly', {
+    ok: true,
+    durationMs: Date.now() - now.getTime(),
+    summary: { checked: summary.length, alerted },
+  });
 
   return res.status(200).json({
     ok: true,

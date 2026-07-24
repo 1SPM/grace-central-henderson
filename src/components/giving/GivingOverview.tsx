@@ -13,6 +13,7 @@ import {
 import type { Giving, Person, Pledge, View } from '../../types';
 import type { GivingHubTab, GivingNavTarget } from './GivingHub';
 import { demoCampaigns, demoFundStreamSplits } from './demoGivingHub';
+import { SampleDataNotice } from '../SampleDataNotice';
 import { fmtImpactUsd, useImpactCardProgram } from '../../hooks/useImpactCardProgram';
 
 interface GivingOverviewProps {
@@ -37,7 +38,7 @@ function StreamPill({ kind, children }: { kind: 'direct' | 'points' | 'campaign'
     points: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
     campaign: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
     card: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-    member: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+    member: 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300',
   };
   return (
     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap ${styles[kind]}`}>
@@ -73,40 +74,41 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice label="Fund-split, stream-summary, and campaign figures below are illustrative samples — not live" />
       {/* KPI hero cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="rounded-xl p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-900/10 border border-amber-200 dark:border-amber-800/40">
-          <p className="text-[11px] font-medium text-gray-600 dark:text-dark-300 flex items-center gap-1.5">
-            <DollarSign size={13} /> Total given
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500">
+          <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
+            <DollarSign size={13} className="text-amber-500" /> Total given
           </p>
-          <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             ${Math.round(stats.total).toLocaleString()}
           </p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">
             {stats.gifts} gifts {stats.isMtd ? 'this month' : 'recorded'}
           </p>
         </div>
-        <div className="rounded-xl p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/40">
-          <p className="text-[11px] font-medium text-gray-600 dark:text-dark-300 flex items-center gap-1.5">
-            <Check size={13} /> Average gift
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600">
+          <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
+            <Check size={13} className="text-blue-500" /> Average gift
           </p>
-          <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             ${Math.round(stats.avgGift).toLocaleString()}
           </p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">per gift</p>
         </div>
-        <div className="rounded-xl p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 border border-emerald-200 dark:border-emerald-800/40">
-          <p className="text-[11px] font-medium text-gray-600 dark:text-dark-300 flex items-center gap-1.5">
-            <LayoutGrid size={13} /> Funds
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600">
+          <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
+            <LayoutGrid size={13} className="text-emerald-500" /> Funds
           </p>
-          <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">{stats.funds.length}</p>
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{stats.funds.length}</p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">active</p>
         </div>
-        <div className="rounded-xl p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800/40">
-          <p className="text-[11px] font-medium text-gray-600 dark:text-dark-300 flex items-center gap-1.5">
-            <CreditCard size={13} /> Card interchange
+        <div className="rounded-2xl p-5 bg-stone-100 dark:bg-dark-800 border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600">
+          <p className="text-[11px] font-medium text-gray-500 dark:text-dark-400 flex items-center gap-1.5">
+            <CreditCard size={13} className="text-indigo-500" /> Card interchange
           </p>
-          <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">
+          <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
             {program.state === 'ready' && cardSummary
               ? fmtImpactUsd(cardSummary.interchange_mtd_micro_usd)
               : '—'}
@@ -232,19 +234,19 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
       </div>
 
       {/* Stream summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Direct giving', value: '$51,400', sub: 'Card · Online · App', trend: '▲ 11% vs last period', accent: 'border-t-amber-500' },
-          { label: 'Points redeemed', value: '$3,840', sub: 'Toward tithe & causes', trend: '▲ 34% vs last period', accent: 'border-t-violet-600' },
-          { label: 'Campaign giving', value: '$24,870', sub: 'Admin + Seasonal', trend: '▲ 8% vs last period', accent: 'border-t-emerald-600' },
-          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-t-rose-500' },
+          { label: 'Direct giving', value: '$51,400', sub: 'Card · Online · App', trend: '▲ 11% vs last period', accent: 'border-l-amber-500' },
+          { label: 'Points redeemed', value: '$3,840', sub: 'Toward tithe & causes', trend: '▲ 34% vs last period', accent: 'border-l-violet-600' },
+          { label: 'Campaign giving', value: '$24,870', sub: 'Admin + Seasonal', trend: '▲ 8% vs last period', accent: 'border-l-emerald-600' },
+          { label: 'Member causes', value: '$4,100', sub: 'Peer-approved campaigns', trend: '1 live · 8 pending', accent: 'border-l-brand-500' },
         ].map(card => (
           <div
             key={card.label}
-            className={`bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 border-t-2 ${card.accent} p-4`}
+            className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${card.accent} p-5`}
           >
             <p className="section-eyebrow">{card.label}</p>
-            <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1.5">{card.value}</p>
+            <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-2">{card.value}</p>
             <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{card.sub}</p>
             <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-1">{card.trend}</p>
           </div>

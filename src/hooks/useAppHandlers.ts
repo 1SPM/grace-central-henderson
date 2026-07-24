@@ -74,6 +74,16 @@ interface UseAppHandlersProps {
   closePersonForm: () => void;
   /** Fired after a person's status changes (e.g. visitor → member) so agents can react. */
   onPersonStatusChange?: (personId: string, previousStatus: string, newStatus: string) => void;
+  /** Fired after a donation is recorded so agents (thank-you flow) can react. */
+  onNewDonation?: (donation: {
+    id: string;
+    personId?: string;
+    amount: number;
+    fund: string;
+    date: string;
+    method: string;
+    isRecurring: boolean;
+  }) => void;
 }
 
 export function useAppHandlers({
@@ -99,6 +109,7 @@ export function useAppHandlers({
   openPersonForm,
   closePersonForm,
   onPersonStatusChange,
+  onNewDonation,
 }: UseAppHandlersProps) {
   const toast = useToast();
 
@@ -308,11 +319,20 @@ export function useAppHandlers({
         is_recurring: donation.isRecurring,
         note: donation.note || null,
       });
+      onNewDonation?.({
+        id: `giving-${Date.now()}`,
+        personId: donation.personId,
+        amount: donation.amount,
+        fund: donation.fund,
+        date: donation.date,
+        method: donation.method,
+        isRecurring: donation.isRecurring,
+      });
     } catch (error) {
       log.error('Failed to record donation', error);
       toast.error('Failed to record donation. Please try again.');
     }
-  }, [addGiving, churchId, toast]);
+  }, [addGiving, churchId, toast, onNewDonation]);
 
   const handleAddPerson = useCallback(() => {
     openPersonForm();

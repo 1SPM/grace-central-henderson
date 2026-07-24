@@ -58,19 +58,39 @@ import {
   toGivingLegacy,
   toAttendanceLegacy,
 } from './utils/typeConverters';
-import { useTutorial } from './contexts/TutorialContext';
+import { useTutorial, PASTOR_CRM_TOUR_ID } from './contexts/TutorialContext';
 import { isDemoModeEnabled, navigateToDemoCrm } from './lib/demoEntry';
 
-/** Bridges the App-level showTutorialPicker state to the TutorialContext (which must be inside TutorialProvider) */
-function TutorialPickerAutoOpen({ show, onShown }: { show: boolean; onShown: () => void }) {
-  const { openPicker } = useTutorial();
+/** Auto-start the pastor CRM overview tour once after setup wizard (pastor/admin only). */
+function PastorTourAutoStart({ show, onShown }: { show: boolean; onShown: () => void }) {
+  const { startPastorTour } = useTutorial();
   useEffect(() => {
     if (show) {
-      openPicker();
+      startPastorTour();
       onShown();
     }
-  }, [show, openPicker, onShown]);
+  }, [show, startPastorTour, onShown]);
   return null;
+}
+
+/** Sidebar checklist with tour launch wired to TutorialContext. */
+function SidebarSetupChecklist(props: {
+  churchSettings: import('./hooks/useChurchSettings').ChurchSettings;
+  peopleCount: number;
+  groupsCount: number;
+  eventsCount: number;
+  onNavigate: (view: string) => void;
+  onDismiss: () => void;
+  onReopenWizard: () => void;
+}) {
+  const { startPastorTour } = useTutorial();
+  return (
+    <SetupChecklist
+      {...props}
+      compact
+      onOpenTutorials={startPastorTour}
+    />
+  );
 }
 
 function MarketingLoading({ label }: { label: string }) {
@@ -93,7 +113,7 @@ function DemoCrmRedirect() {
 }
 
 function App() {
-  const { churchId, isSignedIn, isLoaded, user } = useAuthContext();
+  const { churchId, isSignedIn, isLoaded, user, getAuthToken } = useAuthContext();
   const { view, setView, selectedPersonId, setSelectedPersonId } = useHashRouter();
 
   // Use Supabase data hook
@@ -127,7 +147,7 @@ function App() {
     deleteEvent,
     attendance: dbAttendance,
     checkIn,
-  } = useSupabaseData();
+  } = useSupabaseData(isLoaded);
 
   // Convert to legacy types for existing components (memoized)
   const people = useMemo(() => dbPeople.map(p => {
@@ -153,7 +173,8 @@ function App() {
   const discipleshipData = useDiscipleship(people, churchId);
   const { settings: churchSettings, saveSettings: saveChurchSettings, saveProfile: saveChurchProfile, saveOnboarding, isLoading: settingsLoading } = useChurchSettings(churchId);
   const [showWizard, setShowWizard] = useState(false);
-  const [showTutorialPicker, setShowTutorialPicker] = useState(false);
+  const [showPastorTourAutoStart, setShowPastorTourAutoStart] = useState(false);
+  const pastorTourAutoStartRef = useRef(false);
 
   const reopenWizard = useCallback(() => {
     setShowWizard(true);
@@ -162,6 +183,7 @@ function App() {
   // Bridge: useAppHandlers is created before useAgents, so route status-change
   // events through a ref that the agents hook fills in below.
   const personStatusChangeRef = useRef<((personId: string, previousStatus: string, newStatus: string) => void) | null>(null);
+  const newDonationRef = useRef<((donation: { id: string; personId?: string; amount: number; fund: string; date: string; method: string; isRecurring: boolean }) => void) | null>(null);
 
   // App handlers
   const { attendanceRecords, rsvps, volunteerAssignments, handlers } = useAppHandlers({
@@ -188,6 +210,7 @@ function App() {
     closePersonForm: modals.closePersonForm,
     onPersonStatusChange: (personId, previousStatus, newStatus) =>
       personStatusChangeRef.current?.(personId, previousStatus, newStatus),
+    onNewDonation: (donation) => newDonationRef.current?.(donation),
   });
 
   // Agent task creation callback
@@ -255,6 +278,16 @@ function App() {
     };
     return () => { personStatusChangeRef.current = null; };
   }, [agentHandleNewMember]);
+
+  // When a donation is recorded, let the Donation Processing Agent react
+  // (first-time and large-gift thank-you flow).
+  const agentHandleNewDonation = agents.handleNewDonation;
+  useEffect(() => {
+    newDonationRef.current = (donation) => {
+      void agentHandleNewDonation(donation);
+    };
+    return () => { newDonationRef.current = null; };
+  }, [agentHandleNewDonation]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -362,15 +395,24 @@ function App() {
   //   }
   // }, [settingsLoading, isPortalRoute, churchSettings]);
 
-  // Show tutorial picker after wizard completion (one-time)
+  // Auto-start pastor CRM overview once after wizard (pastor/admin, tour not yet completed)
   useEffect(() => {
-    if (!settingsLoading && !isMobileRoute && churchSettings &&
-        churchSettings.onboarding?.wizardCompleted &&
-        !churchSettings.onboarding?.tutorialPickerShown &&
-        !showWizard) {
-      setShowTutorialPicker(true);
+    const role = user?.role;
+    const pastorTourDone = churchSettings?.onboarding?.completedTutorials?.includes(PASTOR_CRM_TOUR_ID);
+    if (
+      !settingsLoading &&
+      !isMobileRoute &&
+      !isDemo &&
+      !pastorTourAutoStartRef.current &&
+      churchSettings?.onboarding?.wizardCompleted &&
+      !showWizard &&
+      (role === 'pastor' || role === 'admin') &&
+      !pastorTourDone
+    ) {
+      pastorTourAutoStartRef.current = true;
+      setShowPastorTourAutoStart(true);
     }
-  }, [settingsLoading, isMobileRoute, churchSettings, showWizard]);
+  }, [settingsLoading, isMobileRoute, isDemo, churchSettings, showWizard, user?.role]);
 
   if (isPricingRoute) {
     return (
@@ -478,6 +520,7 @@ function App() {
       </div>
     );
   }
+  if (!isDemoModeEnabled && isClerkConfigured && !isSignedIn) { return <SignInPage />; }
 
   // Standalone GRACE Mobile (no admin sidebar/layout, staff-gated)
   if (isMobileRoute) {
@@ -510,7 +553,7 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={
           <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
           </div>
         }>
           <div className="h-screen">
@@ -551,20 +594,25 @@ function App() {
             addEvent: (e) => handlers.addEvent({ ...e, allDay: e.allDay }),
             sendMessage: async ({ channel, recipientIds, subject, body }) => {
               let sent = 0, failed = 0, skipped = 0;
+              // Both /api/agentmail/send and /api/sms/send require a staff
+              // bearer token — fetch it once for the whole batch.
+              const token = await getAuthToken();
+              const authHeaders: HeadersInit = { 'Content-Type': 'application/json' };
+              if (token) authHeaders.Authorization = `Bearer ${token}`;
               for (const id of recipientIds) {
                 const person = people.find(p => p.id === id);
                 try {
                   if (channel === 'email') {
                     if (!person?.email) { skipped++; continue; }
                     const r = await fetch('/api/agentmail/send', {
-                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      method: 'POST', headers: authHeaders,
                       body: JSON.stringify({ person_id: id, subject: subject || 'A note from your church', text: body }),
                     });
                     if (r.ok) sent++; else failed++;
                   } else {
                     if (!person?.phone) { skipped++; continue; }
                     const r = await fetch('/api/sms/send', {
-                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      method: 'POST', headers: authHeaders,
                       body: JSON.stringify({ to: person.phone, message: body }),
                     });
                     if (r.ok) sent++; else failed++;
@@ -635,7 +683,7 @@ function App() {
           if (!firstSeen) { firstSeen = String(Date.now()); localStorage.setItem(key, firstSeen); }
           if (Date.now() - parseInt(firstSeen, 10) > 3 * 24 * 60 * 60 * 1000) return null;
           return (
-            <SetupChecklist
+            <SidebarSetupChecklist
               churchSettings={churchSettings}
               peopleCount={people.length}
               groupsCount={groups.length}
@@ -643,7 +691,6 @@ function App() {
               onNavigate={(v) => navigateView(v as View, setView)}
               onDismiss={() => saveOnboarding({ checklistDismissed: true })}
               onReopenWizard={reopenWizard}
-              compact
             />
           ) as ReactNode;
         })()}
@@ -712,7 +759,7 @@ function App() {
 
       <TutorialPickerModal />
       <TutorialOverlay />
-      <TutorialPickerAutoOpen show={showTutorialPicker} onShown={() => setShowTutorialPicker(false)} />
+      <PastorTourAutoStart show={showPastorTourAutoStart} onShown={() => setShowPastorTourAutoStart(false)} />
       </GraceChatProvider>
       </TutorialProvider>
     </ErrorBoundary>

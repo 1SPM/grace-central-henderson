@@ -200,6 +200,96 @@ async function handleChargeRefunded(
 }
 
 // ============================================
+// charge.dispute.created / charge.dispute.closed
+// ============================================
+// A chargeback. On open, the network withdraws the disputed funds — record
+// a ledger DEBIT (modelled as kind 'refund', tagged is_dispute). On close:
+//   won  → funds reinstated → 'adjustment' CREDIT reverses the hold
+//   lost → the debit stands → no new entry
+// Entitlement removal (for a disputed SaaS subscription) is handled by the
+// subscription.* events Stripe also fires; this handler owns the ledger side.
+//
+// Disputes don't carry our metadata.church_id, so we resolve tenant from the
+// underlying PaymentIntent.
+async function resolveDisputeChurchId(
+  dispute: Stripe.Dispute,
+  ctx: StripeHandlerContext,
+): Promise<string | null> {
+  if (dispute.metadata?.church_id) return dispute.metadata.church_id;
+  const piId = typeof dispute.payment_intent === 'string'
+    ? dispute.payment_intent
+    : dispute.payment_intent?.id;
+  if (!piId) return null;
+  try {
+    const pi = await ctx.stripe.paymentIntents.retrieve(piId);
+    return pi.metadata?.church_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function handleChargeDisputeCreated(
+  event: Stripe.Event,
+  ctx: StripeHandlerContext,
+): Promise<HandlerResult> {
+  const dispute = event.data.object as Stripe.Dispute;
+  const churchId = await resolveDisputeChurchId(dispute, ctx);
+  if (!churchId) return { status: 'skipped', reason: 'could not resolve church_id for dispute' };
+
+  const ledger = await appendLedgerEntry(ctx.supabase, {
+    churchId,
+    source: 'stripe',
+    sourceEventId: event.id,
+    kind: 'refund',
+    direction: 'debit',
+    amountMicroUsd: centsToMicroUsd(dispute.amount),
+    currency: (dispute.currency ?? 'usd').toUpperCase(),
+    description: `Dispute opened: ${dispute.id} (${dispute.reason})`,
+    occurredAt: new Date(event.created * 1000),
+    metadata: {
+      is_dispute: true,
+      stripe_dispute_id: dispute.id,
+      stripe_charge_id: typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id ?? null,
+      reason: dispute.reason,
+      dispute_status: dispute.status,
+    },
+  });
+  return { status: 'processed', ledgerWritten: ledger.inserted, ledgerDuplicate: ledger.duplicate };
+}
+
+async function handleChargeDisputeClosed(
+  event: Stripe.Event,
+  ctx: StripeHandlerContext,
+): Promise<HandlerResult> {
+  const dispute = event.data.object as Stripe.Dispute;
+  // Only a WON dispute reinstates funds; lost/other leaves the created debit.
+  if (dispute.status !== 'won') {
+    return { status: 'skipped', reason: `dispute closed as "${dispute.status}" — created debit stands` };
+  }
+  const churchId = await resolveDisputeChurchId(dispute, ctx);
+  if (!churchId) return { status: 'skipped', reason: 'could not resolve church_id for dispute' };
+
+  const ledger = await appendLedgerEntry(ctx.supabase, {
+    churchId,
+    source: 'stripe',
+    sourceEventId: event.id,
+    kind: 'adjustment',
+    direction: 'credit',
+    amountMicroUsd: centsToMicroUsd(dispute.amount),
+    currency: (dispute.currency ?? 'usd').toUpperCase(),
+    description: `Dispute won — funds reinstated: ${dispute.id}`,
+    occurredAt: new Date(event.created * 1000),
+    metadata: {
+      is_dispute_reversal: true,
+      stripe_dispute_id: dispute.id,
+      stripe_charge_id: typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id ?? null,
+      dispute_status: dispute.status,
+    },
+  });
+  return { status: 'processed', ledgerWritten: ledger.inserted, ledgerDuplicate: ledger.duplicate };
+}
+
+// ============================================
 // invoice.paid
 // ============================================
 // Recurring giving cycle. Look up the subscription for tenant context,
@@ -467,6 +557,8 @@ async function handleConnectAccountUpdated(
 export const STRIPE_HANDLERS: Record<string, StripeEventHandler> = {
   'payment_intent.succeeded': handlePaymentIntentSucceeded,
   'charge.refunded': handleChargeRefunded,
+  'charge.dispute.created': handleChargeDisputeCreated,
+  'charge.dispute.closed': handleChargeDisputeClosed,
   'invoice.paid': handleInvoicePaid,
   'customer.subscription.created': routeSubscriptionEvent,
   'customer.subscription.updated': routeSubscriptionEvent,

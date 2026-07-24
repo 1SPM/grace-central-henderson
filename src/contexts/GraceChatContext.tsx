@@ -10,10 +10,24 @@ import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
 import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
-import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { useAISettings } from '../hooks/useAISettings';
+import { TENANT_DEFAULT_SETTINGS, TENANT_TIMEZONE } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
+
+/**
+ * Map any backend/transport failure to a graceful assistant reply.
+ * Raw error strings ("Not found", "401", HTML error bodies) must never
+ * render as if Grace said them (see UX review 2026-07-06, P0-1).
+ */
+function friendlyAIFailure(error?: string): string {
+  const e = (error || '').toLowerCase();
+  if (e.includes('401') || e.includes('unauthorized') || e.includes('session')) {
+    return "I couldn't verify your session just now. Everything on your dashboard still works — try signing out and back in, or ask me again in a moment.";
+  }
+  return "I couldn't reach my knowledge service just now. While I reconnect, the starters on the left — Overdue tasks, New visitors, Needs care — work offline, or try me again in a moment.";
+}
 
 export type { PendingAction } from '../lib/grace-actions';
 export type ActionInstance = ChatActionInstance;
@@ -45,13 +59,20 @@ interface GraceChatContextValue {
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
-function buildDataContext(data: GraceData): string {
+function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName, churchProfile, graceFacts, userFirstName, userRole } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  // Calendar month-to-date, matching the Dashboard's "Impact MTD" tile
+  // (src/lib/dashboardSummary.ts) — kept separate from the rolling 30-day
+  // window below so Grace can answer "this month" questions with a figure
+  // that actually agrees with what the user sees on the Dashboard, instead
+  // of silently substituting the 30-day number for it.
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const recentGiving = giving.filter(g => new Date(g.date) >= thirtyDaysAgo);
+  const mtdGiving = giving.filter(g => new Date(g.date) >= monthStart);
   const totalsByPerson = new Map<string, number>();
   for (const g of recentGiving) {
     if (g.personId) totalsByPerson.set(g.personId, (totalsByPerson.get(g.personId) ?? 0) + g.amount);
@@ -99,9 +120,10 @@ function buildDataContext(data: GraceData): string {
   });
 
   const totalGiving = recentGiving.reduce((s, g) => s + g.amount, 0);
+  const mtdTotal = mtdGiving.reduce((s, g) => s + g.amount, 0);
   const recentCheckIns = attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).length;
 
-  const resolvedChurch = churchName || CENTRAL_HENDERSON_DEFAULT_SETTINGS.profile.name;
+  const resolvedChurch = churchName || TENANT_DEFAULT_SETTINGS.profile.name;
   const profileLines: string[] = [];
   if (churchProfile) {
     const p = churchProfile;
@@ -128,6 +150,7 @@ function buildDataContext(data: GraceData): string {
     userRole,
     profileBlock,
     factsBlock,
+    voiceMode,
   });
 
   return `${personaHeader}
@@ -168,7 +191,8 @@ If user says "do tasks" / "do them" / "handle these" after seeing a task list, e
 
 Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
-Giving last 30d: $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
+Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
+Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
 Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}
 Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
@@ -229,7 +253,7 @@ function computeSalutation(data: GraceData, hour24: number): string {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
-  const tz = data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE;
+  const tz = data.churchTimezone || TENANT_TIMEZONE;
   const { zoned } = useChurchClock(tz);
   const salutation = useMemo(
     () => computeSalutation(data, zoned.hour24),
@@ -239,7 +263,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
     const stored = loadStoredMessages();
     if (stored) return stored;
-    return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || CENTRAL_HENDERSON_TIMEZONE)))];
+    return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || TENANT_TIMEZONE)))];
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -265,28 +289,32 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       if (m.length !== 1 || m[0].id !== 'greet') return m;
       return [buildGreeting(data, salutation)];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [data.tasks.length, data.people.length, data.prayers.length, data.events.length, salutation]);
 
   // Portal engagement + Impact Card aggregates (Phase D) — lets admins
   // ask GRACE about member-portal activity and the card program.
   const opsContext = useGraceOpsAggregates(data.churchId);
 
+  // Voice read-back preference shapes prompt guidance (flowing sentences
+  // over bullet stacks when replies will be spoken aloud).
+  const { settings: aiSettings } = useAISettings();
+  const voiceMode = aiSettings.voiceReadback;
+
   // Memoize context so we're not rebuilding this on every keystroke.
   // Depend on the specific fields we read so re-computation tracks the
   // actual inputs, not every new wrapper object identity.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataContext = useMemo(() => {
-    const base = buildDataContext(data);
+    const base = buildDataContext(data, voiceMode);
     return opsContext ? `${base}\n${opsContext}` : base;
   }, [
     data.people, data.tasks, data.giving, data.events,
     data.groups, data.prayers, data.attendance, data.churchName,
     data.churchProfile, data.graceFacts, data.userFirstName, data.userRole, data.churchTimezone,
-    opsContext,
+    opsContext, voiceMode,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const suggestions = useMemo(() => buildSuggestions(data), [
     data.people, data.tasks, data.events, data.prayers, data.giving, data.attendance,
   ]);
@@ -304,7 +332,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       // Defer to next tick so panel renders before we send
       setTimeout(() => void sendMessage(seed), 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
@@ -412,15 +440,17 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       });
 
       if (streamResult.error) {
+        // Never surface raw API/transport errors (e.g. "Not found", "401") as
+        // if Grace said them — always reply with a graceful, actionable line.
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: streamResult.error! } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(streamResult.error) } : msg
         ));
       } else if (!streamed) {
         // Fallback to non-streaming when the server didn't honor stream mode
         const result = await generateAIText({ prompt, maxTokens: 1200 });
         const text = result.success && result.text
           ? result.text
-          : result.error || 'Sorry, I couldn\'t answer that. Try rephrasing.';
+          : friendlyAIFailure(result.error);
         setMessages(m => m.map(msg =>
           msg.id === assistantMsgId ? { ...msg, content: text } : msg
         ));

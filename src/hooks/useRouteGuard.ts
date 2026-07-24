@@ -23,6 +23,12 @@ const STAFF_VIEWS = new Set<View>([
   'batch-entry',
   'campaigns',
   'statements',
+  // GRACE WorkOS: the coarse role check here is a UX convenience only —
+  // real module-by-module authorization (Work Orders vs. Approvals vs.
+  // Agents vs. Audit) is enforced per-request server-side via
+  // requirePermission() against the RBAC model. See SHARED_BACKEND.md
+  // "Authorization model" and TECH_DEBT.md TD-044.
+  'workos',
 ]);
 
 // All other views are accessible to any authenticated user

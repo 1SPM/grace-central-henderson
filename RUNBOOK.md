@@ -319,6 +319,75 @@
 
 ---
 
+### RB-057 — Applying the RLS role-gating migrations (056 P0, 057 P1a)
+
+- **Type:** planned procedure (not an incident). Closes the privilege-escalation + sensitive-read gaps from the 2026-07-23 Supabase security audit (tracking issue #35).
+- **Principle:** never apply to prod what hasn't passed on staging; **P0 (056) must bake in prod before P1a (057)**. Both migrations are policy swaps — rollback is instant and non-destructive (SQL in each migration's footer).
+
+**0. Preconditions (do not skip)**
+- Staging Supabase mirrors prod schema (a Supabase branch works). Prod PITR/backups on.
+- `supabase link --project-ref <ref>`; you have the DB password / access token.
+- **Clerk→Supabase third-party auth is actually configured on staging.** Load-bearing (TD-001): if it isn't, `get_church_id()` is `NULL`, everything denies, and the smoke tests **false-pass**. Verify with a real staging member token BEFORE migrating:
+  ```bash
+  curl -s "$SUPABASE_TEST_URL/rest/v1/people?select=id&limit=1" \
+    -H "apikey: $SUPABASE_TEST_ANON_KEY" \
+    -H "Authorization: Bearer $SUPABASE_TEST_TENANT_A_MEMBER_TOKEN"
+  # [] here = TPA not wired → STOP; the tests would prove nothing.
+  ```
+- Smoke-test env (Clerk-issued JWTs for real staging users):
+  ```bash
+  export SUPABASE_TEST_URL=... SUPABASE_TEST_ANON_KEY=... SUPABASE_TEST_TENANT_A_ID=...
+  export SUPABASE_TEST_TENANT_A_TOKEN=...        # user WITH admin.manage_roles
+  export SUPABASE_TEST_TENANT_A_MEMBER_TOKEN=... # NON-privileged (no care.view / giving_financial.view / etc.)
+  # cross-tenant also needs _TENANT_B_TOKEN / _TENANT_B_ID
+  ```
+
+**1. P0 (056) → staging**
+```bash
+git checkout main && git pull                 # 056 is on main (PR #36)
+supabase db push --db-url "$STAGING_DB_URL"
+npx vitest run tools/rls-escalation-smoke.test.ts tools/cross-tenant-smoke.test.ts
+```
+Pass = non-admin cannot INSERT `user_roles` / UPDATE `users`; reads preserved; tenants isolated. Manually confirm the staging admin app loads, dashboards populate, and **role management still works**. Observe Sentry ~30 min.
+
+**2. P0 (056) → production** *(off-peak)*
+```bash
+supabase db push --db-url "$PROD_DB_URL"
+```
+Verify within 5 min: admin app loads; dashboards show data; `updateUserRole` works. Watch prod Sentry 30–60 min. **On breakage** (`new row violates row-level security` / empty results / 403 spike): run the P0 rollback (footer of `056_rls_role_gating_identity.sql`), then investigate.
+
+**3. Bake P0 in prod 24–48 h.** Do not proceed to P1a early.
+
+**4. P1a (057) → staging** *(after PR #37 merged)*
+```bash
+git checkout main && git pull
+supabase db push --db-url "$STAGING_DB_URL"
+npx vitest run tools/rls-read-restriction-smoke.test.ts tools/rls-escalation-smoke.test.ts tools/cross-tenant-smoke.test.ts
+```
+Pass = member reads **zero rows** from the 12 tables; escalation still denied; isolation intact. **Important manual probe:** confirm the server-route-backed features still populate on staging (Pastoral Care, Giving dashboard/statements, finance pages, inbox) — they use service-role and should be unaffected; if any is now empty, a route isn't using service-role → stop before prod. Observe ~30 min.
+
+**5. P1a (057) → production** *(off-peak)*
+```bash
+supabase db push --db-url "$PROD_DB_URL"
+```
+Verify care/giving/finance/comms features populate; the **Faithful anonymous demo still displays** (`demo_anon_read` untouched). Watch Sentry 30–60 min. **On breakage:** run the P1a rollback (footer of `057_…sql`) — revert **one table at a time** by restoring just that table's `tenant_isolation` policy.
+
+**6. Post-apply**
+- Comment on #35: P0 + P1a applied (date, observations).
+- Add the `SUPABASE_TEST_*` values as **CI secrets pointed at staging** so the escalation / read-restriction / cross-tenant smoke tests run on every PR (closes TD-001 / TD-002).
+- **P1b** (`people`, `giving`, `tasks`, `interactions`, `small_groups`, `group_memberships`, `attendance`) stays open in #35 — higher lockout risk (admin app reads/writes these directly), needs the permission-to-writer mapping decided + its own staging pass.
+
+**Failure signatures**
+
+| Symptom | Meaning | Action |
+|---|---|---|
+| `new row violates row-level security policy` on a legit save | writer lacks the mapped permission (over-gated) | rollback that table; remap |
+| Empty result where data expected in the admin app | a browser read got over-gated | shouldn't occur for P0/P1a; find the query |
+| Faithful demo goes blank | a `demo_anon_read` policy disturbed | shouldn't occur — these migrations never touch them |
+| Tests false-pass (all green, nothing gated) | TPA not configured on staging → `get_church_id()` null | fix precondition 0 before trusting results |
+
+---
+
 ## Backups & restore
 
 - **Supabase:** daily automated backups (Pro plan or higher required for PITR — confirm before launch).

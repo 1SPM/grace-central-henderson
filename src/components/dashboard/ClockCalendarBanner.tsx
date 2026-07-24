@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin, Plus } from 'lucide-react';
 import { useChurchClock } from '../../hooks/useChurchClock';
 import { calendarDayKey, type DayAgendaEvent } from '../../lib/calendarEvents';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../../config/tenant';
 
 const MC_DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -14,8 +14,8 @@ const CATEGORY_TONE: Record<string, { label: string; dot: string; cell: string; 
   class: { label: 'Class', dot: 'bg-blue-500', cell: 'bg-blue-500', cellText: 'text-white', border: 'border-l-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300' },
   event: { label: 'Event', dot: 'bg-sky-500', cell: 'bg-sky-500', cellText: 'text-white', border: 'border-l-sky-500', bg: 'bg-sky-50 dark:bg-sky-500/10', text: 'text-sky-700 dark:text-sky-300' },
   'small-group': { label: 'Group', dot: 'bg-teal-500', cell: 'bg-teal-500', cellText: 'text-white', border: 'border-l-teal-500', bg: 'bg-teal-50 dark:bg-teal-500/10', text: 'text-teal-700 dark:text-teal-300' },
-  holiday: { label: 'Holiday', dot: 'bg-rose-500', cell: 'bg-rose-500', cellText: 'text-white', border: 'border-l-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
-  wedding: { label: 'Wedding', dot: 'bg-rose-500', cell: 'bg-rose-500', cellText: 'text-white', border: 'border-l-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300' },
+  holiday: { label: 'Holiday', dot: 'bg-brand-500', cell: 'bg-brand-500', cellText: 'text-white', border: 'border-l-brand-500', bg: 'bg-brand-50 dark:bg-brand-500/10', text: 'text-brand-700 dark:text-brand-300' },
+  wedding: { label: 'Wedding', dot: 'bg-brand-500', cell: 'bg-brand-500', cellText: 'text-white', border: 'border-l-brand-500', bg: 'bg-brand-50 dark:bg-brand-500/10', text: 'text-brand-700 dark:text-brand-300' },
   funeral: { label: 'Funeral', dot: 'bg-stone-500', cell: 'bg-stone-500', cellText: 'text-white', border: 'border-l-stone-500', bg: 'bg-stone-100 dark:bg-stone-500/10', text: 'text-stone-700 dark:text-stone-300' },
   baptism: { label: 'Baptism', dot: 'bg-cyan-500', cell: 'bg-cyan-500', cellText: 'text-white', border: 'border-l-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-300' },
   dedication: { label: 'Dedication', dot: 'bg-violet-500', cell: 'bg-violet-500', cellText: 'text-white', border: 'border-l-violet-500', bg: 'bg-violet-50 dark:bg-violet-500/10', text: 'text-violet-700 dark:text-violet-300' },
@@ -68,7 +68,7 @@ export function ClockCalendarBanner({
   eventDays,
   eventsByDay,
   onOpenCalendar,
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   variant = 'classic',
   className = '',
   actionStrip,
@@ -202,22 +202,28 @@ export function ClockCalendarBanner({
                     if (inMonth) setSelected(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
                   }}
                   disabled={!inMonth}
-                  className={`relative aspect-square rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+                  className={`relative aspect-square rounded-lg text-sm font-medium transition-colors flex items-center justify-center tabular-nums ${
                     !inMonth
                       ? 'text-transparent pointer-events-none'
-                      : tone
-                        ? `${tone.cell} ${tone.cellText} hover:opacity-90${
-                            today ? ' ring-2 ring-inset ring-white/90 dark:ring-slate-900/90' : ''
-                          }${sel ? ' ring-2 ring-offset-2 ring-slate-900 dark:ring-white' : ''}`
-                        : today
-                          ? 'bg-slate-900 dark:bg-dark-100 text-white dark:text-dark-900'
-                          : sel
-                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300'
-                            : 'text-gray-700 dark:text-dark-200 hover:bg-stone-100 dark:hover:bg-dark-800'
+                      : today
+                        ? 'bg-slate-900 dark:bg-dark-100 text-white dark:text-dark-900'
+                        : sel
+                          ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 ring-1 ring-inset ring-indigo-300 dark:ring-indigo-500/40'
+                          : 'text-gray-700 dark:text-dark-200 hover:bg-stone-100 dark:hover:bg-dark-800'
                   }`}
                   aria-label={inMonth ? `${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}${count > 0 ? `, ${count} event${count === 1 ? '' : 's'}` : ''}` : undefined}
                 >
                   {inMonth ? d.getDate() : ''}
+                  {inMonth && count > 0 && tone && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                      {Array.from({ length: Math.min(count, 3) }).map((_, dotIdx) => (
+                        <span
+                          key={dotIdx}
+                          className={`w-1 h-1 rounded-full ${today ? 'bg-white/85 dark:bg-slate-900/70' : tone.dot}`}
+                        />
+                      ))}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -481,7 +487,7 @@ function RedesignClockCalendar({
 }
 
 export function LiveClockDisplay({
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   variant = 'classic',
   className = '',
 }: {
@@ -490,7 +496,9 @@ export function LiveClockDisplay({
   className?: string;
 }) {
   const { format, now } = useChurchClock(timezone);
-  const time = format({ hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  // No seconds — a ticking header clock is constant peripheral motion
+  // that pulls the eye off the page content it sits above.
+  const time = format({ hour: 'numeric', minute: '2-digit' });
   const date = format({ weekday: 'short', month: 'short', day: 'numeric' });
 
   if (variant === 'redesign') {

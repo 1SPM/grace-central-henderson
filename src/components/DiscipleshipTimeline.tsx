@@ -37,7 +37,7 @@ const MILESTONE_COLORS: Record<string, { bg: string; ring: string; text: string;
   cyan: { bg: 'bg-cyan-100 dark:bg-cyan-500/10', ring: 'ring-cyan-500', text: 'text-cyan-600 dark:text-cyan-400', fill: 'bg-cyan-500' },
   green: { bg: 'bg-green-100 dark:bg-green-500/10', ring: 'ring-green-500', text: 'text-green-600 dark:text-green-400', fill: 'bg-green-500' },
   amber: { bg: 'bg-amber-100 dark:bg-amber-500/10', ring: 'ring-amber-500', text: 'text-amber-600 dark:text-amber-400', fill: 'bg-amber-500' },
-  rose: { bg: 'bg-rose-100 dark:bg-rose-500/10', ring: 'ring-rose-500', text: 'text-rose-600 dark:text-rose-400', fill: 'bg-rose-500' },
+  rose: { bg: 'bg-brand-100 dark:bg-brand-500/10', ring: 'ring-brand-500', text: 'text-brand-600 dark:text-brand-400', fill: 'bg-brand-500' },
 };
 
 export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onRemoveMilestone, stepRequestedMilestones }: DiscipleshipTimelineProps) {
@@ -74,7 +74,7 @@ export function DiscipleshipTimeline({ personId, milestones, onAddMilestone, onR
       {/* Progress bar */}
       <div className="w-full h-1.5 bg-gray-100 dark:bg-dark-700 rounded-full mb-6 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 via-slate-500 to-rose-500 rounded-full transition-all duration-500"
+          className="h-full bg-gradient-to-r from-blue-500 via-slate-500 to-brand-500 rounded-full transition-all duration-500"
           style={{ width: `${progressPct}%` }}
         />
       </div>

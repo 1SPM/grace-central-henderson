@@ -22,43 +22,54 @@ const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 const DEMO_ANNOUNCEMENTS: Announcement[] = [
   {
     id: 'ann-1',
-    churchId: 'demo',
-    title: 'Easter Service — Special Schedule',
-    body: 'Join us for our Easter celebration! Services at 7 AM (Sunrise), 9 AM, and 11 AM. Invite your friends and family for this special day.',
+    churchId: 'demo-church',
+    title: 'Summer BBQ Fellowship — Save the Date',
+    body: 'Join us Monday, July 27th at 7 AM for our Summer BBQ Fellowship! Food, games, and worship in the courtyard. Bring a friend and a side dish to share.',
     category: 'event',
     pinned: true,
     publishedAt: now,
     expiresAt: nextWeek,
-    createdBy: 'Pastor Mike',
+    createdBy: 'Pastor James Wilson',
     createdAt: now,
   },
   {
     id: 'ann-2',
-    churchId: 'demo',
-    title: 'Volunteers Needed for Food Drive',
-    body: 'Our annual food drive is coming up next Saturday. We need 20 volunteers to help sort and distribute donations. Sign up at the welcome desk.',
+    churchId: 'demo-church',
+    title: 'Volunteers Needed for Food Pantry Distribution',
+    body: 'Our Food Pantry Distribution is this Thursday at 10 AM. We need volunteers to help sort, pack, and distribute to families in need. Sign up in the Connect tab.',
     category: 'general',
     pinned: false,
     publishedAt: weekAgo,
-    createdBy: 'Admin',
+    createdBy: 'Deacon Marcus Collins',
     createdAt: weekAgo,
   },
   {
     id: 'ann-3',
-    churchId: 'demo',
-    title: 'Building Expansion Update',
-    body: 'Construction on the new youth center is on track! Expected completion in June. Thank you for your generous giving that made this possible.',
+    churchId: 'demo-church',
+    title: 'Building Fund Update: 68% to Goal',
+    body: 'Thanks to your generous giving, the Building Fund is now 68% of the way to our youth center goal. Every gift routed through your Impact Card counts toward this.',
     category: 'update',
     pinned: false,
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Pastor Mike',
+    createdBy: 'Pastor James Wilson',
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: 'ann-4',
-    churchId: 'demo',
+    churchId: 'demo-church',
+    title: 'Baptism Sunday — Coming Up',
+    body: 'We’re celebrating baptisms this Sunday! If you or a family member would like to be baptized, stop by the welcome desk or message Pastor James this week.',
+    category: 'celebration',
+    pinned: false,
+    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    createdBy: 'Pastor James Wilson',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'ann-5',
+    churchId: 'demo-church',
     title: 'Parking Lot Closure This Sunday',
-    body: 'The east parking lot will be closed for repaving. Please use the west lot or street parking. Shuttle service available from the overflow lot.',
+    body: 'The east parking lot will be closed for repaving this Sunday. Please use the west lot or street parking. Shuttle service available from the overflow lot.',
     category: 'urgent',
     pinned: true,
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -105,7 +116,12 @@ export function useAnnouncements(churchId: string = 'demo-church') {
         setAnnouncements(DEMO_ANNOUNCEMENTS);
         return;
       }
-      setAnnouncements(((data ?? []) as AnnouncementRow[]).map(fromRow));
+      const rows = (data ?? []) as AnnouncementRow[];
+      // Real-data-with-demo-fallback: a successful query with zero rows
+      // (no announcements published yet) is a different case from an
+      // error, but reads just as empty to a visitor — same pattern as the
+      // Leadership/Attendance fallbacks elsewhere in this app.
+      setAnnouncements(rows.length > 0 ? rows.map(fromRow) : DEMO_ANNOUNCEMENTS);
     })();
     return () => { cancelled = true; };
   }, [useDb, churchId]);

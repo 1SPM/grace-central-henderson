@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Cake, Gift } from 'lucide-react';
 import { Person } from '../types';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 interface BirthdayCalendarProps {
   people: Person[];
@@ -181,9 +182,7 @@ export function BirthdayCalendar({ people, onViewPerson, embedded = false }: Bir
                     className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white font-medium">
-                        {person.firstName[0]}{person.lastName[0]}
-                      </div>
+                      <MemberAvatar person={person} size="lg" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-dark-100 truncate">
                           {person.firstName} {person.lastName}
@@ -220,14 +219,17 @@ export function BirthdayCalendar({ people, onViewPerson, embedded = false }: Bir
                     onClick={() => onViewPerson(person.id)}
                     className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-dark-100 text-sm">
-                          {person.firstName} {person.lastName}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-dark-400">
-                          {person.nextBirthday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <MemberAvatar person={person} size="md" />
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-dark-100 text-sm">
+                            {person.firstName} {person.lastName}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-dark-400">
+                            {person.nextBirthday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </p>
+                        </div>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         person.daysUntil === 0

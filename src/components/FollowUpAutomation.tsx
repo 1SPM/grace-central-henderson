@@ -286,7 +286,7 @@ export function FollowUpAutomation({
     };
 
     loadData();
-  }, [churchId, personMap]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [churchId, personMap]);  
 
   // New rule form state
   const [newRule, setNewRule] = useState<Partial<AutomationRule>>({

@@ -60,6 +60,7 @@ describe('typeConverters', () => {
         tags: ['volunteer', 'choir'],
         smallGroups: [],
         familyId: 'family-1',
+        portalEnabled: false,
       });
     });
 

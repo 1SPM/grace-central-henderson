@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { View } from '../types';
-import { TUTORIALS, getTutorialById } from '../components/tutorial/tutorialDefinitions';
+import { TUTORIALS, getTutorialById, PASTOR_CRM_TOUR_ID } from '../components/tutorial/tutorialDefinitions';
 import type { TutorialDefinition, TutorialStep } from '../components/tutorial/tutorialDefinitions';
 import type { OnboardingState } from '../hooks/useChurchSettings';
 
@@ -22,6 +22,7 @@ interface TutorialContextValue {
   openPicker: () => void;
   closePicker: () => void;
   startTutorials: (ids: string[]) => void;
+  startPastorTour: () => void;
   nextStep: () => void;
   prevStep: () => void;
   skipTutorial: () => void;
@@ -192,6 +193,10 @@ export function TutorialProvider({
     goToStep(tutorial, 0);
   }, [goToStep, saveOnboarding]);
 
+  const startPastorTour = useCallback(() => {
+    startTutorials([PASTOR_CRM_TOUR_ID]);
+  }, [startTutorials]);
+
   const nextStep = useCallback(() => {
     if (!activeTutorial) return;
 
@@ -278,6 +283,7 @@ export function TutorialProvider({
     openPicker,
     closePicker,
     startTutorials,
+    startPastorTour,
     nextStep,
     prevStep,
     skipTutorial,
@@ -299,4 +305,4 @@ export function useTutorial(): TutorialContextValue {
   return ctx;
 }
 
-export { TUTORIALS };
+export { TUTORIALS, PASTOR_CRM_TOUR_ID };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Bot, Play, Star, User } from 'lucide-react';
 import type { LeaderProfile, Person, View } from '../../../types';
 import { getLeaderHubStats } from './demoLeadersHub';
+import { getLeaderCompanionConfig } from '../../../config/centralHendersonLeaders';
 import { LeaderAvatar } from './LeaderAvatar';
 import { LeaderContactTab } from './LeaderContactTab';
 import { AICompanionConfig } from './AICompanionConfig';
@@ -25,12 +26,14 @@ export function LeaderProfileView({
   const stats = getLeaderHubStats(leader);
   const [studioOpen, setStudioOpen] = useState(false);
   const hasAi = leader.hasAiCompanion !== false;
+  const companion = getLeaderCompanionConfig(leader.id);
+  const hasDidCredentials = Boolean(companion?.didAgentId && companion?.didClientKey);
 
   const kpiCards = [
-    { label: 'Sessions', value: stats.sessions },
-    { label: 'Rating', value: stats.rating.toFixed(1), star: true },
-    { label: 'Blessings', value: `${stats.blessings}/28` },
-    { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)) },
+    { label: 'Sessions', value: stats.sessions, accent: 'border-l-blue-600' },
+    { label: 'Rating', value: stats.rating.toFixed(1), star: true, accent: 'border-l-amber-500' },
+    { label: 'Blessings', value: `${stats.blessings}/28`, accent: 'border-l-brand-600' },
+    { label: 'Human replies', value: Math.round(stats.dms * (1 - stats.aiPct / 100)), accent: 'border-l-emerald-600' },
   ] as const;
 
   return (
@@ -46,12 +49,12 @@ export function LeaderProfileView({
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
           <div className="lg:col-span-2 space-y-3">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5 self-start">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5 self-start">
               <div className="flex flex-col items-center text-center w-full">
                 <div className="w-28 mb-3">
                   <LeaderAvatar leader={leader} size="hero" rounded="xl" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-dark-100">{leader.displayName}</h2>
                 <p className="text-sm text-gray-500 dark:text-dark-400 mt-0.5">{leader.title}</p>
                 <div className="flex gap-1.5 mt-2 flex-wrap justify-center">
                   {leader.isAvailable ? (
@@ -76,35 +79,46 @@ export function LeaderProfileView({
               </div>
             </div>
             {hasAi && (
+              // Same button for every leader used to imply the same real
+              // conversation regardless of whether a D-ID agent actually
+              // exists yet — clicking it for anyone but a credentialed
+              // leader opens a "not configured" placeholder with no
+              // warning beforehand. Preview-only leaders get a visibly
+              // different (outline, not filled) button and label so
+              // that's known before the click, not after.
               <button
                 type="button"
                 onClick={() => setStudioOpen(true)}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+                className={
+                  hasDidCredentials
+                    ? 'w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors'
+                    : 'w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-violet-200 dark:border-violet-500/30 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-sm font-medium transition-colors'
+                }
               >
-                <Play size={14} /> Launch avatar conversation
+                <Play size={14} /> {hasDidCredentials ? 'Launch avatar conversation' : 'Preview avatar conversation'}
               </button>
             )}
           </div>
 
           <div className="lg:col-span-3 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {kpiCards.map(kpi => (
                 <div
                   key={kpi.label}
-                  className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+                  className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}
                 >
                   <p className="section-eyebrow">{kpi.label}</p>
-                  <p className="stat-number text-xl text-slate-900 dark:text-dark-100 mt-1 flex items-center gap-1">
-                    {'star' in kpi && kpi.star && <Star size={14} className="text-amber-500 fill-amber-500" />}
+                  <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-1.5 flex items-center gap-1.5">
+                    {'star' in kpi && kpi.star && <Star size={20} className="text-amber-500 fill-amber-500" />}
                     {kpi.value}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-5">
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">Weekly availability</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-dark-100">Weekly availability</h3>
                 <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-dark-400">
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" /> Live

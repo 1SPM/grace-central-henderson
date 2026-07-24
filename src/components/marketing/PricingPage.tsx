@@ -8,6 +8,7 @@
  */
 
 import { isDemoModeEnabled, navigateToDemoCrm } from '../../lib/demoEntry';
+import { ValueCalculator } from './ValueCalculator';
 
 type PlanGate = {
   financialHub: boolean;
@@ -99,13 +100,13 @@ export function PricingPage({ onStartTrial }: PricingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-16 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-dark-900 dark:to-dark-950 py-16 px-4">
       <div className="max-w-6xl mx-auto">
         <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-light text-gray-900 mb-3" style={{ fontFamily: 'Fraunces, serif' }}>
+          <h1 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-dark-50 mb-3" style={{ fontFamily: 'Fraunces, serif' }}>
             Pricing built for ministry, not enterprise.
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-dark-400 max-w-2xl mx-auto">
             14-day free trial on every plan. No card on file required to start.
             Cancel anytime from your church's billing portal.
           </p>
@@ -170,6 +171,8 @@ export function PricingPage({ onStartTrial }: PricingPageProps) {
           </p>
         </div>
       </div>
+
+      <ValueCalculator />
     </div>
   );
 }

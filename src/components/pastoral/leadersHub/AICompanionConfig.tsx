@@ -6,6 +6,7 @@ import {
   getLeaderCompanionConfig,
 } from '../../../config/centralHendersonLeaders';
 import { demoCompanionConfig } from './demoLeadersHub';
+import { SampleDataNotice } from '../../SampleDataNotice';
 import { buildBrainState } from './companionBrainState';
 import { CompanionBrainPanel } from './CompanionBrainPanel';
 import { DidStudioModal } from './DidStudioModal';
@@ -59,6 +60,7 @@ export function AICompanionConfig({
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice label="Activity and config data below are samples — not live" />
       {showHeader && (
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">

@@ -36,6 +36,11 @@ function timeAgo(iso: string): string {
 
 export function NotificationCenter({ churchId, onNavigate }: NotificationCenterProps) {
   const { notifications, unreadCount, connected, markAllRead } = useRealtimeNotifications(churchId);
+  // Red is reserved for something actually urgent. A routine unread inbox
+  // message or agent note shouldn't carry the same alarm color as a
+  // crisis flag — otherwise red stops meaning anything by the time it's
+  // needed for a real one.
+  const hasUrgentUnread = notifications.some(n => !n.read && n.kind === 'crisis');
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +67,13 @@ export function NotificationCenter({ churchId, onNavigate }: NotificationCenterP
       >
         <Bell size={17} className="text-gray-500 dark:text-dark-400" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span
+            className={`absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center ${
+              hasUrgentUnread
+                ? 'bg-red-500 text-white'
+                : 'bg-gray-300 dark:bg-dark-600 text-gray-700 dark:text-dark-200'
+            }`}
+          >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

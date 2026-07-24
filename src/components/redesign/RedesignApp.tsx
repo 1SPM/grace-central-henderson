@@ -10,7 +10,7 @@ import { DashboardView } from './RedesignDashboard';
 import { dashboardFromGraceData } from './useRedesignDashboard';
 import type { GraceData } from './useGraceData';
 import type { RedesignActions } from './actions';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 import { RedesignPeople } from './RedesignPeople';
 import { RedesignAttendance, RedesignReports } from './RedesignAnalytics';
 import { RedesignEngagement } from './RedesignEngagement';

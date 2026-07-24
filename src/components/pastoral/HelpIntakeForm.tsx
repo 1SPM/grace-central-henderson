@@ -26,7 +26,7 @@ interface HelpIntakeFormProps {
 }
 
 const CATEGORIES: { id: HelpCategory; label: string; icon: typeof Heart; description: string; color: string }[] = [
-  { id: 'marriage', label: 'Marriage & Relationships', icon: Heart, description: 'Relationship guidance & support', color: 'text-rose-500 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' },
+  { id: 'marriage', label: 'Marriage & Relationships', icon: Heart, description: 'Relationship guidance & support', color: 'text-brand-500 bg-brand-50 dark:bg-brand-500/10 border-brand-200 dark:border-brand-500/20' },
   { id: 'addiction', label: 'Addiction & Recovery', icon: Link2, description: 'Freedom from substance & behavioral addiction', color: 'text-amber-600 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' },
   { id: 'grief', label: 'Grief & Loss', icon: CloudRain, description: 'Support through loss and mourning', color: 'text-blue-500 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20' },
   { id: 'faith-questions', label: 'Faith Questions', icon: BookOpen, description: 'Exploring faith, doubt, and spiritual growth', color: 'text-slate-500 bg-slate-50 dark:bg-slate-500/10 border-slate-200 dark:border-slate-500/20' },

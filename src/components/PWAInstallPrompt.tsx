@@ -6,6 +6,14 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+/** True when the user snoozed the prompt within the last 7 days. */
+function isSnoozed(): boolean {
+  const dismissedAt = localStorage.getItem('pwa-prompt-dismissed');
+  if (!dismissedAt) return false;
+  const daysSinceDismissed = (Date.now() - new Date(dismissedAt).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSinceDismissed < 7;
+}
+
 export function PWAInstallPrompt() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -18,21 +26,16 @@ export function PWAInstallPrompt() {
       return;
     }
 
-    // Check if dismissed recently (within 7 days)
-    const dismissedAt = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissedAt) {
-      const dismissedDate = new Date(dismissedAt);
-      const daysSinceDismissed = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissed < 7) {
-        return;
-      }
-    }
+    if (isSnoozed()) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
+      // Re-check on every fire: beforeinstallprompt can fire again mid-session,
+      // which previously resurrected the card right after the user dismissed it.
+      if (isSnoozed()) return;
       setInstallPrompt(e as BeforeInstallPromptEvent);
       // Show prompt after a short delay
-      setTimeout(() => setShowPrompt(true), 3000);
+      setTimeout(() => { if (!isSnoozed()) setShowPrompt(true); }, 3000);
     };
 
     window.addEventListener('beforeinstallprompt', handler);

@@ -38,6 +38,19 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   width:393px;height:852px;background:#fff;border-radius:54px;overflow:hidden;position:relative;
   box-shadow:0 0 0 8px #111,0 0 0 12px #232323,0 40px 90px rgba(0,0,0,.34);
 }
+/* Short desktop viewports: scale the frame so the landing Log In / Sign Up
+   controls are always reachable (page itself does not scroll). */
+@media (min-width:501px) and (max-height:920px){.device{transform:scale(.92);transform-origin:center center}}
+@media (min-width:501px) and (max-height:840px){.device{transform:scale(.84)}}
+@media (min-width:501px) and (max-height:770px){.device{transform:scale(.76)}}
+@media (min-width:501px) and (max-height:700px){.device{transform:scale(.68)}}
+@media (min-width:501px) and (max-height:620px){.device{transform:scale(.60)}}
+/* Real phones (QR rollout path): drop the bezel mockup and go full-bleed so
+   it feels like the actual app instead of a phone-in-a-phone. */
+@media (max-width:500px){
+  .device{width:100vw;height:100dvh;border-radius:0;box-shadow:none}
+  .island{display:none}
+}
 .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:15}
 .status{
   height:var(--ios-safe-top);padding:0 28px 10px;display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:10
@@ -2284,7 +2297,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <p class="home-hero-tagline">Your guide to growth, resources, and community at Central Henderson.</p>
             </div>
             <div class="home-hero-top-right">
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
               <div class="home-donate-stack" id="home-donate-stack" aria-live="polite"></div>
             </div>
           </div>
@@ -3143,7 +3156,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-hero-brand">
                 <img class="cn-hero-logo" src="previews/assets/CCC_Central_Church-invert.png" alt="Central Church iBanc">
               </div>
-              <button type="button" class="home-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
+              <button type="button" class="home-live-pill js-live-pill" onclick="openPush('watch')"><i></i> Live · 342 watching</button>
             </div>
             <div class="cn-hero-copy">
               <h2>Connect at Central</h2>
@@ -3209,7 +3222,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <button type="button" class="cn-pact" onclick="cnToggleComment('cn-cm-1')">💬 24 Comment</button>
               </div>
               <div class="cn-comment-area" id="cn-cm-1">
-                <div class="cn-comment-item"><img class="cn-comment-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><div><strong>Sarah J.</strong> Praying with you! 🙏</div></div>
+                <div class="cn-comment-item"><img class="cn-comment-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><div><strong>Patricia T.</strong> Praying with you! 🙏</div></div>
                 <div class="cn-comment-row"><img class="cn-comment-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt=""><input class="cn-comment-input" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')cnAddComment(this,'cn-cm-1')"></div>
               </div>
             </article>
@@ -3218,7 +3231,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-post-head">
                 <img class="cn-post-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt="">
                 <div style="flex:1;min-width:0">
-                  <div class="cn-post-name">Sarah Johnson</div>
+                  <div class="cn-post-name">Patricia Thomas</div>
                   <div class="cn-post-role">Member · Women of Grace</div>
                 </div>
                 <div class="cn-post-time">4 hr</div>
@@ -3236,7 +3249,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-post-head">
                 <div class="cn-post-av-icon" style="background:#ede9fe">🙏</div>
                 <div style="flex:1;min-width:0">
-                  <div class="cn-post-name">Jake Hernandez</div>
+                  <div class="cn-post-name">Kevin Martinez</div>
                   <div class="cn-post-role">Youth Group · Just now</div>
                 </div>
               </div>
@@ -3252,7 +3265,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-post-head">
                 <img class="cn-post-av" src="https://randomuser.me/api/portraits/men/33.jpg" alt="">
                 <div style="flex:1;min-width:0">
-                  <div class="cn-post-name">David Kim</div>
+                  <div class="cn-post-name">David Park</div>
                   <div class="cn-post-role">Member · Young Adults</div>
                 </div>
                 <div class="cn-post-time">1 d</div>
@@ -3306,7 +3319,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt=""><span>Pastor James</span></div>
               <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt=""><span>Sandra</span></div>
               <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/men/54.jpg" alt=""><span>Derek</span></div>
-              <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><span>Sarah</span></div>
+              <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><span>Patricia</span></div>
               <div class="cn-an-item"><img src="https://randomuser.me/api/portraits/men/33.jpg" alt=""><span>David</span></div>
             </div>
           </div>
@@ -3316,7 +3329,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <div class="cn-req-row">
               <img class="cn-req-av" src="https://randomuser.me/api/portraits/women/55.jpg" alt="">
               <div style="flex:1;min-width:0">
-                <div class="cn-req-name">Linda Park</div>
+                <div class="cn-req-name">Elena Rodriguez</div>
                 <div class="cn-req-mutual">3 mutual · Women of Grace</div>
               </div>
               <div class="cn-req-btns">
@@ -3327,7 +3340,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <div class="cn-req-row">
               <img class="cn-req-av" src="https://randomuser.me/api/portraits/men/61.jpg" alt="">
               <div style="flex:1;min-width:0">
-                <div class="cn-req-name">James Reed</div>
+                <div class="cn-req-name">Jason Reed</div>
                 <div class="cn-req-mutual">1 mutual · Prayer Warriors</div>
               </div>
               <div class="cn-req-btns">
@@ -3339,7 +3352,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('groups-events')">
             <div class="cn-widget-head"><strong>Groups &amp; Events</strong><span>Open →</span></div>
-            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> Sunday Service · Jun 1</p>
+            <p style="font-size:12px;color:var(--ios-muted);line-height:1.5"><strong style="color:#000">Women of Grace</strong> · Thu 6 PM<br><strong style="color:#000">Next:</strong> <span class="js-next-sunday">Sunday Service</span></p>
           </div>
           <div class="cn-widget" style="cursor:pointer" onclick="communityTab('people')">
             <div class="cn-widget-head"><strong>People</strong><span>24 connected →</span></div>
@@ -3350,14 +3363,14 @@ html.embed-preview .watch-donate-toast{display:none!important}
         <!-- Groups & Events -->
         <div class="cn-panel" id="cn-panel-groups-events">
           <div class="cn-ge-hero">
-            <div class="cn-ge-eyebrow"><i></i> Church calendar · June 2026</div>
+            <div class="cn-ge-eyebrow"><i></i> <span class="js-calendar-eyebrow">Church calendar</span></div>
             <div>
               <h2>Groups &amp; Events</h2>
               <p>Your small groups and church calendar in one place</p>
             </div>
             <div class="cn-ge-next">
               <div class="cn-ge-next-lbl">Up next</div>
-              <div class="cn-ge-next-name">Sunday Service · Jun 1 · 10 AM</div>
+              <div class="cn-ge-next-name js-next-sunday-time">Sunday Service · 9:45 AM</div>
               <button type="button" class="cn-rsvp going" style="margin-top:8px;border:none" onclick="event.stopPropagation()">Going ✓</button>
             </div>
           </div>
@@ -3391,32 +3404,32 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <button type="button" class="cn-ev-filter" onclick="filterCnEvents('special',this)">Special</button>
             </div>
             <div id="cn-event-list">
-              <div class="cn-event-row" data-evcat="service">
+              <div class="cn-event-row" data-evcat="service" data-ev-weekday="0" data-ev-week="0">
                 <div class="cn-event-date" style="background:linear-gradient(135deg,#000,#111);color:#fff"><strong>1</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Sunday Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="group">
+              <div class="cn-event-row" data-evcat="group" data-ev-weekday="2" data-ev-week="0">
                 <div class="cn-event-date" style="background:#f5e8f0;color:#7a3a6a"><strong>2</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Women of Grace</div><div style="font-size:11px;color:var(--ios-muted)">6:00 PM · Room 204</div></div>
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
-              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night">
+              <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night" data-ev-weekday="4" data-ev-week="0">
                 <div class="cn-event-date" style="background:#FFF0F1;color:#000"><strong>4</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Prayer Night</div><div style="font-size:11px;color:var(--ios-muted)">7:00 PM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="1">
                 <div class="cn-event-date" style="background:#fee2e2;color:#991b1b"><strong>7</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Pentecost Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Baptism Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Special service</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="2">
                 <div class="cn-event-date" style="background:#e8f5ed;color:#15803d"><strong>21</strong><span>Jun</span></div>
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">Father's Day Service</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">Family Sunday</div><div style="font-size:11px;color:var(--ios-muted)">10:00 AM · Bring family</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
-              <div class="cn-event-row" data-evcat="special">
+              <div class="cn-event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="3">
                 <div class="cn-event-date" style="background:#000;color:#EE2B37"><strong>28</strong><span style="color:rgba(238,43,55,.7)">Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Summer BBQ Fellowship</div><div style="font-size:11px;color:var(--ios-muted)">2:00 PM · Church grounds</div></div>
                 <button type="button" class="cn-rsvp urgent" onclick="cnRsvp(this)">RSVP</button>
@@ -3513,7 +3526,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-wall-body">
                   <div class="cn-wall-user">
                     <img class="cn-wall-av" src="https://randomuser.me/api/portraits/men/33.jpg" alt="">
-                    <div><div class="cn-wall-name">David K.</div><div class="cn-wall-group">Young Adults</div></div>
+                    <div><div class="cn-wall-name">David Park</div><div class="cn-wall-group">Young Adults</div></div>
                   </div>
                   <div class="cn-wall-caption">Game night + real talk about faith on campus 🙌</div>
                   <div class="cn-wall-react" onclick="event.stopPropagation()">
@@ -3547,7 +3560,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-wall-body">
                   <div class="cn-wall-user">
                     <img class="cn-wall-av" src="https://randomuser.me/api/portraits/men/61.jpg" alt="">
-                    <div><div class="cn-wall-name">Michael B.</div><div class="cn-wall-group">Outreach</div></div>
+                    <div><div class="cn-wall-name">Derek W.</div><div class="cn-wall-group">Outreach</div></div>
                   </div>
                   <div class="cn-wall-caption">Packed 200 bags for the pantry — who’s in next month?</div>
                   <div class="cn-wall-react" onclick="event.stopPropagation()">
@@ -3564,7 +3577,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-wall-body">
                   <div class="cn-wall-user">
                     <img class="cn-wall-av" src="https://randomuser.me/api/portraits/women/50.jpg" alt="">
-                    <div><div class="cn-wall-name">Hannah L.</div><div class="cn-wall-group">New Members</div></div>
+                    <div><div class="cn-wall-name">Rachel K.</div><div class="cn-wall-group">New Members</div></div>
                   </div>
                   <div class="cn-wall-caption">Got baptized Sunday — forever grateful 💛</div>
                   <div class="cn-wall-react" onclick="event.stopPropagation()">
@@ -3598,7 +3611,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-wall-body">
                   <div class="cn-wall-user">
                     <img class="cn-wall-av" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
-                    <div><div class="cn-wall-name">Priya N.</div><div class="cn-wall-group">Women of Grace</div></div>
+                    <div><div class="cn-wall-name">Amanda F.</div><div class="cn-wall-group">Women of Grace</div></div>
                   </div>
                   <div class="cn-wall-caption">Circle night — scripture, snacks, and honest prayer 🌸</div>
                   <div class="cn-wall-react" onclick="event.stopPropagation()">
@@ -3632,7 +3645,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-wall-body">
                   <div class="cn-wall-user">
                     <img class="cn-wall-av" src="https://randomuser.me/api/portraits/men/22.jpg" alt="">
-                    <div><div class="cn-wall-name">Marcus C.</div><div class="cn-wall-group">Missions</div></div>
+                    <div><div class="cn-wall-name">Thomas W.</div><div class="cn-wall-group">Missions</div></div>
                   </div>
                   <div class="cn-wall-caption">Well project update — clean water for 40 families</div>
                   <div class="cn-wall-react" onclick="event.stopPropagation()">
@@ -3650,17 +3663,17 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <div class="cn-widget-head"><strong>My connections</strong><span onclick="showToast('All connections')">View all (24)</span></div>
             <div class="cn-conn-row">
               <div class="cn-conn-av"><img src="https://randomuser.me/api/portraits/women/29.jpg" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover"><span class="cn-conn-dot"></span></div>
-              <div style="flex:1"><div style="font-size:13px;font-weight:700">Sarah Johnson</div><div style="font-size:11px;color:var(--ios-muted)">Serving · Women of Grace</div></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:700">Patricia Thomas</div><div style="font-size:11px;color:var(--ios-muted)">Serving · Women of Grace</div></div>
               <button type="button" class="cn-conn-btn connected">✓ Connected</button>
             </div>
             <div class="cn-conn-row">
               <div class="cn-conn-av"><img src="https://randomuser.me/api/portraits/men/33.jpg" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover"><span class="cn-conn-dot"></span></div>
-              <div style="flex:1"><div style="font-size:13px;font-weight:700">David Kim</div><div style="font-size:11px;color:var(--ios-muted)">Partner · Young Adults</div></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:700">David Park</div><div style="font-size:11px;color:var(--ios-muted)">Partner · Young Adults</div></div>
               <button type="button" class="cn-conn-btn connected">✓ Connected</button>
             </div>
             <div class="cn-conn-row">
               <div class="cn-conn-av"><img src="https://randomuser.me/api/portraits/men/47.jpg" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover"><span class="cn-conn-dot off"></span></div>
-              <div style="flex:1"><div style="font-size:13px;font-weight:700">Marcus Lee</div><div style="font-size:11px;color:var(--ios-muted)">Partner · Men of Faith</div></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:700">Brian Cooper</div><div style="font-size:11px;color:var(--ios-muted)">Partner · Men of Faith</div></div>
               <button type="button" class="cn-conn-btn connected">✓ Connected</button>
             </div>
           </div>
@@ -3679,7 +3692,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             </div>
             <div class="cn-conn-row">
               <img class="cn-conn-av" src="https://randomuser.me/api/portraits/women/63.jpg" alt="" style="object-fit:cover">
-              <div style="flex:1"><div style="font-size:13px;font-weight:700">Dorothy Mitchell</div><div style="font-size:11px;color:var(--ios-muted)">5 mutuals</div></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:700">Ashley Robinson</div><div style="font-size:11px;color:var(--ios-muted)">5 mutuals</div></div>
               <button type="button" class="cn-conn-btn" onclick="cnConnect(this)">Connect</button>
             </div>
           </div>
@@ -3689,7 +3702,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <div class="cn-lb-row">
               <div class="cn-lb-rank">👑</div>
               <img class="cn-lb-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt="">
-              <div class="cn-lb-name">Sarah J.</div>
+              <div class="cn-lb-name">Patricia T.</div>
               <div class="cn-lb-bar"><div class="cn-lb-fill" style="width:80%;background:#f59e0b"></div></div>
               <div class="cn-lb-pct">8%</div>
             </div>
@@ -4637,7 +4650,7 @@ var IS_EMBED_PREVIEW = (function () {
 })();
 if (IS_EMBED_PREVIEW) document.documentElement.classList.add('embed-preview');
 const leaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'previews/assets/Pastor-James-Wilson-profile.jpg',profileFrame:'previews/assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'previews/assets/Pastor-James-Wilson-profile.jpg',profileFrame:'previews/assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'previews/assets/watch/video/Maya-welcome-to-Central.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · AI Companion',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · AI Companion',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,humanLive:true,bio:'Pastor Derek serves middle school through college-age students and their parents.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
   {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · AI Companion",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,humanLive:false,bio:'Sis. Priya leads Women of Grace and mentorship circles.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
@@ -5014,11 +5027,11 @@ var socialNotifyTimers = [];
 var socialNotifyIdSeq = 0;
 
 var socialNotificationSeeds = [
-  { type: 'moment', iconEmoji: '📸', iconBg: '#FFF0F1', title: 'Sarah J.', body: 'just posted a memory', meta: 'Faith Moments · Wall', time: '2m', route: { tab: 'people', peopleSub: 'wall', storyId: 'ya-worship' } },
-  { type: 'milestone', iconEmoji: '💧', iconBg: '#dbeafe', title: 'Mike R.', body: 'shared a baptism notice', meta: 'Milestones · Community', time: '5m', route: { tab: 'people', peopleSub: 'wall', storyId: 'baptism' } },
+  { type: 'moment', iconEmoji: '📸', iconBg: '#FFF0F1', title: 'Patricia T.', body: 'just posted a memory', meta: 'Faith Moments · Wall', time: '2m', route: { tab: 'people', peopleSub: 'wall', storyId: 'ya-worship' } },
+  { type: 'milestone', iconEmoji: '💧', iconBg: '#dbeafe', title: 'Derek W.', body: 'shared a baptism notice', meta: 'Milestones · Community', time: '5m', route: { tab: 'people', peopleSub: 'wall', storyId: 'baptism' } },
   { type: 'event', icon: 'events', iconBg: '#e8f0e8', title: 'Youth Worship Night', body: 'starts Saturday at 7 PM', meta: 'Groups & Events', time: '12m', route: { tab: 'groups-events', eventId: 'ev-prayer-night' } },
-  { type: 'request', icon: 'groups', iconBg: '#ede9fe', title: 'Emily K.', body: 'sent you a connection request', meta: 'People · Circle', time: '18m', route: { tab: 'people', peopleSub: 'circle' } },
-  { type: 'prayer', icon: 'prayer', iconBg: '#f5e8f0', title: 'Jake H.', body: 'posted a prayer request', meta: 'Community feed', time: '25m', route: { tab: 'community' } },
+  { type: 'request', icon: 'groups', iconBg: '#ede9fe', title: 'Nicole Davis', body: 'sent you a connection request', meta: 'People · Circle', time: '18m', route: { tab: 'people', peopleSub: 'circle' } },
+  { type: 'prayer', icon: 'prayer', iconBg: '#f5e8f0', title: 'Kevin Martinez', body: 'posted a prayer request', meta: 'Community feed', time: '25m', route: { tab: 'community' } },
   { type: 'post', iconEmoji: '📖', iconBg: '#fef9f0', title: 'Pastor James', body: "posted today's blessing", meta: 'Community · Blessings', time: '1h', route: { tab: 'community' } },
   { type: 'group', iconEmoji: '◈', iconBg: '#FFF0F1', title: 'Serve Team', body: 'shared a food pantry update', meta: 'Groups · Outreach', time: '2h', route: { tab: 'people', peopleSub: 'wall', storyId: 'serve-food' } }
 ];
@@ -5684,6 +5697,9 @@ function showImpactFloat(item) {
   if (!document.getElementById('screen-home')?.classList.contains('active')) return;
   text.textContent = item.merchant + ': +' + formatMoney(item.impact) + ' to ' + item.cause;
   float.classList.add('show');
+  // Auto-dismiss so the pill never sits over content indefinitely (UX review 2026-07-06).
+  clearTimeout(showImpactFloat.timer);
+  showImpactFloat.timer = setTimeout(dismissImpactFloat, 6000);
 }
 
 function dismissImpactFloat() {
@@ -5723,20 +5739,20 @@ var faithStorySeeds = {
   'worship-team': { bg: 'previews/assets/dash-hero-audience.jpg', av: 'https://randomuser.me/api/portraits/women/44.jpg', name: 'Worship Team', meta: 'Arts · 5h ago', cap: 'Sound check done — Thursday 7 PM worship night is about to be fire.', pray: 28, amen: 64, h24: true },
   'serve-food': { bg: 'previews/assets/wallet-hero/food-drive.jpg', av: 'https://randomuser.me/api/portraits/men/61.jpg', name: 'Michael Brooks', meta: 'Outreach · 8h ago', cap: 'Serve day at the pantry — still need 6 more hands this Saturday.', pray: 89, amen: 34, h24: false },
   'baptism': { bg: 'https://images.unsplash.com/photo-1518495978641-61ebd0fc45b0?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/50.jpg', name: 'Hannah Levy', meta: 'New Members · 1d ago', cap: 'Three baptisms Sunday — celebrate with us at the 10 AM service!', pray: 156, amen: 201, h24: false },
-  'young-adults': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/men/33.jpg', name: 'David Kim', meta: 'Young Adults · 12h ago', cap: 'Small group BBQ after service — DM me if you need a ride.', pray: 31, amen: 47, h24: true },
+  'young-adults': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/men/33.jpg', name: 'David Park', meta: 'Young Adults · 12h ago', cap: 'Small group BBQ after service — DM me if you need a ride.', pray: 31, amen: 47, h24: true },
   'outreach': { bg: 'previews/assets/wallet-hero/smiling-volunteers.jpg', av: 'https://randomuser.me/api/portraits/men/61.jpg', name: 'Pastor Michael Brooks', meta: 'Outreach · 6h ago', cap: 'Street team this weekend — training Wed 6 PM in room 102.', pray: 44, amen: 22, h24: true },
   'fresh-volunteers': { bg: 'previews/assets/wallet-hero/smiling-volunteers.jpg', av: 'https://randomuser.me/api/portraits/women/29.jpg', name: 'Serve crew', meta: '24h Moment · 2h ago', cap: 'Setup crew crushed it — thank you volunteers 💛', pray: 19, amen: 41, h24: true },
   'fresh-ya': { bg: 'previews/assets/wallet-hero/smiling-shopping.jpg', av: 'https://randomuser.me/api/portraits/men/33.jpg', name: 'Young Adults', meta: '24h Moment · 4h ago', cap: 'Coffee + scripture at the mall — open invite.', pray: 12, amen: 28, h24: true },
   'fresh-prayer': { bg: 'https://images.unsplash.com/photo-1438232999611-995605637a16?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/68.jpg', name: 'Deacon Robert Hayes', meta: '24h Moment · 1h ago', cap: '5 AM prayer watch — who is standing with me?', pray: 67, amen: 15, h24: true },
   'fresh-sunday': { bg: 'previews/assets/dash-hero-audience.jpg', av: 'https://randomuser.me/api/portraits/men/32.jpg', name: 'Central Henderson', meta: '24h Moment · 30m ago', cap: 'Sanctuary is filling up — grab a seat, worship starts soon.', pray: 88, amen: 102, h24: true },
-  'wall-ya-game': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/men/33.jpg', name: 'David K.', meta: 'Young Adults · Group life', cap: 'Game night + real talk about faith on campus 🙌', pray: 124, amen: 56, h24: false },
+  'wall-ya-game': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/men/33.jpg', name: 'David Park', meta: 'Young Adults · Group life', cap: 'Game night + real talk about faith on campus 🙌', pray: 124, amen: 56, h24: false },
   'wall-worship': { bg: 'previews/assets/dash-hero-audience.jpg', av: 'https://randomuser.me/api/portraits/women/44.jpg', name: 'Worship Team', meta: 'Verified · Arts', cap: 'Thursday worship night hits different 🔥', pray: 89, amen: 201, h24: false },
-  'wall-serve': { bg: 'previews/assets/wallet-hero/food-drive.jpg', av: 'https://randomuser.me/api/portraits/men/61.jpg', name: 'Michael B.', meta: 'Outreach · Serve Day', cap: 'Packed 200 bags for the pantry — who’s in next month?', pray: 156, amen: 78, h24: false },
-  'wall-baptism': { bg: 'https://images.unsplash.com/photo-1518495978641-61ebd0fc45b0?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/50.jpg', name: 'Hannah L.', meta: 'New Members · Milestone', cap: 'Got baptized Sunday — forever grateful 💛', pray: 312, amen: 189, h24: false },
+  'wall-serve': { bg: 'previews/assets/wallet-hero/food-drive.jpg', av: 'https://randomuser.me/api/portraits/men/61.jpg', name: 'Derek W.', meta: 'Outreach · Serve Day', cap: 'Packed 200 bags for the pantry — who’s in next month?', pray: 156, amen: 78, h24: false },
+  'wall-baptism': { bg: 'https://images.unsplash.com/photo-1518495978641-61ebd0fc45b0?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/50.jpg', name: 'Rachel K.', meta: 'New Members · Milestone', cap: 'Got baptized Sunday — forever grateful 💛', pray: 312, amen: 189, h24: false },
   'wall-praise': { bg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/42.jpg', name: 'Maya T.', meta: 'Partner · Prayer praise', cap: 'Job offer came through — praise God with me!', pray: 98, amen: 142, h24: false },
-  'wall-women': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/28.jpg', name: 'Priya N.', meta: 'Women of Grace', cap: 'Circle night — scripture, snacks, and honest prayer 🌸', pray: 67, amen: 44, h24: false },
+  'wall-women': { bg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', av: 'https://randomuser.me/api/portraits/women/28.jpg', name: 'Amanda F.', meta: 'Women of Grace', cap: 'Circle night — scripture, snacks, and honest prayer 🌸', pray: 67, amen: 44, h24: false },
   'wall-youth': { bg: 'https://images.unsplash.com/photo-1516572339223-3a2c8f0e3c5a?w=800&q=80', av: 'https://randomuser.me/api/portraits/men/54.jpg', name: 'Pastor Derek', meta: 'Youth · Verified ✓', cap: 'Youth room worship — bring a friend Sunday 3 PM', pray: 178, amen: 92, h24: false },
-  'wall-well': { bg: 'previews/assets/wallet-hero/well.jpg', av: 'https://randomuser.me/api/portraits/men/22.jpg', name: 'Marcus C.', meta: 'Missions · Serve Day', cap: 'Well project update — clean water for 40 families', pray: 203, amen: 61, h24: false }
+  'wall-well': { bg: 'previews/assets/wallet-hero/well.jpg', av: 'https://randomuser.me/api/portraits/men/22.jpg', name: 'Thomas W.', meta: 'Missions · Serve Day', cap: 'Well project update — clean water for 40 families', pray: 203, amen: 61, h24: false }
 };
 
 function communityTab(tab) {
@@ -7124,6 +7140,51 @@ function toggleGraceFaq(i) {
 }
 GRACE_MESSAGING.renderFaqHtml(GRACE_MSG.faq, 'ios-faq-list', 'toggleGraceFaq');
 initDrawerMenuIcons();
+// Live hero date — was hardcoded "Sat, May 30", which made every demo look stale.
+(function () {
+  var el = document.getElementById('home-hero-date');
+  if (!el) return;
+  var d = new Date();
+  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  el.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ' · Central Henderson';
+})();
+// Live pill honesty — only claim "Live" during actual service windows
+// (Sat 5 PM, Sun 9:45 AM–12:30 PM); otherwise offer the replay.
+(function () {
+  var d = new Date();
+  var day = d.getDay(), mins = d.getHours() * 60 + d.getMinutes();
+  var isLive = (day === 0 && mins >= 585 && mins <= 750) || (day === 6 && mins >= 1020 && mins <= 1110);
+  if (isLive) return;
+  document.querySelectorAll('.js-live-pill').forEach(function (pill) {
+    pill.innerHTML = '<i></i> Watch · Sunday replay';
+  });
+})();
+// Fill "next Sunday" markers and calendar eyebrow with real upcoming dates
+// (were hardcoded "Jun 1" / "June 2026").
+(function () {
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var d = new Date();
+  var sun = new Date(d);
+  sun.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+  var label = months[sun.getMonth()] + ' ' + sun.getDate();
+  document.querySelectorAll('.js-next-sunday').forEach(function (el) { el.textContent = 'Sunday Service · ' + label; });
+  document.querySelectorAll('.js-next-sunday-time').forEach(function (el) { el.textContent = 'Sunday Service · ' + label + ' · 9:45 AM'; });
+  document.querySelectorAll('.js-calendar-eyebrow').forEach(function (el) { el.textContent = 'Church calendar · ' + monthsFull[d.getMonth()] + ' ' + d.getFullYear(); });
+  // demoClock: event rows carry data-ev-weekday/data-ev-week — compute real
+  // future dates so demo events are never in the past.
+  document.querySelectorAll('.cn-event-row[data-ev-weekday]').forEach(function (row) {
+    var wd = Number(row.getAttribute('data-ev-weekday'));
+    var wk = Number(row.getAttribute('data-ev-week') || 0);
+    var ev = new Date();
+    ev.setDate(ev.getDate() + ((wd - ev.getDay() + 7) % 7) + wk * 7);
+    var dayEl = row.querySelector('.cn-event-date strong');
+    var monEl = row.querySelector('.cn-event-date span');
+    if (dayEl) dayEl.textContent = String(ev.getDate());
+    if (monEl) monEl.textContent = months[ev.getMonth()];
+  });
+})();
 renderLeader();
 seedLeaderChat();
 renderImpactNotifications();
@@ -7159,7 +7220,7 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       zIndex: 480,
       voiceProvider: 'elevenlabs',
       autoDetectVoice: true,
-      ttsUrl: '/api/grace-tts',
+      ttsUrl: '/api/grace/tts',
       messaging: graceMsg,
       memberName: 'Maya',
       orbs: ['.drawer-grace .grace-orb', '.home-grace-card .grace-orb'],

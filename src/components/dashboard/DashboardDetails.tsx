@@ -58,9 +58,6 @@ export function DashboardDetails({
       >
         <span className="text-sm font-medium text-slate-800 dark:text-dark-100">
           More on your church
-          <span className="text-gray-500 dark:text-dark-400 font-normal ml-2">
-            ({sectionCount} section{sectionCount === 1 ? '' : 's'})
-          </span>
         </span>
         <ChevronDown
           size={18}
@@ -88,25 +85,31 @@ export function DashboardDetails({
                 )}
               </div>
               <div className="space-y-2.5">
-                {fundTotalsMtd.map(({ fund, amount }) => {
+                {(() => {
+                  const total = fundTotalsMtd.reduce((sum, f) => sum + f.amount, 0) || 1;
                   const max = fundTotalsMtd[0].amount || 1;
-                  return (
+                  return fundTotalsMtd.map(({ fund, amount }) => (
                     <div key={fund}>
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-gray-600 dark:text-dark-300 capitalize">{fund}</span>
-                        <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
-                          ${amount.toLocaleString()}
+                        <span className="flex items-baseline gap-1.5">
+                          <span className="font-medium text-gray-900 dark:text-dark-100 tabular-nums">
+                            ${amount.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] text-gray-400 dark:text-dark-500 tabular-nums">
+                            {Math.round((amount / total) * 100)}%
+                          </span>
                         </span>
                       </div>
-                      <div className="h-1.5 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-gray-100 dark:bg-dark-700/60 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-600 rounded-full"
                           style={{ width: `${(amount / max) * 100}%` }}
                         />
                       </div>
                     </div>
-                  );
-                })}
+                  ));
+                })()}
               </div>
             </div>
           )}
@@ -115,7 +118,7 @@ export function DashboardDetails({
             <div data-tutorial="dashboard-tasks" className="rounded-xl border border-gray-200 dark:border-dark-700 p-4 bg-stone-50/50 dark:bg-dark-800/50">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Heart size={15} className="text-rose-500" />
+                  <Heart size={15} className="text-brand-500" />
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-dark-100">Recent care requests</h2>
                 </div>
                 {onViewPastoralCare && (
@@ -146,7 +149,7 @@ export function DashboardDetails({
                         <span
                           className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                             conv.priority === 'crisis'
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                              ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
                               : conv.status === 'escalated'
                                 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                                 : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'

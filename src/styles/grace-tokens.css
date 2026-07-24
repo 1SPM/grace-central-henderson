@@ -1,0 +1,28 @@
+/* GRACE SaaS brand tokens — the product's own identity.
+ *
+ * GRACE Navy: the back-office chrome color for EVERY tenant. Tenant
+ * brands (Central red, Faithful navy/sky) style member-facing surfaces
+ * only (portal, previews, public give pages) — they must never override
+ * these variables. Concept reference: previews/grace_saas_theme_concept.html
+ *
+ * Consumed by tailwind.config.js as the `brand` palette via the same
+ * RGB-triplet pattern as `indigo` (rgb(var(--twc-brand-N) / <alpha>)).
+ */
+
+:root {
+  /* GRACE Navy ramp — primary 600 #3B53BB, chrome 900–950 */
+  --twc-brand-50:  237 240 251;  /* #EDF0FB */
+  --twc-brand-100: 219 226 247;  /* #DBE2F7 */
+  --twc-brand-200: 183 196 239;  /* #B7C4EF */
+  --twc-brand-300: 143 163 228;  /* #8FA3E4 */
+  --twc-brand-400: 106 132 217;  /* #6A84D9 */
+  --twc-brand-500: 76 104 205;   /* #4C68CD */
+  --twc-brand-600: 59 83 187;    /* #3B53BB */
+  --twc-brand-700: 47 65 150;    /* #2F4196 */
+  --twc-brand-800: 37 51 116;    /* #253374 */
+  --twc-brand-900: 27 37 84;     /* #1B2554 */
+  --twc-brand-950: 16 22 55;     /* #101637 */
+
+  /* Gradient partner — sky, echoing the GRACE orb's cyan→deep-blue */
+  --twc-brand-sky: 78 155 232;   /* #4E9BE8 */
+}

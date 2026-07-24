@@ -8,8 +8,10 @@ import {
   X,
   ArrowRight,
   Settings,
+  Compass,
+  Check,
 } from 'lucide-react';
-import { useTutorial, TUTORIALS } from '../../contexts/TutorialContext';
+import { useTutorial, TUTORIALS, PASTOR_CRM_TOUR_ID } from '../../contexts/TutorialContext';
 
 const ICON_MAP: Record<string, typeof Church> = {
   Church,
@@ -17,10 +19,11 @@ const ICON_MAP: Record<string, typeof Church> = {
   Calendar,
   BookOpen,
   BarChart: BarChart3,
+  Compass,
 };
 
 export function TutorialPickerModal() {
-  const { isPickerOpen, closePicker, startTutorials } = useTutorial();
+  const { isPickerOpen, closePicker, startTutorials, completedTutorials } = useTutorial();
 
   if (!isPickerOpen) return null;
 
@@ -46,10 +49,10 @@ export function TutorialPickerModal() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-100">
-                Quick Tours
+                More CRM Tours
               </h2>
               <p className="text-sm text-gray-500 dark:text-dark-400">
-                Pick a workflow to walk through
+                Scenario-based walkthroughs for Sunday, follow-up, and monthly review
               </p>
             </div>
           </div>
@@ -66,6 +69,8 @@ export function TutorialPickerModal() {
         <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(90vh-220px)]">
           {TUTORIALS.map(tutorial => {
             const Icon = ICON_MAP[tutorial.icon] ?? BookOpen;
+            const isCompleted = completedTutorials.includes(tutorial.id);
+            const isPastorOverview = tutorial.id === PASTOR_CRM_TOUR_ID;
 
             return (
               <button
@@ -77,9 +82,22 @@ export function TutorialPickerModal() {
                   <Icon size={18} className="text-gray-500 dark:text-dark-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">
-                    {tutorial.title}
-                  </h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100">
+                      {tutorial.title}
+                    </h3>
+                    {isPastorOverview && (
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                        Overview
+                      </span>
+                    )}
+                    {isCompleted && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                        <Check size={10} />
+                        Completed
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 dark:text-dark-400">
                     {tutorial.description}
                   </p>
@@ -95,13 +113,13 @@ export function TutorialPickerModal() {
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-dark-500">
               <Settings size={12} />
-              You can find these anytime in Settings
+              Settings → General → Run Tutorials
             </p>
             <button
               onClick={closePicker}
               className="text-xs font-medium text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-200 transition-colors"
             >
-              Skip for now
+              Close
             </button>
           </div>
         </div>

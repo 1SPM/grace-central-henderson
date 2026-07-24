@@ -44,7 +44,7 @@ const TABS: { id: GraceMobileTab; label: string; icon: typeof Home }[] = [
   { id: 'giving', label: 'Giving', icon: DollarSign },
 ];
 
-const DEFAULT_PRIMARY = '#e11d48'; // rose-600 — GRACE admin accent
+const DEFAULT_PRIMARY = '#3B53BB'; // brand-600 — GRACE Navy admin accent
 
 export function GraceMobileLayout({
   children,
@@ -147,7 +147,7 @@ export function GraceMobileLayout({
                   onClick={() => selectMore(link.view)}
                   className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-dark-800 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors text-center"
                 >
-                  <span className="w-10 h-10 rounded-xl bg-white dark:bg-dark-900 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                  <span className="w-10 h-10 rounded-xl bg-white dark:bg-dark-900 flex items-center justify-center text-brand-600 dark:text-brand-400">
                     {link.icon}
                   </span>
                   <span className="text-[11px] font-medium text-gray-700 dark:text-dark-300 leading-tight">

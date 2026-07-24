@@ -166,7 +166,13 @@ function parseDayKey(key: string): Date {
 export function buildHeroSubline(attentionCount: number, nextEventLabel: string | null): string {
   const parts: string[] = [];
   if (attentionCount > 0) {
-    parts.push(`${attentionCount} item${attentionCount === 1 ? '' : 's'} need attention`);
+    // attentionCount is a count of non-empty attention CATEGORIES (mail,
+    // overdue tasks, new visitors, inactive members, birthdays, prayers —
+    // see countTodayAttention above), not individual items. "N items need
+    // attention" read as a literal item count and directly contradicted
+    // Action Center's "N items need attention" (a true item count) showing
+    // a much larger number for the same day — same phrase, different unit.
+    parts.push(`${attentionCount} area${attentionCount === 1 ? '' : 's'} need${attentionCount === 1 ? 's' : ''} attention`);
   } else {
     parts.push('All clear for today');
   }
