@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { LeaderProfile, LeaderStats, PastoralSession, HelpCategory } from '../../types';
 import { VerifiedBadge } from './VerifiedBadge';
+import { LeaderAvatar } from './leadersHub/LeaderAvatar';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   'marriage': 'Marriage',
@@ -172,20 +173,20 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
       {/* Aggregate KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: 'Total Sessions', value: totalSessions, icon: MessageCircle, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-500/10' },
-          { label: 'Completed', value: completedSessions, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
-          { label: 'Total Hours', value: totalHours, icon: Clock, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10' },
-          { label: 'Avg Rating', value: avgRating > 0 ? `${avgRating}/5` : '---', icon: Star, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10' },
-          { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+          { label: 'Total Sessions', value: totalSessions, icon: MessageCircle, bg: 'bg-blue-600', border: 'border-l-blue-600' },
+          { label: 'Completed', value: completedSessions, icon: CheckCircle, bg: 'bg-emerald-600', border: 'border-l-emerald-600' },
+          { label: 'Total Hours', value: totalHours, icon: Clock, bg: 'bg-slate-700 dark:bg-slate-600', border: 'border-l-slate-500' },
+          { label: 'Avg Rating', value: avgRating > 0 ? `${avgRating}/5` : '---', icon: Star, bg: 'bg-amber-500', border: 'border-l-amber-500' },
+          { label: 'Active Leaders', value: `${activeLeaderCount}/${leaders.length}`, icon: Users, bg: 'bg-violet-600', border: 'border-l-violet-600' },
         ].map(stat => (
-          <div key={stat.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`p-1.5 rounded-lg ${stat.bg}`}>
-                <stat.icon size={14} className={stat.color} />
+          <div key={stat.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${stat.border} p-5`}>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className={`p-2 rounded-lg ${stat.bg} shadow-sm`}>
+                <stat.icon size={16} className="text-white" />
               </div>
               <span className="text-xs text-gray-500 dark:text-dark-400">{stat.label}</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{stat.value}</p>
+            <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -225,9 +226,13 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white text-sm font-bold">
-                          {stat.leaderName.charAt(0)}
-                        </div>
+                        {leader ? (
+                          <LeaderAvatar leader={leader} size="sm" showVerified={false} />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white text-sm font-bold">
+                            {stat.leaderName.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-medium text-gray-900 dark:text-dark-100">{stat.leaderName}</span>
@@ -273,13 +278,17 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
                       )}
                     </td>
                     <td className="text-center px-3 py-3">
+                      {/* "Live" / "AI on duty" — same vocabulary as the
+                          Team and Manage tabs (was "Available" /
+                          "Unavailable" here, a third label for the same
+                          leader.isAvailable state). */}
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                         leader?.isAvailable
                           ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400'
+                          : 'bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${leader?.isAvailable ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                        {leader?.isAvailable ? 'Available' : 'Unavailable'}
+                        <span className={`w-1.5 h-1.5 rounded-full ${leader?.isAvailable ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        {leader?.isAvailable ? 'Live' : (leader?.hasAiCompanion !== false ? 'AI on duty' : 'Offline')}
                       </span>
                     </td>
                   </tr>
@@ -295,9 +304,13 @@ export function LeaderStatsDashboard({ leaders, sessions, onBack }: LeaderStatsD
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
-                {selectedStats.leaderName.charAt(0)}
-              </div>
+              {selectedLeader ? (
+                <LeaderAvatar leader={selectedLeader} size="md" showVerified={false} />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white font-bold">
+                  {selectedStats.leaderName.charAt(0)}
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-100">{selectedStats.leaderName}</h3>

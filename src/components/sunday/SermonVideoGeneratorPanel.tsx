@@ -238,7 +238,7 @@ export function SermonVideoGeneratorPanel({ sermonTitle, sections }: SermonVideo
           </div>
 
           {error && (
-            <p className="text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 rounded-lg px-3 py-2">
+            <p className="text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800/40 rounded-lg px-3 py-2">
               {error}
             </p>
           )}

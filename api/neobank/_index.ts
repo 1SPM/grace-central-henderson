@@ -26,6 +26,12 @@ import { requirePlanGate } from '../_lib/billing/gates.js';
 import { readBody, str, int_ } from '../_lib/validation.js';
 import { getI2cAdapter } from '../_lib/i2c/index.js';
 import {
+  resolveDemoChurchId,
+  isDemoModeActive,
+  loadPermissionKeys,
+  hasImpactCardStaffAccess,
+} from '../_lib/authz.js';
+import {
   ensureCardAccount,
   syncAccountBalance,
   loadAdminAccountData,
@@ -33,10 +39,38 @@ import {
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
-const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
+// Legacy coarse JWT-role bucket. Retained only as the backfill-transition
+// fallback inside hasImpactCardStaffAccess — the authoritative gate is now
+// the impact_card.operate / .manage RBAC permission (finding F2).
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
+
+/**
+ * Resolve the caller's Impact Card staff capability from RBAC.
+ * Looks up the app `users` row for this Clerk identity, loads its
+ * permission set, and applies hasImpactCardStaffAccess (which keeps
+ * un-migrated staff working until the user_roles backfill lands).
+ * A caller with no `users` row (pure portal member) is never staff.
+ */
+async function resolveImpactCardStaff(
+  supabase: Db,
+  clerkUserId: string,
+  churchId: string,
+  coarseRole: string,
+): Promise<boolean> {
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('id')
+    .eq('clerk_id', clerkUserId)
+    .eq('church_id', churchId)
+    .maybeSingle();
+
+  const permissions = userRow
+    ? await loadPermissionKeys(supabase, userRow.id, churchId)
+    : new Set<string>();
+
+  return hasImpactCardStaffAccess(permissions, STAFF_ROLES.includes(coarseRole));
+}
 
 const POST_SCHEMA = {
   action: str({ required: true, max: 30, pattern: /^[a-z_]+$/ }),
@@ -198,13 +232,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const auth = await requireClerkAuth(req);
   if (!auth.ok) {
+    const demoChurchId = resolveDemoChurchId(req);
     if (
-      DEMO_MODE
-      && DEMO_CHURCH_ID
+      isDemoModeActive(req)
+      && demoChurchId
       && req.method === 'GET'
       && resource === 'admin'
     ) {
-      const gate = await requirePlanGate(DEMO_CHURCH_ID, 'cardProgram', supabase);
+      const gate = await requirePlanGate(demoChurchId, 'cardProgram', supabase);
       if (!gate.ok) {
         return res.status(gate.status).json({
           error: gate.error,
@@ -212,7 +247,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           required_plan: gate.required_plan,
         });
       }
-      const payload = await buildAdminCardProgramPayload(supabase, DEMO_CHURCH_ID, adapter);
+      const payload = await buildAdminCardProgramPayload(supabase, demoChurchId, adapter);
       return res.status(200).json(payload);
     }
     return res.status(auth.status).json({
@@ -232,7 +267,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  const isStaff = STAFF_ROLES.includes(auth.role);
+  const isStaff = await resolveImpactCardStaff(supabase, auth.clerkUserId, auth.churchId, auth.role);
 
   // ---------- READS ----------
   if (req.method === 'GET') {
@@ -271,9 +306,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         transactions = txns ?? [];
       }
 
+      // Member-facing 'me' resource: never return account_number_last4 or
+      // routing_number to the cardholder themselves (financial-safety brief
+      // explicitly prohibits exposing account numbers / routing details to
+      // members). Staff-facing resources ('account', 'admin' below) select
+      // the full row since staff legitimately need it for support.
       const { data: account } = await supabase
         .from('card_accounts')
-        .select('*')
+        .select('id, church_id, person_id, i2c_account_id, account_name, available_balance_micro_usd, status, last_synced_at, created_at')
         .eq('church_id', auth.churchId)
         .eq('person_id', person.id)
         .maybeSingle();
@@ -634,12 +674,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .maybeSingle();
       if (error || !updated) return res.status(error ? 500 : 404).json({ error: error ? 'card_update_failed' : 'card_not_found' });
+
+      // Audit: a staff-initiated spend-limit change is a financial control —
+      // record it in the portal-activity spine like freeze/cancel/review.
+      await logActivity(supabase, auth.churchId, updated.cardholder_person_id ?? null, 'card_limits_set', cardId, {
+        daily_limit_micro_usd: updates.daily_limit_micro_usd ?? null,
+        monthly_limit_micro_usd: updates.monthly_limit_micro_usd ?? null,
+        actor: 'staff',
+        clerk_user_id: auth.clerkUserId,
+      });
       return res.status(200).json({ card: updated });
     }
 
     case 'set_impact_route': {
-      if (!isStaff) return res.status(403).json({ error: 'forbidden' });
-      const personId = body.person_id;
+      // Staff may set any member's route (person_id in body). A non-staff
+      // caller may only set their OWN route — impact_routes.set_by already
+      // models 'member' as a valid setter, so this is a member self-service
+      // function, not a staff-only one, as long as the caller owns the
+      // person_id being updated.
+      let personId = body.person_id ?? null;
+      let setBy: 'member' | 'staff' = 'staff';
+      if (!isStaff) {
+        const me = await resolvePerson(supabase, auth);
+        if (!me) return res.status(403).json({ error: 'forbidden' });
+        if (personId && personId !== me.id) return res.status(403).json({ error: 'forbidden' });
+        personId = me.id;
+        setBy = 'member';
+      }
       if (!personId || !body.route_label) {
         return res.status(400).json({ error: 'person_id and route_label required' });
       }
@@ -651,7 +712,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           person_id: personId,
           route_label: body.route_label,
           route_fund: routeFund,
-          set_by: 'staff',
+          set_by: setBy,
           effective_at: new Date().toISOString(),
           metadata: { actor: auth.clerkUserId },
         }, { onConflict: 'church_id,person_id' })
@@ -662,7 +723,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await logActivity(supabase, auth.churchId, personId, 'impact_route_set', route.id, {
         route_label: body.route_label,
         route_fund: routeFund,
-        actor: 'staff',
+        actor: setBy,
       });
       return res.status(200).json({ impact_route: route });
     }

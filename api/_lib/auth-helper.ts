@@ -71,7 +71,11 @@ export async function requireClerkAuth(
     return { ok: false, status: 401, error: 'jwt missing church_id claim' };
   }
 
-  const role = payload.role ?? payload.app_metadata?.role ?? '';
+  // app_metadata.role is the real app-role claim. The flat `role` claim is
+  // reserved by Supabase's Third-Party Auth "supabase" JWT template — it's
+  // always the literal string "authenticated" (the Postgres role to assume
+  // for RLS), never a real app role, so it must not take priority here.
+  const role = payload.app_metadata?.role ?? (payload.role !== 'authenticated' ? payload.role : undefined) ?? '';
 
   if (opts.allowedRoles && opts.allowedRoles.length > 0 && !opts.allowedRoles.includes(role)) {
     return { ok: false, status: 403, error: 'forbidden' };

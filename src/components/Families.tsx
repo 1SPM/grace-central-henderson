@@ -176,37 +176,37 @@ export function Families({ people, onSelectPerson, onUpdatePerson, embedded = fa
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-indigo-600 p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                <Home size={20} className="text-indigo-600 dark:text-indigo-400" />
+              <div className="w-11 h-11 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Home size={22} className="text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{families.length}</p>
+                <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">{families.length}</p>
                 <p className="text-sm text-gray-500 dark:text-dark-400">Households</p>
               </div>
             </div>
           </div>
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
-                <Users size={20} className="text-green-600 dark:text-green-400" />
+              <div className="w-11 h-11 bg-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Users size={22} className="text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">
+                <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">
                   {families.reduce((acc, f) => acc + f.members.length, 0)}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-dark-400">In Families</p>
               </div>
             </div>
           </div>
-          <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-amber-500 p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
-                <UserPlus size={20} className="text-amber-600 dark:text-amber-400" />
+              <div className="w-11 h-11 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm">
+                <UserPlus size={22} className="text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-dark-100">{unassignedPeople.length}</p>
+                <p className="stat-number text-3xl text-gray-900 dark:text-dark-100">{unassignedPeople.length}</p>
                 <p className="text-sm text-gray-500 dark:text-dark-400">Unassigned</p>
               </div>
             </div>

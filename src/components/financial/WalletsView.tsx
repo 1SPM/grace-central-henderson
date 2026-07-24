@@ -48,6 +48,13 @@ function kycBadge(status: MemberAccountRow['kycStatus']) {
       </span>
     );
   }
+  if (status === 'rejected') {
+    return (
+      <span className="flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+        <AlertTriangle size={10} /> Rejected
+      </span>
+    );
+  }
   return (
     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 capitalize">
       KYC {status.replace('_', ' ')}
@@ -200,7 +207,7 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
             onViewPortalActivity={onViewPortalActivity}
           />
 
-          <CardProgramSection program={program} embedded />
+          <CardProgramSection program={program} embedded busyId={busyId} withBusy={withBusy} />
 
           <div className="mt-8 mb-6">
             <h2 className="serif text-xl text-slate-900 dark:text-dark-100 leading-none mb-4">Church-wide monitoring</h2>
@@ -232,28 +239,28 @@ export function WalletsView({ people, giving = [], churchName = 'Grace Church', 
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-brand-600 p-5">
               <p className="section-eyebrow">Active cards</p>
-              <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5">
+              <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {summary?.active_cards ?? 0}
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-blue-600 p-5">
               <p className="section-eyebrow">KYC approved</p>
-              <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5">
+              <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {kycApproved}<span className="text-sm text-gray-400 dark:text-dark-500"> / {withCards || people.length}</span>
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-slate-500 p-5">
               <p className="section-eyebrow">Total float</p>
-              <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5">
+              <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">
                 {fmtImpactUsd(summary?.total_float_micro_usd ?? 0)}
               </p>
             </div>
-            <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+            <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 border-l-emerald-600 p-5">
               <p className="section-eyebrow">Interchange (MTD)</p>
-              <p className="stat-number text-2xl text-emerald-700 dark:text-emerald-400 mt-1.5">
+              <p className="stat-number text-3xl text-emerald-700 dark:text-emerald-400 mt-2">
                 {fmtImpactUsd(summary?.interchange_mtd_micro_usd ?? 0)}
               </p>
             </div>

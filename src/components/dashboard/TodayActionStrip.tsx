@@ -31,9 +31,9 @@ interface ActionCard {
 
 const TONE: Record<ActionCard['tone'], { iconBg: string; iconColor: string; ring: string }> = {
   urgent: {
-    iconBg: 'bg-rose-50 dark:bg-rose-500/10',
-    iconColor: 'text-rose-600 dark:text-rose-400',
-    ring: 'hover:border-rose-300 dark:hover:border-rose-500/40',
+    iconBg: 'bg-brand-50 dark:bg-brand-500/10',
+    iconColor: 'text-brand-600 dark:text-brand-400',
+    ring: 'hover:border-brand-300 dark:hover:border-brand-500/40',
   },
   warm: {
     iconBg: 'bg-amber-50 dark:bg-amber-500/10',

@@ -117,7 +117,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
-  const { speak, stop, speakingId, supported: speechSupported } = useGraceSpeech();
+  const { speak, stop, speakingId, supported: speechSupported, provider } = useGraceSpeech();
   const [input, setInput] = useState('');
   const [listenPromptId, setListenPromptId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -198,7 +198,14 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
           <GraceOrb size="xs" />
-          <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
+          <div className="flex flex-col leading-tight">
+            <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
+            {speechSupported && provider !== 'none' && (
+              <span className="text-[10px] text-gray-400 dark:text-dark-500">
+                {provider === 'elevenlabs' ? 'Neural voice' : 'Browser voice'}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {chat.messages.length > 1 && (
@@ -346,7 +353,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
               type="button"
               onClick={voice.listening ? voice.stop : voice.start}
               className={`p-1.5 rounded-lg transition-colors ${voice.listening
-                ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                ? 'bg-brand-500 hover:bg-brand-600 text-white'
                 : 'text-gray-500 hover:bg-stone-200/60 dark:hover:bg-dark-700'}`}
               aria-label={voice.listening ? 'Stop recording' : 'Start voice input'}
             >
@@ -408,10 +415,10 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
 
   return (
     <div className={`ml-2 p-3 rounded-xl border ${isDestructive
-      ? 'bg-rose-50/60 dark:bg-rose-500/5 border-rose-200/70 dark:border-rose-500/20'
+      ? 'bg-brand-50/60 dark:bg-brand-500/5 border-brand-200/70 dark:border-brand-500/20'
       : 'bg-amber-50/60 dark:bg-amber-500/5 border-amber-200/70 dark:border-amber-500/20'}`}>
       <div className={`flex items-center gap-2 mb-2 text-xs font-medium ${isDestructive
-        ? 'text-rose-800 dark:text-rose-400'
+        ? 'text-brand-800 dark:text-brand-400'
         : 'text-amber-800 dark:text-amber-400'}`}>
         {icon}
         <span>{label}</span>
@@ -508,7 +515,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
               <div className="text-xs text-gray-600 dark:text-dark-400">For {action.personName}</div>
             )}
             {!action.taskId && (
-              <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
+              <div className="text-xs text-brand-600 dark:text-brand-400">No matching open task — try the exact title.</div>
             )}
           </div>
         )}
@@ -541,7 +548,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
               />
             </div>
             {!action.taskId && (
-              <div className="text-xs text-rose-600 dark:text-rose-400">No matching open task — try the exact title.</div>
+              <div className="text-xs text-brand-600 dark:text-brand-400">No matching open task — try the exact title.</div>
             )}
           </>
         )}
@@ -555,7 +562,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
                   To: {recipient.firstName} {recipient.lastName}
                   {recipient.email
                     ? <> · <span className="text-slate-700 dark:text-dark-200">{recipient.email}</span></>
-                    : <span className="text-rose-600 dark:text-rose-400"> · no email on file</span>}
+                    : <span className="text-brand-600 dark:text-brand-400"> · no email on file</span>}
                 </div>
               ) : null;
             })()}
@@ -584,7 +591,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
                   To: {recipient.firstName} {recipient.lastName}
                   {recipient.phone
                     ? <> · <span className="text-slate-700 dark:text-dark-200">{recipient.phone}</span></>
-                    : <span className="text-rose-600 dark:text-rose-400"> · no phone on file</span>}
+                    : <span className="text-brand-600 dark:text-brand-400"> · no phone on file</span>}
                 </div>
               ) : null;
             })()}
@@ -603,17 +610,17 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
 
         {(action.type === 'delete_task' || action.type === 'delete_person' || action.type === 'delete_prayer') && (
           <div className="text-sm space-y-1">
-            <div className="text-rose-700 dark:text-rose-400 font-medium">
+            <div className="text-brand-700 dark:text-brand-400 font-medium">
               {action.type === 'delete_task' && (action.taskTitle || '(no task matched)')}
               {action.type === 'delete_person' && (action.personName || '(no person matched)')}
               {action.type === 'delete_prayer' && (action.prayerContent ? `"${action.prayerContent.slice(0, 80)}${action.prayerContent.length > 80 ? '…' : ''}"` : '(no prayer matched)')}
             </div>
-            <div className="text-xs text-rose-600/80 dark:text-rose-400/80">This can't be undone from Grace.</div>
+            <div className="text-xs text-brand-600/80 dark:text-brand-400/80">This can't be undone from Grace.</div>
             {action.type === 'delete_task' && !action.taskId && (
-              <div className="text-xs text-rose-600 dark:text-rose-400">No matching task — pick from the list below.</div>
+              <div className="text-xs text-brand-600 dark:text-brand-400">No matching task — pick from the list below.</div>
             )}
             {action.type === 'delete_prayer' && !action.prayerId && (
-              <div className="text-xs text-rose-600 dark:text-rose-400">No matching active prayer.</div>
+              <div className="text-xs text-brand-600 dark:text-brand-400">No matching active prayer.</div>
             )}
           </div>
         )}
@@ -647,7 +654,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
               className="w-full px-2.5 py-1.5 text-sm bg-white/80 dark:bg-dark-800 border border-stone-300 dark:border-dark-700 rounded-md"
             />
             {!action.prayerId && (
-              <div className="text-xs text-rose-600 dark:text-rose-400">No active prayer found for that person.</div>
+              <div className="text-xs text-brand-600 dark:text-brand-400">No active prayer found for that person.</div>
             )}
           </>
         )}
@@ -748,7 +755,7 @@ function ActionCard({ action, people, onChange, onExecute, onDismiss }: ActionCa
         <button
           onClick={onExecute}
           className={`ml-auto px-3 py-1.5 text-xs font-medium text-white rounded-md transition-colors ${isDestructive
-            ? 'bg-rose-600 hover:bg-rose-700'
+            ? 'bg-brand-600 hover:bg-brand-700'
             : 'bg-slate-900 hover:bg-slate-950'}`}
         >
           {isDestructive ? 'Confirm delete' : 'Execute'}
@@ -772,7 +779,7 @@ export function GraceAdminSidePanel({
   loading = false,
 }: GraceAdminSidePanelProps) {
   return (
-    <div className="hidden sm:flex flex-col w-[220px] shrink-0 bg-gradient-to-b from-blue-900 to-blue-950 border-r border-blue-800/60 text-white">
+    <div className="hidden sm:flex flex-col w-[220px] shrink-0 bg-gradient-to-b from-brand-900 to-brand-950 border-r border-brand-800/60 text-white">
       <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b border-white/10 overflow-visible">
         <div className="overflow-visible p-2">
           <GraceOrb size="md" rings />
@@ -780,13 +787,13 @@ export function GraceAdminSidePanel({
         <p className="mt-4 text-sm font-semibold text-center leading-snug text-white">
           {salutation}
         </p>
-        <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-blue-200/80 font-medium">
+        <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-brand-200/80 font-medium">
           GRACE · Admin Assistant
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <p className="text-[10px] uppercase tracking-[0.12em] text-blue-300/70 font-medium mb-2 px-1">
+        <p className="text-[10px] uppercase tracking-[0.12em] text-brand-300/70 font-medium mb-2 px-1">
           Popular requests
         </p>
         <div className="flex flex-col gap-1.5">
@@ -796,7 +803,7 @@ export function GraceAdminSidePanel({
               type="button"
               disabled={loading}
               onClick={() => onTagClick(tag.prompt)}
-              className="text-left text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-blue-50 transition-colors disabled:opacity-50"
+              className="text-left text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-brand-50 transition-colors disabled:opacity-50"
             >
               {tag.label}
             </button>
@@ -805,7 +812,7 @@ export function GraceAdminSidePanel({
       </div>
 
       <div className="py-4 flex justify-center border-t border-white/10">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-blue-200/60 font-medium">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-brand-200/60 font-medium">
           GRACE
         </span>
       </div>
@@ -874,7 +881,7 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
                 chat.openPanel();
               }
             }}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-900/95 hover:bg-slate-900 backdrop-blur border border-slate-700/50 rounded-full shadow-xl transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-brand-950/95 hover:bg-brand-950 backdrop-blur border border-brand-800/40 rounded-full shadow-xl transition-colors"
           >
             <button
               type="button"
@@ -889,9 +896,9 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
               value={dockValue}
               onChange={(e) => setDockValue(e.target.value)}
               placeholder="Ask Grace to add a task…"
-              className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-slate-400"
+              className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-brand-300/60"
             />
-            <kbd className="hidden sm:inline text-[10px] text-slate-400 font-mono px-1.5 py-0.5 bg-white/5 rounded">⌘/</kbd>
+            <kbd className="hidden sm:inline text-[10px] text-brand-300/60 font-mono px-1.5 py-0.5 bg-white/5 rounded">⌘/</kbd>
             <button
               type="submit"
               className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"

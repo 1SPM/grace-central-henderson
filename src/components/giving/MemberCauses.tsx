@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BadgeCheck, Clock, ThumbsUp } from 'lucide-react';
 import { demoCauses, demoCauseStats, type CauseVerification } from './demoGivingHub';
+import { SampleDataNotice } from '../SampleDataNotice';
 
 const VERIFY_BADGE: Record<CauseVerification, { cls: string; label: string } | null> = {
   verified: {
@@ -36,6 +37,7 @@ export function MemberCauses() {
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
@@ -99,7 +101,7 @@ export function MemberCauses() {
                         decision === 'approved'
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                           : decision === 'declined'
-                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                            ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
                             : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
                       }`}
                     >
@@ -123,7 +125,7 @@ export function MemberCauses() {
                       </button>
                       <button
                         onClick={() => decide(cause.id, 'declined')}
-                        className="px-3 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-md hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-900/50 rounded-md hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
                       >
                         Decline
                       </button>

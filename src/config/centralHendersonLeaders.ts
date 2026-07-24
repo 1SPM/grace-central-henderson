@@ -418,6 +418,15 @@ export const CENTRAL_HENDERSON_COMPANION_CONFIG: Record<string, LeaderCompanionC
     llm: 'GPT-4.1',
     knowledgeGrounding: 'Ungrounded',
     creativity: 50,
+    // D-ID Studio agent (studio.d-id.com/agents) — the other 7 leaders
+    // stay on the divinityAvatarUrl fallback below until their own agents
+    // exist in D-ID Studio.
+    // NOTE: the char after "...Zr1" is a LOWERCASE L, not an uppercase i —
+    // an earlier transcription had it wrong, which made the key invalid and
+    // left the embed stuck on "Loading…". Verified char-by-char against the
+    // Manage Embed panel in studio.d-id.com.
+    didAgentId: 'v2_agt_nxzGwxew',
+    didClientKey: 'ck_cwyMiGIkm7BTZr1lrSmAO',
     divinityAvatarUrl: 'https://link.divinityagi.com/james-wilson',
   },
   'ch-leader-marcus-collins': {

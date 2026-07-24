@@ -26,6 +26,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { shouldSkipFinding, type ExistingFindingForDedup } from '../agentFindingsDedup.js';
 import { memberCareAgent } from './member-care.js';
 import { stewardshipAgent } from './stewardship.js';
 import { operationsAgent } from './operations.js';
@@ -288,6 +289,46 @@ async function loadRecentDedupKeys(
   return keys;
 }
 
+/**
+ * Due-date horizon by severity: an urgent observation surfaces at the
+ * top of tomorrow's list, attention within a few days, info within a
+ * week. tasks.due_date is NOT NULL with no default (migration 001) —
+ * omitting it made every task-sink observation fail to persist, which
+ * went unnoticed for the entire life of this runner because the cron
+ * that drives it had never successfully fired (caught 2026-07-18, on
+ * the first real run after the cron-auth fix).
+ */
+export function taskDueDateForObservation(
+  severity: AgentObservation['severity'],
+  now: Date = new Date(),
+): string {
+  const days = severity === 'urgent' ? 1 : severity === 'attention' ? 3 : 7;
+  return new Date(now.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * tasks.category is CHECK-constrained to four canonical values
+ * (migration 001: follow-up | care | admin | outreach) — the previous
+ * `agent:<id>` value violated that constraint on every insert (same
+ * never-ran-cron blind spot as due_date above). Map each agent onto
+ * the closest canonical category; agent attribution still lives in
+ * agent_logs.metadata and the task description.
+ */
+export function taskCategoryForAgent(agentId: string): 'follow-up' | 'care' | 'admin' | 'outreach' {
+  switch (agentId) {
+    case 'member-care':
+    case 'crisis-escalation':
+      return 'care';
+    case 'portal-engagement':
+      return 'outreach';
+    case 'operations':
+    case 'card-ops':
+      return 'admin';
+    default:
+      return 'follow-up'; // stewardship + any future agent
+  }
+}
+
 async function persistObservation(
   supabase: SupabaseClient,
   churchId: string,
@@ -297,30 +338,37 @@ async function persistObservation(
     if (obs.outputSink === 'task') {
       // Schema mapping: prod tasks table uses `completed` (boolean) +
       // `category` text; no `status`, `source`, or `metadata` columns.
-      // We embed observation kind into category prefix so the existing
-      // task UI can filter by category. Dedup key still lives in
-      // agent_logs.metadata so dedup works regardless.
+      // Dedup key lives in agent_logs.metadata so dedup works regardless.
       const { error } = await supabase.from('tasks').insert({
         church_id: churchId,
         title: obs.title,
         description: obs.detail,
+        due_date: taskDueDateForObservation(obs.severity),
         priority: obs.severity === 'urgent' ? 'high' : obs.severity === 'attention' ? 'medium' : 'low',
-        category: `agent:${obs.agentId}`,
+        category: taskCategoryForAgent(obs.agentId),
         completed: false,
         person_id: obs.personId ?? null,
       });
       if (error) throw new Error(`tasks insert: ${error.message}`);
     } else if (obs.outputSink === 'interaction') {
-      // Schema mapping: prod interactions uses `content` not `notes`,
-      // no `metadata` column. Embed the full context into content.
-      const { error } = await supabase.from('interactions').insert({
-        church_id: churchId,
-        person_id: obs.personId ?? null,
-        type: 'agent_observation',
-        content: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
-        created_by_name: `agent:${obs.agentId}`,
-      });
-      if (error) throw new Error(`interactions insert: ${error.message}`);
+      // Schema mapping: prod interactions uses `content` not `notes`, no
+      // `metadata` column, person_id NOT NULL, and type CHECK-constrained
+      // to note|call|email|visit|text|prayer (migration 001) — the
+      // previous 'agent_observation' type violated that check on every
+      // insert. An agent observation is a note; attribution lives in
+      // created_by_name and the content prefix.
+      if (obs.personId) {
+        const { error } = await supabase.from('interactions').insert({
+          church_id: churchId,
+          person_id: obs.personId,
+          type: 'note',
+          content: `[${obs.agentId}] ${obs.title} — ${obs.detail}`,
+          created_by_name: `agent:${obs.agentId}`,
+        });
+        if (error) throw new Error(`interactions insert: ${error.message}`);
+      }
+      // No personId → nothing to attach an interaction to; the
+      // agent_logs entry below still records the observation.
     }
     // Always write the agent_log entry (the dedup index).
     await supabase.from('agent_logs').insert({
@@ -341,6 +389,77 @@ async function persistObservation(
   } catch (err) {
     console.error('[agents] persistObservation failed', { dedupKey: obs.dedupKey, err: String(err) });
     return 'failed';
+  }
+}
+
+/**
+ * Maps an observation's own severity onto agent_findings' 4-tier scale.
+ * crisis-escalation observations are always 'critical' regardless of
+ * their own severity field — a crisis finding must never be triaged as
+ * merely 'high'. Everything else passes through: urgent -> high,
+ * attention -> normal, info -> info.
+ */
+function findingSeverityForObservation(obs: AgentObservation): 'critical' | 'high' | 'normal' | 'info' {
+  if (obs.agentId === 'crisis-escalation') return 'critical';
+  if (obs.severity === 'urgent') return 'high';
+  if (obs.severity === 'attention') return 'normal';
+  return 'info';
+}
+
+/**
+ * Batch-loads existing agent_findings rows for a set of dedup keys, one
+ * query per agent rather than one per observation.
+ */
+async function loadFindingsDedupState(
+  supabase: SupabaseClient,
+  churchId: string,
+  dedupKeys: string[],
+): Promise<Map<string, ExistingFindingForDedup[]>> {
+  const byKey = new Map<string, ExistingFindingForDedup[]>();
+  if (dedupKeys.length === 0) return byKey;
+  const { data } = await supabase
+    .from('agent_findings')
+    .select('dedup_key, status, suppress_until, created_at')
+    .eq('church_id', churchId)
+    .in('dedup_key', dedupKeys);
+  for (const row of (data as Array<ExistingFindingForDedup & { dedup_key: string }> | null) ?? []) {
+    const arr = byKey.get(row.dedup_key) ?? [];
+    arr.push(row);
+    byKey.set(row.dedup_key, arr);
+  }
+  return byKey;
+}
+
+/**
+ * Additive finding write — independent of the 24h agent_logs dedup that
+ * gates the task/interaction mirror sinks above. A finding uses its own
+ * lifecycle-aware dedup rule (shouldSkipFinding) so e.g. a resolved
+ * finding can get a fresh one even within the same 24h window a
+ * duplicate task write would have been suppressed.
+ */
+async function persistFinding(
+  supabase: SupabaseClient,
+  churchId: string,
+  obs: AgentObservation,
+  existingForKey: ExistingFindingForDedup[],
+  now: Date,
+): Promise<void> {
+  if (shouldSkipFinding(existingForKey, now)) return;
+  const { error } = await supabase.from('agent_findings').insert({
+    church_id: churchId,
+    agent_id: obs.agentId,
+    source: 'cron',
+    dedup_key: obs.dedupKey,
+    title: obs.title,
+    detail: obs.detail,
+    severity: findingSeverityForObservation(obs),
+    status: 'open',
+    subject_type: obs.personId ? 'person' : null,
+    subject_id: obs.personId ?? obs.relatedId ?? null,
+    payload: obs.metadata ?? {},
+  });
+  if (error) {
+    console.error('[agents] agent_findings insert failed', { dedupKey: obs.dedupKey, err: error.message });
   }
 }
 
@@ -399,21 +518,30 @@ export async function runAgentsForChurch(
     result.observationsGenerated += observations.length;
     result.byAgent[a.id].generated = observations.length;
 
+    // Batched once per agent, not per observation.
+    const findingsDedupState = await loadFindingsDedupState(
+      supabase, churchId, observations.map(o => o.dedupKey),
+    );
+
     for (const obs of observations) {
       if (dedup.has(obs.dedupKey)) {
         result.observationsSkippedDedup += 1;
         result.byAgent[a.id].skipped += 1;
-        continue;
+      } else {
+        const status = await persistObservation(supabase, churchId, obs);
+        if (status === 'written') {
+          result.observationsWritten += 1;
+          result.byAgent[a.id].written += 1;
+          dedup.add(obs.dedupKey);                     // local dedup within this run
+        } else if (status === 'failed') {
+          result.observationsFailed += 1;
+          result.byAgent[a.id].failed += 1;
+        }
       }
-      const status = await persistObservation(supabase, churchId, obs);
-      if (status === 'written') {
-        result.observationsWritten += 1;
-        result.byAgent[a.id].written += 1;
-        dedup.add(obs.dedupKey);                     // local dedup within this run
-      } else if (status === 'failed') {
-        result.observationsFailed += 1;
-        result.byAgent[a.id].failed += 1;
-      }
+
+      // Finding write uses its own lifecycle-aware dedup rule, independent
+      // of the 24h agent_logs dedup above (see persistFinding's comment).
+      await persistFinding(supabase, churchId, obs, findingsDedupState.get(obs.dedupKey) ?? [], now);
     }
   }
 
@@ -440,19 +568,29 @@ export async function runAgentsForChurch(
 export async function listChurchesWithAgents(supabase: SupabaseClient): Promise<string[]> {
   // Two ways: settings table OR fall back to ALL churches if no settings rows
   // exist yet (defaults are all-enabled). We do both: union the two lists.
+  type SettingsRow = {
+    church_id: string;
+    member_care_enabled: boolean;
+    stewardship_enabled: boolean;
+    operations_enabled: boolean;
+    portal_engagement_enabled?: boolean | null;
+    card_ops_enabled?: boolean | null;
+    crisis_escalation_enabled?: boolean | null;
+  };
+  // select('*') so the newer flags (portal/card/crisis) are included when the
+  // columns exist, without erroring where the migration hasn't run yet.
   const { data: settingsRows } = await supabase
     .from('church_agent_settings')
-    .select('church_id, member_care_enabled, stewardship_enabled, operations_enabled');
-  const enabledByRow = new Set(
-    ((settingsRows as Array<{ church_id: string; member_care_enabled: boolean; stewardship_enabled: boolean; operations_enabled: boolean }> | null) ?? [])
-      .filter((r) => r.member_care_enabled || r.stewardship_enabled || r.operations_enabled)
-      .map((r) => r.church_id),
-  );
-  const disabledByRow = new Set(
-    ((settingsRows as Array<{ church_id: string; member_care_enabled: boolean; stewardship_enabled: boolean; operations_enabled: boolean }> | null) ?? [])
-      .filter((r) => !r.member_care_enabled && !r.stewardship_enabled && !r.operations_enabled)
-      .map((r) => r.church_id),
-  );
+    .select('*');
+  const rows = (settingsRows as SettingsRow[] | null) ?? [];
+  // Newer flags default to enabled when absent (mirrors loadAgentSettings).
+  const anyEnabled = (r: SettingsRow) =>
+    r.member_care_enabled || r.stewardship_enabled || r.operations_enabled
+    || r.portal_engagement_enabled !== false
+    || r.card_ops_enabled !== false
+    || r.crisis_escalation_enabled !== false;
+  const enabledByRow = new Set(rows.filter(anyEnabled).map((r) => r.church_id));
+  const disabledByRow = new Set(rows.filter((r) => !anyEnabled(r)).map((r) => r.church_id));
 
   const { data: allChurches } = await supabase.from('churches').select('id').limit(5000);
   const out = new Set<string>(enabledByRow);

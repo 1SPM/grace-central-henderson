@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './ThemeContext';
@@ -6,12 +6,45 @@ import { ToastProvider } from './components/Toast';
 import { AuthProvider, IntegrationsProvider, AccessibilityProvider } from './contexts';
 import { handleDemoEntryQuery } from './lib/demoEntry';
 import { checkEnvironment } from './utils/envCheck';
-import { supabase } from './lib/supabase';
 import { initSentry, initPosthog, SentryErrorBoundary } from './lib/observability';
+import { getTenant } from './config/tenant';
 import './index.css';
 import './styles/grace-orb.css';
+import './styles/grace-tokens.css';
 import './styles/central-tokens.css';
+import './styles/faithful-crm-theme.css';
 import './components/marketing/marketing.css';
+
+// Tenant theming — resolved at RUNTIME (hostname map / VITE_TENANT) so one
+// build can serve differently-branded hosts. The stylesheet above is fully
+// scoped to html[data-tenant='faithful']; Central renders untouched.
+const ACTIVE_TENANT = getTenant();
+if (ACTIVE_TENANT.id !== 'centralHenderson') {
+  document.documentElement.dataset.tenant = ACTIVE_TENANT.id;
+  const brand = ACTIVE_TENANT.defaultSettings.branding?.primaryColor;
+  if (brand) {
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', brand);
+  }
+} else if (typeof window !== 'undefined') {
+  // Unknown/unmapped host — check whether some church has registered it
+  // as a custom domain (Settings → Custom domains). Cosmetic only: this
+  // never changes which church's data a session can see (that's the JWT
+  // church_id claim on every authenticated route) — it only overlays
+  // branding for a host neither HOST_TENANTS nor the demo-bypass map
+  // knows about yet. Best-effort, never blocks render.
+  const host = window.location.hostname;
+  if (host !== 'localhost' && host !== '127.0.0.1') {
+    fetch(`/api/tenant/config?host=${encodeURIComponent(host)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { church_name?: string | null; branding?: { primaryColor?: string; logoUrl?: string } } | null) => {
+        const brand = data?.branding?.primaryColor;
+        if (brand) {
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', brand);
+        }
+      })
+      .catch(() => {});
+  }
+}
 
 // Init Sentry first so anything thrown during setup is captured.
 initSentry();
@@ -27,38 +60,24 @@ const isConnectRoute = window.location.pathname === '/connect';
 const isLeadersRoute = window.location.pathname === '/leaders';
 const isMarketplaceRoute = window.location.pathname === '/verified-leaders' || window.location.pathname === '/marketplace';
 const isRedesignRoute = window.location.pathname === '/redesign';
+// Members Portal — its own auth (PortalAuthContext, not the staff
+// AuthContext) and its own component tree. See src/portal/PortalRoot.tsx.
+const isPortalRoute = window.location.pathname === '/portal' || window.location.pathname.startsWith('/portal/');
 const ConnectCard = lazy(() => import('./components/ConnectCard').then(m => ({ default: m.ConnectCard })));
 const LeaderApply = lazy(() => import('./components/LeaderApply').then(m => ({ default: m.LeaderApply })));
 const VerifiedLeaders = lazy(() => import('./components/VerifiedLeaders').then(m => ({ default: m.VerifiedLeaders })));
 const RedesignPreview = lazy(() => import('./components/redesign/RedesignPreview').then(m => ({ default: m.RedesignPreview })));
+const PortalRoot = lazy(() => import('./portal/PortalRoot').then(m => ({ default: m.PortalRoot })));
 
 function PublicConnectPage() {
-  const [churchName, setChurchName] = useState('Our Church');
-  const [churchId, setChurchId] = useState('demo-church');
-
-  useEffect(() => {
-    async function loadChurch() {
-      if (!supabase) return;
-      try {
-        const { data } = await supabase
-          .from('churches')
-          .select('id, settings')
-          .limit(1)
-          .single();
-        if (data) {
-          setChurchId(data.id);
-          const settings = data.settings as Record<string, unknown> | null;
-          const profile = settings?.profile as Record<string, unknown> | null;
-          if (profile?.name && typeof profile.name === 'string') {
-            setChurchName(profile.name);
-          }
-        }
-      } catch {
-        // Use defaults
-      }
-    }
-    loadChurch();
-  }, []);
+  // Resolved from the same hostname-based tenant config every other part
+  // of the app uses (ACTIVE_TENANT above) — no network round-trip, and no
+  // client-driven church lookup. The server independently re-derives the
+  // real church_id from the request's own Host header when the form is
+  // submitted (api/_connect-card.ts) rather than trusting this value —
+  // it's display-only here.
+  const churchName = ACTIVE_TENANT.defaultSettings.profile?.name || 'Our Church';
+  const churchId = ACTIVE_TENANT.churchId || 'demo-church';
 
   return (
     <Suspense fallback={
@@ -120,6 +139,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Suspense>
       ) : isConnectRoute ? (
         <PublicConnectPage />
+      ) : isPortalRoute ? (
+        <Suspense fallback={
+          <div className="h-screen bg-stone-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+          </div>
+        }>
+          <PortalRoot />
+        </Suspense>
       ) : (
         <AccessibilityProvider>
           <AuthProvider>

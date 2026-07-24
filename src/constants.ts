@@ -53,6 +53,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'sarah.mitchell@email.com',
     phone: '(555) 123-4567',
     status: 'visitor',
+    photo: 'https://i.pravatar.cc/150?u=sarah-mitchell-grace',
     firstVisit: getDateString(-14),
     birthDate: '1995-03-15',
     tags: ['first-time', 'young-adult'],
@@ -79,6 +80,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'maria.garcia@email.com',
     phone: '(555) 345-6789',
     status: 'regular',
+    photo: 'https://i.pravatar.cc/150?u=maria-garcia-grace',
     firstVisit: getDateString(-60),
     birthDate: '1992-07-22',
     tags: ['young-adult'],
@@ -174,6 +176,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'kevin.m@email.com',
     phone: '(555) 012-3456',
     status: 'member',
+    photo: 'https://i.pravatar.cc/150?u=kevin-martinez-grace',
     joinDate: getDateString(-365 * 2 + 3), // Membership anniversary coming up!
     birthDate: getBirthDateForUpcoming(3), // Birthday in 3 days!
     tags: ['tech-team', 'young-professional'],
@@ -187,6 +190,7 @@ export const SAMPLE_PEOPLE: Person[] = [
     email: 'rachel.kim@email.com',
     phone: '(555) 123-4560',
     status: 'member',
+    photo: 'https://i.pravatar.cc/150?u=rachel-kim-grace',
     joinDate: getDateString(-365), // Joined exactly 1 year ago - anniversary!
     birthDate: getBirthDateForUpcoming(6), // Birthday in 6 days!
     tags: ['childrens-ministry', 'teacher'],

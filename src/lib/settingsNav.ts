@@ -1,9 +1,10 @@
 import type { View } from '../types';
 
-export type SettingsTab = 'general' | 'forms' | 'email-templates' | 'reports' | 'tags' | 'analytics';
+export type SettingsTab = 'general' | 'automation' | 'forms' | 'email-templates' | 'reports' | 'tags' | 'analytics';
 
 const TAB_TO_VIEW: Record<SettingsTab, View> = {
   general: 'settings',
+  automation: 'settings',
   forms: 'forms',
   'email-templates': 'email-templates',
   reports: 'reports',
@@ -17,6 +18,7 @@ export function parseSettingsTab(): SettingsTab {
   const qIndex = hash.indexOf('?');
   if (qIndex < 0) return 'general';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
+  if (tab === 'automation') return 'automation';
   if (tab === 'forms') return 'forms';
   if (tab === 'email-templates') return 'email-templates';
   if (tab === 'reports') return 'reports';

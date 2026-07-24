@@ -18,8 +18,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createClerkClient } from '@clerk/backend';
-import { randomBytes } from 'node:crypto';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { inviteSinglePerson } from '../_lib/memberInvite.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -81,67 +81,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       results.push({ person_id: personId, status: 'error', error: 'not_found_in_church' });
       continue;
     }
-    if (!person.email) {
-      results.push({ person_id: personId, status: 'skipped', error: 'no_email' });
-      continue;
-    }
-    if (person.clerk_user_id) {
-      results.push({ person_id: personId, status: 'skipped', error: 'already_linked' });
-      continue;
-    }
 
-    try {
-      // Revoke any prior live invitation for this person.
-      await supabase
-        .from('member_invitations')
-        .update({ status: 'revoked' })
-        .eq('person_id', personId)
-        .in('status', ['pending', 'sent']);
+    const result = await inviteSinglePerson({
+      supabase,
+      clerk,
+      churchId: auth.churchId,
+      person,
+      inviterUserId: inviter?.id ?? null,
+      appUrl: APP_URL,
+    });
 
-      const token = randomBytes(24).toString('base64url');
-      const redirectUrl = `${APP_URL}/portal?invite=${token}`;
-
-      let clerkInvitationId: string | null = null;
-      let status: 'pending' | 'sent' = 'pending';
-      if (clerk) {
-        const invitation = await clerk.invitations.createInvitation({
-          emailAddress: person.email as string,
-          redirectUrl,
-          publicMetadata: {
-            church_id: auth.churchId,
-            role: 'member',
-            grace_invite_token: token,
-          },
-          notify: true,
-          ignoreExisting: true,
-        });
-        clerkInvitationId = invitation.id;
-        status = 'sent';
-      }
-
-      const { error: insertErr } = await supabase.from('member_invitations').insert({
-        church_id: auth.churchId,
-        person_id: personId,
-        email: (person.email as string).toLowerCase(),
-        token,
-        status,
-        invited_by_user_id: inviter?.id ?? null,
-        clerk_invitation_id: clerkInvitationId,
-        sent_at: status === 'sent' ? new Date().toISOString() : null,
-      });
-      if (insertErr) throw new Error(insertErr.message);
-
-      // Pre-qualify the person for portal access.
-      await supabase.from('people').update({ portal_enabled: true }).eq('id', personId);
-
+    if (result.status === 'error') {
+      console.error('[members/invite] failed for', personId, result.error);
+      results.push({ person_id: personId, status: 'error', error: result.error });
+    } else if (result.status === 'skipped') {
+      results.push({ person_id: personId, status: 'skipped', error: result.reason });
+    } else {
       results.push({ person_id: personId, status: 'invited' });
-    } catch (err) {
-      console.error('[members/invite] failed for', personId, err);
-      results.push({
-        person_id: personId,
-        status: 'error',
-        error: err instanceof Error ? err.message : 'invite_failed',
-      });
     }
   }
 

@@ -5,10 +5,38 @@ import { createClient } from '@supabase/supabase-js';
  * iCal Calendar Export API
  *
  * Generates an .ics file that can be subscribed to in Google Calendar,
- * Apple Calendar, Outlook, etc.
+ * Apple Calendar, Outlook, etc. Deliberately unauthenticated — a
+ * subscription link is meant to be portable (calendar apps poll it from
+ * their own servers, not from a signed-in browser session), same trust
+ * model as a Google Calendar "secret address".
+ *
+ * Security note (Finding 5, SECURITY_FINDINGS_STATUS.md): this route
+ * MUST use the anon key, never the service role. RLS's only policy
+ * scoping calendar_events for anon is `demo_anon_read` (Faithful's
+ * church only) — that's the actual security boundary keeping this from
+ * leaking a real tenant's calendar to anyone who knows their church_id.
+ * With the anon key that boundary is real; with the service role it
+ * would silently vanish (service role bypasses RLS entirely). isAnonKey
+ * below fails closed if that ever gets swapped by mistake, rather than
+ * relying on nobody ever making that edit.
  *
  * Usage: GET /api/calendar/ical?churchId=xxx
  */
+
+/** True if `key` decodes (no verification needed — Supabase's own JWKs
+ * already sign it; we're only reading the role claim we were handed) to
+ * a Supabase JWT with role "anon". Never "service_role" here — see the
+ * security note above. Fails closed (false) on any malformed input. */
+function isAnonKey(key: string): boolean {
+  try {
+    const payload = key.split('.')[1];
+    if (!payload) return false;
+    const json = Buffer.from(payload, 'base64url').toString('utf8');
+    return JSON.parse(json).role === 'anon';
+  } catch {
+    return false;
+  }
+}
 
 interface CalendarEvent {
   id: string;
@@ -117,25 +145,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let events: CalendarEvent[] = [];
 
     if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data, error } = await supabase
-        .from('calendar_events')
-        .select('id, title, description, start_date, end_date, all_day, location, category')
-        .eq('church_id', churchId)
-        .gte('start_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-        .order('start_date', { ascending: true });
+      if (!isAnonKey(supabaseKey)) {
+        console.error('[calendar/ical] VITE_SUPABASE_ANON_KEY is not an anon-role key — refusing to query without the RLS boundary this route depends on');
+      } else {
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
-      if (!error && data) {
-        events = data.map(e => ({
-          id: e.id,
-          title: e.title,
-          description: e.description || undefined,
-          startDate: e.start_date,
-          endDate: e.end_date || undefined,
-          location: e.location || undefined,
-          allDay: e.all_day || false,
-          category: e.category || undefined,
-        }));
+        // Explicit existence check rather than relying purely on RLS
+        // silently returning nothing for a bogus/nonexistent churchId —
+        // makes the boundary visible in this file, not just implicit.
+        const { data: church } = await supabase.from('churches').select('id').eq('id', churchId).maybeSingle();
+
+        if (church) {
+          const { data, error } = await supabase
+            .from('calendar_events')
+            .select('id, title, description, start_date, end_date, all_day, location, category')
+            .eq('church_id', churchId)
+            .gte('start_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+            .order('start_date', { ascending: true });
+
+          if (!error && data) {
+            events = data.map(e => ({
+              id: e.id,
+              title: e.title,
+              description: e.description || undefined,
+              startDate: e.start_date,
+              endDate: e.end_date || undefined,
+              location: e.location || undefined,
+              allDay: e.all_day || false,
+              category: e.category || undefined,
+            }));
+          }
+        }
       }
     }
 

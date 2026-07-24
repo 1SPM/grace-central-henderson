@@ -29,6 +29,13 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
   const photo = leader.photo ?? getLeaderPhoto(leader.id) ?? '/leaders/james-wilson.jpg';
 
   const hasDidCredentials = Boolean(companion.didAgentId && companion.didClientKey);
+  // Stable per-leader id for the D-ID Frame embed's data-target-id. The
+  // embed script looks this element up by id and renders into it directly
+  // — appending the <script> as a child of the host div (the previous
+  // approach) isn't enough on its own; without data-target-id the widget
+  // falls back to its own floating placement instead of filling this
+  // container, which is what showed up as a stray, wrongly-sized preview.
+  const targetId = `did-agent-target-${leader.id}`;
 
   const mountDidAgent = useCallback(() => {
     if (!hasDidCredentials || agentMounted || !hostRef.current) return;
@@ -38,11 +45,14 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
     script.type = 'module';
     script.src = 'https://agent.d-id.com/v2/index.js';
     script.setAttribute('data-mode', 'full');
-    script.setAttribute('data-agent-id', companion.didAgentId!);
     script.setAttribute('data-client-key', companion.didClientKey!);
+    script.setAttribute('data-agent-id', companion.didAgentId!);
+    script.setAttribute('data-name', 'did-agent');
+    script.setAttribute('data-monitor', 'true');
+    script.setAttribute('data-target-id', targetId);
     host.appendChild(script);
     setAgentMounted(true);
-  }, [agentMounted, companion.didAgentId, companion.didClientKey, hasDidCredentials]);
+  }, [agentMounted, companion.didAgentId, companion.didClientKey, hasDidCredentials, targetId]);
 
   useEffect(() => {
     if (!open) {
@@ -111,58 +121,76 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
         <button type="button" className="did-studio-close" onClick={onClose} aria-label="Close conversation">
           ×
         </button>
-        <div className="ai-did-studio">
+        <div className="ai-did-title-bar" id="did-studio-title">
+          {/* div, not span — .ai-did-title-bar span is the status-chip style */}
+          <div>
+            Chat · {leader.displayName}
+            {leader.isVerified && (
+              <span className="did-verified-badge">✓ Verified Leader</span>
+            )}
+          </div>
+          <span>
+            <span className="pulse-live-dot" />
+            {hasDidCredentials ? 'D-ID Studio' : 'Preview'}
+          </span>
+        </div>
+        {/*
+          Once the real D-ID agent is credentialed, its embedded frame is
+          the entire conversation surface (video + its own input/mic) — the
+          quick-prompt buttons, voice-dots, and side chat below were a
+          stand-in for that and become fake/misleading duplicate UI once a
+          real agent is live, so they're preview-only (!hasDidCredentials).
+          The grid collapses to one column in that case (see
+          .ai-did-studio--live in did-studio.css) so the real frame gets
+          full width instead of being squeezed next to an empty column.
+        */}
+        <div className={`ai-did-studio${hasDidCredentials ? ' ai-did-studio--live' : ''}`}>
           <div className="ai-did-media">
             <div className="ai-did-media-bg" aria-hidden="true" />
-            <div className="ai-did-agent-host" ref={hostRef} />
+            <div className="ai-did-agent-host" id={targetId} ref={hostRef} />
             <img
               className={`ai-did-avatar${agentMounted ? ' ai-did-avatar--hidden' : ''}`}
               src={photo}
               alt={leader.displayName}
             />
-            {hasDidCredentials && (
-              <div className="ai-did-prompts">
-                <button
-                  type="button"
-                  className="ai-did-prompt"
-                  onClick={() => {
-                    setInput('I need help with a problem I\'m facing');
-                    setTimeout(sendMessage, 50);
-                  }}
-                >
-                  I need help with a problem I&apos;m facing
-                </button>
-                <button
-                  type="button"
-                  className="ai-did-prompt"
-                  onClick={() => {
-                    setInput('I am confused on a Bible passage');
-                    setTimeout(sendMessage, 50);
-                  }}
-                >
-                  I am confused on a Bible passage
-                </button>
-              </div>
+            {!hasDidCredentials && (
+              <>
+                <div className="ai-did-prompts">
+                  <button
+                    type="button"
+                    className="ai-did-prompt"
+                    onClick={() => {
+                      setInput('I need help with a problem I\'m facing');
+                      setTimeout(sendMessage, 50);
+                    }}
+                  >
+                    I need help with a problem I&apos;m facing
+                  </button>
+                  <button
+                    type="button"
+                    className="ai-did-prompt"
+                    onClick={() => {
+                      setInput('I am confused on a Bible passage');
+                      setTimeout(sendMessage, 50);
+                    }}
+                  >
+                    I am confused on a Bible passage
+                  </button>
+                </div>
+                <div className="ai-did-controls">
+                  <div className="ai-did-voice-dots" aria-hidden="true">
+                    <span style={{ height: 6 }} />
+                    <span style={{ height: 12, animationDelay: '0.1s' }} />
+                    <span style={{ height: 8, animationDelay: '0.2s' }} />
+                    <span style={{ height: 14, animationDelay: '0.3s' }} />
+                    <span style={{ height: 6, animationDelay: '0.4s' }} />
+                  </div>
+                </div>
+              </>
             )}
-            <div className="ai-did-controls">
-              <div className="ai-did-voice-dots" aria-hidden="true">
-                <span style={{ height: 6 }} />
-                <span style={{ height: 12, animationDelay: '0.1s' }} />
-                <span style={{ height: 8, animationDelay: '0.2s' }} />
-                <span style={{ height: 14, animationDelay: '0.3s' }} />
-                <span style={{ height: 6, animationDelay: '0.4s' }} />
-              </div>
-            </div>
           </div>
-          <div className="ai-did-chat-panel">
-            <div className="ai-did-chat-head" id="did-studio-title">
-              Chat · {leader.displayName}
-              <span>
-                <span className="pulse-live-dot" />
-                {hasDidCredentials ? 'D-ID Studio' : 'Preview'}
-              </span>
-            </div>
-            {!hasDidCredentials ? (
+          {!hasDidCredentials && (
+            <div className="ai-did-chat-panel">
               <div className="ai-did-empty">
                 <p className="mb-2">D-ID agent credentials are not configured for this leader.</p>
                 {companion.divinityAvatarUrl && (
@@ -176,7 +204,6 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
                   </a>
                 )}
               </div>
-            ) : (
               <div className="ai-did-messages">
                 {messages.map(msg => (
                   <div key={msg.id} className={`did-msg did-msg--${msg.role}`}>
@@ -190,25 +217,25 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
                   </div>
                 ))}
               </div>
-            )}
-            <div className="ai-did-input-bar">
-              <input
-                className="ai-did-input"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Type your message here…"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-              <button type="button" className="ai-did-send" onClick={sendMessage} aria-label="Send">
-                ↑
-              </button>
+              <div className="ai-did-input-bar">
+                <input
+                  className="ai-did-input"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="Type your message here…"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                />
+                <button type="button" className="ai-did-send" onClick={sendMessage} aria-label="Send">
+                  ↑
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>,

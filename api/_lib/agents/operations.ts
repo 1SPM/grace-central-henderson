@@ -33,7 +33,12 @@ export const operationsAgent: AgentFunction = (input) => {
       agentId: 'operations',
       kind: 'event_no_leader',
       severity: daysAway <= 2 ? 'urgent' : 'attention',
-      title: `"${e.title}" in ${daysAway} day${daysAway === 1 ? '' : 's'} — no leader assigned`,
+      // Absolute date, not "in N days" — persistObservation inserts once
+      // per dedupKey and never updates the row on later runs (the runner
+      // skips re-processing a finding it's already seen), so a relative
+      // phrase baked in here goes stale the moment a day passes and
+      // eventually contradicts the task's own Overdue badge.
+      title: `"${e.title}" on ${starts.toISOString().slice(0, 10)} — no leader assigned`,
       detail: `Event is ${starts.toISOString().slice(0, 16).replace('T', ' ')}Z. Assign someone before it lands on Sunday with no owner.`,
       relatedId: e.id,
       metadata: { days_until_event: daysAway, event_starts_at: e.starts_at },
@@ -59,7 +64,10 @@ export const operationsAgent: AgentFunction = (input) => {
       agentId: 'operations',
       kind: 'task_overdue',
       severity: daysLate >= 14 ? 'urgent' : daysLate >= 7 ? 'attention' : 'info',
-      title: `Task "${t.title}" is ${daysLate} day${daysLate === 1 ? '' : 's'} overdue`,
+      // Absolute due date, not "is N days overdue" — see the no-leader
+      // observation above for why a relative phrase baked in here goes
+      // stale (this row is inserted once per dedupKey and never updated).
+      title: `Task "${t.title}" overdue (was due ${t.due_date})`,
       detail: `Originally due ${t.due_date}. Reassign, reschedule, or close.`,
       relatedId: t.id,
       metadata: { days_overdue: daysLate, original_due_date: t.due_date },

@@ -11,18 +11,12 @@ import {
   CreditCard,
   ShieldCheck,
   ShieldOff,
-  Snowflake,
-  Play,
-  Ban,
   Loader2,
   Zap,
   TrendingUp,
 } from 'lucide-react';
 import {
   reviewKyc,
-  freezeCard,
-  unfreezeCard,
-  cancelCard,
   issueCard,
   type AdminCardData,
   type CardRecord,
@@ -33,6 +27,7 @@ import {
   useImpactCardProgram,
   type UseImpactCardProgramResult,
 } from '../../hooks/useImpactCardProgram';
+import { CardActionControls } from './CardActionControls';
 
 const DEMO_MERCHANTS = [
   { name: 'Harvest Grocery', category: '5411' },
@@ -89,26 +84,33 @@ async function approveAndIssue(kycId: string): Promise<void> {
 interface CardProgramSectionProps {
   program?: UseImpactCardProgramResult;
   embedded?: boolean;
+  /** Shared in-flight-action tracker from the parent page. Falls back to a
+   * locally-owned one when used standalone (no parent tracker to share). */
+  busyId?: string | null;
+  withBusy?: (id: string, fn: () => Promise<unknown>) => Promise<void>;
 }
 
-export function CardProgramSection({ program: programProp, embedded }: CardProgramSectionProps) {
+export function CardProgramSection({ program: programProp, embedded, busyId: busyIdProp, withBusy: withBusyProp }: CardProgramSectionProps) {
   const internal = useImpactCardProgram();
   const program = programProp ?? internal;
   const { data, state, gateMessage, refetch } = program;
 
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [internalBusyId, setInternalBusyId] = useState<string | null>(null);
 
-  const withBusy = async (id: string, fn: () => Promise<unknown>) => {
-    setBusyId(id);
+  const internalWithBusy = async (id: string, fn: () => Promise<unknown>) => {
+    setInternalBusyId(id);
     try {
       await fn();
       await refetch();
     } catch (err) {
       console.warn('[card-program] action failed', err);
     } finally {
-      setBusyId(null);
+      setInternalBusyId(null);
     }
   };
+
+  const busyId = withBusyProp ? (busyIdProp ?? null) : internalBusyId;
+  const withBusy = withBusyProp ?? internalWithBusy;
 
   if (state === 'loading') {
     return (
@@ -271,37 +273,7 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
                       {busyId === `sim-${card.id}` ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />} Simulate txn
                     </button>
                   )}
-                  {card.status === 'active' ? (
-                    <button
-                      onClick={() => withBusy(card.id, () => freezeCard(card.id))}
-                      disabled={busyId === card.id}
-                      className="p-1.5 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg disabled:opacity-50"
-                      title="Freeze card"
-                    >
-                      <Snowflake size={14} />
-                    </button>
-                  ) : card.status === 'frozen' ? (
-                    <button
-                      onClick={() => withBusy(card.id, () => unfreezeCard(card.id))}
-                      disabled={busyId === card.id}
-                      className="p-1.5 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg disabled:opacity-50"
-                      title="Unfreeze card"
-                    >
-                      <Play size={14} />
-                    </button>
-                  ) : null}
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Cancel ${card.cardholder_name}'s card ${card.masked_pan}? This cannot be undone.`)) {
-                        void withBusy(card.id, () => cancelCard(card.id));
-                      }
-                    }}
-                    disabled={busyId === card.id}
-                    className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg disabled:opacity-50"
-                    title="Cancel card"
-                  >
-                    <Ban size={14} />
-                  </button>
+                  <CardActionControls card={card} busyId={busyId} withBusy={withBusy} compact />
                 </div>
               ))
             )}

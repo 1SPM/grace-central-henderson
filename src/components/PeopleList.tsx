@@ -8,6 +8,7 @@ import { ViewToggle } from './ViewToggle';
 import { ProfileCompletenessBadge } from './ProfileCompleteness';
 import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
+import { MemberAvatar } from './ui/MemberAvatar';
 import { CSVImportWizard } from './CSVImportWizard';
 import { isPastoralStaffRecord } from '../config/centralHendersonLeaders';
 
@@ -302,7 +303,7 @@ export function PeopleList({
   };
 
   return (
-    <div className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
+    <div data-tutorial="people-directory" className={`max-w-6xl mx-auto ${embedded ? 'px-6 pt-4 pb-6' : 'p-6'}`}>
       <div className={`flex items-center justify-between ${embedded ? 'mb-4' : 'mb-6'}`}>
         {!embedded ? (
           <div>
@@ -581,7 +582,7 @@ export function PeopleList({
 
       {/* People List */}
       {viewMode === 'card' ? (
-        <div data-tutorial="people-directory" className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {/* Select All Header */}
           {paginatedPeople.length > 0 && (onBulkUpdateStatus || onBulkAddTag) && (
             <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 dark:text-dark-400">
@@ -626,20 +627,7 @@ export function PeopleList({
                   onClick={() => onViewPerson(person.id)}
                   className="flex items-center gap-4 text-left"
                 >
-                  {person.photo ? (
-                    <img
-                      src={person.photo}
-                      alt={`${person.firstName} ${person.lastName}`}
-                      className="w-12 h-12 rounded-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`w-12 h-12 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium text-lg ${person.photo ? 'hidden' : ''}`}>
-                    {person.firstName[0]}{person.lastName[0]}
-                  </div>
+                  <MemberAvatar person={person} size="xl" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-dark-100">{person.firstName} {person.lastName}</p>
                     <p className="text-sm text-gray-400 dark:text-dark-400">{person.email || 'No email'}</p>
@@ -715,20 +703,7 @@ export function PeopleList({
                   )}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {person.photo ? (
-                        <img
-                          src={person.photo}
-                          alt={`${person.firstName} ${person.lastName}`}
-                          className="w-8 h-8 rounded-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-full flex items-center justify-center text-white font-medium text-sm ${person.photo ? 'hidden' : ''}`}>
-                        {person.firstName[0]}{person.lastName[0]}
-                      </div>
+                      <MemberAvatar person={person} size="md" />
                       <span className="font-medium text-gray-900 dark:text-dark-100">
                         {person.firstName} {person.lastName}
                       </span>

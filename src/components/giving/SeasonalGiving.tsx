@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { demoSeasonal, type SeasonalStatus } from './demoGivingHub';
+import { SampleDataNotice } from '../SampleDataNotice';
 
 const STATUS_STYLE: Record<SeasonalStatus, { pill: string; label: string }> = {
   completed: { pill: 'bg-gray-100 text-gray-500 dark:bg-dark-700 dark:text-dark-400', label: 'Completed' },
@@ -17,6 +18,7 @@ export function SeasonalGiving() {
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-5">
         <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100">Seasonal giving calendar</h2>
         <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">

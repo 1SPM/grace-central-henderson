@@ -18,6 +18,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { dispatchStripeEvent } from '../_lib/webhooks/stripe-dispatch.js';
+import { checkStripeEnvSafety } from '../_lib/billing/stripeMode.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -46,6 +47,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) {
     return res.status(503).json({ error: 'stripe not configured' });
+  }
+  // Don't process live Stripe events in a non-production deploy (a preview
+  // running a live key would mutate real ledger/entitlement state).
+  const modeCheck = checkStripeEnvSafety({ secretKey: STRIPE_SECRET_KEY, vercelEnv: process.env.VERCEL_ENV });
+  if (!modeCheck.ok) {
+    console.error('[stripe webhook] env unsafe:', modeCheck.reason);
+    return res.status(503).json({ error: 'stripe_env_unsafe' });
   }
 
   const sig = req.headers['stripe-signature'];

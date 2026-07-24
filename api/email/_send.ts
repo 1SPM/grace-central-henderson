@@ -1,7 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { requireClerkAuth } from '../_lib/auth-helper.js';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_BASE_URL = 'https://api.resend.com';
+const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
 interface ResendResponse {
   id?: string;
@@ -34,6 +36,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!RESEND_API_KEY) {
     return res.status(503).json({ error: 'Email service not configured' });
   }
+
+  // Security fix: this route had no auth check at all, and accepted an
+  // arbitrary client-supplied `from` address — anyone on the open
+  // internet could send spoofed email through the org's Resend account
+  // to any recipient. Same staff-only gate as api/agentmail/_send.ts
+  // and the sibling api/sms/_send.ts fix (TD-014 pattern).
+  const auth = await requireClerkAuth(req, { allowedRoles: STAFF_ROLES });
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   const { from, to, subject, html, text, reply_to, cc, bcc } = req.body;
 

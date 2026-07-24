@@ -76,9 +76,9 @@ export function DiscipleshipEngagementHub({
   const headerMeta = getViewHeaderMeta('discipleship-engagement');
 
   const spiritualKpis = [
-    { label: 'Step 3+', value: metrics.atStep3Plus, sub: 'Baptized or beyond' },
-    { label: 'Avg steps', value: metrics.avgMilestones, sub: 'Per active member' },
-    { label: 'Need follow-up', value: followUpPeople.length, sub: 'Growth opportunities', highlight: followUpPeople.length > 0 },
+    { label: 'Step 3+', value: metrics.atStep3Plus, sub: 'Baptized or beyond', accent: 'border-l-blue-600' },
+    { label: 'Avg steps', value: metrics.avgMilestones, sub: 'Per active member', accent: 'border-l-emerald-600' },
+    { label: 'Need follow-up', value: followUpPeople.length, sub: 'Growth opportunities', highlight: followUpPeople.length > 0, accent: 'border-l-amber-500' },
   ];
 
   const portalKpis = [
@@ -109,33 +109,33 @@ export function DiscipleshipEngagementHub({
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 mb-3">
-        {spiritualKpis.map(({ label, value, sub, highlight }) => (
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        {spiritualKpis.map(({ label, value, sub, highlight, accent }) => (
           <div
             key={label}
-            className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-4"
+            className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${accent} p-5`}
           >
-            <p className={`text-2xl font-bold ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100'}`}>
+            <p className={`stat-number text-3xl ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100'}`}>
               {value}
             </p>
-            <p className="text-sm font-medium text-gray-700 dark:text-dark-300">{label}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-dark-300 mt-1">{label}</p>
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">{sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {portalKpis.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="bg-stone-100 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-3"
+            className="bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[3px] border-gray-200 dark:border-dark-700 border-l-indigo-500 p-4"
           >
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1.5">
               <Icon size={14} className="text-indigo-500" />
               <p className="text-xs text-gray-500 dark:text-dark-400">{label}</p>
             </div>
-            <p className="text-xl font-bold text-gray-900 dark:text-dark-100">{value}</p>
-            <p className="text-[10px] text-gray-400 dark:text-dark-500">Last 7 days</p>
+            <p className="stat-number text-2xl text-gray-900 dark:text-dark-100">{value}</p>
+            <p className="text-[10px] text-gray-400 dark:text-dark-500 mt-0.5">Last 7 days</p>
           </div>
         ))}
       </div>

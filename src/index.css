@@ -8,6 +8,20 @@
   --color-primary-dark: 81 81 213; /* #5151D5 — hover */
   --color-accent: 103 104 121;     /* #676879 — Monday neutral text */
 
+  /* Tailwind indigo palette (RGB triplets) — tenant-swappable at runtime.
+     Faithful overrides live in styles/faithful-crm-theme.css. */
+  --twc-indigo-50:  243 243 255;
+  --twc-indigo-100: 237 237 255;
+  --twc-indigo-200: 220 220 255;
+  --twc-indigo-300: 194 194 255;
+  --twc-indigo-400: 149 149 255;
+  --twc-indigo-500: 97 97 255;
+  --twc-indigo-600: 81 81 213;
+  --twc-indigo-700: 67 56 184;
+  --twc-indigo-800: 54 48 154;
+  --twc-indigo-900: 45 42 120;
+  --twc-indigo-950: 27 24 80;
+
   /* Accent highlights — Monday purple tones (formerly gold) */
   --gold:         #6161FF;
   --gold-soft:    #9595FF;
@@ -56,12 +70,22 @@ time {
   font-variant-numeric: tabular-nums;
 }
 
-/* Display accent — KPIs, hero numbers, H1s (bold geometric sans, Monday style) */
-.stat-number,
+/* Display accent — H1s (bold geometric sans, Monday style) */
 .serif {
   font-family: 'Poppins', 'Figtree', -apple-system, system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+/* KPI / hero numerals — oversized, near-black weight. Split from .serif
+   (was one shared rule at font-weight 600) so numerals can push bolder
+   than page headings without dragging every H1 in the app along with
+   them. Size itself is still set per usage site (Tailwind text-*), this
+   just fixes the weight/spacing/family every one of those sites gets. */
+.stat-number {
+  font-family: 'Poppins', 'Figtree', -apple-system, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 

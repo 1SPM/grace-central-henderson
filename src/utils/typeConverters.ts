@@ -23,6 +23,7 @@ export interface DbPerson {
   notes: string | null;
   tags: string[];
   family_id: string | null;
+  portal_enabled?: boolean | null;
 }
 
 // Database task type
@@ -119,6 +120,7 @@ export function toPersonLegacy(p: DbPerson): LegacyPerson {
     tags: p.tags,
     smallGroups: [], // Will be populated separately
     familyId: p.family_id || undefined,
+    portalEnabled: p.portal_enabled ?? false,
   };
 }
 

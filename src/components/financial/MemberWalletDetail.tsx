@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BadgeCheck,
-  Ban,
   Copy,
   CreditCard,
   Download,
@@ -14,27 +13,21 @@ import {
   Landmark,
   Loader2,
   MapPin,
-  Play,
   RefreshCw,
   RotateCcw,
   Save,
   Shield,
-  Snowflake,
   Wallet,
 } from 'lucide-react';
 import type { Giving, Person } from '../../types';
 import type { AdminCardData, CardRecord } from '../../lib/services/impactCard';
 import {
-  cancelCard,
-  freezeCard,
   issueCard,
-  issueReplacementCard,
   markTransferForReview,
   retryTransfer,
   setCardLimits,
   setImpactRoute,
   syncAccountBalance,
-  unfreezeCard,
 } from '../../lib/services/impactCard';
 import {
   fmtImpactUsd,
@@ -48,10 +41,9 @@ import {
   spendMicroToEarnedPoints,
 } from '../../hooks/useImpactCardProgram';
 import { buildStatementInput, downloadImpactCardStatement } from './impactCardStatement';
+import { CardActionControls, StaffReasonModal } from './CardActionControls';
 
 type DetailTab = 'overview' | 'transactions' | 'transfers' | 'giving' | 'route' | 'activity';
-
-type StaffAction = 'freeze' | 'cancel' | 'replace' | 'review_transfer';
 
 interface MemberWalletDetailProps {
   person: Person;
@@ -67,44 +59,6 @@ interface MemberWalletDetailProps {
 
 function copyText(value: string) {
   void navigator.clipboard.writeText(value);
-}
-
-function StaffReasonModal({
-  title,
-  confirmLabel,
-  onConfirm,
-  onCancel,
-}: {
-  title: string;
-  confirmLabel: string;
-  onConfirm: (reason: string) => void;
-  onCancel: () => void;
-}) {
-  const [reason, setReason] = useState('');
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-      <div className="bg-white dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-700 p-5 w-full max-w-md shadow-xl">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-2">{title}</h3>
-        <textarea
-          value={reason}
-          onChange={e => setReason(e.target.value)}
-          placeholder="Staff reason (required)…"
-          rows={3}
-          className="w-full text-sm border border-gray-200 dark:border-dark-600 rounded-lg px-3 py-2 dark:bg-dark-800"
-        />
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onCancel} className="px-3 py-1.5 text-sm text-gray-500">Cancel</button>
-          <button
-            onClick={() => reason.trim().length >= 3 && onConfirm(reason.trim())}
-            disabled={reason.trim().length < 3}
-            className="px-3 py-1.5 text-sm font-medium bg-slate-900 text-white rounded-lg disabled:opacity-50"
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function DepositPanel({
@@ -169,6 +123,24 @@ function DepositPanel({
   );
 }
 
+/** Mastercard brand mark — two overlapping circles in the official colors. */
+function MastercardMark() {
+  return (
+    <svg viewBox="0 0 48 30" className="w-11 h-auto" role="img" aria-label="Mastercard">
+      <defs>
+        <clipPath id="impact-mc-lens">
+          <circle cx="17" cy="15" r="14" />
+        </clipPath>
+      </defs>
+      <circle cx="17" cy="15" r="14" fill="#EB001B" />
+      <circle cx="31" cy="15" r="14" fill="#F79E1B" />
+      <g clipPath="url(#impact-mc-lens)">
+        <circle cx="31" cy="15" r="14" fill="#FF5F00" />
+      </g>
+    </svg>
+  );
+}
+
 function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: string | null }) {
   const isFrozen = card.status === 'frozen';
   return (
@@ -176,8 +148,24 @@ function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: strin
       className={`rounded-2xl p-4 text-white shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 ${isFrozen ? 'opacity-60' : ''}`}
     >
       <div className="flex items-center justify-between mb-6">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/60">GRACE Impact Card</span>
-        <span className="text-xs font-semibold italic text-white/80">VISA</span>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Logo PNG has a white background (no alpha) — the white chip makes that read as intentional. */}
+          <span className="w-7 h-7 rounded-full bg-white overflow-hidden flex-shrink-0 shadow">
+            <img
+              src="/previews/assets/central-henderson-logo.png"
+              alt="Central Henderson"
+              className="w-full h-full object-cover"
+            />
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 truncate">GRACE Impact Card</span>
+        </div>
+        <span
+          className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${
+            isFrozen ? 'bg-blue-200/30 text-blue-100' : 'bg-emerald-300/20 text-emerald-200'
+          }`}
+        >
+          {card.status}
+        </span>
       </div>
       <p className="text-base tracking-[0.2em] font-medium mb-4">{card.masked_pan}</p>
       <div className="flex items-end justify-between">
@@ -191,13 +179,7 @@ function CardVisual({ card, routeLabel }: { card: CardRecord; routeLabel?: strin
             </>
           )}
         </div>
-        <span
-          className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${
-            isFrozen ? 'bg-blue-200/30 text-blue-100' : 'bg-emerald-300/20 text-emerald-200'
-          }`}
-        >
-          {card.status}
-        </span>
+        <MastercardMark />
       </div>
     </div>
   );
@@ -226,7 +208,7 @@ export function MemberWalletDetail({
   const [monthlyLimit, setMonthlyLimit] = useState('');
   const [routeLabel, setRouteLabel] = useState('');
   const [routeFund, setRouteFund] = useState('tithe');
-  const [staffAction, setStaffAction] = useState<{ type: StaffAction; cardId?: string; transferId?: string } | null>(null);
+  const [transferReviewAction, setTransferReviewAction] = useState<{ transferId: string } | null>(null);
 
   const cards = getMemberCards(adminData, person.id);
   const account = getMemberAccount(adminData, person.id);
@@ -237,19 +219,11 @@ export function MemberWalletDetail({
   const activeCard = cards.find(c => c.status === 'active' || c.status === 'frozen') ?? cards[0];
   const lastStaffAction = activeCard?.metadata?.last_staff_action;
 
-  const handleStaffConfirm = async (reason: string) => {
-    if (!staffAction) return;
-    const { type, cardId, transferId } = staffAction;
-    setStaffAction(null);
-    if (type === 'freeze' && cardId) {
-      await withBusy(cardId, () => freezeCard(cardId, reason));
-    } else if (type === 'cancel' && cardId) {
-      await withBusy(cardId, () => cancelCard(cardId, reason));
-    } else if (type === 'replace' && cardId) {
-      await withBusy(`replace-${cardId}`, () => issueReplacementCard(cardId, reason));
-    } else if (type === 'review_transfer' && transferId) {
-      await withBusy(`review-${transferId}`, () => markTransferForReview(transferId, reason));
-    }
+  const handleTransferReviewConfirm = async (reason: string) => {
+    if (!transferReviewAction) return;
+    const { transferId } = transferReviewAction;
+    setTransferReviewAction(null);
+    await withBusy(`review-${transferId}`, () => markTransferForReview(transferId, reason));
   };
 
   const exportStatement = () => {
@@ -368,48 +342,13 @@ export function MemberWalletDetail({
           )}
           {activeCard && (
             <div className="flex flex-wrap gap-2 mt-3">
-              {activeCard.status === 'active' && (
-                <button
-                  onClick={() => setStaffAction({ type: 'freeze', cardId: activeCard.id })}
-                  disabled={busyId === activeCard.id}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-cyan-300 dark:border-cyan-500/40 text-cyan-700 dark:text-cyan-400 rounded-lg disabled:opacity-50"
-                >
-                  <Snowflake size={12} /> Freeze
-                </button>
-              )}
-              {activeCard.status === 'frozen' && (
-                <button
-                  onClick={() => withBusy(activeCard.id, () => unfreezeCard(activeCard.id))}
-                  disabled={busyId === activeCard.id}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 rounded-lg disabled:opacity-50"
-                >
-                  <Play size={12} /> Unfreeze
-                </button>
-              )}
+              <CardActionControls card={activeCard} busyId={busyId} withBusy={withBusy} />
               <button
                 onClick={() => openLimitsEditor(activeCard)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 rounded-lg"
               >
                 <Save size={12} /> Set limits
               </button>
-              {(activeCard.status === 'active' || activeCard.status === 'frozen') && (
-                <button
-                  onClick={() => setStaffAction({ type: 'replace', cardId: activeCard.id })}
-                  disabled={busyId === `replace-${activeCard.id}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-indigo-300 text-indigo-700 rounded-lg disabled:opacity-50"
-                >
-                  <CreditCard size={12} /> Issue replacement
-                </button>
-              )}
-              {activeCard.status !== 'cancelled' && (
-                <button
-                  onClick={() => setStaffAction({ type: 'cancel', cardId: activeCard.id })}
-                  disabled={busyId === activeCard.id}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-red-300 text-red-600 rounded-lg disabled:opacity-50"
-                >
-                  <Ban size={12} /> Cancel
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -618,7 +557,7 @@ export function MemberWalletDetail({
                       <RotateCcw size={11} /> Retry
                     </button>
                     <button
-                      onClick={() => setStaffAction({ type: 'review_transfer', transferId: tr.id })}
+                      onClick={() => setTransferReviewAction({ transferId: tr.id })}
                       disabled={busyId === `review-${tr.id}`}
                       className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 border border-red-300 rounded-lg"
                     >
@@ -716,27 +655,20 @@ export function MemberWalletDetail({
               <p className="section-eyebrow mb-2">KYC record</p>
               <p className="text-sm font-medium">{kyc.full_name}</p>
               <p className="text-xs text-gray-400 capitalize">Status: {kyc.status.replace('_', ' ')}</p>
+              {kyc.status === 'rejected' && kyc.rejection_reason && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">Reason: {kyc.rejection_reason}</p>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {staffAction && (
+      {transferReviewAction && (
         <StaffReasonModal
-          title={
-            staffAction.type === 'freeze' ? 'Freeze card — staff reason required'
-              : staffAction.type === 'cancel' ? 'Cancel card — staff reason required'
-                : staffAction.type === 'replace' ? 'Issue replacement card'
-                  : 'Mark transfer for review'
-          }
-          confirmLabel={
-            staffAction.type === 'freeze' ? 'Freeze card'
-              : staffAction.type === 'cancel' ? 'Cancel card'
-                : staffAction.type === 'replace' ? 'Issue replacement'
-                  : 'Mark for review'
-          }
-          onConfirm={reason => void handleStaffConfirm(reason)}
-          onCancel={() => setStaffAction(null)}
+          title="Mark transfer for review"
+          confirmLabel="Mark for review"
+          onConfirm={reason => void handleTransferReviewConfirm(reason)}
+          onCancel={() => setTransferReviewAction(null)}
         />
       )}
     </div>

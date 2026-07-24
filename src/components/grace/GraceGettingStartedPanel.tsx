@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react';
 import { X, Home, MessageCircle, Sparkles, Users, ArrowRight } from 'lucide-react';
 import { GraceOrb } from './GraceOrb';
 import { useGraceChat } from '../../contexts/GraceChatContext';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 
 interface GraceGettingStartedPanelProps {
   churchName?: string;
@@ -76,7 +76,7 @@ export function GraceGettingStartedPanel({ churchName = 'Central Henderson Churc
             <GraceOrb size="lg" rings />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">GRACE</h2>
+            <h2 className="serif text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">GRACE</h2>
             <p className="inline-block text-[11px] font-medium text-sky-200 bg-sky-500/15 border border-sky-400/25 rounded px-2 py-1 mb-3">
               Growth · Resource · Assistance · Community · Engagement
             </p>
@@ -130,7 +130,7 @@ export function GraceGettingStartedPanel({ churchName = 'Central Henderson Churc
             />
             <button
               type="submit"
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500 hover:bg-rose-600 text-white shrink-0 transition-colors shadow-lg shadow-rose-500/25"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-500 hover:bg-brand-600 text-white shrink-0 transition-colors shadow-lg shadow-brand-500/25"
               aria-label="Send to GRACE"
             >
               <ArrowRight size={18} />

@@ -1,6 +1,7 @@
 import { Bot, PhoneCall, Radio } from 'lucide-react';
 import type { LeaderProfile, HelpCategory, PastoralConversation } from '../../../types';
 import { demoCareLog, demoDispatchMatrix, type CareLogEntry } from './demoLeadersHub';
+import { SampleDataNotice } from '../../SampleDataNotice';
 
 const CATEGORY_LABELS: Record<HelpCategory, string> = {
   marriage: 'Marriage',
@@ -92,34 +93,39 @@ export function CareDispatch({ conversations, leaders, onOpenConversation, membe
 
   return (
     <div className="space-y-4">
+      <SampleDataNotice />
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
             label: 'Care touches today',
             value: todayConversations.length || careLog.length,
             sub: 'member requests received',
+            accent: 'border-l-blue-600',
           },
           {
             label: 'AI handled',
             value: aiHandled,
             sub: `${careLog.length ? Math.round((aiHandled / careLog.length) * 100) : 0}% of volume`,
+            accent: 'border-l-violet-600',
           },
           {
             label: 'Escalations',
             value: escalations,
             sub: 'crisis / live handoff',
+            accent: 'border-l-brand-600',
           },
           {
             label: 'Unassigned',
             value: openQueue.filter(c => !c.leaderId).length,
             sub: 'awaiting leader match',
+            accent: 'border-l-amber-500',
           },
         ].map(kpi => (
-          <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
-            <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5">{kpi.value}</p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5">{kpi.sub}</p>
+            <p className="stat-number text-3xl text-slate-900 dark:text-dark-100 mt-2">{kpi.value}</p>
+            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>
           </div>
         ))}
       </div>

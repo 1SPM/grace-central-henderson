@@ -18,6 +18,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Montserrat:wght@500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Set the dark/light class before first paint so there's no flash of
+         the wrong theme while React mounts. Mirrors ThemeContext.tsx's v2
+         default-to-dark logic exactly — keep the two in sync. -->
+    <script>
+      (function () {
+        try {
+          if (!localStorage.getItem('grace-theme-reset-v2')) {
+            localStorage.setItem('grace-theme-reset-v2', '1');
+            localStorage.setItem('grace-theme', 'dark');
+            document.documentElement.classList.add('dark');
+            return;
+          }
+          var saved = localStorage.getItem('grace-theme');
+          if (saved === 'dark' || saved === null) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

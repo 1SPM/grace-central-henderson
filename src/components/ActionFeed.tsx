@@ -23,10 +23,12 @@ import {
 } from 'lucide-react';
 import { Person, Task } from '../types';
 import { PRIORITY_COLORS } from '../constants';
+import { parseLocalDate } from '../utils/validation';
 import { generateAIText } from '../lib/services/ai';
 import { useChurchSettings } from '../hooks/useChurchSettings';
 import { useAISettings } from '../hooks/useAISettings';
 import { ComposeModal } from './action-feed/ComposeModal';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 interface ActionFeedProps {
   people: Person[];
@@ -203,7 +205,10 @@ export function ActionFeed({
       if (task.completed && !showCompleted) return;
       if (task.completed) return;
 
-      const dueDate = new Date(task.dueDate);
+      // parseLocalDate, not new Date(): task.dueDate is a bare YYYY-MM-DD
+      // string, which new Date() parses as UTC midnight — displaying a day
+      // early in any timezone west of UTC (see utils/validation.ts).
+      const dueDate = parseLocalDate(task.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       const timeGroup = getTimeGroup(dueDate, today, tomorrow, nextWeek);
       const person = task.personId ? personMap.get(task.personId) : undefined;
@@ -229,7 +234,10 @@ export function ActionFeed({
     people.forEach(person => {
       if (!person.birthDate) return;
 
-      const bday = new Date(person.birthDate);
+      // parseLocalDate: same UTC-midnight-vs-local-getters mismatch as
+      // task.dueDate above — new Date(person.birthDate) plus .getMonth()/
+      // .getDate() can read back the wrong calendar day west of UTC.
+      const bday = parseLocalDate(person.birthDate);
       const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
 
       if (thisYearBday < today) {
@@ -476,7 +484,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
   }), [allItems]);
 
   const filterConfig = {
-    all: { icon: Zap, color: 'violet' },
+    all: { icon: Zap, color: 'brand' },
     tasks: { icon: ListTodo, color: 'blue' },
     birthdays: { icon: Gift, color: 'pink' },
     visitors: { icon: Users, color: 'amber' },
@@ -525,6 +533,7 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-dark-100">{item.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-dark-400 flex items-center gap-1.5 mt-0.5">
+                  {item.person && <MemberAvatar person={item.person} size="sm" />}
                   {item.type === 'task' && item.dueDate && <Clock size={12} />}
                   {item.type === 'birthday' && <Calendar size={12} />}
                   {item.subtitle}
@@ -697,37 +706,40 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {(['all', 'tasks', 'birthdays', 'visitors'] as FeedFilter[]).map(f => {
           const config = filterConfig[f];
           const Icon = config.icon;
           const isActive = filter === f;
           const count = counts[f];
 
+          // Illustration-badge language (see StatCard): soft tint circle +
+          // outline icon, no solid fill, no left stripe. Active state reads
+          // through the border + text color, not a heavier chip.
           const colorClasses = {
-            violet: {
-              bg: isActive ? 'bg-slate-100 dark:bg-slate-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-slate-300 dark:border-slate-500/30' : 'border-gray-200 dark:border-dark-700',
-              icon: 'text-slate-500',
-              text: isActive ? 'text-slate-700 dark:text-slate-400' : 'text-gray-900 dark:text-dark-100',
+            brand: {
+              border: isActive ? 'border-brand-300 dark:border-brand-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-brand-50 dark:bg-brand-500/10',
+              iconInk: 'text-brand-600 dark:text-brand-300',
+              text: isActive ? 'text-brand-700 dark:text-brand-300' : 'text-gray-900 dark:text-dark-100',
             },
             blue: {
-              bg: isActive ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-blue-300 dark:border-blue-500/30' : 'border-gray-200 dark:border-dark-700',
-              icon: 'text-blue-500',
-              text: isActive ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-sky-300 dark:border-sky-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-sky-50 dark:bg-sky-500/10',
+              iconInk: 'text-sky-600 dark:text-sky-300',
+              text: isActive ? 'text-sky-700 dark:text-sky-300' : 'text-gray-900 dark:text-dark-100',
             },
             pink: {
-              bg: isActive ? 'bg-pink-100 dark:bg-pink-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-pink-300 dark:border-pink-500/30' : 'border-gray-200 dark:border-dark-700',
-              icon: 'text-pink-500',
-              text: isActive ? 'text-pink-700 dark:text-pink-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-pink-300 dark:border-pink-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-pink-50 dark:bg-pink-500/10',
+              iconInk: 'text-pink-600 dark:text-pink-300',
+              text: isActive ? 'text-pink-700 dark:text-pink-300' : 'text-gray-900 dark:text-dark-100',
             },
             amber: {
-              bg: isActive ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-stone-100 dark:bg-dark-800',
-              border: isActive ? 'border-amber-300 dark:border-amber-500/30' : 'border-gray-200 dark:border-dark-700',
-              icon: 'text-amber-500',
-              text: isActive ? 'text-amber-700 dark:text-amber-400' : 'text-gray-900 dark:text-dark-100',
+              border: isActive ? 'border-amber-300 dark:border-amber-500/40' : 'border-gray-200 dark:border-dark-700',
+              iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+              iconInk: 'text-amber-600 dark:text-amber-300',
+              text: isActive ? 'text-amber-700 dark:text-amber-300' : 'text-gray-900 dark:text-dark-100',
             },
           };
 
@@ -737,11 +749,13 @@ Keep it under 160 characters. Be warm but concise. Do not include a subject line
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`${colors.bg} ${colors.border} border rounded-xl p-4 text-left transition-all hover:shadow-md`}
+              className={`bg-white dark:bg-dark-850 border ${colors.border} rounded-2xl p-5 text-left transition-all hover:shadow-md`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <Icon size={20} className={colors.icon} />
-                <span className={`text-2xl font-bold ${colors.text}`}>{count}</span>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className={`${colors.iconBg} w-11 h-11 rounded-full flex items-center justify-center`}>
+                  <Icon size={20} className={`${colors.iconInk} stroke-[1.5]`} />
+                </div>
+                <span className={`stat-number text-3xl ${colors.text}`}>{count}</span>
               </div>
               <p className={`text-sm font-medium ${colors.text}`}>
                 {f === 'all' ? 'All Actions' : f.charAt(0).toUpperCase() + f.slice(1)}

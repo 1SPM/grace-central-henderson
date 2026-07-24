@@ -136,9 +136,19 @@ All tables created in `supabase/migrations/001_initial_schema.sql` through `008_
 - `tenants` / `tenant_members` — currently `churches` / `users` serve this role
 - ~~`audit_logs`~~ — landed in migration 010 (Sprint 1)
 - ~~`token_usage`, `church_ai_budgets`~~ — landed in migration 012 (Sprint 2)
-- `ledger_entries`
+- ~~`ledger_entries`~~ — landed in migration 013
+- ~~`webhook_dlq`, `webhook_events`~~ — landed in migration 013
 - `kyc_verifications`
-- `webhook_dlq`, `webhook_events`
+
+**2026-07-13 — shared backend foundation added (migrations 031–038):**
+`households`, `staff_profiles`, `roles`/`permissions`/`role_permissions`/`user_roles`,
+`consents`/`communication_preferences`/`data_subject_requests`, `work_orders`
+(+ tasks/dependencies/evidence), `approvals`, `agent_runs`/`agent_actions`/`validations`,
+`platform_events`/`notifications`, `care_requests`/`care_assignments`,
+`volunteer_interests`, `artifacts`, `metric_definitions`. This section of
+ARCHITECTURE.md predates that work (see the staleness note at the top of
+this file) — full details, the RBAC model, and data-boundary enforcement
+live in **`SHARED_BACKEND.md`**, not here.
 
 ---
 

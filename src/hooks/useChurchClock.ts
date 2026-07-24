@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../config/tenant';
 
 export interface ZonedTimeParts {
   hour12: number;
@@ -39,7 +39,7 @@ function getZonedTimeParts(date: Date, timeZone: string): ZonedTimeParts {
   };
 }
 
-export function useChurchClock(timezone: string = CENTRAL_HENDERSON_TIMEZONE) {
+export function useChurchClock(timezone: string = TENANT_TIMEZONE) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {

@@ -1,34 +1,43 @@
 import type { LiveServiceCtaCounts } from '../../lib/services/liveService';
 
+export type LiveServiceCtaKey = 'followJesus' | 'getConnected' | 'giveOnline';
+
 interface LiveServiceCTAPanelProps {
   ctaCounts: LiveServiceCtaCounts;
+  onNavigate?: (cta: LiveServiceCtaKey) => void;
 }
 
-const CTAS = [
+const CTAS: {
+  key: LiveServiceCtaKey;
+  title: string;
+  button: string;
+  image: string;
+  primary: boolean;
+}[] = [
   {
-    key: 'followJesus' as const,
+    key: 'followJesus',
     title: 'I Decided to Follow Jesus',
     button: 'Let Us Know',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300&fit=crop',
+    image: '/previews/assets/watch/action-follow-jesus.jpg',
     primary: true,
   },
   {
-    key: 'getConnected' as const,
+    key: 'getConnected',
     title: 'Get Connected to a Group',
     button: 'Take a Next Step',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=300&fit=crop',
+    image: '/previews/assets/watch/action-groups.jpg',
     primary: false,
   },
   {
-    key: 'giveOnline' as const,
+    key: 'giveOnline',
     title: 'Give Online',
     button: 'Give Now',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=300&fit=crop',
+    image: '/previews/assets/watch/action-give.jpg',
     primary: false,
   },
 ];
 
-export function LiveServiceCTAPanel({ ctaCounts }: LiveServiceCTAPanelProps) {
+export function LiveServiceCTAPanel({ ctaCounts, onNavigate }: LiveServiceCTAPanelProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {CTAS.map(cta => (
@@ -49,6 +58,7 @@ export function LiveServiceCTAPanel({ ctaCounts }: LiveServiceCTAPanelProps) {
               </span>
               <button
                 type="button"
+                onClick={() => onNavigate?.(cta.key)}
                 className={`px-4 py-2 rounded-lg text-xs font-semibold ${
                   cta.primary
                     ? 'bg-red-600 text-white hover:bg-red-700'

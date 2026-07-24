@@ -33,6 +33,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { getPlanBySlug, getStripePriceId, type PlanSlug } from '../_lib/billing/plans.js';
+import { checkStripeEnvSafety } from '../_lib/billing/stripeMode.js';
 import { readBody, str, uuid_ } from '../_lib/validation.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -58,6 +59,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       detail: 'STRIPE_SECRET_KEY env var is not set. Cannot create checkout sessions in this environment.',
     });
   }
+  // Refuse to create real charges from a non-production deploy running a live key.
+  const modeCheck = checkStripeEnvSafety({ secretKey: STRIPE_SECRET_KEY, vercelEnv: process.env.VERCEL_ENV });
+  if (!modeCheck.ok) {
+    console.error('[billing] stripe env unsafe:', modeCheck.reason);
+    return res.status(503).json({ error: 'stripe_env_unsafe', detail: modeCheck.reason });
+  }
+  if (modeCheck.warning) console.warn('[billing] stripe env:', modeCheck.warning);
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'supabase_not_configured' });
   }

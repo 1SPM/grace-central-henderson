@@ -8,28 +8,23 @@
  * pipeline and persists observations. Per-church failures are
  * captured into the summary; one bad church doesn't abort the run.
  *
- * Auth: x-vercel-cron header OR Bearer CRON_SECRET. Matches the
- * pattern from api/cron/ai-anomaly.ts and api/cron/reconcile-stripe.ts.
+ * Auth: Bearer CRON_SECRET only — see api/_lib/cronAuth.ts for why the
+ * x-vercel-cron header is not trusted.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { listChurchesWithAgents, runAgentsForChurch, type RunResult } from '../_lib/agents/runner.js';
 import { runMessagingAgentsForChurch, type MessagingRunResult } from '../_lib/agents/messaging.js';
+import { snapshotHealthForChurch } from '../_lib/healthSnapshot.js';
+import { recordCronRun } from '../_lib/cron-runs.js';
+import { requireCronAuth } from '../_lib/cronAuth.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
-
-function isAuthorized(req: VercelRequest): boolean {
-  if (req.headers['x-vercel-cron']) return true;
-  const auth = req.headers.authorization;
-  if (CRON_SECRET && auth === `Bearer ${CRON_SECRET}`) return true;
-  return false;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'unauthorized' });
+  if (requireCronAuth(req, res) !== null) return;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(503).json({ error: 'supabase not configured' });
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -40,6 +35,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     churches = await listChurchesWithAgents(supabase);
   } catch (err) {
     console.error('[agents cron] listChurches failed', err);
+    await recordCronRun(supabase, 'agents', {
+      ok: false,
+      durationMs: Date.now() - startedAt.getTime(),
+      summary: { error: 'list_churches_failed' },
+    });
     return res.status(500).json({ error: 'list_churches_failed' });
   }
 
@@ -73,6 +73,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  await recordCronRun(supabase, 'agents', {
+    ok: failed === 0,
+    durationMs: Date.now() - startedAt.getTime(),
+    summary: {
+      churches_processed: churches.length,
+      churches_succeeded: succeeded,
+      churches_failed: failed,
+      observations_written: results.reduce((n, r) => n + ('observationsWritten' in r ? r.observationsWritten : 0), 0),
+    },
+  });
+
+  // Congregational Health snapshot: every church gets a daily snapshot,
+  // not just the ones with agents enabled — health metrics don't depend
+  // on agent settings. Same cron trigger, its own cron_runs job record.
+  const { data: allChurchRows } = await supabase.from('churches').select('id').limit(5000);
+  const allChurchIds = (allChurchRows as Array<{ id: string }> | null)?.map(c => c.id) ?? [];
+  let healthSucceeded = 0;
+  let healthFailed = 0;
+  for (const churchId of allChurchIds) {
+    try {
+      await snapshotHealthForChurch(supabase, churchId, startedAt);
+      healthSucceeded += 1;
+    } catch (err) {
+      console.error('[health cron] church failed', { churchId, err: err instanceof Error ? err.message : String(err) });
+      healthFailed += 1;
+    }
+  }
+  await recordCronRun(supabase, 'health', {
+    ok: healthFailed === 0,
+    durationMs: Date.now() - startedAt.getTime(),
+    summary: {
+      churches_processed: allChurchIds.length,
+      churches_succeeded: healthSucceeded,
+      churches_failed: healthFailed,
+    },
+  });
+
   return res.status(200).json({
     ok: true,
     started_at: startedAt.toISOString(),
@@ -82,5 +119,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     churches_failed: failed,
     results,
     messaging_results: messagingResults,
+    health_snapshot: { churches_processed: allChurchIds.length, succeeded: healthSucceeded, failed: healthFailed },
   });
 }

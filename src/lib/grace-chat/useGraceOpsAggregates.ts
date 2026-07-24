@@ -29,7 +29,9 @@ export function useGraceOpsAggregates(churchId: string | undefined): string {
         monthStart.setUTCDate(1);
         monthStart.setUTCHours(0, 0, 0, 0);
 
-        const [activityRes, kycRes, cardsRes, interchangeRes] = await Promise.all([
+        const oneDayAgo = new Date(Date.now() - 86_400_000).toISOString();
+
+        const [activityRes, kycRes, cardsRes, interchangeRes, agentLogsRes, cronRunsRes] = await Promise.all([
           sb.from('member_activity_events')
             .select('event_type, person_id, metadata')
             .eq('church_id', churchId)
@@ -48,6 +50,16 @@ export function useGraceOpsAggregates(churchId: string | undefined): string {
             .eq('church_id', churchId)
             .gte('occurred_at', monthStart.toISOString())
             .limit(2000),
+          sb.from('agent_logs')
+            .select('agent_id, message, created_at')
+            .eq('church_id', churchId)
+            .like('message', 'observation:%')
+            .gte('created_at', oneDayAgo)
+            .limit(200),
+          sb.from('cron_runs')
+            .select('job, ran_at, ok')
+            .order('ran_at', { ascending: false })
+            .limit(8),
         ]);
         if (cancelled) return;
 
@@ -86,6 +98,26 @@ export function useGraceOpsAggregates(churchId: string | undefined): string {
             `GRACE Impact Card program: ${pendingKyc} pending KYC application${pendingKyc === 1 ? '' : 's'}; ` +
             `${activeCards} active cards (${frozenCards} frozen); ` +
             `interchange revenue MTD $${interchangeMtd.toFixed(2)}; card spend MTD $${spendMtd.toFixed(2)}.`,
+          );
+        }
+
+        // Overnight automation summary — lets the pastor ask "what did you
+        // do overnight?" and get an answer grounded in real runs.
+        const agentLogs = agentLogsRes.data ?? [];
+        const cronRuns = cronRunsRes.data ?? [];
+        if (!agentLogsRes.error || !cronRunsRes.error) {
+          const byAgent = new Map<string, number>();
+          for (const row of agentLogs) {
+            byAgent.set(row.agent_id, (byAgent.get(row.agent_id) ?? 0) + 1);
+          }
+          const agentSummary = byAgent.size > 0
+            ? [...byAgent.entries()].map(([id, n]) => `${id}: ${n}`).join(', ')
+            : 'none';
+          const lastNightly = cronRuns.find(r => r.job === 'agents');
+          lines.push(
+            `Automation (your agents): observations last 24h — ${agentSummary}. ` +
+            `Last nightly review: ${lastNightly ? `${new Date(lastNightly.ran_at).toLocaleString()} (${lastNightly.ok ? 'succeeded' : 'had trouble'})` : 'not recorded yet'}. ` +
+            `If asked what ran overnight, answer from this — full detail lives in Settings > Automation.`,
           );
         }
 

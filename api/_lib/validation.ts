@@ -128,6 +128,25 @@ export function int_(opts: { min?: number; max?: number; required?: boolean } = 
   };
 }
 
+export function num_(opts: { min?: number; max?: number; required?: boolean } = {}): FieldValidator<number | undefined> {
+  return (input, field) => {
+    if (input === undefined || input === null) {
+      if (opts.required) return { ok: false, error: `${field} is required` };
+      return { ok: true, value: undefined };
+    }
+    if (typeof input !== 'number' || !Number.isFinite(input)) {
+      return { ok: false, error: `${field} must be a number` };
+    }
+    if (opts.min !== undefined && input < opts.min) {
+      return { ok: false, error: `${field} must be ≥ ${opts.min}` };
+    }
+    if (opts.max !== undefined && input > opts.max) {
+      return { ok: false, error: `${field} must be ≤ ${opts.max}` };
+    }
+    return { ok: true, value: input };
+  };
+}
+
 export function arrayOfStr(opts: { maxLength?: number; maxItem?: number; allow?: string[] } = {}): FieldValidator<string[] | undefined> {
   const maxLength = opts.maxLength ?? 50;
   const maxItem = opts.maxItem ?? 200;

@@ -180,13 +180,14 @@ export function validateCredentialFormat(type: 'resend' | 'twilio' | 'stripe', v
 export function validateDate(dateStr: string): { isValid: boolean; date: Date | null } {
   if (!dateStr) return { isValid: false, date: null };
 
-  const date = new Date(dateStr);
+  const isoDate = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const date = isoDate ? parseLocalDate(isoDate[0]) : new Date(dateStr);
   if (isNaN(date.getTime())) {
     return { isValid: false, date: null };
   }
 
-  // Check for reasonable date range (1900-2100)
-  const year = date.getFullYear();
+  // Check for reasonable date range (1900-2100) using calendar year from input when ISO
+  const year = isoDate ? Number(isoDate[1]) : date.getFullYear();
   if (year < 1900 || year > 2100) {
     return { isValid: false, date: null };
   }

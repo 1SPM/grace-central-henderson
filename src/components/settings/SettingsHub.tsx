@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
+  Bot,
   ClipboardList,
   FileText,
   Mail,
@@ -23,9 +24,11 @@ const EmailTemplateBuilder = lazy(() =>
 const PrintableReports = lazy(() => import('../PrintableReports').then(m => ({ default: m.PrintableReports })));
 const TagsManager = lazy(() => import('../TagsManager').then(m => ({ default: m.TagsManager })));
 const Analytics = lazy(() => import('../Analytics').then(m => ({ default: m.Analytics })));
+const AutomationPanel = lazy(() => import('./AutomationPanel').then(m => ({ default: m.AutomationPanel })));
 
 const TABS: { id: SettingsTab; label: string; icon: typeof SettingsIcon }[] = [
   { id: 'general', label: 'General', icon: SettingsIcon },
+  { id: 'automation', label: 'Automation', icon: Bot },
   { id: 'forms', label: 'Forms', icon: ClipboardList },
   { id: 'email-templates', label: 'Email Templates', icon: Mail },
   { id: 'reports', label: 'Reports', icon: FileText },
@@ -34,6 +37,7 @@ const TABS: { id: SettingsTab; label: string; icon: typeof SettingsIcon }[] = [
 ];
 
 interface SettingsHubProps {
+  churchId: string;
   people: Person[];
   tasks: Task[];
   events: CalendarEvent[];
@@ -50,6 +54,7 @@ interface SettingsHubProps {
 }
 
 export function SettingsHub({
+  churchId,
   people,
   tasks,
   events,
@@ -147,6 +152,11 @@ export function SettingsHub({
             onRunWizard={onRunWizard}
             onOpenTutorials={onOpenTutorials}
           />
+        )}
+        {tab === 'automation' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <AutomationPanel churchId={churchId} />
+          </Suspense>
         )}
         {tab === 'forms' && (
           <Suspense fallback={<ListSkeleton />}>

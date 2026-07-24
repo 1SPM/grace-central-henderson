@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bot, HelpCircle } from 'lucide-react';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';
 import { GraceAIFaq } from './GraceAIFaq';
 import type { LeaderProfile, PastoralSession } from '../../types';

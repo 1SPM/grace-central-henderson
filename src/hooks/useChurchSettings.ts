@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
-import { CENTRAL_HENDERSON_DEFAULT_SETTINGS, DEMO_ONBOARDING_SKIP } from '../config/centralHenderson';
+import { TENANT_DEFAULT_SETTINGS, TENANT_DEMO_ONBOARDING_SKIP } from '../config/tenant';
 import { hasEnteredDemo, isDemoModeEnabled, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
 
 const log = createLogger('church-settings');
@@ -88,9 +88,24 @@ export interface ChurchSettings {
   /** IANA timezone for clocks and scheduling display. */
   timezone?: string;
   onboarding?: OnboardingState;
+  /**
+   * Named recurring-giving tiers/badges (e.g. "Generosity Circle" at
+   * $25/week-equivalent). Empty/absent = feature inert. Sorted by
+   * weeklyThreshold is not required — computeGivingTier (api/_lib/
+   * givingTiers.ts) picks the highest threshold the giver qualifies for.
+   */
+  givingTiers?: { label: string; weeklyThreshold: number }[];
+  /**
+   * A church-defined formal membership track (e.g. salvation + baptism +
+   * a first-steps class) layered on top of the existing
+   * discipleship_milestones enum — computed at read time in
+   * api/portal/_journey.ts, never stored as a score. Absent = feature
+   * inert (no membership_track shown in the portal).
+   */
+  membershipTrack?: { label: string; requiredMilestoneTypes: string[] };
 }
 
-const DEFAULT_SETTINGS: ChurchSettings = CENTRAL_HENDERSON_DEFAULT_SETTINGS;
+const DEFAULT_SETTINGS: ChurchSettings = TENANT_DEFAULT_SETTINGS;
 
 function applyDemoOnboardingIfEntered(settings: ChurchSettings): ChurchSettings {
   if (!isDemoModeEnabled || !hasEnteredDemo()) return settings;
@@ -98,8 +113,8 @@ function applyDemoOnboardingIfEntered(settings: ChurchSettings): ChurchSettings 
     ...settings,
     onboarding: {
       ...(settings.onboarding ?? {}),
-      ...DEMO_ONBOARDING_SKIP,
-      completedSteps: [...DEMO_ONBOARDING_SKIP.completedSteps],
+      ...TENANT_DEMO_ONBOARDING_SKIP,
+      completedSteps: [...TENANT_DEMO_ONBOARDING_SKIP.completedSteps],
     },
   };
 }

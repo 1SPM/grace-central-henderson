@@ -15,13 +15,13 @@
 
 import { useState } from 'react';
 import { CreditCard, AlertTriangle, ExternalLink } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useChurchPlan } from '../../hooks/useChurchPlan';
 import { CLIENT_PLANS } from '../../lib/plans';
 
 export function SettingsBilling() {
   const { plan, status, trialEndsAt, trialDaysRemaining, isInTrial, isPastDue, loading } = useChurchPlan();
-  const { getToken } = useAuth();
+  const { getAuthToken } = useAuthContext();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ export function SettingsBilling() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await getAuthToken();
       const res = await fetch('/api/billing/portal-session', {
         method: 'POST',
         headers: {

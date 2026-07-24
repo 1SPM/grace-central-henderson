@@ -5,7 +5,7 @@ import { PersonAvatar } from './PersonAvatar';
 import { ClockCalendarBanner } from '../dashboard/ClockCalendarBanner';
 import { useChurchClock } from '../../hooks/useChurchClock';
 import { greetingWord } from '../../lib/greeting';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../../config/tenant';
 
 const WALLPAPER_KEY = 'grace-hero-wallpaper';
 
@@ -78,7 +78,7 @@ function GreetingBlock({
   prayersOpen: number;
   activeMembers: number;
 }) {
-  const { zoned, format } = useChurchClock(timezone || CENTRAL_HENDERSON_TIMEZONE);
+  const { zoned, format } = useChurchClock(timezone || TENANT_TIMEZONE);
   const salutation = greetingWord(zoned.hour24);
   const dateStr = format({ weekday: 'long', month: 'long', day: 'numeric' });
   const time = format({ hour: 'numeric', minute: '2-digit', second: '2-digit' });

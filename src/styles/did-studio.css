@@ -13,12 +13,15 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+/* Portrait "phone frame" — the D-ID agent UI is designed mobile-first, so
+   the modal is a phone-shaped portrait card on desktop and a full-screen
+   sheet on small viewports, instead of the old 920px landscape split that
+   the agent frame fought against. */
 .did-studio-modal {
   background: #fff;
-  border-radius: 18px;
-  width: 100%;
-  max-width: 920px;
-  max-height: min(88vh, 640px);
+  border-radius: 22px;
+  width: min(420px, 100%);
+  height: min(88vh, 820px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -46,12 +49,43 @@
   background: rgba(0, 0, 0, 0.65);
 }
 
+.ai-did-title-bar {
+  padding: 14px 44px 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Direct child only — the verified badge nested in the left title div has
+   its own styling and must not inherit this status-chip look. */
+.ai-did-title-bar > span {
+  font-size: 10px;
+  font-weight: 600;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Single portrait column: video on top, preview chat (when no real agent)
+   stacked below — matching the phone-frame shape at every viewport. */
 .ai-did-studio {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-rows: minmax(240px, 44%) 1fr;
   flex: 1;
   min-height: 0;
-  height: min(72vh, 560px);
+}
+
+/* Real D-ID agent mounted: its embedded frame (video + its own input/mic)
+   is the whole conversation surface, so it fills the entire frame. */
+.ai-did-studio--live {
+  grid-template-rows: 1fr;
 }
 
 .ai-did-media {
@@ -158,29 +192,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
   background: #fff;
-}
-
-.ai-did-chat-head {
-  padding: 14px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.ai-did-chat-head span {
-  font-size: 10px;
-  font-weight: 600;
-  color: #16a34a;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .pulse-live-dot {
@@ -298,16 +311,38 @@
   font-size: 13px;
 }
 
-@media (max-width: 720px) {
-  .ai-did-studio {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(200px, 38vh) 1fr;
-    height: auto;
-    max-height: none;
+/* Verified Leaders program badge in the title bar */
+.did-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Small screens: the frame becomes a full-screen sheet — no wasted
+   chrome, and D-ID's own mobile layout takes over edge to edge.
+   100dvh (not vh) so iOS Safari's collapsing URL bar doesn't clip the
+   agent's input bar off the bottom. */
+@media (max-width: 640px) {
+  .did-studio-overlay {
+    padding: 0;
   }
 
-  .ai-did-chat-panel {
-    border-left: none;
-    border-top: 1px solid #e5e7eb;
+  .did-studio-modal {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .ai-did-title-bar {
+    padding-top: max(14px, env(safe-area-inset-top));
   }
 }
