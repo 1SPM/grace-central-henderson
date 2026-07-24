@@ -31,6 +31,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireClerkAuth } from './auth-helper.js';
+import { logSecurityEvent, securityContext } from './securityLog.js';
 
 // Same convention as the legacy demo bypass in api/_middleware/auth.ts —
 // same env var, same "explicit opt-in only" posture (see
@@ -143,6 +144,11 @@ export async function resolveStaffActor(
 
   const auth = await requireClerkAuth(req);
   if (!auth.ok) {
+    const ctx = securityContext(req);
+    await logSecurityEvent(supabase, {
+      eventType: 'auth.failed', severity: 'elevated', ip: ctx.ip, route: ctx.route,
+      detail: { reason: auth.error },
+    });
     res.status(auth.status).json({ error: auth.error });
     return null;
   }
@@ -159,10 +165,24 @@ export async function resolveStaffActor(
     return null;
   }
   if (!userRow) {
+    // A valid JWT that resolves a church_id with no matching users row — a
+    // manipulated/stale token or a cross-tenant probe. Should be ~never.
+    const ctx = securityContext(req);
+    await logSecurityEvent(supabase, {
+      eventType: 'authz.no_church_record', severity: 'critical',
+      churchId: auth.churchId, actorClerkId: auth.clerkUserId, ip: ctx.ip, route: ctx.route,
+      detail: { reason: 'jwt church_id has no matching users row' },
+    });
     res.status(403).json({ error: 'no_user_record_for_church' });
     return null;
   }
   if (userRow.account_status !== 'active') {
+    const ctx = securityContext(req);
+    await logSecurityEvent(supabase, {
+      eventType: 'auth.suspended_attempt', severity: 'elevated',
+      churchId: auth.churchId, actorClerkId: auth.clerkUserId, ip: ctx.ip, route: ctx.route,
+      detail: { account_status: userRow.account_status },
+    });
     res.status(403).json({ error: 'account_not_active', account_status: userRow.account_status });
     return null;
   }
@@ -357,6 +377,12 @@ export async function requirePermission(
   if (!actor) return null; // response already sent
 
   if (!actor.permissions.has(permissionKey)) {
+    const ctx = securityContext(req);
+    await logSecurityEvent(supabase, {
+      eventType: 'authz.denied', severity: 'elevated',
+      churchId: actor.churchId, actorClerkId: actor.clerkUserId, ip: ctx.ip, route: ctx.route,
+      detail: { required: permissionKey, actor_role: actor.role },
+    });
     res.status(403).json({ error: 'insufficient_permission', required: permissionKey });
     return null;
   }
