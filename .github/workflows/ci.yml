@@ -57,6 +57,49 @@ jobs:
       - run: npx vitest run tools/lint-rls.test.ts
       - run: npx tsx tools/lint-rls.ts
 
+  frontend-safety:
+    name: Frontend Safety (service-role + public-secret)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Unit-tests the detector, then runs it against the tree (exit 1 = block).
+      - run: npx vitest run tools/check-frontend-safety.test.ts
+      - run: npx tsx tools/check-frontend-safety.ts
+
+  rls-policy-tests:
+    name: RLS Policy Tests (staging)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Cross-tenant / escalation / read-restriction / entitlement / care-visibility
+      # smoke tests. They SKIP (pass) until the SUPABASE_TEST_* secrets are set,
+      # then run for real and BLOCK on failure. See SECURITY_GATE.md.
+      - run: >
+          npx vitest run
+          tools/cross-tenant-smoke.test.ts
+          tools/rls-escalation-smoke.test.ts
+          tools/rls-read-restriction-smoke.test.ts
+          tools/entitlement-billing-rls-smoke.test.ts
+          tools/care-prayer-visibility-smoke.test.ts
+        env:
+          SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
+          SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
+          SUPABASE_TEST_TENANT_A_ID: ${{ secrets.SUPABASE_TEST_TENANT_A_ID }}
+          SUPABASE_TEST_TENANT_A_TOKEN: ${{ secrets.SUPABASE_TEST_TENANT_A_TOKEN }}
+          SUPABASE_TEST_TENANT_A_MEMBER_TOKEN: ${{ secrets.SUPABASE_TEST_TENANT_A_MEMBER_TOKEN }}
+          SUPABASE_TEST_TENANT_B_ID: ${{ secrets.SUPABASE_TEST_TENANT_B_ID }}
+          SUPABASE_TEST_TENANT_B_TOKEN: ${{ secrets.SUPABASE_TEST_TENANT_B_TOKEN }}
+
   gitleaks:
     name: Secret Scan (gitleaks)
     runs-on: ubuntu-latest
@@ -88,7 +131,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test, security-smoke, rls-lint, gitleaks, audit]
+    needs: [lint-and-typecheck, test, security-smoke, rls-lint, frontend-safety, rls-policy-tests, gitleaks, audit]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
