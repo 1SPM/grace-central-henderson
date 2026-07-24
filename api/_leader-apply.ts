@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { readBody, str, email_, arrayOfStr } from './_lib/validation.js';
+import { clientIp, enforceRateLimit } from './_lib/rateLimit/limiter.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -30,6 +31,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Public application form — throttle per IP against spam applications.
+  if (await enforceRateLimit(res, `leader-apply:ip:${clientIp(req)}`, 5, 3600,
+    'Too many applications from this connection. Please try again later.')) return;
 
   // Support legacy clients that send expertiseAreas as a comma-separated
   // string: pre-split before validation.

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { readBody, str, email_, arrayOfStr } from './_lib/validation.js';
 import { resolveChurchIdForHost } from './_lib/resolveChurchByHost.js';
 import { requireClerkAuth } from './_lib/auth-helper.js';
+import { clientIp, enforceRateLimit } from './_lib/rateLimit/limiter.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -44,6 +45,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
   const { firstName, lastName, email, phone, howDidYouHear, prayerRequest, interestedIn } = body;
+
+  // Public form — throttle per IP to stop row/notification spam. Generous
+  // enough for a family filling out several cards from one connection.
+  if (await enforceRateLimit(res, `connect-card:ip:${clientIp(req)}`, 8, 600,
+    'Too many submissions. Please wait a couple of minutes and try again.')) return;
 
   try {
     // Build tags from interests and source
