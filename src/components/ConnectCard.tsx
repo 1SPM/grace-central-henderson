@@ -59,9 +59,13 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
     try {
       // In admin mode a staff session is present — send its bearer token
       // so the server scopes the record to the authenticated church_id
-      // (works on any host). The public form has no session; the provider
-      // returns null and the server falls back to Host-based resolution.
-      const provider = getClerkTokenProvider();
+      // (works on any host). The public form must NEVER attach a token:
+      // a staff member viewing /connect in the same browser still has a
+      // live session provider, and attaching that token forces the server
+      // down the requireClerkAuth branch (rejecting any expired/mismatched
+      // token with a 401) instead of the Host-based resolution the public
+      // form is designed for. Gate strictly on mode.
+      const provider = mode === 'admin' ? getClerkTokenProvider() : null;
       const token = provider ? await provider() : null;
       const response = await fetch('/api/connect-card', {
         method: 'POST',
@@ -76,7 +80,18 @@ export function ConnectCard({ churchName = 'Our Church', churchId, mode = 'admin
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit. Please try again.');
+        // Surface the server's actual message when it's a client-actionable
+        // status (e.g. 429 "Too many submissions…", 400 validation, 404
+        // wrong domain) so a failing submit is diagnosable instead of an
+        // opaque "try again". Fall back to the generic line for 5xx / no body.
+        let message = 'Failed to submit. Please try again.';
+        if (response.status < 500) {
+          const detail = await response.json().catch(() => null);
+          if (detail && typeof detail.error === 'string' && detail.error) {
+            message = detail.error;
+          }
+        }
+        throw new Error(message);
       }
 
       setSubmitted(true);
