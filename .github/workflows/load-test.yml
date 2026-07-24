@@ -27,7 +27,7 @@ jobs:
     name: Baseline (50 VU x 3.5 min)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Run k6 baseline scenario
         uses: grafana/k6-action@v0.3.1
