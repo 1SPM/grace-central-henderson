@@ -674,6 +674,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .maybeSingle();
       if (error || !updated) return res.status(error ? 500 : 404).json({ error: error ? 'card_update_failed' : 'card_not_found' });
+
+      // Audit: a staff-initiated spend-limit change is a financial control —
+      // record it in the portal-activity spine like freeze/cancel/review.
+      await logActivity(supabase, auth.churchId, updated.cardholder_person_id ?? null, 'card_limits_set', cardId, {
+        daily_limit_micro_usd: updates.daily_limit_micro_usd ?? null,
+        monthly_limit_micro_usd: updates.monthly_limit_micro_usd ?? null,
+        actor: 'staff',
+        clerk_user_id: auth.clerkUserId,
+      });
       return res.status(200).json({ card: updated });
     }
 
