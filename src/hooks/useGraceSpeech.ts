@@ -288,9 +288,22 @@ export function useGraceSpeech() {
     abortRef.current = controller;
 
     const fetchChunk = async (chunk: string): Promise<ArrayBuffer> => {
+      // Attach the signed-in user's Clerk token so the server's TTS auth gate
+      // passes. The anonymous public demo has no session → no header → the
+      // server allows it via demo mode. A token hiccup just means no audio
+      // that turn (the text is still on screen), so this is best-effort.
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      try {
+        const clerk = (window as unknown as { Clerk?: { session?: { getToken?: (o?: unknown) => Promise<string | null> } } }).Clerk;
+        const token = clerk?.session?.getToken
+          ? (await clerk.session.getToken({ template: 'supabase' })) ?? (await clerk.session.getToken())
+          : null;
+        if (token) headers.Authorization = `Bearer ${token}`;
+      } catch { /* no session (demo/anonymous) — proceed without a token */ }
+
       const res = await fetch(TTS_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text: chunk }),
         signal: controller.signal,
       });
