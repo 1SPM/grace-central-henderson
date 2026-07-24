@@ -4,13 +4,22 @@
  * Leader avatars = independent, siloed agents where members confide.
  */
 (function (global) {
-  const DEFAULT_CHURCH = 'Central Henderson';
+  const DEFAULT_CHURCH = global.GRACE_PORTAL_CHURCH || 'Central Henderson';
   const GRACE_ACRONYM = 'Growth · Resource · Assistance · Community · Engagement';
 
   function leaderFirstName(name) {
     if (!name) return 'Leader';
     const stripped = name.replace(/^(Pastor|Rev\.|Dr\.|Min\.|Sis\.|Bro\.|Deacon|Elder)\s+/i, '');
     return stripped.split(' ')[0] || name;
+  }
+
+  /** Next calendar date for a given weekday (0=Sun), formatted "Month D". */
+  function nextOccurrence(weekday) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    const d = new Date();
+    d.setDate(d.getDate() + ((weekday - d.getDay() + 7) % 7));
+    return months[d.getMonth()] + ' ' + d.getDate();
   }
 
   function getMessaging(churchName) {
@@ -27,10 +36,12 @@
           4: 'Prayer Night \u00b7 7:00 PM',
           6: 'Food Pantry serve team \u00b7 9:00 AM',
         },
+        // Computed from the weekly schedule so the demo never advertises a
+        // past date (was hardcoded to June 1\u20134; see UX review 2026-07-06).
         events: [
-          'Sunday Service \u00b7 June 1',
-          'Women of Grace \u00b7 June 2',
-          'Prayer Night \u00b7 June 4',
+          'Sunday Service \u00b7 ' + nextOccurrence(0),
+          'Women of Grace \u00b7 ' + nextOccurrence(2),
+          'Prayer Night \u00b7 ' + nextOccurrence(4),
         ],
         serving: [
           'Food Pantry \u00b7 Saturdays',

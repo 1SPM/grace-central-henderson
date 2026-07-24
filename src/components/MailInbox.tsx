@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { validateAction, hydrateAction, type PendingAction } from '../lib/grace-actions';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import type { Person, Task, PrayerRequest } from '../types';
+import { MemberAvatar } from './ui/MemberAvatar';
 
 interface MailRow {
   id: string;
@@ -29,6 +30,7 @@ interface MailInboxProps {
   prayers: PrayerRequest[];
   /** When true, hide the page header (used inside Action Center tab). */
   embedded?: boolean;
+  onSelectPerson?: (personId: string) => void;
 }
 
 type FilterKey = 'all' | 'review' | 'auto' | 'crisis';
@@ -44,7 +46,7 @@ function formatRelativeTime(iso: string): string {
   return `${d}d ago`;
 }
 
-export function MailInbox({ people, tasks, prayers, embedded = false }: MailInboxProps) {
+export function MailInbox({ people, tasks, prayers, embedded = false, onSelectPerson }: MailInboxProps) {
   const [rows, setRows] = useState<MailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -260,7 +262,7 @@ export function MailInbox({ people, tasks, prayers, embedded = false }: MailInbo
 
           const status: { label: string; color: string; icon: React.ReactNode } =
             row.flag === 'crisis'
-              ? { label: 'Flagged', color: 'text-rose-700 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200/70 dark:border-rose-500/20', icon: <AlertTriangle size={11} /> }
+              ? { label: 'Flagged', color: 'text-brand-700 bg-brand-50 dark:bg-brand-500/10 dark:text-brand-400 border-brand-200/70 dark:border-brand-500/20', icon: <AlertTriangle size={11} /> }
               : (row.auto_summary || row.reply_sent_at)
                 ? { label: 'Auto-handled', color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200/70 dark:border-emerald-500/20', icon: <CheckCircle2 size={11} /> }
                 : validatedActions.length > 0
@@ -282,6 +284,18 @@ export function MailInbox({ people, tasks, prayers, embedded = false }: MailInbo
                 }}
                 className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-stone-50/60 dark:hover:bg-dark-800/40"
               >
+                {senderPerson && (
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onSelectPerson?.(senderPerson.id);
+                    }}
+                    className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                  >
+                    <MemberAvatar person={senderPerson} size="lg" />
+                  </button>
+                )}
                 <div className="flex flex-col items-start gap-1 min-w-[120px] shrink-0">
                   <span className={`text-sm ${isUnseen ? 'font-semibold text-slate-900 dark:text-dark-100' : 'text-gray-700 dark:text-dark-300'}`}>
                     {senderName}
@@ -304,7 +318,7 @@ export function MailInbox({ people, tasks, prayers, embedded = false }: MailInbo
               {isOpen && (
                 <div className="border-t border-stone-200/70 dark:border-white/5 p-4 space-y-3 bg-stone-50/40 dark:bg-dark-900/30">
                   {row.flag === 'crisis' && (
-                    <div className="px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200/70 dark:border-rose-500/20 text-sm text-rose-800 dark:text-rose-300">
+                    <div className="px-3 py-2 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-200/70 dark:border-brand-500/20 text-sm text-brand-800 dark:text-brand-300">
                       🚨 This email matched sensitive language. Grace did NOT auto-handle anything. Please respond personally.
                     </div>
                   )}
@@ -368,7 +382,7 @@ export function MailInbox({ people, tasks, prayers, embedded = false }: MailInbo
                         disabled={sendingId === row.id || isDrafting(row.id)}
                       />
                       {sendError[row.id] && (
-                        <div className="text-xs text-rose-600 dark:text-rose-400">{sendError[row.id]}</div>
+                        <div className="text-xs text-brand-600 dark:text-brand-400">{sendError[row.id]}</div>
                       )}
                       <div className="flex gap-2">
                         <button

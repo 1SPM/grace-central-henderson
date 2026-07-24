@@ -54,7 +54,7 @@ export function GraceMobilePreview({
     () =>
       `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
         mobileUrl,
-      )}&bgcolor=ffffff&color=e11d48`,
+      )}&bgcolor=ffffff&color=3B53BB`,
     [mobileUrl],
   );
 
@@ -128,7 +128,7 @@ export function GraceMobilePreview({
           <div className="flex items-center gap-2 bg-stone-100 dark:bg-dark-800 rounded-xl p-1 border border-gray-200 dark:border-dark-600">
             <button
               onClick={() => setViewMode('phone')}
-              className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
+              className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-400"
             >
               <Smartphone size={16} />
               Phone
@@ -200,8 +200,8 @@ export function GraceMobilePreview({
             {/* QR Code Card */}
             <div className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-rose-100 dark:bg-rose-500/10 rounded-xl flex items-center justify-center">
-                  <QrCode className="text-rose-600 dark:text-rose-400" size={20} />
+                <div className="w-10 h-10 bg-brand-100 dark:bg-brand-500/10 rounded-xl flex items-center justify-center">
+                  <QrCode className="text-brand-600 dark:text-brand-400" size={20} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-dark-100">Scan to Preview</h3>
@@ -254,7 +254,7 @@ export function GraceMobilePreview({
                 href={mobileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 w-full px-4 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-medium hover:bg-rose-700 flex items-center justify-center gap-2"
+                className="mt-3 w-full px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-medium hover:bg-brand-700 flex items-center justify-center gap-2"
               >
                 <ExternalLink size={16} />
                 Open in New Tab

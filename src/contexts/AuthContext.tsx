@@ -15,10 +15,10 @@ import {
   ROLE_PERMISSIONS,
   InviteUserParams,
 } from '../lib/services/auth';
-import { supabase } from '../lib/supabase';
+import { supabase, setClerkTokenProvider } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
-import { hasEnteredDemo, DEMO_ENTERED_EVENT } from '../lib/demoEntry';
+import { isDemoModeActive } from '../config/tenant';
 
 // Default church ID for demo/fallback mode. When Supabase is configured but
 // Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
@@ -38,6 +38,14 @@ interface AuthContextType {
   updateUserRole: (userId: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
   removeUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
   getOrganizationUsers: () => Promise<{ success: boolean; users?: User[]; error?: string }>;
+  /**
+   * Returns a Clerk session bearer token for calling the shared-platform
+   * WorkOS API routes (api/work-orders/*, api/approvals/*, etc.), or null
+   * when no real Clerk session exists (demo mode / auth not configured —
+   * those routes have their own demo-mode bootstrap server-side, see
+   * api/_lib/authz.ts). Never throws.
+   */
+  getAuthToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -45,8 +53,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Get Clerk publishable key from environment
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if demo mode is explicitly enabled (security: fail closed)
-const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+// Demo mode is hostname-derived (see isDemoModeActive in config/tenant.ts) —
+// NOT a raw env var. A single shared env var toggled for the Faithful
+// Church demo tenant previously reopened the auth bypass for every other
+// domain this Vercel project serves, including real clients.
+const isDemoModeEnabled = isDemoModeActive();
 const isProduction = import.meta.env.PROD;
 
 // Hook to use auth context
@@ -69,31 +80,84 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
   // Register a Clerk-token provider with the Supabase client so every
   // Supabase request rides on the Clerk session JWT (enabling church-scoped
-  // RLS once Supabase third-party auth is configured — see src/lib/supabase.ts).
+  // RLS via Supabase third-party auth — see src/lib/supabase.ts).
+  //
+  // Registration is synchronous and this effect is declared BEFORE the
+  // syncUser effect below, so React's in-order effect execution guarantees
+  // the provider is in place before the first users-table query fires. The
+  // previous version awaited a dynamic import here, which raced syncUser:
+  // when syncUser's query won, it went out with the anon key, RLS returned
+  // zero rows, and the signed-in user was silently degraded to 'volunteer'.
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const { setClerkTokenProvider } = await import('../lib/supabase');
-      if (cancelled) return;
-      if (clerkSignedIn) {
-        // Use template if your Clerk dashboard has a "supabase" template;
-        // otherwise the default session token works for native third-party.
-        setClerkTokenProvider(async () => {
-          try {
-            return await getToken({ template: 'supabase' }) ?? await getToken();
-          } catch {
-            return await getToken();
-          }
+    if (clerkSignedIn) {
+      // Use template if your Clerk dashboard has a "supabase" template;
+      // otherwise the default session token works for native third-party.
+      const fetchToken = async () => {
+        try {
+          return await getToken({ template: 'supabase' }) ?? await getToken();
+        } catch {
+          return await getToken();
+        }
+      };
+      setClerkTokenProvider(fetchToken);
+
+      // Realtime's websocket connection carries its own auth, separate
+      // from the REST client's per-request Authorization header — a
+      // registered clerkAwareFetch provider alone does not cover
+      // postgres_changes subscriptions. Without this, platform_events'
+      // tenant-isolation RLS policy would reject every realtime message
+      // (the websocket would authenticate as anon, which the policy
+      // never matches), so the Decision Queue would silently never
+      // receive INSERT events.
+      const refreshRealtimeAuth = () => {
+        void fetchToken().then(token => {
+          if (token && supabase) supabase.realtime.setAuth(token);
         });
-      } else {
-        setClerkTokenProvider(null);
-      }
-    })();
-    return () => { cancelled = true; };
+      };
+      refreshRealtimeAuth();
+      // Clerk session tokens are short-lived (~60s); the REST path
+      // re-fetches one on every request via clerkAwareFetch, but the
+      // websocket has no equivalent per-message hook, so it needs its
+      // own periodic refresh to avoid the connection silently going
+      // stale mid-session.
+      const intervalId = setInterval(refreshRealtimeAuth, 50_000);
+      return () => clearInterval(intervalId);
+    } else {
+      setClerkTokenProvider(null);
+    }
   }, [clerkSignedIn, getToken]);
 
   // Sync Clerk user with our database
   useEffect(() => {
+    /**
+     * Last-resort identity when the users-table read fails (RLS
+     * misconfiguration, transient network/Supabase issue): derive the
+     * user from Clerk publicMetadata instead of silently degrading a
+     * real staff member to 'volunteer'. publicMetadata is only writable
+     * server-side with the Clerk secret key (set during onboarding by
+     * POST /api/billing/create-church), so for DISPLAY-level gating
+     * it is exactly as trustworthy as the JWT claim derived from it.
+     * All real authorization stays server-side (requirePermission/RLS)
+     * — this only decides which pages the UI offers to render.
+     */
+    function clerkMetadataFallbackUser(u: NonNullable<typeof clerkUser>): User | null {
+      const metaChurchId = u.publicMetadata?.church_id as string | undefined;
+      const metaRole = u.publicMetadata?.role as string | undefined;
+      const validRoles: UserRole[] = ['admin', 'pastor', 'staff', 'volunteer', 'member'];
+      if (!metaChurchId || !metaRole || !validRoles.includes(metaRole as UserRole)) return null;
+      return {
+        id: u.id, // no DB row id available; Clerk id is stable and unique
+        clerkId: u.id,
+        email: u.emailAddresses[0]?.emailAddress || '',
+        firstName: u.firstName || '',
+        lastName: u.lastName || '',
+        imageUrl: u.imageUrl,
+        role: metaRole as UserRole,
+        churchId: metaChurchId,
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     async function syncUser() {
       if (!clerkLoaded) return;
 
@@ -173,6 +237,17 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
               };
               setUser(mappedUser);
               authService.setCurrentUser(mappedUser);
+            } else {
+              // The row may already exist but be invisible to this
+              // client (RLS reads returning zero rows also make the
+              // insert fail on the duplicate clerk_id). Don't strand a
+              // legitimately-onboarded user as 'volunteer' — fall back
+              // to their server-set Clerk metadata.
+              const fallbackUser = clerkMetadataFallbackUser(clerkUser);
+              if (fallbackUser) {
+                setUser(fallbackUser);
+                authService.setCurrentUser(fallbackUser);
+              }
             }
           }
         } else {
@@ -192,7 +267,14 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
           authService.setCurrentUser(mockUser);
         }
       } catch {
-        // User sync failed - will retry on next auth state change
+        // User sync threw (network/Supabase outage). Same reasoning as
+        // above: prefer the server-set Clerk metadata over degrading a
+        // real staff member to 'volunteer' until the next auth change.
+        const fallbackUser = clerkMetadataFallbackUser(clerkUser);
+        if (fallbackUser) {
+          setUser(fallbackUser);
+          authService.setCurrentUser(fallbackUser);
+        }
       }
 
       setIsLoading(false);
@@ -262,6 +344,19 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     return authService.getOrganizationUsers();
   }, []);
 
+  const getAuthToken = useCallback(async (): Promise<string | null> => {
+    if (!clerkSignedIn) return null;
+    try {
+      return (await getToken({ template: 'supabase' })) ?? (await getToken());
+    } catch {
+      try {
+        return await getToken();
+      } catch {
+        return null;
+      }
+    }
+  }, [clerkSignedIn, getToken]);
+
   const value: AuthContextType = {
     isLoaded: clerkLoaded && !isLoading,
     isSignedIn: clerkSignedIn || false,
@@ -275,6 +370,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     updateUserRole,
     removeUser,
     getOrganizationUsers,
+    getAuthToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -328,6 +424,7 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
     updateUserRole: async () => ({ success: false, error: 'Authentication not configured' }),
     removeUser: async () => ({ success: false, error: 'Authentication not configured' }),
     getOrganizationUsers: async () => ({ success: false, error: 'Authentication not configured' }),
+    getAuthToken: async () => null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -336,15 +433,19 @@ function AuthProviderSecurityBlock({ children }: { children: React.ReactNode }) 
 // Demo auth provider for when Clerk is not configured
 // SECURITY: Only enabled in development or when explicitly opted-in
 // Uses 'admin' role so demo users can explore all features (including Settings)
+//
+// `entered` (hasEnteredDemo/sessionStorage) tracks whether the visitor has
+// clicked through the marketing CTA — it does NOT gate auth here. The
+// documented/shared demo CRM links (docs/LINKS.md) point straight at the
+// CRM shell with no `?enter=demo` param, and App.tsx already renders the
+// CRM for demo mode regardless of `entered` (see the isDemoModeEnabled
+// checks around SignInPage). Gating user/role/permissions on `entered` on
+// top of that left a fresh tab/session with `user: null` — role fell back
+// to 'volunteer' in useRouteGuard, so GRACE WorkOS (a STAFF_VIEW) rendered
+// "Restricted Area" for the demo, until the visitor happened to also hit a
+// `?enter=demo` link. Demo mode being active is itself the authorization;
+// once in, the demo user is always the full pastor/admin persona.
 function AuthProviderDemo({ children }: { children: React.ReactNode }) {
-  const [entered, setEntered] = useState(() => hasEnteredDemo());
-
-  useEffect(() => {
-    const sync = () => setEntered(hasEnteredDemo());
-    window.addEventListener(DEMO_ENTERED_EVENT, sync);
-    return () => window.removeEventListener(DEMO_ENTERED_EVENT, sync);
-  }, []);
-
   const demoUser: User = {
     id: 'demo-user',
     clerkId: 'demo-clerk-id',
@@ -358,19 +459,24 @@ function AuthProviderDemo({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     isLoaded: true,
-    isSignedIn: entered,
-    user: entered ? demoUser : null,
+    isSignedIn: true,
+    user: demoUser,
     churchId: DEFAULT_CHURCH_ID,
-    permissions: entered ? ROLE_PERMISSIONS.pastor : null,
+    permissions: ROLE_PERMISSIONS.pastor,
     signOut: async () => {
       // Demo mode - no actual sign out
     },
-    hasPermission: (permission) => entered && ROLE_PERMISSIONS.pastor[permission],
-    hasAnyPermission: (permissions) => entered && permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
+    hasPermission: (permission) => ROLE_PERMISSIONS.pastor[permission],
+    hasAnyPermission: (permissions) => permissions.some(p => ROLE_PERMISSIONS.pastor[p]),
     inviteUser: async () => ({ success: false, error: 'Demo mode - invites disabled' }),
     updateUserRole: async () => ({ success: false, error: 'Demo mode - role updates disabled' }),
     removeUser: async () => ({ success: false, error: 'Demo mode - user removal disabled' }),
-    getOrganizationUsers: async () => ({ success: true, users: entered ? [demoUser] : [] }),
+    getOrganizationUsers: async () => ({ success: true, users: [demoUser] }),
+    // No real Clerk session in demo mode — the WorkOS API routes recognize
+    // VITE_ENABLE_DEMO_MODE server-side and bootstrap their own actor
+    // (api/_lib/authz.ts resolveDemoStaffActor), so a null token here is
+    // expected and handled, not a bug.
+    getAuthToken: async () => null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -401,7 +507,7 @@ export function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <SignIn routing="path" path="/sign-in" />
+      <SignIn routing="virtual" />
     </div>
   );
 }

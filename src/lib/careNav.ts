@@ -1,6 +1,6 @@
 import type { View } from '../types';
 
-export type CareTab = 'dispatch' | 'life-services';
+export type CareTab = 'dispatch' | 'life-services' | 'requests';
 
 function hashParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -13,6 +13,7 @@ function hashParams(): URLSearchParams {
 export function parseCareTab(): CareTab {
   const tab = hashParams().get('tab');
   if (tab === 'life-services') return 'life-services';
+  if (tab === 'requests') return 'requests';
   return 'dispatch';
 }
 
@@ -22,7 +23,7 @@ export function parseCareLeaderId(): string | null {
 
 export function careHash(tab: CareTab = 'dispatch', leaderId?: string | null): string {
   const params = new URLSearchParams();
-  if (tab === 'life-services') params.set('tab', 'life-services');
+  if (tab === 'life-services' || tab === 'requests') params.set('tab', tab);
   if (leaderId) params.set('leader', leaderId);
   const qs = params.toString();
   return qs ? `#/pastoral-care?${qs}` : '#/pastoral-care';

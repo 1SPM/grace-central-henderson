@@ -262,6 +262,21 @@ class AuthService {
     ];
   }
 
+  /* ────────────────────────────────────────────────────────────────────
+   * ⚠️ DEAD ENDPOINTS — DO NOT WIRE TO UI (Beta Phase 1 audit, 2026-07-06)
+   *
+   * Every method below calls /api/auth/* routes that have NO server
+   * handlers: they are absent from the api/[...path].ts dispatcher and no
+   * api/auth/ directory exists. No component invokes these methods today
+   * (verified — AuthContext re-exports them but nothing consumes those).
+   * The real invitation flow is /api/members/invite.
+   *
+   * Before wiring any of these to UI: build the handlers with Clerk auth +
+   * church-scoped IDOR checks (old TD-014), register them in the
+   * dispatcher, and add cross-tenant tests. Until then they fail closed
+   * (404 → error result), which is safe but misleading.
+   * ──────────────────────────────────────────────────────────────────── */
+
   // Sync Clerk user with local database
   async syncUserWithDatabase(clerkUser: {
     id: string;
@@ -355,12 +370,17 @@ class AuthService {
     }
 
     try {
-      const response = await secureFetch(`/api/auth/users/${userId}/role`, {
-        method: 'PATCH',
+      // Assigns the RBAC user_roles grant server-side (permission-checked,
+      // church-scoped, audited). Members aren't managed here.
+      if (role === 'member') {
+        return { success: false, error: 'Members are managed through the member portal, not team roles.' };
+      }
+      const response = await secureFetch('/api/team/set-role', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ user_id: userId, role }),
       });
 
       if (!response.ok) {

@@ -16,7 +16,84 @@ export interface TutorialDefinition {
   steps: TutorialStep[];
 }
 
+export const PASTOR_CRM_TOUR_ID = 'pastor-crm-overview';
+
 export const TUTORIALS: TutorialDefinition[] = [
+  {
+    id: PASTOR_CRM_TOUR_ID,
+    title: 'Pastor CRM Overview',
+    description: 'Learn the main areas of GRACE Admin — Home, Grace AI, congregation, care, and giving',
+    icon: 'Compass',
+    estimatedMinutes: 4,
+    steps: [
+      {
+        view: 'dashboard',
+        target: 'dashboard-command-bar',
+        title: 'Your Home Command Center',
+        description: 'Start every day here — run your Brief, open Ask Grace, and jump to your Work Queue.',
+      },
+      {
+        view: 'dashboard',
+        target: 'dashboard-ask-grace',
+        title: 'Ask Grace',
+        description: 'GRACE is your AI admin assistant. Ask her to add tasks, log prayers, draft emails, or summarize giving.',
+      },
+      {
+        view: 'dashboard',
+        target: 'dashboard-work-queue',
+        title: 'Work Queue',
+        description: 'Opens the Action Center — your prioritized list of mail, tasks, and follow-ups for today.',
+      },
+      {
+        view: 'dashboard',
+        target: 'sidebar-main-nav',
+        title: 'Main Navigation',
+        description: 'These daily-driver areas cover leadership, congregation care, Sunday tools, and impact campaigns.',
+      },
+      {
+        view: 'feed',
+        target: 'action-feed',
+        title: 'Action Center',
+        description: 'Triage mail, tasks, live service ops, volunteers, and birthdays — everything that needs your attention.',
+      },
+      {
+        view: 'people',
+        target: 'people-directory',
+        title: 'Congregation',
+        description: 'Your member directory — profiles, tags, interaction history, and follow-up notes in one place.',
+      },
+      {
+        view: 'leadership',
+        target: 'leadership-hub',
+        title: 'Leadership',
+        description: 'Manage your pastoral team, deploy AI leader companions, and open each leader\'s workspace.',
+      },
+      {
+        view: 'pastoral-care',
+        target: 'pastoral-care-hub',
+        title: 'Pastoral Care',
+        description: 'Crisis dispatch for urgent care requests plus life services — weddings, funerals, and legacy planning.',
+      },
+      {
+        view: 'sunday-prep',
+        target: 'sunday-prep-main',
+        title: 'Sunday Service Tools',
+        description: 'Prep sermons and announcements, run attendance check-in, and share connect cards for visitors.',
+      },
+      {
+        view: 'giving',
+        target: 'giving-stats',
+        title: 'Impact Campaigns',
+        description: 'Track giving trends, campaigns, and donor care — a quick pulse before Sunday or board meetings.',
+      },
+      {
+        view: 'settings',
+        target: 'settings-tutorials',
+        title: 'More Tours Anytime',
+        description: 'Return here for scenario-based workflow tours — Sunday Game Day, Monday Follow-Up, and more.',
+      },
+    ],
+  },
   {
     id: 'sunday-game-day',
     title: 'Sunday Game Day',

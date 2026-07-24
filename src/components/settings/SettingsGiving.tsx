@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CreditCard, Check, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 interface ConnectStatus {
   connected: boolean;
@@ -31,7 +31,7 @@ interface ConnectStatus {
 const PLATFORM_FEE_PERCENT = 2.5;   // VWS platform fee on donations. Match the number in api/giving/* when wired.
 
 export function SettingsGiving() {
-  const { getToken } = useAuth();
+  const { getAuthToken } = useAuthContext();
   const [status, setStatus] = useState<ConnectStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -41,7 +41,7 @@ export function SettingsGiving() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await getAuthToken();
       const res = await fetch('/api/billing/connect-status', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -56,7 +56,7 @@ export function SettingsGiving() {
     } finally {
       setLoading(false);
     }
-  }, [getToken]);
+  }, [getAuthToken]);
 
   useEffect(() => {
     refresh();
@@ -73,7 +73,7 @@ export function SettingsGiving() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await getAuthToken();
       const res = await fetch('/api/billing/connect-onboarding', {
         method: 'POST',
         headers: {

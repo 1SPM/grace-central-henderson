@@ -3,9 +3,31 @@
  * Keeps ELEVENLABS_API_KEY server-side; never expose to the browser.
  */
 
-export const MAX_TTS_TEXT_LEN = 800;
+export const MAX_TTS_TEXT_LEN = 1200;
 export const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — warm, calm female
 export const DEFAULT_MODEL_ID = 'eleven_flash_v2_5';
+
+// Delivery defaults: lower stability lets intonation vary naturally; higher
+// style adds warmth. Both tunable via env without a redeploy.
+export const DEFAULT_STABILITY = 0.45;
+export const DEFAULT_STYLE = 0.35;
+
+function envTuning(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === '') return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(1, Math.max(0, parsed));
+}
+
+export function voiceSettings() {
+  return {
+    stability: envTuning('ELEVENLABS_STABILITY', DEFAULT_STABILITY),
+    similarity_boost: 0.75,
+    style: envTuning('ELEVENLABS_STYLE', DEFAULT_STYLE),
+    use_speaker_boost: true,
+  };
+}
 
 export function isTtsConfigured(): boolean {
   return Boolean(process.env.ELEVENLABS_API_KEY || process.env.GRACE_TTS_UPSTREAM_URL);
@@ -79,12 +101,7 @@ export async function synthesizeSpeech(text: string): Promise<Buffer> {
       body: JSON.stringify({
         text,
         model_id: modelId,
-        voice_settings: {
-          stability: 0.55,
-          similarity_boost: 0.78,
-          style: 0.15,
-          use_speaker_boost: true,
-        },
+        voice_settings: voiceSettings(),
       }),
     },
   );

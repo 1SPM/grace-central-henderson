@@ -13,18 +13,21 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      // One-time reset: flip existing installs to the new light default.
-      // Users can still opt back into dark via the toggle afterwards.
-      const resetDone = localStorage.getItem('grace-theme-reset-v1');
-      if (!resetDone) {
-        localStorage.removeItem('grace-theme');
-        localStorage.setItem('grace-theme-reset-v1', '1');
-        return 'light';
+      // One-time reset: dark is now the standard default, superseding the
+      // earlier v1 reset that had flipped everyone to light. Runs once per
+      // browser; after that the user's own toggle choice always wins.
+      // Mirrors index.html's inline pre-paint script, which applies this
+      // same v2 default before React mounts to avoid a light-mode flash.
+      const resetV2Done = localStorage.getItem('grace-theme-reset-v2');
+      if (!resetV2Done) {
+        localStorage.setItem('grace-theme-reset-v2', '1');
+        localStorage.setItem('grace-theme', 'dark');
+        return 'dark';
       }
       const saved = localStorage.getItem('grace-theme') as Theme;
       if (saved === 'light' || saved === 'dark') return saved;
     }
-    return 'light';
+    return 'dark';
   });
 
   useEffect(() => {

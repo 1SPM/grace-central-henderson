@@ -37,9 +37,13 @@ export function checkEnvironment(): EnvCheckResult {
     warnings.push('VITE_STRIPE_PUBLISHABLE_KEY not set - online giving disabled');
   }
 
-  // Demo mode check
+  // Demo mode note: whether the auth bypass is actually active no longer
+  // depends on this raw flag in production — see isDemoModeActive in
+  // config/tenant.ts, which derives it from the resolved tenant (hostname)
+  // instead. This is left set only as a reminder that the var is now
+  // inert in production and can be removed from Vercel entirely.
   if (import.meta.env.VITE_ENABLE_DEMO_MODE === 'true' && import.meta.env.PROD) {
-    warnings.push('VITE_ENABLE_DEMO_MODE is true in production - this is a security risk');
+    warnings.push('VITE_ENABLE_DEMO_MODE is set but no longer controls demo-mode auth in production (see isDemoModeActive in config/tenant.ts) - safe to remove from Vercel');
   }
 
   // Log results

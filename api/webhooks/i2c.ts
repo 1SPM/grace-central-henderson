@@ -38,6 +38,26 @@ import { requireClerkAuth } from '../_lib/auth-helper.js';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const I2C_WEBHOOK_SECRET = process.env.I2C_WEBHOOK_SECRET;
+// Explicit opt-in for the staff-injected "simulated" path (demo). Previously
+// the mock path was enabled merely by the ABSENCE of I2C_WEBHOOK_SECRET, so a
+// prod deploy that forgot to set the secret would silently let staff fabricate
+// card/interchange/ledger events. Now the simulated path requires this flag.
+const I2C_ALLOW_SIMULATED = process.env.I2C_ALLOW_SIMULATED === 'true';
+
+export type I2cAuthMode = 'live' | 'simulated' | 'refuse';
+
+/**
+ * Decide how to authenticate an inbound i2c webhook:
+ *   - secret set          → 'live'      (verify HMAC signature)
+ *   - no secret + opt-in   → 'simulated' (require staff auth; demo events)
+ *   - no secret, no opt-in → 'refuse'    (503 — not configured)
+ * Pure + exported for tests.
+ */
+export function resolveI2cAuthMode(hasSecret: boolean, allowSimulated: boolean): I2cAuthMode {
+  if (hasSecret) return 'live';
+  if (allowSimulated) return 'simulated';
+  return 'refuse';
+}
 
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 const EVENT_TYPES = ['authorization', 'capture', 'refund', 'reversal', 'fee', 'declined'];
@@ -93,14 +113,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const raw = await readRawBody(req);
 
   let simulated = false;
-  if (I2C_WEBHOOK_SECRET) {
+  const mode = resolveI2cAuthMode(Boolean(I2C_WEBHOOK_SECRET), I2C_ALLOW_SIMULATED);
+  if (mode === 'refuse') {
+    // No signing secret and simulated events not explicitly enabled — refuse
+    // rather than silently accepting staff-injected financial events.
+    return res.status(503).json({
+      error: 'i2c_not_configured',
+      detail: 'Set I2C_WEBHOOK_SECRET (live) or I2C_ALLOW_SIMULATED=true (demo) to enable this endpoint.',
+    });
+  }
+  if (mode === 'live') {
     const sig = req.headers['x-i2c-signature'];
-    if (!sig || typeof sig !== 'string' || !verifySignature(raw, sig, I2C_WEBHOOK_SECRET)) {
+    if (!sig || typeof sig !== 'string' || !verifySignature(raw, sig, I2C_WEBHOOK_SECRET!)) {
       console.warn('[i2c webhook] signature verification failed');
       return res.status(400).json({ error: 'invalid signature' });
     }
   } else {
-    // Mock mode: only authenticated staff may inject simulated events.
+    // Simulated mode (explicitly enabled): only authenticated staff may inject.
     const auth = await requireClerkAuth(req, { allowedRoles: STAFF_ROLES });
     if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
     simulated = true;

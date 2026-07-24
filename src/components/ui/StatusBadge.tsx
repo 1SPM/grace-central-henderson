@@ -11,9 +11,9 @@ interface StatusBadgeProps {
 
 const variantStyles = {
   urgent: {
-    bg: 'bg-rose-100 dark:bg-rose-900/30',
-    text: 'text-rose-700 dark:text-rose-400',
-    icon: 'text-rose-500',
+    bg: 'bg-brand-100 dark:bg-brand-900/30',
+    text: 'text-brand-700 dark:text-brand-400',
+    icon: 'text-brand-500',
   },
   normal: {
     bg: 'bg-blue-100 dark:bg-blue-900/30',

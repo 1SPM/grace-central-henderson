@@ -4,6 +4,7 @@
 
 import { generateAIText } from './ai';
 import { createLogger } from '../../utils/logger';
+import { isDemoModeActive } from '../../config/tenant';
 
 const log = createLogger('news-service');
 
@@ -34,7 +35,7 @@ export interface CuratedNewsItem {
  * Only enabled when a backend news API is properly configured.
  */
 export function hasNewsApiKey(): boolean {
-  const isDemoMode = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true' || !import.meta.env.VITE_SUPABASE_URL;
+  const isDemoMode = isDemoModeActive() || !import.meta.env.VITE_SUPABASE_URL;
   if (isDemoMode) return false;
   return !!import.meta.env.VITE_NEWS_API_ENABLED;
 }

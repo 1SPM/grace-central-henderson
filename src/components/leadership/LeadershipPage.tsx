@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Crown } from 'lucide-react';
-import { churchShortName } from '../../config/centralHenderson';
+import { churchShortName } from '../../config/tenant';
 import { HubPageHeader } from '../ui/HubPageHeader';
 import { getViewHeaderMeta } from '../../lib/viewHeaderMeta';
 import { LeadersHubContent } from '../pastoral/leadersHub/LeadersHub';
@@ -105,7 +105,7 @@ export function LeadershipPage({
   const headerMeta = getViewHeaderMeta('leadership');
 
   return (
-    <div className="h-[calc(100vh-32px)] flex flex-col bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 overflow-hidden">
+    <div data-tutorial="leadership-hub" className="h-[calc(100vh-32px)] flex flex-col bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 overflow-hidden">
       <div className="shrink-0 border-b border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/90 backdrop-blur-sm px-4 sm:px-6 pt-4 pb-0">
         <div className="max-w-7xl mx-auto">
           <HubPageHeader

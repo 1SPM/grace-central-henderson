@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/react-dom';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
 
 interface TutorialTooltipProps {
   targetElement: HTMLElement | null;
@@ -13,6 +13,9 @@ interface TutorialTooltipProps {
   onPrev: () => void;
   onSkip: () => void;
   onEnd: () => void;
+  voiceAvailable?: boolean;
+  voiceMuted?: boolean;
+  onToggleVoice?: () => void;
 }
 
 export function TutorialTooltip({
@@ -26,6 +29,9 @@ export function TutorialTooltip({
   onPrev,
   onSkip,
   onEnd,
+  voiceAvailable = false,
+  voiceMuted = false,
+  onToggleVoice,
 }: TutorialTooltipProps) {
   const [visible, setVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -105,13 +111,27 @@ export function TutorialTooltip({
         <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
           {tutorialTitle}
         </span>
-        <button
-          onClick={onEnd}
-          className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
-          aria-label="Close tutorial"
-        >
-          <X size={14} className="text-gray-400 dark:text-dark-500" />
-        </button>
+        <div className="flex items-center gap-0.5">
+          {voiceAvailable && onToggleVoice && (
+            <button
+              onClick={onToggleVoice}
+              className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
+              aria-label={voiceMuted ? 'Unmute tour narration' : 'Mute tour narration'}
+              title={voiceMuted ? 'Unmute narration' : 'Mute narration'}
+            >
+              {voiceMuted
+                ? <VolumeX size={14} className="text-gray-400 dark:text-dark-500" />
+                : <Volume2 size={14} className="text-indigo-500 dark:text-indigo-400" />}
+            </button>
+          )}
+          <button
+            onClick={onEnd}
+            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
+            aria-label="Close tutorial"
+          >
+            <X size={14} className="text-gray-400 dark:text-dark-500" />
+          </button>
+        </div>
       </div>
 
       {/* Content */}

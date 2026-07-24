@@ -32,7 +32,7 @@ import {
   appendDemoChatMessage,
   getDemoChatStore,
 } from '../lib/demoLiveServiceData';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../config/tenant';
 
 const log = createLogger('live-service-ops');
 
@@ -75,7 +75,7 @@ function defaultWindow(): { start: Date; end: Date } {
 export function useLiveServiceOps({
   churchId,
   churchProfile,
-  timezone = CENTRAL_HENDERSON_TIMEZONE,
+  timezone = TENANT_TIMEZONE,
   people = [],
 }: UseLiveServiceOpsOptions): UseLiveServiceOpsResult {
   const { zoned } = useChurchClock(timezone);

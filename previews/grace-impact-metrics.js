@@ -53,7 +53,7 @@
       title: 'Honor Each Other',
       speaker: 'Pastor James Wilson',
       serviceDate: 'May 25, 2026',
-      videoUrl: 'https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4',
+      videoUrl: '/previews/assets/watch/video/Church-Stage-video.mp4',
     },
     church: {
       name: 'Central Henderson',

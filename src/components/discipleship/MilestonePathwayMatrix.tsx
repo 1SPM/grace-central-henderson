@@ -32,7 +32,16 @@ const MILESTONE_COLORS: Record<MilestoneType, string> = {
   baptized: 'text-cyan-500',
   joined_group: 'text-green-500',
   serving: 'text-amber-500',
-  leading: 'text-rose-500',
+  leading: 'text-brand-500',
+};
+
+const MILESTONE_BORDER_COLORS: Record<MilestoneType, string> = {
+  first_visit: 'border-l-blue-500',
+  attended_class: 'border-l-slate-500',
+  baptized: 'border-l-cyan-500',
+  joined_group: 'border-l-green-500',
+  serving: 'border-l-amber-500',
+  leading: 'border-l-brand-500',
 };
 
 type FilterStatus = 'all' | MilestoneType;
@@ -133,22 +142,22 @@ export function MilestonePathwayMatrix({
 
   return (
     <div>
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {stats.map(s => {
           const Icon = MILESTONE_ICONS[s.type];
           return (
             <button
               key={s.type}
               onClick={() => setFilterStatus(filterStatus === s.type ? 'all' : s.type)}
-              className={`bg-stone-100 dark:bg-dark-850 rounded-xl border p-3 text-center transition-all ${
+              className={`bg-stone-100 dark:bg-dark-850 rounded-2xl border-y border-r border-l-[3px] p-4 text-center transition-all ${
                 filterStatus === s.type
                   ? 'border-indigo-500 ring-1 ring-indigo-500'
-                  : 'border-gray-200 dark:border-dark-700 hover:border-gray-300 dark:hover:border-dark-600'
+                  : `border-gray-200 dark:border-dark-700 ${MILESTONE_BORDER_COLORS[s.type]} hover:border-gray-300 dark:hover:border-dark-600`
               }`}
             >
-              <Icon size={18} className={`mx-auto mb-1 ${MILESTONE_COLORS[s.type]}`} />
-              <p className="text-lg font-bold text-gray-900 dark:text-dark-100">{s.pct}%</p>
-              <p className="text-[10px] text-gray-500 dark:text-dark-400">{s.label}</p>
+              <Icon size={18} className={`mx-auto mb-1.5 ${MILESTONE_COLORS[s.type]}`} />
+              <p className="stat-number text-xl text-gray-900 dark:text-dark-100">{s.pct}%</p>
+              <p className="text-[10px] text-gray-500 dark:text-dark-400 mt-0.5">{s.label}</p>
               <p className="text-[9px] text-gray-400 dark:text-dark-500">{s.count}/{people.length}</p>
             </button>
           );

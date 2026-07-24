@@ -28,28 +28,28 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Leaders', value: badges.staff, sub: 'All verified' },
-          { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty` },
-          { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed' },
-          { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%' },
-          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true },
+          { label: 'Leaders', value: badges.staff, sub: 'All verified', accent: 'border-l-brand-600' },
+          { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty`, accent: 'border-l-emerald-600' },
+          { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed', accent: 'border-l-violet-600' },
+          { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%', accent: 'border-l-blue-600' },
+          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true, accent: 'border-l-amber-500' },
         ].map(kpi => (
-          <div key={kpi.label} className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
+          <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
-            <p className="stat-number text-2xl text-slate-900 dark:text-dark-100 mt-1.5 flex items-center gap-1">
-              {kpi.star && <Star size={18} className="text-amber-500 fill-amber-500" />}
+            <p className="stat-number text-4xl text-slate-900 dark:text-dark-100 mt-2 flex items-center gap-1.5">
+              {kpi.star && <Star size={26} className="text-amber-500 fill-amber-500" />}
               {kpi.value}
             </p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5">{kpi.sub}</p>
+            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-900 dark:text-dark-100 mb-3">Clergy &amp; Staff</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <h3 className="text-sm font-bold text-gray-900 dark:text-dark-100 mb-3">Clergy &amp; Staff</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {active.map(leader => {
             const live = statsForLeader(activity ?? null, leader.id);
             const stats = getLeaderHubStats(leader);
@@ -61,12 +61,12 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
                 key={leader.id}
                 type="button"
                 onClick={() => onSelectLeader(leader.id)}
-                className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-3.5 text-left hover:border-gray-300 dark:hover:border-dark-500 transition-colors"
+                className="bg-stone-100 dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 text-left hover:border-gray-300 dark:hover:border-dark-500 transition-colors"
               >
-                <div className="flex items-start gap-3 mb-2.5">
+                <div className="flex items-start gap-3 mb-3">
                   <LeaderAvatar leader={leader} size="md" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100 truncate leading-tight">
+                    <p className="text-sm font-bold text-gray-900 dark:text-dark-100 truncate leading-tight">
                       {leader.displayName}
                     </p>
                     <p className="text-[11px] text-gray-500 dark:text-dark-400 truncate mt-0.5">{leader.title}</p>
@@ -88,17 +88,17 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-1 pt-2.5 border-t border-gray-200 dark:border-dark-700 text-center">
+                <div className="grid grid-cols-3 gap-1 pt-3 border-t border-gray-200 dark:border-dark-700 text-center">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{sessions}</p>
+                    <p className="stat-number text-xl text-gray-900 dark:text-dark-100">{sessions}</p>
                     <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Sessions</p>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.rating.toFixed(1)}</p>
+                    <p className="stat-number text-xl text-gray-900 dark:text-dark-100">{stats.rating.toFixed(1)}</p>
                     <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Rating</p>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">{stats.blessings}/28</p>
+                    <p className="stat-number text-xl text-gray-900 dark:text-dark-100">{stats.blessings}/28</p>
                     <p className="text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wide">Blessings</p>
                   </div>
                 </div>

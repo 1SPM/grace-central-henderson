@@ -27,6 +27,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .nb{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:calc(var(--radius-card) - 4px);cursor:pointer;transition:background var(--transition-fast)}
 .nb:hover{background:var(--central-canvas)}
 .nb.active{background:var(--central-canvas)}
+.nb:focus-visible{outline:2px solid var(--central-red);outline-offset:-2px}
 .nb-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 .nb-label{font-size:13px;color:var(--central-grey);font-weight:400;line-height:1.3;font-family:var(--font-web)}
 .nb.active .nb-label{color:var(--central-black);font-weight:600}
@@ -67,9 +68,9 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .hero-greeting{font-size:12px;color:rgba(255,255,255,.55);margin-bottom:3px}
 .hero-name{font-size:18px;font-weight:700;color:#fff}
 .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 20px}
-.hero-stat{background:rgba(255,255,255,.08);border-radius:10px;padding:12px 14px}
-.hero-stat-val{font-size:18px;font-weight:700;color:#fff}
-.hero-stat-key{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
+.hero-stat{background:rgba(255,255,255,.08);border-radius:12px;padding:14px 16px}
+.hero-stat-val{font-size:22px;font-weight:800;letter-spacing:-.3px;color:#fff}
+.hero-stat-key{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px}
 
 /* ── CARDS ── */
 .card{background:var(--central-card);border:1px solid var(--central-line);border-radius:var(--radius-card);margin-bottom:14px;overflow:hidden}
@@ -346,10 +347,20 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 /* D-ID Studio modal */
 .did-studio-overlay{position:fixed;inset:0;background:rgba(10,22,40,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .did-studio-overlay.open{display:flex}
-.did-studio-modal{background:#fff;border-radius:18px;width:100%;max-width:920px;max-height:min(88vh,640px);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);position:relative}
+/* Portrait "phone frame" — matches the Leadership CRM's DidStudioModal:
+   the D-ID agent UI is mobile-first, so the modal is a phone-shaped card
+   on desktop and a full-screen sheet on small viewports. */
+.did-studio-modal{background:#fff;border-radius:22px;width:min(420px,100%);height:min(88vh,820px);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.35);position:relative}
 .did-studio-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:20px;cursor:pointer;z-index:10;line-height:1}
 .did-studio-close:hover{background:rgba(0,0,0,.65)}
-.ai-did-studio{display:grid;grid-template-columns:1.1fr 0.9fr;flex:1;min-height:0;height:min(72vh,560px)}
+.ai-did-title-bar{padding:14px 44px 14px 16px;font-size:14px;font-weight:600;color:#111827;border-bottom:1px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ai-did-title-bar>span{font-size:10px;font-weight:600;color:#16a34a;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.did-verified-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#15803d;background:#dcfce7;padding:3px 8px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.ai-did-studio{display:grid;grid-template-rows:minmax(240px,44%) 1fr;flex:1;min-height:0}
+/* Real D-ID agent mounted: its frame (video + own input/mic) is the whole
+   conversation surface — hide the preview stand-ins. */
+.ai-did-studio--live{grid-template-rows:1fr}
+.ai-did-studio--live .ai-did-chat-panel,.ai-did-studio--live .ai-did-prompts,.ai-did-studio--live .ai-did-controls{display:none}
 .ai-did-media{position:relative;background:#0f2744;min-height:240px;overflow:hidden}
 .ai-did-media-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.45) 0%,rgba(238,43,55,.15) 50%,rgba(30,58,95,.5) 100%),url('https://images.unsplash.com/photo-1544427920-c49cc3071b01?w=900&q=80') center/cover;opacity:.5}
 .ai-did-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:1}
@@ -362,16 +373,21 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .ai-did-voice-dots{display:flex;gap:3px;align-items:center;height:18px}
 .ai-did-voice-dots span{width:3px;border-radius:2px;background:rgba(255,255,255,.75);animation:wave .8s ease-in-out infinite}
 .ai-did-agent-host{position:absolute;inset:0;z-index:2}
-.ai-did-chat-panel{display:flex;flex-direction:column;min-height:0;border-left:1px solid #e5e7eb;background:#fff}
+.ai-did-chat-panel{display:flex;flex-direction:column;min-height:0;border-top:1px solid #e5e7eb;background:#fff}
 .ai-did-chat-head{padding:14px 16px;font-size:14px;font-weight:600;color:#111827;border-bottom:1px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .ai-did-chat-head span{font-size:10px;font-weight:600;color:#16a34a;display:flex;align-items:center;gap:4px}
 .ai-did-studio .ai-chat-messages{flex:1;padding:16px;min-height:100px;overflow-y:auto}
 .ai-did-studio .ai-input-bar{border-top:1px solid #f3f0eb}
 @media (max-width:720px){
-  .ai-did-studio{grid-template-columns:1fr;grid-template-rows:minmax(200px,38vh) 1fr;height:auto;max-height:none}
-  .ai-did-chat-panel{border-left:none;border-top:1px solid #e5e7eb}
   .ai-hero-chatrow{flex-direction:column;align-items:stretch}
   .ai-hero-begin{width:100%;text-align:center}
+}
+/* Small screens: full-screen sheet, 100dvh so mobile Safari's collapsing
+   URL bar can't clip the agent's input bar off the bottom. */
+@media (max-width:640px){
+  .did-studio-overlay{padding:0}
+  .did-studio-modal{width:100%;height:100dvh;max-height:none;border-radius:0}
+  .ai-did-title-bar{padding-top:max(14px,env(safe-area-inset-top))}
 }
 
 /* Chat window */
@@ -762,18 +778,21 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .plive-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pblink 1.2s infinite}
 @keyframes pblink{0%,100%{opacity:1}50%{opacity:.2}}
 
-.pf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.pf-scard{border-radius:16px;padding:16px 18px;color:#fff;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
-.pf-scard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.15)}
-.pf-scard::before{content:'';position:absolute;top:-28px;right:-28px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.12)}
-.pf-sc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;opacity:.8;margin-bottom:5px}
-.pf-sc-val{font-size:22px;font-weight:800;letter-spacing:-.4px;line-height:1;font-variant-numeric:tabular-nums}
-.pf-sc-sub{font-size:10px;margin-top:5px;opacity:.8;display:flex;align-items:center;gap:5px}
-.pf-delta{font-size:9px;font-weight:700;background:rgba(255,255,255,.2);padding:1px 7px;border-radius:8px}
-.pf-sc1{background:linear-gradient(135deg,#16a34a,#22c55e)}
-.pf-sc2{background:linear-gradient(135deg,#0891b2,#06b6d4)}
-.pf-sc3{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}
-.pf-sc4{background:linear-gradient(135deg,#dc2626,#ef4444)}
+.pf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.pf-scard{background:#f7f5f2;border-radius:16px;padding:18px 20px;color:#1a1a1a;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;border-top:3px solid transparent}
+.pf-scard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.1)}
+.pf-sc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:6px}
+.pf-sc-val{font-size:26px;font-weight:800;letter-spacing:-.4px;line-height:1;font-variant-numeric:tabular-nums;color:#1a1a1a}
+.pf-sc-sub{font-size:10px;margin-top:6px;color:#999;display:flex;align-items:center;gap:5px}
+.pf-delta{font-size:9px;font-weight:700;background:#f0ede7;color:#555;padding:1px 7px;border-radius:8px}
+.pf-sc1,.pf-sc--green{border-top-color:#16a34a}
+.pf-sc1 .pf-sc-val,.pf-sc--green .pf-sc-val{color:#15803d}
+.pf-sc2{border-top-color:#0891b2}
+.pf-sc2 .pf-sc-val{color:#0e7490}
+.pf-sc3,.pf-sc--purple{border-top-color:#7c3aed}
+.pf-sc3 .pf-sc-val,.pf-sc--purple .pf-sc-val{color:#6d28d9}
+.pf-sc4,.pf-sc--red{border-top-color:#EE2B37}
+.pf-sc4 .pf-sc-val,.pf-sc--red .pf-sc-val{color:#C41E2A}
 
 .pf-main{display:grid;grid-template-columns:1fr 300px;gap:14px}
 .pf-left{display:flex;flex-direction:column;gap:12px}
@@ -1153,10 +1172,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wlt-impact-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .wlt-impact-head h3{font-size:16px;font-weight:800;color:#1a1a1a;margin:0}
 .wlt-impact-link{font-size:11px;font-weight:700;color:#EE2B37;cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
-.pf-grid--3{grid-template-columns:repeat(3,1fr)}
-.pf-sc--green{background:linear-gradient(135deg,#15803d,#22c55e)}
-.pf-sc--purple{background:linear-gradient(135deg,#5b21b6,#7c3aed)}
-.pf-sc--red{background:linear-gradient(135deg,#b91c1c,#EE2B37)}
+.pf-grid--3{grid-template-columns:repeat(3,1fr);gap:12px}
 .wlt-goal-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:14px 18px;color:#fff}
 .wlt-goal-cta strong{font-size:13px;font-weight:700}
 .wlt-goal-cta button{background:#EE2B37;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
@@ -1453,7 +1469,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .watch-kpi-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .watch-kpi-bar .journey-hero-stat{padding:10px 12px}
 .watch-kpi-bar .journey-hero-stat-val{font-size:18px}
-.watch-live-stage{position:relative;min-height:420px;background:#0d0d0d}
+.watch-live-stage{position:relative;min-height:420px;background:#0d0d0d url('assets/dash-hero-audience.jpg') center/cover no-repeat}
 .watch-live-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .watch-live-stage::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.2) 40%,rgba(0,0,0,.75) 100%);z-index:1;pointer-events:none}
 .watch-live-stage>*:not(.watch-live-video){position:relative;z-index:2}
@@ -1686,6 +1702,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 }
 .dash-pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pillar-accent,#EE2B37);opacity:.85}
 .dash-pillar:hover{border-color:var(--pillar-accent,#EE2B37);background:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(27,42,74,.07)}
+.dash-pillar:focus-visible{outline:2px solid var(--pillar-accent,#EE2B37);outline-offset:2px}
 .dash-pillar-top{margin-bottom:8px}
 .dash-pillar-step{
   font-size:18px;font-weight:800;color:var(--pillar-accent,#EE2B37);letter-spacing:-.02em;
@@ -1875,23 +1892,23 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div style="font-size:10px;font-weight:600;color:#C41E2A">My GRACE Members Portal</div>
   </div>
   <div class="sb-scroll">
-    <div class="nb active" id="nav-home" onclick="goSection('home')">
+    <div class="nb active" id="nav-home" onclick="goSection('home')" role="button" tabindex="0" aria-current="page">
       <span class="nb-ico" data-grace-icon="home" data-grace-size="20"></span><span class="nb-label">My Church</span>
     </div>
-    <div class="nb" id="nav-ai" onclick="goSection('ai')">
+    <div class="nb" id="nav-ai" onclick="goSection('ai')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="leadership" data-grace-size="20"></span><span class="nb-label">My Leadership</span>
     </div>
-    <div class="nb" id="nav-give" onclick="openWalletTab('give')">
+    <div class="nb" id="nav-give" onclick="openWalletTab('give')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="give" data-grace-size="20"></span><span class="nb-label">My GRACE Impact Card</span>
     </div>
-    <div class="nb" id="nav-community" onclick="openNetworkTab('community')">
+    <div class="nb" id="nav-community" onclick="openNetworkTab('community')" role="button" tabindex="0" aria-label="Connect, 5 new">
       <span class="nb-ico" data-grace-icon="people" data-grace-size="20"></span><span class="nb-label">Connect</span>
       <span class="nb-badge nb-badge-orange">5</span>
     </div>
-    <div class="nb" id="nav-profile" onclick="openProfileTab('overview')">
+    <div class="nb" id="nav-profile" onclick="openProfileTab('overview')" role="button" tabindex="0">
       <span class="nb-ico" data-grace-icon="profile" data-grace-size="20"></span><span class="nb-label">My Journey</span>
     </div>
-    <div class="nb" id="nav-mobile" onclick="goSection('mobile')">
+    <div class="nb" id="nav-mobile" onclick="goSection('mobile')" role="button" tabindex="0">
       <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="nb-label">Link to Mobile</span>
     </div>
     <div class="sb-member">
@@ -1981,31 +1998,31 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
         <div class="dash-mod-body">
           <div class="dash-pillars">
-            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')">
+            <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
               <div class="dash-pillar-name">Journey</div>
               <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
               <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
             </div>
-            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')">
+            <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
               <div class="dash-pillar-name">Impact</div>
               <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
               <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
             </div>
-            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')">
+            <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
               <div class="dash-pillar-name">Care</div>
               <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
               <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
             </div>
-            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')">
+            <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
               <div class="dash-pillar-name">Connect</div>
               <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
               <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
             </div>
-            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()">
+            <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
               <div class="dash-pillar-name">Giving</div>
               <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
@@ -2551,7 +2568,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   <img class="post-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt="">
                 </div>
                 <div class="post-meta">
-                  <div class="post-name">Sarah Johnson</div>
+                  <div class="post-name">Patricia Thomas</div>
                   <div class="post-role">Member · Women of Grace</div>
                 </div>
                 <div class="post-time">4 hr ago</div>
@@ -2576,7 +2593,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <button class="pact" id="pray-2" onclick="togglePray('pray-2','count-2')"><span class="pact-ico">🙏</span><span class="pact-count" id="count-2">42</span> Pray</button>
                 <button class="pact" id="amen-2" onclick="toggleAmen('amen-2','acount-2')"><span class="pact-ico">🙌</span><span class="pact-count" id="acount-2">61</span> Amen</button>
                 <button class="pact" onclick="toggleComment('comments-2')"><span class="pact-ico">💬</span><span class="pact-count">8</span> Comment</button>
-                <button class="pact" onclick="sharePost('Sarah\'s milestone')"><span class="pact-ico">↗</span> Share</button>
+                <button class="pact" onclick="sharePost('Patricia\'s milestone')"><span class="pact-ico">↗</span> Share</button>
               </div>
               <div class="comment-area" id="comments-2">
                 <div class="comment-input-row"><img class="comment-av-sm" src="https://randomuser.me/api/portraits/women/42.jpg" alt=""><input class="comment-input" placeholder="Write a comment..." onkeydown="if(event.key==='Enter')addComment(this,'comments-2')"></div>
@@ -2591,7 +2608,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   <img class="post-av" src="https://randomuser.me/api/portraits/men/75.jpg" alt="">
                 </div>
                 <div class="post-meta">
-                  <div class="post-name">Jake Hernandez</div>
+                  <div class="post-name">Kevin Martinez</div>
                   <div class="post-role">Youth Group · Just now</div>
                 </div>
                 <div class="post-time">5 hr ago</div>
@@ -2619,7 +2636,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   <img class="post-av" src="https://randomuser.me/api/portraits/men/33.jpg" alt="">
                 </div>
                 <div class="post-meta">
-                  <div class="post-name">David Kim</div>
+                  <div class="post-name">David Park</div>
                   <div class="post-role">Member · Young Adults</div>
                 </div>
                 <div class="post-time">Yesterday</div>
@@ -2668,7 +2685,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div class="post-body">
                 <div class="post-type-badge ptb-event">📺 Watch Party</div>
-                <div style="font-size:13px;color:#374151;margin-bottom:8px">12 members from Young Adults watched the 9:45 AM Sunday service together at David Kim's home in Henderson, NV. 🙌</div>
+                <div style="font-size:13px;color:#374151;margin-bottom:8px">12 members from Young Adults watched the 9:45 AM Sunday service together at David Park's home in Henderson, NV. 🙌</div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
                   <div style="font-size:11px;background:#f7f5f2;padding:4px 10px;border-radius:8px;color:#555">📍 Henderson, NV</div>
                   <div style="font-size:11px;background:#dcfce7;padding:4px 10px;border-radius:8px;color:#15803d">✓ 68 min avg watch time</div>
@@ -2697,7 +2714,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/men/32.jpg" alt=""><div class="an-name">Pastor James</div></div>
               <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/women/44.jpg" alt=""><div class="an-name">Sandra</div></div>
               <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/men/54.jpg" alt=""><div class="an-name">Derek</div></div>
-              <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><div class="an-name">Sarah</div></div>
+              <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/women/29.jpg" alt=""><div class="an-name">Patricia</div></div>
               <div class="an-av-wrap" onclick="greetActiveMember(this)" style="cursor:pointer"><img class="an-av" src="https://randomuser.me/api/portraits/men/33.jpg" alt=""><div class="an-name">David</div></div>
             </div>
           </div>
@@ -2707,12 +2724,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="panel-head"><div class="panel-title">Connection requests</div><div style="font-size:10px;background:#FFF0F1;color:#000000;padding:2px 8px;border-radius:8px;font-weight:700" id="net-req-badge">2 new</div></div>
             <div class="req-row">
               <img class="req-av" src="https://randomuser.me/api/portraits/women/55.jpg" alt="">
-              <div><div class="req-name">Linda Park</div><div class="req-mutual">3 mutual connections · Women of Grace</div></div>
+              <div><div class="req-name">Elena Rodriguez</div><div class="req-mutual">3 mutual connections · Women of Grace</div></div>
               <div class="req-btns"><button class="req-accept" onclick="acceptReq(this)">Accept</button><button class="req-decline" onclick="declineReq(this)">✕</button></div>
             </div>
             <div class="req-row">
               <img class="req-av" src="https://randomuser.me/api/portraits/men/61.jpg" alt="">
-              <div><div class="req-name">James Reed</div><div class="req-mutual">1 mutual connection · Prayer Warriors</div></div>
+              <div><div class="req-name">Jason Reed</div><div class="req-mutual">1 mutual connection · Prayer Warriors</div></div>
               <div class="req-btns"><button class="req-accept" onclick="acceptReq(this)">Accept</button><button class="req-decline" onclick="declineReq(this)">✕</button></div>
             </div>
           </div>
@@ -2721,7 +2738,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="panel-head"><div class="panel-title">Groups &amp; Events</div><div class="panel-link">Open →</div></div>
             <div style="padding:12px 16px;font-size:12px;color:#666;line-height:1.55">
               <div><strong style="color:#1a1a1a">Women of Grace</strong> · Thu 6 PM</div>
-              <div style="margin-top:6px"><strong style="color:#1a1a1a">Next event:</strong> Sunday Service · Jun 1</div>
+              <div style="margin-top:6px"><strong style="color:#1a1a1a">Next event:</strong> <span class="js-next-sunday">Sunday Service</span></div>
             </div>
           </div>
 
@@ -2741,13 +2758,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
         <div class="ge-hero ge-hero--featured">
           <div>
-            <div class="ge-hero-eyebrow">Church calendar · June 2026</div>
+            <div class="ge-hero-eyebrow js-calendar-eyebrow">Church calendar</div>
             <h2>Groups &amp; Events</h2>
             <p>Your small groups and church calendar in one place</p>
           </div>
           <div class="ge-next">
             <div class="ge-next-lbl">Up next</div>
-            <div class="ge-next-name" id="ge-next-name">Sunday Service · Jun 1 · 10 AM</div>
+            <div class="ge-next-name js-next-sunday-time" id="ge-next-name">Sunday Service · 9:45 AM</div>
             <button class="event-rsvp going" style="margin-top:8px;font-size:11px" onclick="event.stopPropagation()">Going ✓</button>
           </div>
         </div>
@@ -2813,32 +2830,32 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="event-filter-pill" onclick="filterNetEvents('special',this)">Special</div>
             </div>
             <div id="net-event-list">
-              <div class="event-row" data-evcat="service">
+              <div class="event-row" data-evcat="service" data-ev-weekday="0" data-ev-week="0">
                 <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:#fff">1</div><div class="event-date-mon" style="color:rgba(255,255,255,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Sunday Service</div><div class="event-time">10:00 AM · Sanctuary</div></div>
                 <button class="event-rsvp going" onclick="rsvpEvent(this)">Going ✓</button>
               </div>
-              <div class="event-row" data-evcat="group">
+              <div class="event-row" data-evcat="group" data-ev-weekday="2" data-ev-week="0">
                 <div class="event-date" style="background:#f5e8f0"><div class="event-date-day" style="color:#7a3a6a">2</div><div class="event-date-mon" style="color:rgba(122,58,106,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Women of Grace</div><div class="event-time">6:00 PM · Room 204</div></div>
                 <button class="event-rsvp going" onclick="rsvpEvent(this)">Going ✓</button>
               </div>
-              <div class="event-row" data-evcat="service">
+              <div class="event-row" data-evcat="service" data-ev-weekday="4" data-ev-week="0">
                 <div class="event-date" style="background:#FFF0F1"><div class="event-date-day" style="color:#000000">4</div><div class="event-date-mon" style="color:rgba(122,79,26,.6)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Prayer Night</div><div class="event-time">7:00 PM · Sanctuary</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="1">
                 <div class="event-date" style="background:#fee2e2"><div class="event-date-day" style="color:#991b1b">7</div><div class="event-date-mon" style="color:rgba(153,27,27,.6)">Jun</div></div>
-                <div style="flex:1"><div class="event-name">Pentecost Sunday</div><div class="event-time">10:00 AM · Special service</div></div>
+                <div style="flex:1"><div class="event-name">Baptism Sunday</div><div class="event-time">10:00 AM · Special service</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="2">
                 <div class="event-date" style="background:#e8f5ed"><div class="event-date-day" style="color:#15803d">21</div><div class="event-date-mon" style="color:rgba(21,128,61,.6)">Jun</div></div>
-                <div style="flex:1"><div class="event-name">Father's Day Service</div><div class="event-time">10:00 AM · Bring family</div></div>
+                <div style="flex:1"><div class="event-name">Family Sunday</div><div class="event-time">10:00 AM · Bring family</div></div>
                 <button class="event-rsvp" onclick="rsvpEvent(this)">RSVP</button>
               </div>
-              <div class="event-row" data-evcat="special">
+              <div class="event-row" data-evcat="special" data-ev-weekday="0" data-ev-week="3">
                 <div class="event-date" style="background:linear-gradient(135deg,#000000,#111111)"><div class="event-date-day" style="color:#EE2B37">28</div><div class="event-date-mon" style="color:rgba(238,43,55,.7)">Jun</div></div>
                 <div style="flex:1"><div class="event-name">Summer BBQ Fellowship</div><div class="event-time">2:00 PM · Church grounds</div></div>
                 <button class="event-rsvp" style="background:#EE2B37;color:#000000;border-color:#EE2B37" onclick="rsvpEvent(this)">RSVP</button>
@@ -2896,7 +2913,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="grouplife">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Group life</span><img src="assets/causes/youth-camp.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/33.jpg" alt=""><div><div class="net-wall-name">David C.</div><div class="net-wall-role">Young Adults</div></div></div>
+              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/33.jpg" alt=""><div><div class="net-wall-name">David Park</div><div class="net-wall-role">Young Adults</div></div></div>
               <div class="net-wall-caption">Game night — real talk about faith at Central 🙌</div>
               <div class="net-wall-stats"><span>🙏 42</span><span>💬 18</span><span>↗ 6</span></div>
             </div>
@@ -2912,7 +2929,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="serve">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Serve Day</span><img src="assets/causes/food-pantry.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/47.jpg" alt=""><div><div class="net-wall-name">Michael R.</div><div class="net-wall-role">Outreach</div></div></div>
+              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/47.jpg" alt=""><div><div class="net-wall-name">Derek W.</div><div class="net-wall-role">Outreach</div></div></div>
               <div class="net-wall-caption">Packed 227 bags for the pantry — who's in next month?</div>
               <div class="net-wall-stats"><span>🙏 156</span><span>💬 31</span><span>↗ 22</span></div>
             </div>
@@ -2920,7 +2937,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="milestones">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Milestones</span><img src="assets/causes/benevolence.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/women/38.jpg" alt=""><div><div class="net-wall-name">Hannah L.</div><div class="net-wall-role">New Members</div></div></div>
+              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/women/38.jpg" alt=""><div><div class="net-wall-name">Rachel K.</div><div class="net-wall-role">New Members</div></div></div>
               <div class="net-wall-caption">Got baptized Sunday — so grateful 🤍</div>
               <div class="net-wall-stats"><span>🙏 203</span><span>💬 47</span><span>↗ 18</span></div>
             </div>
@@ -2936,7 +2953,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="grouplife">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Group life</span><img src="assets/causes/youth-camp.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/women/55.jpg" alt=""><div><div class="net-wall-name">Priya N.</div><div class="net-wall-role">Women of Grace</div></div></div>
+              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/women/55.jpg" alt=""><div><div class="net-wall-name">Amanda F.</div><div class="net-wall-role">Women of Grace</div></div></div>
               <div class="net-wall-caption">Circle night — scripture, snacks, and honest prayer 🌸</div>
               <div class="net-wall-stats"><span>🙏 38</span><span>💬 14</span><span>↗ 5</span></div>
             </div>
@@ -2952,7 +2969,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="serve">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Missions</span><img src="assets/causes/guatemala.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/47.jpg" alt=""><div><div class="net-wall-name">Marcus C.</div><div class="net-wall-role">Missions</div></div></div>
+              <div class="net-wall-user"><img src="https://randomuser.me/api/portraits/men/47.jpg" alt=""><div><div class="net-wall-name">Thomas W.</div><div class="net-wall-role">Missions</div></div></div>
               <div class="net-wall-caption">Missions update — clean water for 40 families</div>
               <div class="net-wall-stats"><span>🙏 94</span><span>💬 22</span><span>↗ 15</span></div>
             </div>
@@ -2980,7 +2997,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div class="mobile-link-preview">
             <img
               class="mobile-preview-img"
-              src="/previews/assets/Memebers portal cell.png"
+              src="/previews/assets/members-portal-phone.png"
               alt="Central Church Members Card Portal on iPhone"
               width="270"
               height="585"
@@ -3591,7 +3608,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="watch-immersive">
         <div class="watch-immersive-layout">
           <div class="watch-live-stage" id="watch-live-stage">
-            <video class="watch-live-video" id="watch-live-video" src="https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4" muted loop playsinline autoplay aria-hidden="true"></video>
+            <video class="watch-live-video" id="watch-live-video" src="assets/watch/video/Church-Stage-video.mp4" poster="assets/dash-hero-audience.jpg" muted loop playsinline autoplay aria-hidden="true" onerror="this.style.display='none'"></video>
             <div class="watch-live-top">
               <div class="watch-live-badge" aria-live="polite">
                 <span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:ld 1.4s infinite"></span>LIVE · <span id="watch-live-badge-time">9:45 AM</span>
@@ -4167,6 +4184,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <div class="did-studio-overlay" id="did-studio-overlay" onclick="if(event.target===this)closeDidStudio()" role="dialog" aria-modal="true" aria-labelledby="did-studio-title">
   <div class="did-studio-modal">
     <button type="button" class="did-studio-close" onclick="closeDidStudio()" aria-label="Close conversation">×</button>
+    <div class="ai-did-title-bar" id="did-studio-title"><div>Chat</div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
     <div class="ai-did-studio" id="ai-did-studio">
       <div class="ai-did-media">
         <div class="ai-did-media-bg" aria-hidden="true"></div>
@@ -4183,7 +4201,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
       <div class="ai-did-chat-panel">
-        <div class="ai-did-chat-head" id="did-studio-title">Chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
+        <div class="ai-did-chat-head">Preview chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> Preview</span></div>
         <div class="ai-chat-messages" id="did-chat-messages"></div>
         <div class="ai-input-bar">
           <button type="button" class="ai-mic" id="did-mic-btn" onclick="toggleDidMic()" title="Hold to speak">🎤</button>
@@ -4342,7 +4360,7 @@ function initMobileSharePanel(){
     });
   }
 }
-const WATCH_LIVE_VIDEO='https://divinity-agi.s3.ca-central-1.amazonaws.com/Church-Stage-video.mp4';
+const WATCH_LIVE_VIDEO='assets/watch/video/Church-Stage-video.mp4';
 let watchLiveTimers=[];
 let watchViewerCount=342;
 let watchChatIdx=0;
@@ -4609,7 +4627,7 @@ function leaderFollowUpLine(leader){return GRACE_MESSAGING.leaderFollowUpLine(le
 function leaderChatPlaceholder(name){return GRACE_MSG.leaderAvatar.chatPlaceholder(name);}
 
 /* ══ HOME CHAT + D-ID STUDIO ══ */
-let didAgentMounted=false;
+let didAgentMountedFor=null;
 let graceFaqOpen=0;
 function toggleGraceFaq(i){
   const isOpen=graceFaqOpen===i;
@@ -4663,13 +4681,21 @@ function syncHomeLeaderStrip(){
   if(av)av.src=leader.img;
   if(name)name.textContent=leader.name;
 }
+function didLeaderCreds(leader){
+  return {
+    agentId:(leader&&leader.didAgentId)||DID_STUDIO_CONFIG.agentId,
+    clientKey:(leader&&leader.didClientKey)||DID_STUDIO_CONFIG.clientKey
+  };
+}
 function syncDidStudioLeader(){
   const leader=aiLeaders[currentLeader];
   if(!leader)return;
   const img=document.getElementById('did-avatar-img');
-  if(img){img.src=leader.img;img.style.opacity=didAgentMounted?'0':'1';}
+  if(img){img.src=leader.img;img.style.opacity=didAgentMountedFor===currentLeader?'0':'1';}
+  const creds=didLeaderCreds(leader);
+  const live=!!(creds.agentId&&creds.clientKey);
   const head=document.getElementById('did-studio-title');
-  if(head)head.innerHTML='Chat · '+leader.name+' <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span>';
+  if(head)head.innerHTML='<div>Chat · '+leader.name+'<span class="did-verified-badge">✓ Verified Leader</span></div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> '+(live?'D-ID Studio':'Preview')+'</span>';
 }
 function seedDidChat(){
   const box=document.getElementById('did-chat-messages');
@@ -4679,18 +4705,37 @@ function seedDidChat(){
   box.dataset.seeded='1';
 }
 function mountDidAgentEmbed(){
-  if(didAgentMounted||!DID_STUDIO_CONFIG.agentId||!DID_STUDIO_CONFIG.clientKey)return;
   const host=document.getElementById('did-agent-host');
-  if(!host)return;
+  const studio=document.getElementById('ai-did-studio');
+  if(!host||!studio)return;
+  const leader=aiLeaders[currentLeader];
+  const creds=didLeaderCreds(leader);
+  const img=document.getElementById('did-avatar-img');
+  if(!creds.agentId||!creds.clientKey){
+    // Preview mode — this leader has no D-ID agent yet. Tear down any
+    // agent left mounted from a previous leader so their video/session
+    // can't bleed into this conversation.
+    if(didAgentMountedFor!==null){host.innerHTML='';didAgentMountedFor=null;}
+    studio.classList.remove('ai-did-studio--live');
+    if(img)img.style.opacity='1';
+    return;
+  }
+  if(didAgentMountedFor===currentLeader)return;
+  host.innerHTML='';
   const s=document.createElement('script');
   s.type='module';
   s.src='https://agent.d-id.com/v2/index.js';
   s.setAttribute('data-mode','full');
-  s.setAttribute('data-agent-id',DID_STUDIO_CONFIG.agentId);
-  s.setAttribute('data-client-key',DID_STUDIO_CONFIG.clientKey);
+  s.setAttribute('data-agent-id',creds.agentId);
+  s.setAttribute('data-client-key',creds.clientKey);
+  s.setAttribute('data-name','did-agent');
+  s.setAttribute('data-monitor','true');
+  // Without data-target-id the widget ignores the host div and floats in
+  // its own placement — same fix as the CRM's DidStudioModal.
+  s.setAttribute('data-target-id','did-agent-host');
   host.appendChild(s);
-  didAgentMounted=true;
-  const img=document.getElementById('did-avatar-img');
+  didAgentMountedFor=currentLeader;
+  studio.classList.add('ai-did-studio--live');
   if(img)img.style.opacity='0';
 }
 function openDidStudio(prefill){
@@ -4866,6 +4911,16 @@ function openDivinityAvatar(idx){
   const i=(idx!==null&&idx!==undefined)?idx:currentLeader;
   const l=aiLeaders[i];
   if(!l)return;
+  // Leaders with their own D-ID Studio agent get the same portrait
+  // phone-frame conversation as the Leadership CRM (DidStudioModal).
+  // The Divinity session below stays as the fallback until each
+  // leader's agent is credentialed.
+  if(l.didAgentId&&l.didClientKey){
+    closeLeaderProfile();
+    currentLeader=i;
+    openDidStudio();
+    return;
+  }
   closeLeaderProfile();
   closeDidStudio();
   divinitySessionLeader=i;
@@ -5175,6 +5230,36 @@ function formatHomeDate(){
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} · Central Henderson`;
 }
+// Fill "next Sunday" markers with a real upcoming date (was hardcoded "Jun 1").
+(function(){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d=new Date();
+  d.setDate(d.getDate()+((7-d.getDay())%7));
+  const label=months[d.getMonth()]+' '+d.getDate();
+  document.querySelectorAll('.js-next-sunday').forEach(el=>{el.textContent='Sunday Service · '+label;});
+  document.querySelectorAll('.js-next-sunday-time').forEach(el=>{el.textContent='Sunday Service · '+label+' · 9:45 AM';});
+  const monthsFull=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now=new Date();
+  document.querySelectorAll('.js-calendar-eyebrow').forEach(el=>{el.textContent='Church calendar · '+monthsFull[now.getMonth()]+' '+now.getFullYear();});
+  // demoClock: event rows carry data-ev-weekday/data-ev-week — compute real
+  // future dates so demo events are never in the past (UX review 2026-07-06).
+  document.querySelectorAll('.event-row[data-ev-weekday]').forEach(row=>{
+    const wd=Number(row.dataset.evWeekday),wk=Number(row.dataset.evWeek||0);
+    const ev=new Date();
+    ev.setDate(ev.getDate()+((wd-ev.getDay()+7)%7)+wk*7);
+    const dayEl=row.querySelector('.event-date-day'),monEl=row.querySelector('.event-date-mon');
+    if(dayEl)dayEl.textContent=String(ev.getDate());
+    if(monEl)monEl.textContent=months[ev.getMonth()];
+  });
+  // Community feed "attending" card: next Sunday +3 weeks (Summer BBQ seed).
+  (function(){
+    const day=document.querySelector('.post-event-card .pec-day'),mon=document.querySelector('.post-event-card .pec-mon');
+    if(!day||!mon)return;
+    const ev=new Date();
+    ev.setDate(ev.getDate()+((7-ev.getDay())%7)+21);
+    day.textContent=String(ev.getDate());mon.textContent=months[ev.getMonth()];
+  })();
+})();
 function formatHomeGreeting(){
   const h=new Date().getHours();
   const period=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
@@ -5197,7 +5282,15 @@ function syncHomeKpis(){
   set('home-hero-date',formatHomeDate());
   set('home-hero-greeting-name',formatHomeGreeting());
   const livePill=document.getElementById('home-live-pill');
-  if(livePill)livePill.innerHTML=`<span class="dash-live-dot"></span> Sunday Service Live · ${watchViewerCount} watching`;
+  if(livePill){
+    // Only claim "Live" during service windows (Sat 5 PM, Sun 9:45 AM–12:30 PM);
+    // otherwise offer the replay (UX review 2026-07-06).
+    const now=new Date(),day=now.getDay(),mins=now.getHours()*60+now.getMinutes();
+    const isLive=(day===0&&mins>=585&&mins<=750)||(day===6&&mins>=1020&&mins<=1110);
+    livePill.innerHTML=isLive
+      ?`<span class="dash-live-dot"></span> Sunday Service Live · ${watchViewerCount} watching`
+      :`<span class="dash-live-dot"></span> Watch · Sunday replay`;
+  }
   set('home-kpi-impact',impactMoney);
   set('home-kpi-given','$'+Number(givenMonth).toLocaleString());
   set('home-kpi-rhythm',`${level} · ${commitPct}%`);
@@ -5678,6 +5771,20 @@ function openMomentComposer(){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeWallLightbox();closeGuidelinesModal();}
 });
+/* Generic Enter/Space activation for any custom role="button" element
+   (sidebar nav, leader strip, composer input, leader tags, etc.) — a div
+   with role="button" is only keyboard-focusable via tabindex, native key
+   activation still has to be added by hand, and several of these already
+   had the role/tabindex pair without it. One delegated listener covers
+   every current and future onclick-div "button" instead of patching each
+   one's markup individually. */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const btn=e.target.closest('[role="button"]');
+  if(!btn)return;
+  e.preventDefault();
+  btn.click();
+});
 /* Wall card stats: 🙏 toggle, 💬 comment, ↗ share (delegated) */
 document.addEventListener('click',e=>{
   const stat=e.target.closest('#net-people-wall .net-wall-stats span');
@@ -5956,8 +6063,8 @@ function submitPost(){
 
 /* Live network ticker — new posts appear periodically */
 const liveNetPosts=[
-  {name:'Kezia Mensah',role:'Women of Grace',av:'https://randomuser.me/api/portraits/women/35.jpg',type:'blessings',badge:'ptb-blessing',badgeTxt:'🙌 Praise Report',body:'God came through! Got the job I\'ve been praying for. All glory to God and this community for standing with me! 🙌',pcount:12,acount:31},
-  {name:'Jake Hernandez',role:'Youth Group',av:'https://randomuser.me/api/portraits/men/25.jpg',type:'prayer',badge:'ptb-prayer',badgeTxt:'🙏 Prayer Request',body:'Please pray for my college applications — trusting God with where He wants me to go next year.',pcount:24,acount:0},
+  {name:'Susan Harris',role:'Women of Grace',av:'https://randomuser.me/api/portraits/women/35.jpg',type:'blessings',badge:'ptb-blessing',badgeTxt:'🙌 Praise Report',body:'God came through! Got the job I\'ve been praying for. All glory to God and this community for standing with me! 🙌',pcount:12,acount:31},
+  {name:'Christopher Hall',role:'Youth Group',av:'https://randomuser.me/api/portraits/men/25.jpg',type:'prayer',badge:'ptb-prayer',badgeTxt:'🙏 Prayer Request',body:'Please pray for my college applications — trusting God with where He wants me to go next year.',pcount:24,acount:0},
 ];
 let netLiveIdx=0;
 setInterval(()=>{
@@ -5991,7 +6098,7 @@ setInterval(()=>{
 
 /* ── AI HUB LOGIC ── */
 const aiLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'https://divinity-agi.s3.ca-central-1.amazonaws.com/Maya-welcome-to-Central-mp4.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',didAgentId:'v2_agt_nxzGwxew',didClientKey:'ck_cwyMiGIkm7BTZr1lrSmAO',introVideoUrl:'assets/watch/video/Maya-welcome-to-Central.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
   {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
@@ -6547,6 +6654,9 @@ function showImpactFloat(item){
   if(!float||!text||!document.getElementById('sec-home')?.classList.contains('active'))return;
   text.textContent=item.merchant+': +'+formatMoney(item.impact)+' to '+item.cause;
   float.classList.add('show');
+  // Auto-dismiss so the pill never sits over content indefinitely (UX review 2026-07-06).
+  clearTimeout(showImpactFloat.timer);
+  showImpactFloat.timer=setTimeout(dismissImpactFloat,6000);
 }
 function dismissImpactFloat(){
   document.getElementById('impact-float')?.classList.remove('show');
@@ -7505,7 +7615,7 @@ GRACE_COMPANION.mount({
   zIndex: 8800,
   voiceProvider: 'elevenlabs',
   autoDetectVoice: true,
-  ttsUrl: '/api/grace-tts',
+  ttsUrl: '/api/grace/tts',
   messaging: GRACE_MSG,
   memberName: HOME_STATE.memberName || 'Maya',
   orbs: ['.sb-grace-orb', '.av-ring-wrap--grace'],

@@ -21,11 +21,20 @@ paths = [
   '''^.*\.md$''',
   '''^supabase/seed\.sql$''',
   '''^supabase/reset_and_seed\.sql$''',
+  # Fabricated JWTs (fake payload, literal "fakesignature") used to
+  # exercise the JWT-role-decode guard in api/calendar/_ical.ts — no
+  # real key ever lives here, just enough structure to trip gitleaks'
+  # generic jwt rule as a false positive.
+  '''^api/calendar/_ical\.test\.ts$''',
 ]
 
 # Common false-positive value patterns:
 # - Placeholder/example strings users will recognize
 # - Public Supabase anon keys are intentionally public by design
+# - D-ID Agents client keys (ck_...) are public by design too: they ship
+#   verbatim in the browser embed <script data-client-key=...> and are
+#   gated server-side by the agent's Allowed Domains list in
+#   studio.d-id.com -> Manage Embed, same trust model as Supabase anon.
 regexes = [
   '''sk_test_xxx''',
   '''pk_test_xxx''',
@@ -35,6 +44,7 @@ regexes = [
   '''your-.*-here''',
   '''your-.*-key''',
   '''YOUR_USERNAME''',
+  '''\bck_[A-Za-z0-9]{20,24}\b''',
 ]
 
 # Commits we have already triaged and confirmed clean.

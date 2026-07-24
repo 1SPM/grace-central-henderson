@@ -256,7 +256,7 @@ export function GlobalSearch({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [visibleResults, activeIndex, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visibleResults, activeIndex, mode]);  
 
   const handleCopy = (text: string, id: string) => {
     copyToClipboard(text, id);

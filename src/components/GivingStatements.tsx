@@ -19,6 +19,7 @@ import {
 import { jsPDF } from 'jspdf';
 import type { Giving, Person, GivingStatement } from '../types';
 import { useToast } from './Toast';
+import { getClerkTokenProvider } from '../lib/supabase';
 
 // Helper function moved outside component
 const formatCurrency = (amount: number) => {
@@ -632,9 +633,14 @@ export function GivingStatements({
       person, data, selectedYear,
       churchName, churchAddress, churchPhone, churchEmail,
     );
+    const provider = getClerkTokenProvider();
+    const token = provider ? await provider() : null;
     const res = await fetch('/api/email/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         to: person.email,
         subject: `Your ${selectedYear} Giving Statement — ${churchName}`,

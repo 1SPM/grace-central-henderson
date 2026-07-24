@@ -82,8 +82,9 @@ describe('i2c/index — getI2cAdapter selector', () => {
     expect(a.mode).toBe('mock');
   });
 
-  it('throws (not implemented) when both liveMode + API key set — fails LOUDLY rather than silently mocking', () => {
+  it('returns live adapter when both liveMode + API key set', () => {
     process.env.I2C_API_KEY = 'test-key';
-    expect(() => getI2cAdapter({ liveMode: true })).toThrow(/not yet implemented/);
+    const a = getI2cAdapter({ liveMode: true });
+    expect(a.mode).toBe('live');
   });
 });

@@ -1,16 +1,18 @@
 /**
  * Demo marketing entry — gate CRM access until a visitor clicks a CTA.
- * Used when VITE_ENABLE_DEMO_MODE=true (grace-crm-two demo deploy).
+ * Active only on the Faithful Church demo hosts (see
+ * isDemoModeActive in ../config/tenant.ts for why this is hostname-derived
+ * rather than a raw env var).
  */
 
-import { DEMO_ONBOARDING_SKIP } from '../config/centralHenderson';
+import { TENANT_DEMO_ONBOARDING_SKIP, isDemoModeActive } from '../config/tenant';
 
 const DEMO_ENTERED_KEY = 'grace_demo_entered';
 export const DEMO_ENTERED_EVENT = 'grace-demo-entered';
 
-export const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+export const isDemoModeEnabled = isDemoModeActive();
 
-export { DEMO_ONBOARDING_SKIP };
+export { TENANT_DEMO_ONBOARDING_SKIP };
 
 export function hasEnteredDemo(): boolean {
   try {

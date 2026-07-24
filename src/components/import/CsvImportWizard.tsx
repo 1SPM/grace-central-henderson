@@ -20,7 +20,7 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../contexts/AuthContext';
 import {
   parseCsv,
   autoDetectPeopleMapping,
@@ -58,7 +58,7 @@ interface ImportProgress {
 }
 
 export function CsvImportWizard() {
-  const { getToken } = useAuth();
+  const { getAuthToken } = useAuthContext();
   const [step, setStep] = useState<Step>('upload');
   const [fileName, setFileName] = useState<string | null>(null);
   const [parsed, setParsed] = useState<CsvParseResult | null>(null);
@@ -115,7 +115,7 @@ export function CsvImportWizard() {
   const handleImport = useCallback(async () => {
     if (!validation || validation.valid.length === 0) return;
     setStep('import');
-    const token = await getToken();
+    const token = await getAuthToken();
     if (!token) {
       setImportErrors([{ row_index: -1, message: 'Sign-in token unavailable.' }]);
       setStep('done');
@@ -163,7 +163,7 @@ export function CsvImportWizard() {
 
     setImportErrors(collected);
     setStep('done');
-  }, [validation, getToken, dedupeByEmail]);
+  }, [validation, getAuthToken, dedupeByEmail]);
 
   const reset = useCallback(() => {
     setStep('upload');

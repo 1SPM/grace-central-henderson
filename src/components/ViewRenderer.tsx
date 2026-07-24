@@ -46,6 +46,7 @@ const QRCheckIn = lazy(() => import('./QRCheckIn').then(m => ({ default: m.QRChe
 const DiscipleshipEngagementHub = lazy(() =>
   import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
 );
+const WorkOsHub = lazy(() => import('./workos/WorkOsHub').then(m => ({ default: m.WorkOsHub })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
@@ -218,7 +219,7 @@ export function ViewRenderer(props: ViewRendererProps) {
   const { settings, saveOnboarding } = useChurchSettings(churchId);
   const churchName = settings?.profile?.name || 'Grace Church';
   const { getBlockedMessage } = useRouteGuard();
-  const { openPicker: openTutorialPicker } = useTutorial();
+  const { openPicker: openTutorialPicker, startPastorTour } = useTutorial();
 
   // Role-based access check
   const blockedMessage = getBlockedMessage(view);
@@ -286,12 +287,14 @@ export function ViewRenderer(props: ViewRendererProps) {
       onAssignVolunteer={handlers.assignVolunteer}
       onUpdateVolunteerStatus={handlers.updateVolunteerStatus}
       onRemoveVolunteer={handlers.removeVolunteer}
+      onNavigate={setView}
       defaultTab={defaultTab}
     />
   );
 
   const renderSettingsHub = (defaultTab?: SettingsTab) => (
     <SettingsHub
+      churchId={churchId}
       people={people}
       tasks={tasks}
       events={events}
@@ -357,6 +360,7 @@ export function ViewRenderer(props: ViewRendererProps) {
           churchSettings={settings}
           onNavigate={(v) => navigateView(v, setView)}
           onDismissGraceIntro={() => saveOnboarding({ graceIntroDismissed: true })}
+          onStartPastorTour={startPastorTour}
           onOpenTutorials={openTutorialPicker}
           leaders={pastoralCare.leaders}
           onViewLeaders={() => {
@@ -466,6 +470,13 @@ export function ViewRenderer(props: ViewRendererProps) {
 
     case 'tasks':
       return <Tasks tasks={tasks} people={people} onToggleTask={handlers.toggleTask} onAddTask={handlers.addTask} />;
+
+    case 'workos':
+      return (
+        <SafeView>
+          <WorkOsHub setView={setView} />
+        </SafeView>
+      );
 
     case 'settings':
       return renderSettingsHub();

@@ -59,7 +59,10 @@ export function LeaderContactTab({ leader, people, onNavigate }: LeaderContactTa
           </div>
           <div className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg">
             <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-500 mb-1">Email</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
+            <p
+              className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate"
+              title={contact.email || undefined}
+            >
               {contact.email || 'Not on file'}
             </p>
           </div>
@@ -90,7 +93,7 @@ export function LeaderContactTab({ leader, people, onNavigate }: LeaderContactTa
             <button
               type="button"
               onClick={openDispatch}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-rose-200 dark:border-rose-800/40 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-sm font-medium text-rose-800 dark:text-rose-300"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-200 dark:border-brand-800/40 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 dark:hover:bg-brand-900/30 text-sm font-medium text-brand-800 dark:text-brand-300"
             >
               <HeartHandshake size={14} /> Open in Crisis Dispatch
             </button>
@@ -109,7 +112,7 @@ export function LeaderContactTab({ leader, people, onNavigate }: LeaderContactTa
             className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-850 text-gray-900 dark:text-dark-100 resize-none"
           />
           {result && (
-            <p className={`text-xs mt-2 ${result.success ? 'text-emerald-600' : 'text-rose-600'}`}>
+            <p className={`text-xs mt-2 ${result.success ? 'text-emerald-600' : 'text-brand-600'}`}>
               {result.message}
             </p>
           )}

@@ -1,0 +1,428 @@
+/* Faithful Church — generic white-label member portal theme */
+@import url('assets/fonts/grace-fonts.css');
+
+:root {
+  /* GRACE navy palette */
+  --grace-navy-950: #0c1929;
+  --grace-navy-800: #1e3a5f;
+  --grace-sky-500: #449eca;
+  --grace-off-white: #f8f9fb;
+  --grace-white: #ffffff;
+
+  --shadow-card: 0 12px 28px rgba(12, 25, 41, 0.12);
+
+  /* Map legacy --central-* tokens for existing portal markup */
+  --central-red: var(--grace-sky-500);
+  --central-red-hover: #3a8ab5;
+  --central-black: var(--grace-navy-950);
+  --central-white: var(--grace-white);
+  --central-grey: #64748b;
+  --central-canvas: var(--grace-off-white);
+  --central-card: var(--grace-white);
+  --central-line: #e2e8f0;
+  --central-red-soft: #e8f4fa;
+  --central-ink-soft: var(--grace-navy-800);
+
+  --font-brand: var(--font-display);
+  --font-web: var(--font-body);
+
+  --container-max: 1180px;
+  --section-padding-desktop: 96px;
+  --section-padding-tablet: 72px;
+  --section-padding-mobile: 48px;
+
+  --radius-button: 999px;
+  --radius-card: 18px;
+  --radius-panel: 22px;
+
+  --transition-fast: 180ms ease;
+  --transition-slow: 240ms cubic-bezier(.16, 1, .3, 1);
+
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-heading: var(--font-display);
+  --accent: var(--grace-sky-500);
+  --text: var(--grace-navy-950);
+  --bg: var(--grace-white);
+  --bg-muted: var(--grace-off-white);
+  --bg-dark: var(--grace-navy-950);
+  --text-on-dark: var(--grace-white);
+  --accent-soft: #e8f4fa;
+  --border: var(--central-line);
+  --brand-accent: var(--grace-sky-500);
+  --brand-dark: var(--grace-navy-950);
+  --brand-soft: #e8f4fa;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--grace-off-white);
+  color: var(--grace-navy-950);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+.card-title,
+.hero-name,
+.dash-pillar-name,
+.sb-church,
+.tb-title,
+.dash-mod-title {
+  font-family: var(--font-display);
+  color: var(--grace-navy-950);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+h1 { font-size: clamp(40px, 6vw, 72px); }
+h2 { font-size: clamp(30px, 4vw, 48px); }
+h3 { font-size: clamp(21px, 2.5vw, 30px); }
+
+p,
+label,
+input,
+button,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+.financial-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: linear-gradient(145deg, var(--grace-navy-800), var(--grace-navy-950));
+  color: var(--grace-white);
+  box-shadow: var(--shadow-card);
+}
+
+.financial-card::after {
+  content: "";
+  position: absolute;
+  right: -35px;
+  bottom: -70px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: rgba(68, 158, 202, 0.18);
+}
+
+.financial-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.72;
+}
+
+.financial-card-value {
+  margin-top: 8px;
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.accent { color: var(--grace-sky-500); }
+.bg-dark { background: var(--grace-navy-950); color: var(--grace-white); }
+.bg-light { background: var(--grace-white); color: var(--grace-navy-950); }
+.bg-muted { background: var(--grace-off-white); }
+.border-accent { border-color: var(--grace-sky-500); }
+
+.sb {
+  background: var(--grace-white);
+  border-right-color: var(--central-line);
+}
+
+.sb-church {
+  font-family: var(--font-display);
+  color: var(--grace-navy-950);
+}
+
+.sb-av { border-color: var(--grace-sky-500); }
+
+.sb-tier {
+  background: var(--central-red-soft);
+  color: var(--grace-navy-800);
+  border-radius: var(--radius-button);
+}
+
+.sb-tier-dot,
+.nb-badge,
+.nb-badge-orange,
+.sd-on,
+.token-val {
+  background: var(--grace-sky-500);
+}
+
+.nb {
+  border-radius: calc(var(--radius-card) - 4px);
+  transition: background var(--transition-fast);
+}
+
+.nb.active { background: var(--grace-off-white); }
+.nb.active .nb-label { color: var(--grace-navy-950); font-weight: 600; }
+.nb-label { font-family: var(--font-body); color: var(--central-grey); }
+
+.card,
+.hero-card,
+.blessing-card,
+.pulse-card,
+.dash-pillar,
+.tile,
+.give-amt {
+  border-radius: var(--radius-card);
+}
+
+.card-link,
+.ba-outline,
+.blessing-role,
+.blessing-verse,
+.lc-topic {
+  color: var(--grace-sky-500);
+}
+
+.ba-primary,
+.home-live-pill,
+.pilot-next-btn {
+  background: var(--grace-sky-500);
+  color: var(--grace-white);
+  border-radius: var(--radius-button);
+  transition: background var(--transition-fast);
+}
+
+.ba-primary:hover,
+.home-live-pill:hover,
+.pilot-next-btn:hover {
+  background: var(--central-red-hover);
+}
+
+.co { padding-bottom: var(--section-padding-mobile); }
+.tb-title { color: var(--grace-navy-950); }
+.tb-search,
+.tb-bell {
+  border-radius: var(--radius-card);
+  border-color: var(--central-line);
+}
+
+.platform-note,
+.token-label,
+.pulse-sub {
+  color: var(--central-grey);
+}
+
+.grace-ic { display: block; flex-shrink: 0; }
+.grace-inline { display: inline-flex; align-items: center; gap: 6px; }
+.ic-tile {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-card);
+  background: var(--central-red-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ic-row {
+  width: 34px;
+  height: 34px;
+  border-radius: calc(var(--radius-card) - 2px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+}
+.nb-ico, .tile-ico, .dash-hub-ico, .pf-mc-ico, .badge-circle,
+.post-av-icon, .tb-bell, .tb-search, .pf-qa-ico, .tx-ico, .pf-tx-ico,
+.central-action-ico, .video-play-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  line-height: 0;
+}
+.badge-circle, .post-av-icon { background: var(--central-red-soft) !important; }
+.pf-mc-ico { min-height: 28px; }
+.qcmd { display: inline-flex; align-items: center; gap: 6px; }
+
+.pulse-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--grace-sky-500);
+  animation: ld 1.4s infinite;
+  flex-shrink: 0;
+}
+@keyframes ld {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-card {
+  background: var(--central-card);
+  border: 1px solid var(--central-line);
+  padding: 16px;
+}
+.pulse-score {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--grace-sky-500);
+  line-height: 1;
+  font-family: var(--font-display);
+}
+.pulse-sub { font-size: 10px; margin-top: 4px; }
+.pulse-activity { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.pulse-act { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #555; line-height: 1.4; font-family: var(--font-body); }
+.pulse-act strong { color: var(--grace-navy-950); font-weight: 600; }
+.pulse-act-time { font-size: 9px; color: var(--central-grey); display: block; margin-top: 2px; }
+.sb-pulse-block { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--central-line); width: 100%; }
+.sb-commitment { font-size: 10px; font-weight: 700; color: var(--grace-sky-500); text-align: center; font-family: var(--font-display); }
+
+.dash-pillar {
+  border-radius: var(--radius-card);
+  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.dash-pillar-name { font-family: var(--font-display); }
+.dash-pillar-badge { border-radius: var(--radius-button); }
+
+.net-hero-logo,
+.tb-church-mark {
+  height: 28px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+}
+
+/* Sidebar nav — sky icons, soft active state */
+.nb:hover {
+  background: var(--central-red-soft);
+}
+
+.nb.active {
+  background: var(--central-red-soft);
+  box-shadow: inset 3px 0 0 var(--grace-sky-500);
+}
+
+.nb .nb-ico svg {
+  color: var(--grace-sky-500);
+}
+
+.nb.active .nb-ico svg {
+  color: var(--grace-navy-800);
+}
+
+/* Primary actions — sky blue instead of black */
+.give-amt:hover,
+.give-amt.active,
+.give-btn,
+.lc-btn-ai,
+.ai-send,
+.pcare-new-btn,
+.feed-tab.active,
+.pec-date,
+.conn-action:hover,
+.req-accept,
+.pm-post-btn,
+.pf-cs-save,
+.cause-ftab.active,
+.cause-btn-give,
+.wlt-tab.active,
+.wlt-grace-ctas .wlt-btn-primary,
+.wlt-act-tab.active,
+.net-wall-filter.active,
+.net-tab.active,
+.event-filter-pill.active,
+.journey-nav-btn.active,
+.journey-jtab.active,
+.study-step-dot.active,
+.study-step-btn,
+.grace-faq-block .faq-card.open .faq-toggle,
+.wallet-act-primary,
+.lg-profile-btn:hover,
+.wallet-copy-btn:hover {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.give-btn:hover,
+.pcare-new-btn:hover,
+.pm-post-btn:hover,
+.pf-cs-save:hover,
+.cause-btn-give:hover,
+.study-step-btn:hover {
+  background: var(--central-red-hover) !important;
+  border-color: var(--central-red-hover) !important;
+}
+
+.pf-qa:hover .pf-qa-ico {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.hero-card {
+  background: linear-gradient(135deg, var(--grace-navy-800) 0%, var(--grace-navy-950) 60%, var(--grace-navy-800) 100%) !important;
+}
+
+.hero-card::before {
+  background: rgba(68, 158, 202, 0.18) !important;
+}
+
+.pf-calc-result {
+  background: linear-gradient(135deg, var(--grace-navy-800), var(--grace-navy-950)) !important;
+}
+
+button[style*="background:#000"],
+button[style*="background: #000"],
+button[style*="background:#000000"],
+button[style*="background: #000000"] {
+  background: var(--grace-sky-500) !important;
+  border-color: var(--grace-sky-500) !important;
+  color: var(--grace-white) !important;
+}
+
+.blessing-card,
+.dash-blessing-compact,
+.dash-outreach-assigned {
+  background: linear-gradient(135deg, var(--central-red-soft), var(--grace-off-white)) !important;
+  border-color: #c5e3f2 !important;
+}
+
+.blessing-role,
+.blessing-verse,
+.crisis-hotline-action,
+.lco-row-action,
+.dash-outreach-assigned-role {
+  color: var(--grace-sky-500) !important;
+}
+
+.tile:hover {
+  background: var(--central-red-soft) !important;
+  border-color: #c5e3f2 !important;
+}
+
+.dash-hero-leader .home-leader-strip-cta {
+  color: #a8daf0 !important;
+}
+
+@media (min-width: 768px) {
+  .co { padding-bottom: var(--section-padding-tablet); }
+}
+
+@media (min-width: 1024px) {
+  .co { padding-bottom: var(--section-padding-desktop); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nb,
+  .dash-pillar,
+  .ba-primary,
+  .home-live-pill {
+    transition: none;
+  }
+  .pulse-live-dot {
+    animation: none;
+  }
+}

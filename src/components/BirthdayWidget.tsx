@@ -66,7 +66,7 @@ export function BirthdayWidget({ people, onViewPerson }: BirthdayWidgetProps) {
   return (
     <div className="bg-stone-100 dark:bg-dark-850 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-brand-500 rounded-xl flex items-center justify-center">
           <Cake className="text-white" size={20} />
         </div>
         <div>
@@ -91,12 +91,12 @@ export function BirthdayWidget({ people, onViewPerson }: BirthdayWidgetProps) {
               onClick={() => onViewPerson(person.id)}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all group ${
                 daysUntil === 0
-                  ? 'bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-500/10 dark:to-rose-500/10 border border-pink-200 dark:border-pink-500/30'
+                  ? 'bg-gradient-to-r from-pink-50 to-brand-50 dark:from-pink-500/10 dark:to-brand-500/10 border border-pink-200 dark:border-pink-500/30'
                   : 'hover:bg-gray-50 dark:hover:bg-dark-800'
               }`}
             >
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white font-medium">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-brand-500 rounded-full flex items-center justify-center text-white font-medium">
                   {person.firstName[0]}{person.lastName[0]}
                 </div>
                 {daysUntil === 0 && (

@@ -167,7 +167,19 @@ function convertLegacyGiving(g: LegacyGiving): Giving {
 }
 
 // Main hook for all data
-export function useSupabaseData() {
+//
+// authReady gates the initial fetch on the caller's auth-provider being
+// fully initialized (Clerk token provider registered — see AuthContext's
+// isLoaded). Supabase client requests fire the instant this hook mounts;
+// without this gate, the query races AuthContext's own token-provider
+// registration effect (a *parent* effect, which runs after this hook's
+// *child* effect on first mount) and goes out with the anon key. RLS then
+// legitimately scopes that anon request to nothing — no error, just an
+// empty result — so a real (non-demo) tenant would silently see zero
+// people/tasks/etc. forever, with no retry. Demo-mode testing never
+// exercises this path (it skips Supabase entirely), which is why it went
+// unnoticed until a real tenant's data was inspected.
+export function useSupabaseData(authReady: boolean = true) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDemo, setIsDemo] = useState(!isSupabaseConfigured());
@@ -184,6 +196,8 @@ export function useSupabaseData() {
 
   // Load initial data
   useEffect(() => {
+    if (!authReady) return;
+
     async function loadData() {
       setIsLoading(true);
       setError(null);
@@ -274,7 +288,7 @@ export function useSupabaseData() {
     }
 
     loadData();
-  }, []);
+  }, [authReady]);
 
   // ==========================================
   // PEOPLE CRUD

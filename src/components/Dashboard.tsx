@@ -30,7 +30,7 @@ import {
   countDetailSections,
   findNextEventLabel,
 } from '../lib/dashboardSummary';
-import { CENTRAL_HENDERSON_TIMEZONE } from '../config/centralHenderson';
+import { TENANT_TIMEZONE } from '../config/tenant';
 
 interface DashboardProps {
   churchId?: string;
@@ -52,6 +52,7 @@ interface DashboardProps {
   churchSettings?: ChurchSettings;
   onNavigate?: (view: string) => void;
   onDismissGraceIntro?: () => void;
+  onStartPastorTour?: () => void;
   onOpenTutorials?: () => void;
   leaders?: LeaderProfile[];
   onViewLeaders?: () => void;
@@ -76,6 +77,7 @@ export function Dashboard({
   churchSettings,
   onNavigate,
   onDismissGraceIntro,
+  onStartPastorTour,
   onOpenTutorials,
   careConversations = [],
 }: DashboardProps) {
@@ -84,7 +86,7 @@ export function Dashboard({
   const portalActivity = usePortalActivity(churchId ?? '');
   const { user } = useAuthContext();
   const churchName = churchSettings?.profile?.name || 'Central Henderson Church';
-  const timezone = churchSettings?.timezone || CENTRAL_HENDERSON_TIMEZONE;
+  const timezone = churchSettings?.timezone || TENANT_TIMEZONE;
   const { zoned, churchTodayKey } = useChurchClock(timezone);
   const greeting = greetingWord(zoned.hour24);
   const addressee = resolveAddressee(user?.firstName, user?.role);
@@ -150,7 +152,10 @@ export function Dashboard({
   const workQueue = onViewActions ?? onViewTasks;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    // pb-24: clears the floating "Ask Grace" dock (fixed bottom-6, ~56px
+    // tall) so it doesn't sit on top of the last card's content when
+    // scrolled to the bottom — see AskGrace.tsx.
+    <div className="p-6 pb-24 max-w-7xl mx-auto">
       <DashboardCommandBar
         greeting={greeting}
         addressee={addressee}
@@ -164,8 +169,32 @@ export function Dashboard({
         onWorkQueue={workQueue}
         onMail={() => onNavigate?.('mail')}
         onSundayPrep={() => onNavigate?.('sunday-prep')}
+        onStartPastorTour={onStartPastorTour}
         onOpenTutorials={onOpenTutorials}
       />
+
+      {/*
+        Pulse (people/money/care) leads, calendar follows. A pastor's first
+        read of the day is "how are we doing," not "what's the grid look
+        like" — the old order put a mostly-empty month grid above the one
+        row of numbers that actually answers that question.
+      */}
+      <DashboardPulse
+        metrics={metrics}
+        peopleCount={people.length}
+        visitorsCount={visitors.length}
+        peopleSparkline={peopleSparkline}
+        portalActive7d={portalActive7d}
+        portalLogins7d={portalLogins7d}
+        onViewPeople={onViewPeople}
+        onViewGiving={onViewGiving}
+        onViewPastoralCare={() => onNavigate?.('pastoral-care')}
+        onViewPortalActivity={() => onNavigate?.('discipleship-engagement')}
+      />
+
+      {!churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
+        <GraceGettingStartedPanel churchName={churchName} onDismiss={onDismissGraceIntro} />
+      )}
 
       <ClockCalendarBanner
         className="mb-6"
@@ -191,23 +220,6 @@ export function Dashboard({
             variant="embedded"
           />
         }
-      />
-
-      {!churchSettings?.onboarding?.graceIntroDismissed && onDismissGraceIntro && (
-        <GraceGettingStartedPanel churchName={churchName} onDismiss={onDismissGraceIntro} />
-      )}
-
-      <DashboardPulse
-        metrics={metrics}
-        peopleCount={people.length}
-        visitorsCount={visitors.length}
-        peopleSparkline={peopleSparkline}
-        portalActive7d={portalActive7d}
-        portalLogins7d={portalLogins7d}
-        onViewPeople={onViewPeople}
-        onViewGiving={onViewGiving}
-        onViewPastoralCare={() => onNavigate?.('pastoral-care')}
-        onViewPortalActivity={() => onNavigate?.('discipleship-engagement')}
       />
 
       <DashboardDetails

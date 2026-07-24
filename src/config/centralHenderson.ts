@@ -4,6 +4,7 @@
  * @see https://centralchurch.online/locations/henderson/
  */
 import type { ChurchSettings } from '../hooks/useChurchSettings';
+import { WATCH_LIVE_VIDEO_URL } from '../lib/watchCatalog';
 
 export const CENTRAL_HENDERSON_TIMEZONE = 'America/Los_Angeles';
 
@@ -43,7 +44,7 @@ export const CENTRAL_HENDERSON_DEFAULT_SETTINGS: ChurchSettings = {
       { day: 'Sunday', time: '1:00 PM', name: 'Weekend Experience' },
       { day: 'Sunday', time: '5:00 PM', name: 'Weekend Experience (Spanish)' },
     ],
-    liveStreamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCentralHenderson',
+    liveStreamUrl: WATCH_LIVE_VIDEO_URL,
     currentSeries: {
       title: 'Honor Each Other',
       part: 'Part 4',

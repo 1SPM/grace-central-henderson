@@ -22,7 +22,7 @@
  *     currentPage: fn() -> 'home'|'wallet'|'watch'|...,  // for page briefings
  *     onUnknown: fn(entry),           // unknown question flagged for admin
  *     voiceProvider: 'elevenlabs' | 'browser',
- *     ttsUrl: '/api/grace-tts',
+ *     ttsUrl: '/api/grace/tts',
  *     autoDetectVoice: true
  *   });
  *   GRACE_COMPANION.open(); GRACE_COMPANION.ask('How do I give?');
@@ -126,7 +126,7 @@
     init(adapter) {
       const preferred = adapter.voiceProvider || 'browser';
       this.provider = preferred === 'elevenlabs' ? 'elevenlabs' : 'browser';
-      this.ttsUrl = adapter.ttsUrl || '/api/grace-tts';
+      this.ttsUrl = adapter.ttsUrl || '/api/grace/tts';
       this.autoDetect = adapter.autoDetectVoice !== false;
       if (this.browserSupported) this.pick();
     },
@@ -651,6 +651,46 @@
     return { intent: navIntent || 'general', text: base.text, nav: base.nav, navLabel: base.navLabel && base.navLabel.replace(/^[^\w]+\s*/, '') };
   }
 
+  /* ══ AI BRIDGE — unknown questions go to the shared GRACE endpoint ══
+   * Adaptability step B (UX review 2026-07-06): scripted intents, navigation,
+   * and crisis routing above stay deterministic. Only questions the intent
+   * engine can't answer are sent to /api/ai/generate (works unauthenticated
+   * when the deployment sets DEMO_AI_ACCESS=true). On any failure we fall
+   * back to the scripted "I haven't been taught yet" reply — zero regression.
+   */
+  function buildMemberPersonaPrompt(question) {
+    const k = know();
+    const facts = [];
+    if (k.serviceTimes) facts.push('Service times: ' + k.serviceTimes);
+    if (k.events && k.events.length) facts.push('Upcoming: ' + k.events.join('; '));
+    if (k.serving && k.serving.length) facts.push('Serving opportunities: ' + k.serving.join('; '));
+    return 'You are GRACE, the friendly in-app companion for members of ' + M.churchName + '. ' +
+      'GRACE stands for Growth, Resource, Assistance, Community, Engagement — you help members navigate ' +
+      'church life: giving, watching services, groups, events, care requests, and Bible study.\n\n' +
+      'CHURCH FACTS (cite these when relevant):\n' + facts.join('\n') + '\n\n' +
+      'RULES:\n' +
+      '- Warm, plainspoken, at most 3 short sentences.\n' +
+      '- You are a navigator, not a pastor: never give personal spiritual counsel, crisis guidance, or ' +
+      'medical/legal/financial advice. For personal or pastoral matters, suggest connecting with a verified leader or opening Care.\n' +
+      '- If you do not know a church-specific detail, say the ' + M.churchName + ' team can follow up — do not invent facts.\n\n' +
+      'Member (' + name() + ') asks: ' + question;
+  }
+
+  function askAi(question) {
+    const url = (A && A.aiUrl) || '/api/ai/generate';
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 12000) : null;
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildMemberPersonaPrompt(question), maxTokens: 400 }),
+      signal: controller ? controller.signal : undefined
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('http ' + r.status))))
+      .then((j) => (j && j.success && j.text ? String(j.text).trim() : Promise.reject(new Error(j && j.error || 'empty'))))
+      .finally(() => { if (timer) clearTimeout(timer); });
+  }
+
   /* ══ GREETING — learned routine + church rhythm ══ */
   function buildGreeting(page) {
     const d = Memory.data;
@@ -967,11 +1007,26 @@
       thinking = true;
       showTyping();
       setTimeout(() => {
-        removeTyping();
-        thinking = false;
         const resp = think(text);
         Memory.record(resp.intent);
         renderChips();
+        if (resp.intent === 'unknown') {
+          // AI bridge: let the shared GRACE endpoint answer; scripted reply is the fallback.
+          askAi(text)
+            .then((aiText) => {
+              removeTyping();
+              thinking = false;
+              appendGrace(aiText, resp.nav, resp.navLabel);
+            })
+            .catch(() => {
+              removeTyping();
+              thinking = false;
+              appendGrace(resp.text, resp.nav, resp.navLabel);
+            });
+          return;
+        }
+        removeTyping();
+        thinking = false;
         appendGrace(resp.text, resp.nav, resp.navLabel);
         if (resp.care && !resp.handoff) {
           // Crisis: also notify live care, mirroring existing dispatch behavior

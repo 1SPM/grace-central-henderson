@@ -1,7 +1,7 @@
-/* Central Henderson — duotone icon system (#EE2B37 + #FCE4E6) */
+/* GRACE duotone icon system — accent/light overridable per portal */
 (function (global) {
-  const ACCENT = '#EE2B37';
-  const LIGHT = '#FCE4E6';
+  const ACCENT = global.GRACE_ICON_ACCENT || '#EE2B37';
+  const LIGHT = global.GRACE_ICON_LIGHT || '#FCE4E6';
 
   function c(variant, role) {
     const inv = variant === 'inverse';
@@ -226,7 +226,7 @@
     });
   }
 
-  global.GRACE_BRAND = { navy: ACCENT, gold: LIGHT, cream: '#F4F4F4', tileBg: '#FFF0F1' };
+  global.GRACE_BRAND = { navy: ACCENT, gold: LIGHT, cream: '#F4F4F4', tileBg: '#e8f4fa' };
   global.graceIcon = graceIcon;
   global.graceIconTile = graceIconTile;
   global.graceIconRow = graceIconRow;
