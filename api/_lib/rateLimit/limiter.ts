@@ -20,7 +20,7 @@
  * No new dependencies — Upstash's REST API is called with global `fetch`.
  */
 
-import type { VercelRequest } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -72,6 +72,29 @@ export async function rateLimit(key: string, max: number, windowSeconds: number)
     }
   }
   return memoryFixedWindow(key, max, windowSeconds);
+}
+
+/**
+ * Convenience wrapper for route handlers: check `key`, and if over the
+ * limit send a 429 with Retry-After and return `true` (the caller should
+ * `return`). Returns `false` when the request may proceed.
+ *
+ *   if (await enforceRateLimit(res, `pay:ip:${ip}`, 10, 3600)) return;
+ */
+export async function enforceRateLimit(
+  res: VercelResponse,
+  key: string,
+  max: number,
+  windowSeconds: number,
+  message = 'Too many requests — please slow down and try again shortly.',
+): Promise<boolean> {
+  const result = await rateLimit(key, max, windowSeconds);
+  if (result.limited) {
+    res.setHeader('Retry-After', String(result.retryAfterSeconds));
+    res.status(429).json({ error: 'rate_limited', detail: message, retry_after_seconds: result.retryAfterSeconds });
+    return true;
+  }
+  return false;
 }
 
 // ── Upstash (durable, cross-instance) ────────────────────────────────

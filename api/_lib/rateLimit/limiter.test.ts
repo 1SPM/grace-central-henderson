@@ -92,6 +92,39 @@ describe('rateLimit — Upstash path', () => {
   });
 });
 
+describe('enforceRateLimit', () => {
+  beforeEach(() => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    vi.resetModules();
+  });
+  function mockRes() {
+    const res = { statusCode: 0, headers: {} as Record<string, string>, body: undefined as unknown,
+      setHeader(k: string, v: string) { this.headers[k] = v; },
+      status(c: number) { this.statusCode = c; return this; },
+      json(p: unknown) { this.body = p; return this; } };
+    return res;
+  }
+  it('returns false and sends nothing while under the limit', async () => {
+    const { enforceRateLimit } = await loadLimiter();
+    const res = mockRes();
+    const limited = await enforceRateLimit(res as never, `enf-${Math.random()}`, 2, 60);
+    expect(limited).toBe(false);
+    expect(res.statusCode).toBe(0);
+  });
+  it('returns true and sends a 429 + Retry-After once over the limit', async () => {
+    const { enforceRateLimit } = await loadLimiter();
+    const key = `enf-over-${Math.random()}`;
+    const res = mockRes();
+    await enforceRateLimit(res as never, key, 1, 60); // 1 ok
+    const limited = await enforceRateLimit(res as never, key, 1, 60); // 2 → over
+    expect(limited).toBe(true);
+    expect(res.statusCode).toBe(429);
+    expect(res.headers['Retry-After']).toBeDefined();
+    expect((res.body as { error: string }).error).toBe('rate_limited');
+  });
+});
+
 describe('clientIp', () => {
   it('prefers x-real-ip; ignores spoofable leftmost XFF', async () => {
     const { clientIp } = await loadLimiter();

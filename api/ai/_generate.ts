@@ -6,6 +6,7 @@ import { requireClerkAuth } from '../_lib/auth-helper.js';
 import { resolveDemoChurchId } from '../_lib/authz.js';
 import { checkBudget } from '../_lib/ai/budget.js';
 import { recordUsage } from '../_lib/ai/usage.js';
+import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -80,11 +81,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(503).json({ error: 'AI service not configured' });
   }
 
-  // Rate limiting
-  const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || 'unknown';
-  if (isRateLimited(clientIp)) {
-    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
-  }
+  // Rate limiting — durable per-IP (global via Upstash when configured),
+  // using the spoof-resistant client IP rather than the leftmost XFF.
+  const ip = clientIp(req);
+  if (await enforceRateLimit(res, `ai:generate:ip:${ip}`, 20, 60,
+    'Too many AI requests. Please wait a moment and try again.')) return;
 
   const { prompt, context, maxTokens } = req.body;
 
@@ -113,7 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } else if (DEMO_AI_ACCESS) {
     // Public demo lane: no token required, but tighter per-IP throttle and
     // capped output. Metered against the demo tenant below.
-    if (isRateLimited(`demo:${clientIp}`, DEMO_RATE_LIMIT)) {
+    if (isRateLimited(`demo:${ip}`, DEMO_RATE_LIMIT)) {
       return res.status(429).json({ error: 'Demo rate limit reached. Please try again in a minute.' });
     }
     churchId = resolveAiDemoChurchId(req);

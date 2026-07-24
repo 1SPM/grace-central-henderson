@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { MAX_TTS_TEXT_LEN, isTtsConfigured, synthesizeSpeech } from '../_lib/grace-tts.js';
+import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
@@ -13,6 +14,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isTtsConfigured()) {
     return res.status(503).json({ error: 'TTS not configured' });
   }
+
+  // TTS calls a paid upstream provider; cap per-IP synthesis rate so a
+  // single caller can't run up the bill. Falls back to on-screen text.
+  if (await enforceRateLimit(res, `tts:ip:${clientIp(req)}`, 30, 300,
+    'Voice playback is busy — please wait a moment. The text is still available on screen.')) return;
 
   let body: { text?: string } = {};
   try {

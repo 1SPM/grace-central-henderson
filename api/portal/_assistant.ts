@@ -23,6 +23,7 @@ import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
 import { runAssistantTurn, type AssistantHistoryTurn } from '../_lib/ai/assistant-runtime.js';
 import { readBody, str } from '../_lib/validation.js';
+import { enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -58,6 +59,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
   const member = await resolveMemberActor(req, res, supabase);
   if (!member) return;
+
+  // Per-member conversational rate limit, on top of the church AI budget cap —
+  // stops one member from burning the whole church allowance in a burst.
+  if (await enforceRateLimit(res, `assistant:member:${member.personId}`, 20, 60,
+    'You’re sending messages quickly — please wait a moment before the next one.')) return;
 
   const bodyRaw = req.body as Record<string, unknown> | undefined;
   const history = parseHistory(bodyRaw?.history);

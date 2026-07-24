@@ -32,6 +32,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { readBody, str, int_, email_ } from '../_lib/validation.js';
+import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -65,6 +66,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
   const { church_slug, amount_cents, fund, email, donor_name, note, person_id } = body;
+
+  // Card-testing / fraud defense: this endpoint is public and each hit is a
+  // processor cost. Cap per-IP and per-donor-email attempts. (Also enforce
+  // Stripe Radar + a Turnstile challenge on the giving page.)
+  const ip = clientIp(req);
+  if (await enforceRateLimit(res, `pay:ip:${ip}`, 10, 3600,
+    'Too many payment attempts. Please wait a few minutes and try again.')) return;
+  if (email && await enforceRateLimit(res, `pay:email:${email.toLowerCase()}`, 5, 600,
+    'Too many payment attempts for this email. Please wait a few minutes.')) return;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const { data: church, error } = await supabase
