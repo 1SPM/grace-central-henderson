@@ -9,6 +9,10 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 const BUCKET = 'sermon-videos';
+// A signed URL is a bearer token that bypasses RLS, and we regenerate it on
+// every status fetch — so keep the TTL short rather than handing out a link
+// that stays live for days. 1 hour is ample for playback after a poll.
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 interface JobRow {
   id: string;
@@ -60,13 +64,13 @@ function publicProviderError(error: unknown): string {
 async function createSignedUrl(supabase: SupabaseClient, storagePath: string): Promise<string | null> {
   const { data, error } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, 60 * 60 * 24 * 7);
+    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
   if (error) return null;
   return data.signedUrl;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -85,6 +89,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : typeof req.body?.jobId === 'string'
       ? req.body.jobId
       : '';
+
+  // DELETE — remove the stored MP4 BEFORE deleting the row, so a partial
+  // failure can never orphan a private video with no row referencing it.
+  // Church-scoped: a caller can only delete their own church's jobs.
+  if (req.method === 'DELETE') {
+    if (!jobId) return res.status(400).json({ error: 'jobId is required to delete a video job.' });
+    const { data: job, error } = await supabase
+      .from('sermon_video_jobs')
+      .select('id, storage_path')
+      .eq('id', jobId)
+      .eq('church_id', auth.churchId)
+      .maybeSingle();
+    if (error) return res.status(500).json({ error: error.message });
+    if (!job) return res.status(404).json({ error: 'Video job not found.' });
+
+    const storagePath = (job as { storage_path: string | null }).storage_path;
+    if (storagePath) {
+      const { error: rmErr } = await supabase.storage.from(BUCKET).remove([storagePath]);
+      if (rmErr) {
+        // Don't delete the row if the object couldn't be removed — that would
+        // orphan the file. Surface it so the caller can retry.
+        return res.status(502).json({ error: `Failed to remove stored video: ${rmErr.message}` });
+      }
+    }
+
+    const { error: delErr } = await supabase
+      .from('sermon_video_jobs')
+      .delete()
+      .eq('id', jobId)
+      .eq('church_id', auth.churchId);
+    if (delErr) return res.status(500).json({ error: delErr.message });
+    return res.status(200).json({ success: true, deleted: jobId });
+  }
 
   if (!jobId) {
     const limit = Math.min(Number(req.query.limit || 8) || 8, 25);
