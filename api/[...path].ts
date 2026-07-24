@@ -56,6 +56,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'connect-card': () => import('./_connect-card.js'),
   'consents': () => import('./consents/_index.js'),
   'consents/data-requests': () => import('./consents/_data-requests.js'),
+  'consents/erase': () => import('./consents/_erase.js'),
   'cron/agents': () => import('./cron/_agents.js'),
   'cron/ai-anomaly': () => import('./cron/_ai-anomaly.js'),
   'cron/reconcile-stripe': () => import('./cron/_reconcile-stripe.js'),
