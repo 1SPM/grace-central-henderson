@@ -30,6 +30,7 @@ import { createClerkClient } from '@clerk/backend';
 import { requirePermission } from '../_lib/authz.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, uuid_, bool_ } from '../_lib/validation.js';
+import { erasePostHogPerson } from '../_lib/privacy/thirdPartyErase.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -86,16 +87,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 2. Best-effort third-party fan-out. Failures are recorded, not fatal — the
   //    authoritative erasure above already succeeded.
   const processors: Record<string, ProcessorOutcome> = {
-    // Automated where we hold a reliable server credential:
     clerk: 'not_linked',
-    // Reported for follow-up (need their own admin credentials / manual step):
-    posthog: 'not_configured',
-    d_id: 'manual_follow_up',
+    posthog: 'not_linked',
+    // D-ID streaming avatar sessions are ephemeral; we store no per-person
+    // handle, so there is nothing to delete via API.
+    d_id: 'no_stored_identifier',
     // Legally retained by the provider — no deletion:
     stripe: 'retained_by_law',
   };
 
   if (clerkUserId) {
+    // Clerk auth account.
     if (CLERK_SECRET_KEY) {
       try {
         const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
@@ -107,6 +109,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else {
       processors.clerk = 'not_configured';
     }
+    // PostHog analytics (distinct id = the Clerk user id). Best-effort;
+    // 'not_configured' until POSTHOG_PROJECT_ID / _PERSONAL_API_KEY are set.
+    processors.posthog = await erasePostHogPerson([clerkUserId]);
   }
 
   // 3. Durable, PII-FREE proof of erasure (append-only; survives the cascade that
