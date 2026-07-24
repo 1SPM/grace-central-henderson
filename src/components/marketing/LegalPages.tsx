@@ -90,15 +90,19 @@ export function TermsPage() {
       <h2>4. Data ownership</h2>
       <p>
         Your church's data — including member records, giving records, and content — remains
-        your property. You may export all data at any time via CSV download from Settings
-        → Data Export. On cancellation, read-only access is retained for 90 days; after
-        that, your data is permanently deleted per our retention schedule.
+        your property. You may export your records at any time via CSV download from Settings
+        → Data Export. When you cancel, we keep your account in read-only mode for 90 days so
+        you can export. After that we delete your personal and member data on request or as part
+        of account closure, with two exceptions we are legally required to keep: donation and
+        financial-transaction records (retained for seven years for tax and audit purposes) and
+        security audit logs (retained in de-identified form). See the Privacy Policy → Data
+        retention for the full schedule.
       </p>
 
       <h2>5. AI features</h2>
       <p>
-        GRACE uses third-party large language model providers (currently Google Gemini,
-        OpenAI, and Anthropic) to power its AI-assisted features. AI outputs are suggestions
+        GRACE uses a third-party large language model provider (currently Google Gemini)
+        to power its AI-assisted features. AI outputs are suggestions
         only; you remain responsible for any pastoral or operational decisions you take based
         on them. Inference inputs are subject to our Privacy Policy and are not used by
         upstream providers for training when our paid API tier is in effect.
@@ -166,7 +170,8 @@ export function PrivacyPage() {
         <li><strong>Clerk</strong> — authentication</li>
         <li><strong>Stripe</strong> — payment processing</li>
         <li><strong>i2c + OWVI</strong> — card program (Enterprise only)</li>
-        <li><strong>Google / OpenAI / Anthropic</strong> — AI inference (Pro+ features)</li>
+        <li><strong>Google Gemini</strong> — AI inference (Pro+ features)</li>
+        <li><strong>D-ID</strong> — animated avatar / video-agent features</li>
         <li><strong>Resend / Twilio</strong> — email + SMS delivery</li>
         <li><strong>Sentry / PostHog</strong> — error monitoring + product analytics (PII-scrubbed)</li>
       </ul>
@@ -186,13 +191,18 @@ export function PrivacyPage() {
 
       <h2>6. Your rights</h2>
       <p>
-        You can export, correct, or delete data at any time from your account. For
-        members of your church who request access or deletion of their own records,
-        contact your church administrator. For broader requests (subject access,
-        right to be forgotten under GDPR), email{' '}
+        You can export your records at any time via CSV download from Settings → Data Export.
+        To correct or delete your data, submit a request from the member portal or email{' '}
         <a className="text-amber-700 hover:text-amber-900" href="mailto:privacy@grace-crm.app">
           privacy@grace-crm.app
-        </a>.
+        </a>; we action verified requests within 30 days. Members of a church should contact
+        their church administrator for access to their own records.
+      </p>
+      <p>
+        When we delete an account we remove your personal and member data — your profile, prayer
+        requests, care conversations, journey notes, and community posts — and we instruct our
+        processors (Clerk, Stripe, our analytics and avatar providers) to delete their copies.
+        Records we are legally required to keep are retained as described in Data retention below.
       </p>
 
       <h2>7. Security</h2>
@@ -200,6 +210,22 @@ export function PrivacyPage() {
         We use industry-standard encryption in transit (TLS 1.2+) and at rest (AES-256).
         Per-tenant Row-Level Security in the database structurally prevents cross-tenant
         data access. We are pursuing SOC 2 Type II certification.
+      </p>
+
+      <h2>8. Data retention</h2>
+      <p>How long we keep each kind of data:</p>
+      <ul>
+        <li><strong>Personal &amp; member data</strong> (profile, prayer requests, care conversations, journey notes, community posts) — deleted on account closure or verified deletion request.</li>
+        <li><strong>Donation &amp; financial records</strong> (giving history, receipts, ledger) — retained for seven years for tax and audit purposes. On individual deletion these are kept but unlinked from your name.</li>
+        <li><strong>Pastoral-care notes</strong> — retained per your church's policy; unlinked from your name on individual deletion.</li>
+        <li><strong>Security audit logs</strong> — retained in de-identified form for up to 24 months.</li>
+        <li><strong>AI usage records</strong> — token and cost metadata only (never conversation content) for up to 24 months, for billing.</li>
+        <li><strong>Backups</strong> — encrypted backups are rotated out within 30 days, which is when deletion becomes permanent.</li>
+      </ul>
+      <p>
+        Data held by our sub-processors (see §3) is deleted on the schedule each provider maintains
+        once we issue a deletion instruction; some, such as Stripe transaction records, are retained
+        by the provider where the law requires it.
       </p>
 
       <p className="mt-8 italic text-sm text-gray-500">
