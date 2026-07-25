@@ -320,29 +320,24 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
             <X size={18} className="text-white/70" />
           </button>
           <div className={`flex flex-col items-center text-center ${sidebarCollapsed ? 'lg:gap-2' : 'gap-3'}`}>
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt={displayChurch}
-                className={`rounded-full object-cover flex-shrink-0 ring-2 ring-white/30 ${sidebarCollapsed ? 'w-10 h-10' : 'w-[72px] h-[72px]'}`}
+            {/* Always the glowing GRACE orb (doubles as the Ask-Grace launcher),
+                for every tenant. A tenant's own logo lives in the top header
+                bar instead — see below. */}
+            <button
+              type="button"
+              onClick={() => {
+                grace.openPanel();
+                setSidebarOpen(false);
+              }}
+              className="rounded-full flex-shrink-0 overflow-visible p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 hover:opacity-90 transition-opacity"
+              title="Ask Grace"
+              aria-label="Ask Grace"
+            >
+              <GraceOrb
+                size={sidebarCollapsed ? 'sm' : 'sb'}
+                rings
               />
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  grace.openPanel();
-                  setSidebarOpen(false);
-                }}
-                className="rounded-full flex-shrink-0 overflow-visible p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 hover:opacity-90 transition-opacity"
-                title="Ask Grace"
-                aria-label="Ask Grace"
-              >
-                <GraceOrb
-                  size={sidebarCollapsed ? 'sm' : 'sb'}
-                  rings
-                />
-              </button>
-            )}
+            </button>
             <div className={`min-w-0 w-full ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               <h2 className="font-bold text-white text-base leading-snug">
                 {displayChurch}
@@ -591,6 +586,22 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
           >
             <Menu size={20} className="text-gray-600 dark:text-dark-400" />
           </button>
+
+          {/* Church brand mark — the tenant's own logo + name (only when the
+              tenant has a logo; the sidebar now always shows the GRACE orb). */}
+          {logoUrl && (
+            <div className="flex items-center gap-2 mr-3 min-w-0 flex-shrink-0">
+              <img
+                src={logoUrl}
+                alt={displayChurch}
+                className="w-7 h-7 rounded-full object-cover ring-1 ring-stone-300/70 dark:ring-white/15 flex-shrink-0"
+              />
+              <span className="hidden sm:block font-semibold text-sm text-gray-900 dark:text-dark-100 truncate">
+                {displayChurch}
+              </span>
+              <span className="hidden sm:block h-4 w-px bg-stone-300/70 dark:bg-white/10 ml-1" aria-hidden="true" />
+            </div>
+          )}
 
           {/* Breadcrumbs — only show when nested (single-page crumbs are redundant) */}
           <nav className="flex items-center gap-1 text-sm flex-1">
