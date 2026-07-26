@@ -117,7 +117,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
 export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
-  const { speak, stop, speakingId, supported: speechSupported, provider } = useGraceSpeech();
+  const { speak, stop, speakingId, supported: speechSupported, provider, notice: voiceNotice } = useGraceSpeech();
   const [input, setInput] = useState('');
   const [listenPromptId, setListenPromptId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -338,6 +338,14 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
         onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
         className="p-3 border-t border-stone-300/60 dark:border-white/5"
       >
+        {voiceNotice && (
+          <p className="mb-2 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+            <VolumeX size={12} className="shrink-0" />
+            {voiceNotice === 'busy'
+              ? 'Voice is busy for a moment — the reply is shown above.'
+              : 'Neural voice is unavailable right now — using the browser voice.'}
+          </p>
+        )}
         <div className="flex items-center gap-2 bg-white/70 dark:bg-dark-800 border border-stone-200/70 dark:border-white/5 rounded-xl px-3 py-2">
           <input
             ref={inputRef}
