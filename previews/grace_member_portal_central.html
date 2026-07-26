@@ -3280,7 +3280,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <input type="text" id="wallet-send-memo" placeholder="e.g. Tithe, Missions" maxlength="60">
               </div>
               <button type="button" class="wallet-submit" id="wallet-send-submit" onclick="submitWalletTransfer('send')">Review &amp; send</button>
-              <p class="wallet-i2c-note">Transfers route through i2C when connected · Typically 1–3 business days for ACH</p>
+              <p class="wallet-i2c-note">Transfers route through GRACE Banking when connected · Typically 1–3 business days for ACH</p>
             </div>
             <div class="wallet-transfer-panel" id="wallet-receive-panel" hidden>
               <div class="wallet-transfer-head">
@@ -3293,11 +3293,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">084009519</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
               </div>
               <div class="wallet-qr-box">
-                <div class="wallet-qr-placeholder">QR · i2C</div>
+                <div class="wallet-qr-placeholder">QR · GRACE Banking</div>
                 <div style="font-size:11px;color:#555">Share this code to receive a payment</div>
               </div>
-              <button type="button" class="wallet-submit" onclick="pfToast('Payment request link ready to share (i2C)','↗','success')">Create payment request</button>
-              <p class="wallet-i2c-note">Deposit details will sync from your i2C program · Same-day ACH may apply</p>
+              <button type="button" class="wallet-submit" onclick="pfToast('Payment request link ready to share (GRACE Banking)','↗','success')">Create payment request</button>
+              <p class="wallet-i2c-note">Deposit details will sync from your GRACE Banking program · Same-day ACH may apply</p>
             </div>
             <div class="wallet-manage-panel" id="wallet-manage-panel">
               <div class="wallet-freeze-row">
@@ -6874,7 +6874,7 @@ function submitWalletTransfer(mode){
     if(activityFeedRecent.length>10)activityFeedRecent.pop();
     syncWalletKpis();
     if(activityTabMode==='recent')renderActivityFeed('recent');
-    pfToast('Transfer queued for i2C · '+dest,'↗','success');
+    pfToast('Transfer queued for GRACE Banking · '+dest,'↗','success');
     closeWalletTransfer();
     if(amt) amt.value='';
     const memo=document.getElementById('wallet-send-memo');

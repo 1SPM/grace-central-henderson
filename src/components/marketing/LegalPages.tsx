@@ -169,7 +169,7 @@ export function PrivacyPage() {
         <li><strong>Supabase</strong> — database + storage (US-East data center)</li>
         <li><strong>Clerk</strong> — authentication</li>
         <li><strong>Stripe</strong> — payment processing</li>
-        <li><strong>i2c + OWVI</strong> — card program (Enterprise only)</li>
+        <li><strong>GRACE Banking Services</strong> — card program (Enterprise only)</li>
         <li><strong>Google Gemini</strong> — AI inference (Pro+ features)</li>
         <li><strong>D-ID</strong> — animated avatar / video-agent features</li>
         <li><strong>Resend / Twilio</strong> — email + SMS delivery</li>

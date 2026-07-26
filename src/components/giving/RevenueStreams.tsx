@@ -90,14 +90,14 @@ export function RevenueStreams({ onNavigateToWallets }: RevenueStreamsProps) {
                       Card spend
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 text-gray-600 dark:text-dark-300 text-xs">i2c card interchange</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-dark-300 text-xs">GRACE Banking card interchange</td>
                   <td className="px-3 py-2.5 text-right font-medium text-gray-900 dark:text-dark-100 tabular-nums">
                     {fmtImpactUsd(spendMtd)}
                   </td>
                   <td className="px-3 py-2.5 text-right text-gray-400 dark:text-dark-500">—</td>
                   <td className="px-3 py-2.5 text-right text-gray-400 dark:text-dark-500">—</td>
                   <td className="px-3 py-2.5 text-gray-600 dark:text-dark-300 text-xs">Interchange → ledger</td>
-                  <td className="px-3 py-2.5 text-gray-500 dark:text-dark-400 text-xs">i2c settlement</td>
+                  <td className="px-3 py-2.5 text-gray-500 dark:text-dark-400 text-xs">GRACE Banking settlement</td>
                   <td className="px-5 py-2.5">
                     <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                       Live
@@ -153,7 +153,7 @@ export function RevenueStreams({ onNavigateToWallets }: RevenueStreamsProps) {
             )}
           </div>
           <p className="text-xs text-gray-500 dark:text-dark-400 mb-4">
-            i2cInc merchant program — card spend generates interchange credited to the church ledger
+            GRACE Banking Services — card spend generates interchange credited to the church ledger
           </p>
           {program.state === 'ready' ? (
             <div className="space-y-2.5">

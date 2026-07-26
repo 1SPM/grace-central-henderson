@@ -40,7 +40,7 @@ const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.Reac
   { view: 'people', label: 'Congregation', subtitle: 'Directory, groups, skills & families', icon: <Users size={16} /> },
   { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, archive, attendance & announcements', icon: <Church size={16} /> },
   { view: 'sunday-prep', label: 'Sermon Archive', subtitle: 'Sunday Service Tools · Past messages', icon: <BookOpen size={16} />, sundayTab: 'archive' },
-  { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'i2c card program & member usage', icon: <Wallet size={16} /> },
+  { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'GRACE Banking card program & member usage', icon: <Wallet size={16} /> },
   { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
   { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Crisis dispatch, weddings, funerals & legacy planning', icon: <Heart size={16} /> },
   { view: 'discipleship-engagement', label: 'Growth & Engagement', subtitle: 'Pathways, portal signals & spiritual growth', icon: <TrendingUp size={16} /> },

@@ -57,7 +57,7 @@ export function PointsRewards() {
             </p>
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
               {program.state === 'ready'
-                ? `≈ ${fmtImpactUsd(interchangeMtd)} redeemable · funded by i2c card interchange`
+                ? `≈ ${fmtImpactUsd(interchangeMtd)} redeemable · funded by GRACE Banking card interchange`
                 : 'Funded by card interchange when program is active'}
             </p>
           </div>
