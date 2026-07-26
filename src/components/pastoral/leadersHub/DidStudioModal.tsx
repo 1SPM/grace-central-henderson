@@ -24,7 +24,12 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [agentMounted, setAgentMounted] = useState(false);
+  const [agentReady, setAgentReady] = useState(false);
+  const [agentTimedOut, setAgentTimedOut] = useState(false);
+  const [mountNonce, setMountNonce] = useState(0);
   const hostRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const pollRef = useRef<number | null>(null);
   const seededRef = useRef(false);
   const photo = leader.photo ?? getLeaderPhoto(leader.id) ?? '/leaders/james-wilson.jpg';
 
@@ -37,8 +42,8 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
   // container, which is what showed up as a stray, wrongly-sized preview.
   const targetId = `did-agent-target-${leader.id}`;
 
-  const mountDidAgent = useCallback(() => {
-    if (!hasDidCredentials || agentMounted || !hostRef.current) return;
+  const injectAgent = useCallback(() => {
+    if (!hasDidCredentials || !hostRef.current) return;
     const host = hostRef.current;
     host.innerHTML = '';
     const script = document.createElement('script');
@@ -51,13 +56,28 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
     script.setAttribute('data-monitor', 'true');
     script.setAttribute('data-target-id', targetId);
     host.appendChild(script);
+    // Bump the nonce so the readiness/timeout watcher (re)starts for this mount.
+    setAgentReady(false);
+    setAgentTimedOut(false);
+    setMountNonce(n => n + 1);
+  }, [companion.didAgentId, companion.didClientKey, hasDidCredentials, targetId]);
+
+  const mountDidAgent = useCallback(() => {
+    if (agentMounted) return;
+    injectAgent();
     setAgentMounted(true);
-  }, [agentMounted, companion.didAgentId, companion.didClientKey, hasDidCredentials, targetId]);
+  }, [agentMounted, injectAgent]);
+
+  const retryAgent = useCallback(() => {
+    injectAgent();
+  }, [injectAgent]);
 
   useEffect(() => {
     if (!open) {
       seededRef.current = false;
       setAgentMounted(false);
+      setAgentReady(false);
+      setAgentTimedOut(false);
       if (hostRef.current) hostRef.current.innerHTML = '';
       return;
     }
@@ -74,6 +94,34 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
       setInput(prefill.trim());
     }
   }, [open, greeting, companion.greeting, mountDidAgent, prefill]);
+
+  // Turn an infinite "Loading…" into an escapable state. The D-ID agent is
+  // "up" once it renders a <video>. If that never happens — most commonly a
+  // restrictive network (VPN/firewall) blocking the WebRTC media stream, since
+  // the agent config, client key, and streams API are all verified healthy —
+  // surface a retry + open-in-new-tab fallback instead of spinning forever.
+  useEffect(() => {
+    if (!open || !hasDidCredentials || mountNonce === 0) return;
+    const findVideo = () =>
+      (hostRef.current?.closest('.ai-did-media')?.querySelector('video')
+        ?? document.querySelector('.didagent_target video')) as HTMLVideoElement | null;
+    pollRef.current = window.setInterval(() => {
+      const v = findVideo();
+      if (v && v.readyState >= 1) {
+        setAgentReady(true);
+        if (pollRef.current) window.clearInterval(pollRef.current);
+        if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      }
+    }, 800);
+    timeoutRef.current = window.setTimeout(() => {
+      setAgentTimedOut(true);
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    }, 18000);
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, [open, hasDidCredentials, mountNonce]);
 
   useEffect(() => {
     if (!open) return;
@@ -153,6 +201,47 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
               src={photo}
               alt={leader.displayName}
             />
+            {hasDidCredentials && agentTimedOut && !agentReady && (
+              <div
+                style={{
+                  position: 'absolute', inset: 0, zIndex: 5,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  justifyContent: 'center', gap: 12, padding: 24, textAlign: 'center',
+                  background: 'rgba(15,23,42,0.92)', color: '#e2e8f0',
+                }}
+              >
+                <p style={{ fontWeight: 600, fontSize: 14 }}>
+                  The live avatar is taking longer than usual to connect.
+                </p>
+                <p style={{ fontSize: 12, color: '#94a3b8', maxWidth: 320, lineHeight: 1.5 }}>
+                  This usually means the video stream is blocked by the network (a VPN
+                  or firewall). {leader.displayName.split(' ').slice(-1)[0]}’s agent is
+                  configured correctly — try again, or open it in a new tab.
+                </p>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={retryAgent}
+                    style={{
+                      padding: '8px 14px', borderRadius: 8, background: '#4f46e5',
+                      color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    Retry
+                  </button>
+                  {companion.divinityAvatarUrl && (
+                    <a
+                      href={companion.divinityAvatarUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#a5b4fc', fontSize: 13 }}
+                    >
+                      Open in a new tab →
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
             {!hasDidCredentials && (
               <>
                 <div className="ai-did-prompts">
