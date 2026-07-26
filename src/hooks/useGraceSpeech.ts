@@ -161,6 +161,11 @@ export function useGraceSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [provider, setProvider] = useState<GraceVoiceProvider>('none');
+  // Transient, user-facing voice status so failures aren't silent:
+  //   'busy'        → rate-limited (429), text stays on screen, retry shortly
+  //   'unavailable' → neural TTS errored (502/etc); fell back to browser voice
+  const [notice, setNotice] = useState<'busy' | 'unavailable' | null>(null);
+  const noticeTimerRef = useRef<number | null>(null);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const sessionRef = useRef(0);
@@ -195,6 +200,16 @@ export function useGraceSpeech() {
     primeSpeechSynthesis();
     return () => window.speechSynthesis.removeEventListener('voiceschanged', refreshVoices);
   }, [browserSupported]);
+
+  const flagNotice = useCallback((kind: 'busy' | 'unavailable') => {
+    setNotice(kind);
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current);
+    noticeTimerRef.current = window.setTimeout(() => setNotice(null), 6000);
+  }, []);
+
+  useEffect(() => () => {
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current);
+  }, []);
 
   const cleanupAudio = useCallback(() => {
     if (sourceRef.current) {
@@ -307,7 +322,11 @@ export function useGraceSpeech() {
         body: JSON.stringify({ text: chunk }),
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`TTS ${res.status}`);
+      if (!res.ok) {
+        const e = new Error(`TTS ${res.status}`) as Error & { status?: number };
+        e.status = res.status;
+        throw e;
+      }
       const buffer = await res.arrayBuffer();
       if (buffer.byteLength === 0) throw new Error('TTS empty response');
       return buffer;
@@ -367,19 +386,29 @@ export function useGraceSpeech() {
       cleanupAudio();
       setIsSpeaking(false);
       setSpeakingId(null);
+      // Rate-limited: this is transient and self-heals in a few minutes. Show
+      // a "busy" notice and keep the neural voice — don't drop to the robotic
+      // browser voice mid-conversation for a momentary throttle.
+      if ((err as { status?: number })?.status === 429) {
+        flagNotice('busy');
+        return;
+      }
       const isPlayError = err instanceof DOMException
         && (err.name === 'NotAllowedError' || err.name === 'NotSupportedError');
       if (isPlayError) {
         log.warn('ElevenLabs audio playback blocked', err.name);
         return;
       }
+      // Neural TTS is genuinely unavailable (502/etc): tell the user we're on
+      // the browser voice instead of failing silently, then fall back.
+      flagNotice('unavailable');
       if (!fallbackLoggedRef.current) {
         fallbackLoggedRef.current = true;
         log.info('ElevenLabs unavailable, using browser speech');
       }
       speakBrowser(text, messageId);
     }
-  }, [browserSupported, cleanupAudio, speakBrowser]);
+  }, [browserSupported, cleanupAudio, speakBrowser, flagNotice]);
 
   const speak = useCallback((text: string, messageId?: string) => {
     if (!text.trim()) return;
@@ -392,5 +421,5 @@ export function useGraceSpeech() {
 
   const supported = provider !== 'none';
 
-  return { speak, stop, isSpeaking, speakingId, supported, provider };
+  return { speak, stop, isSpeaking, speakingId, supported, provider, notice };
 }

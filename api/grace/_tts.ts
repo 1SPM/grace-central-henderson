@@ -23,16 +23,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // separately IP-rate-limited). No token + not demo → 401.
   const hasBearer = typeof req.headers.authorization === 'string'
     && req.headers.authorization.startsWith('Bearer ');
+
+  // Rate-limit key: prefer the authenticated USER, not the IP. Each spoken
+  // answer is split into several chunked POSTs, and a whole church office
+  // often shares one NAT IP — a per-IP cap throttled staff collectively and
+  // cut answers off mid-sentence ("GRACE stopped speaking"). Per-user gives
+  // each signed-in staffer their own generous budget; the anonymous public
+  // demo stays per-IP (tighter, since it's untrusted).
+  let rateKey = `tts:ip:${clientIp(req)}`;
+  let rateLimit = 30;
   if (hasBearer) {
     const auth = await requireClerkAuth(req);
     if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+    rateKey = `tts:user:${auth.clerkUserId}`;
+    rateLimit = 120; // ~40 chunked answers / 5 min per staffer — ample, still bounds abuse
   } else if (!isDemoModeActive(req)) {
     return res.status(401).json({ error: 'auth_required' });
   }
 
-  // Cap per-IP synthesis rate so a single caller can't run up the bill.
-  // Falls back to on-screen text.
-  if (await enforceRateLimit(res, `tts:ip:${clientIp(req)}`, 30, 300,
+  // Cap synthesis rate so a single caller can't run up the bill. On trip the
+  // client shows a transient "voice is busy" notice; the text stays on screen.
+  if (await enforceRateLimit(res, rateKey, rateLimit, 300,
     'Voice playback is busy — please wait a moment. The text is still available on screen.')) return;
 
   let body: { text?: string } = {};

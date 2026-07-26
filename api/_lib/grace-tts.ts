@@ -46,9 +46,42 @@ export function ttsHealthPayload() {
   };
 }
 
+// Cache the (network-backed) health result so the honest probe below doesn't
+// hit ElevenLabs on every page load. Per-instance is fine — a stale window of
+// a few minutes is acceptable for a "which voice to use" hint.
+let healthCache: { at: number; payload: ReturnType<typeof ttsHealthPayload> } | null = null;
+const HEALTH_TTL_MS = 5 * 60_000;
+
 export async function probeTtsHealth(): Promise<ReturnType<typeof ttsHealthPayload>> {
-  if (process.env.ELEVENLABS_API_KEY) {
-    return ttsHealthPayload();
+  const now = Date.now();
+  if (healthCache && now - healthCache.at < HEALTH_TTL_MS) return healthCache.payload;
+  const payload = await computeTtsHealth();
+  healthCache = { at: now, payload };
+  return payload;
+}
+
+async function computeTtsHealth(): Promise<ReturnType<typeof ttsHealthPayload>> {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (apiKey) {
+    // Honest probe: confirm the key is valid AND has quota left, so the UI
+    // shows "Browser voice" (not a false "Neural voice") when ElevenLabs is
+    // unusable — instead of claiming neural and then failing silently.
+    try {
+      const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+        method: 'GET',
+        headers: { 'xi-api-key': apiKey, Accept: 'application/json' },
+      });
+      if (!res.ok) return { ...ttsHealthPayload(), ok: false };
+      const sub = await res.json() as { character_count?: number; character_limit?: number };
+      const remaining = typeof sub.character_limit === 'number' && typeof sub.character_count === 'number'
+        ? sub.character_limit - sub.character_count
+        : Number.POSITIVE_INFINITY;
+      return { ...ttsHealthPayload(), ok: remaining > 0 };
+    } catch {
+      // Transient network error probing ElevenLabs — assume usable; the synth
+      // path has its own error handling + client fallback if it's really down.
+      return ttsHealthPayload();
+    }
   }
   const upstream = upstreamTtsUrl();
   if (!upstream) {
