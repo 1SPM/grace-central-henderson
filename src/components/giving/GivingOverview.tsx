@@ -115,7 +115,7 @@ export function GivingOverview({ giving, pledges, onNavigate, onGoToTab, onNavig
           </p>
           <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">
             {program.state === 'ready' && cardSummary
-              ? `${cardSummary.active_cards} active cards · i2c MTD`
+              ? `${cardSummary.active_cards} active cards · GRACE Banking MTD`
               : 'Impact Card program'}
           </p>
           {onNavigateToWallets && program.state === 'ready' && (

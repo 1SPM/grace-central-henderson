@@ -109,7 +109,7 @@ function DepositPanel({
         </div>
       </dl>
       <p className="text-[10px] text-gray-400 dark:text-dark-500 mt-3 leading-relaxed">
-        Full account numbers are not stored in CRM (PCI). Unmasked values are available in the i2c merchant console.
+        Full account numbers are not stored in CRM (PCI). Unmasked values are available in the GRACE Banking Services console.
       </p>
       <button
         onClick={() => withBusy(`sync-${personId}`, () => syncAccountBalance(personId))}
@@ -117,7 +117,7 @@ function DepositPanel({
         className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-dark-600 rounded-lg disabled:opacity-50"
       >
         {busyId === `sync-${personId}` ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-        Sync balance from i2c
+        Sync balance from GRACE Banking
       </button>
     </div>
   );
@@ -312,7 +312,7 @@ export function MemberWalletDetail({
             )}
             {adminData.adapter_mode === 'mock' && (
               <span className="text-[11px] font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                i2c sandbox
+                GRACE Banking sandbox
               </span>
             )}
           </div>
@@ -373,7 +373,7 @@ export function MemberWalletDetail({
                   onClick={() => withBusy(`sync-${person.id}`, () => syncAccountBalance(person.id))}
                   disabled={busyId === `sync-${person.id}`}
                   className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg"
-                  title="Sync balance from i2c"
+                  title="Sync balance from GRACE Banking"
                 >
                   {busyId === `sync-${person.id}` ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                 </button>
@@ -504,7 +504,7 @@ export function MemberWalletDetail({
             )}
             <p className="text-xs text-gray-600 dark:text-dark-300 leading-relaxed">
               Staff can force-freeze, override impact routes, retry failed transfers, and sync balances.
-              Deposit account numbers are masked for PCI. Full ACH details available via i2c admin console.
+              Deposit account numbers are masked for PCI. Full ACH details available via GRACE Banking Services admin console.
             </p>
           </div>
         </div>

@@ -38,13 +38,13 @@ export function ImpactCardSetupGuide({
                   ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
                   : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
               }`}>
-                {isSandbox ? 'i2c sandbox (mock)' : 'i2c live'}
+                {isSandbox ? 'GRACE Banking sandbox (mock)' : 'GRACE Banking live'}
               </span>
             </div>
             <p className="text-xs text-indigo-700/80 dark:text-indigo-300/80 mt-1">
               {isSandbox
                 ? 'Balances and transfers use the mock adapter until production credentials are configured.'
-                : 'Live mode is active — card and account operations route through i2cInc merchant services.'}
+                : 'Live mode is active — card and account operations route through GRACE Banking Services.'}
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function ImpactCardSetupGuide({
             <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">
               Set <code className="px-1 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 rounded text-[10px]">I2C_LIVE=true</code> and{' '}
               <code className="px-1 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 rounded text-[10px]">I2C_API_KEY</code> on Vercel.
-              The live HTTP client (TD-036) activates once i2c sandbox credentials are provisioned.
+              The live HTTP client (TD-036) activates once GRACE Banking sandbox credentials are provisioned.
             </p>
           </div>
 

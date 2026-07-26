@@ -100,7 +100,7 @@ export function downloadImpactCardStatement(input: ImpactCardStatementInput): vo
 
   doc.setFontSize(8);
   doc.text(
-    `i2c merchant program — ${input.adapterMode === 'live' ? 'live' : 'sandbox (mock)'}`,
+    `GRACE Banking Services — ${input.adapterMode === 'live' ? 'live' : 'sandbox (mock)'}`,
     pageWidth / 2,
     doc.internal.pageSize.getHeight() - 10,
     { align: 'center' },

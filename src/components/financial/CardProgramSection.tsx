@@ -171,16 +171,8 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
 
       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-dark-400">
         <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-dark-700">
-          Adapter: {data.adapter_mode === 'live' ? 'i2c live' : 'i2c sandbox (mock)'}
+          Adapter: {data.adapter_mode === 'live' ? 'GRACE Banking live' : 'GRACE Banking sandbox (mock)'}
         </span>
-        <a
-          href="https://www.i2cinc.com/products/merchant-services"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-indigo-600 dark:text-indigo-400 hover:underline"
-        >
-          i2c program docs →
-        </a>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -247,7 +239,7 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
         <div className="bg-stone-100 dark:bg-dark-800 border border-stone-200 dark:border-dark-700 rounded-xl overflow-hidden">
           <div className="p-4 border-b border-stone-200 dark:border-dark-700">
             <h3 className="font-medium text-gray-900 dark:text-dark-100 text-sm">Issued cards</h3>
-            <p className="text-xs text-gray-500 dark:text-dark-400">{liveCards.length} live · i2c merchant program</p>
+            <p className="text-xs text-gray-500 dark:text-dark-400">{liveCards.length} live · GRACE Banking Services</p>
           </div>
           <div className="divide-y divide-stone-200 dark:divide-dark-700 max-h-80 overflow-y-auto">
             {liveCards.length === 0 ? (
@@ -267,7 +259,7 @@ export function CardProgramContent({ data, busyId, withBusy, embedded }: CardPro
                     <button
                       onClick={() => withBusy(`sim-${card.id}`, () => simulateTransaction(card))}
                       disabled={busyId === `sim-${card.id}`}
-                      title="Simulate a card transaction through the i2c webhook pipeline"
+                      title="Simulate a card transaction through the GRACE Banking webhook pipeline"
                       className="px-2 py-1.5 border border-gray-300 dark:border-dark-600 text-gray-600 dark:text-dark-300 text-xs rounded-lg disabled:opacity-50 flex items-center gap-1"
                     >
                       {busyId === `sim-${card.id}` ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />} Simulate txn
@@ -322,7 +314,7 @@ function SectionHeader({ mode }: { mode?: 'live' | 'mock' }) {
       <div>
         <h2 className="serif text-2xl text-slate-900 dark:text-dark-100 leading-none">Impact Card Program</h2>
         <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
-          GRACE Impact Card — i2cInc merchant services, KYC, card roster, and interchange revenue
+          GRACE Impact Card — GRACE Banking Services, KYC, card roster, and interchange revenue
         </p>
       </div>
       {mode === 'mock' && (
@@ -332,7 +324,7 @@ function SectionHeader({ mode }: { mode?: 'live' | 'mock' }) {
       )}
       {mode === 'live' && (
         <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium rounded-full">
-          i2c live
+          GRACE Banking live
         </span>
       )}
     </div>

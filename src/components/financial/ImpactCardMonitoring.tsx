@@ -29,7 +29,7 @@ export function ImpactCardMonitoring({ data, compact }: ImpactCardMonitoringProp
   if (Math.abs(summary.reconciliation_delta_micro_usd) > 100_000) {
     alerts.push({
       level: 'warn',
-      message: `i2c ledger vs interchange delta ${fmtImpactUsd(Math.abs(summary.reconciliation_delta_micro_usd))} — reconcile in Impact Card Accounts`,
+      message: `GRACE Banking ledger vs interchange delta ${fmtImpactUsd(Math.abs(summary.reconciliation_delta_micro_usd))} — reconcile in Impact Card Accounts`,
     });
   }
   if (summary.pending_kyc > 0) {
@@ -99,17 +99,17 @@ export function ImpactCardMonitoring({ data, compact }: ImpactCardMonitoringProp
 
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4">
         <p className="section-eyebrow mb-3 flex items-center gap-1.5">
-          <Scale size={12} /> i2c / ledger reconciliation (MTD)
+          <Scale size={12} /> GRACE Banking / ledger reconciliation (MTD)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div>
-            <p className="text-gray-500 dark:text-dark-400 text-xs">Interchange fees (i2c events)</p>
+            <p className="text-gray-500 dark:text-dark-400 text-xs">Interchange fees (GRACE Banking events)</p>
             <p className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">
               {fmtImpactUsd(summary.interchange_mtd_micro_usd)}
             </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-dark-400 text-xs">Ledger net (source=i2c)</p>
+            <p className="text-gray-500 dark:text-dark-400 text-xs">Ledger net (source: GRACE Banking)</p>
             <p className="font-semibold text-slate-900 dark:text-dark-100 tabular-nums">
               {fmtImpactUsd(summary.ledger_i2c_net_mtd_micro_usd ?? 0)}
             </p>
@@ -124,7 +124,7 @@ export function ImpactCardMonitoring({ data, compact }: ImpactCardMonitoringProp
         </div>
         <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-3 flex items-center gap-1">
           <CreditCard size={11} />
-          Compare with Impact Card processor activity (source: i2c) for full audit trail.
+          Compare with Impact Card processor activity (source: GRACE Banking) for full audit trail.
         </p>
       </div>
     </div>

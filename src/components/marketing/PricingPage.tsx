@@ -70,7 +70,7 @@ const PLANS: PlanCard[] = [
       'Everything in Pro',
       'Unlimited members',
       'Custom domain (your.church)',
-      'Member card program (i2c neobanking)',
+      'Member card program (GRACE Banking Services)',
       'White-label branding',
       'Dedicated success manager',
       'SOC 2 evidence on request',
