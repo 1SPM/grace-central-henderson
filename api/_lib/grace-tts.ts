@@ -63,25 +63,31 @@ export async function probeTtsHealth(): Promise<ReturnType<typeof ttsHealthPaylo
 async function computeTtsHealth(): Promise<ReturnType<typeof ttsHealthPayload>> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (apiKey) {
-    // Honest probe: confirm the key is valid AND has quota left, so the UI
-    // shows "Browser voice" (not a false "Neural voice") when ElevenLabs is
-    // unusable — instead of claiming neural and then failing silently.
+    // Honest quota check — but FAIL OPEN. The only thing we can reliably act
+    // on is a *successful* subscription response that explicitly shows the
+    // character quota is exhausted; in that one case we report ok:false so the
+    // UI shows "Browser voice" instead of failing silently. Everything else —
+    // a scoped/TTS-only key that can't read this endpoint (401/403), a rate
+    // limit, a 5xx, or a network error — is INCONCLUSIVE and must not disable
+    // neural voice: the key clearly exists and the synth path has its own
+    // error handling + client fallback. Failing closed here would wrongly
+    // downgrade every user to the robotic browser voice.
     try {
       const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
         method: 'GET',
         headers: { 'xi-api-key': apiKey, Accept: 'application/json' },
       });
-      if (!res.ok) return { ...ttsHealthPayload(), ok: false };
-      const sub = await res.json() as { character_count?: number; character_limit?: number };
-      const remaining = typeof sub.character_limit === 'number' && typeof sub.character_count === 'number'
-        ? sub.character_limit - sub.character_count
-        : Number.POSITIVE_INFINITY;
-      return { ...ttsHealthPayload(), ok: remaining > 0 };
+      if (res.ok) {
+        const sub = await res.json() as { character_count?: number; character_limit?: number };
+        if (typeof sub.character_limit === 'number' && typeof sub.character_count === 'number'
+          && sub.character_count >= sub.character_limit) {
+          return { ...ttsHealthPayload(), ok: false }; // definitively over quota
+        }
+      }
     } catch {
-      // Transient network error probing ElevenLabs — assume usable; the synth
-      // path has its own error handling + client fallback if it's really down.
-      return ttsHealthPayload();
+      // Inconclusive — fall through to ok:true.
     }
+    return ttsHealthPayload();
   }
   const upstream = upstreamTtsUrl();
   if (!upstream) {
