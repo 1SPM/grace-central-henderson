@@ -38,6 +38,87 @@
         } catch (e) {}
       })();
     </script>
+    <!-- Blank-page guard. MUST stay inline in the HTML.
+         The app is a module bundle at /assets/index-<hash>.js. If that script
+         fails to load — the classic "a stale service worker serves an
+         index.html pointing at an asset hash that no longer exists after a
+         deploy" — React never mounts, #root stays empty, and the page is a
+         permanent white screen. Critically, every in-app recovery path
+         (ErrorBoundary, UpdatePrompt, the grace-build version check in
+         main.tsx) is inside that same bundle, so none of them can run. This
+         handler is the only code guaranteed to still execute.
+         First failure  -> drop the service worker + caches and reload once.
+         Second failure -> show a readable message instead of a blank page. -->
+    <script>
+      (function () {
+        var FLAG = 'grace-blank-page-recovery';
+        function alreadyTried() {
+          try { return !!sessionStorage.getItem(FLAG); } catch (e) { return false; }
+        }
+        function markTried() {
+          try { sessionStorage.setItem(FLAG, String(Date.now())); } catch (e) {}
+        }
+        function showFallback() {
+          var root = document.getElementById('root');
+          if (!root || root.children.length) return;
+          root.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+            'font-family:Figtree,system-ui,sans-serif;background:#18181b;color:#e4e4e7;padding:24px">' +
+            '<div style="max-width:380px;text-align:center">' +
+            '<p style="font-size:16px;font-weight:600;margin:0 0 8px">This page didn\'t finish loading</p>' +
+            '<p style="font-size:13px;color:#a1a1aa;line-height:1.5;margin:0 0 16px">' +
+            'A new version was just released. Reloading should pick it up.</p>' +
+            '<button onclick="location.reload(true)" style="padding:9px 18px;border:0;border-radius:8px;' +
+            'background:#6366f1;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Reload</button>' +
+            '</div></div>';
+        }
+        function selfHeal() {
+          if (alreadyTried()) { showFallback(); return; }
+          markTried();
+          var reload = function () { window.location.reload(); };
+          try {
+            var jobs = [];
+            if ('serviceWorker' in navigator) {
+              jobs.push(
+                navigator.serviceWorker.getRegistrations()
+                  .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+                  .catch(function () {})
+              );
+            }
+            if (window.caches && window.caches.keys) {
+              jobs.push(
+                window.caches.keys()
+                  .then(function (ks) { return Promise.all(ks.map(function (k) { return window.caches.delete(k); })); })
+                  .catch(function () {})
+              );
+            }
+            Promise.all(jobs).then(reload, reload);
+          } catch (e) { reload(); }
+        }
+        // Resource errors don't bubble — listen in the capture phase.
+        window.addEventListener('error', function (e) {
+          var t = e && e.target;
+          if (t && t.tagName === 'SCRIPT' && typeof t.src === 'string' && t.src.indexOf('/assets/') !== -1) {
+            selfHeal();
+          }
+        }, true);
+        // Vite emits this when a lazily-imported chunk 404s after boot.
+        window.addEventListener('vite:preloadError', function () { selfHeal(); });
+        // Last resort: the bundle downloaded fine but the app never mounted
+        // (a boot-time crash, e.g. missing config). Show the message — but
+        // deliberately DO NOT reload here. A reload on a timer would cut off a
+        // slow-but-succeeding load on a poor connection and could loop; the
+        // reload path is reserved for a script that demonstrably failed.
+        // Harmless if we're merely slow: showFallback() no-ops once anything
+        // has rendered, and React replaces this markup if it mounts later.
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var root = document.getElementById('root');
+            if (root && root.children.length === 0) showFallback();
+          }, 15000);
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
