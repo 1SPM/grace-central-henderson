@@ -4171,7 +4171,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
       </div>
       <div class="ai-did-chat-panel">
-        <div class="ai-did-chat-head" id="did-studio-title">Chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
+        <div class="ai-did-chat-head" id="did-studio-title">Chat <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> Live Avatar</span></div>
         <div class="ai-chat-messages" id="did-chat-messages"></div>
         <div class="ai-input-bar">
           <button type="button" class="ai-mic" id="did-mic-btn" onclick="toggleDidMic()" title="Hold to speak">🎤</button>
@@ -4662,7 +4662,7 @@ function syncDidStudioLeader(){
   const img=document.getElementById('did-avatar-img');
   if(img){img.src=leader.img;img.style.opacity=didAgentMounted?'0':'1';}
   const head=document.getElementById('did-studio-title');
-  if(head)head.innerHTML='Chat · '+leader.name+' <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span>';
+  if(head)head.innerHTML='Chat · '+leader.name+' <span><span class="pulse-live-dot" style="width:6px;height:6px"></span> Live Avatar</span>';
 }
 function seedDidChat(){
   const box=document.getElementById('did-chat-messages');

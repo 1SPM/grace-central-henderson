@@ -171,7 +171,7 @@ export function PrivacyPage() {
         <li><strong>Stripe</strong> — payment processing</li>
         <li><strong>GRACE Banking Services + OWVI</strong> — card program (Enterprise only)</li>
         <li><strong>Google Gemini</strong> — AI inference (Pro+ features)</li>
-        <li><strong>D-ID</strong> — animated avatar / video-agent features</li>
+        <li><strong>GRACE Avatar Services</strong> — animated avatar / video-agent features</li>
         <li><strong>Resend / Twilio</strong> — email + SMS delivery</li>
         <li><strong>Sentry / PostHog</strong> — error monitoring + product analytics (PII-scrubbed)</li>
       </ul>
