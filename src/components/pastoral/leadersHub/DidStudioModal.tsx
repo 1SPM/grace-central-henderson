@@ -95,19 +95,36 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
     }
   }, [open, greeting, companion.greeting, mountDidAgent, prefill]);
 
-  // Turn an infinite "Loading…" into an escapable state. The D-ID agent is
-  // "up" once it renders a <video>. If that never happens — most commonly a
-  // restrictive network (VPN/firewall) blocking the WebRTC media stream, since
-  // the agent config, client key, and streams API are all verified healthy —
-  // surface a retry + open-in-new-tab fallback instead of spinning forever.
+  // Turn an infinite "Loading…" into an escapable state, WITHOUT firing while
+  // the agent is actually fine.
+  //
+  // The embed renders into a SHADOW ROOT attached to our host div, so
+  // document.querySelector('video') can never see it — shadow DOM is not
+  // pierced by ordinary selectors. An earlier version of this check looked
+  // only in the light DOM, always counted zero videos, and so covered a
+  // perfectly healthy avatar with the "taking longer than usual" panel every
+  // single time. Look inside hostRef's shadowRoot first.
+  //
+  // Readiness is deliberately "the agent has rendered anything", not "a video
+  // is playing": the widget shows its own microphone-permission step before it
+  // ever creates a media element, and that step is a normal, working state we
+  // must not interrupt.
   useEffect(() => {
     if (!open || !hasDidCredentials || mountNonce === 0) return;
-    const findVideo = () =>
-      (hostRef.current?.closest('.ai-did-media')?.querySelector('video')
-        ?? document.querySelector('.didagent_target video')) as HTMLVideoElement | null;
+    const agentHasMounted = () => {
+      const host = hostRef.current;
+      if (!host) return false;
+      const shadow = host.shadowRoot;
+      if (shadow) {
+        if (shadow.querySelector('video')) return true;
+        // Permission prompt / controls rendered but no media element yet.
+        if (shadow.children.length > 0 && (shadow.textContent ?? '').trim().length > 0) return true;
+      }
+      return !!host.querySelector('video')
+        || !!document.querySelector('.didagent_target video');
+    };
     pollRef.current = window.setInterval(() => {
-      const v = findVideo();
-      if (v && v.readyState >= 1) {
+      if (agentHasMounted()) {
         setAgentReady(true);
         if (pollRef.current) window.clearInterval(pollRef.current);
         if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
