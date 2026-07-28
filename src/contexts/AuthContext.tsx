@@ -18,12 +18,20 @@ import {
 import { supabase, setClerkTokenProvider } from '../lib/supabase';
 import { resolveAuthMode } from './authMode';
 import { TEMP_DISPLAY_NAME } from '../lib/greeting';
-import { isDemoModeActive } from '../config/tenant';
+import { isDemoModeActive, TENANT_CHURCH_ID } from '../config/tenant';
 
-// Default church ID for demo/fallback mode. When Supabase is configured but
-// Clerk is not (single-tenant interim setup), VITE_DEFAULT_CHURCH_ID points
-// at the real church row so reads and writes carry a valid UUID.
-const DEFAULT_CHURCH_ID: string = import.meta.env.VITE_DEFAULT_CHURCH_ID || 'demo-church';
+// Default church ID for demo/fallback mode — the identity used when there is
+// no signed-in user.
+//
+// The host-resolved tenant church_id comes FIRST and deliberately outranks
+// VITE_DEFAULT_CHURCH_ID: one Vercel build serves every domain, so a single
+// build-time env var cannot be correct for both the real client and the demo
+// tenant at the same time (see the incident documented in config/tenant.ts).
+// It previously fell through to the literal string 'demo-church', which is not
+// a UUID — so any query filtering explicitly on church_id silently matched
+// nothing for anonymous visitors, while RLS-scoped queries still worked.
+const DEFAULT_CHURCH_ID: string =
+  TENANT_CHURCH_ID || import.meta.env.VITE_DEFAULT_CHURCH_ID || 'demo-church';
 
 interface AuthContextType {
   isLoaded: boolean;
