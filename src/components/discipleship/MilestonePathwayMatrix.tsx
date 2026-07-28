@@ -16,6 +16,7 @@ import type { Person, DiscipleshipMilestone, MilestoneType } from '../../types';
 import { DEFAULT_MILESTONE_DEFINITIONS } from '../../types';
 import type { MemberEngagementRow } from '../../hooks/usePortalActivity';
 import type { MemberActivityEvent } from '../../lib/database.types';
+import { MemberAvatar } from '../ui/MemberAvatar';
 
 const MILESTONE_ICONS: Record<MilestoneType, typeof DoorOpen> = {
   first_visit: DoorOpen,
@@ -224,9 +225,7 @@ export function MilestonePathwayMatrix({
                           onClick={() => onViewPerson?.(person.id)}
                           className="flex items-center gap-2.5 text-left hover:text-indigo-600 dark:hover:text-indigo-400"
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-slate-500 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                            {person.firstName[0]}{person.lastName[0]}
-                          </div>
+                          <MemberAvatar person={person} size="md" />
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate max-w-[160px]">
                               {person.firstName} {person.lastName}

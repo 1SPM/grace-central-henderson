@@ -166,7 +166,7 @@ function App() {
 
   // Custom hooks for state management
   const modals = useModals();
-  const collectionMgmt = useCollectionManagement(giving);
+  const collectionMgmt = useCollectionManagement(giving, churchId);
   const charityBasketMgmt = useCharityBaskets();
   const pastoralCare = usePastoralCare();
   const announcementData = useAnnouncements(churchId);
