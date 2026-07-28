@@ -4,7 +4,7 @@
  */
 (function (global) {
   const GRACE_METRICS = {
-    graceImpact: { month: 18.42, ytd: 5328, lifetime: 5808 },
+    graceImpact: { month: 18.42, ytd: 1240, lifetime: 4380 },
     pulse: {
       score: 248,
       week: { service: 45, volunteer: 80, care: 25, learning: 30, community: 68 },
@@ -32,8 +32,8 @@
       { cause: 'Food Pantry', pct: 10 },
       { cause: 'Care Fund', pct: 5 },
     ],
-    givingGoal: { pct: 89, raised: 5328, target: 6000 },
-    givenMonth: 120,
+    givingGoal: { pct: 52, raised: 1240, target: 2400 },
+    givenMonth: 230,
     walletAvailable: 3240,
     leadership: {
       participationWeek: 4,
