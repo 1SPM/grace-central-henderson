@@ -27,6 +27,21 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+    ignore:
+      # Stripe is deliberately dormant at this stage — no STRIPE_SECRET_KEY is
+      # set, so /api/giving/create-payment-intent fails closed with 503
+      # service_not_configured on every domain, and the client reports online
+      # giving as disabled. Major bumps here are 5-8 breaking versions of work
+      # nobody can validate without live keys, so they only generate
+      # permanently-red PRs.
+      #
+      # Scoped to MAJOR only on purpose: minor, patch and — critically —
+      # SECURITY updates still come through. Remove this block when the Stripe
+      # work is picked back up and Dependabot will re-open the majors fresh.
+      - dependency-name: "@stripe/stripe-js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@stripe/react-stripe-js"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore(deps)
       include: scope
@@ -44,6 +59,12 @@ updates:
       - dependencies
       - npm
       - api
+    ignore:
+      # See the Stripe note above — same reasoning, server SDK. `stripe` 14 -> 22
+      # is eight majors against payment code that CI cannot exercise without
+      # live keys. Major-only, so security advisories are still delivered.
+      - dependency-name: "stripe"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore(api-deps)
       include: scope
