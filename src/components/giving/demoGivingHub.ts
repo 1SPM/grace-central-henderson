@@ -32,10 +32,10 @@ export const demoCampaigns: HubCampaign[] = [
     kind: 'admin',
     accent: 'gold',
     icon: 'building',
-    raised: 68400,
-    goal: 100000,
-    donors: 142,
-    daysLeft: 47,
+    raised: 214800,
+    goal: 250000,
+    donors: 168,
+    daysLeft: 34,
     routesTo: 'Building Fund account',
   },
   {
@@ -45,10 +45,10 @@ export const demoCampaigns: HubCampaign[] = [
     kind: 'admin',
     accent: 'blue',
     icon: 'plane',
-    raised: 27300,
-    goal: 30000,
-    donors: 98,
-    daysLeft: 18,
+    raised: 41650,
+    goal: 42000,
+    donors: 121,
+    daysLeft: 9,
     routesTo: 'Missions Fund account',
   },
   {
@@ -58,9 +58,9 @@ export const demoCampaigns: HubCampaign[] = [
     kind: 'seasonal',
     accent: 'green',
     icon: 'sun',
-    raised: 8600,
-    goal: 20000,
-    donors: 61,
+    raised: 23400,
+    goal: 25000,
+    donors: 97,
     daysLeft: 12,
     routesTo: 'Missions Fund account',
   },
@@ -71,10 +71,10 @@ export const demoCampaigns: HubCampaign[] = [
     kind: 'member',
     accent: 'purple',
     icon: 'heart',
-    raised: 4100,
-    goal: 5000,
-    donors: 54,
-    daysLeft: 28,
+    raised: 11850,
+    goal: 12000,
+    donors: 88,
+    daysLeft: 6,
     routesTo: 'Escrow → disburse on goal',
     submittedBy: 'Maria Santos',
   },
@@ -96,14 +96,14 @@ export interface RevenueStream {
 }
 
 export const demoRevenueStreams: RevenueStream[] = [
-  { id: 'rs-online', label: 'Direct — Online', kind: 'direct', source: 'App / Website', mtdVolume: 31200, avgGift: 390, donors: 80, routesTo: 'Chosen fund', settlement: 'Same-day', status: 'Active' },
-  { id: 'rs-debit', label: 'Direct — Debit card', kind: 'direct', source: 'Grace Visa debit', mtdVolume: 14200, avgGift: 450, donors: 32, routesTo: 'Tithe fund', settlement: 'Same-day', status: 'Active' },
-  { id: 'rs-credit', label: 'Direct — Credit card', kind: 'direct', source: 'Grace Visa credit', mtdVolume: 6000, avgGift: 600, donors: 10, routesTo: 'Tithe fund', settlement: 'Same-day', status: 'Active' },
-  { id: 'rs-pts-tithe', label: 'Points → Tithe', kind: 'points', source: 'Card spend rewards', mtdVolume: 2890, avgGift: 82, donors: 35, routesTo: 'Tithe fund', settlement: 'Instant', status: 'Active' },
-  { id: 'rs-pts-cause', label: 'Points → Cause', kind: 'points', source: 'Card spend rewards', mtdVolume: 950, avgGift: 48, donors: 20, routesTo: 'Member cause', settlement: 'Instant', status: 'Active' },
-  { id: 'rs-camp-admin', label: 'Campaign — Admin', kind: 'campaign', source: 'Building Drive / Kenya', mtdVolume: 19770, avgGift: 510, donors: 39, routesTo: 'Campaign fund', settlement: 'Same-day', status: 'Active' },
-  { id: 'rs-camp-seasonal', label: 'Campaign — Seasonal', kind: 'seasonal', source: 'Summer Outreach', mtdVolume: 5100, avgGift: 340, donors: 15, routesTo: 'Missions fund', settlement: 'Same-day', status: 'Active' },
-  { id: 'rs-member-cause', label: 'Member cause', kind: 'member', source: 'Food Pantry Drive', mtdVolume: 4100, avgGift: 76, donors: 54, routesTo: 'Escrow → disburse', settlement: 'On goal met', status: 'Live' },
+  { id: 'rs-online', label: 'Direct — Online', kind: 'direct', source: 'App / Website', mtdVolume: 32600, avgGift: 405, donors: 81, routesTo: 'Chosen fund', settlement: 'Same-day', status: 'Active' },
+  { id: 'rs-debit', label: 'Direct — Debit card', kind: 'direct', source: 'Grace Visa debit', mtdVolume: 18400, avgGift: 470, donors: 39, routesTo: 'Tithe fund', settlement: 'Same-day', status: 'Active' },
+  { id: 'rs-credit', label: 'Direct — Credit card', kind: 'direct', source: 'Grace Visa credit', mtdVolume: 8100, avgGift: 620, donors: 13, routesTo: 'Tithe fund', settlement: 'Same-day', status: 'Active' },
+  { id: 'rs-pts-tithe', label: 'Points → Tithe', kind: 'points', source: 'Card spend rewards', mtdVolume: 4120, avgGift: 92, donors: 45, routesTo: 'Tithe fund', settlement: 'Instant', status: 'Active' },
+  { id: 'rs-pts-cause', label: 'Points → Cause', kind: 'points', source: 'Card spend rewards', mtdVolume: 1480, avgGift: 52, donors: 28, routesTo: 'Member cause', settlement: 'Instant', status: 'Active' },
+  { id: 'rs-camp-admin', label: 'Campaign — Admin', kind: 'campaign', source: 'Building Drive / Kenya', mtdVolume: 28600, avgGift: 560, donors: 51, routesTo: 'Campaign fund', settlement: 'Same-day', status: 'Active' },
+  { id: 'rs-camp-seasonal', label: 'Campaign — Seasonal', kind: 'seasonal', source: 'Summer Outreach', mtdVolume: 7300, avgGift: 365, donors: 20, routesTo: 'Missions fund', settlement: 'Same-day', status: 'Active' },
+  { id: 'rs-member-cause', label: 'Member cause', kind: 'member', source: 'Food Pantry Drive', mtdVolume: 11850, avgGift: 135, donors: 88, routesTo: 'Escrow → disburse', settlement: 'On goal met', status: 'Live' },
 ];
 
 export interface RecurringGiver {
@@ -115,11 +115,11 @@ export interface RecurringGiver {
 }
 
 export const demoRecurring: RecurringGiver[] = [
-  { name: 'James Okafor', amount: 400, frequency: 'Weekly', fund: 'Tithe', nextDate: 'Jun 15' },
-  { name: 'Maria Santos', amount: 200, frequency: 'Monthly', fund: 'Missions', nextDate: 'Jun 15' },
-  { name: 'David Osei', amount: 500, frequency: 'Weekly', fund: 'Tithe', nextDate: 'Jun 15' },
-  { name: 'Robert Chen', amount: 150, frequency: 'Monthly', fund: 'Building', nextDate: 'Jun 20' },
-  { name: 'Amara Williams', amount: 75, frequency: 'Weekly', fund: 'Youth', nextDate: 'Jun 15' },
+  { name: 'James Okafor', amount: 650, frequency: 'Weekly', fund: 'Tithe', nextDate: 'Jun 15' },
+  { name: 'Maria Santos', amount: 450, frequency: 'Monthly', fund: 'Missions', nextDate: 'Jun 15' },
+  { name: 'David Osei', amount: 800, frequency: 'Weekly', fund: 'Tithe', nextDate: 'Jun 15' },
+  { name: 'Robert Chen', amount: 300, frequency: 'Monthly', fund: 'Building', nextDate: 'Jun 20' },
+  { name: 'Amara Williams', amount: 175, frequency: 'Weekly', fund: 'Youth', nextDate: 'Jun 15' },
 ];
 
 /**
@@ -197,8 +197,8 @@ export interface SeasonalCampaign {
 }
 
 export const demoSeasonal: SeasonalCampaign[] = [
-  { id: 'se-easter', emoji: '🐣', name: 'Easter Outreach', dates: 'Mar 28 – Apr 5', status: 'completed', raised: 12400 },
-  { id: 'se-grad', emoji: '🎓', name: 'Graduation Giving', dates: 'May 1 – May 31', status: 'completed', raised: 4200 },
+  { id: 'se-easter', emoji: '🐣', name: 'Easter Outreach', dates: 'Mar 28 – Apr 5', status: 'completed', raised: 28400 },
+  { id: 'se-grad', emoji: '🎓', name: 'Graduation Giving', dates: 'May 1 – May 31', status: 'completed', raised: 9800 },
   { id: 'se-summer', emoji: '☀️', name: 'Summer Outreach', dates: 'Jun 1 – Aug 31', status: 'active', description: 'Food banks, youth camp, community events' },
   { id: 'se-harvest', emoji: '🍂', name: 'Harvest Giving', dates: 'Oct 1 – Nov 15', status: 'upcoming', description: 'Thanksgiving drives, local shelter support' },
   { id: 'se-christmas', emoji: '🎄', name: 'Christmas Blessing', dates: 'Dec 1 – Dec 24', status: 'upcoming', description: 'Family hampers, toy drives, community dinners' },
@@ -266,8 +266,8 @@ export const demoCauses: MemberCause[] = [
 ];
 
 export const demoCauseStats = {
-  awaitingReview: 8,
-  approvedLive: 1,
+  awaitingReview: 12,
+  approvedLive: 3,
   approvedLiveLabel: 'Food Pantry Drive',
-  totalVotes: 247,
+  totalVotes: 683,
 };
