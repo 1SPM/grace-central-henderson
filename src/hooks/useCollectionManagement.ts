@@ -22,9 +22,34 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
   },
 ];
 
+/**
+ * Pledges backing the campaign above. CampaignsTab derives a campaign's
+ * "raised" and "donors" purely from pledges (raised = Σ totalGiven,
+ * donors = pledge count), so with an empty pledge list the capital campaign
+ * renders as $0 of its goal with 0 donors — i.e. a live campaign that looks
+ * dead. These are generated rather than hand-listed to keep the file short.
+ */
+const INITIAL_PLEDGES: Pledge[] = Array.from({ length: 124 }, (_, i) => {
+  const amount = 1500 + ((i * 337) % 6500);
+  const totalGiven = Math.round(amount * (0.45 + ((i * 17) % 45) / 100));
+  return {
+    id: `pledge-${i + 1}`,
+    campaignId: 'campaign-1',
+    amount,
+    frequency: 'monthly',
+    startDate: '2026-01-15',
+    endDate: '2026-12-31',
+    fund: 'building',
+    status: 'active',
+    totalPledged: amount,
+    totalGiven,
+    percentComplete: Math.round((totalGiven / amount) * 100),
+  };
+});
+
 export function useCollectionManagement(giving: GivingRecord[]) {
   const [campaigns, setCampaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
-  const [pledges, setPledges] = useState<Pledge[]>([]);
+  const [pledges, setPledges] = useState<Pledge[]>(INITIAL_PLEDGES);
   const [donationBatches, setDonationBatches] = useState<DonationBatch[]>([]);
   const [givingStatements, setGivingStatements] = useState<GivingStatement[]>([]);
 
