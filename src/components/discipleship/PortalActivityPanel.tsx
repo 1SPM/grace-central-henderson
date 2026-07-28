@@ -16,6 +16,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import type { MemberActivityEvent } from '../../lib/database.types';
+import { MemberAvatar } from '../ui/MemberAvatar';
 import type { Person, SmallGroup } from '../../types';
 import type { MemberEngagementRow, PortalEngagementSummary } from '../../hooks/usePortalActivity';
 
@@ -223,9 +224,22 @@ export function PortalActivityPanel({
                   disabled={!e.person_id || !onViewPerson}
                   className="w-full flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors text-left disabled:hover:bg-transparent disabled:cursor-default"
                 >
-                  <div className={`w-8 h-8 ${meta.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <Icon size={14} className={meta.color} />
-                  </div>
+                  {/* The member's face, with the event type as a corner badge —
+                      the icon still says WHAT happened, the photo says WHO. */}
+                  {person ? (
+                    <div className="relative flex-shrink-0">
+                      <MemberAvatar person={person} size="lg" />
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 ${meta.bg} rounded-full flex items-center justify-center ring-2 ring-stone-100 dark:ring-dark-850`}
+                      >
+                        <Icon size={9} className={meta.color} />
+                      </span>
+                    </div>
+                  ) : (
+                    <div className={`w-10 h-10 ${meta.bg} rounded-full flex items-center justify-center flex-shrink-0`}>
+                      <Icon size={14} className={meta.color} />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900 dark:text-dark-100 truncate">
                       {describeEvent(e, personName)}
@@ -267,11 +281,7 @@ export function PortalActivityPanel({
                   onClick={() => onViewPerson?.(row.personId)}
                   className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors text-left"
                 >
-                  <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-500/15 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">
-                      {person.firstName.charAt(0)}{person.lastName.charAt(0)}
-                    </span>
-                  </div>
+                  <MemberAvatar person={person} size="lg" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">
                       {person.firstName} {person.lastName}
