@@ -121,7 +121,21 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           cacheId: 'grace-crm-voice-v4',
-          globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+          // NOTE: `html` is deliberately absent. Precaching index.html made the
+          // service worker serve a stale shell after every deploy: the cached
+          // HTML still pointed at the previous /assets/index-<hash>.js, and if
+          // that asset was gone the app never mounted and the page went blank.
+          // It also silently defeated the grace-build version check in
+          // main.tsx — that guard compares the meta tag in the served HTML
+          // against localStorage, so being handed the OLD HTML meant it
+          // compared old-to-old and never detected the new deploy.
+          //
+          // Vercel already serves index.html as `max-age=0, must-revalidate`,
+          // so letting navigations hit the network is both correct and cheap.
+          // Nothing is lost offline that matters: every screen reads Supabase,
+          // so an offline shell could only ever render an empty app.
+          globPatterns: ['**/*.{js,css,svg,png,ico,woff,woff2}'],
+          navigateFallback: null,
           cleanupOutdatedCaches: true,
           skipWaiting: true,
           clientsClaim: true,
