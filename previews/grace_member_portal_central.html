@@ -4184,7 +4184,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <div class="did-studio-overlay" id="did-studio-overlay" onclick="if(event.target===this)closeDidStudio()" role="dialog" aria-modal="true" aria-labelledby="did-studio-title">
   <div class="did-studio-modal">
     <button type="button" class="did-studio-close" onclick="closeDidStudio()" aria-label="Close conversation">×</button>
-    <div class="ai-did-title-bar" id="did-studio-title"><div>Chat</div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> D-ID Studio</span></div>
+    <div class="ai-did-title-bar" id="did-studio-title"><div>Chat</div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> Live Avatar</span></div>
     <div class="ai-did-studio" id="ai-did-studio">
       <div class="ai-did-media">
         <div class="ai-did-media-bg" aria-hidden="true"></div>
@@ -4695,7 +4695,7 @@ function syncDidStudioLeader(){
   const creds=didLeaderCreds(leader);
   const live=!!(creds.agentId&&creds.clientKey);
   const head=document.getElementById('did-studio-title');
-  if(head)head.innerHTML='<div>Chat · '+leader.name+'<span class="did-verified-badge">✓ Verified Leader</span></div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> '+(live?'D-ID Studio':'Preview')+'</span>';
+  if(head)head.innerHTML='<div>Chat · '+leader.name+'<span class="did-verified-badge">✓ Verified Leader</span></div><span><span class="pulse-live-dot" style="width:6px;height:6px"></span> '+(live?'Live Avatar':'Preview')+'</span>';
 }
 function seedDidChat(){
   const box=document.getElementById('did-chat-messages');

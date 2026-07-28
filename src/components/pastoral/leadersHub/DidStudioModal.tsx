@@ -148,7 +148,7 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
         role: 'ai',
         text: hasDidCredentials
           ? 'Thank you for sharing. I\'m here with you — let\'s walk through this together in prayer and scripture.'
-          : 'Avatar session is in preview mode. Configure D-ID agent credentials to enable live conversation.',
+          : 'Avatar session is in preview mode. Configure avatar credentials to enable live conversation.',
       },
     ]);
   };
@@ -179,7 +179,7 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
           </div>
           <span>
             <span className="pulse-live-dot" />
-            {hasDidCredentials ? 'D-ID Studio' : 'Preview'}
+            {hasDidCredentials ? 'Live Avatar' : 'Preview'}
           </span>
         </div>
         {/*
@@ -281,7 +281,7 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
           {!hasDidCredentials && (
             <div className="ai-did-chat-panel">
               <div className="ai-did-empty">
-                <p className="mb-2">D-ID agent credentials are not configured for this leader.</p>
+                <p className="mb-2">Avatar credentials are not configured for this leader.</p>
                 {companion.divinityAvatarUrl && (
                   <a
                     href={companion.divinityAvatarUrl}
