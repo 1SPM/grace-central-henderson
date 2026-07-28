@@ -101,6 +101,22 @@ export const TENANT_TIMEZONE = ACTIVE.timezone;
 export const TENANT_GRACE_FACTS = ACTIVE.graceFacts;
 export const TENANT_DEMO_ONBOARDING_SKIP = ACTIVE.demoOnboardingSkip;
 
+/**
+ * The churches.id this host's data lives under — resolved at RUNTIME from the
+ * hostname, for the same reason as the demo-mode flag above: one Vercel build
+ * serves every domain, so a build-time env var physically cannot hold a
+ * different church_id per tenant.
+ *
+ * This is the fallback identity for a request with no signed-in user (the
+ * anonymous demo). Before this existed, AuthContext fell back to the literal
+ * string 'demo-church', so every query that filters explicitly on church_id
+ * (`.eq('church_id', churchId)`) matched nothing on the demo host — while
+ * queries that rely on RLS alone still worked. That asymmetry is why the
+ * Growth & Engagement page rendered all-zero against a fully populated
+ * database.
+ */
+export const TENANT_CHURCH_ID = ACTIVE.churchId;
+
 // Tenant-agnostic helper, re-exported so call sites need only this module.
 export { churchShortName };
 
