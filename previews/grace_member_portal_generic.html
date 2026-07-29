@@ -21,7 +21,10 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
   --sb-blue-deep:#102a49;
   --sb-on:#ffffff;
   --sb-on-dim:rgba(255,255,255,.66);
-  --sb-on-faint:rgba(255,255,255,.42);
+  --sb-on-faint:rgba(255,255,255,.58);
+  /* sky-500 gives white text only 3.0:1 -- below AA for 14px bold. This is
+     the same hue family, darkened until white clears 4.5:1. */
+  --sb-active:#2a7ba6;
   --sb-rule:rgba(255,255,255,.14);
   --sb-hover:rgba(255,255,255,.09);
 }
@@ -39,7 +42,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 }
 .nb{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:calc(var(--radius-card) - 4px);cursor:pointer;transition:background var(--transition-fast),color var(--transition-fast)}
 .nb:hover{background:var(--sb-hover)}
-.nb.active{background:var(--grace-sky-500)}
+.nb.active{background:var(--sb-active)}
 .nb:focus-visible{outline:2px solid #fff;outline-offset:-2px}
 .nb-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0;opacity:.82;transition:opacity var(--transition-fast)}
 .nb:hover .nb-ico,.nb.active .nb-ico{opacity:1}
@@ -61,6 +64,16 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .sd-on{background:#fff}
 .sd-off{background:rgba(255,255,255,.22)}
 .sb-pulse-block{border-top-color:var(--sb-rule)!important}
+/* The card-impact figure was rendering invisible: grace-faithful-theme.css
+   gives .token-val a sky-500 BACKGROUND (written for the old white rail),
+   while .pulse-score sets sky-500 TEXT and, being later in this sheet, beat
+   a plain .token-val colour rule -- sky on sky. These .sb-scoped selectors
+   (0,2,0) outrank both, drop the chip background, and let the amount read
+   as the number it is. */
+.sb .token-val{background:transparent;color:#fff;font-size:15px;font-weight:800;letter-spacing:-.2px}
+.sb .token-val.pulse-score,.sb .pulse-score{color:#fff}
+.sb .token-label{font-size:11px;color:rgba(255,255,255,.6)}
+
 /* grace-duotone-icons.js hard-codes a red duotone fill for its 'inverse'
    variant (a Central-brand leftover), which muddies on the blue rail.
    Neutralise it to a white wash -- attribute selector matches the literal
@@ -1953,7 +1966,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <div class="sb-pulse-block">
         <div class="token-row" style="margin-bottom:4px">
           <span class="token-label" style="display:flex;align-items:center;gap:5px">Card impact · May</span>
-          <span class="token-val pulse-score" style="font-size:14px">$18.42</span>
+          <span class="token-val pulse-score">$18.42</span>
         </div>
       </div>
     </div>
