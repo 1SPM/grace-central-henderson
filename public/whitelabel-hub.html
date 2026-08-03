@@ -108,6 +108,66 @@
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(30, 41, 59, .18);
     }
+    .card-featured .card-body { padding-bottom: 24px }
+    .card-split { display: grid; gap: 24px }
+    @media (min-width: 768px) {
+      .card-split { grid-template-columns: 1fr 320px; align-items: start }
+    }
+    .card-main { display: flex; flex-direction: column; gap: 20px; min-height: 100% }
+    .card-main .card-tags { margin-bottom: 0 }
+    .phone-preview {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      background: linear-gradient(180deg, #f8f8fa 0%, #ececf0 100%);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      min-height: 320px;
+    }
+    .phone-preview-img {
+      width: auto;
+      height: auto;
+      max-width: 270px;
+      display: block;
+      filter: drop-shadow(0 20px 50px rgba(0, 0, 0, .22));
+    }
+    .share-panel { display: flex; flex-direction: column; gap: 16px }
+    .share-block { background: var(--gray); border: 1px solid var(--border); border-radius: 16px; padding: 20px }
+    .share-block-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px }
+    .share-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+    .share-icon svg { width: 20px; height: 20px }
+    .share-icon-qr { background: rgba(51, 65, 85, .1); color: var(--accent) }
+    .share-icon-link { background: rgba(16,185,129,.12); color: #059669 }
+    .share-block-header h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px }
+    .share-block-header p { font-size: 13px; color: var(--muted) }
+    .qr-wrap { display: flex; justify-content: center; padding: 16px; background: var(--white); border-radius: 12px; border: 1px solid var(--border) }
+    .qr-wrap img { width: 192px; height: 192px; display: block }
+    .share-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.45 }
+    .url-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: stretch }
+    .url-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap }
+    .app-link-preview { min-width: 0; min-height: var(--touch); padding: 9px 12px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; gap: 1px }
+    .app-link-domain { font-size: 12px; font-weight: 700; color: var(--text); overflow-wrap: anywhere }
+    .app-link-path { font-size: 11px; color: var(--muted); line-height: 1.25; overflow-wrap: anywhere }
+    .btn-copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--touch); padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 650; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap }
+    .btn-copy:hover { background: #ebebed }
+    .btn-copy.copied { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.25) }
+    .btn-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: var(--touch); margin-top: 12px; padding: 10px 16px; background: var(--accent); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 650; text-decoration: none; transition: background .16s ease, transform .16s ease, box-shadow .16s ease }
+    .btn-open:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(30, 41, 59, .18) }
+    .share-note { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); line-height: 1.5 }
+    @media (max-width: 767px) {
+      .card-split { grid-template-columns: 1fr }
+      .phone-preview { min-height: 240px }
+      .phone-preview-img { max-width: 220px }
+    }
+    @media (max-width: 640px) {
+      .url-row { grid-template-columns: 1fr }
+      .btn-copy { width: 100% }
+    }
+    @media (max-width: 380px) {
+      .share-block { padding: 16px }
+    }
     .cross-link {
       margin-top: 32px;
       padding: 16px 20px;
@@ -187,6 +247,91 @@
           <a id="wl-portal-link" href="/previews/grace_member_portal_generic.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Generic Members Portal &rarr;</a>
         </div>
       </div>
+      <div class="card card-featured">
+        <div class="card-body">
+          <div class="card-split">
+            <div class="card-main">
+              <span class="card-badge">New iOS App</span>
+              <h3>New iOS Members Card App</h3>
+              <p>Redesigned Faithful Church mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+              <div class="card-tags">
+                <span class="tag">iOS Native</span>
+                <span class="tag">Members Card</span>
+                <span class="tag">Giving</span>
+                <span class="tag">Faithful Church</span>
+              </div>
+              <div class="phone-preview">
+                <img
+                  class="phone-preview-img"
+                  src="/previews/assets/members-portal-phone-faithful.png"
+                  alt="Faithful Church Members Card Portal on iPhone"
+                  width="270"
+                  height="585"
+                />
+              </div>
+            </div>
+            <div id="share-ios-app" class="share-panel">
+              <div class="share-block">
+                <div class="share-block-header">
+                  <div class="share-icon share-icon-qr" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1"/>
+                      <rect x="14" y="3" width="7" height="7" rx="1"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1"/>
+                      <path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M16 16h2v2"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4>Scan to Preview</h4>
+                    <p>Open on your mobile device</p>
+                  </div>
+                </div>
+                <div class="qr-wrap">
+                  <img id="ios-app-qr" alt="QR code for iOS Members Card app" width="192" height="192" loading="lazy" />
+                </div>
+                <p class="share-hint">Scan with your phone camera to preview the member experience &mdash; no account needed.</p>
+              </div>
+              <div class="share-block">
+                <div class="share-block-header">
+                  <div class="share-icon share-icon-link" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4>App URL</h4>
+                    <p>Share with members</p>
+                  </div>
+                </div>
+                <div class="url-row">
+                  <input id="ios-app-url" type="text" class="url-input" readonly aria-label="iOS Members Card app URL" />
+                  <div class="app-link-preview" aria-hidden="true">
+                    <span id="ios-app-domain" class="app-link-domain"></span>
+                    <span id="ios-app-path" class="app-link-path"></span>
+                  </div>
+                  <button type="button" id="ios-app-copy" class="btn-copy" aria-label="Copy app URL">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span id="ios-app-copy-label">Copy</span>
+                  </button>
+                </div>
+                <a id="ios-app-open" class="btn-open" target="_blank" rel="noopener noreferrer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  Open in New Tab
+                </a>
+              </div>
+              <div class="share-note">Best on a phone: scan the QR code and tap Log In to explore the full member experience &mdash; demo data, no account needed.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <p class="cross-link">
       Looking for the Central Henderson demo?
@@ -207,6 +352,44 @@
         var demoHub = document.getElementById('demo-hub-link');
         if (demoHub) demoHub.href = demo.hub;
       }
+
+      var IOS_APP_PATH = (wl && wl.mobileApp) || '/grace_faithful_church_members_card_ios_app.html';
+      var appUrl = window.location.origin + IOS_APP_PATH;
+      var urlInput = document.getElementById('ios-app-url');
+      var domainLabel = document.getElementById('ios-app-domain');
+      var pathLabel = document.getElementById('ios-app-path');
+      var openLink = document.getElementById('ios-app-open');
+      var qrImg = document.getElementById('ios-app-qr');
+      var copyBtn = document.getElementById('ios-app-copy');
+      var copyLabel = document.getElementById('ios-app-copy-label');
+
+      urlInput.value = appUrl;
+      urlInput.title = appUrl;
+      domainLabel.textContent = window.location.host;
+      pathLabel.textContent = IOS_APP_PATH;
+      openLink.href = appUrl;
+      qrImg.src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+        encodeURIComponent(appUrl) +
+        '&bgcolor=ffffff&color=334155';
+
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(appUrl).then(function () {
+          copyBtn.classList.add('copied');
+          copyLabel.textContent = 'Copied!';
+          setTimeout(function () {
+            copyBtn.classList.remove('copied');
+            copyLabel.textContent = 'Copy';
+          }, 2000);
+        }).catch(function () {
+          urlInput.select();
+          document.execCommand('copy');
+          copyLabel.textContent = 'Copied!';
+          setTimeout(function () {
+            copyLabel.textContent = 'Copy';
+          }, 2000);
+        });
+      });
     })();
   </script>
 </body>
