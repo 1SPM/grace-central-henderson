@@ -62,7 +62,8 @@ export default defineConfig(({ mode }) => {
       {
         name: 'security-headers',
         configureServer(server) {
-          server.middlewares.use((_req, res, next) => {
+          server.middlewares.use((req, res, next) => {
+            const isCalculatorEmbed = req.url?.startsWith('/pricing?embed=calculator');
             // Content Security Policy
             res.setHeader(
               'Content-Security-Policy',
@@ -74,10 +75,10 @@ export default defineConfig(({ mode }) => {
               "media-src 'self' blob: data: https://*.d-id.com; " +
               "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.twilio.com https://api.stripe.com https://*.clerk.accounts.dev wss://*.supabase.co https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://*.i.posthog.com https://*.d-id.com wss://*.d-id.com; " +
               "frame-src 'self' https://js.stripe.com https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.d-id.com https://www.youtube-nocookie.com; " +
-              "frame-ancestors 'none';"
+              `frame-ancestors ${isCalculatorEmbed ? "'self'" : "'none'"};`
             );
             // Prevent clickjacking
-            res.setHeader('X-Frame-Options', 'DENY');
+            res.setHeader('X-Frame-Options', isCalculatorEmbed ? 'SAMEORIGIN' : 'DENY');
             // Prevent MIME type sniffing
             res.setHeader('X-Content-Type-Options', 'nosniff');
             // Enable XSS filter
