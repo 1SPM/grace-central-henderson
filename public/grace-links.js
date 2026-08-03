@@ -10,5 +10,6 @@ window.GRACE_LINKS = {
     hub: 'https://grace-crm-two.vercel.app/whitelabel-hub.html',
     crm: 'https://grace-crm-two.vercel.app/#/dashboard',
     memberPortal: '/previews/grace_member_portal_generic.html',
+    mobileApp: '/grace_faithful_church_members_card_ios_app.html',
   },
 };
