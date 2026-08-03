@@ -22,9 +22,15 @@ function copyMemberPortalDemos(): Plugin {
     closeBundle() {
       const root = process.cwd();
       const dist = path.join(root, 'dist');
-      const iosApp = path.join(root, 'grace_central_henderson_members_card_ios_app.html');
-      if (fs.existsSync(iosApp)) {
-        fs.copyFileSync(iosApp, path.join(dist, path.basename(iosApp)));
+      const iosApps = [
+        'grace_central_henderson_members_card_ios_app.html',
+        'grace_faithful_church_members_card_ios_app.html',
+      ];
+      for (const name of iosApps) {
+        const iosApp = path.join(root, name);
+        if (fs.existsSync(iosApp)) {
+          fs.copyFileSync(iosApp, path.join(dist, path.basename(iosApp)));
+        }
       }
       copyDirSync(path.join(root, 'previews'), path.join(dist, 'previews'));
     },
