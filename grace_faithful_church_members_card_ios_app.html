@@ -21,7 +21,7 @@
   --ios-muted:var(--central-grey,#6b7280);
   --brand-dark:var(--central-black,#000000);
   --brand-accent:var(--central-red,#449eca);
-  --brand-soft:var(--central-red-soft,#FFF0F1);
+  --brand-soft:var(--central-red-soft,#e8f4fa);
   --brand-soft-2:#fafafa;
   --success:#15803d;
   --warning:#b45309;
@@ -157,7 +157,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .home-leader-chip-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.04em}
 .home-leader-chip-name{font-size:13px;font-weight:700;color:#fff;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .home-leader-chip-sub{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px}
-.home-leader-chip-cta{font-size:11px;font-weight:700;color:#fecaca;flex-shrink:0}
+.home-leader-chip-cta{font-size:11px;font-weight:700;color:#6cc3ea;flex-shrink:0}
 .home-live-pill{
   display:inline-flex;align-items:center;gap:7px;background:#449eca;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:10px 14px;
   font-size:10px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;
@@ -318,7 +318,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .pillar-name{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
 .pillar-sub{font-size:9px;color:#888;line-height:1.35}
 .pillar-badge{
-  font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:8px;display:inline-block;background:#FFF0F1;color:#000
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:8px;display:inline-block;background:#e8f4fa;color:#000
 }
 /* Leadership page */
 .ld-hero-centered{
@@ -632,8 +632,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .ld-profile-tag.lang{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.2)}
 .ld-profile-verified-inline{margin-top:12px;margin-bottom:4px}
 .ld-dm-banner{
-  display:none;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#fef2f2;
-  border-bottom:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;line-height:1.35
+  display:none;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#eff6ff;
+  border-bottom:1px solid #c5e3f2;font-size:11px;font-weight:600;color:#1e3a5f;line-height:1.35
 }
 .ld-dm-banner.open{display:flex}
 .ld-dm-banner button{
@@ -681,7 +681,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 }
 .leader-card::before{content:"";position:absolute;width:160px;height:160px;right:-58px;top:-68px;border-radius:999px;background:radial-gradient(circle,rgba(68,158,202,.34),transparent 70%)}
 .tag{
-  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(68,158,202,.14);border:1px solid rgba(68,158,202,.24);color:#ffb4bb;font-size:11px;font-weight:700
+  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(68,158,202,.14);border:1px solid rgba(68,158,202,.24);color:#a8daf0;font-size:11px;font-weight:700
 }
 .leader-top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
 .avatar{width:54px;height:54px;border-radius:18px;object-fit:cover;border:2px solid rgba(68,158,202,.34);flex-shrink:0}
@@ -692,7 +692,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 }
 .btn.primary{background:#449eca;color:#fff}
 .btn.dark{background:#000;color:#fff}
-.btn.soft{background:#fff1f2;color:#3a8ab5}
+.btn.soft{background:#e8f4fa;color:#3a8ab5}
 .leader-chips{display:flex;gap:8px;overflow:auto;padding-top:12px;scrollbar-width:none}
 .leader-chips::-webkit-scrollbar{display:none}
 .leader-chip{
@@ -788,7 +788,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .gv-fund{
   padding:7px 11px;border-radius:20px;border:1px solid #e8e0d5;background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit
 }
-.gv-fund.active{border-color:#449eca;color:#449eca;background:#FFF0F1}
+.gv-fund.active{border-color:#449eca;color:#449eca;background:#e8f4fa}
 .gv-opt-row{display:flex;gap:8px;margin-bottom:12px}
 .gv-opt{
   flex:1;padding:10px;border:1px solid #ece8e1;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:8px
@@ -844,7 +844,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .gv-stat-impact{background:linear-gradient(135deg,#15803d,#22c55e)}
 .gv-stat-pulse{background:linear-gradient(135deg,#0d9488,#14b8a6)}
 .gv-stat-commit{background:linear-gradient(135deg,#6d28d9,#8b5cf6)}
-.gv-stat-lives{background:linear-gradient(135deg,#449eca,#b91c1c)}
+.gv-stat-lives{background:linear-gradient(135deg,#449eca,#1e3a5f)}
 .gv-stat-lbl{font-size:9px;font-weight:700;opacity:.85;text-transform:uppercase;letter-spacing:.04em}
 .gv-stat-val{font-size:20px;font-weight:800;margin-top:4px;line-height:1.1}
 .gv-stat-sub{font-size:10px;opacity:.85;margin-top:4px}
@@ -1016,7 +1016,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cn-kpi{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px}
 .cn-kpi strong{display:block;font-size:18px;font-weight:800;line-height:1.1}
 .cn-kpi span{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.55);margin-top:4px;line-height:1.3}
-.cn-kpi-hot strong{color:#fca5a5}
+.cn-kpi-hot strong{color:#6cc3ea}
 .cn-kpi-hot span{color:rgba(252,165,165,.85)}
 .cn-tabs{display:flex;gap:6px;margin-bottom:12px}
 .cn-tab{
@@ -1052,7 +1052,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cn-post-role{font-size:10px;color:var(--ios-muted)}
 .cn-post-time{font-size:10px;color:#bbb;margin-left:auto;flex-shrink:0}
 .cn-post-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;margin-bottom:8px;display:inline-block}
-.cn-pb-blessing{background:#FFF0F1;color:#000}
+.cn-pb-blessing{background:#e8f4fa;color:#000}
 .cn-pb-prayer{background:#ede9fe;color:#5b21b6}
 .cn-pb-milestone{background:#dcfce7;color:#15803d}
 .cn-pb-event{background:#dbeafe;color:#1e40af}
@@ -1233,7 +1233,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cn-fm-hero>*{position:relative;z-index:1}
 .cn-fm-hero h3{font-family:var(--font-heading),Arial,sans-serif;font-size:17px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
 .cn-fm-hero p{font-size:11px;color:rgba(255,255,255,.72);margin-top:6px;line-height:1.45}
-.cn-fm-guidelines{font-size:10px;font-weight:700;color:#fca5a5;margin-top:8px;cursor:pointer;display:inline-block}
+.cn-fm-guidelines{font-size:10px;font-weight:700;color:#6cc3ea;margin-top:8px;cursor:pointer;display:inline-block}
 .cn-stories-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;-webkit-overflow-scrolling:touch;margin-bottom:4px}
 .cn-stories-scroll::-webkit-scrollbar{display:none}
 .cn-story-item{flex-shrink:0;width:68px;text-align:center;cursor:pointer}
@@ -1521,7 +1521,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .fund{
   padding:10px 12px;border-radius:999px;border:1px solid var(--ios-line);background:#fff;font-size:12px;font-weight:700;cursor:pointer
 }
-.fund.active{background:var(--brand-soft);border-color:#F5C2C6;color:#3a8ab5}
+.fund.active{background:var(--brand-soft);border-color:#c5e3f2;color:#3a8ab5}
 .impact-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:10px}
 .impact-dot{width:10px;height:10px;border-radius:50%}
 .impact-bar{height:9px;border-radius:999px;background:#eceff3;overflow:hidden}
@@ -1560,14 +1560,14 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--ios-muted);margin-bottom:8px}
 .progress-row strong{color:#000}
 .track{height:10px;border-radius:999px;background:#e9edf2;overflow:hidden}
-.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#449eca,#ff8791)}
+.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#449eca,#1e3a5f)}
 .metric{
   border-radius:18px;border:1px solid var(--ios-line);background:#fff;padding:14px
 }
 .metric strong{display:block;font-size:18px;font-weight:800}
 .metric span{display:block;font-size:11px;color:var(--ios-muted);margin-top:4px}
 .members-card-showcase{
-  margin-bottom:14px;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#fff7f8,#ffffff);border:1px solid #f3c7cc;padding:12px
+  margin-bottom:14px;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#f2f9fc,#ffffff);border:1px solid #c5e3f2;padding:12px
 }
 .members-card-shell{
   position:relative;border-radius:22px;overflow:hidden;min-height:190px;padding:18px 18px 16px;color:#fff;
@@ -1657,7 +1657,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--ios-line);background:#fff
 }
 .impact-notify-item:last-child{border-bottom:none}
-.impact-notify-item.is-new{animation:impactSlide .45s ease;background:linear-gradient(90deg,#fff7f8 0%,#fff 55%)}
+.impact-notify-item.is-new{animation:impactSlide .45s ease;background:linear-gradient(90deg,#f2f9fc 0%,#fff 55%)}
 @keyframes impactSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .impact-notify-icon{
   width:42px;height:42px;border-radius:14px;background:var(--brand-soft);display:grid;place-items:center;flex-shrink:0
@@ -1742,7 +1742,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   font-family:inherit;cursor:pointer
 }
 .social-notify-item:last-child{border-bottom:none}
-.social-notify-item.is-new{background:linear-gradient(90deg,#fff7f8 0%,#fff 55%)}
+.social-notify-item.is-new{background:linear-gradient(90deg,#f2f9fc 0%,#fff 55%)}
 .social-notify-icon{
   width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;font-size:18px;line-height:1
 }
@@ -1780,7 +1780,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .crisis-pastoral-wrap{padding:8px 16px 4px}
 .crisis-pastoral-btn{
   width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:14px;
-  border:1px solid rgba(68,158,202,.35);background:#fff7f8;color:#111;font-size:13px;font-weight:700;
+  border:1px solid rgba(68,158,202,.35);background:#f2f9fc;color:#111;font-size:13px;font-weight:700;
   cursor:pointer;font-family:inherit
 }
 .crisis-support-note{padding:10px 16px 14px;font-size:10px;color:var(--ios-muted);line-height:1.5}
@@ -1920,7 +1920,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 }
 @keyframes watchChatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .watch-live-chat-msg img{width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:1px}
-.watch-live-chat-msg strong{font-weight:800;color:#fca5a5;margin-right:4px}
+.watch-live-chat-msg strong{font-weight:800;color:#6cc3ea;margin-right:4px}
 .watch-live-foot{
   position:absolute;left:0;right:0;bottom:48px;z-index:3;padding:8px 56px 0 12px;
   background:linear-gradient(180deg,transparent,rgba(0,0,0,.5))
@@ -2089,7 +2089,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .home-gi-kpi{background:#f7f5f2;border:1px solid #ece8e1;border-radius:10px;padding:10px 12px}
 .home-gi-kpi-val{font-size:18px;font-weight:800;line-height:1.1}
 .home-gi-kpi-key{font-size:9px;color:#888;margin-top:3px}
-.home-gi-partner{font-size:10px;font-weight:600;color:#555;background:#fff8f8;border:1px solid #f5c2c6;border-radius:8px;padding:7px 10px;margin-bottom:10px;text-align:center}
+.home-gi-partner{font-size:10px;font-weight:600;color:#555;background:#f2f9fc;border:1px solid #c5e3f2;border-radius:8px;padding:7px 10px;margin-bottom:10px;text-align:center}
 .home-gi-alloc-head{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
 .home-gi-alloc-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
 .home-gi-alloc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
@@ -2114,7 +2114,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cr-hero-leader strong{color:#449eca;display:block;font-size:12px}
 .care-option{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #f3f0eb;cursor:pointer}
 .care-option:last-child{border-bottom:none}
-.care-option--crisis{background:#fff8f8}
+.care-option--crisis{background:#fff5f5}
 .co-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
 .co-name{font-size:12px;font-weight:700;color:#1a1a1a}
 .co-sub{font-size:10px;color:#888;margin-top:2px;line-height:1.35}
@@ -2184,7 +2184,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 .cn-post-modal{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:430px;max-height:85vh;overflow-y:auto;padding:16px}
 .cn-pm-types{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .cn-pm-type{padding:6px 10px;border-radius:20px;border:1px solid #ece8e1;font-size:10px;font-weight:600;cursor:pointer;background:#faf8f5}
-.cn-pm-type.selected{border-color:#449eca;background:#FFF0F1;color:#449eca}
+.cn-pm-type.selected{border-color:#449eca;background:#e8f4fa;color:#449eca}
 .cn-pm-text{width:100%;min-height:100px;border:1px solid #e8e0d5;border-radius:12px;padding:12px;font-size:13px;font-family:inherit;resize:vertical}
 .cn-pm-submit{width:100%;padding:12px;border:none;border-radius:12px;background:#000;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px}
 .cn-comment-area{display:none;padding:8px 14px 12px;border-top:1px solid #f3f0eb}
@@ -3019,9 +3019,9 @@ html.embed-preview .watch-donate-toast{display:none!important}
             </div>
             <div class="gv-activity-pane active" id="gv-activity-recent">
               <div class="gv-tx-impact">Card-generated impact from spending this month: <strong id="gv-tx-impact-total">+$18.42</strong></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f4fa">🛒</div><div class="gv-tx-body"><div class="gv-tx-name">Walmart Grocery</div><div class="gv-tx-meta">May 28 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">+$2.40 Food Pantry</div></div></div>
               <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f0e8">⛽</div><div class="gv-tx-body"><div class="gv-tx-name">Shell Gas Station</div><div class="gv-tx-meta">May 27 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$58.75</div><div class="gv-tx-contrib">+$0.88 Missions</div></div></div>
-              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#FFF0F1">💛</div><div class="gv-tx-body"><div class="gv-tx-name">Sunday Tithe — Direct</div><div class="gv-tx-meta">May 25 · Recurring</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">General Tithe</div></div></div>
+              <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8f4fa">💛</div><div class="gv-tx-body"><div class="gv-tx-name">Sunday Tithe — Direct</div><div class="gv-tx-meta">May 25 · Recurring</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$120.00</div><div class="gv-tx-contrib">General Tithe</div></div></div>
               <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#e8edf8">📦</div><div class="gv-tx-body"><div class="gv-tx-name">Amazon Purchase</div><div class="gv-tx-meta">May 24 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$360.00</div><div class="gv-tx-contrib">+$3.60 Building</div></div></div>
               <div class="gv-tx-row"><div class="gv-tx-ico" style="background:#f5ece8">🍔</div><div class="gv-tx-body"><div class="gv-tx-name">Chick-fil-A</div><div class="gv-tx-meta">May 23 · GRACE Impact Card</div></div><div class="gv-tx-right"><div class="gv-tx-spend">−$27.00</div><div class="gv-tx-contrib">+$0.54 Youth</div></div></div>
             </div>
@@ -3132,7 +3132,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <div class="cr-dispatch-cell"><div class="cr-dispatch-title">Grief &amp; Bereavement</div><div class="cr-dispatch-sub">Wilson + Hayes</div><span class="cr-dispatch-badge">Live</span></div>
             <div class="cr-dispatch-cell"><div class="cr-dispatch-title">Food Pantry</div><div class="cr-dispatch-sub">Deacon Hayes</div><span class="cr-dispatch-badge">Live</span></div>
             <div class="cr-dispatch-cell"><div class="cr-dispatch-title">Weddings &amp; Pre-Marital</div><div class="cr-dispatch-sub">Min. Grace Okafor</div><span class="cr-dispatch-badge cr-dispatch-badge--standby">Standby</span></div>
-            <div class="cr-dispatch-cell" style="background:#fff8f8"><div class="cr-dispatch-title" style="color:#b91c1c">Crisis Support</div><div class="cr-dispatch-sub">All leaders on call</div><span class="cr-dispatch-badge cr-dispatch-badge--crisis">Priority · Always on</span></div>
+            <div class="cr-dispatch-cell" style="background:#fff5f5"><div class="cr-dispatch-title" style="color:#b91c1c">Crisis Support</div><div class="cr-dispatch-sub">All leaders on call</div><span class="cr-dispatch-badge cr-dispatch-badge--crisis">Priority · Always on</span></div>
           </div>
         </div>
       </div>
@@ -3415,7 +3415,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <button type="button" class="cn-rsvp going" onclick="cnRsvp(this)">Going ✓</button>
               </div>
               <div class="cn-event-row" data-evcat="service" data-event-id="ev-prayer-night" data-ev-weekday="4" data-ev-week="0">
-                <div class="cn-event-date" style="background:#FFF0F1;color:#000"><strong>4</strong><span>Jun</span></div>
+                <div class="cn-event-date" style="background:#e8f4fa;color:#000"><strong>4</strong><span>Jun</span></div>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Prayer Night</div><div style="font-size:11px;color:var(--ios-muted)">7:00 PM · Sanctuary</div></div>
                 <button type="button" class="cn-rsvp" onclick="cnRsvp(this)">RSVP</button>
               </div>
@@ -4362,7 +4362,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="gv-cause-img" style="background-image:url('previews/assets/causes/guatemala.jpg')"><span class="gv-cause-badge">Global</span></div>
               <div class="gv-cause-body">
                 <div class="gv-cause-title">Guatemala Mission 2026</div>
-                <div class="gv-cause-meter-track"><div class="gv-cause-meter-fill" style="width:74%;background:#b91c1c"></div></div>
+                <div class="gv-cause-meter-track"><div class="gv-cause-meter-fill" style="width:74%;background:#449eca"></div></div>
                 <div class="gv-cause-meter-sub">Oct departure · 74% funded</div>
                 <div class="gv-cause-actions"><button type="button" class="btn dark" onclick="quickGiveCampaign('Guatemala Mission 2026')">Give</button><button type="button" class="btn soft route" onclick="routeGiveImpact('Guatemala Mission 2026',this)">Route impact</button></div>
               </div>
@@ -4635,6 +4635,10 @@ html.embed-preview .watch-donate-toast{display:none!important}
     </div>
 
 <script src="previews/grace-impact-metrics.js"></script>
+<script>
+  window.GRACE_ICON_ACCENT = '#449eca';
+  window.GRACE_ICON_LIGHT = '#e8f4fa';
+</script>
 <script src="previews/grace-duotone-icons.js"></script>
 <script src="previews/grace-verified-leaders-faq.js"></script>
 <script src="previews/grace-messaging.js"></script>
@@ -5027,13 +5031,13 @@ var socialNotifyTimers = [];
 var socialNotifyIdSeq = 0;
 
 var socialNotificationSeeds = [
-  { type: 'moment', iconEmoji: '📸', iconBg: '#FFF0F1', title: 'Patricia T.', body: 'just posted a memory', meta: 'Faith Moments · Wall', time: '2m', route: { tab: 'people', peopleSub: 'wall', storyId: 'ya-worship' } },
+  { type: 'moment', iconEmoji: '📸', iconBg: '#e8f4fa', title: 'Patricia T.', body: 'just posted a memory', meta: 'Faith Moments · Wall', time: '2m', route: { tab: 'people', peopleSub: 'wall', storyId: 'ya-worship' } },
   { type: 'milestone', iconEmoji: '💧', iconBg: '#dbeafe', title: 'Derek W.', body: 'shared a baptism notice', meta: 'Milestones · Community', time: '5m', route: { tab: 'people', peopleSub: 'wall', storyId: 'baptism' } },
   { type: 'event', icon: 'events', iconBg: '#e8f0e8', title: 'Youth Worship Night', body: 'starts Saturday at 7 PM', meta: 'Groups & Events', time: '12m', route: { tab: 'groups-events', eventId: 'ev-prayer-night' } },
   { type: 'request', icon: 'groups', iconBg: '#ede9fe', title: 'Nicole Davis', body: 'sent you a connection request', meta: 'People · Circle', time: '18m', route: { tab: 'people', peopleSub: 'circle' } },
   { type: 'prayer', icon: 'prayer', iconBg: '#f5e8f0', title: 'Kevin Martinez', body: 'posted a prayer request', meta: 'Community feed', time: '25m', route: { tab: 'community' } },
   { type: 'post', iconEmoji: '📖', iconBg: '#fef9f0', title: 'Pastor James', body: "posted today's blessing", meta: 'Community · Blessings', time: '1h', route: { tab: 'community' } },
-  { type: 'group', iconEmoji: '◈', iconBg: '#FFF0F1', title: 'Serve Team', body: 'shared a food pantry update', meta: 'Groups · Outreach', time: '2h', route: { tab: 'people', peopleSub: 'wall', storyId: 'serve-food' } }
+  { type: 'group', iconEmoji: '◈', iconBg: '#e8f4fa', title: 'Serve Team', body: 'shared a food pantry update', meta: 'Groups · Outreach', time: '2h', route: { tab: 'people', peopleSub: 'wall', storyId: 'serve-food' } }
 ];
 
 function nextSocialNotifyId() {
@@ -5287,7 +5291,7 @@ function notifyEventRsvp(eventTitle) {
 }
 
 const purchaseImpactFeed = [
-  { icon: 'merchant', bg: '#FFF0F1', merchant: 'Walmart Grocery', date: 'May 28', spend: 120, impact: 2.4, cause: 'Food Pantry', time: 'Just now' },
+  { icon: 'merchant', bg: '#e8f4fa', merchant: 'Walmart Grocery', date: 'May 28', spend: 120, impact: 2.4, cause: 'Food Pantry', time: 'Just now' },
   { icon: 'gas', bg: '#e8f0e8', merchant: 'Shell Gas Station', date: 'May 27', spend: 58.75, impact: 0.88, cause: 'Missions', time: '1d' },
   { icon: 'package', bg: '#e8edf8', merchant: 'Amazon Purchase', date: 'May 24', spend: 360, impact: 3.6, cause: 'Building Fund', time: '4d' },
   { icon: 'dining', bg: '#f5ece8', merchant: 'Chick-fil-A', date: 'May 23', spend: 27, impact: 0.54, cause: 'Youth', time: '5d' }
@@ -5295,7 +5299,7 @@ const purchaseImpactFeed = [
 
 const demoPurchaseQueue = [
   { icon: 'dining', bg: '#f5ece8', merchant: "McDonald's", date: 'Today', spend: 13, impact: 0.26, cause: 'Youth', time: 'Now' },
-  { icon: 'merchant', bg: '#FFF0F1', merchant: 'Target Essentials', date: 'Today', spend: 84.5, impact: 1.69, cause: 'Food Pantry', time: 'Now' },
+  { icon: 'merchant', bg: '#e8f4fa', merchant: 'Target Essentials', date: 'Today', spend: 84.5, impact: 1.69, cause: 'Food Pantry', time: 'Now' },
   { icon: 'gas', bg: '#e8f0e8', merchant: 'Chevron Fuel', date: 'Today', spend: 42.25, impact: 0.63, cause: 'Missions', time: 'Now' }
 ];
 
