@@ -305,52 +305,41 @@
     .sec-check .sec-no { color: #3a8ab5 }
     .sec-check .sec-rule { background: var(--line-light) }
     .sec-check .sec-sub { color: var(--ink-muted) }
-    .check-quote {
-      font-family: var(--display); font-style: italic; font-weight: 440;
-      font-size: clamp(20px, 2.6vw, 27px); line-height: 1.45; color: var(--navy-800);
-      border-left: 3px solid var(--sky); padding-left: 24px; max-width: 34em;
-      margin: 40px 0 46px;
-    }
-    .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px }
-    .tier {
-      background: #fff; border: 1px solid var(--line-light); border-radius: 16px; padding: 26px 24px;
-      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-    }
-    .tier:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(16,35,59,.11) }
-    .tier-bar { height: 8px; border-radius: 4px; margin-bottom: 18px }
-    .tier-bar--confirmed { background: var(--sky) }
-    .tier-bar--estimated {
-      background: repeating-linear-gradient(-55deg, var(--sky), var(--sky) 5px, rgba(68,158,202,.28) 5px, rgba(68,158,202,.28) 10px);
-    }
-    .tier-bar--contingent { background: transparent; border: 1.5px dashed var(--sky); height: 8px }
-    .tier h4 { font-family: var(--display); font-size: 19px; font-weight: 560; margin-bottom: 4px }
-    .tier-sub { font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #3a8ab5; margin-bottom: 12px }
-    .tier p { font-size: 14px; color: var(--ink-muted); line-height: 1.6 }
-    .check-note {
-      margin-top: 34px; font-size: 15px; color: var(--navy-800); font-weight: 550;
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    }
-    .check-note::before { content: ''; width: 22px; height: 1px; background: var(--sky) }
-    .calculator-embed {
-      margin-top: 46px; overflow: hidden; background: #fff; border: 1px solid var(--line-light);
-      border-radius: 20px; box-shadow: 0 24px 54px rgba(16,35,59,.1);
-    }
-    .calculator-embed-head {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
-      padding: 26px 28px 22px; border-bottom: 1px solid var(--line-light);
-    }
-    .calculator-embed-head h3 { font-family: var(--display); font-size: 27px; font-weight: 520; letter-spacing: -.01em; }
-    .calculator-embed-head p { max-width: 46ch; font-size: 14px; color: var(--ink-muted); line-height: 1.55; }
-    .calculator-embed-frame { display: block; width: 100%; height: 2380px; border: 0; background: #fff; }
-    .check-cta { margin-top: 34px }
-    .btn-navy { background: var(--navy-800); color: #fff }
-    .btn-navy:hover { background: var(--navy-950); transform: translateY(-2px); box-shadow: 0 14px 34px rgba(16,35,59,.28) }
-    @media (max-width: 820px) {
-      .tier-grid { grid-template-columns: 1fr }
-      .calculator-embed-head { display: block; padding: 22px 20px 18px }
-      .calculator-embed-head h3 { margin-bottom: 8px }
-      .calculator-embed-frame { height: 3700px }
-    }
+    .calc-teaser { margin-top: 38px; padding: 42px; border-radius: 22px; background: #0b1220; color: #f8fafc; box-shadow: 0 24px 54px rgba(16,35,59,.18); }
+    .calc-teaser h3 { max-width: 18ch; font-family: var(--display); font-size: clamp(32px, 4.3vw, 52px); font-weight: 420; letter-spacing: -.02em; line-height: 1.08; }
+    .calc-teaser-intro { max-width: 54ch; margin: 14px 0 28px; color: #cbd5e1; font-size: 16px; line-height: 1.55; }
+    .calc-profiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; }
+    .calc-profile { min-width: 0; padding: 12px 13px; border: 1px solid #2c3a55; border-radius: 11px; background: #16213a; color: #f8fafc; text-align: left; font: inherit; cursor: pointer; }
+    .calc-profile[aria-pressed="true"] { border-color: #60a5fa; box-shadow: inset 0 0 0 1px #60a5fa; background: #17294a; }
+    .calc-profile b { display: block; font-size: 14px; }
+    .calc-profile span { display: block; margin-top: 3px; color: #a9b7cc; font-size: 12.5px; line-height: 1.35; }
+    .calc-quick { padding: 18px; border: 1px solid #2c3a55; border-radius: 14px; background: #16213a; }
+    .calc-quick-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .calc-quick-head b { font-size: 14px; }
+    .calc-quick-head span { color: #a9b7cc; font-size: 12.5px; }
+    .calc-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .calc-field { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .calc-field:last-child { grid-column: span 1; }
+    .calc-field label { color: #d9e2f0; font-size: 12.5px; font-weight: 650; }
+    .calc-number { position: relative; }
+    .calc-number input[type="number"] { width: 100%; padding: 9px 34px 9px 23px; border: 1px solid #2c3a55; border-radius: 9px; background: #101a2e; color: #f8fafc; font: inherit; font-size: 15px; font-weight: 600; text-align: right; }
+    .calc-number .calc-prefix, .calc-number .calc-suffix { position: absolute; top: 50%; transform: translateY(-50%); color: #a9b7cc; font-size: 12px; pointer-events: none; }
+    .calc-number .calc-prefix { left: 9px; }
+    .calc-number .calc-suffix { right: 9px; }
+    .calc-number input[type="number"].no-prefix { padding-left: 10px; }
+    .calc-range { width: 100%; accent-color: #60a5fa; }
+    .calc-hint { min-height: 30px; color: #a9b7cc; font-size: 11.5px; line-height: 1.35; }
+    .calc-lever { margin: 16px 0 0; padding-top: 14px; border-top: 1px dotted #3d4b65; color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+    .calc-lever b { color: #f8fafc; }
+    .calc-answer { padding-top: 30px; }
+    .calc-answer-label { color: #a9b7cc; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .calc-answer-value { margin: 4px 0 10px; font-family: var(--display); font-size: clamp(48px, 8vw, 78px); font-weight: 400; line-height: 1; letter-spacing: -.025em; }
+    .calc-answer-copy { max-width: 58ch; color: #d9e2f0; font-size: 15px; line-height: 1.55; }
+    .calc-full-link { display: inline-flex; align-items: center; margin-top: 24px; padding: 11px 17px; border: 1px solid #60a5fa; border-radius: 9px; color: #f8fafc; font-size: 14px; font-weight: 700; text-decoration: none; }
+    .calc-full-link:hover { background: #17294a; }
+    .calc-full-note { display: block; margin-top: 8px; color: #a9b7cc; font-size: 12px; }
+    @media (max-width: 820px) { .calc-teaser { padding: 28px 20px; } .calc-profiles, .calc-fields { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .calc-profiles, .calc-fields { grid-template-columns: 1fr; } .calc-field:last-child { grid-column: auto; } .calc-hint { min-height: auto; } }
 
     /* ---- footer cta ---- */
     .footer-cta {
@@ -541,52 +530,36 @@
       </div>
       <h2 class="rv rv-d1">Check the math <em>yourself.</em></h2>
       <p class="sec-sub rv rv-d2">
-        Most software pitches end with one big number. Ours ends with a calculator
-        that sorts every dollar of that number by how much you should trust it.
+        Start with the five inputs your leadership team already knows. The full calculator
+        opens separately when you are ready to inspect every assumption.
       </p>
-      <blockquote class="check-quote rv rv-d2">
-        &ldquo;Pick your size. We&rsquo;ll show a number, then show you exactly which
-        parts of it we can prove.&rdquo;
-      </blockquote>
-      <div class="tier-grid">
-        <div class="tier rv">
-          <div class="tier-bar tier-bar--confirmed" aria-hidden="true"></div>
-          <h4>Confirmed</h4>
-          <div class="tier-sub">Checkable today</div>
-          <p>Lines you can verify against your own budget before signing &mdash;
-             software you'd cancel and processing fees that change on day one.</p>
+      <div class="calc-teaser rv rv-d2" aria-labelledby="calc-teaser-title">
+        <h3 id="calc-teaser-title">What would GRACE actually be worth to your church?</h3>
+        <p class="calc-teaser-intro">Pick your size. We&rsquo;ll show a number, then show you exactly which parts of it we can prove.</p>
+        <div class="calc-profiles" role="group" aria-label="Church size profile">
+          <button class="calc-profile" type="button" data-calc-profile="single" aria-pressed="false"><b>Single campus</b><span>~800 people · $2M budget</span></button>
+          <button class="calc-profile" type="button" data-calc-profile="growing" aria-pressed="false"><b>Two sites</b><span>~2,500 people · $6M budget</span></button>
+          <button class="calc-profile" type="button" data-calc-profile="multisite" aria-pressed="true"><b>Multi-site</b><span>~7,000 people · $15M budget</span></button>
+          <button class="calc-profile" type="button" data-calc-profile="network" aria-pressed="false"><b>Church network</b><span>20,000+ people · $30M budget</span></button>
         </div>
-        <div class="tier rv rv-d1">
-          <div class="tier-bar tier-bar--estimated" aria-hidden="true"></div>
-          <h4>Estimated</h4>
-          <div class="tier-sub">Real, but softer</div>
-          <p>Reclaimed staff hours and giving lift. Real value, but softer than an
-             invoice &mdash; so the model discounts them instead of leaning on them.</p>
+        <div class="calc-quick">
+          <div class="calc-quick-head"><b>Five numbers you already know</b><span>Prefilled from your size. Change any of them and the answer moves.</span></div>
+          <div class="calc-fields">
+            <div class="calc-field"><label for="calc-giving">Annual giving</label><div class="calc-number"><span class="calc-prefix">$</span><input id="calc-giving" type="number" min="0" step="10000" value="10500000" /></div><input class="calc-range" type="range" min="0" max="18000000" step="10000" value="10500000" data-calc-range="calc-giving" /><span class="calc-hint">Tithes &amp; offerings, all channels</span></div>
+            <div class="calc-field"><label for="calc-online">Given online</label><div class="calc-number"><input id="calc-online" class="no-prefix" type="number" min="0" max="100" step="1" value="55" /><span class="calc-suffix">%</span></div><input class="calc-range" type="range" min="0" max="100" step="1" value="55" data-calc-range="calc-online" /><span class="calc-hint">Cash and check don&rsquo;t count</span></div>
+            <div class="calc-field"><label for="calc-rate">You pay to process it</label><div class="calc-number"><input id="calc-rate" class="no-prefix" type="number" min="0" max="10" step="0.05" value="2.90" /><span class="calc-suffix">%</span></div><input class="calc-range" type="range" min="0" max="6" step="0.05" value="2.90" data-calc-range="calc-rate" /><span class="calc-hint">All-in processor and platform rate</span></div>
+            <div class="calc-field"><label for="calc-it">Annual software &amp; IT</label><div class="calc-number"><span class="calc-prefix">$</span><input id="calc-it" type="number" min="0" step="1000" value="720000" /></div><input class="calc-range" type="range" min="0" max="2500000" step="1000" value="720000" data-calc-range="calc-it" /><span class="calc-hint">Only the line GRACE can replace</span></div>
+            <div class="calc-field"><label for="calc-fte">Office &amp; admin staff</label><div class="calc-number"><input id="calc-fte" class="no-prefix" type="number" min="0" step="0.5" value="8" /><span class="calc-suffix">FTE</span></div><input class="calc-range" type="range" min="0" max="60" step="0.5" value="8" data-calc-range="calc-fte" /><span class="calc-hint">People doing data entry and scheduling</span></div>
+          </div>
+          <p class="calc-lever" id="calc-lever"></p>
         </div>
-        <div class="tier rv rv-d2">
-          <div class="tier-bar tier-bar--contingent" aria-hidden="true"></div>
-          <h4>Contingent</h4>
-          <div class="tier-sub">Not contracted</div>
-          <p>The GRACE Impact Card. Upside your church may earn, never guaranteed
-             &mdash; so it never props up the headline number.</p>
+        <div class="calc-answer">
+          <div class="calc-answer-label">Estimated annual value · expected</div>
+          <div class="calc-answer-value" id="calc-answer">$0/yr</div>
+          <p class="calc-answer-copy" id="calc-caveat"></p>
+          <a class="calc-full-link" href="https://grace-value-calculator-eta.vercel.app/" target="_blank" rel="noopener noreferrer">Check our math &rarr;</a>
+          <span class="calc-full-note">Opens the complete calculator, including its extended fields and assumptions.</span>
         </div>
-      </div>
-      <div class="calculator-embed rv rv-d2">
-        <div class="calculator-embed-head">
-          <h3>Use the live calculator now.</h3>
-          <p>Enter your own bills, giving volume, and staffing assumptions. The result keeps confirmed and estimated value separate, and shows a negative result when that is the honest outcome.</p>
-        </div>
-        <iframe
-          id="value-calculator-frame"
-          class="calculator-embed-frame"
-          title="GRACE value calculator"
-          src="https://grace-crm-two.vercel.app/pricing?embed=calculator"
-          loading="eager"
-        ></iframe>
-      </div>
-      <p class="check-note rv">Some lines run in your favor. Some run against you. The calculator shows both.</p>
-      <div class="check-cta rv rv-d1">
-        <a class="btn btn-navy" data-grace-link="pricing" href="https://grace-crm-two.vercel.app/pricing" target="_blank" rel="noopener noreferrer">Open the value calculator in a new tab &rarr;</a>
       </div>
     </div>
   </section>
@@ -610,7 +583,7 @@
       <div class="foot-links">
         <a href="#watch">Walkthrough</a>
         <a href="#click">Live demos</a>
-        <a data-grace-link="pricing" href="https://grace-crm-two.vercel.app/pricing" target="_blank" rel="noopener noreferrer">Calculator</a>
+        <a href="https://grace-value-calculator-eta.vercel.app/" target="_blank" rel="noopener noreferrer">Calculator</a>
         <a href="mailto:info@divinityagi.com?subject=GRACE%20platform%20inquiry">Email</a>
       </div>
       <span>Demos contain sample data only.</span>
@@ -668,26 +641,106 @@
       var linkApp = document.getElementById('link-app');
       var linkCrm = document.getElementById('link-crm');
       var linkPortal = document.getElementById('link-portal');
-      var pricingPath = window.location.protocol === 'file:'
-        ? 'https://grace-crm-two.vercel.app/pricing'
-        : resolvePagePath((wl && wl.pricing) || '/pricing');
-      var calculatorFrame = document.getElementById('value-calculator-frame');
       if (linkApp) linkApp.href = appPath;
       if (wl) {
         if (linkCrm && wl.crm) linkCrm.href = wl.crm;
         if (linkPortal && wl.memberPortal) linkPortal.href = resolvePagePath(wl.memberPortal);
-      }
-      document.querySelectorAll('[data-grace-link="pricing"]').forEach(function (link) {
-        link.href = pricingPath;
-      });
-      if (calculatorFrame && window.location.protocol !== 'file:') {
-        calculatorFrame.src = pricingPath + '?embed=calculator';
       }
       var qr = document.getElementById('qr-app');
       if (qr) {
         qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' +
           encodeURIComponent(appUrl) + '&bgcolor=ffffff&color=1e3a5f';
       }
+
+      /* Five-input calculator preview. The complete model lives on the public calculator. */
+      var calcProfiles = {
+        single: { giving: 1400000, it: 96000, fte: 2, loaded: 58000, rate: 3.20, plan: 199 },
+        growing: { giving: 4200000, it: 288000, fte: 4, loaded: 62000, rate: 3.05, plan: 199 },
+        multisite: { giving: 10500000, it: 720000, fte: 8, loaded: 68000, rate: 2.90, plan: 499 },
+        network: { giving: 21000000, it: 1440000, fte: 16, loaded: 74000, rate: 2.75, plan: 499 }
+      };
+      var calcProfile = 'multisite';
+      function calcInput(id) {
+        var input = document.getElementById(id);
+        var value = input ? parseFloat(input.value) : 0;
+        return isFinite(value) && value >= 0 ? value : 0;
+      }
+      function calcMoney(value) {
+        return (value < 0 ? '−' : '') + '$' + Math.round(Math.abs(value) + 0.0000001).toLocaleString('en-US');
+      }
+      function calcSyncRange(id) {
+        var input = document.getElementById(id);
+        var range = document.querySelector('[data-calc-range="' + id + '"]');
+        if (!input || !range) return;
+        var value = parseFloat(input.value);
+        if (!isFinite(value)) return;
+        if (value > parseFloat(range.max)) range.max = value;
+        range.value = value;
+      }
+      function renderCalcPreview() {
+        var p = calcProfiles[calcProfile];
+        if (!p) return;
+        var giving = calcInput('calc-giving');
+        var online = calcInput('calc-online');
+        var rate = calcInput('calc-rate');
+        var it = calcInput('calc-it');
+        var fte = calcInput('calc-fte');
+        var itSaving = it * 0.18;
+        var processing = giving * online / 100 * (rate - 5.55) / 100;
+        var confirmed = itSaving + processing - p.plan * 12;
+        var staff = fte * p.loaded * 0.12 * 0.75;
+        var givingLift = giving * 0.01 * 0.75;
+        var net = confirmed + staff + givingLift;
+        var answer = document.getElementById('calc-answer');
+        var caveat = document.getElementById('calc-caveat');
+        var lever = document.getElementById('calc-lever');
+        if (answer) answer.textContent = calcMoney(net) + '/yr';
+        if (caveat) {
+          caveat.textContent = net < 0
+            ? 'At these assumptions GRACE costs more than it returns. Check the complete model before making a decision.'
+            : confirmed < 0
+              ? 'None of that is confirmed yet. The lines you can check against your own budget run ' + calcMoney(confirmed) + '/yr against you, and softer assumptions carry the total.'
+              : calcMoney(confirmed) + '/yr of that is checkable against your own budget today. The rest depends on adoption.';
+        }
+        if (lever) {
+          var levers = [
+            { name: 'your processing rate', value: Math.abs(processing), verb: processing < 0 ? 'costing you' : 'saving you' },
+            { name: 'your software & IT line', value: itSaving, verb: 'worth' },
+            { name: 'the giving lift assumption', value: givingLift, verb: 'worth' },
+            { name: 'staff hours returned', value: staff, verb: 'worth' }
+          ].sort(function (a, b) { return b.value - a.value; });
+          lever.innerHTML = 'Biggest swing in your number right now: <b>' + levers[0].name + '</b>, ' + levers[0].verb + ' ' + calcMoney(levers[0].value) + ' a year. Next is ' + levers[1].name + ', ' + levers[1].verb + ' ' + calcMoney(levers[1].value) + '.';
+        }
+      }
+      function applyCalcProfile(name) {
+        var p = calcProfiles[name];
+        if (!p) return;
+        calcProfile = name;
+        document.getElementById('calc-giving').value = p.giving;
+        document.getElementById('calc-online').value = 55;
+        document.getElementById('calc-rate').value = p.rate;
+        document.getElementById('calc-it').value = p.it;
+        document.getElementById('calc-fte').value = p.fte;
+        ['calc-giving', 'calc-online', 'calc-rate', 'calc-it', 'calc-fte'].forEach(calcSyncRange);
+        document.querySelectorAll('[data-calc-profile]').forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.getAttribute('data-calc-profile') === name));
+        });
+        renderCalcPreview();
+      }
+      document.querySelectorAll('[data-calc-profile]').forEach(function (button) {
+        button.addEventListener('click', function () { applyCalcProfile(button.getAttribute('data-calc-profile')); });
+      });
+      document.querySelectorAll('.calc-field input[type="number"]').forEach(function (input) {
+        input.addEventListener('input', function () { calcSyncRange(input.id); renderCalcPreview(); });
+      });
+      document.querySelectorAll('[data-calc-range]').forEach(function (range) {
+        range.addEventListener('input', function () {
+          var input = document.getElementById(range.getAttribute('data-calc-range'));
+          if (input) input.value = range.value;
+          renderCalcPreview();
+        });
+      });
+      applyCalcProfile(calcProfile);
     })();
   </script>
 </body>

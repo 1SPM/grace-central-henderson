@@ -85,9 +85,6 @@ interface PricingPageProps {
 }
 
 export function PricingPage({ onStartTrial }: PricingPageProps) {
-  // This public component is embedded only by GRACE's same-origin platform page.
-  const calculatorOnly = new URLSearchParams(window.location.search).get('embed') === 'calculator';
-
   const handleCta = (slug: 'starter' | 'pro' | 'enterprise') => {
     if (slug === 'enterprise') {
       window.location.assign('https://calendly.com/virtualworshipsolutions-info/enterprise-rate');
@@ -101,14 +98,6 @@ export function PricingPage({ onStartTrial }: PricingPageProps) {
       window.location.assign(`/signup?plan=${slug}`);
     }
   };
-
-  if (calculatorOnly) {
-    return (
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-dark-900 dark:to-dark-950">
-        <ValueCalculator />
-      </main>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-dark-900 dark:to-dark-950 py-16 px-4">
