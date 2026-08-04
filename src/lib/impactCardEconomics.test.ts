@@ -1,32 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { impactCardModel, illustrativeMonthlyChurchImpact, IMPACT_CARD_ECONOMICS } from './impactCardEconomics';
+import { impactCardModel, illustrativeMonthlyGraceRevenue, IMPACT_CARD_ECONOMICS } from './impactCardEconomics';
 
 describe('impactCardModel', () => {
-  it('nets a positive pool after pass-through costs, before the church share', () => {
+  it('computes i2c cost as a share of fee revenue, not of total volume', () => {
     const m = impactCardModel();
-    expect(m.passThroughCostPct).toBeCloseTo(0.55, 5);
-    expect(m.netPoolPct).toBeCloseTo(1.25, 5);
+    expect(m.cardFeePct).toBe(IMPACT_CARD_ECONOMICS.cardFeePct);
+    expect(m.i2cCostPct).toBeCloseTo(0.20, 5);
   });
 
-  it('leaves GRACE a thin but non-negative margin after the church share', () => {
+  it('leaves GRACE the majority of the card fee as net revenue', () => {
     const m = impactCardModel();
-    expect(m.churchSharePct).toBe(IMPACT_CARD_ECONOMICS.churchSharePct);
-    expect(m.graceMarginPct).toBeCloseTo(0.25, 5);
-    expect(m.graceMarginPct).toBeGreaterThanOrEqual(0);
+    expect(m.graceNetRevenuePct).toBeCloseTo(0.80, 5);
+    expect(m.graceNetRevenuePct).toBeGreaterThan(0);
   });
 
-  it('never lets the church share exceed the net pool, even if assumptions change', () => {
+  it('never lets the i2c cost exceed the gross card fee', () => {
     const m = impactCardModel();
-    expect(m.churchSharePct).toBeLessThanOrEqual(m.netPoolPct);
+    expect(m.i2cCostPct).toBeLessThanOrEqual(m.cardFeePct);
   });
 });
 
-describe('illustrativeMonthlyChurchImpact', () => {
-  it('computes 1% of monthly card spend', () => {
-    expect(illustrativeMonthlyChurchImpact(48_000)).toBeCloseTo(480, 5);
+describe('illustrativeMonthlyGraceRevenue', () => {
+  it('computes 1% of monthly card spend as GRACE revenue', () => {
+    expect(illustrativeMonthlyGraceRevenue(48_000)).toBeCloseTo(480, 5);
   });
 
   it('floors negative input at zero', () => {
-    expect(illustrativeMonthlyChurchImpact(-500)).toBe(0);
+    expect(illustrativeMonthlyGraceRevenue(-500)).toBe(0);
   });
 });

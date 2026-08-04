@@ -294,19 +294,18 @@
       </section>
 
       <!-- EXCLUDED -->
-      <section class="group" aria-labelledby="g-excluded">
+      <section class="group" style="border:2px solid var(--accent)" aria-labelledby="g-excluded">
         <div class="group-head">
-          <h2 id="g-excluded">Impact Card revenue</h2>
+          <h2 id="g-excluded">GRACE Impact Card revenue</h2>
           <span class="tag excluded">Excluded from every scenario</span>
         </div>
-        <p class="rationale">The GRACE Impact Card's interchange-revenue model is <strong>not yet live</strong> — it requires a signed sponsor-bank agreement and compliance review. Until real money moves on real rails, this calculator counts it as <strong>$0 in the totals above, in every scenario, including optimistic</strong>. What follows is the modeled split we're targeting — a shape, not a contract — funded entirely by members' own everyday spending, not the church's money.</p>
+        <p class="rationale">The Impact Card is <strong>GRACE's primary revenue engine</strong> — not a rebate program for your church. It's the mechanism that lets GRACE hold subscription pricing where it is while continuing to build the platform. We're putting the model here, in the open, for the same reason everything else on this page is editable: you should be able to see how we make money, not just how we spend yours.</p>
+        <p class="rationale">It's <strong>not yet live</strong> — it requires a signed sponsor-bank agreement and compliance review — so it counts as <strong>$0 in the totals above, in every scenario, including optimistic</strong>. None of the figures below are money your church receives.</p>
 
         <div class="card-econ-box">
-          <div class="ce-row"><span>Gross interchange (modeled, exempt-issuer consumer debit)</span><strong id="ceGross"></strong></div>
-          <div class="ce-row"><span>− Network, sponsor bank, i2c processing, fraud reserve</span><strong id="ceCost"></strong></div>
-          <div class="ce-row ce-subtotal"><span>= Net pool</span><strong id="cePool"></strong></div>
-          <div class="ce-row"><span>→ Church share (target)</span><strong id="ceChurch" style="color:var(--confirmed)"></strong></div>
-          <div class="ce-row"><span>→ GRACE margin (residual — thin on purpose)</span><strong id="ceGrace"></strong></div>
+          <div class="ce-row"><span>Card transaction fee (GRACE's take rate on member card spend)</span><strong id="ceGross"></strong></div>
+          <div class="ce-row"><span>− i2c processing cost (20% of that fee revenue)</span><strong id="ceCost"></strong></div>
+          <div class="ce-row ce-subtotal"><span>= GRACE net revenue</span><strong id="cePool" style="color:var(--accent)"></strong></div>
         </div>
 
         <div class="row">
@@ -314,6 +313,7 @@
           <div class="field suffix"><span class="unit" style="left:10px;right:auto">$</span><input id="cardSpendPerMember" type="number" min="0" step="10" value="150" data-event="assumption_changed" data-field="card_spend_per_member" style="padding-left:26px"><span class="unit">/mo</span></div>
         </div>
         <div class="fee-verdict" id="cardImpactNote" aria-live="polite"></div>
+        <p class="rationale" style="margin-top:10px">Your church's return on the card program is the kind this page doesn't put a dollar sign on: member engagement with giving, a tool that strengthens your standing as a tax-exempt organization doing tangible good, and a subscription price GRACE can hold because this line helps fund the company — not a rebate check.</p>
       </section>
     </main>
 
@@ -398,23 +398,20 @@
   var FOLLOWUP_VALUE = 15;
   var WEEKS_PER_MONTH = 52 / 12;
 
-  // Impact Card economics — modeled, not contracted. See
-  // src/lib/impactCardEconomics.ts for full sourcing notes (Durbin-exempt
-  // consumer debit interchange, standard BaaS program-manager cost stack,
-  // and why the church share is set as a target rather than "whatever's
-  // left"). Kept as a single source of truth in comments here since this
-  // standalone page has no module system to import from.
+  // GRACE Impact Card revenue model — mirrors the company's own i2c
+  // planning (VR CHURCH/i2c Proposal Letter; i2cinc Faith Organizations
+  // Use Cases and Projections pro forma), not external interchange
+  // benchmarks. The Impact Card is GRACE's primary revenue engine, not
+  // a rebate program for the church. See src/lib/impactCardEconomics.ts
+  // for the source of truth and full sourcing notes; kept in comments
+  // here too since this standalone page has no module system to import
+  // from.
   var CARD_ECON = {
-    grossInterchangePct: 1.80,
-    networkFeePct: 0.10,
-    issuingBankFeePct: 0.15,
-    processorFeePct: 0.20,
-    fraudReservePct: 0.10,
-    churchSharePct: 1.00
+    cardFeePct: 1.00,           // "Credit/Debit Card Transaction Fees (1% avg)" — GRACE's take rate
+    i2cCostShareOfRevenue: 0.20 // "i2c service fees, estimated at 20% of total revenue"
   };
-  CARD_ECON.passThroughCostPct = CARD_ECON.networkFeePct + CARD_ECON.issuingBankFeePct + CARD_ECON.processorFeePct + CARD_ECON.fraudReservePct;
-  CARD_ECON.netPoolPct = CARD_ECON.grossInterchangePct - CARD_ECON.passThroughCostPct;
-  CARD_ECON.graceMarginPct = Math.max(0, CARD_ECON.netPoolPct - CARD_ECON.churchSharePct);
+  CARD_ECON.i2cCostPct = CARD_ECON.cardFeePct * CARD_ECON.i2cCostShareOfRevenue;
+  CARD_ECON.graceNetRevenuePct = CARD_ECON.cardFeePct - CARD_ECON.i2cCostPct;
 
   var state = { scenario: 'expected', period: 'monthly', plan: 'pro', started: false, edited: {}, completed: false };
 
@@ -465,7 +462,7 @@
     var confirmed = software + feeDelta - planPrice;
 
     var modeledCardVolume = Math.max(0, val('members')) * Math.max(0, val('cardSpendPerMember'));
-    var modeledChurchImpact = modeledCardVolume * CARD_ECON.churchSharePct / 100;
+    var modeledGraceRevenue = modeledCardVolume * CARD_ECON.cardFeePct / 100;
 
     return {
       months: months,
@@ -475,9 +472,10 @@
       confirmed: confirmed * months,
       estimated: estimated * months,
       net: (confirmed + estimated) * months,
-      // Not folded into confirmed/estimated/net — the card program isn't live.
+      // Not folded into confirmed/estimated/net — this is GRACE's revenue,
+      // not the church's, and the card program isn't live either way.
       modeledCardVolume: modeledCardVolume * months,
-      modeledChurchImpact: modeledChurchImpact * months
+      modeledGraceRevenue: modeledGraceRevenue * months
     };
   }
 
@@ -504,16 +502,14 @@
     }
 
     // Impact Card economics — static breakdown, filled once per render (values don't change with inputs)
-    $('ceGross').textContent = CARD_ECON.grossInterchangePct.toFixed(2) + '%';
-    $('ceCost').textContent = '−' + CARD_ECON.passThroughCostPct.toFixed(2) + '%';
-    $('cePool').textContent = CARD_ECON.netPoolPct.toFixed(2) + '%';
-    $('ceChurch').textContent = CARD_ECON.churchSharePct.toFixed(2) + '%';
-    $('ceGrace').textContent = CARD_ECON.graceMarginPct.toFixed(2) + '%';
+    $('ceGross').textContent = CARD_ECON.cardFeePct.toFixed(2) + '%';
+    $('ceCost').textContent = '−' + CARD_ECON.i2cCostPct.toFixed(2) + '%';
+    $('cePool').textContent = CARD_ECON.graceNetRevenuePct.toFixed(2) + '%';
 
     var cardVolMonthly = m.modeledCardVolume / m.months;
-    var cardImpactPer = m.modeledChurchImpact;
+    var graceRevenuePer = m.modeledGraceRevenue;
     var perSuffix = state.period === 'annual' ? '/yr' : '/mo';
-    $('cardImpactNote').innerHTML = 'At ' + Math.max(1, val('members')).toLocaleString() + ' members and ' + fmt(val('cardSpendPerMember')) + '/mo each, that\'s <strong class="num">' + fmt(cardVolMonthly) + (perSuffix === '/yr' ? '/mo' : perSuffix) + '</strong> in modeled card volume — an <strong class="num" style="color:var(--confirmed)">illustrative ' + fmt(cardImpactPer) + perSuffix + '</strong> for the church at the ' + CARD_ECON.churchSharePct.toFixed(0) + '% share above. Not counted in Net value below, not a projection — a worked example so &ldquo;1%&rdquo; has a dollar shape before the program exists.';
+    $('cardImpactNote').innerHTML = 'At ' + Math.max(1, val('members')).toLocaleString() + ' members and ' + fmt(val('cardSpendPerMember')) + '/mo each, that\'s <strong class="num">' + fmt(cardVolMonthly) + (perSuffix === '/yr' ? '/mo' : perSuffix) + '</strong> in modeled card volume — an <strong class="num" style="color:var(--accent)">illustrative ' + fmt(graceRevenuePer) + perSuffix + ' to GRACE</strong>, not your church. Not counted in Net value below, not a projection — a worked example of how the card sustains the platform, so it&rsquo;s not a black box before the program exists.';
 
     // plan recommendation with visible reasoning
     var members = Math.max(1, val('members'));
@@ -612,7 +608,7 @@
       'Plan cost (' + PLANS[state.plan].name + '): ' + fmt(-m.planPrice) + per + '\n' +
       'Confirmed subtotal: ' + fmt(m.confirmed) + per + '\n' +
       'Estimated time & follow-up value: ' + fmt(m.estimated) + per + '\n' +
-      'Impact Card revenue: $0 in totals above (not live) — modeled illustration at a 1% church share: ' + fmt(m.modeledChurchImpact) + per + ', not counted in Net\n' +
+      'Impact Card revenue: $0 in totals above (not live, and it\'s GRACE\'s revenue, not the church\'s) — modeled illustration: ' + fmt(m.modeledGraceRevenue) + per + ' to GRACE, not counted in Net\n' +
       'Net: ' + fmt(m.net) + per + '\n' +
       'These are estimates from your own inputs, not commitments from GRACE.';
     var self = this;

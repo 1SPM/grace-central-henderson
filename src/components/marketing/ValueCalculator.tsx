@@ -5,13 +5,16 @@
  * (software subscriptions, published processing rates, plan price) are
  * verifiable from the church's own bills and never scale with scenario.
  * Estimated figures (staff/volunteer time, missed follow-ups) depend on
- * adoption and are scaled by the scenario multiplier. Impact Card
- * interchange revenue stays excluded from the confirmed/estimated/net
- * totals in every scenario, including optimistic, until the live i2c
- * adapter ships (see api/_lib/i2c — mock-only today) — but it's no
- * longer a bare "$0, trust us": the card shows the actual modeled split
- * (see lib/impactCardEconomics) so the shape of the number is visible
- * before the number itself is real.
+ * adoption and are scaled by the scenario multiplier.
+ *
+ * The GRACE Impact Card is GRACE's primary revenue engine (see
+ * lib/impactCardEconomics — modeled on the company's own i2c planning,
+ * not external interchange benchmarks), not a rebate program for the
+ * church. It's shown prominently because it's central to how GRACE
+ * sustains itself, but its revenue is never counted toward the church's
+ * confirmed/estimated/net totals in any scenario, including optimistic
+ * — it isn't money the church receives. It's excluded until the live
+ * i2c adapter ships (see api/_lib/i2c — mock-only today) either way.
  *
  * Ported from the standalone prototype at
  * previews/grace_value_calculator.html — same model, same copy, now
@@ -21,7 +24,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CLIENT_PLANS, type PlanSlug } from '../../lib/plans';
 import { capture } from '../../lib/observability/posthog';
-import { impactCardModel, illustrativeMonthlyChurchImpact } from '../../lib/impactCardEconomics';
+import { impactCardModel, illustrativeMonthlyGraceRevenue } from '../../lib/impactCardEconomics';
 
 type Scenario = 'conservative' | 'expected' | 'optimistic';
 type Period = 'monthly' | 'annual';
@@ -176,7 +179,7 @@ export function ValueCalculator() {
     const confirmed = software + feeDelta - planPrice;
 
     const modeledCardVolume = Math.max(0, inputs.members) * Math.max(0, inputs.cardSpendPerMember);
-    const modeledChurchImpact = illustrativeMonthlyChurchImpact(modeledCardVolume);
+    const modeledGraceRevenue = illustrativeMonthlyGraceRevenue(modeledCardVolume);
 
     return {
       months,
@@ -186,10 +189,11 @@ export function ValueCalculator() {
       confirmed: confirmed * months,
       estimated: estimated * months,
       net: (confirmed + estimated) * months,
-      // Deliberately NOT folded into confirmed/estimated/net — the card
-      // program isn't live. Shown separately, months-scaled for display only.
+      // Deliberately NOT folded into confirmed/estimated/net — this is
+      // GRACE's revenue, not the church's, and the card program isn't
+      // live yet either way. Shown separately, months-scaled for display.
       modeledCardVolume: modeledCardVolume * months,
-      modeledChurchImpact: modeledChurchImpact * months,
+      modeledGraceRevenue: modeledGraceRevenue * months,
     };
   }, [inputs, scenario, period, plan]);
 
@@ -235,7 +239,7 @@ export function ValueCalculator() {
       `Plan cost (${CLIENT_PLANS[plan].name}): ${fmt(-m.planPrice)}${per}`,
       `Confirmed subtotal: ${fmt(m.confirmed)}${per}`,
       `Estimated time & follow-up value: ${fmt(m.estimated)}${per}`,
-      `Impact Card revenue: $0 in totals above (not live) — modeled illustration at a 1% church share: ${fmt(m.modeledChurchImpact)}${per}, not counted in Net`,
+      `Impact Card revenue: $0 in totals above (not live, and it's GRACE's revenue, not the church's) — modeled illustration: ${fmt(m.modeledGraceRevenue)}${per} to GRACE, not counted in Net`,
       `Net: ${fmt(m.net)}${per}`,
       `These are estimates from your own inputs, not commitments from GRACE.`,
     ].join('\n');
@@ -332,25 +336,28 @@ export function ValueCalculator() {
             <NumberField id="followups" label="Visitor follow-ups missed per month" note="The most speculative line in this model. Valued at $15 each; worth $0 in the conservative scenario." suffix="/mo" value={inputs.followups} onChange={(v) => set('followups', v)} />
           </div>
 
-          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-2xl p-5 sm:p-6">
+          <div className="bg-white dark:bg-dark-800 border-2 border-amber-300 dark:border-amber-700/60 rounded-2xl p-5 sm:p-6">
             <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Impact Card revenue</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>GRACE Impact Card revenue</h3>
               <Tag tone="excluded">Excluded from every scenario</Tag>
             </div>
+            <p className="text-[13px] text-gray-600 dark:text-dark-300 max-w-[58ch] mb-3">
+              The Impact Card is <strong>GRACE's primary revenue engine</strong> — not a rebate program for your
+              church. It's the mechanism that lets GRACE hold subscription pricing where it is while continuing
+              to build the platform. We're putting the model here, in the open, for the same reason everything
+              else on this page is editable: you should be able to see how we make money, not just how we spend
+              yours.
+            </p>
             <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              The GRACE Impact Card's interchange-revenue model is <strong>not yet live</strong> — it requires a
-              signed sponsor-bank agreement and compliance review. Until real money moves on real rails, this
-              calculator counts it as <strong>$0 in the totals above, in every scenario, including optimistic</strong>.
-              What follows is the modeled split we're targeting — a shape, not a contract — funded entirely by
-              members' own everyday spending, not the church's money.
+              It's <strong>not yet live</strong> — it requires a signed sponsor-bank agreement and compliance
+              review — so it counts as <strong>$0 in the totals above, in every scenario, including optimistic</strong>.
+              None of the figures below are money your church receives.
             </p>
 
             <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-850 p-4 mb-3.5 text-[13px]">
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">Gross interchange (modeled, exempt-issuer consumer debit)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.grossInterchangePct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">− Network, sponsor bank, i2c processing, fraud reserve</span><span className="tabular-nums text-gray-800 dark:text-dark-100">−{cardEconomics.passThroughCostPct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1 border-t border-dashed border-gray-300 dark:border-dark-600 font-semibold"><span className="text-gray-700 dark:text-dark-200">= Net pool</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.netPoolPct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">→ Church share (target)</span><span className="tabular-nums text-emerald-700 dark:text-emerald-400 font-semibold">{cardEconomics.churchSharePct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">→ GRACE margin (residual — thin on purpose)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.graceMarginPct.toFixed(2)}%</span></div>
+              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">Card transaction fee (GRACE's take rate on member card spend)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.cardFeePct.toFixed(2)}%</span></div>
+              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">− i2c processing cost (20% of that fee revenue)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">−{cardEconomics.i2cCostPct.toFixed(2)}%</span></div>
+              <div className="flex justify-between py-1 border-t border-dashed border-gray-300 dark:border-dark-600 font-semibold"><span className="text-gray-700 dark:text-dark-200">= GRACE net revenue</span><span className="tabular-nums text-amber-700 dark:text-amber-400">{cardEconomics.graceNetRevenuePct.toFixed(2)}%</span></div>
             </div>
 
             <NumberField id="cardSpendPerMember" label="Estimated everyday spend per member" note="Groceries, gas, dining routed through the Impact Card instead of another debit card — your assumption, not ours" prefix="$" suffix="/mo" step={10} value={inputs.cardSpendPerMember} onChange={(v) => set('cardSpendPerMember', v)} />
@@ -358,9 +365,15 @@ export function ValueCalculator() {
             <p className="text-[13.5px] text-gray-600 dark:text-dark-300 border-t border-gray-200 dark:border-dark-700 pt-3 mt-1">
               At {members.toLocaleString()} members and {fmt(inputs.cardSpendPerMember)}/mo each, that's{' '}
               <strong className="text-gray-800 dark:text-dark-100 tabular-nums">{fmt(m.modeledCardVolume / m.months)}{per === '/yr' ? '/mo' : per}</strong> in modeled card volume — an{' '}
-              <strong className="text-emerald-700 dark:text-emerald-400 tabular-nums">illustrative {fmt(m.modeledChurchImpact)}{per}</strong> for the church
-              at the {cardEconomics.churchSharePct.toFixed(0)}% share above. Not counted in Net value below, not a projection —
-              a worked example so &ldquo;1%&rdquo; has a dollar shape before the program exists.
+              <strong className="text-amber-700 dark:text-amber-400 tabular-nums">illustrative {fmt(m.modeledGraceRevenue)}{per} to GRACE</strong>,
+              not your church. Not counted in Net value below, not a projection — a worked example of how the card
+              sustains the platform, so it's not a black box before the program exists.
+            </p>
+            <p className="text-[12.5px] text-gray-500 dark:text-dark-400 mt-3">
+              Your church's return on the card program is the kind this page doesn't put a dollar sign on: member
+              engagement with giving, a tool that strengthens your standing as a tax-exempt organization doing
+              tangible good, and a subscription price GRACE can hold because this line helps fund the company —
+              not a rebate check.
             </p>
           </div>
         </div>
