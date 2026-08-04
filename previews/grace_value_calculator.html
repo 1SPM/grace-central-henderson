@@ -9,403 +9,496 @@
 <!-- ARTIFACT-BODY-START -->
 <style>
   :root {
-    --ground: #FFFBEB;
-    --card: #FFFFFF;
-    --card-inset: #FAF7EF;
-    --ink: #1C1917;
-    --ink-soft: #57534E;
-    --muted: #78716C;
-    --line: #E7E0D2;
-    --accent: #B45309;
-    --accent-strong: #92400E;
-    --accent-wash: #FEF3C7;
-    --confirmed: #047857;
-    --confirmed-wash: #ECFDF5;
-    --negative: #B91C1C;
-    --negative-wash: #FEF2F2;
-    --focus: #D97706;
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
+    --confirmed: #047857; --confirmed-wash: #ECFDF5;
+    --contingent: #7C3AED; --contingent-wash: #F5F3FF;
+    --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --ground: #1C1917;
-      --card: #292524;
-      --card-inset: #211E1B;
-      --ink: #FAFAF9;
-      --ink-soft: #D6D3D1;
-      --muted: #A8A29E;
-      --line: #44403C;
-      --accent: #FBBF24;
-      --accent-strong: #FCD34D;
-      --accent-wash: rgba(251, 191, 36, .12);
-      --confirmed: #34D399;
-      --confirmed-wash: rgba(52, 211, 153, .10);
-      --negative: #F87171;
-      --negative-wash: rgba(248, 113, 113, .10);
-      --focus: #FBBF24;
+      --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+      --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+      --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
+      --confirmed: #34D399; --confirmed-wash: rgba(52,211,153,.10);
+      --contingent: #C4B5FD; --contingent-wash: rgba(196,181,253,.12);
+      --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
     }
   }
   :root[data-theme="dark"] {
-    --ground: #1C1917; --card: #292524; --card-inset: #211E1B;
-    --ink: #FAFAF9; --ink-soft: #D6D3D1; --muted: #A8A29E; --line: #44403C;
-    --accent: #FBBF24; --accent-strong: #FCD34D; --accent-wash: rgba(251,191,36,.12);
+    --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+    --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+    --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
     --confirmed: #34D399; --confirmed-wash: rgba(52,211,153,.10);
-    --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #FBBF24;
+    --contingent: #C4B5FD; --contingent-wash: rgba(196,181,253,.12);
+    --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
   }
   :root[data-theme="light"] {
-    --ground: #FFFBEB; --card: #FFFFFF; --card-inset: #FAF7EF;
-    --ink: #1C1917; --ink-soft: #57534E; --muted: #78716C; --line: #E7E0D2;
-    --accent: #B45309; --accent-strong: #92400E; --accent-wash: #FEF3C7;
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
     --confirmed: #047857; --confirmed-wash: #ECFDF5;
-    --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #D97706;
+    --contingent: #7C3AED; --contingent-wash: #F5F3FF;
+    --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
   }
 
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; background: var(--ground); color: var(--ink);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  .serif { font-family: "Fraunces", Georgia, "Times New Roman", serif; }
   .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 56px 20px 80px; }
 
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 20px 80px; }
-
-  header.hero { max-width: 640px; margin-bottom: 36px; }
-  .hero h1 {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 300;
-    font-size: clamp(28px, 4.5vw, 40px);
-    line-height: 1.15;
-    margin: 0 0 12px;
-    text-wrap: balance;
+  /* ---------- Layer 1: the answer ---------- */
+  h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 300;
+    font-size: clamp(30px, 5vw, 44px); line-height: 1.12; margin: 0 0 10px; text-wrap: balance;
   }
-  .hero p { color: var(--ink-soft); margin: 0 0 8px; }
-  .promise {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 8px 14px;
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    background: var(--card);
-    border-radius: 0 10px 10px 0;
-    font-size: 13px;
-    color: var(--ink-soft);
+  .sub { color: var(--ink-soft); margin: 0 0 26px; font-size: 17px; max-width: 52ch; }
+
+  .picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 28px; }
+  .picker button {
+    text-align: left; font: inherit; cursor: pointer; padding: 11px 13px;
+    border: 1px solid var(--line); border-radius: 11px; background: var(--card); color: var(--ink);
+  }
+  .picker button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-wash); box-shadow: inset 0 0 0 1px var(--accent); }
+  .picker button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .picker .pn { font-weight: 700; font-size: 14px; display: block; }
+  .picker .pd { font-size: 12.5px; color: var(--muted); margin-top: 2px; display: block; }
+
+  /* Quick inputs — the handful a church leader knows without looking anything up */
+  .quick { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; margin-bottom: 26px; }
+  .quick .qh { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .quick .qh b { font-size: 14px; }
+  .quick .qh span { font-size: 12.5px; color: var(--muted); }
+  .qgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 12px 14px; }
+  .q { display: flex; flex-direction: column; gap: 4px; }
+  .q label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .q .fw { position: relative; }
+  .q .fw .u { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
+  .q .fw.sfx .u { left: auto; right: 9px; }
+  .q input {
+    width: 100%; padding: 9px 10px 9px 22px; border: 1px solid var(--line); border-radius: 9px;
+    background: var(--card-inset); color: var(--ink); font: inherit; font-size: 15px;
+    font-variant-numeric: tabular-nums; text-align: right;
+  }
+  .q .fw.sfx input { padding: 9px 34px 9px 10px; }
+  .q input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .q .hint { font-size: 11.5px; color: var(--muted); }
+  .q select {
+    width: 100%; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--card-inset); color: var(--ink-soft); font: inherit; font-size: 12px;
+  }
+  .q select:focus { outline: 2px solid var(--focus); }
+  /* paired range sliders — drag to explore, type for precision */
+  input[type="range"].sl {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 18px;
+    background: transparent; cursor: pointer; margin: 4px 0 0; display: block;
+  }
+  input[type="range"].sl::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 2px;
+    background: linear-gradient(to right, var(--accent) var(--fill, 50%), var(--line) var(--fill, 50%));
+  }
+  input[type="range"].sl::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line); }
+  input[type="range"].sl::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+  input[type="range"].sl::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 15px; height: 15px; margin-top: -5.5px;
+    border-radius: 50%; background: var(--card); border: 2px solid var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  input[type="range"].sl::-moz-range-thumb {
+    width: 13px; height: 13px; border-radius: 50%; background: var(--card);
+    border: 2px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  input[type="range"].sl:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (prefers-reduced-motion: no-preference) {
+    input[type="range"].sl::-webkit-slider-thumb { transition: transform .12s ease; }
+    input[type="range"].sl:active::-webkit-slider-thumb { transform: scale(1.15); }
   }
 
-  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
-  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .summary { position: static !important; } }
+  .lever { font-size: 13px; color: var(--ink-soft); margin: 14px 0 0; padding-top: 12px; border-top: 1px dotted var(--line); }
+  .lever b { color: var(--ink); }
 
-  .group { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 22px 14px; margin-bottom: 20px; }
-  .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
-  .group h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: 19px; margin: 0; }
-  .tag {
+  .answer { padding: 4px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 30px; }
+  .answer .lbl { font-size: 12.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .answer .big {
+    font-family: "Fraunces", Georgia, serif; font-weight: 400;
+    font-size: clamp(46px, 9vw, 76px); line-height: 1; margin: 6px 0 10px;
+  }
+  .answer .big.pos { color: var(--confirmed); }
+  .answer .big.soft { color: var(--ink); }   /* positive, but nothing in it is confirmed yet */
+  .answer .big.neg { color: var(--negative); }
+  .answer .caveat { color: var(--ink-soft); max-width: 56ch; margin: 0; }
+
+  /* ---------- Layer 2: what's behind it ---------- */
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: 21px; margin: 0 0 4px; }
+  .h2note { color: var(--muted); font-size: 14px; margin: 0 0 18px; max-width: 58ch; }
+
+  .tiers { display: grid; gap: 2px; margin-bottom: 26px; }
+  .tier { display: grid; grid-template-columns: 118px 1fr auto; gap: 16px; align-items: baseline;
+          padding: 14px 0; border-top: 1px solid var(--line); }
+  .tier:last-child { border-bottom: 1px solid var(--line); }
+  .tier .k { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+  .tier.c .k { color: var(--confirmed); }
+  .tier.e .k { color: var(--accent-strong); }
+  .tier .d { font-size: 14px; color: var(--ink-soft); }
+  .tier .v { font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tier .v.pos { color: var(--confirmed); }
+  .tier .v.neg { color: var(--negative); }
+  .tier .v.zero { color: var(--muted); }
+  @media (max-width: 620px) {
+    .tier { grid-template-columns: 1fr auto; }
+    .tier .k { grid-column: 1 / -1; }
+  }
+
+  .fee {
+    padding: 16px 18px; border-radius: 12px; background: var(--negative-wash);
+    border: 1px solid var(--line); border-left: 3px solid var(--negative); margin-bottom: 14px;
+  }
+  .fee .h { font-weight: 700; display: block; margin-bottom: 4px; }
+  .fee p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .cta {
+    display: block; width: fit-content; max-width: 100%; margin-top: 14px;
+    font: inherit; font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 10px;
+    cursor: pointer; background: var(--ink); color: var(--ground); border: 1px solid var(--ink);
+  }
+  .cta:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .cta-note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+  /* ---------- GRACE Impact Card — primary revenue engine, always visible ---------- */
+  .engine {
+    margin-bottom: 30px; padding: 22px 22px 20px; border-radius: 14px;
+    background: var(--card); border: 2px solid var(--contingent);
+  }
+  .engine .eh { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .engine .eh h2 { margin: 0; }
+  .engine .etag {
     font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+    padding: 3px 9px; border-radius: 999px; background: var(--contingent-wash); color: var(--contingent); white-space: nowrap;
   }
-  .tag.confirmed { background: var(--confirmed-wash); color: var(--confirmed); }
-  .tag.estimated { background: var(--accent-wash); color: var(--accent-strong); }
-  .tag.excluded { background: var(--negative-wash); color: var(--negative); }
-  .group > .rationale { font-size: 13px; color: var(--muted); margin: 2px 0 14px; max-width: 58ch; }
+  .engine p { font-size: 14px; color: var(--ink-soft); margin: 8px 0; max-width: 62ch; }
+  .engine p.small { font-size: 13px; color: var(--muted); }
+  .engine .wf { margin: 14px 0; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .engine .wf .r { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline;
+                   padding: 9px 14px; font-size: 13.5px; border-top: 1px solid var(--line); }
+  .engine .wf .r:first-of-type { border-top: none; }
+  .engine .wf .r .n { color: var(--ink-soft); }
+  .engine .wf .r .a { font-variant-numeric: tabular-nums; text-align: right; color: var(--ink); }
+  .engine .wf .r.take .a { color: var(--negative); }
+  .engine .wf .r.out { background: var(--card-inset); font-weight: 700; }
+  .engine .wf .r.out .a { color: var(--contingent); }
+  .engine .row { display: grid; grid-template-columns: 1fr 150px; gap: 14px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+  .engine .row label { font-weight: 600; font-size: 14px; display: block; }
+  .engine .row .note { font-size: 12.5px; color: var(--muted); margin-top: 1px; max-width: 50ch; }
+  .engine .field { position: relative; }
+  .engine .field .unit { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
+  .engine .field input { width: 100%; padding: 8px 10px 8px 24px; border: 1px solid var(--line); border-radius: 9px;
+                          background: var(--card-inset); color: var(--ink); font-size: 15px;
+                          font-variant-numeric: tabular-nums; text-align: right; }
+  .engine .field.suffix input { padding: 8px 44px 8px 10px; }
+  .engine .field.suffix .unit { left: auto; right: 10px; }
+  .engine .field input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .engine .derived { font-size: 13.5px; color: var(--ink-soft); padding: 12px 0 0; border-top: 1px dotted var(--line); margin-top: 4px; }
+  .engine .derived b { color: var(--contingent); font-variant-numeric: tabular-nums; }
 
-  .row { display: grid; grid-template-columns: 1fr 150px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
-  .row:first-of-type { border-top: none; }
-  .row label { font-weight: 600; font-size: 14px; display: block; }
-  .row .note { font-size: 12.5px; color: var(--muted); margin-top: 1px; max-width: 48ch; }
-  .field { position: relative; }
-  .field .unit { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
-  .field input {
-    width: 100%; padding: 8px 10px 8px 24px;
-    border: 1px solid var(--line); border-radius: 10px;
-    background: var(--card-inset); color: var(--ink);
-    font-size: 15px; font-variant-numeric: tabular-nums; text-align: right;
+  /* ---------- Layer 3: check our math ---------- */
+  details.deep { margin-top: 34px; border-top: 1px solid var(--line); padding-top: 18px; }
+  details.deep > summary {
+    cursor: pointer; font-weight: 700; font-size: 15px; list-style: none;
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; color: var(--ink);
   }
+  details.deep > summary::-webkit-details-marker { display: none; }
+  details.deep > summary::before { content: "▸"; color: var(--accent); font-size: 13px; }
+  details.deep[open] > summary::before { content: "▾"; }
+  details.deep > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .deep-note { font-size: 13.5px; color: var(--muted); margin: 2px 0 20px 18px; max-width: 62ch; }
+
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+  @media (max-width: 620px) { .controls { grid-template-columns: 1fr; } }
+  .seg { display: grid; grid-auto-flow: column; gap: 3px; background: var(--card-inset);
+         border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { border: none; background: transparent; color: var(--ink-soft); font: inherit;
+                font-size: 13px; font-weight: 600; padding: 6px 4px; border-radius: 7px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .seg button:focus-visible { outline: 2px solid var(--focus); }
+  .seg-cap { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); margin: -6px 0 0; }
+
+  .grp { margin-bottom: 26px; }
+  .grp h3 { font-size: 15px; margin: 0 0 2px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+         padding: 2px 8px; border-radius: 999px; }
+  .tag.c { background: var(--confirmed-wash); color: var(--confirmed); }
+  .tag.e { background: var(--accent-wash); color: var(--accent-strong); }
+  .grp > p.why { font-size: 13.5px; color: var(--muted); margin: 4px 0 12px; max-width: 62ch; }
+
+  .row { display: grid; grid-template-columns: 1fr 150px; gap: 14px; align-items: center;
+         padding: 9px 0; border-top: 1px solid var(--line); }
+  .row label { font-weight: 600; font-size: 14px; display: block; }
+  .row .note { font-size: 12.5px; color: var(--muted); margin-top: 1px; max-width: 50ch; }
+  .field { position: relative; }
+  .field .unit { position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+                 color: var(--muted); font-size: 13px; pointer-events: none; }
+  .field input { width: 100%; padding: 8px 10px 8px 24px; border: 1px solid var(--line); border-radius: 9px;
+                 background: var(--card-inset); color: var(--ink); font-size: 15px;
+                 font-variant-numeric: tabular-nums; text-align: right; }
   .field.suffix input { padding: 8px 44px 8px 10px; }
   .field.suffix .unit { left: auto; right: 10px; }
   .field input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
   .row.locked input { opacity: .55; }
+  .derived { font-size: 12.5px; color: var(--muted); padding: 9px 0 0; border-top: 1px dotted var(--line); }
+  .derived b { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .aside { font-size: 13px; color: var(--muted); margin: 10px 0 0; max-width: 62ch; }
+  .aside b { color: var(--ink-soft); }
 
-  .fee-verdict { border-top: 1px solid var(--line); padding: 12px 0 6px; font-size: 13.5px; color: var(--ink-soft); }
-  .fee-verdict strong.num { font-size: 15px; }
-
-  .card-econ-box { border: 1px solid var(--line); border-radius: 12px; background: var(--card-inset); padding: 14px 16px; margin-bottom: 14px; font-size: 13px; }
-  .ce-row { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; color: var(--ink-soft); }
-  .ce-row strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-  .ce-subtotal { border-top: 1px dashed var(--line); margin-top: 2px; padding-top: 8px; font-weight: 600; }
-  .ce-subtotal span { color: var(--ink); }
-
-  /* Summary panel */
-  .summary { position: sticky; top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
-  .summary h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: 19px; margin: 0 0 14px; }
-
-  .seg { display: grid; grid-auto-flow: column; gap: 4px; background: var(--card-inset); border: 1px solid var(--line); border-radius: 10px; padding: 4px; margin-bottom: 12px; }
-  .seg button {
-    border: none; background: transparent; color: var(--ink-soft);
-    font: inherit; font-size: 13px; font-weight: 600;
-    padding: 6px 4px; border-radius: 7px; cursor: pointer;
-  }
-  .seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
-  .seg button:focus-visible { outline: 2px solid var(--focus); }
-  .seg-caption { font-size: 12px; color: var(--muted); margin: -6px 0 14px; }
-
-  .plan-select { margin-bottom: 14px; }
-  .plan-select label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
-  .plan-select select {
-    width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px;
-    background: var(--card-inset); color: var(--ink); font: inherit; font-size: 14px;
-  }
-  .plan-why { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
-  .plan-why strong { color: var(--ink-soft); }
-
-  .ledger { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; font-size: 14px; }
-  .ledger .li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; }
+  .ledger { margin-top: 26px; padding: 16px 18px; border-radius: 12px; background: var(--card-inset); border: 1px solid var(--line); }
+  .ledger .lh { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .ledger .li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 14px; }
   .ledger .li .lbl { color: var(--ink-soft); }
-  .ledger .li .lbl small { display: block; font-size: 11.5px; color: var(--muted); }
-  .ledger .li.subtotal { border-top: 1px dashed var(--line); font-weight: 600; }
-  .ledger .li .val.pos { color: var(--confirmed); }
-  .ledger .li .val.neg { color: var(--negative); }
+  .ledger .li.sub { border-top: 1px dashed var(--line); font-weight: 700; margin-top: 3px; padding-top: 8px; }
+  .ledger .li .v { font-variant-numeric: tabular-nums; }
+  .ledger .li .v.pos { color: var(--confirmed); }
+  .ledger .li .v.neg { color: var(--negative); }
+  .ledger .li .v.off { color: var(--muted); }
+  .btn-copy { margin-top: 14px; font: inherit; font-size: 13px; font-weight: 600; padding: 9px 14px;
+              border-radius: 9px; cursor: pointer; background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-copy:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-  .net { margin-top: 14px; padding: 16px; border-radius: 12px; background: var(--card-inset); border: 1px solid var(--line); }
-  .net .label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  .net .figure { font-family: "Fraunces", Georgia, serif; font-size: 34px; font-weight: 400; line-height: 1.1; margin-top: 2px; }
-  .net .figure.pos { color: var(--confirmed); }
-  .net .figure.neg { color: var(--negative); }
-  .net .read { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
-
-  .split-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 12px; border: 1px solid var(--line); }
-  .split-bar .seg-confirmed { background: var(--confirmed); }
-  .split-bar .seg-estimated { background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 4px, var(--accent-wash) 4px, var(--accent-wash) 8px); }
-  .split-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; }
-  .split-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
-
-  .actions { margin-top: 16px; display: grid; gap: 8px; }
-  .actions button {
-    font: inherit; font-weight: 600; font-size: 14px;
-    padding: 11px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line);
-  }
-  .btn-primary { background: var(--accent); color: #FFFBEB; border-color: var(--accent); }
-  :root[data-theme="dark"] .btn-primary, .btn-primary.dark-ink { color: #1C1917; }
-  .btn-secondary { background: transparent; color: var(--ink-soft); }
-  .actions button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-  .disclaimer { font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.5; }
-
-  .eventlog { margin-top: 28px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; }
-  .eventlog h3 { margin: 0 0 4px; font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-  .eventlog p.about { font-size: 12.5px; color: var(--muted); margin: 0 0 10px; max-width: 70ch; }
-  .eventlog ul { list-style: none; margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ink-soft); max-height: 120px; overflow-y: auto; }
-  .eventlog li { padding: 2px 0; border-top: 1px dotted var(--line); }
-  .eventlog li:first-child { border-top: none; }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .net .figure { transition: color .25s ease; }
-  }
+  footer.fine { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line);
+                font-size: 12.5px; color: var(--muted); line-height: 1.55; }
 </style>
 
 <div class="wrap">
-  <header class="hero">
-    <h1>What would GRACE actually be worth to your church?</h1>
-    <p>Every number below is an assumption you can edit — nothing is hidden in the math.
-       Figures you can verify from your own bills are marked <strong style="color:var(--confirmed)">confirmed</strong>;
-       everything that depends on how your team adopts GRACE is marked <strong style="color:var(--accent-strong)">estimated</strong> and shrinks under the conservative scenario.</p>
-    <span class="promise">A planning aid, not a pledge — we don't get to guarantee your outcome, so this won't pretend to either.</span>
-  </header>
 
-  <div class="layout">
-    <main>
-      <!-- CONFIRMED -->
-      <section class="group" aria-labelledby="g-confirmed">
-        <div class="group-head">
-          <h2 id="g-confirmed">Software you'd replace</h2>
-          <span class="tag confirmed">Confirmed — check your bills</span>
-        </div>
-        <p class="rationale">Subscriptions GRACE replaces outright. These are real invoices you already pay, so they count at full value in every scenario.</p>
-        <div class="row">
-          <div><label for="chms">Church management software</label><div class="note">e.g. Planning Center, Breeze, ChurchTrac — your current monthly bill</div></div>
-          <div class="field"><span class="unit">$</span><input id="chms" type="number" min="0" step="1" value="119" data-event="assumption_changed" data-field="chms_subscription"></div>
-        </div>
-        <div class="row">
-          <div><label for="email">Email &amp; newsletter tool</label><div class="note">Mailchimp, Constant Contact, etc.</div></div>
-          <div class="field"><span class="unit">$</span><input id="email" type="number" min="0" step="1" value="45" data-event="assumption_changed" data-field="email_tool"></div>
-        </div>
-        <div class="row">
-          <div><label for="forms">Forms, sign-ups &amp; website add-ons</label><div class="note">Jotform, event registration tools</div></div>
-          <div class="field"><span class="unit">$</span><input id="forms" type="number" min="0" step="1" value="29" data-event="assumption_changed" data-field="forms_tool"></div>
-        </div>
-        <div class="row">
-          <div><label for="texting">Texting / communication service</label><div class="note">Text-in-church, Clearstream, etc.</div></div>
-          <div class="field"><span class="unit">$</span><input id="texting" type="number" min="0" step="1" value="25" data-event="assumption_changed" data-field="texting_service"></div>
-        </div>
-      </section>
+  <!-- ============ LAYER 1 — the answer ============ -->
+  <h1>What would GRACE actually be worth to your church?</h1>
+  <p class="sub">Pick your size. We'll show a number, then show you exactly which parts of it we can prove.</p>
 
-      <!-- PROCESSING FEES -->
-      <section class="group" aria-labelledby="g-fees">
-        <div class="group-head">
-          <h2 id="g-fees">Giving &amp; processing fees</h2>
-          <span class="tag confirmed">Confirmed — published rates</span>
-        </div>
-        <p class="rationale">GRACE charges the standard Stripe rate <strong>plus a 2.50% platform fee</strong> on online gifts. Depending on what you pay today, GRACE may cost <em>more</em> here — we show that rather than hide it.</p>
-        <div class="row">
-          <div><label for="volume">Monthly online giving volume</label><div class="note">Total processed through your current giving tool</div></div>
-          <div class="field"><span class="unit">$</span><input id="volume" type="number" min="0" step="100" value="8000" data-event="assumption_changed" data-field="giving_volume"></div>
-        </div>
-        <div class="row">
-          <div><label for="currentRate">Your current effective rate</label><div class="note">All-in: processor % + per-gift fees + any platform cut</div></div>
-          <div class="field suffix"><input id="currentRate" type="number" min="0" max="15" step="0.1" value="3.4" data-event="assumption_changed" data-field="current_processing_rate"><span class="unit">%</span></div>
-        </div>
-        <div class="row locked">
-          <div><label for="graceRate">GRACE effective rate</label><div class="note">Stripe 2.9% + $0.30 avg ≈ 3.25% + GRACE platform fee 2.50% — fixed, not editable, so we can't quietly flatter ourselves</div></div>
-          <div class="field suffix"><input id="graceRate" type="number" value="5.75" disabled aria-label="GRACE effective rate, fixed at 5.75 percent"><span class="unit">%</span></div>
-        </div>
-        <div class="fee-verdict" id="feeVerdict" aria-live="polite"></div>
-      </section>
+  <div class="picker" role="group" aria-label="Church size">
+    <button type="button" data-profile="single"><span class="pn">Single campus</span><span class="pd">~800 people · $2M budget</span></button>
+    <button type="button" data-profile="growing"><span class="pn">Two sites</span><span class="pd">~2,500 people · $6M budget</span></button>
+    <button type="button" data-profile="multisite" aria-pressed="true"><span class="pn">Multi-site</span><span class="pd">~7,000 people · $15M budget</span></button>
+    <button type="button" data-profile="network"><span class="pn">Church network</span><span class="pd">20,000+ people · $30M budget</span></button>
+  </div>
 
-      <!-- ESTIMATED -->
-      <section class="group" aria-labelledby="g-time">
-        <div class="group-head">
-          <h2 id="g-time">Staff &amp; volunteer time</h2>
-          <span class="tag estimated">Estimated — scenario-scaled</span>
-        </div>
-        <p class="rationale">Time GRACE's automation may give back. These are the softest numbers in the model, so the scenario control scales them down — confirmed figures above never move.</p>
-        <div class="row">
-          <div><label for="adminHrs">Manual admin hours per week</label><div class="note">Attendance entry, follow-up lists, report assembly</div></div>
-          <div class="field suffix"><input id="adminHrs" type="number" min="0" step="0.5" value="6" data-event="assumption_changed" data-field="admin_hours"><span class="unit">hrs</span></div>
-        </div>
-        <div class="row">
-          <div><label for="dupHrs">Duplicate data entry per week</label><div class="note">Re-keying the same people into multiple tools</div></div>
-          <div class="field suffix"><input id="dupHrs" type="number" min="0" step="0.5" value="2" data-event="assumption_changed" data-field="duplicate_entry_hours"><span class="unit">hrs</span></div>
-        </div>
-        <div class="row">
-          <div><label for="volHrs">Volunteer coordination per week</label><div class="note">Scheduling, reminders, swap-finding</div></div>
-          <div class="field suffix"><input id="volHrs" type="number" min="0" step="0.5" value="3" data-event="assumption_changed" data-field="volunteer_hours"><span class="unit">hrs</span></div>
-        </div>
-        <div class="row">
-          <div><label for="rate">Loaded staff cost per hour</label><div class="note">Salary + benefits ÷ hours; use $0 if all volunteer-run</div></div>
-          <div class="field"><span class="unit">$</span><input id="rate" type="number" min="0" step="1" value="22" data-event="assumption_changed" data-field="staff_rate"></div>
-        </div>
-        <div class="row">
-          <div><label for="reduction">Share of that time GRACE saves</label><div class="note">Our adoption assumption — edit it if you think we're optimistic</div></div>
-          <div class="field suffix"><input id="reduction" type="number" min="0" max="100" step="5" value="40" data-event="assumption_changed" data-field="time_reduction_pct"><span class="unit">%</span></div>
-        </div>
-        <div class="row">
-          <div><label for="followups">Visitor follow-ups missed per month</label><div class="note">The most speculative line in this model. Valued at $15 each; worth $0 in the conservative scenario.</div></div>
-          <div class="field suffix"><input id="followups" type="number" min="0" step="1" value="8" data-event="assumption_changed" data-field="missed_followups"><span class="unit">/mo</span></div>
-        </div>
-      </section>
+  <section class="quick">
+    <div class="qh">
+      <b>Five numbers you already know</b>
+      <span>Prefilled from your size. Change any of them and the answer moves.</span>
+    </div>
+    <div class="qgrid">
+      <div class="q">
+        <label for="givingBase">Annual giving</label>
+        <div class="fw"><span class="u">$</span><input id="givingBase" type="number" data-sl="0|40000000|25000" min="0" step="10000" value="10500000" data-f="giving_base"></div>
+        <span class="hint">Tithes &amp; offerings, all channels</span>
+      </div>
+      <div class="q">
+        <label for="onlineShare">Given online</label>
+        <div class="fw sfx"><input id="onlineShare" type="number" data-sl="0|100|1" min="0" max="100" step="1" value="55" data-f="online_share"><span class="u">%</span></div>
+        <span class="hint">Cash and check don't count</span>
+      </div>
+      <div class="q">
+        <label for="currentRate">You pay to process it</label>
+        <div class="fw sfx"><input id="currentRate" type="number" data-sl="0|6|0.05" min="0" max="15" step="0.05" value="2.90" data-f="current_rate"><span class="u">%</span></div>
+        <select id="rateBand" aria-label="Typical rates, if you're not sure">
+          <option value="">Not sure? Pick a typical rate…</option>
+          <option value="3.20">Processor pass-through only ≈ 3.20%</option>
+          <option value="3.00">All-in giving platform ≈ 3.00%</option>
+          <option value="2.75">Negotiated / enterprise ≈ 2.75%</option>
+        </select>
+      </div>
+      <div class="q">
+        <label for="itSpend">Annual software &amp; IT</label>
+        <div class="fw"><span class="u">$</span><input id="itSpend" type="number" data-sl="0|2500000|1000" min="0" step="1000" value="720000" data-f="it_spend"></div>
+        <span class="hint" id="itHint"></span>
+      </div>
+      <div class="q">
+        <label for="adminFTE">Office &amp; admin staff</label>
+        <div class="fw sfx"><input id="adminFTE" type="number" data-sl="0|60|0.5" min="0" step="0.5" value="8" data-f="admin_fte"><span class="u">FTE</span></div>
+        <span class="hint">People doing data entry and scheduling</span>
+      </div>
+    </div>
+    <p class="lever" id="lever"></p>
+  </section>
 
-      <!-- EXCLUDED -->
-      <section class="group" style="border:2px solid var(--accent)" aria-labelledby="g-excluded">
-        <div class="group-head">
-          <h2 id="g-excluded">GRACE Impact Card revenue</h2>
-          <span class="tag excluded">Excluded from every scenario</span>
-        </div>
-        <p class="rationale">The Impact Card is <strong>GRACE's primary revenue engine</strong> — not a rebate program for your church. It's the mechanism that lets GRACE hold subscription pricing where it is while continuing to build the platform. We're putting the model here, in the open, for the same reason everything else on this page is editable: you should be able to see how we make money, not just how we spend yours.</p>
-        <p class="rationale">It's <strong>not yet live</strong> — it requires a signed sponsor-bank agreement and compliance review — so it counts as <strong>$0 in the totals above, in every scenario, including optimistic</strong>. None of the figures below are money your church receives.</p>
+  <section class="answer">
+    <div class="lbl" id="answerLabel">Estimated annual value</div>
+    <div class="big num" id="bigNumber">$0</div>
+    <p class="caveat" id="caveat"></p>
+  </section>
 
-        <div class="card-econ-box">
-          <div class="ce-row"><span>Card transaction fee (GRACE's take rate on member card spend)</span><strong id="ceGross"></strong></div>
-          <div class="ce-row"><span>− i2c processing cost (20% of that fee revenue)</span><strong id="ceCost"></strong></div>
-          <div class="ce-row ce-subtotal"><span>= GRACE net revenue</span><strong id="cePool" style="color:var(--accent)"></strong></div>
-        </div>
+  <!-- ============ LAYER 2 — what's behind it ============ -->
+  <h2>What's behind that number</h2>
+  <p class="h2note">We sort every dollar by how much you should trust it. Only the top row is checkable against your own budget today.</p>
 
-        <div class="row">
-          <div><label for="cardSpendPerMember">Estimated everyday spend per member</label><div class="note">Groceries, gas, dining routed through the Impact Card instead of another debit card — your assumption, not ours</div></div>
-          <div class="field suffix"><span class="unit" style="left:10px;right:auto">$</span><input id="cardSpendPerMember" type="number" min="0" step="10" value="150" data-event="assumption_changed" data-field="card_spend_per_member" style="padding-left:26px"><span class="unit">/mo</span></div>
-        </div>
-        <div class="fee-verdict" id="cardImpactNote" aria-live="polite"></div>
-        <p class="rationale" style="margin-top:10px">Your church's return on the card program is the kind this page doesn't put a dollar sign on: member engagement with giving, a tool that strengthens your standing as a tax-exempt organization doing tangible good, and a subscription price GRACE can hold because this line helps fund the company — not a rebate check.</p>
-      </section>
-    </main>
+  <div class="tiers">
+    <div class="tier c">
+      <span class="k">Confirmed</span>
+      <span class="d">Software you'd stop paying for, and the change in your processing costs.</span>
+      <span class="v num" id="tConfirmed">$0</span>
+    </div>
+    <div class="tier e">
+      <span class="k">Estimated</span>
+      <span class="d">Staff hours returned and a modest giving lift. Depends on how your team adopts it.</span>
+      <span class="v num" id="tEstimated">$0</span>
+    </div>
+  </div>
 
-    <!-- SUMMARY -->
-    <aside class="summary" aria-label="Value summary">
-      <h2>Your numbers</h2>
+  <div class="fee" id="feeBox" hidden>
+    <span class="h" id="feeHead"></span>
+    <p id="feeBody"></p>
+    <button type="button" class="cta" id="btnCta">Ask us about enterprise pricing</button>
+    <span class="cta-note" id="ctaNote"></span>
+  </div>
 
+  <!-- ============ GRACE Impact Card — primary revenue engine ============ -->
+  <section class="engine" aria-labelledby="engineHead">
+    <div class="eh">
+      <h2 id="engineHead">GRACE Impact Card revenue</h2>
+      <span class="etag">Not counted above</span>
+    </div>
+    <p>The Impact Card is <b>GRACE's primary revenue engine</b> &mdash; not a rebate program for your church. It's the mechanism that lets GRACE hold subscription pricing where it is while continuing to build the platform. We're putting the model here, in the open, for the same reason everything else on this page is editable: you should be able to see how we make money, not just how we spend yours.</p>
+    <p class="small">It's <b>not yet live</b> &mdash; it requires a signed sponsor-bank agreement and compliance review &mdash; so it's <b>never counted in the value above, in any scenario</b>. Nothing below is money your church receives.</p>
+
+    <div class="wf">
+      <div class="r"><span class="n">Card transaction fee <small style="display:block;color:var(--muted);font-size:11.5px">GRACE's take rate on member card spend</small></span><span class="a" id="engFee"></span></div>
+      <div class="r take"><span class="n">− i2c processing cost <small style="display:block;color:var(--muted);font-size:11.5px">20% of that fee revenue</small></span><span class="a" id="engCost"></span></div>
+      <div class="r out"><span class="n">= GRACE net revenue</span><span class="a" id="engNet"></span></div>
+    </div>
+
+    <div class="row">
+      <div><label for="cardSpendPerMember">Estimated everyday spend per member</label><div class="note">Groceries, gas, dining routed through the Impact Card instead of another debit card &mdash; your assumption, not ours</div></div>
+      <div class="field suffix"><span class="unit" style="left:10px;right:auto">$</span><input id="cardSpendPerMember" type="number" min="0" step="10" value="150" data-f="card_spend_per_member" style="padding-left:26px"></div>
+    </div>
+    <div class="derived" id="engineDerived"></div>
+    <p class="small" style="margin-top:12px">Your church's return on the card program is the kind this page doesn't put a dollar sign on: member engagement with giving, a tool that strengthens your standing as a tax-exempt organization doing tangible good, and a subscription price GRACE can hold because this line helps fund the company &mdash; not a rebate check.</p>
+  </section>
+
+  <!-- ============ LAYER 3 — check our math ============ -->
+  <details class="deep" id="deep">
+    <summary>Check our math</summary>
+    <p class="deep-note">Every figure above comes from the assumptions below, prefilled with ratios typical of a church your size. Change any of them and the number at the top moves.</p>
+
+    <div class="controls">
       <div class="seg" role="group" aria-label="Scenario">
         <button type="button" data-scenario="conservative" aria-pressed="false">Conservative</button>
         <button type="button" data-scenario="expected" aria-pressed="true">Expected</button>
         <button type="button" data-scenario="optimistic" aria-pressed="false">Optimistic</button>
       </div>
-      <p class="seg-caption" id="scenarioCaption">Expected: estimated time savings counted at 75%.</p>
-
       <div class="seg" role="group" aria-label="Period">
-        <button type="button" data-period="monthly" aria-pressed="true">Monthly</button>
-        <button type="button" data-period="annual" aria-pressed="false">Annual</button>
+        <button type="button" data-period="annual" aria-pressed="true">Annual</button>
+        <button type="button" data-period="monthly" aria-pressed="false">Monthly</button>
       </div>
+      <p class="seg-cap" id="segCap"></p>
+    </div>
 
-      <div class="plan-select">
-        <label for="planSel">GRACE plan</label>
-        <select id="planSel">
-          <option value="starter">Starter — $49/mo · up to 100 members</option>
-          <option value="pro" selected>Pro — $199/mo · up to 1,000 members</option>
-          <option value="enterprise">Enterprise — $499/mo · unlimited + card program</option>
-        </select>
-        <p class="plan-why" id="planWhy"></p>
+    <div class="grp">
+      <h3>Your scale</h3>
+      <div class="row">
+        <div><label for="budget">Annual operating budget</label><div class="note">Total expenses across all campuses</div></div>
+        <div class="field"><span class="unit">$</span><input id="budget" type="number" min="0" step="50000" value="15000000" data-f="budget"></div>
       </div>
-
-      <div class="row" style="grid-template-columns: 1fr 110px; border-top:none; padding-top:0;">
-        <div><label for="members" style="font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Congregation size</label></div>
-        <div class="field suffix"><input id="members" type="number" min="1" step="10" value="240" data-event="assumption_changed" data-field="member_count"><span class="unit">ppl</span></div>
+      <div class="row">
+        <div><label for="gap">Annual gap to close</label><div class="note">Deficit, debt paydown target, or the shortfall on next year's plan</div></div>
+        <div class="field"><span class="unit">$</span><input id="gap" type="number" min="0" step="10000" value="975000" data-f="gap"></div>
       </div>
-
-      <div class="ledger" id="ledger" aria-live="polite"></div>
-
-      <div class="net">
-        <div class="label" id="netLabel">Net value · expected · monthly</div>
-        <div class="figure num" id="netFigure">$0</div>
-        <div class="read" id="netRead"></div>
-        <div class="split-bar" id="splitBar" role="img" aria-label="Share of value that is confirmed versus estimated">
-          <div class="seg-confirmed" style="width:50%"></div>
-          <div class="seg-estimated" style="width:50%"></div>
-        </div>
-        <div class="split-legend">
-          <span><span class="sw" style="background:var(--confirmed)"></span>Confirmed</span>
-          <span><span class="sw" style="background:repeating-linear-gradient(45deg,var(--accent),var(--accent) 3px,var(--accent-wash) 3px,var(--accent-wash) 6px)"></span>Estimated</span>
-        </div>
+      <div class="row">
+        <div><label for="attenders">Weekly attendance</label><div class="note">People across all campuses. Used to size the Impact Card revenue estimate above.</div></div>
+        <div class="field suffix"><input id="attenders" type="number" min="0" step="50" value="7000" data-sl="0|30000|50" data-f="attenders"><span class="unit">ppl</span></div>
       </div>
+      <p class="aside" id="gapAside"></p>
+    </div>
 
-      <div class="actions">
-        <button type="button" class="btn-primary" id="btnSelect">Start 14-day trial on this plan</button>
-        <button type="button" class="btn-secondary" id="btnCopy">Copy summary for your board</button>
+    <div class="grp">
+      <h3>How much of that IT line GRACE replaces <span class="tag c">Confirmed</span></h3>
+      <p class="why">Above about $5M of budget, the number that matters is your whole office and information technology line, not one church-management invoice. Be strict: anything GRACE doesn't actually do should stay out.</p>
+      <div class="row">
+        <div><label for="itShare">Share GRACE replaces</label><div class="note">ChMS, email, forms, texting, registration, volunteer scheduling. Not connectivity, hardware, AV, or streaming.</div></div>
+        <div class="field suffix"><input id="itShare" type="number" data-sl="0|100|1" min="0" max="100" step="1" value="18" data-f="it_share"><span class="unit">%</span></div>
       </div>
+      <div class="derived" id="itDerived"></div>
+    </div>
 
-      <p class="disclaimer">These numbers move with your inputs, not with our sales targets — what you actually save depends on how your team runs GRACE. No card needed for the 14-day trial; cancel anytime from Settings → Billing. Direct gifts stay tax-deductible; card interchange, once it's live, won't be.</p>
-    </aside>
-  </div>
+    <div class="grp">
+      <h3>Giving &amp; processing fees <span class="tag c">Confirmed</span></h3>
+      <p class="why">GRACE charges the processor's rate plus a platform fee on online gifts. Past a certain giving volume this becomes the largest line in the model, and it runs against you.</p>
+      <div class="row locked">
+        <div><label for="processorRate">Processor rate through GRACE</label><div class="note">Stripe 2.9% + $0.30 on a blended gift ≈ 3.05%. Pass-through; GRACE keeps none of it.</div></div>
+        <div class="field suffix"><input id="processorRate" type="number" value="3.05" disabled aria-label="Processor rate, fixed at 3.05 percent"><span class="unit">%</span></div>
+      </div>
+      <div class="row">
+        <div><label for="platformFee">GRACE platform fee</label><div class="note">2.50% is the published rate. Anything lower requires a signed enterprise agreement.</div></div>
+        <div class="field suffix"><input id="platformFee" type="number" data-sl="0|5|0.05" min="0" max="5" step="0.05" value="2.50" data-f="platform_fee"><span class="unit">%</span></div>
+      </div>
+      <div class="derived" id="feeDerived"></div>
+      <p class="aside" id="breakevenAside"></p>
+    </div>
 
-  <section class="eventlog" aria-label="Analytics transparency">
-    <h3>What this page reports</h3>
-    <p class="about">Every analytics event this page sends shows up below the moment it fires. Only field names travel — never your dollar amounts or congregation details.</p>
-    <ul id="events"><li>— no events yet —</li></ul>
-  </section>
+    <div class="grp">
+      <h3>Staff capacity returned <span class="tag e">Estimated</span></h3>
+      <p class="why">Automation rarely produces layoffs; it produces reclaimed hours. This values those hours and discounts them by scenario, because they're softer than an invoice.</p>
+      <div class="row">
+        <div><label for="loadedCost">Loaded cost per FTE</label><div class="note">Salary + benefits, annual</div></div>
+        <div class="field"><span class="unit">$</span><input id="loadedCost" type="number" min="0" step="1000" value="68000" data-f="loaded_cost"></div>
+      </div>
+      <div class="row">
+        <div><label for="shareFreed">Share of their time freed</label><div class="note">Our adoption assumption. Edit it if you think we're optimistic.</div></div>
+        <div class="field suffix"><input id="shareFreed" type="number" data-sl="0|100|1" min="0" max="100" step="1" value="12" data-f="share_freed"><span class="unit">%</span></div>
+      </div>
+      <div class="derived" id="timeDerived"></div>
+      <p class="aside"><b>This is capacity, not cash.</b> Freed hours only become dollars if you redeploy or don't backfill those roles. If your board needs cash to service debt, weight this line lightly. The conservative scenario cuts it in half for that reason.</p>
+    </div>
+
+    <div class="grp">
+      <h3>Giving lift <span class="tag e">Estimated</span></h3>
+      <p class="why">Recurring-gift prompts, failed-card recovery, and faster follow-up on new givers. Once your giving base passes seven figures, small percentages here dominate everything else, so we default it low.</p>
+      <div class="row">
+        <div><label for="givingLift">Expected lift on total giving</label><div class="note">We have no audited proof of this at your size, so treat anything above 2% as a hypothesis to test rather than a budget line.</div></div>
+        <div class="field suffix"><input id="givingLift" type="number" data-sl="0|10|0.25" min="0" max="10" step="0.25" value="1" data-f="giving_lift"><span class="unit">%</span></div>
+      </div>
+      <div class="derived" id="liftDerived"></div>
+    </div>
+
+    <div class="ledger">
+      <div class="lh" id="ledgerHead">Full ledger</div>
+      <div id="ledger"></div>
+      <button type="button" class="btn-copy" id="btnCopy">Copy summary for your board</button>
+    </div>
+  </details>
+
+  <footer class="fine">
+    Numbers move with your inputs, not with our sales targets. Size profiles are prefilled from sector norms for churches at each budget level; your own figures always override them.
+    Direct gifts stay tax-deductible. The GRACE Impact Card is GRACE's revenue, not your church's &mdash; it never creates taxable or deductible activity on your books.
+  </footer>
 </div>
 
 <script>
 (function () {
   'use strict';
 
+  var RATIO = { it: 0.048, giving: 0.70, gap: 0.065, onlineShare: 55 };
+  var PROFILES = {
+    single:    { budget: 2000000,  fte: 2,  loaded: 58000, att: 800,   rate: 3.20, plan: 'pro' },
+    growing:   { budget: 6000000,  fte: 4,  loaded: 62000, att: 2500,  rate: 3.05, plan: 'pro' },
+    multisite: { budget: 15000000, fte: 8,  loaded: 68000, att: 7000,  rate: 2.90, plan: 'enterprise' },
+    network:   { budget: 30000000, fte: 16, loaded: 74000, att: 20000, rate: 2.75, plan: 'enterprise' }
+  };
   var SCENARIOS = {
-    conservative: { mult: 0.5, followups: false, caption: 'Conservative: estimated time savings counted at 50%; missed-follow-up value counted at $0.' },
-    expected:     { mult: 0.75, followups: true, caption: 'Expected: estimated time savings counted at 75%.' },
-    optimistic:   { mult: 1.0, followups: true, caption: 'Optimistic: estimated time savings counted at 100%. Still excludes Impact Card revenue.' }
+    conservative: { est: 0.50, caption: 'Conservative: estimated lines at 50%. Confirmed lines never move in any scenario.' },
+    expected:     { est: 0.75, caption: 'Expected: estimated lines at 75%. Confirmed lines never move in any scenario.' },
+    optimistic:   { est: 1.00, caption: 'Optimistic: estimated lines counted in full. Confirmed lines never move in any scenario. Still excludes Impact Card revenue.' }
   };
-  var PLANS = {
-    starter:    { price: 49,  cap: 100,  name: 'Starter' },
-    pro:        { price: 199, cap: 1000, name: 'Pro' },
-    enterprise: { price: 499, cap: null, name: 'Enterprise' }
-  };
-  var GRACE_RATE = 5.75; // Stripe ~3.25% effective + 2.50% platform fee (fixed on purpose)
-  var FOLLOWUP_VALUE = 15;
-  var WEEKS_PER_MONTH = 52 / 12;
+  var PLANS = { starter: { price: 49, name: 'Starter' }, pro: { price: 199, name: 'Pro' }, enterprise: { price: 499, name: 'Enterprise' } };
+  var PROCESSOR_RATE = 3.05;
+  var ENTERPRISE_THRESHOLD = 2000000;
 
   // GRACE Impact Card revenue model — mirrors the company's own i2c
   // planning (VR CHURCH/i2c Proposal Letter; i2cinc Faith Organizations
   // Use Cases and Projections pro forma), not external interchange
   // benchmarks. The Impact Card is GRACE's primary revenue engine, not
   // a rebate program for the church. See src/lib/impactCardEconomics.ts
-  // for the source of truth and full sourcing notes; kept in comments
-  // here too since this standalone page has no module system to import
-  // from.
+  // for the source of truth and full sourcing notes.
   var CARD_ECON = {
     cardFeePct: 1.00,           // "Credit/Debit Card Transaction Fees (1% avg)" — GRACE's take rate
     i2cCostShareOfRevenue: 0.20 // "i2c service fees, estimated at 20% of total revenue"
@@ -413,212 +506,357 @@
   CARD_ECON.i2cCostPct = CARD_ECON.cardFeePct * CARD_ECON.i2cCostShareOfRevenue;
   CARD_ECON.graceNetRevenuePct = CARD_ECON.cardFeePct - CARD_ECON.i2cCostPct;
 
-  var state = { scenario: 'expected', period: 'monthly', plan: 'pro', started: false, edited: {}, completed: false };
+  var state = {
+    scenario: 'expected', period: 'annual', plan: 'enterprise', profile: 'multisite',
+    started: false, edited: {}, completed: false, ctaFired: false, ctaPath: 'trial'
+  };
 
   function $(id) { return document.getElementById(id); }
   function val(id) { var n = parseFloat($(id).value); return isFinite(n) && n >= 0 ? n : 0; }
-  function fmt(n) {
-    var sign = n < 0 ? '−' : '';
-    return sign + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
-  }
+  function fmt(n) { return (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US'); }
+  function pct(n, dp) { var d = dp == null ? 1 : dp, f = Math.pow(10, d); return (Math.round(n * f) / f) + '%'; }
+  function budgetVal() { return val('budget'); }
 
-  // --- analytics: event names + field names only, never values -------------
-  var logEl = $('events');
   function track(name, field) {
-    var payload = { event: name };
-    if (field) payload.field = field;
-    (window.dataLayer = window.dataLayer || []).push(payload);
-    if (logEl.firstChild && logEl.firstChild.textContent.indexOf('no events') !== -1) logEl.innerHTML = '';
-    var li = document.createElement('li');
-    li.textContent = new Date().toLocaleTimeString() + '  ' + name + (field ? '  { field: "' + field + '" }' : '');
-    logEl.insertBefore(li, logEl.firstChild);
+    var p = { event: name }; if (field) p.field = field;
+    (window.dataLayer = window.dataLayer || []).push(p);
   }
-  function started() {
-    if (!state.started) { state.started = true; track('calculator_started'); }
-  }
-  function maybeCompleted() {
-    // "completed": user has touched at least 3 distinct assumptions
-    if (!state.completed && Object.keys(state.edited).length >= 3) {
-      state.completed = true;
-      track('calculator_completed');
-    }
+  function started() { if (!state.started) { state.started = true; track('calculator_started'); } }
+
+  // --- GRACE Impact Card revenue (GRACE's own, never the church's) --------
+  function cardRevenue() {
+    var monthlyVolume = val('attenders') * val('cardSpendPerMember');
+    var monthlyGraceRevenue = monthlyVolume * CARD_ECON.graceNetRevenuePct / 100;
+    return { monthlyVolume: monthlyVolume, monthlyGraceRevenue: monthlyGraceRevenue };
   }
 
   // --- model ---------------------------------------------------------------
   function compute() {
     var sc = SCENARIOS[state.scenario];
-    var months = state.period === 'annual' ? 12 : 1;
-
-    var software = val('chms') + val('email') + val('forms') + val('texting');
-
-    var volume = val('volume');
-    var feeDelta = volume * (val('currentRate') - GRACE_RATE) / 100; // negative when GRACE costs more
-
-    var hoursValue = (val('adminHrs') + val('dupHrs') + val('volHrs')) * WEEKS_PER_MONTH * val('rate') * (val('reduction') / 100);
-    var followupValue = sc.followups ? val('followups') * FOLLOWUP_VALUE : 0;
-    var estimated = (hoursValue + followupValue) * sc.mult;
-
-    var planPrice = PLANS[state.plan].price;
-    var confirmed = software + feeDelta - planPrice;
-
-    var modeledCardVolume = Math.max(0, val('members')) * Math.max(0, val('cardSpendPerMember'));
-    var modeledGraceRevenue = modeledCardVolume * CARD_ECON.cardFeePct / 100;
-
+    var itSaving = val('itSpend') * val('itShare') / 100;
+    var onlineVolume = val('givingBase') * val('onlineShare') / 100;
+    var graceRate = PROCESSOR_RATE + val('platformFee');
+    var feeDelta = onlineVolume * (val('currentRate') - graceRate) / 100;
+    var planCost = PLANS[state.plan].price * 12;
+    var confirmed = itSaving + feeDelta - planCost;
+    var timeValue = val('adminFTE') * val('loadedCost') * val('shareFreed') / 100;
+    var liftValue = val('givingBase') * val('givingLift') / 100;
+    var estimated = (timeValue + liftValue) * sc.est;
+    var rateDelta = (graceRate - val('currentRate')) / 100;
+    var breakeven = rateDelta > 0 ? (itSaving - planCost) / rateDelta : null;
     return {
-      months: months,
-      software: software * months,
-      feeDelta: feeDelta * months,
-      planPrice: planPrice * months,
-      confirmed: confirmed * months,
-      estimated: estimated * months,
-      net: (confirmed + estimated) * months,
-      // Not folded into confirmed/estimated/net — this is GRACE's revenue,
-      // not the church's, and the card program isn't live either way.
-      modeledCardVolume: modeledCardVolume * months,
-      modeledGraceRevenue: modeledGraceRevenue * months
+      itSaving: itSaving, onlineVolume: onlineVolume, graceRate: graceRate, feeDelta: feeDelta,
+      planCost: planCost, confirmed: confirmed, breakeven: breakeven,
+      timeValue: timeValue, liftValue: liftValue, estimated: estimated,
+      // Never added to net — this is GRACE's revenue, not the church's.
+      net: confirmed + estimated
     };
-  }
-
-  function recommendedPlan(memberCount) {
-    if (memberCount <= PLANS.starter.cap) return 'starter';
-    if (memberCount <= PLANS.pro.cap) return 'pro';
-    return 'enterprise';
   }
 
   // --- render --------------------------------------------------------------
   function render() {
     var m = compute();
-    var per = state.period === 'annual' ? '/yr' : '/mo';
+    var annual = state.period === 'annual';
+    var div = annual ? 1 : 12;
+    var per = annual ? '/yr' : '/mo';
+    function show(n) { return fmt(n / div); }
 
-    // fee verdict
-    var fv = $('feeVerdict');
-    var feeMonthly = m.feeDelta / m.months;
-    if (Math.abs(feeMonthly) < 1) {
-      fv.textContent = 'Processing costs are roughly the same either way.';
-    } else if (feeMonthly < 0) {
-      fv.innerHTML = 'At these rates GRACE processing costs <strong class="num" style="color:var(--negative)">' + fmt(-feeMonthly) + '/mo more</strong> than you pay today. The rest of the model has to earn that back.';
+    // ---- Layer 1
+    $('answerLabel').textContent = 'Estimated ' + (annual ? 'annual' : 'monthly') + ' value · ' + state.scenario;
+    var big = $('bigNumber');
+    big.textContent = show(m.net) + per;
+    // Green only when the confirmed lines carry it. A positive total made
+    // entirely of soft assumptions gets neutral ink, not a success colour.
+    big.className = 'big num ' + (m.net < 0 ? 'neg' : (m.confirmed >= 0 ? 'pos' : 'soft'));
+
+    var cav;
+    if (m.net < 0) {
+      cav = 'At these assumptions GRACE costs more than it returns. The platform fee is usually why.';
+    } else if (m.confirmed < 0) {
+      cav = 'None of that is confirmed yet. The lines you can check against your own budget run ' +
+            show(m.confirmed) + per + ' against you, and softer assumptions carry the total.';
     } else {
-      fv.innerHTML = 'At these rates GRACE processing saves <strong class="num" style="color:var(--confirmed)">' + fmt(feeMonthly) + '/mo</strong> versus today.';
+      cav = show(m.confirmed) + per + ' of that is checkable against your own budget today. The rest depends on adoption.';
+    }
+    $('caveat').textContent = cav;
+
+    // ---- Layer 2 tiers
+    function setTier(id, v, cls) {
+      var el = $(id);
+      el.textContent = show(v);
+      el.className = 'v num ' + cls;
+    }
+    setTier('tConfirmed', m.confirmed, m.confirmed >= 0 ? 'pos' : 'neg');
+    setTier('tEstimated', m.estimated, m.estimated > 0 ? 'pos' : 'zero');
+
+    // ---- Layer 2 fee box
+    var fee = val('platformFee');
+    var box = $('feeBox');
+    if (m.feeDelta < -1) {
+      box.hidden = false;
+      $('feeHead').textContent = fee >= 2.5
+        ? 'Our published rate does not survive your scale.'
+        : 'Even at a negotiated rate, processing runs against you.';
+      var be = val('currentRate') - PROCESSOR_RATE;
+      $('feeBody').innerHTML = 'On ' + fmt(m.onlineVolume) + ' of online giving, our ' + pct(m.graceRate, 2) +
+        ' all-in rate costs you <strong>' + fmt(-m.feeDelta) + ' a year more</strong> than the ' + pct(val('currentRate'), 2) +
+        ' you pay today. ' +
+        (be > 0
+          ? 'To break even, our platform fee would need to be at or below ' + pct(be, 2) + '.'
+          : 'Of that gap, ' + pct(PROCESSOR_RATE - val('currentRate'), 2) + ' is the processor and ' + pct(fee, 2) + ' is our platform fee.');
+    } else {
+      box.hidden = true;
     }
 
-    // Impact Card economics — static breakdown, filled once per render (values don't change with inputs)
-    $('ceGross').textContent = CARD_ECON.cardFeePct.toFixed(2) + '%';
-    $('ceCost').textContent = '−' + CARD_ECON.i2cCostPct.toFixed(2) + '%';
-    $('cePool').textContent = CARD_ECON.graceNetRevenuePct.toFixed(2) + '%';
+    // ---- GRACE Impact Card revenue engine (always visible, never in the church's total)
+    $('engFee').textContent = pct(CARD_ECON.cardFeePct, 2);
+    $('engCost').textContent = '−' + pct(CARD_ECON.i2cCostPct, 2);
+    $('engNet').textContent = pct(CARD_ECON.graceNetRevenuePct, 2);
+    var cr = cardRevenue();
+    $('engineDerived').innerHTML = 'At ' + Math.max(1, val('attenders')).toLocaleString() + ' attenders and ' + fmt(val('cardSpendPerMember')) +
+      '/mo each, that\'s <b>' + fmt(cr.monthlyVolume) + '/mo</b> in modeled card volume — an <b>illustrative ' + fmt(cr.monthlyGraceRevenue) +
+      '/mo to GRACE</b>, not your church. Not counted in the value above, not a projection — a worked example of how the card sustains the platform.';
 
-    var cardVolMonthly = m.modeledCardVolume / m.months;
-    var graceRevenuePer = m.modeledGraceRevenue;
-    var perSuffix = state.period === 'annual' ? '/yr' : '/mo';
-    $('cardImpactNote').innerHTML = 'At ' + Math.max(1, val('members')).toLocaleString() + ' members and ' + fmt(val('cardSpendPerMember')) + '/mo each, that\'s <strong class="num">' + fmt(cardVolMonthly) + (perSuffix === '/yr' ? '/mo' : perSuffix) + '</strong> in modeled card volume — an <strong class="num" style="color:var(--accent)">illustrative ' + fmt(graceRevenuePer) + perSuffix + ' to GRACE</strong>, not your church. Not counted in Net value below, not a projection — a worked example of how the card sustains the platform, so it&rsquo;s not a black box before the program exists.';
-
-    // plan recommendation with visible reasoning
-    var members = Math.max(1, val('members'));
-    var rec = recommendedPlan(members);
-    var why = $('planWhy');
-    if (rec === state.plan) {
-      why.innerHTML = '<strong>' + PLANS[rec].name + ' fits:</strong> you entered ' + members.toLocaleString() + ' people' + (PLANS[rec].cap ? ', within its ' + PLANS[rec].cap.toLocaleString() + '-member limit.' : '.');
-    } else {
-      why.innerHTML = 'Heads up: at ' + members.toLocaleString() + ' people, <strong>' + PLANS[rec].name + '</strong> is the fit' + (PLANS[rec].cap ? ' (limit ' + PLANS[rec].cap.toLocaleString() + ')' : '') + ' — you’ve selected ' + PLANS[state.plan].name + '.';
+    // ---- CTA routing
+    var enterprise = val('givingBase') > ENTERPRISE_THRESHOLD;
+    state.ctaPath = enterprise ? 'enterprise' : 'trial';
+    if (!state.ctaFired) {
+      $('btnCta').textContent = enterprise ? 'Ask us about enterprise pricing' : 'Start a 14-day trial';
     }
+    $('ctaNote').textContent = enterprise
+      ? 'Above ' + fmt(ENTERPRISE_THRESHOLD) + ' in annual giving we price differently. No obligation, and we\'ll tell you if we\'re not the right fit.'
+      : 'No card required. Cancel anytime.';
 
-    // ledger
+    // ---- biggest lever: which single input is moving the number most
+    $('itHint').textContent = budgetVal() > 0
+      ? 'Typically ' + pct(RATIO.it * 100) + ' of budget (' + fmt(budgetVal() * RATIO.it) + ')' : '';
+    var levers = [
+      { n: 'your processing rate',       v: Math.abs(m.feeDelta), d: m.feeDelta < 0 ? 'costing you' : 'saving you' },
+      { n: 'the giving lift assumption', v: m.liftValue * SCENARIOS[state.scenario].est, d: 'worth' },
+      { n: 'your software &amp; IT line', v: m.itSaving, d: 'worth' },
+      { n: 'staff hours returned',       v: m.timeValue * SCENARIOS[state.scenario].est, d: 'worth' }
+    ].sort(function (a, b) { return b.v - a.v; });
+    $('lever').innerHTML = 'Biggest swing in your number right now: <b>' + levers[0].n + '</b>, ' +
+      levers[0].d + ' ' + fmt(levers[0].v) + ' a year. Next is ' + levers[1].n + ', ' +
+      levers[1].d + ' ' + fmt(levers[1].v) + '.';
+
+    // ---- Layer 3
+    var budget = val('budget');
+    $('gapAside').textContent = budget > 0
+      ? 'That gap is ' + pct(val('gap') / budget * 100) + ' of your budget. Churches carrying a deficit at this size commonly sit in the 4–8% band, and one-time gains like a property sale often mask how much of it recurs.'
+      : '';
+
+    $('itDerived').innerHTML = 'GRACE absorbs <b>' + fmt(m.itSaving) + '</b> a year of that line, <b>' + fmt(m.itSaving / 12) + '</b> a month.';
+    $('feeDerived').innerHTML = 'Online giving of <b>' + fmt(m.onlineVolume) + '</b> at ' + pct(m.graceRate, 2) +
+      ' versus ' + pct(val('currentRate'), 2) + ' is <b>' + fmt(m.feeDelta) + '</b> a year.';
+    $('timeDerived').innerHTML = 'Values freed capacity at <b>' + fmt(m.timeValue) + '</b> a year before the scenario discount, about <b>' +
+      (Math.round(val('adminFTE') * val('shareFreed') / 100 * 10) / 10) + ' FTE</b> returned to ministry.';
+    $('liftDerived').innerHTML = 'A ' + pct(val('givingLift')) + ' lift on ' + fmt(val('givingBase')) + ' is <b>' + fmt(m.liftValue) + '</b> a year before the discount.';
+
+    var ba = $('breakevenAside');
+    ba.textContent = (m.breakeven !== null && m.breakeven > 0)
+      ? 'At these rates the confirmed lines stay positive only while your online giving stays under ' + fmt(m.breakeven) + ' a year.'
+      : '';
+
+    $('ledgerHead').textContent = 'Full ledger · ' + state.scenario + ' · ' + (annual ? 'annual' : 'monthly');
     var rows = [
-      { lbl: 'Software replaced', sub: 'confirmed', v: m.software },
-      { lbl: 'Processing fee difference', sub: 'confirmed · can be negative', v: m.feeDelta },
-      { lbl: PLANS[state.plan].name + ' plan cost', sub: 'confirmed', v: -m.planPrice },
-      { lbl: 'Confirmed subtotal', sub: null, v: m.confirmed, subtotal: true },
-      { lbl: 'Time & follow-up value', sub: 'estimated · ' + state.scenario + ' scenario', v: m.estimated },
-      { lbl: 'Impact Card revenue', sub: 'excluded until live', v: 0 }
+      { l: 'Software &amp; IT consolidated', v: m.itSaving },
+      { l: 'Processing fee difference', v: m.feeDelta },
+      { l: PLANS[state.plan].name + ' plan cost', v: -m.planCost },
+      { l: 'Confirmed subtotal', v: m.confirmed, sub: true },
+      { l: 'Staff capacity returned', v: m.timeValue * SCENARIOS[state.scenario].est },
+      { l: 'Giving lift', v: m.liftValue * SCENARIOS[state.scenario].est },
+      { l: 'Net', v: m.net, sub: true }
     ];
     $('ledger').innerHTML = rows.map(function (r) {
-      var cls = r.v > 0.5 ? 'pos' : (r.v < -0.5 ? 'neg' : '');
-      return '<div class="li' + (r.subtotal ? ' subtotal' : '') + '">' +
-        '<span class="lbl">' + r.lbl + (r.sub ? '<small>' + r.sub + '</small>' : '') + '</span>' +
-        '<span class="val num ' + cls + '">' + fmt(r.v) + per + '</span></div>';
+      var c = (r.v > 0.5 ? 'pos' : (r.v < -0.5 ? 'neg' : 'off'));
+      return '<div class="li' + (r.sub ? ' sub' : '') + '"><span class="lbl">' + r.l +
+             '</span><span class="v ' + c + '">' + show(r.v) + per + '</span></div>';
     }).join('');
+  }
 
-    // net
-    $('netLabel').textContent = 'Net value · ' + state.scenario + ' · ' + state.period;
-    var fig = $('netFigure');
-    fig.textContent = fmt(m.net) + per;
-    fig.className = 'figure num ' + (m.net >= 0 ? 'pos' : 'neg');
-    $('netRead').textContent = m.net >= 0
-      ? (m.confirmed >= 0
-          ? 'At these assumptions, GRACE returns more than it costs. ' + fmt(m.confirmed) + per + ' of that is confirmed today.'
-          : 'At these assumptions, GRACE returns more than it costs — but the entire surplus is estimated. Confirmed items alone run ' + fmt(m.confirmed) + per + '.')
-      : 'At these assumptions, GRACE costs more than it saves. That’s a legitimate answer — adjust the assumptions or pick a smaller plan.';
+  function applyProfile(name) {
+    var p = PROFILES[name];
+    if (!p) return;
+    state.profile = name;
+    state.plan = p.plan;
+    $('budget').value      = p.budget;
+    $('gap').value         = Math.round(p.budget * RATIO.gap / 5000) * 5000;
+    $('itSpend').value     = Math.round(p.budget * RATIO.it / 1000) * 1000;
+    $('itShare').value     = 18;
+    $('givingBase').value  = Math.round(p.budget * RATIO.giving / 10000) * 10000;
+    $('onlineShare').value = RATIO.onlineShare;
+    $('currentRate').value = p.rate;
+    $('platformFee').value = 2.50;
+    $('adminFTE').value    = p.fte;
+    $('loadedCost').value  = p.loaded;
+    $('shareFreed').value  = 12;
+    $('givingLift').value  = 1;
+    $('attenders').value   = p.att;
+    $('cardSpendPerMember').value = 150;
+    $('rateBand').value    = '';
+    document.querySelectorAll('[data-profile]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.profile === name));
+    });
+    track('profile_applied', name);
+    rescaleSliders(p.budget);
+    render();
+  }
 
-    // split bar (share of positive value)
-    var posC = Math.max(0, m.confirmed), posE = Math.max(0, m.estimated), tot = posC + posE;
-    var cPct = tot > 0 ? Math.round(100 * posC / tot) : 0;
-    var bar = $('splitBar');
-    bar.children[0].style.width = cPct + '%';
-    bar.children[1].style.width = (100 - cPct) + '%';
-    bar.setAttribute('aria-label', cPct + '% of modeled value is confirmed, ' + (100 - cPct) + '% is estimated');
+  // --- sliders -------------------------------------------------------------
+  // Every tagged number field gets a range paired to it. Drag to explore,
+  // type when you know the real figure. Both stay in sync.
+  var SLIDERS = [];
+  function paintFill(r) {
+    var min = parseFloat(r.min), max = parseFloat(r.max), v = parseFloat(r.value);
+    var f = max > min ? (v - min) / (max - min) * 100 : 0;
+    r.style.setProperty('--fill', Math.max(0, Math.min(100, f)) + '%');
+  }
+  function buildSliders() {
+    document.querySelectorAll('input[data-sl]').forEach(function (numInput) {
+      var spec = numInput.dataset.sl.split('|');
+      var r = document.createElement('input');
+      r.type = 'range';
+      r.className = 'sl';
+      r.min = spec[0]; r.max = spec[1]; r.step = spec[2];
+      r.value = numInput.value;
+      r.setAttribute('aria-label', (document.querySelector('label[for="' + numInput.id + '"]') || {}).textContent || numInput.id);
+      r.tabIndex = -1; // the number field is the keyboard path; skip the duplicate stop
+      // insert after the field wrapper so it spans the full control width
+      var host = numInput.closest('.fw') || numInput.closest('.field') || numInput;
+      host.parentNode.insertBefore(r, host.nextSibling);
+
+      r.addEventListener('input', function () {
+        numInput.value = r.value;
+        paintFill(r);
+        started();
+        state.edited[numInput.dataset.f] = true;
+        render();
+      });
+      SLIDERS.push({ r: r, n: numInput });
+      paintFill(r);
+    });
+  }
+  function syncSliders() {
+    SLIDERS.forEach(function (s) {
+      var v = parseFloat(s.n.value);
+      if (!isFinite(v)) return;
+      // a typed value outside the drag range widens the range rather than clamping it
+      if (v > parseFloat(s.r.max)) s.r.max = v;
+      if (v < parseFloat(s.r.min)) s.r.min = v;
+      s.r.value = v;
+      paintFill(s.r);
+    });
+  }
+  // money sliders rescale to the chosen church size so the thumb stays useful
+  function rescaleSliders(budget) {
+    function setMax(id, max) {
+      var s = SLIDERS.filter(function (x) { return x.n.id === id; })[0];
+      if (s) { s.r.max = Math.max(max, parseFloat(s.n.value) || 0); }
+    }
+    setMax('givingBase', Math.round(budget * 1.2));
+    setMax('itSpend', Math.round(budget * 0.15));
+    setMax('attenders', Math.max(1500, Math.round(budget / 1000)));
+    syncSliders();
   }
 
   // --- wiring --------------------------------------------------------------
-  document.querySelectorAll('input[data-event]').forEach(function (input) {
-    input.addEventListener('input', function () {
-      started();
-      state.edited[input.dataset.field] = true;
-      track('assumption_changed', input.dataset.field);
-      maybeCompleted();
+  document.querySelectorAll('input[data-f]').forEach(function (i) {
+    i.addEventListener('input', function () {
+      started(); state.edited[i.dataset.f] = true;
+      track('assumption_changed', i.dataset.f);
+      if (!state.completed && Object.keys(state.edited).length >= 3) { state.completed = true; track('calculator_completed'); }
+      syncSliders();
       render();
     });
   });
-
-  document.querySelectorAll('[data-scenario]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      started();
-      state.scenario = btn.dataset.scenario;
-      document.querySelectorAll('[data-scenario]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
-      $('scenarioCaption').textContent = SCENARIOS[state.scenario].caption;
+  document.querySelectorAll('[data-profile]').forEach(function (b) {
+    b.addEventListener('click', function () { started(); applyProfile(b.dataset.profile); });
+  });
+  document.querySelectorAll('[data-scenario]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      started(); state.scenario = b.dataset.scenario;
+      document.querySelectorAll('[data-scenario]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      $('segCap').textContent = SCENARIOS[state.scenario].caption;
       render();
     });
   });
-
-  document.querySelectorAll('[data-period]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      started();
-      state.period = btn.dataset.period;
-      document.querySelectorAll('[data-period]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+  document.querySelectorAll('[data-period]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      started(); state.period = b.dataset.period;
+      document.querySelectorAll('[data-period]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       render();
     });
   });
+  $('deep').addEventListener('toggle', function () { if (this.open) { started(); track('math_opened'); } });
 
-  $('planSel').addEventListener('change', function () {
+  $('rateBand').addEventListener('change', function () {
+    if (!this.value) return;
     started();
-    state.plan = this.value;
-    track('plan_compared', this.value);
+    $('currentRate').value = this.value;
+    track('rate_band_picked', this.value);
+    syncSliders();
     render();
   });
+  // once they type their real rate, the helper shouldn't claim credit for it
+  $('currentRate').addEventListener('input', function () { $('rateBand').value = ''; });
 
-  $('btnSelect').addEventListener('click', function () {
-    track('plan_selected', state.plan);
-    this.textContent = 'In production this opens /signup?plan=' + state.plan;
+  $('btnCta').addEventListener('click', function () {
+    state.ctaFired = true;
+    if (state.ctaPath === 'enterprise') {
+      track('enterprise_pricing_requested', 'fee_box');
+      // carry their figures through so the first conversation starts informed
+      var mm = compute();
+      var q = [
+        'profile=' + encodeURIComponent(state.profile),
+        'budget=' + Math.round(val('budget')),
+        'giving=' + Math.round(val('givingBase')),
+        'online=' + val('onlineShare'),
+        'rate=' + val('currentRate'),
+        'confirmed=' + Math.round(mm.confirmed)
+      ].join('&');
+      window.location.href = '/enterprise-pricing?' + q;
+      return;
+    } else {
+      track('trial_started', state.plan);
+      this.textContent = 'In production this opens /signup?plan=' + state.plan;
+    }
   });
 
   $('btnCopy').addEventListener('click', function () {
-    var m = compute();
-    var per = state.period === 'annual' ? '/yr' : '/mo';
-    var text = 'GRACE value estimate (' + state.scenario + ' scenario, ' + state.period + ')\n' +
-      'Software replaced: ' + fmt(m.software) + per + '\n' +
-      'Processing fee difference: ' + fmt(m.feeDelta) + per + '\n' +
-      'Plan cost (' + PLANS[state.plan].name + '): ' + fmt(-m.planPrice) + per + '\n' +
-      'Confirmed subtotal: ' + fmt(m.confirmed) + per + '\n' +
-      'Estimated time & follow-up value: ' + fmt(m.estimated) + per + '\n' +
-      'Impact Card revenue: $0 in totals above (not live, and it\'s GRACE\'s revenue, not the church\'s) — modeled illustration: ' + fmt(m.modeledGraceRevenue) + per + ' to GRACE, not counted in Net\n' +
-      'Net: ' + fmt(m.net) + per + '\n' +
-      'These are estimates from your own inputs, not commitments from GRACE.';
+    var m = compute(), sc = SCENARIOS[state.scenario], gapVal = val('gap'), cr = cardRevenue();
+    var lines = [
+      'GRACE value estimate — ' + state.scenario + ' scenario, annualized',
+      'Modeled on a ' + fmt(val('budget')) + ' budget with ' + fmt(val('givingBase')) + ' in giving.',
+      '',
+      'CONFIRMED (checkable against your own budget)',
+      '  Software & IT consolidated:  ' + fmt(m.itSaving) + '/yr',
+      '  Processing fee difference:   ' + fmt(m.feeDelta) + '/yr',
+      '  ' + PLANS[state.plan].name + ' plan cost: ' + fmt(-m.planCost) + '/yr',
+      '  Subtotal:                    ' + fmt(m.confirmed) + '/yr',
+      '',
+      'ESTIMATED (adoption-dependent, counted at ' + Math.round(sc.est * 100) + '%)',
+      '  Staff capacity returned:     ' + fmt(m.timeValue * sc.est) + '/yr',
+      '  Giving lift:                 ' + fmt(m.liftValue * sc.est) + '/yr',
+      '',
+      'NET: ' + fmt(m.net) + '/yr',
+      gapVal > 0 ? 'That is ' + pct(m.net / gapVal * 100) + ' of the ' + fmt(gapVal) + ' gap entered.' : '',
+      '',
+      'GRACE IMPACT CARD (GRACE\'s revenue, not counted above)',
+      '  Modeled GRACE revenue:       ' + fmt(cr.monthlyGraceRevenue * 12) + '/yr — not the church\'s money, not live yet',
+      '',
+      'Estimates from your own inputs, not commitments from GRACE.',
+      'The Impact Card is GRACE\'s revenue, not your church\'s — it never creates taxable or deductible activity on your books.'
+    ].filter(Boolean);
     var self = this;
     function done() { self.textContent = 'Copied ✓'; setTimeout(function () { self.textContent = 'Copy summary for your board'; }, 1600); }
-    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); } else { done(); }
-    maybeCompleted();
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(lines.join('\n')).then(done, done); } else { done(); }
+    track('summary_copied');
   });
 
-  $('members').addEventListener('input', render);
-
+  buildSliders();
+  rescaleSliders(val('budget'));
+  $('segCap').textContent = SCENARIOS[state.scenario].caption;
   render();
 })();
 </script>
