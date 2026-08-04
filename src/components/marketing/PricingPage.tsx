@@ -87,7 +87,7 @@ interface PricingPageProps {
 export function PricingPage({ onStartTrial }: PricingPageProps) {
   const handleCta = (slug: 'starter' | 'pro' | 'enterprise') => {
     if (slug === 'enterprise') {
-      window.location.assign('mailto:sales@grace-crm.app?subject=GRACE Enterprise inquiry');
+      window.location.assign('https://calendly.com/virtualworshipsolutions-info/enterprise-rate');
       return;
     }
     if (onStartTrial) {
