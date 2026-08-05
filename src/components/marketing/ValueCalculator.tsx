@@ -35,11 +35,11 @@ const SCENARIOS: Record<Scenario, { mult: number; followups: boolean; caption: s
   optimistic: { mult: 1.0, followups: true, caption: 'Optimistic: estimated time savings counted at 100%. Still excludes Impact Card revenue.' },
 };
 
-/** Stripe ~2.9% + $0.30 avg ≈ 3.25% effective, plus the 2.50% platform fee
+/** Stripe ~2.9% + $0.30 avg ≈ 3.25% effective, plus the 0.75% platform fee
  *  (api/giving/_create-payment-intent.ts PLATFORM_FEE_BPS). Fixed, not
  *  editable — the calculator can't quietly flatter itself on the one
  *  number that's ours to set. */
-const GRACE_RATE_PCT = 5.75;
+const GRACE_RATE_PCT = 4.00;
 const FOLLOWUP_VALUE_USD = 15;
 const WEEKS_PER_MONTH = 52 / 12;
 
@@ -303,12 +303,12 @@ export function ValueCalculator() {
               <Tag tone="confirmed">Confirmed &mdash; published rates</Tag>
             </div>
             <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              GRACE charges the standard Stripe rate <strong>plus a 2.50% platform fee</strong> on online gifts.
+              GRACE charges the standard Stripe rate <strong>plus a 0.75% platform fee</strong> on online gifts.
               Depending on what you pay today, GRACE may cost <em>more</em> here — we show that rather than hide it.
             </p>
             <NumberField id="volume" label="Monthly online giving volume" note="Total processed through your current giving tool" prefix="$" step={100} value={inputs.volume} onChange={(v) => set('volume', v)} />
             <NumberField id="currentRate" label="Your current effective rate" note="All-in: processor % + per-gift fees + any platform cut" suffix="%" step={0.1} value={inputs.currentRate} onChange={(v) => set('currentRate', v)} />
-            <NumberField id="graceRate" label="GRACE effective rate" note="Stripe 2.9% + $0.30 avg ≈ 3.25% + GRACE platform fee 2.50% — fixed, not editable, so we can't quietly flatter ourselves" suffix="%" value={GRACE_RATE_PCT} disabled />
+            <NumberField id="graceRate" label="GRACE effective rate" note="Stripe 2.9% + $0.30 avg ≈ 3.25% + GRACE platform fee 0.75% — fixed, not editable, so we can't quietly flatter ourselves" suffix="%" value={GRACE_RATE_PCT} disabled />
             <p className="text-[13.5px] text-gray-600 dark:text-dark-300 border-t border-gray-200 dark:border-dark-700 pt-3 mt-1" aria-live="polite">
               {Math.abs(feeMonthly) < 1 ? (
                 'Processing costs are roughly the same either way.'
@@ -356,7 +356,7 @@ export function ValueCalculator() {
 
             <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-850 p-4 mb-3.5 text-[13px]">
               <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">Card transaction fee (GRACE's take rate on member card spend)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.cardFeePct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">− i2c processing cost (20% of that fee revenue)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">−{cardEconomics.i2cCostPct.toFixed(2)}%</span></div>
+              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">− GRACE Banking processing cost (20% of that fee revenue)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">−{cardEconomics.i2cCostPct.toFixed(2)}%</span></div>
               <div className="flex justify-between py-1 border-t border-dashed border-gray-300 dark:border-dark-600 font-semibold"><span className="text-gray-700 dark:text-dark-200">= GRACE net revenue</span><span className="tabular-nums text-amber-700 dark:text-amber-400">{cardEconomics.graceNetRevenuePct.toFixed(2)}%</span></div>
             </div>
 

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise pricing — GRACE</title>
+<meta name="description" content="How GRACE handles giving for churches at real scale, when a negotiated processing rate is already in play.">
+</head>
+<body>
+<!-- ARTIFACT-BODY-START -->
+<style>
+  :root {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
+    --confirmed: #047857; --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+      --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+      --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
+      --confirmed: #34D399; --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+    --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+    --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
+    --confirmed: #34D399; --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
+  }
+  :root[data-theme="light"] {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
+    --confirmed: #047857; --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px 72px; }
+
+  .back { display: inline-block; font-size: 13.5px; color: var(--muted); text-decoration: none; margin-bottom: 22px; }
+  .back:hover { color: var(--ink-soft); }
+  .back:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 300;
+    font-size: clamp(30px, 5vw, 42px); line-height: 1.14; margin: 0 0 12px; text-wrap: balance;
+  }
+  .lede { font-size: 17px; color: var(--ink-soft); margin: 0 0 28px; max-width: 56ch; }
+
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: 20px; margin: 32px 0 8px; }
+  p { margin: 0 0 14px; }
+  .body { color: var(--ink-soft); max-width: 62ch; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin: 22px 0; }
+  .panel h3 { font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; font-size: 14.5px; }
+  .kv dt { color: var(--ink-soft); margin: 0; }
+  .kv dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+  .kv dd.neg { color: var(--negative); }
+  .kv dd.pos { color: var(--confirmed); }
+  .panel .foot { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; padding-top: 10px; border-top: 1px dotted var(--line); }
+
+  .straight { background: var(--negative-wash); border: 1px solid var(--line); border-left: 3px solid var(--negative);
+              border-radius: 12px; padding: 16px 18px; margin: 22px 0; }
+  .straight b { display: block; margin-bottom: 4px; color: var(--ink); }
+  .straight p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 26px 0 8px; }
+  @media (max-width: 560px) { .actions { grid-template-columns: 1fr; } }
+  .btn {
+    display: block; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px;
+    padding: 14px 18px; border-radius: 11px; border: 1px solid var(--accent); cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: var(--ground); }
+  .btn-secondary { background: transparent; color: var(--accent-strong); border-color: var(--line); }
+  .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .btn small { display: block; font-weight: 500; font-size: 12.5px; opacity: .85; margin-top: 3px; }
+  .or { text-align: center; font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .or a { color: var(--accent-strong); }
+
+  .offramp {
+    display: block; text-decoration: none; margin: 26px 0 8px; padding: 18px 20px;
+    background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 12px; transition: border-color .15s ease, transform .15s ease;
+  }
+  .offramp:hover { border-color: var(--accent); }
+  .offramp:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .offramp .oh { display: block; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+  .offramp .ob { display: block; font-size: 14.5px; color: var(--ink-soft); }
+  .offramp .oc { display: block; font-size: 14px; font-weight: 700; color: var(--accent-strong); margin-top: 10px; }
+  @media (prefers-reduced-motion: reduce) { .offramp { transition: none; } }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 8px 0 0; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 34px; margin-bottom: 12px; color: var(--ink-soft); font-size: 14.5px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 1px;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent-wash); color: var(--accent-strong);
+    font-size: 12px; font-weight: 700; display: grid; place-items: center;
+  }
+  ol.steps li b { color: var(--ink); }
+
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <a class="back" href="/">← Back to the calculator</a>
+
+  <h1>Enterprise pricing</h1>
+  <p class="lede">Our 0.75% platform fee is the same rate at every giving volume — there's no separate enterprise price. At real scale, the thing that can still run against you is the processor's own rate, not ours, and that's worth a real conversation instead of a calculator default.</p>
+
+  <div class="panel" id="theirNumbers" hidden>
+    <h3>What you entered on the calculator</h3>
+    <dl class="kv" id="kv"></dl>
+    <p class="foot">We'll bring these to the call so you're not re-explaining your church to us.</p>
+  </div>
+
+  <div class="straight">
+    <b>Being straight with you: the 0.75% platform fee doesn't move. What can is everything around it.</b>
+    <p>If your negotiated processing rate already beats standard card-network pass-through, our default math will undersell you — and we'd rather talk through your actual numbers than let a generic default do that. We also scope migration, multi-campus rollout, and integration work case by case, since that's genuinely different by size. Whatever we quote arrives in writing, and it holds.</p>
+  </div>
+
+  <h2>What a conversation looks like</h2>
+  <ol class="steps">
+    <li><b>Thirty minutes, your numbers, no deck.</b> We go through what you actually pay today across giving, church management, communications, and IT.</li>
+    <li><b>A written quote within five business days.</b> Per-campus cost, migration scope, and what it would take to move your giving — or a recommendation to leave your giving where it is. The 0.75% platform fee doesn't change; what we're scoping is everything around it.</li>
+    <li><b>An honest answer about fit.</b> If GRACE is the wrong call at your size, we will say so on the first call rather than the third.</li>
+  </ol>
+
+  <div class="actions">
+    <a class="btn btn-primary" id="bookBtn"
+       href="https://calendly.com/virtualworshipsolutions-info/enterprise-rate"
+       target="_blank" rel="noopener noreferrer">
+      Book a 30-minute call<small>Pick a time that works</small>
+    </a>
+    <a class="btn btn-secondary" id="mailBtn" href="#">
+      Email us instead<small>We reply within one business day</small>
+    </a>
+  </div>
+  <p class="or">Or write to <a href="mailto:info@virtualworshipsolutions.com">info@virtualworshipsolutions.com</a> directly.</p>
+
+  <a class="offramp" id="pilotLink" href="/pilot">
+    <span class="oh">Not ready to talk about a platform contract?</span>
+    <span class="ob">Take one campus for 90 days instead. Fixed fee, credited back in full if you expand, and we leave your giving platform exactly where it is.</span>
+    <span class="oc">See how a pilot works →</span>
+  </a>
+
+  <h2>What we'll ask you for</h2>
+  <p class="body">Nothing you don't already have. Annual giving and roughly what share comes in online, your current giving platform and its all-in rate, your church-management and communications tools, campus count, and an approximate record count. If you have last year's office and IT line from your budget, bring that too.</p>
+
+  <footer>
+    Virtual Worship Solutions · <a href="mailto:info@virtualworshipsolutions.com" style="color:var(--accent-strong)">info@virtualworshipsolutions.com</a><br>
+    Any figures discussed are estimates until they appear in a signed agreement.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var EMAIL = 'info@virtualworshipsolutions.com';
+  var p = new URLSearchParams(location.search);
+
+  function money(v) {
+    var n = parseFloat(v);
+    return isFinite(n) ? (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US') : null;
+  }
+  function num(v) { var n = parseFloat(v); return isFinite(n) ? n : null; }
+
+  var PROFILE_NAME = {
+    single: 'Single campus', growing: 'Two sites',
+    multisite: 'Multi-site', network: 'Church network'
+  };
+
+  // Rebuild what they had on the calculator, when it was passed through.
+  var rows = [];
+  if (PROFILE_NAME[p.get('profile')]) rows.push(['Church size', PROFILE_NAME[p.get('profile')], '']);
+  if (money(p.get('budget')))  rows.push(['Annual operating budget', money(p.get('budget')), '']);
+  if (money(p.get('giving')))  rows.push(['Annual giving', money(p.get('giving')), '']);
+  if (num(p.get('online')) !== null) rows.push(['Share given online', num(p.get('online')) + '%', '']);
+  if (num(p.get('rate')) !== null)   rows.push(['Current processing rate', num(p.get('rate')) + '%', '']);
+  if (money(p.get('confirmed'))) {
+    rows.push(['Confirmed value on our published pricing', money(p.get('confirmed')),
+               parseFloat(p.get('confirmed')) < 0 ? 'neg' : 'pos']);
+  }
+
+  if (rows.length) {
+    document.getElementById('kv').innerHTML = rows.map(function (r) {
+      return '<dt>' + r[0] + '</dt><dd class="' + r[2] + '">' + r[1] + '</dd>';
+    }).join('');
+    document.getElementById('theirNumbers').hidden = false;
+  }
+
+  // Pre-write the email so they send context instead of "hi, pricing?"
+  var lines = ['Hello,', '', 'We\'d like to talk about enterprise pricing for our church.', ''];
+  if (rows.length) {
+    lines.push('From your calculator:');
+    rows.forEach(function (r) { lines.push('  ' + r[0] + ': ' + r[1]); });
+    lines.push('');
+  }
+  lines.push('A few details about us:');
+  lines.push('  Church name:');
+  lines.push('  Campuses:');
+  lines.push('  Approximate records in our current system:');
+  lines.push('  Current church-management platform:');
+  lines.push('  Current giving platform:');
+  lines.push('');
+  lines.push('Best time to reach us:');
+  lines.push('');
+  lines.push('Thank you,');
+
+  var subject = 'Enterprise pricing enquiry'
+    + (PROFILE_NAME[p.get('profile')] ? ' — ' + PROFILE_NAME[p.get('profile')] : '')
+    + (money(p.get('giving')) ? ' (' + money(p.get('giving')) + ' giving)' : '');
+
+  var mailto = 'mailto:' + EMAIL
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(lines.join('\n'));
+  document.getElementById('mailBtn').setAttribute('href', mailto);
+
+  // Carry the same context into the booking link so the call is prepared.
+  var book = document.getElementById('bookBtn');
+  var cal = new URL(book.getAttribute('href'));
+  if (money(p.get('giving'))) cal.searchParams.set('a1', 'Annual giving ' + money(p.get('giving')));
+  if (PROFILE_NAME[p.get('profile')]) cal.searchParams.set('a2', PROFILE_NAME[p.get('profile')]);
+  book.setAttribute('href', cal.toString());
+
+  var pilot = document.getElementById('pilotLink');
+  if (location.search) pilot.setAttribute('href', '/pilot' + location.search);
+  pilot.addEventListener('click', function () { track('pilot_link_clicked'); });
+
+  function track(name) { (window.dataLayer = window.dataLayer || []).push({ event: name }); }
+  book.addEventListener('click', function () { track('enterprise_call_booked'); });
+  document.getElementById('mailBtn').addEventListener('click', function () { track('enterprise_email_opened'); });
+  track('enterprise_pricing_viewed');
+})();
+</script>
+<!-- ARTIFACT-BODY-END -->
+</body>
+</html>

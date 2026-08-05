@@ -109,7 +109,7 @@ export function DonatePage({ churchSlug }: DonatePageProps) {
       // compute the fee for display so the PayStep matches what one-time shows.
       const platformFeeFromBody = typeof body.platform_fee_cents === 'number'
         ? body.platform_fee_cents
-        : Math.floor((effectiveAmountCents * 250) / 10_000);   // 2.5% fallback
+        : Math.floor((effectiveAmountCents * 75) / 10_000);   // 0.75% fallback
       setPlatformFeeCents(platformFeeFromBody);
       setStep('pay');
     } catch (err) {
