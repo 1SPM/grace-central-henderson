@@ -281,7 +281,7 @@ export function ValueCalculator() {
   return (
     <section className="max-w-4xl mx-auto px-4 py-20" aria-labelledby="value-calc-heading">
       <h2 id="value-calc-heading" className="text-3xl md:text-4xl font-light text-gray-900 dark:text-dark-50 mb-3 text-center" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-        The GRACE Impact Card empowers your congregation with seamless giving anytime and anywhere.
+        Empower your congregation with seamless giving anytime and anywhere, with GRACE.
       </h2>
       <p className="text-gray-600 dark:text-dark-400 mb-9 text-center max-w-[46ch] mx-auto">
         GRACE brings giving, community, and everyday commerce together in one engine that funds ministry.
