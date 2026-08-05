@@ -28,7 +28,7 @@ interface ConnectStatus {
   church_slug: string | null;
 }
 
-const PLATFORM_FEE_PERCENT = 2.5;   // VWS platform fee on donations. Match the number in api/giving/* when wired.
+const PLATFORM_FEE_PERCENT = 0.75;   // VWS platform fee on donations. Match the number in api/giving/* when wired.
 
 export function SettingsGiving() {
   const { getAuthToken } = useAuthContext();

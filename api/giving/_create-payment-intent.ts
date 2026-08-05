@@ -38,8 +38,8 @@ const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-/** Platform fee in basis points. 250 = 2.50%. Matches SettingsGiving display. */
-const PLATFORM_FEE_BPS = 250;
+/** Platform fee in basis points. 75 = 0.75%. Matches SettingsGiving display. */
+const PLATFORM_FEE_BPS = 75;
 
 const SCHEMA = {
   church_slug: str({ required: true, max: 100, pattern: /^[a-z0-9-]+$/ }),

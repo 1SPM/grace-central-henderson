@@ -363,7 +363,7 @@
 
     <div class="wf">
       <div class="r"><span class="n">Card transaction fee <small style="display:block;color:var(--muted);font-size:11.5px">GRACE's take rate on member card spend</small></span><span class="a" id="engFee"></span></div>
-      <div class="r take"><span class="n">− i2c processing cost <small style="display:block;color:var(--muted);font-size:11.5px">20% of that fee revenue</small></span><span class="a" id="engCost"></span></div>
+      <div class="r take"><span class="n">− GRACE Banking processing cost <small style="display:block;color:var(--muted);font-size:11.5px">20% of that fee revenue</small></span><span class="a" id="engCost"></span></div>
       <div class="r out"><span class="n">= GRACE net revenue</span><span class="a" id="engNet"></span></div>
     </div>
 
@@ -428,8 +428,8 @@
         <div class="field suffix"><input id="processorRate" type="number" value="3.05" disabled aria-label="Processor rate, fixed at 3.05 percent"><span class="unit">%</span></div>
       </div>
       <div class="row">
-        <div><label for="platformFee">GRACE platform fee</label><div class="note">2.50% is the published rate. Anything lower requires a signed enterprise agreement.</div></div>
-        <div class="field suffix"><input id="platformFee" type="number" data-sl="0|5|0.05" min="0" max="5" step="0.05" value="2.50" data-f="platform_fee"><span class="unit">%</span></div>
+        <div><label for="platformFee">GRACE platform fee</label><div class="note">0.75% flat, the same rate at every giving volume — no separate enterprise tier.</div></div>
+        <div class="field suffix"><input id="platformFee" type="number" data-sl="0|5|0.05" min="0" max="5" step="0.05" value="0.75" data-f="platform_fee"><span class="unit">%</span></div>
       </div>
       <div class="derived" id="feeDerived"></div>
       <p class="aside" id="breakevenAside"></p>
@@ -594,9 +594,9 @@
     var box = $('feeBox');
     if (m.feeDelta < -1) {
       box.hidden = false;
-      $('feeHead').textContent = fee >= 2.5
-        ? 'Our published rate does not survive your scale.'
-        : 'Even at a negotiated rate, processing runs against you.';
+      $('feeHead').textContent = fee >= 0.75
+        ? 'At your rate, processing still runs against you.'
+        : 'Even below our published fee, processing runs against you.';
       var be = val('currentRate') - PROCESSOR_RATE;
       $('feeBody').innerHTML = 'On ' + fmt(m.onlineVolume) + ' of online giving, our ' + pct(m.graceRate, 2) +
         ' all-in rate costs you <strong>' + fmt(-m.feeDelta) + ' a year more</strong> than the ' + pct(val('currentRate'), 2) +
@@ -624,7 +624,7 @@
       $('btnCta').textContent = enterprise ? 'Ask us about enterprise pricing' : 'Start a 14-day trial';
     }
     $('ctaNote').textContent = enterprise
-      ? 'Above ' + fmt(ENTERPRISE_THRESHOLD) + ' in annual giving we price differently. No obligation, and we\'ll tell you if we\'re not the right fit.'
+      ? 'The 0.75% fee is the same at every size. Above ' + fmt(ENTERPRISE_THRESHOLD) + ' in annual giving, let\'s talk through migration and whether your negotiated processing rate changes the math.'
       : 'No card required. Cancel anytime.';
 
     // ---- biggest lever: which single input is moving the number most
@@ -687,7 +687,7 @@
     $('givingBase').value  = Math.round(p.budget * RATIO.giving / 10000) * 10000;
     $('onlineShare').value = RATIO.onlineShare;
     $('currentRate').value = p.rate;
-    $('platformFee').value = 2.50;
+    $('platformFee').value = 0.75;
     $('adminFTE').value    = p.fte;
     $('loadedCost').value  = p.loaded;
     $('shareFreed').value  = 12;
