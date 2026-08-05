@@ -256,22 +256,6 @@
   </div>
   <p class="loop-cap">Members spend on their church's card. That spending funds ministry. Members see the impact and stay engaged, and the ecosystem grows.</p>
 
-  <!-- the card, made tangible -->
-  <div class="cardviz">
-    <div class="bankcard" aria-hidden="true">
-      <div class="who">Your Church<small>Member Card</small></div>
-      <div class="tap" aria-hidden="true"><span></span><span></span><span></span></div>
-      <div class="chip"></div>
-      <div class="digits">•••• •••• •••• 4821</div>
-      <div class="since">Member since 2026</div>
-      <div class="foot"><span class="mark">GRACE Impact Card</span></div>
-    </div>
-    <div class="tagline">
-      <p class="t1">Support a cause with every transaction.</p>
-      <p>The <b>GRACE Impact Card</b> puts your church's name in every member's wallet and turns everyday spending into ministry funding, automatically.</p>
-    </div>
-  </div>
-
   <!-- three outcomes -->
   <div class="outcomes">
 
@@ -308,6 +292,22 @@
       <div class="how" id="groHow"></div>
     </section>
 
+  </div>
+
+  <!-- the card, made tangible -->
+  <div class="cardviz">
+    <div class="bankcard" aria-hidden="true">
+      <div class="who">Your Church<small>Member Card</small></div>
+      <div class="tap" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="chip"></div>
+      <div class="digits">•••• •••• •••• 4821</div>
+      <div class="since">Member since 2026</div>
+      <div class="foot"><span class="mark">GRACE Impact Card</span></div>
+    </div>
+    <div class="tagline">
+      <p class="t1">Support a cause with every transaction.</p>
+      <p>The <b>GRACE Impact Card</b> puts your church's name in every member's wallet and turns everyday spending into ministry funding, automatically.</p>
+    </div>
   </div>
 
   <div class="ctaband">
@@ -359,8 +359,8 @@
   // --- personalization + shareable scenario state --------------------------
   var qs = new URLSearchParams(window.location.search);
   var churchName = (qs.get('church') || '').trim().slice(0, 40);
+  // headline stays generic — only the card face and tab title personalize
   if (churchName) {
-    document.querySelector('h1').textContent = 'Turn ' + churchName + ' into a thriving ecosystem.';
     document.querySelector('.bankcard .who').firstChild.nodeValue = churchName;
     document.title = churchName + ' · GRACE Value Calculator';
   }
@@ -443,9 +443,10 @@
   $('fte').addEventListener('input', function () { touched.fte = true; track('assumption_changed', 'fte'); render(); syncUrl(); });
   $('giving').addEventListener('input', function () { touched.giving = true; track('assumption_changed', 'giving'); render(); syncUrl(); });
 
+  var DEMO_URL = 'https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html';
   $('btnCta').addEventListener('click', function () {
     track('demo_requested', 'ecosystem_calculator');
-    window.location.href = '/connect';
+    window.open(DEMO_URL, '_blank', 'noopener');
   });
 
   $('btnShare').addEventListener('click', function () {
