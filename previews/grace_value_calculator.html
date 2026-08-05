@@ -213,6 +213,42 @@
   }
   .ctaband .share:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
+  /* ---------- check the math ---------- */
+  details.mathcheck { margin: 40px auto 0; max-width: 620px; border-top: 1px solid var(--line); padding-top: 18px; }
+  details.mathcheck > summary {
+    cursor: pointer; font-weight: 700; font-size: 14.5px; list-style: none;
+    display: flex; align-items: center; justify-content: center; gap: 7px; padding: 4px 0; color: var(--ink-soft);
+  }
+  details.mathcheck > summary::-webkit-details-marker { display: none; }
+  details.mathcheck > summary::before { content: "▸"; color: var(--accent); font-size: 12px; }
+  details.mathcheck[open] > summary::before { content: "▾"; }
+  details.mathcheck > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .mathcheck-note { font-size: 13px; color: var(--muted); text-align: center; max-width: 50ch; margin: 10px auto 20px; }
+
+  .mgrp { margin-bottom: 14px; padding: 16px 18px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--line); }
+  .mgrp.revenue { border-left-color: var(--revenue); }
+  .mgrp.savings { border-left-color: var(--savings); }
+  .mgrp.growth  { border-left-color: var(--growth); }
+  .mgrp h4 { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 3px; }
+  .mgrp.revenue h4 { color: var(--revenue); }
+  .mgrp.savings h4 { color: var(--savings); }
+  .mgrp.growth  h4 { color: var(--growth); }
+  .mgrp .formula { font-size: 12.5px; color: var(--muted); margin: 0 0 10px; }
+  .mrow { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+          padding: 8px 0; border-top: 1px dotted var(--line); }
+  .mrow:first-of-type { border-top: none; }
+  .mrow label { font-size: 13.5px; color: var(--ink-soft); }
+  .mrow .mfield { position: relative; width: 108px; flex: none; }
+  .mrow .mfield input {
+    width: 100%; padding: 6px 26px 6px 8px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--card-inset); color: var(--ink); font: inherit; font-size: 13.5px;
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .mrow .mfield.pfx input { padding: 6px 30px 6px 20px; }
+  .mrow .mfield .u { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--muted); pointer-events: none; }
+  .mrow .mfield.pfx .u:first-child { left: 8px; right: auto; }
+  .mrow .mfield input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+
   footer.fine { margin-top: 52px; padding-top: 16px; border-top: 1px solid var(--line);
                 font-size: 12px; color: var(--muted); line-height: 1.55; text-align: center; }
 </style>
@@ -316,6 +352,51 @@
     <button type="button" class="share" id="btnShare">Copy a link to this scenario</button>
   </div>
 
+  <!-- check the math -->
+  <details class="mathcheck" id="mathDetails">
+    <summary>Check the math</summary>
+    <p class="mathcheck-note">Every number above comes from the assumptions below. Change any of them and the totals move.</p>
+
+    <div class="mgrp revenue">
+      <h4>New revenue</h4>
+      <p class="formula">Members on the card &times; everyday spend &times; your church's commission &times; 12 months</p>
+      <div class="mrow">
+        <label for="mSpend">Everyday spend per account</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mSpend" type="number" min="0" step="25" value="500"><span class="u" style="left:auto;right:9px">/mo</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mCommission">Church's commission</label>
+        <div class="mfield"><input id="mCommission" type="number" min="0" max="5" step="0.05" value="1"><span class="u">%</span></div>
+      </div>
+    </div>
+
+    <div class="mgrp savings">
+      <h4>Efficiency savings</h4>
+      <p class="formula">(Admin staff &times; loaded cost &times; share automated) + (members &times; software replaced)</p>
+      <div class="mrow">
+        <label for="mLoaded">Loaded cost per staff member</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mLoaded" type="number" min="0" step="1000" value="65000"><span class="u" style="left:auto;right:9px">/yr</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mAutomated">Share of their work automated</label>
+        <div class="mfield"><input id="mAutomated" type="number" min="0" max="100" step="1" value="15"><span class="u">%</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mSoftware">Software replaced, per member</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mSoftware" type="number" min="0" step="1" value="6"><span class="u" style="left:auto;right:9px">/yr</span></div>
+      </div>
+    </div>
+
+    <div class="mgrp growth">
+      <h4>Giving growth</h4>
+      <p class="formula">Annual giving today &times; the lift from an engaged, retained congregation</p>
+      <div class="mrow">
+        <label for="mLift">Engagement lift on giving</label>
+        <div class="mfield"><input id="mLift" type="number" min="0" max="20" step="0.5" value="2"><span class="u">%</span></div>
+      </div>
+    </div>
+  </details>
+
   <footer class="fine">
     Illustrative estimates based on your inputs and GRACE program planning. Actual results vary by congregation and program terms.
   </footer>
@@ -326,17 +407,20 @@
   'use strict';
 
   // The model, kept deliberately simple:
-  //   New revenue   = members × card adoption × $500/mo spend × 1% to the church
-  //   Savings       = admin FTE × $65k loaded × 15% automated + software replaced ($6/member/yr)
-  //   Giving growth = annual giving × 2% engagement lift
-  var SPEND_PER_ACCOUNT = 500;   // avg monthly card spend per member account
-  var CHURCH_SHARE = 0.01;       // church's share of card volume (program planning)
-  var LOADED_FTE = 65000;        // loaded annual cost per admin FTE
-  var AUTOMATED = 0.15;          // share of admin work GRACE automates
-  var SOFTWARE_PER_MEMBER = 6;   // annual software spend replaced, per member
-  var ENGAGE_LIFT = 0.02;        // engagement-driven lift on annual giving
+  //   New revenue   = members × card adoption × everyday spend × church's commission
+  //   Savings       = admin staff × loaded cost × share automated + software replaced
+  //   Giving growth = annual giving × engagement lift
+  // Defaults mirror program planning; every one is editable under "Check the math."
+  var DEFAULTS = {
+    mSpend: 500, mCommission: 1, mLoaded: 65000, mAutomated: 15, mSoftware: 6, mLift: 2
+  };
 
   function $(id) { return document.getElementById(id); }
+  function assumption(id) {
+    var el = $(id);
+    var n = el ? parseFloat(el.value) : NaN;
+    return isFinite(n) && n >= 0 ? n : DEFAULTS[id];
+  }
   function fmt(n) {
     if (n >= 1e6) return '$' + (Math.round(n / 1e5) / 10).toLocaleString('en-US') + 'M';
     return '$' + Math.round(n).toLocaleString('en-US');
@@ -406,10 +490,17 @@
     var fte = parseFloat($('fte').value);
     var giving = parseFloat($('giving').value);
 
+    var spendPerAccount = assumption('mSpend');
+    var commission = assumption('mCommission') / 100;
+    var loaded = assumption('mLoaded');
+    var automated = assumption('mAutomated') / 100;
+    var softwarePerMember = assumption('mSoftware');
+    var lift = assumption('mLift') / 100;
+
     var accounts = members * adopt;
-    var revenue = accounts * SPEND_PER_ACCOUNT * 12 * CHURCH_SHARE;
-    var savings = fte * LOADED_FTE * AUTOMATED + members * SOFTWARE_PER_MEMBER;
-    var growth = giving * ENGAGE_LIFT;
+    var revenue = accounts * spendPerAccount * 12 * commission;
+    var savings = fte * loaded * automated + members * softwarePerMember;
+    var growth = giving * lift;
     var total = revenue + savings + growth;
 
     $('membersOut').textContent = members.toLocaleString('en-US');
@@ -422,10 +513,10 @@
     $('givingOut').textContent = fmtM(giving);
 
     $('revHow').innerHTML = '<b>' + Math.round(accounts).toLocaleString('en-US') + ' members</b> × <b>$' +
-      SPEND_PER_ACCOUNT + '/mo</b> everyday spend × <b>1%</b> to your church';
-    $('savHow').innerHTML = '<b>' + fte + ' staff</b> × 15% of their week automated, plus <b>' +
-      fmt(members * SOFTWARE_PER_MEMBER) + '/yr</b> of software replaced';
-    $('groHow').innerHTML = '<b>2% lift</b> on <b>' + fmt(giving) + '</b> from engaged, retained members';
+      spendPerAccount + '/mo</b> everyday spend × <b>' + assumption('mCommission') + '%</b> to your church';
+    $('savHow').innerHTML = '<b>' + fte + ' staff</b> × ' + assumption('mAutomated') + '% of their week automated, plus <b>' +
+      fmt(members * softwarePerMember) + '/yr</b> of software replaced';
+    $('groHow').innerHTML = '<b>' + assumption('mLift') + '% lift</b> on <b>' + fmt(giving) + '</b> from engaged, retained members';
 
     ['members', 'adopt', 'fte', 'giving'].forEach(function (id) { paintFill($(id)); });
   }
@@ -442,6 +533,15 @@
   $('adopt').addEventListener('input', function () { track('assumption_changed', 'adoption'); render(); syncUrl(); });
   $('fte').addEventListener('input', function () { touched.fte = true; track('assumption_changed', 'fte'); render(); syncUrl(); });
   $('giving').addEventListener('input', function () { touched.giving = true; track('assumption_changed', 'giving'); render(); syncUrl(); });
+
+  Object.keys(DEFAULTS).forEach(function (id) {
+    var el = $(id);
+    if (el) el.addEventListener('input', function () { track('math_assumption_changed', id); render(); });
+  });
+  var mathDetails = $('mathDetails');
+  if (mathDetails) {
+    mathDetails.addEventListener('toggle', function () { if (this.open) track('math_opened'); });
+  }
 
   var DEMO_URL = 'https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html';
   $('btnCta').addEventListener('click', function () {
