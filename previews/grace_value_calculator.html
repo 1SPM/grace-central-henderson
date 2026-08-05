@@ -6,7 +6,7 @@
 <title>GRACE Value Calculator</title>
 <meta name="description" content="See what the GRACE ecosystem generates for your church every year: new revenue from the GRACE Impact Card, efficiency savings from automation, and giving growth from an engaged congregation.">
 <meta property="og:title" content="GRACE Value Calculator">
-<meta property="og:description" content="Turn your congregation into a thriving ecosystem. See what GRACE generates for a church your size.">
+<meta property="og:description" content="Empower your congregation with seamless giving, powered by GRACE. See what GRACE generates for a church your size.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://grace-value-calculator-eta.vercel.app/">
 <meta name="twitter:card" content="summary">
@@ -108,44 +108,59 @@
   .total .ts { color: var(--ink-soft); font-size: 16px; max-width: 44ch; margin: 0 auto; }
 
   /* ---------- ecosystem loop ---------- */
-  .loop { margin: 40px auto 8px; max-width: 620px; }
-  .loop svg { display: block; width: 100%; height: auto; }
+  .loop { position: relative; margin: 40px auto 8px; max-width: 620px; }
+  .loop svg { display: block; width: 100%; height: auto; overflow: visible; }
   .loop .n { font-size: 13px; font-weight: 700; fill: var(--ink); }
   .loop .d { font-size: 10.5px; fill: var(--muted); }
   .loop .ring { stroke: var(--line); }
-  .loop .arrow { fill: var(--accent); }
-  .loop-cap { text-align: center; color: var(--muted); font-size: 13.5px; margin: 6px auto 40px; max-width: 52ch; }
-
-  /* ---------- the card, made tangible ---------- */
-  .cardviz { display: flex; align-items: center; justify-content: center; gap: 34px; flex-wrap: wrap; margin: 0 auto 44px; }
-  .bankcard {
-    width: 300px; height: 186px; border-radius: 16px; position: relative; flex: none;
-    background: linear-gradient(135deg, #1E1B4B 0%, #312E81 45%, #7C3AED 130%);
-    box-shadow: 0 18px 40px -18px rgba(49,46,129,.55), 0 4px 12px rgba(0,0,0,.18);
-    transform: rotate(-4deg); color: #EEF2FF;
+  .loop .arrow {
+    fill: var(--accent);
+    offset-path: path('M112,158 A238,86 0 1,1 588,158 A238,86 0 1,1 112,158');
   }
-  .bankcard .chip { position: absolute; top: 58px; left: 24px; width: 40px; height: 30px; border-radius: 6px;
-                    background: linear-gradient(135deg, #FCD34D, #B45309); }
-  .bankcard .chip::after { content: ""; position: absolute; inset: 6px 8px; border: 1px solid rgba(0,0,0,.28); border-radius: 3px; }
-  .bankcard .tap { position: absolute; top: 24px; right: 24px; width: 22px; height: 22px; }
-  .bankcard .tap span { position: absolute; inset: 0; border: 2px solid rgba(238,242,255,.85); border-radius: 50%;
-                        border-color: transparent rgba(238,242,255,.85) transparent transparent; }
-  .bankcard .tap span:nth-child(2) { inset: 5px; }
-  .bankcard .tap span:nth-child(3) { inset: 10px; }
-  .bankcard .who { position: absolute; top: 22px; left: 24px; font-size: 15px; font-weight: 700; letter-spacing: .02em; }
-  .bankcard .who small { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .75; margin-top: 2px; }
-  .bankcard .digits { position: absolute; bottom: 60px; left: 24px; font-size: 16px; letter-spacing: .18em; font-variant-numeric: tabular-nums; opacity: .95; }
-  .bankcard .since { position: absolute; bottom: 42px; left: 24px; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; white-space: nowrap; }
-  .bankcard .foot { position: absolute; bottom: 16px; left: 24px; right: 24px; display: flex; justify-content: flex-end;
-                    font-size: 11px; letter-spacing: .04em; }
-  .bankcard .foot .mark { font-weight: 800; opacity: 1; color: #EEF2FF; white-space: nowrap; }
-  .cardviz .tagline { max-width: 340px; }
-  .cardviz .tagline .t1 {
-    font-family: "Fraunces", Georgia, serif; font-weight: 400; font-size: clamp(24px, 3.6vw, 32px);
-    line-height: 1.15; margin: 0 0 8px; color: var(--ink); text-wrap: balance;
+  .loop .arrow.a1 { offset-distance: 0%; }
+  .loop .arrow.a2 { offset-distance: 25%; }
+  .loop .arrow.a3 { offset-distance: 50%; }
+  .loop .arrow.a4 { offset-distance: 75%; }
+  .loop .icon { color: var(--accent); transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  .loop .icon:hover { transform: scale(1.22); }
+  .loop .icon circle, .loop .icon path, .loop .icon rect, .loop .icon line {
+    fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
-  .cardviz .tagline p { margin: 0; font-size: 14.5px; color: var(--ink-soft); max-width: 38ch; }
-  @media (max-width: 700px) { .cardviz { gap: 26px; } .cardviz .tagline { text-align: center; } }
+  .loop .hub { fill: var(--card-inset); stroke: var(--line); stroke-width: 1.2; }
+  .loop .church { color: var(--ink); }
+  .loop .church circle, .loop .church path, .loop .church line {
+    fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .loop .ring { animation: loop-dash-flow 12s linear infinite; }
+    .loop .arrow { offset-rotate: auto; animation: loop-orbit 12s linear infinite; }
+    .loop .arrow.a2 { animation-delay: -3s; }
+    .loop .arrow.a3 { animation-delay: -6s; }
+    .loop .arrow.a4 { animation-delay: -9s; }
+  }
+  @keyframes loop-dash-flow { to { stroke-dashoffset: -24; } }
+  @keyframes loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  .loop-notice {
+    position: absolute; left: 50%; top: 50%; max-width: 200px; z-index: 2;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 9px 13px; box-shadow: 0 8px 20px -8px rgba(0,0,0,.3);
+    opacity: 0; transform: translate(-50%, -50%) translateY(8px);
+    transition: opacity .4s ease, transform .4s ease, left .5s ease, top .5s ease;
+    pointer-events: none;
+  }
+  .loop-notice.show { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  .loop-notice .lnt { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--revenue); margin-bottom: 2px; }
+  .loop-notice .lnb { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { .loop-notice { transition: none; } }
+  @media (max-width: 560px) {
+    .loop-notice { position: static; max-width: none; left: auto; top: auto; margin: 14px auto 0; transform: none; }
+    .loop-notice.show { transform: none; }
+  }
+  .loop-cap {
+    text-align: center; color: var(--ink-soft); font-size: 16.5px; font-weight: 500;
+    line-height: 1.5; margin: 16px auto 40px; max-width: 54ch;
+  }
+  .loop-cap b { color: var(--accent); font-weight: 700; }
 
   /* ---------- three outcomes ---------- */
   .outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
@@ -255,7 +270,7 @@
 
 <div class="wrap">
 
-  <h1>Turn your congregation into a thriving&nbsp;ecosystem.</h1>
+  <h1>Empower your congregation with seamless giving, powered by GRACE.</h1>
   <p class="sub">GRACE brings giving, community, and everyday commerce together in one engine that funds ministry.</p>
 
   <div class="people">
@@ -272,25 +287,48 @@
 
   <!-- ecosystem loop -->
   <div class="loop" aria-hidden="true">
-    <svg viewBox="0 0 700 264">
-      <ellipse cx="350" cy="132" rx="238" ry="88" fill="none" class="ring" stroke-width="1.6" stroke-dasharray="5 5"/>
-      <!-- flow arrows on the ring, clockwise -->
-      <polygon class="arrow" points="-6,-5 8,0 -6,5" transform="translate(518,70) rotate(20)"/>
-      <polygon class="arrow" points="-6,-5 8,0 -6,5" transform="translate(518,194) rotate(160)"/>
-      <polygon class="arrow" points="-6,-5 8,0 -6,5" transform="translate(182,194) rotate(200)"/>
-      <polygon class="arrow" points="-6,-5 8,0 -6,5" transform="translate(182,70) rotate(-20)"/>
+    <svg viewBox="0 0 700 316">
+      <ellipse cx="350" cy="158" rx="238" ry="86" fill="none" class="ring" stroke-width="1.6" stroke-dasharray="6 6"/>
+      <!-- arrows travel the ring path, clockwise -->
+      <polygon class="arrow a1" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a2" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a3" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a4" points="-6,-5 8,0 -6,5"/>
+      <!-- the church, anchoring the ecosystem -->
+      <circle class="hub" cx="350" cy="158" r="27"/>
+      <svg class="church" x="333" y="141" width="34" height="34" viewBox="0 0 24 24">
+        <path d="M12 2v3"/><path d="M10.3 3.5h3.4"/>
+        <path d="M4 21V11l8-6 8 6v10"/><path d="M9 21v-6h6v6"/>
+      </svg>
+      <!-- node icons -->
+      <svg class="icon i1" x="339" y="15" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+      </svg>
+      <svg class="icon i2" x="586" y="106" width="22" height="22" viewBox="0 0 24 24">
+        <rect x="2" y="6" width="20" height="14" rx="2.5"/><line x1="2" y1="11" x2="22" y2="11"/>
+      </svg>
+      <svg class="icon i3" x="339" y="245" width="22" height="22" viewBox="0 0 24 24">
+        <path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2.3 5 6 5c2 0 3.5 1 4.5 2.3 1-1.3 2.5-2.3 4.5-2.3 3.7 0 5.5 3.5 4 6.7C19.5 16.4 12 21 12 21z"/>
+      </svg>
+      <svg class="icon i4" x="92" y="106" width="22" height="22" viewBox="0 0 24 24">
+        <path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M5.5 9A8 8 0 0 1 20 12"/><path d="M18.5 15A8 8 0 0 1 4 12"/>
+      </svg>
       <!-- nodes -->
       <g text-anchor="middle">
-        <text x="350" y="26" class="n">Your members</text>
-        <text x="597" y="126" class="n">Everyday spending</text>
-        <text x="597" y="142" class="d">on your church's own card</text>
-        <text x="350" y="252" class="n">Ministry funding</text>
-        <text x="103" y="126" class="n">Engagement &amp; agency</text>
-        <text x="103" y="142" class="d">members choose the impact</text>
+        <text x="350" y="58" class="n">Your members</text>
+        <text x="597" y="156" class="n">Everyday spending</text>
+        <text x="597" y="172" class="d">on your church's own card</text>
+        <text x="350" y="296" class="n">Ministry funding</text>
+        <text x="103" y="156" class="n">Engagement &amp; agency</text>
+        <text x="103" y="172" class="d">members choose the impact</text>
       </g>
     </svg>
+    <div class="loop-notice" id="loopNotice" aria-hidden="true">
+      <div class="lnt">Example activity &middot; GRACE Impact Card</div>
+      <div class="lnb" id="loopNoticeText"></div>
+    </div>
   </div>
-  <p class="loop-cap">Members spend on their church's card. That spending funds ministry. Members see the impact and stay engaged, and the ecosystem grows.</p>
+  <p class="loop-cap">Members spend on their church's card. That spending funds <b>designated initiatives like missions, youth, and benevolence</b>. Members see the impact and stay engaged, growing the ecosystem.</p>
 
   <!-- three outcomes -->
   <div class="outcomes">
@@ -298,7 +336,7 @@
     <section class="oc revenue" aria-labelledby="ocR">
       <span class="k" id="ocR">New revenue</span>
       <span class="v num" id="revOut">$0</span>
-      <p class="story">The GRACE Impact Card turns everyday purchases like groceries, gas, and dining into ministry funding, at no cost to the member.</p>
+      <p class="story">The GRACE Impact Card turns everyday generosity like groceries, gas, and dining into designated funding for missions, youth, and benevolence, at no cost to the member.</p>
       <div class="dial">
         <div class="dl"><span>Members carrying the card</span><b><span id="adoptOut">25</span>%</b></div>
         <input type="range" class="sm" id="adopt" min="5" max="60" step="1" value="25" aria-label="Share of members carrying the card">
@@ -309,7 +347,7 @@
     <section class="oc savings" aria-labelledby="ocS">
       <span class="k" id="ocS">Efficiency savings</span>
       <span class="v num" id="savOut">$0</span>
-      <p class="story">GRACE automates data entry, scheduling, and follow-ups, and replaces the stack of software subscriptions your office pays for today.</p>
+      <p class="story">GRACE automates data entry, scheduling, and follow-ups, and replaces the stack of software subscriptions your operating budget pays for today.</p>
       <div class="dial">
         <div class="dl"><span>Office &amp; admin staff</span><b><span id="fteOut">6</span> FTE</b></div>
         <input type="range" class="sm" id="fte" min="1" max="40" step="1" value="6" aria-label="Office and admin staff">
@@ -320,7 +358,7 @@
     <section class="oc growth" aria-labelledby="ocG">
       <span class="k" id="ocG">Giving growth</span>
       <span class="v num" id="groOut">$0</span>
-      <p class="story">Members with agency stay. Seeing their everyday choices fund real initiatives keeps your congregation engaged, giving, and growing.</p>
+      <p class="story">Members with agency stay engaged. Seeing their generosity fund real, designated initiatives keeps your congregation engaged, giving, and growing.</p>
       <div class="dial">
         <div class="dl"><span>Annual giving today</span><b>$<span id="givingOut">5.0M</span></b></div>
         <input type="range" class="sm" id="giving" min="100000" max="40000000" step="100000" value="5000000" aria-label="Annual giving">
@@ -328,22 +366,6 @@
       <div class="how" id="groHow"></div>
     </section>
 
-  </div>
-
-  <!-- the card, made tangible -->
-  <div class="cardviz">
-    <div class="bankcard" aria-hidden="true">
-      <div class="who">Your Church<small>Member Card</small></div>
-      <div class="tap" aria-hidden="true"><span></span><span></span><span></span></div>
-      <div class="chip"></div>
-      <div class="digits">•••• •••• •••• 4821</div>
-      <div class="since">Member since 2026</div>
-      <div class="foot"><span class="mark">GRACE Impact Card</span></div>
-    </div>
-    <div class="tagline">
-      <p class="t1">Support a cause with every transaction.</p>
-      <p>The <b>GRACE Impact Card</b> puts your church's name in every member's wallet and turns everyday spending into ministry funding, automatically.</p>
-    </div>
   </div>
 
   <div class="ctaband">
@@ -355,7 +377,7 @@
   <!-- check the math -->
   <details class="mathcheck" id="mathDetails">
     <summary>Check the math</summary>
-    <p class="mathcheck-note">Every number above comes from the assumptions below. Change any of them and the totals move.</p>
+    <p class="mathcheck-note">Financial stewardship means showing our work, not just the results. Every number above comes from the assumptions below, and changing any of them moves the totals.</p>
 
     <div class="mgrp revenue">
       <h4>New revenue</h4>
@@ -443,9 +465,8 @@
   // --- personalization + shareable scenario state --------------------------
   var qs = new URLSearchParams(window.location.search);
   var churchName = (qs.get('church') || '').trim().slice(0, 40);
-  // headline stays generic — only the card face and tab title personalize
+  // headline stays generic — only the tab title personalizes
   if (churchName) {
-    document.querySelector('.bankcard .who').firstChild.nodeValue = churchName;
     document.title = churchName + ' · GRACE Value Calculator';
   }
 
@@ -565,6 +586,35 @@
   if ((q = qnum('g')) !== null) { $('giving').value = Math.max(100000, Math.min(40000000, q)); touched.giving = true; }
   if (!touched.fte) $('fte').value = Math.max(1, Math.round(parseFloat($('members').value) / 400));
   if (!touched.giving) $('giving').value = Math.round(parseFloat($('members').value) * 2000 / 100000) * 100000;
+
+  // --- periodic example-activity notice -------------------------------------
+  // Illustrative only — labeled "Example activity," never implied as live
+  // transactions. Ties the abstract loop diagram to a concrete, human example.
+  // Each example has a fixed spot around the ring (matching where the flow
+  // arrows travel) so the notice reads as "this fund's activity," not a
+  // single fixed ticker.
+  var ACTIVITY_EXAMPLES = [
+    { text: 'Grocery run routed $2.40 to Food Pantry', x: 78, y: 22 },
+    { text: 'Gas fill-up routed $1.85 to Youth Ministry', x: 78, y: 78 },
+    { text: 'Dinner out routed $3.10 to Missions', x: 22, y: 78 },
+    { text: 'Coffee run routed $0.95 to Benevolence Fund', x: 22, y: 22 }
+  ];
+  (function () {
+    var el = $('loopNotice'), textEl = $('loopNoticeText');
+    if (!el || !textEl) return;
+    var i = 0;
+    function cycle() {
+      var item = ACTIVITY_EXAMPLES[i % ACTIVITY_EXAMPLES.length];
+      textEl.textContent = item.text;
+      el.style.left = item.x + '%';
+      el.style.top = item.y + '%';
+      i++;
+      el.classList.add('show');
+      setTimeout(function () { el.classList.remove('show'); }, 4200);
+    }
+    setTimeout(cycle, 1800);
+    setInterval(cycle, 6800);
+  })();
 
   render();
   track('calculator_started');

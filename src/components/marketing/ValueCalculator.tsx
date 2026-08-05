@@ -1,515 +1,614 @@
 /**
- * Interactive value calculator — /pricing.
+ * GRACE ecosystem value calculator — /pricing.
  *
- * Every input is a labeled, editable assumption. Confirmed figures
- * (software subscriptions, published processing rates, plan price) are
- * verifiable from the church's own bills and never scale with scenario.
- * Estimated figures (staff/volunteer time, missed follow-ups) depend on
- * adoption and are scaled by the scenario multiplier.
+ * One congregation-size input drives three outcomes: new revenue (the
+ * church's commission on GRACE Impact Card spend), efficiency savings
+ * (automation), and giving growth (engagement). Every constant behind
+ * those three numbers is exposed and editable under "Check the math."
  *
- * The GRACE Impact Card is GRACE's primary revenue engine (see
- * lib/impactCardEconomics — modeled on the company's own i2c planning,
- * not external interchange benchmarks), not a rebate program for the
- * church. It's shown prominently because it's central to how GRACE
- * sustains itself, but its revenue is never counted toward the church's
- * confirmed/estimated/net totals in any scenario, including optimistic
- * — it isn't money the church receives. It's excluded until the live
- * i2c adapter ships (see api/_lib/i2c — mock-only today) either way.
- *
- * Ported from the standalone prototype at
- * previews/grace_value_calculator.html — same model, same copy, now
- * wired to the real plan catalog (lib/plans.ts) and PostHog.
+ * Ported from the standalone showcase at previews/grace_value_calculator.html
+ * — same model, same copy — after replacing an earlier tiered/audit-style
+ * version that tested as confusing rather than as the intuitive hook this
+ * page needs. Keep both in sync when either changes.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CLIENT_PLANS, type PlanSlug } from '../../lib/plans';
 import { capture } from '../../lib/observability/posthog';
-import { impactCardModel, illustrativeMonthlyGraceRevenue } from '../../lib/impactCardEconomics';
 
-type Scenario = 'conservative' | 'expected' | 'optimistic';
-type Period = 'monthly' | 'annual';
+const DEMO_URL = 'https://grace-crm-two.vercel.app/previews/grace_member_portal_generic.html';
 
-const SCENARIOS: Record<Scenario, { mult: number; followups: boolean; caption: string }> = {
-  conservative: { mult: 0.5, followups: false, caption: 'Conservative: estimated time savings counted at 50%; missed-follow-up value counted at $0.' },
-  expected: { mult: 0.75, followups: true, caption: 'Expected: estimated time savings counted at 75%.' },
-  optimistic: { mult: 1.0, followups: true, caption: 'Optimistic: estimated time savings counted at 100%. Still excludes Impact Card revenue.' },
-};
+const MEMBERS_MIN = 200;
+const MEMBERS_MAX = 20000;
+const ADOPT_MIN = 5;
+const ADOPT_MAX = 60;
+const FTE_MIN = 1;
+const FTE_MAX = 40;
+const GIVING_MIN = 100_000;
+const GIVING_MAX = 40_000_000;
 
-/** Stripe ~2.9% + $0.30 avg ≈ 3.25% effective, plus the 0.75% platform fee
- *  (api/giving/_create-payment-intent.ts PLATFORM_FEE_BPS). Fixed, not
- *  editable — the calculator can't quietly flatter itself on the one
- *  number that's ours to set. */
-const GRACE_RATE_PCT = 4.00;
-const FOLLOWUP_VALUE_USD = 15;
-const WEEKS_PER_MONTH = 52 / 12;
+// Defaults mirror program planning; every one is editable under "Check the math."
+const ASSUMPTION_DEFAULTS = {
+  spendPerAccount: 500, // avg monthly card spend per member account ($)
+  commissionPct: 1, // church's commission on card volume (%)
+  loadedCost: 65_000, // loaded annual cost per admin staff member ($)
+  automatedPct: 15, // share of admin work GRACE automates (%)
+  softwarePerMember: 6, // annual software spend replaced, per member ($)
+  liftPct: 2, // engagement-driven lift on annual giving (%)
+} as const;
 
-interface Inputs {
-  chms: number;
-  email: number;
-  forms: number;
-  texting: number;
-  volume: number;
-  currentRate: number;
-  adminHrs: number;
-  dupHrs: number;
-  volHrs: number;
-  rate: number;
-  reductionPct: number;
-  followups: number;
-  members: number;
-  cardSpendPerMember: number;
-}
+type Assumptions = typeof ASSUMPTION_DEFAULTS;
 
-const DEFAULT_INPUTS: Inputs = {
-  chms: 119,
-  email: 45,
-  forms: 29,
-  texting: 25,
-  volume: 8000,
-  currentRate: 3.4,
-  adminHrs: 6,
-  dupHrs: 2,
-  volHrs: 3,
-  rate: 22,
-  reductionPct: 40,
-  followups: 8,
-  members: 240,
-  cardSpendPerMember: 150,
-};
-
-function recommendedPlan(memberCount: number): PlanSlug {
-  if (memberCount <= (CLIENT_PLANS.starter.limits.members ?? Infinity)) return 'starter';
-  if (memberCount <= (CLIENT_PLANS.pro.limits.members ?? Infinity)) return 'pro';
-  return 'enterprise';
-}
+// Illustrative only — the notice is always labeled "Example activity," never
+// implied as a live transaction feed. Ties the abstract loop diagram to a
+// concrete, human example of what a designated-fund routing looks like.
+// Each example has a fixed spot around the loop (matching where the flow
+// arrows travel) so the notice reads as "this fund's activity," not a
+// single fixed ticker.
+const ACTIVITY_EXAMPLES = [
+  { text: 'Grocery run routed $2.40 to Food Pantry', x: 78, y: 22 },
+  { text: 'Gas fill-up routed $1.85 to Youth Ministry', x: 78, y: 78 },
+  { text: 'Dinner out routed $3.10 to Missions', x: 22, y: 78 },
+  { text: 'Coffee run routed $0.95 to Benevolence Fund', x: 22, y: 22 },
+];
 
 function fmt(n: number): string {
-  const sign = n < 0 ? '−' : '';
-  return sign + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
+  if (Math.abs(n) >= 1_000_000) return '$' + (Math.round(n / 100_000) / 10).toLocaleString('en-US') + 'M';
+  return (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
 }
 
-function NumberField({
-  id, label, note, value, onChange, prefix, suffix, disabled, step = 1,
+function fmtCompact(n: number): string {
+  return n >= 1_000_000 ? (Math.round(n / 100_000) / 10) + 'M' : Math.round(n / 1000) + 'k';
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, n));
+}
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return reduced;
+}
+
+/** Rolls the displayed total toward `target` instead of snapping — the
+ *  cause-and-effect between moving a slider and the number changing
+ *  should feel visible, not instant. */
+function useCountUp(target: number): number {
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(target);
+  const shownRef = useRef(target);
+  const fromRef = useRef(target);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (reduced) {
+      shownRef.current = target;
+      setShown(target);
+      return;
+    }
+    fromRef.current = shownRef.current;
+    const from = fromRef.current;
+    const t0 = performance.now();
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+
+    function step(now: number) {
+      const k = Math.min(1, (now - t0) / 350);
+      const eased = 1 - Math.pow(1 - k, 3);
+      const val = from + (target - from) * eased;
+      shownRef.current = val;
+      setShown(val);
+      if (k < 1) rafRef.current = requestAnimationFrame(step);
+    }
+    rafRef.current = requestAnimationFrame(step);
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+  }, [target, reduced]);
+
+  return shown;
+}
+
+function OutcomeCard({
+  tone, label, value, story, dialLabel, dialValue, dialDisplay, dialMin, dialMax, dialStep, onDial, how,
 }: {
-  id: string; label: string; note?: string; value: number;
-  onChange?: (v: number) => void; prefix?: string; suffix?: string;
-  disabled?: boolean; step?: number;
+  tone: 'revenue' | 'savings' | 'growth';
+  label: string;
+  value: number;
+  story: string;
+  dialLabel: string;
+  dialValue: number;
+  dialDisplay: string;
+  dialMin: number;
+  dialMax: number;
+  dialStep: number;
+  onDial: (v: number) => void;
+  how: React.ReactNode;
 }) {
+  const tones = {
+    revenue: { border: 'border-t-violet-600 dark:border-t-violet-400', text: 'text-violet-600 dark:text-violet-400', accent: 'accent-violet-600 dark:accent-violet-400' },
+    savings: { border: 'border-t-emerald-600 dark:border-t-emerald-400', text: 'text-emerald-600 dark:text-emerald-400', accent: 'accent-emerald-600 dark:accent-emerald-400' },
+    growth: { border: 'border-t-amber-600 dark:border-t-amber-400', text: 'text-amber-600 dark:text-amber-400', accent: 'accent-amber-600 dark:accent-amber-400' },
+  } as const;
+  const t = tones[tone];
+
   return (
-    <div className="grid grid-cols-[1fr_150px] items-center gap-3.5 py-2.5 border-t border-gray-200 dark:border-dark-700 first:border-t-0">
-      <div>
-        <label htmlFor={id} className="block text-sm font-semibold text-gray-900 dark:text-dark-100">{label}</label>
-        {note && <div className="text-xs text-gray-500 dark:text-dark-400 mt-0.5 max-w-[48ch]">{note}</div>}
-      </div>
-      <div className="relative">
-        {prefix && <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-500 text-sm pointer-events-none">{prefix}</span>}
+    <section className={`rounded-2xl border border-gray-200 dark:border-dark-700 border-t-4 ${t.border} bg-white dark:bg-dark-800 p-5 flex flex-col gap-1.5`}>
+      <span className={`text-[11.5px] font-extrabold uppercase tracking-wide ${t.text}`}>{label}</span>
+      <span className={`text-3xl sm:text-4xl tabular-nums ${t.text}`} style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{fmt(value)}</span>
+      <p className="text-sm text-gray-600 dark:text-dark-300 flex-1">{story}</p>
+      <div className="mt-2">
+        <div className="flex justify-between text-xs text-gray-500 dark:text-dark-400 mb-0.5">
+          <span>{dialLabel}</span>
+          <span className="text-gray-900 dark:text-dark-100 tabular-nums font-medium">{dialDisplay}</span>
+        </div>
         <input
-          id={id}
-          type="number"
-          min={0}
-          step={step}
-          value={value}
-          disabled={disabled}
-          onChange={(e) => onChange?.(Number(e.target.value))}
-          className={[
-            'w-full rounded-lg border text-right tabular-nums text-[15px]',
-            'border-gray-300 dark:border-dark-600 bg-gray-50 dark:bg-dark-850 text-gray-900 dark:text-dark-100',
-            'focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500/60',
-            prefix ? 'pl-6 pr-2.5 py-2' : suffix ? 'pl-2.5 pr-9 py-2' : 'px-2.5 py-2',
-            disabled ? 'opacity-60' : '',
-          ].join(' ')}
+          type="range"
+          min={dialMin}
+          max={dialMax}
+          step={dialStep}
+          value={dialValue}
+          onChange={(e) => onDial(Number(e.target.value))}
+          className={`w-full ${t.accent}`}
         />
-        {suffix && <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-500 text-sm pointer-events-none">{suffix}</span>}
+      </div>
+      <div className="text-xs text-gray-500 dark:text-dark-400 border-t border-dotted border-gray-200 dark:border-dark-700 pt-2 mt-1">
+        {how}
+      </div>
+    </section>
+  );
+}
+
+function ActivityNotice() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let hideTimer: ReturnType<typeof setTimeout>;
+    function cycle() {
+      setIndex((i) => (i + 1) % ACTIVITY_EXAMPLES.length);
+      setVisible(true);
+      hideTimer = setTimeout(() => setVisible(false), 4200);
+    }
+    const first = setTimeout(cycle, 1800);
+    const interval = setInterval(cycle, 6800);
+    return () => { clearTimeout(first); clearInterval(interval); clearTimeout(hideTimer); };
+  }, []);
+
+  const item = ACTIVITY_EXAMPLES[index];
+
+  return (
+    <div
+      className={[
+        'gc-loop-notice absolute z-[2] max-w-[200px] rounded-xl border border-gray-200 dark:border-dark-700',
+        'bg-white dark:bg-dark-800 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.3)] px-3.5 py-2.5 pointer-events-none',
+        'max-sm:mt-3.5 max-sm:mx-auto max-sm:max-w-none',
+        visible ? 'opacity-100' : 'opacity-0',
+      ].join(' ')}
+      style={{
+        left: `${item.x}%`,
+        top: `${item.y}%`,
+        transform: `translate(-50%, -50%) translateY(${visible ? 0 : 8}px)`,
+        transition: 'opacity .4s ease, transform .4s ease, left .5s ease, top .5s ease',
+      }}
+      aria-hidden="true"
+    >
+      <div className="text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400 mb-0.5">
+        Example activity &middot; GRACE Impact Card
+      </div>
+      <div className="text-[12.5px] text-gray-600 dark:text-dark-300 leading-snug">
+        {item.text}
       </div>
     </div>
   );
 }
 
-function Tag({ tone, children }: { tone: 'confirmed' | 'estimated' | 'excluded'; children: React.ReactNode }) {
-  const toneClasses = {
-    confirmed: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    estimated: 'bg-amber-50 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-    excluded: 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  } as const;
-  return (
-    <span className={`text-[10.5px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full whitespace-nowrap ${toneClasses[tone]}`}>
-      {children}
-    </span>
-  );
-}
-
 export function ValueCalculator() {
-  const [inputs, setInputs] = useState<Inputs>(DEFAULT_INPUTS);
-  const [scenario, setScenario] = useState<Scenario>('expected');
-  const [period, setPeriod] = useState<Period>('monthly');
-  const [plan, setPlan] = useState<PlanSlug>('pro');
-  const [ctaClicked, setCtaClicked] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [members, setMembers] = useState(2500);
+  const [adoptPct, setAdoptPct] = useState(25);
+  const [fte, setFte] = useState(6);
+  const [giving, setGiving] = useState(5_000_000);
+  const [touchedFte, setTouchedFte] = useState(false);
+  const [touchedGiving, setTouchedGiving] = useState(false);
+  const [assumptions, setAssumptions] = useState<Assumptions>(ASSUMPTION_DEFAULTS);
+  const [churchName, setChurchName] = useState('');
+  const [mathOpen, setMathOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const started = useRef(false);
   const editedFields = useRef(new Set<string>());
   const completed = useRef(false);
+  const mathTracked = useRef(false);
 
   const trackStart = () => {
     if (!started.current) { started.current = true; capture('calculator_started'); }
   };
-
-  function set<K extends keyof Inputs>(field: K, value: number) {
+  const trackField = (field: string) => {
     trackStart();
-    setInputs((prev) => ({ ...prev, [field]: value }));
     editedFields.current.add(field);
     capture('assumption_changed', { field });
     if (!completed.current && editedFields.current.size >= 3) {
       completed.current = true;
       capture('calculator_completed');
     }
-  }
+  };
 
-  const m = useMemo(() => {
-    const sc = SCENARIOS[scenario];
-    const months = period === 'annual' ? 12 : 1;
+  // Restore a shared scenario from the URL on mount; church stays as a
+  // query param only (never persisted), same as the standalone page.
+  useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    const church = (qs.get('church') || '').trim().slice(0, 40);
+    if (church) setChurchName(church);
 
-    const software = inputs.chms + inputs.email + inputs.forms + inputs.texting;
-    const feeDelta = (inputs.volume * (inputs.currentRate - GRACE_RATE_PCT)) / 100;
-    const hoursValue = (inputs.adminHrs + inputs.dupHrs + inputs.volHrs) * WEEKS_PER_MONTH * inputs.rate * (inputs.reductionPct / 100);
-    const followupValue = sc.followups ? inputs.followups * FOLLOWUP_VALUE_USD : 0;
-    const estimated = (hoursValue + followupValue) * sc.mult;
+    const m = parseFloat(qs.get('m') || '');
+    const a = parseFloat(qs.get('a') || '');
+    const f = parseFloat(qs.get('f') || '');
+    const g = parseFloat(qs.get('g') || '');
+    if (isFinite(m)) setMembers(clamp(m, MEMBERS_MIN, MEMBERS_MAX));
+    if (isFinite(a)) setAdoptPct(clamp(a, ADOPT_MIN, ADOPT_MAX));
+    if (isFinite(f)) { setFte(clamp(f, FTE_MIN, FTE_MAX)); setTouchedFte(true); }
+    if (isFinite(g)) { setGiving(clamp(g, GIVING_MIN, GIVING_MAX)); setTouchedGiving(true); }
+  }, []);
 
-    const planPrice = CLIENT_PLANS[plan].priceUsdMonthly;
-    const confirmed = software + feeDelta - planPrice;
-
-    const modeledCardVolume = Math.max(0, inputs.members) * Math.max(0, inputs.cardSpendPerMember);
-    const modeledGraceRevenue = illustrativeMonthlyGraceRevenue(modeledCardVolume);
-
-    return {
-      months,
-      software: software * months,
-      feeDelta: feeDelta * months,
-      planPrice: planPrice * months,
-      confirmed: confirmed * months,
-      estimated: estimated * months,
-      net: (confirmed + estimated) * months,
-      // Deliberately NOT folded into confirmed/estimated/net — this is
-      // GRACE's revenue, not the church's, and the card program isn't
-      // live yet either way. Shown separately, months-scaled for display.
-      modeledCardVolume: modeledCardVolume * months,
-      modeledGraceRevenue: modeledGraceRevenue * months,
-    };
-  }, [inputs, scenario, period, plan]);
-
-  const cardEconomics = useMemo(() => impactCardModel(), []);
-
-  const per = period === 'annual' ? '/yr' : '/mo';
-  const feeMonthly = m.feeDelta / m.months;
-  const members = Math.max(1, inputs.members);
-  const rec = recommendedPlan(members);
-  const recFits = rec === plan;
-
-  const posC = Math.max(0, m.confirmed);
-  const posE = Math.max(0, m.estimated);
-  const totPos = posC + posE;
-  const cPct = totPos > 0 ? Math.round((100 * posC) / totPos) : 0;
+  // Companion dials scale with congregation size until the visitor takes
+  // the wheel themselves.
+  useEffect(() => {
+    if (!touchedFte) setFte(Math.max(1, Math.round(members / 400)));
+    if (!touchedGiving) setGiving(Math.round((members * 2000) / 100_000) * 100_000);
+  }, [members]);
 
   useEffect(() => {
-    if (ctaClicked) setCtaClicked(false);
-  }, [plan]);
+    if (churchName) document.title = `${churchName} · GRACE Value Calculator`;
+    return () => { document.title = 'GRACE'; };
+  }, [churchName]);
 
-  function handleScenario(s: Scenario) {
+  // Keep the URL shareable without fighting the app's own hand-rolled
+  // pathname routing — only ever touch the query string.
+  const urlTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (urlTimer.current) clearTimeout(urlTimer.current);
+    urlTimer.current = setTimeout(() => {
+      const p = new URLSearchParams();
+      if (churchName) p.set('church', churchName);
+      p.set('m', String(members));
+      p.set('a', String(adoptPct));
+      p.set('f', String(fte));
+      p.set('g', String(giving));
+      try {
+        window.history.replaceState(null, '', `${window.location.pathname}?${p.toString()}`);
+      } catch {
+        // best-effort; nothing depends on this succeeding
+      }
+    }, 250);
+    return () => { if (urlTimer.current) clearTimeout(urlTimer.current); };
+  }, [churchName, members, adoptPct, fte, giving]);
+
+  const model = useMemo(() => {
+    const accounts = members * (adoptPct / 100);
+    const revenue = accounts * assumptions.spendPerAccount * 12 * (assumptions.commissionPct / 100);
+    const savings = fte * assumptions.loadedCost * (assumptions.automatedPct / 100) + members * assumptions.softwarePerMember;
+    const growth = giving * (assumptions.liftPct / 100);
+    return { accounts, revenue, savings, growth, total: revenue + savings + growth };
+  }, [members, adoptPct, fte, giving, assumptions]);
+
+  const displayTotal = useCountUp(model.total);
+
+  function setAssumption<K extends keyof Assumptions>(key: K, value: number) {
+    trackField(`math_${key}`);
+    setAssumptions((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function shareUrl(): string {
+    const p = new URLSearchParams();
+    if (churchName) p.set('church', churchName);
+    p.set('m', String(members));
+    p.set('a', String(adoptPct));
+    p.set('f', String(fte));
+    p.set('g', String(giving));
+    return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
+  }
+
+  async function handleShare() {
     trackStart();
-    setScenario(s);
-  }
-  function handlePeriod(p: Period) {
-    trackStart();
-    setPeriod(p);
-  }
-  function handlePlan(p: PlanSlug) {
-    trackStart();
-    setPlan(p);
-    capture('plan_compared', { plan: p });
-  }
-  function handleSelect() {
-    capture('plan_selected', { plan });
-    setCtaClicked(true);
-  }
-  async function handleCopy() {
-    const text = [
-      `GRACE value estimate (${scenario} scenario, ${period})`,
-      `Software replaced: ${fmt(m.software)}${per}`,
-      `Processing fee difference: ${fmt(m.feeDelta)}${per}`,
-      `Plan cost (${CLIENT_PLANS[plan].name}): ${fmt(-m.planPrice)}${per}`,
-      `Confirmed subtotal: ${fmt(m.confirmed)}${per}`,
-      `Estimated time & follow-up value: ${fmt(m.estimated)}${per}`,
-      `Impact Card revenue: $0 in totals above (not live, and it's GRACE's revenue, not the church's) — modeled illustration: ${fmt(m.modeledGraceRevenue)}${per} to GRACE, not counted in Net`,
-      `Net: ${fmt(m.net)}${per}`,
-      `These are estimates from your own inputs, not commitments from GRACE.`,
-    ].join('\n');
+    capture('scenario_shared');
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(shareUrl());
     } catch {
-      // clipboard API unavailable — the on-screen numbers still stand
+      // clipboard API unavailable — the URL bar already reflects the scenario
     }
-    setCopied(true);
-    if (!completed.current) { completed.current = true; capture('calculator_completed'); }
-    setTimeout(() => setCopied(false), 1600);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 1600);
   }
 
-  const rows: { lbl: string; sub: string | null; v: number; subtotal?: boolean }[] = [
-    { lbl: 'Software replaced', sub: 'confirmed', v: m.software },
-    { lbl: 'Processing fee difference', sub: 'confirmed · can be negative', v: m.feeDelta },
-    { lbl: `${CLIENT_PLANS[plan].name} plan cost`, sub: 'confirmed', v: -m.planPrice },
-    { lbl: 'Confirmed subtotal', sub: null, v: m.confirmed, subtotal: true },
-    { lbl: 'Time & follow-up value', sub: `estimated · ${scenario} scenario`, v: m.estimated },
-    { lbl: 'Impact Card revenue', sub: 'excluded until live', v: 0 },
-  ];
+  function handleCta() {
+    trackStart();
+    capture('demo_requested', { source: 'ecosystem_calculator' });
+    window.open(DEMO_URL, '_blank', 'noopener');
+  }
+
+  function handleMathToggle(e: React.SyntheticEvent<HTMLDetailsElement>) {
+    const open = e.currentTarget.open;
+    setMathOpen(open);
+    if (open && !mathTracked.current) { mathTracked.current = true; trackStart(); capture('math_opened'); }
+  }
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-16" aria-labelledby="value-calc-heading">
-      <header className="max-w-2xl mb-9">
-        <h2 id="value-calc-heading" className="text-3xl md:text-4xl font-light text-gray-900 dark:text-dark-50 mb-3" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-          What would GRACE actually be worth to your church?
-        </h2>
-        <p className="text-gray-600 dark:text-dark-400 mb-3">
-          Every number below is an assumption you can edit — nothing is hidden in the math.
-          Figures you can verify from your own bills are marked{' '}
-          <strong className="text-emerald-700 dark:text-emerald-400">confirmed</strong>; everything that depends
-          on how your team adopts GRACE is marked <strong className="text-amber-700 dark:text-amber-400">estimated</strong> and
-          shrinks under the conservative scenario.
-        </p>
-        <span className="inline-block border border-gray-200 dark:border-dark-700 border-l-[3px] border-l-amber-600 dark:border-l-amber-400 bg-white dark:bg-dark-800 rounded-r-lg px-3.5 py-2 text-[13px] text-gray-600 dark:text-dark-300">
-          A planning aid, not a pledge — we don't get to guarantee your outcome, so this won't pretend to either.
-        </span>
-      </header>
+    <section className="max-w-4xl mx-auto px-4 py-20" aria-labelledby="value-calc-heading">
+      <h2 id="value-calc-heading" className="text-3xl md:text-4xl font-light text-gray-900 dark:text-dark-50 mb-3 text-center" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+        Empower your congregation with seamless giving, powered by GRACE.
+      </h2>
+      <p className="text-gray-600 dark:text-dark-400 mb-9 text-center max-w-[46ch] mx-auto">
+        GRACE brings giving, community, and everyday commerce together in one engine that funds ministry.
+      </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
-        {/* Inputs */}
-        <div>
-          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-2xl p-5 sm:p-6 pb-3.5 mb-5">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Software you'd replace</h3>
-              <Tag tone="confirmed">Confirmed &mdash; check your bills</Tag>
-            </div>
-            <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              Subscriptions GRACE replaces outright. These are real invoices you already pay, so they count at full value in every scenario.
-            </p>
-            <NumberField id="chms" label="Church management software" note="e.g. Planning Center, Breeze, ChurchTrac — your current monthly bill" prefix="$" value={inputs.chms} onChange={(v) => set('chms', v)} />
-            <NumberField id="email" label="Email & newsletter tool" note="Mailchimp, Constant Contact, etc." prefix="$" value={inputs.email} onChange={(v) => set('email', v)} />
-            <NumberField id="forms" label="Forms, sign-ups & website add-ons" note="Jotform, event registration tools" prefix="$" value={inputs.forms} onChange={(v) => set('forms', v)} />
-            <NumberField id="texting" label="Texting / communication service" note="Text-in-church, Clearstream, etc." prefix="$" value={inputs.texting} onChange={(v) => set('texting', v)} />
-          </div>
-
-          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-2xl p-5 sm:p-6 pb-3.5 mb-5">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Giving & processing fees</h3>
-              <Tag tone="confirmed">Confirmed &mdash; published rates</Tag>
-            </div>
-            <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              GRACE charges the standard Stripe rate <strong>plus a 0.75% platform fee</strong> on online gifts.
-              Depending on what you pay today, GRACE may cost <em>more</em> here — we show that rather than hide it.
-            </p>
-            <NumberField id="volume" label="Monthly online giving volume" note="Total processed through your current giving tool" prefix="$" step={100} value={inputs.volume} onChange={(v) => set('volume', v)} />
-            <NumberField id="currentRate" label="Your current effective rate" note="All-in: processor % + per-gift fees + any platform cut" suffix="%" step={0.1} value={inputs.currentRate} onChange={(v) => set('currentRate', v)} />
-            <NumberField id="graceRate" label="GRACE effective rate" note="Stripe 2.9% + $0.30 avg ≈ 3.25% + GRACE platform fee 0.75% — fixed, not editable, so we can't quietly flatter ourselves" suffix="%" value={GRACE_RATE_PCT} disabled />
-            <p className="text-[13.5px] text-gray-600 dark:text-dark-300 border-t border-gray-200 dark:border-dark-700 pt-3 mt-1" aria-live="polite">
-              {Math.abs(feeMonthly) < 1 ? (
-                'Processing costs are roughly the same either way.'
-              ) : feeMonthly < 0 ? (
-                <>At these rates GRACE processing costs <strong className="text-red-600 dark:text-red-400 tabular-nums">{fmt(-feeMonthly)}/mo more</strong> than you pay today. The rest of the model has to earn that back.</>
-              ) : (
-                <>At these rates GRACE processing saves <strong className="text-emerald-700 dark:text-emerald-400 tabular-nums">{fmt(feeMonthly)}/mo</strong> versus today.</>
-              )}
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-2xl p-5 sm:p-6 pb-3.5 mb-5">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Staff & volunteer time</h3>
-              <Tag tone="estimated">Estimated &mdash; scenario-scaled</Tag>
-            </div>
-            <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              Time GRACE's automation may give back. These are the softest numbers in the model, so the scenario control scales them down — confirmed figures above never move.
-            </p>
-            <NumberField id="adminHrs" label="Manual admin hours per week" note="Attendance entry, follow-up lists, report assembly" suffix="hrs" step={0.5} value={inputs.adminHrs} onChange={(v) => set('adminHrs', v)} />
-            <NumberField id="dupHrs" label="Duplicate data entry per week" note="Re-keying the same people into multiple tools" suffix="hrs" step={0.5} value={inputs.dupHrs} onChange={(v) => set('dupHrs', v)} />
-            <NumberField id="volHrs" label="Volunteer coordination per week" note="Scheduling, reminders, swap-finding" suffix="hrs" step={0.5} value={inputs.volHrs} onChange={(v) => set('volHrs', v)} />
-            <NumberField id="rate" label="Loaded staff cost per hour" note="Salary + benefits ÷ hours; use $0 if all volunteer-run" prefix="$" value={inputs.rate} onChange={(v) => set('rate', v)} />
-            <NumberField id="reduction" label="Share of that time GRACE saves" note="Our adoption assumption — edit it if you think we're optimistic" suffix="%" step={5} value={inputs.reductionPct} onChange={(v) => set('reductionPct', v)} />
-            <NumberField id="followups" label="Visitor follow-ups missed per month" note="The most speculative line in this model. Valued at $15 each; worth $0 in the conservative scenario." suffix="/mo" value={inputs.followups} onChange={(v) => set('followups', v)} />
-          </div>
-
-          <div className="bg-white dark:bg-dark-800 border-2 border-amber-300 dark:border-amber-700/60 rounded-2xl p-5 sm:p-6">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>GRACE Impact Card revenue</h3>
-              <Tag tone="excluded">Excluded from every scenario</Tag>
-            </div>
-            <p className="text-[13px] text-gray-600 dark:text-dark-300 max-w-[58ch] mb-3">
-              The Impact Card is <strong>GRACE's primary revenue engine</strong> — not a rebate program for your
-              church. It's the mechanism that lets GRACE hold subscription pricing where it is while continuing
-              to build the platform. We're putting the model here, in the open, for the same reason everything
-              else on this page is editable: you should be able to see how we make money, not just how we spend
-              yours.
-            </p>
-            <p className="text-[13px] text-gray-500 dark:text-dark-400 max-w-[58ch] mb-3">
-              It's <strong>not yet live</strong> — it requires a signed sponsor-bank agreement and compliance
-              review — so it counts as <strong>$0 in the totals above, in every scenario, including optimistic</strong>.
-              None of the figures below are money your church receives.
-            </p>
-
-            <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-850 p-4 mb-3.5 text-[13px]">
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">Card transaction fee (GRACE's take rate on member card spend)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">{cardEconomics.cardFeePct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1"><span className="text-gray-600 dark:text-dark-300">− GRACE Banking processing cost (20% of that fee revenue)</span><span className="tabular-nums text-gray-800 dark:text-dark-100">−{cardEconomics.i2cCostPct.toFixed(2)}%</span></div>
-              <div className="flex justify-between py-1 border-t border-dashed border-gray-300 dark:border-dark-600 font-semibold"><span className="text-gray-700 dark:text-dark-200">= GRACE net revenue</span><span className="tabular-nums text-amber-700 dark:text-amber-400">{cardEconomics.graceNetRevenuePct.toFixed(2)}%</span></div>
-            </div>
-
-            <NumberField id="cardSpendPerMember" label="Estimated everyday spend per member" note="Groceries, gas, dining routed through the Impact Card instead of another debit card — your assumption, not ours" prefix="$" suffix="/mo" step={10} value={inputs.cardSpendPerMember} onChange={(v) => set('cardSpendPerMember', v)} />
-
-            <p className="text-[13.5px] text-gray-600 dark:text-dark-300 border-t border-gray-200 dark:border-dark-700 pt-3 mt-1">
-              At {members.toLocaleString()} members and {fmt(inputs.cardSpendPerMember)}/mo each, that's{' '}
-              <strong className="text-gray-800 dark:text-dark-100 tabular-nums">{fmt(m.modeledCardVolume / m.months)}{per === '/yr' ? '/mo' : per}</strong> in modeled card volume — an{' '}
-              <strong className="text-amber-700 dark:text-amber-400 tabular-nums">illustrative {fmt(m.modeledGraceRevenue)}{per} to GRACE</strong>,
-              not your church. Not counted in Net value below, not a projection — a worked example of how the card
-              sustains the platform, so it's not a black box before the program exists.
-            </p>
-            <p className="text-[12.5px] text-gray-500 dark:text-dark-400 mt-3">
-              Your church's return on the card program is the kind this page doesn't put a dollar sign on: member
-              engagement with giving, a tool that strengthens your standing as a tax-exempt organization doing
-              tangible good, and a subscription price GRACE can hold because this line helps fund the company —
-              not a rebate check.
-            </p>
-          </div>
+      {/* the one input that matters */}
+      <div className="max-w-[560px] mx-auto text-center mb-2">
+        <label htmlFor="calc-members" className="text-[13px] font-bold uppercase tracking-wide text-gray-500 dark:text-dark-400">
+          Your congregation
+        </label>
+        <div className="text-4xl sm:text-5xl mt-0.5 mb-1.5 text-gray-900 dark:text-dark-50 tabular-nums" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+          {members.toLocaleString('en-US')} <span className="text-[.45em] text-gray-500 dark:text-dark-400" style={{ fontFamily: 'inherit' }}>people</span>
         </div>
-
-        {/* Summary */}
-        <aside className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-2xl p-5 sm:p-6 lg:sticky lg:top-4" aria-label="Value summary">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-dark-100 mb-3.5" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Your numbers</h3>
-
-          <div className="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-lg p-1 mb-2.5" role="group" aria-label="Scenario">
-            {(['conservative', 'expected', 'optimistic'] as Scenario[]).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => handleScenario(s)}
-                aria-pressed={scenario === s}
-                className={[
-                  'text-xs font-semibold py-1.5 rounded-md capitalize',
-                  scenario === s ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-50 shadow-sm' : 'text-gray-500 dark:text-dark-400',
-                ].join(' ')}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-gray-500 dark:text-dark-400 mb-3.5">{SCENARIOS[scenario].caption}</p>
-
-          <div className="grid grid-cols-2 gap-1 bg-gray-100 dark:bg-dark-850 border border-gray-200 dark:border-dark-700 rounded-lg p-1 mb-3.5" role="group" aria-label="Period">
-            {(['monthly', 'annual'] as Period[]).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => handlePeriod(p)}
-                aria-pressed={period === p}
-                className={[
-                  'text-xs font-semibold py-1.5 rounded-md capitalize',
-                  period === p ? 'bg-white dark:bg-dark-700 text-gray-900 dark:text-dark-50 shadow-sm' : 'text-gray-500 dark:text-dark-400',
-                ].join(' ')}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          <label htmlFor="planSel" className="block text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-dark-400 mb-1.5">GRACE plan</label>
-          <select
-            id="planSel"
-            value={plan}
-            onChange={(e) => handlePlan(e.target.value as PlanSlug)}
-            className="w-full rounded-lg border border-gray-300 dark:border-dark-600 bg-gray-50 dark:bg-dark-850 text-gray-900 dark:text-dark-100 text-sm px-2.5 py-2 mb-1.5 focus:outline-none focus:ring-2 focus:ring-amber-400"
-          >
-            {(Object.keys(CLIENT_PLANS) as PlanSlug[]).map((slug) => {
-              const p = CLIENT_PLANS[slug];
-              return (
-                <option key={slug} value={slug}>
-                  {p.name} — ${p.priceUsdMonthly}/mo · {p.limits.members ? `up to ${p.limits.members.toLocaleString()} members` : 'unlimited members'}
-                </option>
-              );
-            })}
-          </select>
-          <p className="text-[12.5px] text-gray-500 dark:text-dark-400 mb-3.5">
-            {recFits ? (
-              <><strong className="text-gray-700 dark:text-dark-200">{CLIENT_PLANS[rec].name} fits:</strong> you entered {members.toLocaleString()} people{CLIENT_PLANS[rec].limits.members ? `, within its ${CLIENT_PLANS[rec].limits.members!.toLocaleString()}-member limit.` : '.'}</>
-            ) : (
-              <>Heads up: at {members.toLocaleString()} people, <strong className="text-gray-700 dark:text-dark-200">{CLIENT_PLANS[rec].name}</strong> is the fit{CLIENT_PLANS[rec].limits.members ? ` (limit ${CLIENT_PLANS[rec].limits.members!.toLocaleString()})` : ''} — you've selected {CLIENT_PLANS[plan].name}.</>
-            )}
-          </p>
-
-          <NumberField id="members" label="Congregation size" value={inputs.members} suffix="ppl" step={10} onChange={(v) => set('members', v)} />
-
-          <div className="border-t border-gray-200 dark:border-dark-700 mt-1.5 pt-2.5 text-sm" aria-live="polite">
-            {rows.map((r) => {
-              const cls = r.v > 0.5 ? 'text-emerald-700 dark:text-emerald-400' : r.v < -0.5 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-dark-200';
-              return (
-                <div key={r.lbl} className={`flex justify-between gap-3 py-1.5 ${r.subtotal ? 'border-t border-dashed border-gray-300 dark:border-dark-600 font-semibold' : ''}`}>
-                  <span className="text-gray-600 dark:text-dark-300">
-                    {r.lbl}
-                    {r.sub && <small className="block text-[11.5px] text-gray-400 dark:text-dark-500">{r.sub}</small>}
-                  </span>
-                  <span className={`tabular-nums ${cls}`}>{fmt(r.v)}{per}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-3.5 p-4 rounded-xl bg-gray-50 dark:bg-dark-850 border border-gray-200 dark:border-dark-700">
-            <div className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-dark-400">Net value &middot; {scenario} &middot; {period}</div>
-            <div className={`text-[34px] leading-tight mt-0.5 tabular-nums ${m.net >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`} style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-              {fmt(m.net)}{per}
-            </div>
-            <p className="text-[13px] text-gray-600 dark:text-dark-300 mt-1.5">
-              {m.net >= 0
-                ? (m.confirmed >= 0
-                    ? <>At these assumptions, GRACE returns more than it costs. {fmt(m.confirmed)}{per} of that is confirmed today.</>
-                    : <>At these assumptions, GRACE returns more than it costs — but the entire surplus is estimated. Confirmed items alone run {fmt(m.confirmed)}{per}.</>)
-                : <>At these assumptions, GRACE costs more than it saves. That's a legitimate answer — adjust the assumptions or pick a smaller plan.</>}
-            </p>
-            <div className="flex h-2.5 rounded-full overflow-hidden border border-gray-200 dark:border-dark-700 mt-3" role="img" aria-label={`${cPct}% of modeled value is confirmed, ${100 - cPct}% is estimated`}>
-              <div className="bg-emerald-600 dark:bg-emerald-400" style={{ width: `${cPct}%` }} />
-              <div
-                className="bg-amber-600 dark:bg-amber-400"
-                style={{
-                  width: `${100 - cPct}%`,
-                  backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,.35) 3px, rgba(255,255,255,.35) 6px)',
-                }}
-              />
-            </div>
-            <div className="flex gap-4 text-xs text-gray-500 dark:text-dark-400 mt-2">
-              <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-600 dark:bg-emerald-400 mr-1.5 align-[-1px]" />Confirmed</span>
-              <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-amber-600 dark:bg-amber-400 mr-1.5 align-[-1px]" />Estimated</span>
-            </div>
-          </div>
-
-          <div className="grid gap-2 mt-4">
-            <button
-              type="button"
-              onClick={handleSelect}
-              className="py-2.5 rounded-lg font-semibold text-sm bg-amber-600 hover:bg-amber-700 text-white transition-colors"
-            >
-              {ctaClicked ? `Continues to /signup?plan=${plan}` : 'Start 14-day trial on this plan'}
-            </button>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="py-2.5 rounded-lg font-semibold text-sm border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-750 transition-colors"
-            >
-              {copied ? 'Copied ✓' : 'Copy summary for your board'}
-            </button>
-          </div>
-
-          <p className="text-xs text-gray-500 dark:text-dark-400 mt-3.5 leading-relaxed">
-            These numbers move with your inputs, not with our sales targets — what you actually save depends on how
-            your team runs GRACE. No card needed for the 14-day trial; cancel anytime from Settings → Billing.
-            Direct gifts stay tax-deductible; card interchange, once it's live, won't be.
-          </p>
-        </aside>
+        <input
+          id="calc-members"
+          type="range"
+          min={MEMBERS_MIN}
+          max={MEMBERS_MAX}
+          step={100}
+          value={members}
+          onChange={(e) => { trackField('members'); setMembers(Number(e.target.value)); }}
+          className="w-full accent-gray-900 dark:accent-dark-100"
+          aria-label="Congregation size"
+        />
       </div>
+
+      {/* the answer */}
+      <div className="text-center py-6 pb-2.5">
+        <div className="text-[12.5px] font-bold uppercase tracking-wide text-gray-500 dark:text-dark-400">
+          What the GRACE ecosystem generates for your church
+        </div>
+        <div className="text-6xl sm:text-7xl tabular-nums text-emerald-700 dark:text-emerald-400 my-1.5" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+          {fmt(displayTotal)}
+        </div>
+        <p className="text-gray-600 dark:text-dark-300 max-w-[44ch] mx-auto">
+          every year in new revenue, recovered staff time, and giving growth, powered by your own members.
+        </p>
+      </div>
+
+      {/* ecosystem loop */}
+      <style>{`
+        .gc-loop-icon { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+        .gc-loop-icon:hover { transform: scale(1.22); }
+        .gc-loop-arrow {
+          offset-path: path('M112,158 A238,86 0 1,1 588,158 A238,86 0 1,1 112,158');
+        }
+        .gc-loop-arrow.a1 { offset-distance: 0%; }
+        .gc-loop-arrow.a2 { offset-distance: 25%; }
+        .gc-loop-arrow.a3 { offset-distance: 50%; }
+        .gc-loop-arrow.a4 { offset-distance: 75%; }
+        @media (prefers-reduced-motion: no-preference) {
+          .gc-loop-ring { animation: gc-loop-dash-flow 12s linear infinite; }
+          .gc-loop-arrow { offset-rotate: auto; animation: gc-loop-orbit 12s linear infinite; }
+          .gc-loop-arrow.a2 { animation-delay: -3s; }
+          .gc-loop-arrow.a3 { animation-delay: -6s; }
+          .gc-loop-arrow.a4 { animation-delay: -9s; }
+        }
+        @keyframes gc-loop-dash-flow { to { stroke-dashoffset: -24; } }
+        @keyframes gc-loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+        @media (prefers-reduced-motion: reduce) { .gc-loop-notice { transition: none !important; } }
+        @media (max-width: 639px) {
+          .gc-loop-notice { position: static !important; left: auto !important; top: auto !important; transform: none !important; }
+        }
+      `}</style>
+      <div className="relative max-w-[620px] mx-auto mt-10 mb-2">
+        <svg viewBox="0 0 700 316" className="w-full h-auto overflow-visible text-gray-300 dark:text-dark-600" aria-hidden="true">
+          <ellipse className="gc-loop-ring" cx="350" cy="158" rx="238" ry="86" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="6 6" />
+          <g className="fill-amber-600 dark:fill-amber-400">
+            <polygon className="gc-loop-arrow a1" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a2" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a3" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a4" points="-6,-5 8,0 -6,5" />
+          </g>
+          <circle cx="350" cy="158" r="27" className="fill-gray-100 dark:fill-dark-850 stroke-gray-200 dark:stroke-dark-700" strokeWidth={1.2} />
+          <g
+            className="text-gray-900 dark:text-dark-50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.7}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <svg x="333" y="141" width="34" height="34" viewBox="0 0 24 24">
+              <path d="M12 2v3" /><path d="M10.3 3.5h3.4" />
+              <path d="M4 21V11l8-6 8 6v10" /><path d="M9 21v-6h6v6" />
+            </svg>
+          </g>
+          <g
+            className="text-violet-600 dark:text-violet-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <svg className="gc-loop-icon" x="339" y="15" width="22" height="22" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+            </svg>
+            <svg className="gc-loop-icon" x="586" y="106" width="22" height="22" viewBox="0 0 24 24">
+              <rect x="2" y="6" width="20" height="14" rx="2.5" /><line x1="2" y1="11" x2="22" y2="11" />
+            </svg>
+            <svg className="gc-loop-icon" x="339" y="245" width="22" height="22" viewBox="0 0 24 24">
+              <path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2.3 5 6 5c2 0 3.5 1 4.5 2.3 1-1.3 2.5-2.3 4.5-2.3 3.7 0 5.5 3.5 4 6.7C19.5 16.4 12 21 12 21z" />
+            </svg>
+            <svg className="gc-loop-icon" x="92" y="106" width="22" height="22" viewBox="0 0 24 24">
+              <path d="M4 4v5h5" /><path d="M20 20v-5h-5" /><path d="M5.5 9A8 8 0 0 1 20 12" /><path d="M18.5 15A8 8 0 0 1 4 12" />
+            </svg>
+          </g>
+          <g textAnchor="middle">
+            <text x="350" y="58" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Your members</text>
+            <text x="597" y="156" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Everyday spending</text>
+            <text x="597" y="172" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">on your church's own card</text>
+            <text x="350" y="296" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Ministry funding</text>
+            <text x="103" y="156" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Engagement &amp; agency</text>
+            <text x="103" y="172" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">members choose the impact</text>
+          </g>
+        </svg>
+        <ActivityNotice />
+      </div>
+      <p className="text-center text-gray-600 dark:text-dark-300 text-[16.5px] font-medium leading-[1.5] max-w-[54ch] mx-auto mb-10">
+        Members spend on their church's card. That spending funds{' '}
+        <strong className="text-violet-600 dark:text-violet-400 font-bold">designated initiatives like missions, youth, and benevolence</strong>.
+        Members see the impact and stay engaged, growing the ecosystem.
+      </p>
+
+      {/* three outcomes */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
+        <OutcomeCard
+          tone="revenue"
+          label="New revenue"
+          value={model.revenue}
+          story="The GRACE Impact Card turns everyday generosity like groceries, gas, and dining into designated funding for missions, youth, and benevolence, at no cost to the member."
+          dialLabel="Members carrying the card"
+          dialValue={adoptPct}
+          dialDisplay={`${Math.round(adoptPct)}%`}
+          dialMin={ADOPT_MIN}
+          dialMax={ADOPT_MAX}
+          dialStep={1}
+          onDial={(v) => { trackField('adoption'); setAdoptPct(v); }}
+          how={<>{Math.round(model.accounts).toLocaleString('en-US')} members × ${assumptions.spendPerAccount}/mo everyday spend × {assumptions.commissionPct}% to your church</>}
+        />
+        <OutcomeCard
+          tone="savings"
+          label="Efficiency savings"
+          value={model.savings}
+          story="GRACE automates data entry, scheduling, and follow-ups, and replaces the stack of software subscriptions your operating budget pays for today."
+          dialLabel="Office & admin staff"
+          dialValue={fte}
+          dialDisplay={`${fte} FTE`}
+          dialMin={FTE_MIN}
+          dialMax={FTE_MAX}
+          dialStep={1}
+          onDial={(v) => { trackField('fte'); setTouchedFte(true); setFte(v); }}
+          how={<>{fte} staff × {assumptions.automatedPct}% of their week automated, plus {fmt(members * assumptions.softwarePerMember)}/yr of software replaced</>}
+        />
+        <OutcomeCard
+          tone="growth"
+          label="Giving growth"
+          value={model.growth}
+          story="Members with agency stay engaged. Seeing their generosity fund real, designated initiatives keeps your congregation engaged, giving, and growing."
+          dialLabel="Annual giving today"
+          dialValue={giving}
+          dialDisplay={`$${fmtCompact(giving)}`}
+          dialMin={GIVING_MIN}
+          dialMax={GIVING_MAX}
+          dialStep={100_000}
+          onDial={(v) => { trackField('giving'); setTouchedGiving(true); setGiving(v); }}
+          how={<>{assumptions.liftPct}% lift on {fmt(giving)} from engaged, retained members</>}
+        />
+      </div>
+
+      {/* cta */}
+      <div className="text-center mt-11">
+        <p className="text-gray-600 dark:text-dark-300 max-w-[46ch] mx-auto mb-4">
+          This is what one connected ecosystem does that five disconnected tools can't. See it running for a church like yours.
+        </p>
+        <button
+          type="button"
+          onClick={handleCta}
+          className="inline-block font-bold text-[15px] px-7 py-3.5 rounded-xl bg-gray-900 dark:bg-dark-100 text-white dark:text-dark-900 hover:opacity-90 transition-opacity"
+        >
+          See GRACE in action
+        </button>
+        <button
+          type="button"
+          onClick={handleShare}
+          className="block mx-auto mt-3 text-[13px] font-semibold text-gray-600 dark:text-dark-300 underline underline-offset-4 hover:text-gray-900 dark:hover:text-dark-100"
+        >
+          {shareCopied ? 'Link copied ✓' : 'Copy a link to this scenario'}
+        </button>
+      </div>
+
+      {/* check the math */}
+      <details
+        className="max-w-[620px] mx-auto mt-10 border-t border-gray-200 dark:border-dark-700 pt-4.5"
+        open={mathOpen}
+        onToggle={handleMathToggle}
+      >
+        <summary className="cursor-pointer font-bold text-[14.5px] text-gray-700 dark:text-dark-300 flex items-center justify-center gap-1.5 list-none [&::-webkit-details-marker]:hidden">
+          <span aria-hidden="true">{mathOpen ? '▾' : '▸'}</span> Check the math
+        </summary>
+        <p className="text-[13px] text-gray-500 dark:text-dark-400 text-center max-w-[50ch] mx-auto my-3">
+          Financial stewardship means showing our work, not just the results. Every number above comes from the assumptions below, and changing any of them moves the totals.
+        </p>
+
+        <MathGroup tone="revenue" title="New revenue" formula="Members on the card × everyday spend × your church's commission × 12 months">
+          <MathRow label="Everyday spend per account" prefix="$" suffix="/mo" value={assumptions.spendPerAccount} min={0} step={25} onChange={(v) => setAssumption('spendPerAccount', v)} />
+          <MathRow label="Church's commission" suffix="%" value={assumptions.commissionPct} min={0} max={5} step={0.05} onChange={(v) => setAssumption('commissionPct', v)} />
+        </MathGroup>
+
+        <MathGroup tone="savings" title="Efficiency savings" formula="(Admin staff × loaded cost × share automated) + (members × software replaced)">
+          <MathRow label="Loaded cost per staff member" prefix="$" suffix="/yr" value={assumptions.loadedCost} min={0} step={1000} onChange={(v) => setAssumption('loadedCost', v)} />
+          <MathRow label="Share of their work automated" suffix="%" value={assumptions.automatedPct} min={0} max={100} step={1} onChange={(v) => setAssumption('automatedPct', v)} />
+          <MathRow label="Software replaced, per member" prefix="$" suffix="/yr" value={assumptions.softwarePerMember} min={0} step={1} onChange={(v) => setAssumption('softwarePerMember', v)} />
+        </MathGroup>
+
+        <MathGroup tone="growth" title="Giving growth" formula="Annual giving today × the lift from an engaged, retained congregation">
+          <MathRow label="Engagement lift on giving" suffix="%" value={assumptions.liftPct} min={0} max={20} step={0.5} onChange={(v) => setAssumption('liftPct', v)} />
+        </MathGroup>
+      </details>
+
+      <footer className="text-center text-xs text-gray-500 dark:text-dark-400 mt-10 pt-4 border-t border-gray-200 dark:border-dark-700 leading-relaxed">
+        Illustrative estimates based on your inputs and GRACE program planning. Actual results vary by congregation and program terms.
+      </footer>
     </section>
+  );
+}
+
+function MathGroup({ tone, title, formula, children }: { tone: 'revenue' | 'savings' | 'growth'; title: string; formula: string; children: React.ReactNode }) {
+  const tones = {
+    revenue: { border: 'border-l-violet-600 dark:border-l-violet-400', text: 'text-violet-600 dark:text-violet-400' },
+    savings: { border: 'border-l-emerald-600 dark:border-l-emerald-400', text: 'text-emerald-600 dark:text-emerald-400' },
+    growth: { border: 'border-l-amber-600 dark:border-l-amber-400', text: 'text-amber-600 dark:text-amber-400' },
+  } as const;
+  const t = tones[tone];
+  return (
+    <div className={`mb-3.5 p-4 rounded-xl border border-gray-200 dark:border-dark-700 border-l-[3px] ${t.border} bg-white dark:bg-dark-800`}>
+      <h4 className={`text-[11.5px] font-extrabold uppercase tracking-wide ${t.text} mb-0.5`}>{title}</h4>
+      <p className="text-[12.5px] text-gray-500 dark:text-dark-400 mb-2.5">{formula}</p>
+      {children}
+    </div>
+  );
+}
+
+function MathRow({
+  label, value, onChange, prefix, suffix, min, max, step,
+}: {
+  label: string; value: number; onChange: (v: number) => void;
+  prefix?: string; suffix?: string; min: number; max?: number; step: number;
+}) {
+  return (
+    <div className="flex justify-between items-center gap-3 py-2 border-t border-dotted border-gray-200 dark:border-dark-700 first:border-t-0">
+      <label className="text-[13.5px] text-gray-600 dark:text-dark-300">{label}</label>
+      <div className="relative w-[110px] flex-none">
+        {prefix && <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[12px] text-gray-400 dark:text-dark-500 pointer-events-none">{prefix}</span>}
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className={[
+            'w-full rounded-lg border border-gray-300 dark:border-dark-600 bg-gray-50 dark:bg-dark-850 text-gray-900 dark:text-dark-100 text-[13.5px] text-right tabular-nums py-1.5',
+            prefix && suffix ? 'pl-5 pr-8' : prefix ? 'pl-5 pr-2' : suffix ? 'pl-2 pr-8' : 'px-2',
+            'focus:outline-none focus:ring-2 focus:ring-amber-400',
+          ].join(' ')}
+        />
+        {suffix && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[12px] text-gray-400 dark:text-dark-500 pointer-events-none">{suffix}</span>}
+      </div>
+    </div>
   );
 }
