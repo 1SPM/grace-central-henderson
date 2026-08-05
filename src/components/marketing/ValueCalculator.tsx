@@ -41,11 +41,14 @@ type Assumptions = typeof ASSUMPTION_DEFAULTS;
 // Illustrative only — the notice is always labeled "Example activity," never
 // implied as a live transaction feed. Ties the abstract loop diagram to a
 // concrete, human example of what a designated-fund routing looks like.
+// Each example has a fixed spot around the loop (matching where the flow
+// arrows travel) so the notice reads as "this fund's activity," not a
+// single fixed ticker.
 const ACTIVITY_EXAMPLES = [
-  'Grocery run routed $2.40 to Food Pantry',
-  'Gas fill-up routed $1.85 to Youth Ministry',
-  'Dinner out routed $3.10 to Missions',
-  'Coffee run routed $0.95 to Benevolence Fund',
+  { text: 'Grocery run routed $2.40 to Food Pantry', x: 78, y: 22 },
+  { text: 'Gas fill-up routed $1.85 to Youth Ministry', x: 78, y: 78 },
+  { text: 'Dinner out routed $3.10 to Missions', x: 22, y: 78 },
+  { text: 'Coffee run routed $0.95 to Benevolence Fund', x: 22, y: 22 },
 ];
 
 function fmt(n: number): string {
@@ -175,21 +178,29 @@ function ActivityNotice() {
     return () => { clearTimeout(first); clearInterval(interval); clearTimeout(hideTimer); };
   }, []);
 
+  const item = ACTIVITY_EXAMPLES[index];
+
   return (
     <div
       className={[
-        'gc-loop-notice absolute right-1 -bottom-1 max-w-[230px] rounded-xl border border-gray-200 dark:border-dark-700',
+        'gc-loop-notice absolute z-[2] max-w-[200px] rounded-xl border border-gray-200 dark:border-dark-700',
         'bg-white dark:bg-dark-800 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.3)] px-3.5 py-2.5 pointer-events-none',
-        'sm:right-1 sm:-bottom-1 max-sm:static max-sm:mt-3.5 max-sm:mx-auto max-sm:max-w-none',
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2',
+        'max-sm:mt-3.5 max-sm:mx-auto max-sm:max-w-none',
+        visible ? 'opacity-100' : 'opacity-0',
       ].join(' ')}
+      style={{
+        left: `${item.x}%`,
+        top: `${item.y}%`,
+        transform: `translate(-50%, -50%) translateY(${visible ? 0 : 8}px)`,
+        transition: 'opacity .4s ease, transform .4s ease, left .5s ease, top .5s ease',
+      }}
       aria-hidden="true"
     >
       <div className="text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400 mb-0.5">
         Example activity &middot; GRACE Impact Card
       </div>
       <div className="text-[12.5px] text-gray-600 dark:text-dark-300 leading-snug">
-        {ACTIVITY_EXAMPLES[index]}
+        {item.text}
       </div>
     </div>
   );
@@ -387,10 +398,10 @@ export function ValueCalculator() {
         }
         @keyframes gc-loop-dash-flow { to { stroke-dashoffset: -24; } }
         @keyframes gc-loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
-        .gc-loop-notice {
-          transition: opacity .4s ease, transform .4s ease;
+        @media (prefers-reduced-motion: reduce) { .gc-loop-notice { transition: none !important; } }
+        @media (max-width: 639px) {
+          .gc-loop-notice { position: static !important; left: auto !important; top: auto !important; transform: none !important; }
         }
-        @media (prefers-reduced-motion: reduce) { .gc-loop-notice { transition: none; } }
       `}</style>
       <div className="relative max-w-[620px] mx-auto mt-10 mb-2">
         <svg viewBox="0 0 700 316" className="w-full h-auto overflow-visible text-gray-300 dark:text-dark-600" aria-hidden="true">

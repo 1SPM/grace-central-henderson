@@ -141,17 +141,21 @@
   @keyframes loop-dash-flow { to { stroke-dashoffset: -24; } }
   @keyframes loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
   .loop-notice {
-    position: absolute; right: 4px; bottom: -4px; max-width: 230px;
+    position: absolute; left: 50%; top: 50%; max-width: 200px; z-index: 2;
     background: var(--card); border: 1px solid var(--line); border-radius: 12px;
     padding: 9px 13px; box-shadow: 0 8px 20px -8px rgba(0,0,0,.3);
-    opacity: 0; transform: translateY(8px); transition: opacity .4s ease, transform .4s ease;
+    opacity: 0; transform: translate(-50%, -50%) translateY(8px);
+    transition: opacity .4s ease, transform .4s ease, left .5s ease, top .5s ease;
     pointer-events: none;
   }
-  .loop-notice.show { opacity: 1; transform: translateY(0); }
+  .loop-notice.show { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
   .loop-notice .lnt { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--revenue); margin-bottom: 2px; }
   .loop-notice .lnb { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
   @media (prefers-reduced-motion: reduce) { .loop-notice { transition: none; } }
-  @media (max-width: 560px) { .loop-notice { position: static; max-width: none; margin: 14px auto 0; transform: none; } .loop-notice.show { transform: none; } }
+  @media (max-width: 560px) {
+    .loop-notice { position: static; max-width: none; left: auto; top: auto; margin: 14px auto 0; transform: none; }
+    .loop-notice.show { transform: none; }
+  }
   .loop-cap {
     text-align: center; color: var(--ink-soft); font-size: 16.5px; font-weight: 500;
     line-height: 1.5; margin: 16px auto 40px; max-width: 54ch;
@@ -586,18 +590,24 @@
   // --- periodic example-activity notice -------------------------------------
   // Illustrative only — labeled "Example activity," never implied as live
   // transactions. Ties the abstract loop diagram to a concrete, human example.
+  // Each example has a fixed spot around the ring (matching where the flow
+  // arrows travel) so the notice reads as "this fund's activity," not a
+  // single fixed ticker.
   var ACTIVITY_EXAMPLES = [
-    'Grocery run routed $2.40 to Food Pantry',
-    'Gas fill-up routed $1.85 to Youth Ministry',
-    'Dinner out routed $3.10 to Missions',
-    'Coffee run routed $0.95 to Benevolence Fund'
+    { text: 'Grocery run routed $2.40 to Food Pantry', x: 78, y: 22 },
+    { text: 'Gas fill-up routed $1.85 to Youth Ministry', x: 78, y: 78 },
+    { text: 'Dinner out routed $3.10 to Missions', x: 22, y: 78 },
+    { text: 'Coffee run routed $0.95 to Benevolence Fund', x: 22, y: 22 }
   ];
   (function () {
     var el = $('loopNotice'), textEl = $('loopNoticeText');
     if (!el || !textEl) return;
     var i = 0;
     function cycle() {
-      textEl.textContent = ACTIVITY_EXAMPLES[i % ACTIVITY_EXAMPLES.length];
+      var item = ACTIVITY_EXAMPLES[i % ACTIVITY_EXAMPLES.length];
+      textEl.textContent = item.text;
+      el.style.left = item.x + '%';
+      el.style.top = item.y + '%';
       i++;
       el.classList.add('show');
       setTimeout(function () { el.classList.remove('show'); }, 4200);
