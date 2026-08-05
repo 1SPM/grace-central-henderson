@@ -38,6 +38,16 @@ const ASSUMPTION_DEFAULTS = {
 
 type Assumptions = typeof ASSUMPTION_DEFAULTS;
 
+// Illustrative only — the notice is always labeled "Example activity," never
+// implied as a live transaction feed. Ties the abstract loop diagram to a
+// concrete, human example of what a designated-fund routing looks like.
+const ACTIVITY_EXAMPLES = [
+  'Grocery run routed $2.40 to Food Pantry',
+  'Gas fill-up routed $1.85 to Youth Ministry',
+  'Dinner out routed $3.10 to Missions',
+  'Coffee run routed $0.95 to Benevolence Fund',
+];
+
 function fmt(n: number): string {
   if (Math.abs(n) >= 1_000_000) return '$' + (Math.round(n / 100_000) / 10).toLocaleString('en-US') + 'M';
   return (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
@@ -146,6 +156,42 @@ function OutcomeCard({
         {how}
       </div>
     </section>
+  );
+}
+
+function ActivityNotice() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let hideTimer: ReturnType<typeof setTimeout>;
+    function cycle() {
+      setIndex((i) => (i + 1) % ACTIVITY_EXAMPLES.length);
+      setVisible(true);
+      hideTimer = setTimeout(() => setVisible(false), 4200);
+    }
+    const first = setTimeout(cycle, 1800);
+    const interval = setInterval(cycle, 6800);
+    return () => { clearTimeout(first); clearInterval(interval); clearTimeout(hideTimer); };
+  }, []);
+
+  return (
+    <div
+      className={[
+        'gc-loop-notice absolute right-1 -bottom-1 max-w-[230px] rounded-xl border border-gray-200 dark:border-dark-700',
+        'bg-white dark:bg-dark-800 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.3)] px-3.5 py-2.5 pointer-events-none',
+        'sm:right-1 sm:-bottom-1 max-sm:static max-sm:mt-3.5 max-sm:mx-auto max-sm:max-w-none',
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2',
+      ].join(' ')}
+      aria-hidden="true"
+    >
+      <div className="text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400 mb-0.5">
+        Example activity &middot; GRACE Impact Card
+      </div>
+      <div className="text-[12.5px] text-gray-600 dark:text-dark-300 leading-snug">
+        {ACTIVITY_EXAMPLES[index]}
+      </div>
+    </div>
   );
 }
 
@@ -281,7 +327,7 @@ export function ValueCalculator() {
   return (
     <section className="max-w-4xl mx-auto px-4 py-20" aria-labelledby="value-calc-heading">
       <h2 id="value-calc-heading" className="text-3xl md:text-4xl font-light text-gray-900 dark:text-dark-50 mb-3 text-center" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-        Empower your congregation with seamless giving anytime and anywhere, with GRACE.
+        Empower your congregation with seamless giving, powered by GRACE.
       </h2>
       <p className="text-gray-600 dark:text-dark-400 mb-9 text-center max-w-[46ch] mx-auto">
         GRACE brings giving, community, and everyday commerce together in one engine that funds ministry.
@@ -322,27 +368,89 @@ export function ValueCalculator() {
       </div>
 
       {/* ecosystem loop */}
-      <div className="max-w-[620px] mx-auto mt-10 mb-2" aria-hidden="true">
-        <svg viewBox="0 0 700 264" className="w-full h-auto text-gray-300 dark:text-dark-600">
-          <ellipse cx="350" cy="132" rx="238" ry="88" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="5 5" />
+      <style>{`
+        .gc-loop-icon { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+        .gc-loop-icon:hover { transform: scale(1.22); }
+        .gc-loop-arrow {
+          offset-path: path('M112,158 A238,86 0 1,1 588,158 A238,86 0 1,1 112,158');
+        }
+        .gc-loop-arrow.a1 { offset-distance: 0%; }
+        .gc-loop-arrow.a2 { offset-distance: 25%; }
+        .gc-loop-arrow.a3 { offset-distance: 50%; }
+        .gc-loop-arrow.a4 { offset-distance: 75%; }
+        @media (prefers-reduced-motion: no-preference) {
+          .gc-loop-ring { animation: gc-loop-dash-flow 12s linear infinite; }
+          .gc-loop-arrow { offset-rotate: auto; animation: gc-loop-orbit 12s linear infinite; }
+          .gc-loop-arrow.a2 { animation-delay: -3s; }
+          .gc-loop-arrow.a3 { animation-delay: -6s; }
+          .gc-loop-arrow.a4 { animation-delay: -9s; }
+        }
+        @keyframes gc-loop-dash-flow { to { stroke-dashoffset: -24; } }
+        @keyframes gc-loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+        .gc-loop-notice {
+          transition: opacity .4s ease, transform .4s ease;
+        }
+        @media (prefers-reduced-motion: reduce) { .gc-loop-notice { transition: none; } }
+      `}</style>
+      <div className="relative max-w-[620px] mx-auto mt-10 mb-2">
+        <svg viewBox="0 0 700 316" className="w-full h-auto overflow-visible text-gray-300 dark:text-dark-600" aria-hidden="true">
+          <ellipse className="gc-loop-ring" cx="350" cy="158" rx="238" ry="86" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="6 6" />
           <g className="fill-amber-600 dark:fill-amber-400">
-            <polygon points="-6,-5 8,0 -6,5" transform="translate(518,70) rotate(20)" />
-            <polygon points="-6,-5 8,0 -6,5" transform="translate(518,194) rotate(160)" />
-            <polygon points="-6,-5 8,0 -6,5" transform="translate(182,194) rotate(200)" />
-            <polygon points="-6,-5 8,0 -6,5" transform="translate(182,70) rotate(-20)" />
+            <polygon className="gc-loop-arrow a1" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a2" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a3" points="-6,-5 8,0 -6,5" />
+            <polygon className="gc-loop-arrow a4" points="-6,-5 8,0 -6,5" />
+          </g>
+          <circle cx="350" cy="158" r="27" className="fill-gray-100 dark:fill-dark-850 stroke-gray-200 dark:stroke-dark-700" strokeWidth={1.2} />
+          <g
+            className="text-gray-900 dark:text-dark-50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.7}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <svg x="333" y="141" width="34" height="34" viewBox="0 0 24 24">
+              <path d="M12 2v3" /><path d="M10.3 3.5h3.4" />
+              <path d="M4 21V11l8-6 8 6v10" /><path d="M9 21v-6h6v6" />
+            </svg>
+          </g>
+          <g
+            className="text-violet-600 dark:text-violet-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <svg className="gc-loop-icon" x="339" y="15" width="22" height="22" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+            </svg>
+            <svg className="gc-loop-icon" x="586" y="106" width="22" height="22" viewBox="0 0 24 24">
+              <rect x="2" y="6" width="20" height="14" rx="2.5" /><line x1="2" y1="11" x2="22" y2="11" />
+            </svg>
+            <svg className="gc-loop-icon" x="339" y="245" width="22" height="22" viewBox="0 0 24 24">
+              <path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2.3 5 6 5c2 0 3.5 1 4.5 2.3 1-1.3 2.5-2.3 4.5-2.3 3.7 0 5.5 3.5 4 6.7C19.5 16.4 12 21 12 21z" />
+            </svg>
+            <svg className="gc-loop-icon" x="92" y="106" width="22" height="22" viewBox="0 0 24 24">
+              <path d="M4 4v5h5" /><path d="M20 20v-5h-5" /><path d="M5.5 9A8 8 0 0 1 20 12" /><path d="M18.5 15A8 8 0 0 1 4 12" />
+            </svg>
           </g>
           <g textAnchor="middle">
-            <text x="350" y="26" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Your members</text>
-            <text x="597" y="126" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Everyday spending</text>
-            <text x="597" y="142" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">on your church's own card</text>
-            <text x="350" y="252" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Ministry funding</text>
-            <text x="103" y="126" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Engagement &amp; agency</text>
-            <text x="103" y="142" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">members choose the impact</text>
+            <text x="350" y="58" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Your members</text>
+            <text x="597" y="156" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Everyday spending</text>
+            <text x="597" y="172" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">on your church's own card</text>
+            <text x="350" y="296" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Ministry funding</text>
+            <text x="103" y="156" className="fill-gray-900 dark:fill-dark-50 text-[13px] font-bold">Engagement &amp; agency</text>
+            <text x="103" y="172" className="fill-gray-500 dark:fill-dark-400 text-[10.5px]">members choose the impact</text>
           </g>
         </svg>
+        <ActivityNotice />
       </div>
-      <p className="text-center text-gray-500 dark:text-dark-400 text-[13.5px] max-w-[52ch] mx-auto mb-10">
-        Members spend on their church's card. That spending funds designated initiatives like missions, youth, and benevolence. Members see the impact and stay engaged, and the ecosystem grows.
+      <p className="text-center text-gray-600 dark:text-dark-300 text-[16.5px] font-medium leading-[1.5] max-w-[54ch] mx-auto mb-10">
+        Members spend on their church's card. That spending funds{' '}
+        <strong className="text-violet-600 dark:text-violet-400 font-bold">designated initiatives like missions, youth, and benevolence</strong>.
+        Members see the impact and stay engaged, growing the ecosystem.
       </p>
 
       {/* three outcomes */}
@@ -389,46 +497,6 @@ export function ValueCalculator() {
           onDial={(v) => { trackField('giving'); setTouchedGiving(true); setGiving(v); }}
           how={<>{assumptions.liftPct}% lift on {fmt(giving)} from engaged, retained members</>}
         />
-      </div>
-
-      {/* the card, made tangible */}
-      <div className="flex items-center justify-center gap-8 flex-wrap mb-10">
-        <div
-          className="w-[280px] h-[174px] rounded-2xl relative flex-none text-indigo-50"
-          style={{
-            background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 45%, #7C3AED 130%)',
-            boxShadow: '0 18px 40px -18px rgba(49,46,129,.55), 0 4px 12px rgba(0,0,0,.18)',
-            transform: 'rotate(-4deg)',
-          }}
-          aria-hidden="true"
-        >
-          <div className="absolute top-[20px] left-[22px] text-sm font-bold tracking-wide">
-            {churchName || 'Your Church'}
-            <small className="block text-[10px] font-semibold tracking-[0.14em] uppercase opacity-75 mt-0.5">Member Card</small>
-          </div>
-          <div className="absolute top-[22px] right-[22px] w-5 h-5">
-            <span className="absolute inset-0 rounded-full border-2" style={{ borderColor: 'transparent rgba(238,242,255,.85) transparent transparent' }} />
-            <span className="absolute inset-[4px] rounded-full border-2" style={{ borderColor: 'transparent rgba(238,242,255,.85) transparent transparent' }} />
-            <span className="absolute inset-[9px] rounded-full border-2" style={{ borderColor: 'transparent rgba(238,242,255,.85) transparent transparent' }} />
-          </div>
-          <div
-            className="absolute top-[54px] left-[22px] w-9 h-[27px] rounded-md"
-            style={{ background: 'linear-gradient(135deg, #FCD34D, #B45309)' }}
-          />
-          <div className="absolute bottom-[54px] left-[22px] text-[15px] tracking-[0.18em] tabular-nums opacity-95">•••• •••• •••• 4821</div>
-          <div className="absolute bottom-[38px] left-[22px] text-[9px] tracking-wide uppercase opacity-70 whitespace-nowrap">Member since 2026</div>
-          <div className="absolute bottom-[14px] left-[22px] right-[22px] flex justify-end text-[11px]">
-            <span className="font-extrabold whitespace-nowrap">GRACE Impact Card</span>
-          </div>
-        </div>
-        <div className="max-w-[340px]">
-          <p className="text-2xl sm:text-3xl font-normal text-gray-900 dark:text-dark-50 mb-2" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-            Support a cause with every transaction.
-          </p>
-          <p className="text-[14.5px] text-gray-600 dark:text-dark-300 max-w-[38ch]">
-            The <strong>GRACE Impact Card</strong> puts your church's name in every member's wallet and turns everyday generosity into designated giving, automatically.
-          </p>
-        </div>
       </div>
 
       {/* cta */}
