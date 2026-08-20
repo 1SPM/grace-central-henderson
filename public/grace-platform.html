@@ -335,6 +335,20 @@
     @media (max-width: 820px) { .calc-teaser { padding: 28px 20px; } }
     @media (max-width: 520px) { .calc-breakdown { grid-template-columns: 1fr; } }
 
+    /* ---- 04 · trust ---- */
+    .sec-trust { position: relative; padding: 100px 0 108px; background: var(--navy-900); color: #fff; }
+    .sec-trust .sec-no { color: var(--sky-light); }
+    .sec-trust .sec-rule { background: var(--line-dark); }
+    .sec-trust .sec-sub { color: rgba(255,255,255,.72); }
+    .trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+    .trust-card { padding: 24px 22px; border: 1px solid var(--line-dark); border-radius: 16px; background: rgba(12,25,41,.42); }
+    .trust-card b { display: block; color: var(--sky-light); font-size: 11px; letter-spacing: .11em; text-transform: uppercase; margin-bottom: 11px; }
+    .trust-card h3 { font-family: var(--display); font-size: 24px; font-weight: 500; line-height: 1.15; margin-bottom: 9px; }
+    .trust-card p { color: rgba(255,255,255,.7); font-size: 14.5px; line-height: 1.58; }
+    .trust-link { display: inline-flex; margin-top: 28px; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--sky); padding-bottom: 3px; }
+    .trust-link:hover { color: var(--sky-light); }
+    @media (max-width: 760px) { .trust-grid { grid-template-columns: 1fr; } }
+
     /* ---- footer cta ---- */
     .footer-cta {
       position: relative; overflow: hidden; text-align: center; padding: 120px 0 96px;
@@ -388,6 +402,7 @@
       <a href="#watch">Watch</a>
       <a href="#click">Live demos</a>
       <a href="https://grace-value-calculator-eta.vercel.app/" target="_blank" rel="noopener noreferrer">Value</a>
+      <a href="https://grace-value-calculator-eta.vercel.app/trust" target="_blank" rel="noopener noreferrer">Trust</a>
       <a class="nav-cta" href="https://calendly.com/virtualworshipsolutions-info/enterprise-rate" target="_blank" rel="noopener noreferrer">Book a conversation</a>
     </div>
   </nav>
@@ -528,27 +543,45 @@
         The full calculator opens separately when you are ready to inspect every assumption.
       </p>
       <div class="calc-teaser rv rv-d2" aria-labelledby="calc-teaser-title">
-        <h3 id="calc-teaser-title">Empower your congregation with seamless giving, powered by GRACE.</h3>
-        <p class="calc-teaser-intro">Move the slider to your congregation size. We&rsquo;ll show what the GRACE ecosystem could generate for your church in new revenue, efficiency savings, and giving growth.</p>
+        <h3 id="calc-teaser-title">See the operating value. Understand the trust model.</h3>
+        <p class="calc-teaser-intro">Move the slider to your congregation size. We&rsquo;ll show estimated staff capacity and giving engagement separately from the projected Impact Card opportunity.</p>
         <div class="calc-quick">
           <div class="calc-quick-head">Your congregation</div>
           <div class="calc-members-value"><span id="calc-members-out">2,500</span> <small>people</small></div>
           <input class="calc-range" type="range" id="calc-members" min="200" max="20000" step="100" value="2500" aria-label="Congregation size" />
         </div>
         <div class="calc-answer">
-          <div class="calc-answer-label">What the GRACE ecosystem generates for your church</div>
+          <div class="calc-answer-label">Illustrative operating value for your church</div>
           <div class="calc-answer-value" id="calc-answer">$0/yr</div>
-          <p class="calc-answer-copy">Every year in new revenue, recovered staff time, and giving growth, powered by your own members.</p>
-          <p class="calc-answer-note">The new-revenue portion is a projection — it depends on an executed card program agreement, which is not yet in place. Staff-time and giving-growth figures don't.</p>
+          <p class="calc-answer-copy">Estimated staff capacity and giving engagement. Impact Card potential is shown separately and excluded from this total.</p>
+          <p class="calc-answer-note">Impact Card potential is a projection. It requires an executed card program agreement and is not included in the operating-value total above.</p>
           <div class="calc-breakdown">
-            <div class="calc-bd-item calc-bd-revenue"><span class="calc-bd-k">New revenue</span><span class="calc-bd-badge">Projected — requires card agreement</span><span class="calc-bd-v" id="calc-bd-revenue">$0</span></div>
+            <div class="calc-bd-item calc-bd-revenue"><span class="calc-bd-k">Card potential</span><span class="calc-bd-badge">Projected · excluded · requires card agreement</span><span class="calc-bd-v" id="calc-bd-revenue">$0</span></div>
             <div class="calc-bd-item calc-bd-savings"><span class="calc-bd-k">Efficiency savings</span><span class="calc-bd-v" id="calc-bd-savings">$0</span></div>
             <div class="calc-bd-item calc-bd-growth"><span class="calc-bd-k">Giving growth</span><span class="calc-bd-v" id="calc-bd-growth">$0</span></div>
           </div>
           <a class="calc-full-link" href="https://grace-value-calculator-eta.vercel.app/" target="_blank" rel="noopener noreferrer">Check the full model &rarr;</a>
-          <span class="calc-full-note">Opens the complete calculator, including every editable assumption.</span>
+          <span class="calc-full-note">The full calculator marks card potential as contingent on executed agreements.</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ================= 04 · TRUST ================= -->
+  <section id="trust" class="sec sec-trust">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-no">04 &middot; Trust</span>
+        <span class="sec-rule" aria-hidden="true"></span>
+      </div>
+      <h2 class="rv rv-d1">Built for church control, <em>not dependency.</em></h2>
+      <p class="sec-sub rv rv-d2">GRACE is reinforced by an own-the-stack discipline: use modular foundations we can control, keep sensitive ministry work close, and remove the meter wherever an owned alternative can do the job well. GRACE carries the infrastructure work so a church does not have to.</p>
+      <div class="trust-grid rv rv-d3">
+        <article class="trust-card"><b>Running now</b><h3>Cloud-tested and observed</h3><p>GRACE runs in the cloud today while we test, monitor, and support it reliably. We use outside services only where they currently do a job better than the stack we control.</p></article>
+        <article class="trust-card"><b>Built into the product</b><h3>Controls that do not depend on a promise</h3><p>Church data is isolated by role and tenant. Security-relevant access events are logged. Consequential workflows keep people accountable and in control.</p></article>
+        <article class="trust-card"><b>End state</b><h3>Own the stack where it matters</h3><p>We are building toward GRACE-operated and customer-controlled infrastructure for appropriate workloads. The more of the stack we own, the fewer per-task meters stand between a church and its work. That is roadmap, not a live deployment option.</p></article>
+      </div>
+      <a class="trust-link rv rv-d4" href="https://grace-value-calculator-eta.vercel.app/trust" target="_blank" rel="noopener noreferrer">Read the GRACE trust architecture →</a>
     </div>
   </section>
 
@@ -572,6 +605,7 @@
         <a href="#watch">Walkthrough</a>
         <a href="#click">Live demos</a>
         <a href="https://grace-value-calculator-eta.vercel.app/" target="_blank" rel="noopener noreferrer">Calculator</a>
+        <a href="https://grace-value-calculator-eta.vercel.app/trust" target="_blank" rel="noopener noreferrer">Trust</a>
         <a href="mailto:info@divinityagi.com?subject=GRACE%20platform%20inquiry">Email</a>
       </div>
       <span>Demos contain sample data only.</span>
@@ -643,7 +677,7 @@
       /* Ecosystem-model calculator preview, matching the full calculator's
          congregation-driven model. The complete, editable model lives on
          the public calculator (see calc-full-link below). */
-      var CALC_ASSUMPTIONS = { spendPerAccount: 500, commissionPct: 1, adoptPct: 25, loadedCost: 65000, automatedPct: 15, softwarePerMember: 6, liftPct: 2 };
+      var CALC_ASSUMPTIONS = { spendPerAccount: 500, netSharePct: 0.5, adoptPct: 15, loadedCost: 65000, automatedPct: 15, softwarePerMember: 6, liftPct: 2 };
       function calcMoney(value) {
         if (Math.abs(value) >= 1e6) return '$' + (Math.round(value / 1e5) / 10).toLocaleString('en-US') + 'M';
         return (value < 0 ? '−' : '') + '$' + Math.round(Math.abs(value)).toLocaleString('en-US');
@@ -656,10 +690,10 @@
         var fte = Math.max(1, Math.round(members / 400));
         var giving = Math.round(members * 2000 / 100000) * 100000;
         var accounts = members * (a.adoptPct / 100);
-        var revenue = accounts * a.spendPerAccount * 12 * (a.commissionPct / 100);
+        var revenue = accounts * a.spendPerAccount * 12 * (a.netSharePct / 100);
         var savings = fte * a.loadedCost * (a.automatedPct / 100) + members * a.softwarePerMember;
         var growth = giving * (a.liftPct / 100);
-        var total = revenue + savings + growth;
+        var total = savings + growth;
 
         var out = document.getElementById('calc-members-out');
         if (out) out.textContent = Math.round(members).toLocaleString('en-US');
