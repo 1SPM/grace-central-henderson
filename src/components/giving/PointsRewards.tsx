@@ -9,8 +9,8 @@ import {
   Wallet,
 } from 'lucide-react';
 import {
+  demoCommunityGiving,
   demoEarnRules,
-  demoPointsLeaders,
   demoRedemptionOptions,
 } from './demoGivingHub';
 import {
@@ -131,48 +131,49 @@ export function PointsRewards() {
       </div>
 
       <div className="bg-stone-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden">
-        <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 p-5 pb-3">Top point earners this month</h2>
+        <h2 className="text-sm font-medium text-gray-900 dark:text-dark-100 p-5 pb-3">Community giving this month</h2>
         {program.state !== 'ready' ? (
           <p className="text-sm text-gray-400 dark:text-dark-500 text-center py-8">
-            Live leaderboard available when Impact Card program is active
+            Community stats available when Impact Card program is active
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-[11px] uppercase tracking-wide text-gray-400 dark:text-dark-500 border-b border-gray-200 dark:border-dark-700">
-                  <th className="px-5 py-2 font-medium">#</th>
-                  <th className="px-3 py-2 font-medium">Member</th>
-                  <th className="px-3 py-2 font-medium text-right">Points (est.)</th>
-                  <th className="px-3 py-2 font-medium text-right">Card spend</th>
-                  <th className="px-5 py-2 font-medium">Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {demoPointsLeaders.map(l => (
-                  <tr key={l.rank} className="border-b border-gray-100 dark:border-dark-700 last:border-0">
-                    <td className="px-5 py-2.5 text-gray-400 dark:text-dark-500">{l.rank}</td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 dark:text-dark-300">
-                          {l.initials}
-                        </div>
-                        <span className="font-medium text-gray-900 dark:text-dark-100">{l.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2.5 text-right font-medium text-violet-700 dark:text-violet-300 tabular-nums">
-                      {l.points.toLocaleString()}
-                    </td>
-                    <td className="px-3 py-2.5 text-right text-gray-600 dark:text-dark-300 tabular-nums">
-                      ${l.cardSpend.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-2.5 text-xs text-gray-400 dark:text-dark-500 italic">
-                      Demo row — wire to member accounts
-                    </td>
-                  </tr>
+          <div className="px-5 pb-5 space-y-5">
+            <div className="flex flex-wrap gap-6">
+              <div>
+                <p className="text-[11px] text-gray-500 dark:text-dark-400">Members participating</p>
+                <p className="stat-number text-xl text-slate-900 dark:text-dark-100">
+                  {demoCommunityGiving.participantsThisMonth}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] text-gray-500 dark:text-dark-400">Points earned (community)</p>
+                <p className="stat-number text-xl text-slate-900 dark:text-dark-100">
+                  {demoCommunityGiving.pointsEarnedThisMonth.toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] text-gray-500 dark:text-dark-400 mb-2">Causes funded</p>
+              <div className="space-y-2">
+                {demoCommunityGiving.causesFunded.map(c => (
+                  <div key={c.cause} className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm text-gray-700 dark:text-dark-300">{c.cause}</span>
+                    <div className="flex-1 h-2 rounded-full bg-gray-200 dark:bg-dark-700 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-violet-500 dark:bg-violet-400"
+                        style={{ width: `${c.sharePct}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-xs text-gray-500 dark:text-dark-400 tabular-nums">
+                      {c.sharePct}%
+                    </span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-dark-500 italic">
+              Demo aggregate — wire to real Impact Card program totals
+            </p>
           </div>
         )}
       </div>

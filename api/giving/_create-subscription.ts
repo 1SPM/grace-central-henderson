@@ -11,7 +11,7 @@
  *   3. Create an ad-hoc Price on the platform (recurring monthly/weekly)
  *      with product_data inline — keeps the price catalog clean
  *   4. Create the Subscription with:
- *        application_fee_percent = 2.5
+ *        application_fee_percent = 0.75
  *        transfer_data.destination = church Stripe Connect account
  *        payment_behavior = 'default_incomplete' so we can confirm
  *        the first invoice's PaymentIntent via Stripe Elements

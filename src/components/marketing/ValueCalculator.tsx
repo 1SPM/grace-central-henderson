@@ -113,7 +113,7 @@ function useCountUp(target: number): number {
 }
 
 function OutcomeCard({
-  tone, label, value, story, dialLabel, dialValue, dialDisplay, dialMin, dialMax, dialStep, onDial, how,
+  tone, label, value, story, dialLabel, dialValue, dialDisplay, dialMin, dialMax, dialStep, onDial, how, badge,
 }: {
   tone: 'revenue' | 'savings' | 'growth';
   label: string;
@@ -127,6 +127,8 @@ function OutcomeCard({
   dialStep: number;
   onDial: (v: number) => void;
   how: React.ReactNode;
+  /** Short caveat shown under the label — for figures that depend on something not yet in place. */
+  badge?: string;
 }) {
   const tones = {
     revenue: { border: 'border-t-violet-600 dark:border-t-violet-400', text: 'text-violet-600 dark:text-violet-400', accent: 'accent-violet-600 dark:accent-violet-400' },
@@ -137,7 +139,14 @@ function OutcomeCard({
 
   return (
     <section className={`rounded-2xl border border-gray-200 dark:border-dark-700 border-t-4 ${t.border} bg-white dark:bg-dark-800 p-5 flex flex-col gap-1.5`}>
-      <span className={`text-[11.5px] font-extrabold uppercase tracking-wide ${t.text}`}>{label}</span>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className={`text-[11.5px] font-extrabold uppercase tracking-wide ${t.text}`}>{label}</span>
+        {badge && (
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-400 bg-gray-100 dark:bg-dark-700 rounded-full px-2 py-0.5">
+            {badge}
+          </span>
+        )}
+      </div>
       <span className={`text-3xl sm:text-4xl tabular-nums ${t.text}`} style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{fmt(value)}</span>
       <p className="text-sm text-gray-600 dark:text-dark-300 flex-1">{story}</p>
       <div className="mt-2">
@@ -376,6 +385,9 @@ export function ValueCalculator() {
         <p className="text-gray-600 dark:text-dark-300 max-w-[44ch] mx-auto">
           every year in new revenue, recovered staff time, and giving growth, powered by your own members.
         </p>
+        <p className="text-xs text-gray-500 dark:text-dark-400 max-w-[44ch] mx-auto mt-2">
+          The new-revenue portion is a projection — it depends on an executed card program agreement, which is not yet in place. Staff-time and giving-growth figures don't.
+        </p>
       </div>
 
       {/* ecosystem loop */}
@@ -469,6 +481,7 @@ export function ValueCalculator() {
         <OutcomeCard
           tone="revenue"
           label="New revenue"
+          badge="Projected — requires card agreement"
           value={model.revenue}
           story="The GRACE Impact Card turns everyday generosity like groceries, gas, and dining into designated funding for missions, youth, and benevolence, at no cost to the member."
           dialLabel="Members carrying the card"
@@ -561,7 +574,7 @@ export function ValueCalculator() {
       </details>
 
       <footer className="text-center text-xs text-gray-500 dark:text-dark-400 mt-10 pt-4 border-t border-gray-200 dark:border-dark-700 leading-relaxed">
-        Illustrative estimates based on your inputs and GRACE program planning. Actual results vary by congregation and program terms.
+        Illustrative estimates based on your inputs and GRACE program planning. Efficiency savings and giving growth are modeled from live product usage; new-card-revenue figures are a projection of program potential and require an executed card program agreement, which does not yet exist. Actual results vary by congregation.
       </footer>
     </section>
   );

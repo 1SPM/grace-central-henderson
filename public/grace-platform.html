@@ -323,6 +323,8 @@
     .calc-bd-savings { border-top-color: #34d399; }
     .calc-bd-growth { border-top-color: #fbbf24; }
     .calc-bd-k { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #a9b7cc; margin-bottom: 4px; }
+    .calc-bd-badge { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: #a9b7cc; background: #101a2e; border-radius: 999px; padding: 2px 8px; margin: 0 0 6px; width: fit-content; }
+    .calc-answer-note { max-width: 58ch; margin: 10px 0 0; color: #a9b7cc; font-size: 12.5px; line-height: 1.5; }
     .calc-bd-v { display: block; font-family: var(--display); font-size: 22px; }
     .calc-bd-revenue .calc-bd-v { color: #a78bfa; }
     .calc-bd-savings .calc-bd-v { color: #34d399; }
@@ -537,8 +539,9 @@
           <div class="calc-answer-label">What the GRACE ecosystem generates for your church</div>
           <div class="calc-answer-value" id="calc-answer">$0/yr</div>
           <p class="calc-answer-copy">Every year in new revenue, recovered staff time, and giving growth, powered by your own members.</p>
+          <p class="calc-answer-note">The new-revenue portion is a projection — it depends on an executed card program agreement, which is not yet in place. Staff-time and giving-growth figures don't.</p>
           <div class="calc-breakdown">
-            <div class="calc-bd-item calc-bd-revenue"><span class="calc-bd-k">New revenue</span><span class="calc-bd-v" id="calc-bd-revenue">$0</span></div>
+            <div class="calc-bd-item calc-bd-revenue"><span class="calc-bd-k">New revenue</span><span class="calc-bd-badge">Projected — requires card agreement</span><span class="calc-bd-v" id="calc-bd-revenue">$0</span></div>
             <div class="calc-bd-item calc-bd-savings"><span class="calc-bd-k">Efficiency savings</span><span class="calc-bd-v" id="calc-bd-savings">$0</span></div>
             <div class="calc-bd-item calc-bd-growth"><span class="calc-bd-k">Giving growth</span><span class="calc-bd-v" id="calc-bd-growth">$0</span></div>
           </div>
