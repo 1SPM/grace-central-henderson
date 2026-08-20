@@ -106,6 +106,7 @@
     font-size: clamp(52px, 10vw, 88px); line-height: 1.05; margin: 4px 0 6px;
   }
   .total .ts { color: var(--ink-soft); font-size: 16px; max-width: 44ch; margin: 0 auto; }
+  .total .tc { color: var(--muted); font-size: 12.5px; max-width: 44ch; margin: 8px auto 0; }
 
   /* ---------- ecosystem loop ---------- */
   .loop { position: relative; margin: 40px auto 8px; max-width: 620px; }
@@ -174,6 +175,7 @@
   .oc.growth  { border-top-color: var(--growth); }
   .oc .k { font-size: 11.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
   .oc.revenue .k { color: var(--revenue); }
+  .oc .badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--card-inset); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; }
   .oc.savings .k { color: var(--savings); }
   .oc.growth  .k { color: var(--growth); }
   .oc .v { font-family: "Fraunces", Georgia, serif; font-size: clamp(30px, 4.5vw, 40px); line-height: 1.1; }
@@ -283,6 +285,7 @@
     <div class="tl">What the GRACE ecosystem generates for your church</div>
     <div class="tv num" id="totalOut">$0</div>
     <p class="ts">every year in new revenue, recovered staff time, and giving growth, powered by your own members.</p>
+    <p class="tc">The new-revenue portion is a projection — it depends on an executed card program agreement, which is not yet in place. Staff-time and giving-growth figures don't.</p>
   </div>
 
   <!-- ecosystem loop -->
@@ -334,7 +337,7 @@
   <div class="outcomes">
 
     <section class="oc revenue" aria-labelledby="ocR">
-      <span class="k" id="ocR">New revenue</span>
+      <span class="k" id="ocR">New revenue</span><span class="badge">Projected — requires card agreement</span>
       <span class="v num" id="revOut">$0</span>
       <p class="story">The GRACE Impact Card turns everyday generosity like groceries, gas, and dining into designated funding for missions, youth, and benevolence, at no cost to the member.</p>
       <div class="dial">
@@ -420,7 +423,7 @@
   </details>
 
   <footer class="fine">
-    Illustrative estimates based on your inputs and GRACE program planning. Actual results vary by congregation and program terms.
+    Illustrative estimates based on your inputs and GRACE program planning. Efficiency savings and giving growth are modeled from live product usage; new-card-revenue figures are a projection of program potential and require an executed card program agreement, which does not yet exist. Actual results vary by congregation.
   </footer>
 </div>
 

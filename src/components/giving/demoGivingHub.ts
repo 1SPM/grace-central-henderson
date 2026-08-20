@@ -165,22 +165,29 @@ export const demoRedemptionOptions: RedemptionOption[] = [
   { id: 'rd-missions', title: 'Missions fund', detail: 'Direct your points to the global missions giving stream', icon: 'missions' },
 ];
 
-export interface PointsLeader {
-  rank: number;
-  name: string;
-  initials: string;
-  points: number;
-  cardSpend: number;
-  redeemable: number;
-  allocation: string;
+/**
+ * Community-aggregate framing only — never a per-member ranking by points
+ * or card spend. A named, dollar-ranked leaderboard publishes individual
+ * financial behavior and manufactures social pressure, the same mechanism
+ * guilt-based giving runs on. If a leaderboard ever ships, it must be
+ * opt-in per member, first-name-anonymous, and never ranked by dollars.
+ * See GRACE_Financial_UX_Redesign_July2026.md Part 4, item 1.
+ */
+export interface CommunityGivingSnapshot {
+  participantsThisMonth: number;
+  pointsEarnedThisMonth: number;
+  causesFunded: { cause: string; sharePct: number }[];
 }
 
-export const demoPointsLeaders: PointsLeader[] = [
-  { rank: 1, name: 'David Osei', initials: 'DO', points: 42000, cardSpend: 28000, redeemable: 420, allocation: 'Applied to tithe' },
-  { rank: 2, name: 'James Okafor', initials: 'JO', points: 18600, cardSpend: 12400, redeemable: 186, allocation: 'Split tithe + missions' },
-  { rank: 3, name: 'Maria Santos', initials: 'MS', points: 13200, cardSpend: 8800, redeemable: 132, allocation: 'Dedicated to Food Pantry' },
-  { rank: 4, name: 'Robert Chen', initials: 'RC', points: 9600, cardSpend: 6400, redeemable: 96, allocation: 'Applied to tithe' },
-];
+export const demoCommunityGiving: CommunityGivingSnapshot = {
+  participantsThisMonth: 4,
+  pointsEarnedThisMonth: 83400,
+  causesFunded: [
+    { cause: 'Tithe', sharePct: 73 },
+    { cause: 'Food Pantry', sharePct: 16 },
+    { cause: 'Missions', sharePct: 11 },
+  ],
+};
 
 // ── Seasonal giving ───────────────────────────────────────────────
 
