@@ -1,0 +1,10 @@
+GRACE Virtual Campus — art credits
+
+atlas.png is a packed subset of tiles from LimeZu's "Modern Interiors" and
+"Modern Office (Revamped)" pixel-art packs (https://limezu.itch.io), used under
+their licence (use in commercial/non-commercial projects permitted; the packs
+themselves may not be redistributed). Only the specific tiles the campus uses
+are included here; the source packs are not part of this repository.
+
+Rebuild the atlas from the source packs with:
+  CAMPUS_ASSET_ROOT="/path/to/Virtual Office Graphics" node tools/campus/build-atlas.mjs

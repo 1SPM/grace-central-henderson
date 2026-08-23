@@ -45,3 +45,12 @@ describe('workosNav (route test)', () => {
     expect(workosHash('overview')).toBe('#/workos');
   });
 });
+
+describe('workosNav campus tab', () => {
+  afterEach(() => setHash('#/'));
+  it('parses the campus tab and round-trips through workosHash', () => {
+    setHash('#/workos?tab=campus');
+    expect(parseWorkOsTab()).toBe('campus');
+    expect(workosHash('campus')).toBe('#/workos?tab=campus');
+  });
+});
