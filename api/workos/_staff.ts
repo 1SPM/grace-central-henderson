@@ -18,6 +18,16 @@ import { staffDisplayName, type StaffRow } from '../_lib/ministryAreas.js';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+/**
+ * staff_profiles.user_id is UNIQUE, so PostgREST returns the embed as a
+ * to-one OBJECT — but typings and older rows can present an array. Handle
+ * both: the array-only guard silently dropped every title in production.
+ */
+function profileTitle(sp: unknown): string | null {
+  const p = Array.isArray(sp) ? sp[0] : sp;
+  return (p as { title?: string | null } | null | undefined)?.title ?? null;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -48,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return {
       user_id: u.id,
       name: staffDisplayName(row),
-      title: (Array.isArray(u.staff_profiles) ? u.staff_profiles[0]?.title : null) ?? null,
+      title: profileTitle(u.staff_profiles),
     };
   });
 
