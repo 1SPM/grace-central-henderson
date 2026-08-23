@@ -283,3 +283,24 @@ An owner who later leaves the staff list is shown as "Former staff member"
 rather than silently reading as unowned. Task-level ownership
 (`work_order_tasks.owner_user_id`, and the unused `useTaskBoard.reassignTask`)
 is deliberately still untouched.
+
+### 12.2 The GRACE window — campus and chat as one unit
+
+Every Grace entry point (sidebar orb, dock, ⌘/) now opens one **floating,
+non-modal window** instead of the fixed pop-out: the 2D campus fills it, the
+Ask Grace chat sits as a right rail, and the brand quick-tag rail appears
+when the window is wide or fullscreen.
+
+- `src/components/ui/FloatingWindow.tsx` — generic shell: drag by header
+  (pointer capture), corner resize, fullscreen toggle (double-click header
+  works too), Esc closes, geometry persisted per device
+  (`grace-window-geometry`), clamped so the header can never leave the
+  viewport. Below `sm` it is always fullscreen. **No backdrop by design** —
+  the app stays live behind it, which is what makes moving it useful.
+- `CampusView` gained `embedded`/`onNavigated` props: canvas fills the
+  container, the room/area panel becomes an overlay card on the map, and
+  clicking a GRACE surface navigates the app underneath **and closes the
+  window** — in that moment the campus is a launcher.
+- Responsive inside the window: under 900px wide the campus yields entirely
+  and the window is chat-only; the brand rail needs ≥1240px or fullscreen.
+- `#/workos?tab=campus` is unchanged — same component, two mounts.

@@ -6,6 +6,9 @@ import { useGraceSpeech } from '../hooks/useGraceSpeech';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
+import { FloatingWindow } from './ui/FloatingWindow';
+import { CampusView } from './workos/CampusView';
+import type { View } from '../types';
 
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
@@ -843,6 +846,12 @@ export function AvatarSkyPanel() {
 
 interface AskGraceProps {
   hideDock?: boolean;
+  /**
+   * Lets the campus inside the GRACE window navigate the app behind it.
+   * Optional so existing mounts/tests keep working; without it, surface
+   * links still rewrite the hash, they just can't switch the View state.
+   */
+  setView?: (v: View) => void;
 }
 
 function useIsOnGracePage(): boolean {
@@ -863,7 +872,7 @@ function useIsOnGracePage(): boolean {
   return onGrace;
 }
 
-export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
+export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
@@ -918,30 +927,53 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
         </div>
       )}
 
-      {chat.panelOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40" onClick={chat.closePanel} />
-          <aside
-            className="fixed z-50 bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 shadow-2xl
-              inset-0 sm:inset-auto
-              sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2
-              sm:w-[min(780px,calc(100vw-48px))] sm:h-[min(640px,calc(100vh-96px))]
-              sm:rounded-2xl sm:border sm:border-stone-300/70 sm:dark:border-white/5
-              overflow-hidden flex"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-          >
-            <GraceAdminSidePanel
-              salutation={chat.salutation}
-              tags={chat.quickTags}
-              onTagClick={(prompt) => void chat.sendMessage(prompt)}
-              loading={chat.loading}
-            />
-            <div className="flex-1 min-w-0">
-              <AskGraceChat variant="panel" onClose={chat.closePanel} />
+      {/* The GRACE window: the 2D campus and the chat as one floating,
+          draggable, resizable, fullscreen-able unit. Non-modal on purpose —
+          the app stays live behind it, which is what makes moving it useful. */}
+      <FloatingWindow
+        open={chat.panelOpen}
+        onClose={chat.closePanel}
+        storageKey="grace-window-geometry"
+        aria-label="GRACE — campus and chat"
+        title={
+          <>
+            <GraceOrb size="xs" />
+            <span className="text-sm font-semibold text-gray-900 dark:text-dark-100 truncate">GRACE</span>
+            <span className="hidden sm:inline text-xs text-gray-500 dark:text-dark-400 truncate">Virtual Campus · Ask Grace</span>
+          </>
+        }
+      >
+        {({ width, fullscreen }) => {
+          // The campus needs real width to be worth drawing; in a narrow
+          // window the chat is the point, so the map yields entirely.
+          const showCampus = width >= 900;
+          const showBrandRail = (fullscreen || width >= 1240) && showCampus;
+          return (
+            <div className="flex h-full min-h-0">
+              {showBrandRail && (
+                <GraceAdminSidePanel
+                  salutation={chat.salutation}
+                  tags={chat.quickTags}
+                  onTagClick={(prompt) => void chat.sendMessage(prompt)}
+                  loading={chat.loading}
+                />
+              )}
+              {showCampus && (
+                <div className="flex-1 min-w-0 relative border-r border-stone-300/60 dark:border-white/10">
+                  <CampusView
+                    embedded
+                    setView={setView ?? (() => {})}
+                    onNavigated={chat.closePanel}
+                  />
+                </div>
+              )}
+              <div className={showCampus ? 'w-[380px] shrink-0 min-w-0' : 'flex-1 min-w-0'}>
+                <AskGraceChat variant="panel" onClose={chat.closePanel} />
+              </div>
             </div>
-          </aside>
-        </>
-      )}
+          );
+        }}
+      </FloatingWindow>
     </>
   );
 }
