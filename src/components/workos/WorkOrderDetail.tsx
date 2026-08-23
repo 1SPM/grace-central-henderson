@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, FileText, Paperclip, ShieldCheck } from 'lucide-react';
 import { useWorkOrders, type WorkOrderDetail as WorkOrderDetailData } from '../../hooks/useWorkOrders';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
+import { useChurchStaff } from '../../hooks/useChurchStaff';
+import { OwnerPicker } from './OwnerPicker';
 import { ProgressBar } from '../ui/ProgressBar';
 import { StatusBadge } from '../ui/StatusBadge';
 import { STATUS_LABELS, STATUS_VARIANT } from './WorkOrderList';
@@ -22,7 +24,8 @@ interface WorkOrderDetailProps {
 }
 
 export function WorkOrderDetail({ workOrderId, onBack }: WorkOrderDetailProps) {
-  const { getDetail, updateStatus, updateTask, addEvidence, requestApproval, getCompletionReport } = useWorkOrders();
+  const { getDetail, updateStatus, setOwner, updateTask, addEvidence, requestApproval, getCompletionReport } = useWorkOrders();
+  const { staff } = useChurchStaff();
   const { has } = useWorkOsPermissions();
   const [detail, setDetail] = useState<WorkOrderDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -141,6 +144,21 @@ export function WorkOrderDetail({ workOrderId, onBack }: WorkOrderDetailProps) {
           </p>
         </div>
         <StatusBadge variant={STATUS_VARIANT[wo.status]}>{STATUS_LABELS[wo.status]}</StatusBadge>
+      </div>
+
+      {/* Who is accountable. First-class, next to status — an unowned Work
+          Order is exactly what Verity flags, and this is where it gets fixed. */}
+      <div className="mb-5">
+        <OwnerPicker
+          id={`wo-owner-${wo.id}`}
+          ownerUserId={wo.owner_user_id ?? null}
+          staff={staff}
+          canManage={canManage}
+          onChange={async ownerUserId => {
+            await setOwner(wo.id, ownerUserId);
+            await load();
+          }}
+        />
       </div>
 
       <div className="mb-6">

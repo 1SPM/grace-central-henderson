@@ -32,6 +32,8 @@ const STATUS_PATTERN = new RegExp(`^(${WORK_ORDER_STATUSES.join('|')})$`);
 const PRIORITY_PATTERN = /^(low|medium|high|urgent)$/;
 const SENSITIVITY_PATTERN = /^(public|internal|restricted|confidential)$/;
 
+const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 const CREATE_SCHEMA = {
   title: str({ required: true, min: 1, max: 200 }),
   description: str({ max: 5000 }),
@@ -209,6 +211,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const update: Record<string, unknown> = { ...body };
+
+    // Ownership is the one field a human needs to be able to *clear*, and
+    // `uuid_()` maps an explicit null to undefined (TD-045), which the spread
+    // above then drops. Read it off the raw body so "unassign" actually
+    // unassigns, and verify a named owner is active staff in this church.
+    const rawBody = (req.body ?? {}) as Record<string, unknown>;
+    if (Object.prototype.hasOwnProperty.call(rawBody, 'owner_user_id')) {
+      const ownerRaw = rawBody.owner_user_id;
+      if (ownerRaw === null || ownerRaw === '') {
+        update.owner_user_id = null;
+      } else if (typeof ownerRaw === 'string' && UUID_RE.test(ownerRaw)) {
+        const { data: owner } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', ownerRaw)
+          .eq('church_id', actor.churchId)
+          .eq('account_status', 'active')
+          .maybeSingle();
+        if (!owner) return res.status(400).json({ error: 'owner_not_in_church' });
+        update.owner_user_id = ownerRaw;
+      } else {
+        return res.status(400).json({ error: 'invalid_request', detail: 'owner_user_id must be a UUID or null' });
+      }
+    }
     if (body.status === 'in_progress' && !existing.started_at) update.started_at = new Date().toISOString();
     if (body.status === 'completed') update.completed_at = new Date().toISOString();
     if (body.status === 'cancelled') update.cancelled_at = new Date().toISOString();

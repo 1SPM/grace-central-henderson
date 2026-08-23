@@ -254,3 +254,32 @@ area → accountable human (users)  → supporting agent (registry) → campus r
 The AI clergy layer (`#/leadership`) is untouched and stays its own thing:
 it models pastoral presence, not operational accountability, and the two
 never share an identity.
+
+### 12.1 Work Order ownership
+
+`work_orders.owner_user_id` has existed since migration `034` and Verity has
+flagged unowned Work Orders since `agentWorkflows.ts` shipped, but nothing in
+the UI could answer her. `OwnerPicker` (`src/components/workos/OwnerPicker.tsx`)
+is that control:
+
+- **Detail** — the owner sits next to status; changing it PATCHes and reloads.
+- **List** — every row names its owner, or shows an amber "Unowned".
+- **Create** — an owner can be named at creation. Left unset the server still
+  defaults to the creator, which is the pre-existing behaviour.
+- **Staff list** — `GET /api/workos/staff` (`useChurchStaff`), thin by design:
+  id, display name, title. Any active staff actor may read it.
+
+Two server-side details worth knowing:
+
+- `PATCH /api/work-orders` now reads `owner_user_id` off the **raw** body, so
+  an explicit `null` clears the column. The shared `uuid_()` validator maps
+  null to undefined and the `{ ...body }` spread then drops it — TD-045 —
+  which meant "unassign" was previously impossible. Assignment is still
+  gated by `work_orders.manage`.
+- A named owner is verified to be an **active user of the caller's church**
+  before it is written (`owner_not_in_church` otherwise).
+
+An owner who later leaves the staff list is shown as "Former staff member"
+rather than silently reading as unowned. Task-level ownership
+(`work_order_tasks.owner_user_id`, and the unused `useTaskBoard.reassignTask`)
+is deliberately still untouched.

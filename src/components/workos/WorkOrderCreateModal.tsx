@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { useChurchStaff } from '../../hooks/useChurchStaff';
 
 export interface NewWorkOrderInput {
   title: string;
@@ -7,6 +8,7 @@ export interface NewWorkOrderInput {
   priority?: string;
   ministry?: string;
   due_date?: string;
+  owner_user_id?: string;
 }
 
 interface WorkOrderCreateModalProps {
@@ -15,10 +17,12 @@ interface WorkOrderCreateModalProps {
 }
 
 export function WorkOrderCreateModal({ onClose, onCreate }: WorkOrderCreateModalProps) {
+  const { staff } = useChurchStaff();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
   const [ministry, setMinistry] = useState('');
+  const [ownerUserId, setOwnerUserId] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +42,7 @@ export function WorkOrderCreateModal({ onClose, onCreate }: WorkOrderCreateModal
         priority,
         ministry: ministry.trim() || undefined,
         due_date: dueDate || undefined,
+        owner_user_id: ownerUserId || undefined,
       });
       onClose();
     } catch (err) {
@@ -103,6 +108,24 @@ export function WorkOrderCreateModal({ onClose, onCreate }: WorkOrderCreateModal
                 className="w-full rounded-lg border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-dark-100"
               />
             </div>
+          </div>
+          <div>
+            <label htmlFor="wo-owner" className="block text-xs font-medium text-gray-600 dark:text-dark-300 mb-1">Owner</label>
+            <select
+              id="wo-owner"
+              value={ownerUserId}
+              onChange={e => setOwnerUserId(e.target.value)}
+              disabled={staff.length === 0}
+              className="w-full rounded-lg border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-sm text-gray-900 dark:text-dark-100 disabled:opacity-50"
+            >
+              {/* Defaults to the creator server-side when left unset, which is
+                  how work_orders has always behaved — but naming someone here
+                  is what stops new Work Orders arriving unowned. */}
+              <option value="">Me (the person creating this)</option>
+              {staff.map(s => (
+                <option key={s.user_id} value={s.user_id}>{s.name}{s.title ? ` · ${s.title}` : ''}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label htmlFor="wo-ministry" className="block text-xs font-medium text-gray-600 dark:text-dark-300 mb-1">Ministry (optional)</label>
