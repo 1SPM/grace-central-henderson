@@ -39,6 +39,16 @@ const CAMPUS_ROOMS = [
   'fellowship', 'admin_front', 'admin_work', 'senior_pastor', 'associate_pastor',
 ];
 
+/**
+ * staff_profiles.user_id is UNIQUE, so PostgREST returns the embed as a
+ * to-one OBJECT — but typings and older rows can present an array. Handle
+ * both: the array-only guard silently dropped every title in production.
+ */
+function profileTitle(sp: unknown): string | null {
+  const p = Array.isArray(sp) ? sp[0] : sp;
+  return (p as { title?: string | null } | null | undefined)?.title ?? null;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
@@ -83,7 +93,7 @@ async function getAreas(
     id: u.id,
     first_name: u.first_name,
     last_name: u.last_name,
-    title: (Array.isArray(u.staff_profiles) ? u.staff_profiles[0]?.title : null) ?? null,
+    title: profileTitle(u.staff_profiles),
   }));
 
   const areas = resolveAreas(
