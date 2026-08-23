@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ClipboardList, Kanban, ClipboardCheck, Bot, History } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Kanban, ClipboardCheck, Bot, Map as MapIcon, History } from 'lucide-react';
 import { HubPageHeader } from '../ui/HubPageHeader';
 import { parseWorkOsTab, parseWorkOsId, openWorkOs, type WorkOsTab } from '../../lib/workosNav';
 import { ExecutiveOverview } from './ExecutiveOverview';
@@ -9,6 +9,7 @@ import { TaskBoard } from './TaskBoard';
 import { ApprovalCentre } from './ApprovalCentre';
 import { AgentCommandCentre } from './AgentCommandCentre';
 import { AuditTimeline } from './AuditTimeline';
+import { CampusView } from './CampusView';
 import type { View } from '../../types';
 
 const TABS: { id: WorkOsTab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -17,6 +18,7 @@ const TABS: { id: WorkOsTab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'tasks', label: 'Task Board', icon: Kanban },
   { id: 'approvals', label: 'Approvals', icon: ClipboardCheck },
   { id: 'agents', label: 'Agents', icon: Bot },
+  { id: 'campus', label: 'Campus', icon: MapIcon },
   { id: 'audit', label: 'Audit', icon: History },
 ];
 
@@ -97,6 +99,7 @@ export function WorkOsHub({ setView, defaultTab }: WorkOsHubProps) {
         {tab === 'tasks' && <TaskBoard onOpenWorkOrder={handleOpenWorkOrder} />}
         {tab === 'approvals' && <ApprovalCentre />}
         {tab === 'agents' && <AgentCommandCentre />}
+        {tab === 'campus' && <CampusView setView={setView} />}
         {tab === 'audit' && <AuditTimeline />}
       </div>
     </div>

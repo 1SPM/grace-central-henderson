@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GRACE Value Calculator</title>
-<meta name="description" content="See what the GRACE ecosystem generates for your church every year: new revenue from the GRACE Impact Card, efficiency savings from automation, and giving growth from an engaged congregation.">
+<meta name="description" content="Explore GRACE's estimated operational value and the future potential of the GRACE Impact Card, with every assumption visible.">
 <meta property="og:title" content="GRACE Value Calculator">
-<meta property="og:description" content="Empower your congregation with seamless giving, powered by GRACE. See what GRACE generates for a church your size.">
+<meta property="og:description" content="A transparent model for GRACE operational value and future Impact Card potential. Every assumption is visible and editable.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://grace-value-calculator-eta.vercel.app/">
 <meta name="twitter:card" content="summary">
@@ -272,8 +272,8 @@
 
 <div class="wrap">
 
-  <h1>Empower your congregation with seamless giving, powered by GRACE.</h1>
-  <p class="sub">GRACE brings giving, community, and everyday commerce together in one engine that funds ministry.</p>
+  <h1>See the operating value. Inspect the assumptions.</h1>
+  <p class="sub">A planning model for church leaders who need to understand what drives the estimate before making a decision.</p>
 
   <div class="people">
     <label for="members">Your congregation</label>
@@ -282,10 +282,10 @@
   </div>
 
   <div class="total">
-    <div class="tl">What the GRACE ecosystem generates for your church</div>
+    <div class="tl">Illustrative operating value for your church</div>
     <div class="tv num" id="totalOut">$0</div>
-    <p class="ts">every year in new revenue, recovered staff time, and giving growth, powered by your own members.</p>
-    <p class="tc">The new-revenue portion is a projection — it depends on an executed card program agreement, which is not yet in place. Staff-time and giving-growth figures don't.</p>
+    <p class="ts">per year in estimated staff capacity and giving engagement. The Impact Card is shown separately and excluded from this total.</p>
+    <p class="tc">This is a planning model, not a guarantee. Every assumption is visible below.</p>
   </div>
 
   <!-- ecosystem loop -->
@@ -319,8 +319,8 @@
       <!-- nodes -->
       <g text-anchor="middle">
         <text x="350" y="58" class="n">Your members</text>
-        <text x="597" y="156" class="n">Everyday spending</text>
-        <text x="597" y="172" class="d">on your church's own card</text>
+        <text x="597" y="156" class="n">Future card program</text>
+        <text x="597" y="172" class="d">subject to banking agreements</text>
         <text x="350" y="296" class="n">Ministry funding</text>
         <text x="103" y="156" class="n">Engagement &amp; agency</text>
         <text x="103" y="172" class="d">members choose the impact</text>
@@ -331,18 +331,18 @@
       <div class="lnb" id="loopNoticeText"></div>
     </div>
   </div>
-  <p class="loop-cap">Members spend on their church's card. That spending funds <b>designated initiatives like missions, youth, and benevolence</b>. Members see the impact and stay engaged, growing the ecosystem.</p>
+  <p class="loop-cap">If launched, the GRACE Impact Card would let members direct a share of eligible card economics toward <b>missions, youth, and benevolence</b>. It is a future program concept, not a live card product.</p>
 
   <!-- three outcomes -->
   <div class="outcomes">
 
     <section class="oc revenue" aria-labelledby="ocR">
-      <span class="k" id="ocR">New revenue</span><span class="badge">Projected — requires card agreement</span>
+      <span class="k" id="ocR">Impact Card potential</span><span class="badge">Projected · excluded from total · requires agreements</span>
       <span class="v num" id="revOut">$0</span>
-      <p class="story">The GRACE Impact Card turns everyday generosity like groceries, gas, and dining into designated funding for missions, youth, and benevolence, at no cost to the member.</p>
+      <p class="story">A potential future program for directing a share of eligible everyday card economics toward member-selected ministry initiatives. No bank, sponsorship, or program-management agreement is executed today.</p>
       <div class="dial">
-        <div class="dl"><span>Members carrying the card</span><b><span id="adoptOut">25</span>%</b></div>
-        <input type="range" class="sm" id="adopt" min="5" max="60" step="1" value="25" aria-label="Share of members carrying the card">
+        <div class="dl"><span>Potential active-card adoption</span><b><span id="adoptOut">15</span>%</b></div>
+        <input type="range" class="sm" id="adopt" min="0" max="60" step="1" value="15" aria-label="Potential share of members carrying the card">
       </div>
       <div class="how" id="revHow"></div>
     </section>
@@ -372,7 +372,7 @@
   </div>
 
   <div class="ctaband">
-    <p>This is what one connected ecosystem does that five disconnected tools can't. See it running for a church like yours.</p>
+    <p>Explore the operational model and the future card concept. Every financial assumption remains visible and editable.</p>
     <button type="button" class="cta" id="btnCta">See GRACE in action</button>
     <button type="button" class="share" id="btnShare">Copy a link to this scenario</button>
   </div>
@@ -383,15 +383,15 @@
     <p class="mathcheck-note">Financial stewardship means showing our work, not just the results. Every number above comes from the assumptions below, and changing any of them moves the totals.</p>
 
     <div class="mgrp revenue">
-      <h4>New revenue</h4>
-      <p class="formula">Members on the card &times; everyday spend &times; your church's commission &times; 12 months</p>
+      <h4>Impact Card potential <span class="badge">Excluded from headline</span></h4>
+      <p class="formula">Potential active cards &times; eligible everyday spend &times; estimated net share to the church &times; 12 months</p>
       <div class="mrow">
         <label for="mSpend">Everyday spend per account</label>
         <div class="mfield pfx"><span class="u">$</span><input id="mSpend" type="number" min="0" step="25" value="500"><span class="u" style="left:auto;right:9px">/mo</span></div>
       </div>
       <div class="mrow">
-        <label for="mCommission">Church's commission</label>
-        <div class="mfield"><input id="mCommission" type="number" min="0" max="5" step="0.05" value="1"><span class="u">%</span></div>
+        <label for="mCommission">Estimated net share to the church</label>
+        <div class="mfield"><input id="mCommission" type="number" min="0" max="5" step="0.05" value="0.5"><span class="u">%</span></div>
       </div>
     </div>
 
@@ -423,7 +423,7 @@
   </details>
 
   <footer class="fine">
-    Illustrative estimates based on your inputs and GRACE program planning. Efficiency savings and giving growth are modeled from live product usage; new-card-revenue figures are a projection of program potential and require an executed card program agreement, which does not yet exist. Actual results vary by congregation.
+    Illustrative estimates based on your inputs and GRACE planning assumptions. Staff capacity and giving engagement are estimates, not guarantees. Impact Card potential is excluded from the headline and requires executed banking, sponsorship, and program-management agreements before it can become a live program. Actual results vary by congregation.
   </footer>
 </div>
 
@@ -432,12 +432,13 @@
   'use strict';
 
   // The model, kept deliberately simple:
-  //   New revenue   = members × card adoption × everyday spend × church's commission
+  //   Card potential = members × card adoption × everyday spend × estimated net share
   //   Savings       = admin staff × loaded cost × share automated + software replaced
   //   Giving growth = annual giving × engagement lift
-  // Defaults mirror program planning; every one is editable under "Check the math."
+  // Card potential is intentionally excluded from the headline until the program is contracted.
+  // Every assumption is editable under "Check the math."
   var DEFAULTS = {
-    mSpend: 500, mCommission: 1, mLoaded: 65000, mAutomated: 15, mSoftware: 6, mLift: 2
+    mSpend: 500, mCommission: 0.5, mLoaded: 65000, mAutomated: 15, mSoftware: 6, mLift: 2
   };
 
   function $(id) { return document.getElementById(id); }
@@ -515,17 +516,17 @@
     var giving = parseFloat($('giving').value);
 
     var spendPerAccount = assumption('mSpend');
-    var commission = assumption('mCommission') / 100;
+    var netShare = assumption('mCommission') / 100;
     var loaded = assumption('mLoaded');
     var automated = assumption('mAutomated') / 100;
     var softwarePerMember = assumption('mSoftware');
     var lift = assumption('mLift') / 100;
 
     var accounts = members * adopt;
-    var revenue = accounts * spendPerAccount * 12 * commission;
+    var revenue = accounts * spendPerAccount * 12 * netShare;
     var savings = fte * loaded * automated + members * softwarePerMember;
     var growth = giving * lift;
-    var total = revenue + savings + growth;
+    var total = savings + growth;
 
     $('membersOut').textContent = members.toLocaleString('en-US');
     setTotal(total);
@@ -537,7 +538,7 @@
     $('givingOut').textContent = fmtM(giving);
 
     $('revHow').innerHTML = '<b>' + Math.round(accounts).toLocaleString('en-US') + ' members</b> × <b>$' +
-      spendPerAccount + '/mo</b> everyday spend × <b>' + assumption('mCommission') + '%</b> to your church';
+      spendPerAccount + '/mo</b> eligible spend × <b>' + assumption('mCommission') + '%</b> estimated net share';
     $('savHow').innerHTML = '<b>' + fte + ' staff</b> × ' + assumption('mAutomated') + '% of their week automated, plus <b>' +
       fmt(members * softwarePerMember) + '/yr</b> of software replaced';
     $('groHow').innerHTML = '<b>' + assumption('mLift') + '% lift</b> on <b>' + fmt(giving) + '</b> from engaged, retained members';
@@ -584,23 +585,19 @@
   function qnum(k) { var v = parseFloat(qs.get(k)); return isFinite(v) ? v : null; }
   var q;
   if ((q = qnum('m')) !== null) $('members').value = Math.max(200, Math.min(20000, q));
-  if ((q = qnum('a')) !== null) $('adopt').value = Math.max(5, Math.min(60, q));
+  if ((q = qnum('a')) !== null) $('adopt').value = Math.max(0, Math.min(60, q));
   if ((q = qnum('f')) !== null) { $('fte').value = Math.max(1, Math.min(40, q)); touched.fte = true; }
   if ((q = qnum('g')) !== null) { $('giving').value = Math.max(100000, Math.min(40000000, q)); touched.giving = true; }
   if (!touched.fte) $('fte').value = Math.max(1, Math.round(parseFloat($('members').value) / 400));
   if (!touched.giving) $('giving').value = Math.round(parseFloat($('members').value) * 2000 / 100000) * 100000;
 
-  // --- periodic example-activity notice -------------------------------------
-  // Illustrative only — labeled "Example activity," never implied as live
-  // transactions. Ties the abstract loop diagram to a concrete, human example.
-  // Each example has a fixed spot around the ring (matching where the flow
-  // arrows travel) so the notice reads as "this fund's activity," not a
-  // single fixed ticker.
+  // --- periodic program-concept notice --------------------------------------
+  // These describe possible use cases only. They are not live transactions.
   var ACTIVITY_EXAMPLES = [
-    { text: 'Grocery run routed $2.40 to Food Pantry', x: 78, y: 22 },
-    { text: 'Gas fill-up routed $1.85 to Youth Ministry', x: 78, y: 78 },
-    { text: 'Dinner out routed $3.10 to Missions', x: 22, y: 78 },
-    { text: 'Coffee run routed $0.95 to Benevolence Fund', x: 22, y: 22 }
+    { text: 'Potential member-selected support for Food Pantry', x: 78, y: 22 },
+    { text: 'Potential member-selected support for Youth Ministry', x: 78, y: 78 },
+    { text: 'Potential member-selected support for Missions', x: 22, y: 78 },
+    { text: 'Potential member-selected support for Benevolence', x: 22, y: 22 }
   ];
   (function () {
     var el = $('loopNotice'), textEl = $('loopNoticeText');

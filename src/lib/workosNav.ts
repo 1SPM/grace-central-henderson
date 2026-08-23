@@ -1,8 +1,8 @@
 import type { View } from '../types';
 
-export type WorkOsTab = 'overview' | 'work-orders' | 'tasks' | 'approvals' | 'agents' | 'audit';
+export type WorkOsTab = 'overview' | 'work-orders' | 'tasks' | 'approvals' | 'agents' | 'campus' | 'audit';
 
-const VALID_TABS: WorkOsTab[] = ['overview', 'work-orders', 'tasks', 'approvals', 'agents', 'audit'];
+const VALID_TABS: WorkOsTab[] = ['overview', 'work-orders', 'tasks', 'approvals', 'agents', 'campus', 'audit'];
 
 function hashParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();

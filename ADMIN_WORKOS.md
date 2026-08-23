@@ -161,3 +161,41 @@ waiver in `SECURITY_FINDINGS_STATUS.md`.
 - **Backend:** `api/_lib/{workosMetrics,agentRegistry,agentWorkflows,completionReport}.ts`, `api/workos/*`, `api/agents/_workos-{registry,run}.ts`, `api/audit/_timeline.ts`, `api/work-orders/_{pilot-readiness,completion-report}.ts`, plus a `GET` handler added to `api/work-orders/_tasks.ts`, plus the demo-mode bootstrap in `api/_lib/authz.ts`.
 - **Frontend:** `src/lib/workosNav.ts`, `src/lib/services/workos.ts`, `src/hooks/use{WorkOrders,Approvals,AgentCommandCentre,AuditTimeline,WorkOsSummary,WorkOsPermissions,TaskBoard}.ts`, `src/components/workos/*.tsx`, `AuthContext.getAuthToken`, `types.ts`/`Layout.tsx`/`ViewRenderer.tsx`/`useRouteGuard.ts`/`useHashRouter.ts` wiring.
 - **Tests:** see the completion output.
+
+---
+
+## 11. Campus (the Virtual Campus tab)
+
+`#/workos?tab=campus` — `src/components/workos/CampusView.tsx`. A 2D,
+top-down model of the church drawn on a canvas from the building's
+architectural floor plan (1 tile = 2.5 ft, 56 × 64 tiles), in the style of
+the VWS Virtual Office concept: a spatial front-end over live WorkOS state.
+
+- **Data, not code:** `campus/campusMap.ts` (rooms, doors, furniture, floor
+  patches), `campus/campusBindings.ts` (each room's department → the CRM
+  routes it owns + permission hints), `campus/campusAssignments.ts` (which
+  agent sits where, which character it wears — the seating chart, meant to
+  be edited).
+- **Renderer:** `campus/CampusRenderer.ts` — Canvas 2D; static floor/wall
+  layer built once, y-sorted furniture + characters per frame, pan/zoom,
+  hit-testing, agents idling/wandering in their rooms, the visitor walking
+  with arrow keys (collision with walls/furniture). No game library.
+- **Live state:** agent pips and side-panel status come from
+  `GET /api/agents/workos-registry` (the same hook as the Agents tab);
+  "Run now" is the same `POST /api/agents/workos-run`; per-room "N waiting"
+  comes from the Decision Queue counts by kind. Nothing on the campus has a
+  power the WorkOS does not already have — rooms deep-link into existing hubs.
+- **Honesty rules carried over:** unbuilt agents are grey pips at empty
+  desks; the Care Wing is tinted/dashed and its department is
+  confidential-tier (presence and counts only); the Night Crew (cron agents
+  outside the registry) is listed on the hallway Bulletin Board, not drawn as
+  staff; VWS platform agents (Steve/Charles/Marco) sit in a "Platform Annex"
+  — the borrowed storage room — not on the ministry floor.
+- **Art:** `public/campus/atlas.png` is a packed subset of LimeZu tiles
+  built by `tools/campus/build-atlas.mjs` from the source packs (not in the
+  repo) — see `public/campus/CREDITS.txt`.
+- **Tests:** `campus/campusMap.test.ts` — rooms never overlap, every room has
+  a department and vice versa, every door is walkable on both sides, every
+  registry agent has a walkable seat inside its room, every room is reachable
+  on foot from the canopy, every furniture sprite exists in the atlas with a
+  matching collision footprint.
