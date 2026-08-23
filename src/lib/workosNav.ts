@@ -21,6 +21,18 @@ export function parseWorkOsId(): string | null {
   return hashParams().get('id');
 }
 
+/** Optional room context for the Campus tab. */
+export function parseCampusRoom(): string | null {
+  return hashParams().get('room');
+}
+
+/** Address one campus room without inventing a second routing system. */
+export function campusHash(room?: string | null): string {
+  const params = new URLSearchParams({ tab: 'campus' });
+  if (room) params.set('room', room);
+  return `#/workos?${params.toString()}`;
+}
+
 export function workosHash(tab: WorkOsTab = 'overview', id?: string | null): string {
   const params = new URLSearchParams();
   if (tab !== 'overview') params.set('tab', tab);

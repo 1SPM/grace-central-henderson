@@ -13,7 +13,10 @@ import { Bot, Crosshair, Minus, Plus, Maximize2, ExternalLink, Lock, Moon, Arrow
 import { useTheme } from '../../ThemeContext';
 import { useAgentCommandCentre, type AgentRegistryEntry } from '../../hooks/useAgentCommandCentre';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
-import { useDecisionQueue, type DecisionQueueKind } from '../../hooks/useDecisionQueue';
+import { useDecisionQueue } from '../../hooks/useDecisionQueue';
+import { useMinistryAreas } from '../../hooks/useMinistryAreas';
+import { AreaPairing } from './AreaPairing';
+import type { AreaSurface } from '../../lib/ministryAreas';
 import { StatusBadge } from '../ui/StatusBadge';
 import type { View } from '../../types';
 import { CampusRenderer, type AgentStatusKind, type CampusAgent } from './campus/CampusRenderer';
@@ -42,34 +45,30 @@ function statusKind(a: AgentRegistryEntry): AgentStatusKind {
   return 'idle';
 }
 
-/** Which Decision Queue kinds land on which department's desk. */
-const DESK_KINDS: Record<string, DecisionQueueKind[]> = {
-  study: ['approval', 'related_party_review'],
-  care: ['crisis', 'care_triage'],
-  finance: ['kyc_review', 'failed_transfer'],
-  welcome: ['invitation_stalled'],
-  hallway: ['agent_finding'],
-};
-
 function formatTime(iso: string | null): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-interface CampusViewProps { setView: (v: View) => void }
+interface CampusViewProps {
+  setView: (v: View) => void;
+  /** Room to open on mount, from #/workos?tab=campus&room=… */
+  defaultRoom?: string | null;
+}
 
-export function CampusView({ setView }: CampusViewProps) {
+export function CampusView({ setView, defaultRoom }: CampusViewProps) {
   const { theme } = useTheme();
   const { agents, isLoading, error, forbidden, runningKey, runAgent } = useAgentCommandCentre();
   const { has } = useWorkOsPermissions();
   const { counts } = useDecisionQueue();
+  const { areas, agents: agentOptions } = useMinistryAreas();
   const canManage = has('agents.manage');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<CampusRenderer | null>(null);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(defaultRoom ?? null);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [hover, setHover] = useState<{ roomId: string | null; agentKey: string | null }>({ roomId: null, agentKey: null });
   const [visitorRoom, setVisitorRoom] = useState<string | null>('canopy');
@@ -100,18 +99,44 @@ export function CampusView({ setView }: CampusViewProps) {
 
   useEffect(() => { rendererRef.current?.setTheme(theme); }, [theme]);
 
-  const campusAgents = useMemo<CampusAgent[]>(() => agents.map(a => ({ key: a.key, name: a.name, role: a.role, status: statusKind(a) })), [agents]);
+  // Where each agent currently works, from the ministry-area assignment —
+  // so reassigning an area in Settings actually moves the character.
+  const roomByAgentKey = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const a of areas) if (a.agent_key) m.set(a.agent_key, a.room_id);
+    return m;
+  }, [areas]);
+
+  const campusAgents = useMemo<CampusAgent[]>(
+    () => agents.map(a => ({ key: a.key, name: a.name, role: a.role, status: statusKind(a), room: roomByAgentKey.get(a.key) })),
+    [agents, roomByAgentKey],
+  );
   useEffect(() => { rendererRef.current?.setAgents(campusAgents); }, [campusAgents, ready]);
   useEffect(() => { rendererRef.current?.setSelection(selectedRoom, selectedAgent); }, [selectedRoom, selectedAgent]);
 
   const room: CampusRoom | null = selectedRoom ? roomById(selectedRoom) ?? null : null;
+  // The ministry area assigned to this room is the north star. The static
+  // department binding is only a fallback for rooms no area occupies.
+  // A room may host more than one area (Giving and Impact Card share the
+  // work room). Render all of them rather than silently showing the first.
+  const areasInRoom = useMemo(() => areas.filter(a => a.room_id === room?.id), [areas, room?.id]);
+  const area = areasInRoom[0] ?? null;
   const dept = room ? DEPARTMENTS[room.department] : null;
-  const agentsInRoom = useMemo(() => agents.filter(a => (AGENT_SEATS[a.key] ?? OVERFLOW_SEAT).room === room?.id), [agents, room?.id]);
+  const agentsInRoom = useMemo(
+    () => agents.filter(a => (roomByAgentKey.get(a.key) ?? AGENT_SEATS[a.key]?.room ?? OVERFLOW_SEAT.room) === room?.id),
+    [agents, roomByAgentKey, room?.id],
+  );
   const agent = selectedAgent ? agents.find(a => a.key === selectedAgent) ?? null : null;
-  const deskCount = dept ? (DESK_KINDS[dept.id] ?? []).reduce((n, k) => n + (counts.by_kind[k] ?? 0), 0) : 0;
+  const deskCount = areasInRoom.reduce(
+    (total, a) => total + a.queueKinds.reduce((n, k) => n + (counts.by_kind[k as keyof typeof counts.by_kind] ?? 0), 0),
+    0,
+  );
+  const surfaces: (CampusRoute | AreaSurface)[] = areasInRoom.length
+    ? areasInRoom.flatMap(a => a.surfaces)
+    : (dept?.routes ?? []);
 
-  const go = useCallback((route: CampusRoute) => {
-    setView(route.view);
+  const go = useCallback((route: CampusRoute | AreaSurface) => {
+    setView(route.view as View);
     window.history.replaceState(null, '', route.hash);
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   }, [setView]);
@@ -205,21 +230,35 @@ export function CampusView({ setView }: CampusViewProps) {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
                     {room.name || 'Hallway'}
-                    {dept.confidential && <Lock size={12} className="text-violet-600 dark:text-violet-400" aria-label="Confidential-tier" />}
+                    {(area?.confidential ?? dept.confidential) && <Lock size={12} className="text-violet-600 dark:text-violet-400" aria-label="Confidential-tier" />}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-dark-400">{dept.name}{room.planName ? ` · plan: ${room.planName}` : ''}</p>
+                  <p className="text-xs text-gray-500 dark:text-dark-400">
+                    {areasInRoom.length ? areasInRoom.map(a => a.name).join(' · ') : dept.name}
+                    {room.planName ? ` · plan: ${room.planName}` : ''}
+                  </p>
                 </div>
                 {deskCount > 0 && (
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 shrink-0" title="Items on this desk in the Decision Queue">{deskCount} waiting</span>
                 )}
               </div>
-              <p className="text-xs text-gray-600 dark:text-dark-300 mt-2">{dept.blurb}</p>
+              <p className="text-xs text-gray-600 dark:text-dark-300 mt-2">{area?.purpose ?? dept.blurb}</p>
 
-              {dept.routes.length > 0 && (
+              {/* The pairing — identical markup to the WorkOS Overview. */}
+              {areasInRoom.map((a, i) => (
+                <div key={a.key} className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-800">
+                  {areasInRoom.length > 1 && (
+                    <p className="text-xs font-medium text-gray-800 dark:text-dark-100 mb-1.5">{a.name}</p>
+                  )}
+                  {i > 0 && <p className="text-xs text-gray-600 dark:text-dark-300 mb-2">{a.purpose}</p>}
+                  <AreaPairing area={a} agents={agentOptions} showRoom={false} />
+                </div>
+              ))}
+
+              {surfaces.length > 0 && (
                 <div className="mt-3">
                   <p className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-dark-500 mb-1">In GRACE</p>
                   <ul className="space-y-1">
-                    {dept.routes.map(rt => (
+                    {surfaces.map(rt => (
                       <li key={rt.hash}>
                         <button type="button" onClick={() => go(rt)} className="w-full text-left text-xs px-2 py-1.5 rounded-lg border border-gray-200 dark:border-dark-700 hover:bg-slate-50 dark:hover:bg-dark-800 flex items-center justify-between gap-2 text-gray-800 dark:text-dark-100">
                           <span className="truncate">{rt.label}</span>

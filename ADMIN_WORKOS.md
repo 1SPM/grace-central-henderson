@@ -199,3 +199,58 @@ the VWS Virtual Office concept: a spatial front-end over live WorkOS state.
   registry agent has a walkable seat inside its room, every room is reachable
   on foot from the canopy, every furniture sprite exists in the atlas with a
   matching collision footprint.
+
+---
+
+## 12. Ministry areas — the shared operational map
+
+GRACE is the north star. An **area** is a job the church office does; the
+campus and the control panel are two views of the same map:
+
+```
+area → accountable human (users)  → supporting agent (registry) → campus room
+     → GRACE surfaces (existing routes)
+     → work: work_orders.ministry, Decision Queue kinds
+```
+
+- **Definition (code):** `api/_lib/ministryAreas.ts` — 14 areas, each with the
+  exact `work_orders.ministry` string it owns, the RBAC role that should hold
+  it, a default agent and room, its GRACE surfaces, and its Decision Queue
+  kinds. Re-exported to the browser as `src/lib/ministryAreas.ts` so there is
+  one definition, not two.
+- **Assignment (data):** `ministry_assignments` (migration `066`) stores only
+  the three links a pastor can change — owner, agent, room. No row = coded
+  default. Not in `churches.settings`, because `useChurchSettings` rewrites
+  that whole JSONB blob from the browser and would drop unknown keys.
+- **Resolver:** `resolveAreas()` in `ministryAreas.ts` is pure (no IO, no
+  clock) and unit-tested, same posture as `decisionQueue.ts`. An override
+  pointing at someone who is no longer active staff resolves to
+  `owner: null` — an honest gap, never a dangling id.
+- **API:** `GET/PUT /api/workos/areas`. GET = any active staff actor;
+  PUT = `admin.manage_settings`, audited as `ministry_area_reassigned`.
+  `null` and "absent" are distinct in the PUT body (null clears a link) —
+  the shared `uuid_()`/`str()` validators collapse them, which is TD-045, so
+  those three fields are hand-validated.
+- **Surfaces, all reading one hook (`useMinistryAreas`):**
+  - Campus room panel — the pairing for whichever areas sit in that room.
+    A room may host several areas (Giving and Impact Card share the work
+    room); all are rendered, none hidden.
+  - WorkOS Overview — `MinistryAreasPanel`, the same `AreaPairing`
+    component, for the whole church.
+  - Agents tab — each agent card names the area, person, and room it supports.
+  - Settings → **Ministry Areas** — where a pastor reassigns the three links.
+- **The campus follows the assignment:** an agent's character stands in its
+  area's room (`CampusRenderer.setAgents` honours `CampusAgent.room`), so
+  moving an area in Settings moves the sprite on the map.
+- **Honesty:** unassigned areas say "Nobody assigned — should be held by
+  <role>"; defaults are labelled "default" rather than shown as decisions;
+  counts are live queries. Nothing invents a person, a run, or a readiness.
+- **Tests:** `src/lib/ministryAreas.test.ts` (cross-file invariants: every
+  area's room and agent are real, ministry strings unique, every Decision
+  Queue kind owned exactly once, one primary surface each) and
+  `api/_lib/ministryAreas.test.ts` (the resolver, including the
+  deactivated-owner and unknown-area cases).
+
+The AI clergy layer (`#/leadership`) is untouched and stays its own thing:
+it models pastoral presence, not operational accountability, and the two
+never share an identity.

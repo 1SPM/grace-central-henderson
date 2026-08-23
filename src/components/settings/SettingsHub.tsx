@@ -3,6 +3,7 @@ import {
   BarChart3,
   Bot,
   ClipboardList,
+  Compass,
   FileText,
   Mail,
   Settings as SettingsIcon,
@@ -25,9 +26,11 @@ const PrintableReports = lazy(() => import('../PrintableReports').then(m => ({ d
 const TagsManager = lazy(() => import('../TagsManager').then(m => ({ default: m.TagsManager })));
 const Analytics = lazy(() => import('../Analytics').then(m => ({ default: m.Analytics })));
 const AutomationPanel = lazy(() => import('./AutomationPanel').then(m => ({ default: m.AutomationPanel })));
+const MinistryAreasSettings = lazy(() => import('./MinistryAreasSettings').then(m => ({ default: m.MinistryAreasSettings })));
 
 const TABS: { id: SettingsTab; label: string; icon: typeof SettingsIcon }[] = [
   { id: 'general', label: 'General', icon: SettingsIcon },
+  { id: 'ministry-areas', label: 'Ministry Areas', icon: Compass },
   { id: 'automation', label: 'Automation', icon: Bot },
   { id: 'forms', label: 'Forms', icon: ClipboardList },
   { id: 'email-templates', label: 'Email Templates', icon: Mail },
@@ -152,6 +155,11 @@ export function SettingsHub({
             onRunWizard={onRunWizard}
             onOpenTutorials={onOpenTutorials}
           />
+        )}
+        {tab === 'ministry-areas' && (
+          <Suspense fallback={<ListSkeleton />}>
+            <MinistryAreasSettings />
+          </Suspense>
         )}
         {tab === 'automation' && (
           <Suspense fallback={<ListSkeleton />}>
