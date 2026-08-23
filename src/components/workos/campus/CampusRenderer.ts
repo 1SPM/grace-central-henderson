@@ -28,7 +28,19 @@ interface AtlasJson {
 const ATLAS = atlasData as AtlasJson;
 
 export type AgentStatusKind = 'live' | 'idle' | 'off' | 'running' | 'failed';
-export interface CampusAgent { key: string; name: string; role: string; status: AgentStatusKind }
+export interface CampusAgent {
+  key: string;
+  name: string;
+  role: string;
+  status: AgentStatusKind;
+  /**
+   * Room this agent currently works in, from the ministry-area assignment
+   * (Settings → Ministry Areas). Overrides the default seat in
+   * campusAssignments.ts, so reassigning an area on the WorkOS side actually
+   * moves the character on the map.
+   */
+  room?: string;
+}
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 const DIR_INDEX: Record<Facing, number> = { right: 0, up: 1, left: 2, down: 3 };
@@ -148,15 +160,66 @@ export class CampusRenderer {
   setAgents(agents: CampusAgent[]): void {
     const byKey = new Map(this.actors.map(a => [a.key, a]));
     const next: Actor[] = [];
+    const taken = new Set<number>();
     let overflow = 0;
+
     for (const a of agents) {
+      const base = AGENT_SEATS[a.key] ?? {
+        ...OVERFLOW_SEAT,
+        tile: { x: OVERFLOW_SEAT.tile.x + (overflow++ % 3), y: OVERFLOW_SEAT.tile.y + Math.floor(overflow / 3) },
+      };
+      // The assigned room wins over the default seat; the character and
+      // facing stay with the agent so it stays recognisable when it moves.
+      const seat: AgentSeat = a.room && a.room !== base.room
+        ? { ...base, room: a.room, tile: this.seatInRoom(a.room, taken) ?? base.tile }
+        : base;
+      taken.add(idx(seat.tile.x, seat.tile.y));
+
       const existing = byKey.get(a.key);
-      if (existing) { existing.status = a.status; existing.name = a.name; next.push(existing); continue; }
-      const seat = AGENT_SEATS[a.key] ?? { ...OVERFLOW_SEAT, tile: { x: OVERFLOW_SEAT.tile.x + (overflow++ % 3), y: OVERFLOW_SEAT.tile.y + Math.floor(overflow / 3) } };
+      if (existing) {
+        existing.status = a.status;
+        existing.name = a.name;
+        if (existing.seat.room !== seat.room) {
+          // Reassigned while the map was open — walk them to the new desk.
+          existing.seat = seat;
+          existing.tx = seat.tile.x * TILE;
+          existing.ty = seat.tile.y * TILE;
+          existing.x = existing.tx;
+          existing.y = existing.ty;
+          existing.moving = false;
+        }
+        next.push(existing);
+        continue;
+      }
+
       const x = seat.tile.x * TILE, y = seat.tile.y * TILE;
-      next.push({ key: a.key, name: a.name, seat, x, y, tx: x, ty: y, facing: seat.facing ?? 'down', moving: false, nextDecisionAt: 1 + Math.random() * 3, animT: Math.random() * 10, status: a.status, isOrb: a.key === 'grace' });
+      next.push({
+        key: a.key, name: a.name, seat, x, y, tx: x, ty: y,
+        facing: seat.facing ?? 'down', moving: false,
+        nextDecisionAt: 1 + Math.random() * 3, animT: Math.random() * 10,
+        status: a.status, isOrb: a.key === 'grace',
+      });
     }
     this.actors = next;
+  }
+
+  /**
+   * A free standing tile inside a room, scanned in a stable order so the
+   * same assignment always produces the same desk. Returns null when the
+   * room has no walkable tile left (caller keeps the default seat).
+   */
+  private seatInRoom(roomId: string, taken: Set<number>): { x: number; y: number } | null {
+    const room = ROOMS.find(r => r.id === roomId);
+    if (!room) return null;
+    const ri = ROOMS.indexOf(room);
+    for (let y = room.rect.y; y < room.rect.y + room.rect.h; y++) {
+      for (let x = room.rect.x; x < room.rect.x + room.rect.w; x++) {
+        const k = idx(x, y);
+        if (this.grid.solid[k] || this.grid.roomAt[k] !== ri || taken.has(k)) continue;
+        return { x, y };
+      }
+    }
+    return null;
   }
 
   setSelection(roomId: string | null, agentKey: string | null): void {
