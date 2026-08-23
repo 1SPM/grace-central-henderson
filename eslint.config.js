@@ -47,6 +47,13 @@ export default tseslint.config(
     },
   },
   {
+    // Node-only build tooling (e.g. the campus atlas packer).
+    files: ['tools/**/*.mjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
     ignores: [
       'dist/**',
       'node_modules/**',
