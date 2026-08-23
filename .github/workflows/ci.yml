@@ -91,6 +91,7 @@ jobs:
           tools/rls-read-restriction-smoke.test.ts
           tools/entitlement-billing-rls-smoke.test.ts
           tools/care-prayer-visibility-smoke.test.ts
+          tools/append-only-cascade-smoke.test.ts
         env:
           SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
           SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
@@ -99,6 +100,11 @@ jobs:
           SUPABASE_TEST_TENANT_A_MEMBER_TOKEN: ${{ secrets.SUPABASE_TEST_TENANT_A_MEMBER_TOKEN }}
           SUPABASE_TEST_TENANT_B_ID: ${{ secrets.SUPABASE_TEST_TENANT_B_ID }}
           SUPABASE_TEST_TENANT_B_TOKEN: ${{ secrets.SUPABASE_TEST_TENANT_B_TOKEN }}
+          # Service role (staging only) — append-only triggers fire for every
+          # role, so proving the 054 FK-cascade fix needs a client that can
+          # write the fixture. The test refuses to run against the production
+          # project ref and skips entirely when this secret is unset.
+          SUPABASE_TEST_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
   gitleaks:
     name: Secret Scan (gitleaks)
