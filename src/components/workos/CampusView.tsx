@@ -54,9 +54,18 @@ interface CampusViewProps {
   setView: (v: View) => void;
   /** Room to open on mount, from #/workos?tab=campus&room=… */
   defaultRoom?: string | null;
+  /**
+   * Floating-window mode (the unified GRACE window): the canvas fills its
+   * container, the room panel becomes an overlay on the map, and the
+   * caption/legend chrome is dropped. Same component, same behaviour —
+   * only the frame changes.
+   */
+  embedded?: boolean;
+  /** Called after a surface link navigates the app (the window closes itself). */
+  onNavigated?: () => void;
 }
 
-export function CampusView({ setView, defaultRoom }: CampusViewProps) {
+export function CampusView({ setView, defaultRoom, embedded = false, onNavigated }: CampusViewProps) {
   const { theme } = useTheme();
   const { agents, isLoading, error, forbidden, runningKey, runAgent } = useAgentCommandCentre();
   const { has } = useWorkOsPermissions();
@@ -139,7 +148,10 @@ export function CampusView({ setView, defaultRoom }: CampusViewProps) {
     setView(route.view as View);
     window.history.replaceState(null, '', route.hash);
     window.dispatchEvent(new HashChangeEvent('hashchange'));
-  }, [setView]);
+    // In the floating GRACE window the campus is a launcher at this moment:
+    // the destination is behind the window, so the host closes it.
+    onNavigated?.();
+  }, [setView, onNavigated]);
 
   const focus = useCallback((roomId: string) => {
     setSelectedRoom(roomId); setSelectedAgent(null);
@@ -157,11 +169,14 @@ export function CampusView({ setView, defaultRoom }: CampusViewProps) {
   const hoverRoom = hover.roomId ? roomById(hover.roomId) : null;
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col lg:flex-row gap-4">
+    <div className={embedded ? 'h-full' : 'p-4 sm:p-6'}>
+      <div className={embedded ? 'h-full relative' : 'flex flex-col lg:flex-row gap-4'}>
         {/* Map */}
-        <div className="flex-1 min-w-0">
-          <div className="relative rounded-xl border border-gray-200 dark:border-dark-700 overflow-hidden bg-slate-100 dark:bg-dark-900" style={{ height: 'min(72vh, 760px)' }}>
+        <div className={embedded ? 'h-full' : 'flex-1 min-w-0'}>
+          <div
+            className={`relative overflow-hidden bg-slate-100 dark:bg-dark-900 ${embedded ? 'h-full' : 'rounded-xl border border-gray-200 dark:border-dark-700'}`}
+            style={embedded ? undefined : { height: 'min(72vh, 760px)' }}
+          >
             <canvas ref={canvasRef} className="w-full h-full block" aria-label="Map of the church campus. Use the arrow keys to walk, drag to pan, scroll to zoom, click a room or an agent for details." tabIndex={0} />
             {!ready && !loadError && (
               <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-500 dark:text-dark-400">Loading the campus…</div>
@@ -181,24 +196,26 @@ export function CampusView({ setView, defaultRoom }: CampusViewProps) {
               {hover.agentKey ? `Agent: ${agents.find(a => a.key === hover.agentKey)?.name ?? hover.agentKey}` : hoverRoom ? (hoverRoom.name || 'Hallway') : 'Arrow keys to walk · drag to pan · scroll to zoom'}
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-dark-400">
+          {!embedded && <p className="mt-2 text-xs text-gray-500 dark:text-dark-400">
             Drawn from the church's floor plan at 1 tile = 2.5 ft. Rooms are bound to the CRM surfaces their department uses; pips are the real registry statuses
             (green ran, amber built but never run, grey not built). The Care Wing is tinted and dashed because it is confidential-tier.
-          </p>
-          {error && <p className="mt-1 text-xs text-brand-600 dark:text-brand-400">{error}</p>}
+          </p>}
+          {error && <p className={embedded ? 'absolute top-3 left-3 z-10 text-xs text-brand-600 dark:text-brand-400 bg-white/90 dark:bg-dark-850/90 rounded-md px-2 py-1' : 'mt-1 text-xs text-brand-600 dark:text-brand-400'}>{error}</p>}
           {/* Legend */}
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-600 dark:text-dark-300">
+          {!embedded && <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-600 dark:text-dark-300">
             <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full" style={{ background: '#1F8A5B' }} /> ran successfully</span>
             <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full" style={{ background: '#B7791F' }} /> built, never run</span>
             <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full" style={{ background: '#8B94A8' }} /> registered, not built</span>
             <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full" style={{ background: '#4E9BE8' }} /> running</span>
             <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full" style={{ background: '#C2413F' }} /> last run failed</span>
-          </div>
+          </div>}
         </div>
 
-        {/* Side panel */}
-        <aside className="w-full lg:w-[340px] shrink-0 space-y-3">
-          {!room && !agent && (
+        {/* Side panel — an overlay card on the map when embedded */}
+        <aside className={embedded
+          ? `absolute top-3 left-3 z-10 w-[300px] max-w-[calc(100%-96px)] max-h-[calc(100%-24px)] overflow-y-auto space-y-3 ${room ? '' : 'hidden'}`
+          : 'w-full lg:w-[340px] shrink-0 space-y-3'}>
+          {!embedded && !room && !agent && (
             <div className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4">
               <p className="text-sm font-semibold text-gray-900 dark:text-dark-100">Walk the campus</p>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
