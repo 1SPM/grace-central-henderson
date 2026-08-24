@@ -131,7 +131,22 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevLoadingRef = useRef(chat.loading);
-  const voice = useVoiceInput((text) => setInput(prev => prev ? `${prev} ${text}` : text));
+  // Voice-triggered send: a spoken utterance auto-sends the moment
+  // recognition ends (you stopped talking) — but voice dictated into
+  // text you'd already typed just appends, since you may not be done
+  // composing. voiceAppendModeRef is set right before voice.start() (see
+  // toggleVoice below); handleSendRef always points at the latest
+  // handleSend so this callback (created once, at mount) never goes stale.
+  const voiceAppendModeRef = useRef(false);
+  const handleSendRef = useRef<(query: string) => void>(() => {});
+  const voice = useVoiceInput((text) => {
+    if (voiceAppendModeRef.current) {
+      setInput(prev => prev ? `${prev} ${text}` : text);
+      return;
+    }
+    setInput('');
+    handleSendRef.current(text);
+  });
 
   useEffect(() => {
     if (variant === 'panel') inputRef.current?.focus();
@@ -192,8 +207,6 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
     }
   }, [chat.loading, chat.messages, aiSettings.voiceReadback, speechSupported, speak]);
 
-  if (!aiSettings.aiAssistant) return null;
-
   const handleSend = async (query: string) => {
     if (!query.trim() || chat.loading) return;
     stop();
@@ -202,9 +215,27 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
     await chat.sendMessage(query);
   };
 
+  // Keep handleSendRef current — read by the voice-input callback above,
+  // which is created once (inside useVoiceInput) and would otherwise
+  // close over a stale handleSend from an earlier render.
+  useEffect(() => {
+    handleSendRef.current = handleSend;
+  });
+
+  if (!aiSettings.aiAssistant) return null;
+
   const handleClose = () => {
     stop();
     onClose?.();
+  };
+
+  const toggleVoice = () => {
+    if (voice.listening) {
+      voice.stop();
+      return;
+    }
+    voiceAppendModeRef.current = input.trim().length > 0;
+    voice.start();
   };
 
   const wrapperClass = variant === 'inline'
@@ -223,7 +254,7 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
           {fullscreen && voice.supported ? (
             <button
               type="button"
-              onClick={voice.listening ? voice.stop : voice.start}
+              onClick={toggleVoice}
               aria-label={voice.listening ? 'Stop listening' : 'Ask Grace something — click to speak'}
               title={voice.listening ? 'Stop listening' : 'Click to speak'}
               className="appearance-none bg-transparent border-0 p-0 m-0 rounded-full cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
@@ -394,7 +425,7 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
           {voice.supported && (
             <button
               type="button"
-              onClick={voice.listening ? voice.stop : voice.start}
+              onClick={toggleVoice}
               className={`p-1.5 rounded-lg transition-colors ${voice.listening
                 ? 'bg-brand-500 hover:bg-brand-600 text-white'
                 : 'text-gray-500 hover:bg-stone-200/60 dark:hover:bg-dark-700'}`}
