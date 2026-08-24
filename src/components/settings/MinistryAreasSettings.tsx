@@ -19,7 +19,7 @@
 import { useState } from 'react';
 import { Compass, Lock, MapPin, RotateCcw } from 'lucide-react';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
-import { ROOM_LABEL, roleLabel } from '../workos/AreaPairing';
+import { ROOM_LABEL, roleLabel, AreaAccentDot } from '../workos/AreaPairing';
 
 export function MinistryAreasSettings() {
   const { areas, staff, agents, rooms, canManage, isLoading, error, forbidden, savingKey, reassign } = useMinistryAreas();
@@ -79,12 +79,14 @@ export function MinistryAreasSettings() {
           return (
             <li
               key={area.key}
-              className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4"
+              className="rounded-xl border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-850 p-4 border-l-[3px]"
+              style={{ borderLeftColor: area.accent_color }}
               data-testid={`area-settings-${area.key}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
+                    <AreaAccentDot color={area.accent_color} />
                     {area.name}
                     {area.confidential && <Lock size={11} className="text-violet-600 dark:text-violet-400" aria-label="Confidential-tier" />}
                   </p>

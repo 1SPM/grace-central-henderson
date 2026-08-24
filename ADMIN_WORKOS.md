@@ -309,3 +309,62 @@ when the window is wide or fullscreen.
   there is no campus to toggle. With the map gone the brand rail needs far
   less room, so it stays from 700px up rather than 1240px.
 - `#/workos?tab=campus` is unchanged — same component, two mounts.
+
+### 12.3 Gather-inspired campus polish
+
+Five ideas adapted from researching Gather (a real multiplayer virtual-office
+product) into the single-admin GRACE campus, plus the RBAC gap the research
+surfaced along the way.
+
+1. **Mini Mode** — a third `FloatingWindow` state beyond windowed/fullscreen.
+   The Minimize button shrinks the whole GRACE window to a small draggable
+   pill (orb + a live Decision Queue count) that stays on screen while the
+   pastor works elsewhere in the CRM; a plain click restores it, a real drag
+   moves it without restoring (disambiguated by movement distance, not by a
+   timer). Persists per device alongside the rest of the window geometry.
+2. **Action-first room panel** — the room panel now leads with one filled
+   button ("Open <primary surface>") above the fold, Gather's "Wave" pattern
+   applied to "the one thing worth doing at this desk." The full surface
+   list stays below as detail, not removed. The agent "Run now" button was
+   upgraded from outline to filled to match.
+3. **Agent "wave"** — an agent's sprite does a brief lift-and-scale pulse
+   when its `latest_run.finished_at` changes while the window is already
+   open (`CampusView` diffs `agents` against a ref; `CampusRenderer.bounce()`
+   plays it). The animation curve is `computeBounce()`, a pure exported
+   function, unit-tested without a canvas. Nothing bounces on first load —
+   the diff ref starts empty, so every key looks unchanged on mount.
+4. **Ministry-area color coding** — every area now carries `accentColor` (14
+   distinct hex values, picked to avoid the 5 semantic status-pip colors).
+   Rendered as a thin strip under the room's canvas label
+   (`CampusRenderer.setRoomMeta`) and a left-border/dot on the `AreaPairing`,
+   `MinistryAreasPanel`, and Settings cards. Never applied to a status pip —
+   that channel stays ran/never-run/failed only.
+5. **Calendar pins** — `GET /api/workos/areas` now also fetches upcoming
+   `calendar_events` and attaches the soonest one per area via
+   `attachNextEvents()` (pure, 14-day lookahead). `calendar_events.category`
+   maps to an area through `EVENT_CATEGORY_AREA` — deliberately partial:
+   `holiday`/`event`/`other` map to nothing rather than being guessed onto a
+   room. Surfaced as a small dot next to the room's canvas label plus a
+   "Next: <title> — <when>" line in the pairing panel.
+
+**RBAC fix, found while grounding the "staff portal" question.** The four
+non-admin Faithful staff seeded in `ministry_assignments` (Naomi, Fatoumata,
+Trevor, Ivy) held only the generic `Member Services` role from the 059
+backfill — e.g. Naomi owned Giving & Stewardship but had zero
+`giving_financial.*` permission. Granted each their job-matching role
+(`Finance`, `Pastoral Care`, `Volunteer Coordinator`, `Communications`) on
+top of the existing grant — RBAC is additive, nothing was revoked. Their
+`clerk_id`s remain synthetic demo values (`demo-staff-finance+<churchId>`,
+etc.) — nobody can actually sign in as any of them yet; that still runs
+through the existing `api/team/_invite.ts` flow (migration 055), untouched
+here.
+
+**Dev-server fix.** `src/lib/ministryAreas.ts` re-exports
+`api/_lib/ministryAreas.ts` so the browser and the API share one
+definition. In `npm run dev`, Vite serves that sibling file at its
+root-relative path — `/api/_lib/ministryAreas.ts` — which collided with
+`vite.config.ts`'s `/api` proxy rule and got forwarded to the (often not
+running) backend instead of served as a module, breaking every page that
+imports the shared map. Fixed with a narrow `bypass` for `/api/_lib/*`
+(no real API route is ever registered under that prefix). Production was
+never affected — Vite's build step doesn't run this dev-only proxy.
