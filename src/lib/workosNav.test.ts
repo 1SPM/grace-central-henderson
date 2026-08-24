@@ -8,9 +8,9 @@ function setHash(hash: string) {
 describe('workosNav (route test)', () => {
   afterEach(() => setHash('#/'));
 
-  it('defaults to the overview tab when no tab is in the hash', () => {
+  it('defaults to the agents tab when no tab is in the hash', () => {
     setHash('#/workos');
-    expect(parseWorkOsTab()).toBe('overview');
+    expect(parseWorkOsTab()).toBe('agents');
   });
 
   it('parses a valid tab from the hash', () => {
@@ -18,9 +18,9 @@ describe('workosNav (route test)', () => {
     expect(parseWorkOsTab()).toBe('approvals');
   });
 
-  it('falls back to overview for an unrecognized tab value (no crash, no silent wrong tab)', () => {
+  it('falls back to agents for an unrecognized tab value (no crash, no silent wrong tab)', () => {
     setHash('#/workos?tab=not-a-real-tab');
-    expect(parseWorkOsTab()).toBe('overview');
+    expect(parseWorkOsTab()).toBe('agents');
   });
 
   it('parses a Work Order id from the hash', () => {
@@ -41,8 +41,8 @@ describe('workosNav (route test)', () => {
     expect(parseWorkOsId()).toBe('wo-9');
   });
 
-  it('workosHash omits the tab param for the default overview tab', () => {
-    expect(workosHash('overview')).toBe('#/workos');
+  it('workosHash omits the tab param for the default agents tab', () => {
+    expect(workosHash('agents')).toBe('#/workos');
   });
 });
 

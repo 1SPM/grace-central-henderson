@@ -14,7 +14,7 @@ function hashParams(): URLSearchParams {
 
 export function parseWorkOsTab(): WorkOsTab {
   const tab = hashParams().get('tab');
-  return (VALID_TABS as string[]).includes(tab ?? '') ? (tab as WorkOsTab) : 'overview';
+  return (VALID_TABS as string[]).includes(tab ?? '') ? (tab as WorkOsTab) : 'agents';
 }
 
 export function parseWorkOsId(): string | null {
@@ -33,9 +33,9 @@ export function campusHash(room?: string | null): string {
   return `#/workos?${params.toString()}`;
 }
 
-export function workosHash(tab: WorkOsTab = 'overview', id?: string | null): string {
+export function workosHash(tab: WorkOsTab = 'agents', id?: string | null): string {
   const params = new URLSearchParams();
-  if (tab !== 'overview') params.set('tab', tab);
+  if (tab !== 'agents') params.set('tab', tab);
   if (id) params.set('id', id);
   const qs = params.toString();
   return qs ? `#/workos?${qs}` : '#/workos';
