@@ -31,12 +31,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { readBody, str, int_, email_ } from '../_lib/validation.js';
+import { PLATFORM_FEE_PERCENT } from '../_lib/billing/givingFee.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const PLATFORM_FEE_PERCENT = 0.75;
 
 const SCHEMA = {
   church_slug: str({ required: true, max: 100, pattern: /^[a-z0-9-]+$/ }),

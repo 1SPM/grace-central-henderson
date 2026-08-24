@@ -96,6 +96,10 @@ async function handlePaymentIntentSucceeded(
       stripe_payment_intent_id: pi.id,
       fund,
       is_recurring: pi.metadata?.is_recurring === 'true',
+      // Actual fee Stripe applied to this charge (cents) — the ground
+      // truth for Steward's fee-drift check, not just the rate we
+      // intended to request at PaymentIntent creation.
+      platform_fee_amount_cents: pi.application_fee_amount ?? null,
     },
   };
   const ledger = await appendLedgerEntry(ctx.supabase, entry);
@@ -349,6 +353,9 @@ async function handleInvoicePaid(
       stripe_invoice_id: invoice.id,
       stripe_subscription_id: subscription.id,
       fund,
+      // Actual rate applied to this subscription — the ground truth
+      // for Steward's fee-drift check.
+      platform_fee_percent: subscription.application_fee_percent ?? null,
     },
   };
   const ledger = await appendLedgerEntry(ctx.supabase, entry);
