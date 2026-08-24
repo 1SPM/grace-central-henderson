@@ -126,6 +126,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workos/summary': () => import('./workos/_summary.js'),
   'workos/decision-queue': () => import('./workos/_decision-queue.js'),
   'workos/notification-prefs': () => import('./workos/_notification-prefs.js'),
+  'workos/my-work': () => import('./workos/_my-work.js'),
 };
 
 // Generous, per-IP-per-route defaults — this is a defense-in-depth
