@@ -48,6 +48,12 @@ interface FloatingWindowProps {
   initialHeight?: number;
   minWidth?: number;
   minHeight?: number;
+  /**
+   * Extra buttons in the header, left of the fullscreen control. A function
+   * receives the current inner size, for actions that depend on how wide
+   * the window is (e.g. the campus collapse toggle).
+   */
+  headerActions?: ReactNode | ((size: FloatingWindowSize) => ReactNode);
   'aria-label'?: string;
 }
 
@@ -88,6 +94,7 @@ export function FloatingWindow({
   initialHeight = 700,
   minWidth = 680,
   minHeight = 440,
+  headerActions,
   'aria-label': ariaLabel,
 }: FloatingWindowProps) {
   const defaults = useCallback((): Geometry => {
@@ -194,6 +201,7 @@ export function FloatingWindow({
         style={{ touchAction: 'none' }}
       >
         <div className="flex-1 min-w-0 flex items-center gap-2">{title}</div>
+        {typeof headerActions === 'function' ? headerActions(size) : headerActions}
         {!isNarrowViewport && (
           <button
             type="button"

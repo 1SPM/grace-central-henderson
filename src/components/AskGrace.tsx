@@ -7,6 +7,7 @@ import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { FloatingWindow } from './ui/FloatingWindow';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { CampusView } from './workos/CampusView';
 import type { View } from '../types';
 
@@ -872,10 +873,26 @@ function useIsOnGracePage(): boolean {
   return onGrace;
 }
 
+const CAMPUS_COLLAPSED_KEY = 'grace-window-campus-collapsed';
+
 export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
+  // Collapsing the campus makes the GRACE window a plain chat window.
+  // Remembered per device: someone who wants chat-only should get it every
+  // time, not have to re-collapse on each open.
+  const [campusCollapsed, setCampusCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try { return window.localStorage.getItem(CAMPUS_COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const toggleCampus = useCallback(() => {
+    setCampusCollapsed(prev => {
+      const next = !prev;
+      try { window.localStorage.setItem(CAMPUS_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* storage blocked */ }
+      return next;
+    });
+  }, []);
   const onGracePage = useIsOnGracePage();
   const shouldHideDock = hideDock || onGracePage;
 
@@ -935,6 +952,23 @@ export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
         onClose={chat.closePanel}
         storageKey="grace-window-geometry"
         aria-label="GRACE — campus and chat"
+        headerActions={({ width }) => (
+          // Hidden when the window is too narrow to show a campus anyway —
+          // a toggle for something that cannot appear is just confusing.
+          width >= 900 ? (
+            <button
+              type="button"
+              onClick={toggleCampus}
+              title={campusCollapsed ? 'Show the campus' : 'Hide the campus'}
+              aria-label={campusCollapsed ? 'Show the campus' : 'Hide the campus'}
+              aria-pressed={campusCollapsed}
+              data-testid="grace-campus-toggle"
+              className="p-1.5 rounded-lg text-gray-500 dark:text-dark-300 hover:bg-black/5 dark:hover:bg-white/10"
+            >
+              {campusCollapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+            </button>
+          ) : null
+        )}
         title={
           <>
             <GraceOrb size="xs" />
@@ -945,9 +979,13 @@ export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
       >
         {({ width, fullscreen }) => {
           // The campus needs real width to be worth drawing; in a narrow
-          // window the chat is the point, so the map yields entirely.
-          const showCampus = width >= 900;
-          const showBrandRail = (fullscreen || width >= 1240) && showCampus;
+          // window the chat is the point, so the map yields entirely. It
+          // also yields when the user has collapsed it by hand.
+          const showCampus = width >= 900 && !campusCollapsed;
+          // With the campus hidden, the window becomes the classic GRACE unit —
+          // orb + quick tags + chat — so the rail needs far less room to earn
+          // its place than it does when it is competing with a map.
+          const showBrandRail = showCampus ? (fullscreen || width >= 1240) : width >= 700;
           return (
             <div className="flex h-full min-h-0">
               {showBrandRail && (
