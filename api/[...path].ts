@@ -120,6 +120,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'work-orders/create-from-template': () => import('./work-orders/_create-from-template.js'),
   'work-orders/completion-report': () => import('./work-orders/_completion-report.js'),
   'workos/areas': () => import('./workos/_areas.js'),
+  'workos/agent-settings': () => import('./workos/_agent-settings.js'),
   'workos/permissions': () => import('./workos/_permissions.js'),
   'workos/staff': () => import('./workos/_staff.js'),
   'workos/summary': () => import('./workos/_summary.js'),
