@@ -22,22 +22,23 @@ export class WorkOsApiError extends Error {
 export type GetAuthToken = () => Promise<string | null>;
 
 /**
- * Demo "sign in as [leader]" selection — see src/components/auth/
- * DemoLeaderSignIn.tsx. Only ever read/sent when there's no real bearer
- * token (demo mode has none), so a real Clerk session can never be
- * overridden by a stale localStorage value.
+ * "View as [team member]" selection — see src/components/auth/
+ * ViewAsLeader.tsx. Sent alongside a real bearer token: the backend
+ * (api/_lib/authz.ts resolveStaffActor) only honors this header for a
+ * caller whose own real session already holds admin.manage_settings, so
+ * it is a privileged admin's preview tool, never an anonymous bypass.
  */
-const DEMO_ACTOR_STORAGE_KEY = 'grace-demo-actor-clerk-id';
+const VIEW_AS_STORAGE_KEY = 'grace-view-as-clerk-id';
 
-export function getDemoActor(): string | null {
+export function getViewAsActor(): string | null {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(DEMO_ACTOR_STORAGE_KEY);
+  return window.localStorage.getItem(VIEW_AS_STORAGE_KEY);
 }
 
-export function setDemoActor(clerkId: string | null): void {
+export function setViewAsActor(clerkId: string | null): void {
   if (typeof window === 'undefined') return;
-  if (clerkId) window.localStorage.setItem(DEMO_ACTOR_STORAGE_KEY, clerkId);
-  else window.localStorage.removeItem(DEMO_ACTOR_STORAGE_KEY);
+  if (clerkId) window.localStorage.setItem(VIEW_AS_STORAGE_KEY, clerkId);
+  else window.localStorage.removeItem(VIEW_AS_STORAGE_KEY);
 }
 
 export async function workosFetch<T>(
@@ -50,12 +51,9 @@ export async function workosFetch<T>(
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> | undefined),
   };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  } else {
-    const demoActor = getDemoActor();
-    if (demoActor) headers['x-grace-demo-actor'] = demoActor;
-  }
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const viewAsActor = getViewAsActor();
+  if (viewAsActor) headers['x-grace-view-as'] = viewAsActor;
 
   const response = await fetch(path, { ...options, headers });
   const body = await response.json().catch(() => ({}));

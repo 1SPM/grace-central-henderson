@@ -36,7 +36,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { useDecisionQueue } from '../hooks/useDecisionQueue';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
-import { DemoLeaderSignIn } from './auth/DemoLeaderSignIn';
+import { ViewAsLeader } from './auth/ViewAsLeader';
 
 interface LayoutProps {
   currentView: View;
@@ -564,18 +564,22 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
           {/* Demo Mode indicator — only shown when in demo mode */}
           {isDemo && (
-            <div className={`mt-2 pt-2 border-t border-white/15 space-y-1.5 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+            <div className={`mt-2 pt-2 border-t border-white/15 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
               <div className="px-2.5">
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-semibold bg-white/90 text-amber-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                   Demo Mode
                 </div>
               </div>
-              <div className="px-2.5">
-                <DemoLeaderSignIn />
-              </div>
             </div>
           )}
+
+          {/* "View as [team member]" — a real signed-in master admin only;
+              self-gated (including its own border/spacing), so it renders
+              nothing at all for anyone else. Deliberately independent of the
+              isDemo block above: it must keep working on
+              gracecrm-centralhenderson.org, which is never in demo mode. */}
+          {!sidebarCollapsed && <ViewAsLeader />}
         </div>
       </aside>
 

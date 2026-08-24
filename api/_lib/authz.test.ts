@@ -413,6 +413,135 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
   });
 });
 
+describe('resolveStaffActor — "view as [team member]" (x-grace-view-as)', () => {
+  function makeReqWithViewAs(token: string, viewAsClerkId: string) {
+    return {
+      headers: { authorization: `Bearer ${token}`, 'x-grace-view-as': viewAsClerkId },
+    } as unknown as import('@vercel/node').VercelRequest;
+  }
+
+  it('ignores the header for a real caller who is NOT a master admin — resolves their own identity', async () => {
+    const { verifyToken } = await import('@clerk/backend');
+    (verifyToken as ReturnType<typeof vi.fn>).mockResolvedValue({
+      sub: FIXTURE_STAFF_USER.clerk_id,
+      app_metadata: { church_id: FIXTURE_CHURCH_ID },
+    });
+    const { resolveStaffActor } = await import('./authz.js');
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active', person_id: null } }),
+        user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
+        // No admin.manage_settings — an ordinary staff permission only.
+        role_permissions: () => ({ data: [{ permissions: { key: 'work_orders.manage' } }] }),
+      },
+    });
+    const res = makeRes();
+
+    const actor = await resolveStaffActor(
+      makeReqWithViewAs('valid-token', 'demo-leader-james-wilson+11111111-1111-1111-1111-111111111111'),
+      res,
+      supabase as never,
+    );
+
+    expect(actor).not.toBeNull();
+    expect(actor!.userId).toBe(FIXTURE_STAFF_USER.id);
+    expect(actor!.clerkUserId).toBe(FIXTURE_STAFF_USER.clerk_id);
+    // The target lookup must never even be attempted — a second `users`
+    // select would appear here if the permission gate hadn't short-circuited.
+    expect(supabase.__calls.filter(c => c.table === 'users' && c.op === 'select')).toHaveLength(1);
+  });
+
+  it('a real master admin can view as a named team member, and it is logged', async () => {
+    const { verifyToken } = await import('@clerk/backend');
+    (verifyToken as ReturnType<typeof vi.fn>).mockResolvedValue({
+      sub: FIXTURE_STAFF_USER.clerk_id,
+      app_metadata: { church_id: FIXTURE_CHURCH_ID },
+    });
+    const { resolveStaffActor } = await import('./authz.js');
+
+    let usersCall = 0;
+    let rolesCall = 0;
+    const TARGET_USER_ID = 'target-leader-user-id';
+    const TARGET_CLERK_ID = 'demo-leader-james-wilson+11111111-1111-1111-1111-111111111111';
+    const TARGET_PERSON_ID = '00000000-0000-0000-0000-000000000101';
+
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => {
+          usersCall += 1;
+          // 1st call resolves the real caller (the admin); 2nd resolves
+          // the view-as target — matching resolveStaffActor's call order.
+          return usersCall === 1
+            ? { data: { id: FIXTURE_STAFF_USER.id, account_status: 'active', person_id: null } }
+            : { data: { id: TARGET_USER_ID, account_status: 'active', person_id: TARGET_PERSON_ID } };
+        },
+        user_roles: () => ({ data: [{ role_id: 'some-role-id' }] }),
+        role_permissions: () => {
+          rolesCall += 1;
+          // 1st call: the caller's own permissions (must include
+          // admin.manage_settings for the gate to open at all). 2nd call:
+          // the target's — deliberately a DIFFERENT, non-admin set, to
+          // prove the resolved actor really is the target, not the caller.
+          return rolesCall === 1
+            ? { data: [{ permissions: { key: 'admin.manage_settings' } }] }
+            : { data: [{ permissions: { key: 'pastoral_care.manage' } }] };
+        },
+        security_events: () => ({ data: null }),
+      },
+    });
+    const res = makeRes();
+
+    const actor = await resolveStaffActor(
+      makeReqWithViewAs('valid-token', TARGET_CLERK_ID),
+      res,
+      supabase as never,
+    );
+
+    expect(actor).not.toBeNull();
+    expect(actor!.userId).toBe(TARGET_USER_ID);
+    expect(actor!.clerkUserId).toBe(TARGET_CLERK_ID);
+    expect(actor!.personId).toBe(TARGET_PERSON_ID);
+    expect(actor!.permissions.has('admin.manage_settings')).toBe(false);
+    expect(actor!.permissions.has('pastoral_care.manage')).toBe(true);
+
+    const auditInsert = supabase.__calls.find(c => c.table === 'security_events' && c.op === 'insert');
+    expect(auditInsert).toBeDefined();
+    expect((auditInsert!.payload as { event_type: string }).event_type).toBe('authz.view_as');
+  });
+
+  it('the anonymous demo bootstrap ignores x-grace-view-as entirely — no bearer token means no admin permission to gate on', async () => {
+    delete process.env.VITE_ENABLE_DEMO_MODE;
+    const { resolveStaffActor } = await import('./authz.js');
+
+    const supabase = createMockSupabase({
+      tables: {
+        users: () => ({ data: { id: 'demo-user-row-id', account_status: 'active' } }),
+        roles: () => ({ data: { id: 'sysadmin-role-id' } }),
+        user_roles: () => ({ data: [{ id: 'grant-1', role_id: 'sysadmin-role-id' }] }),
+        role_permissions: () => ({ data: [{ permissions: { key: 'admin.manage_settings' } }] }),
+      },
+    });
+    const res = makeRes();
+
+    // No Authorization header (so hasBearerToken is false, and
+    // gracecrm-centralhenderson.org's own demo bypass takes over) — but a
+    // crafted x-grace-view-as header IS present, exactly what an attacker
+    // hitting the API directly (bypassing the app's own sign-in gate)
+    // would send. It must be fully ignored: the anonymous path only ever
+    // resolves the single shared demo-workos-admin actor, never a named
+    // individual, regardless of any header sent.
+    const req = {
+      headers: { host: 'gracecrm-centralhenderson.org', 'x-grace-view-as': 'demo-leader-james-wilson+11111111-1111-1111-1111-111111111111' },
+    } as unknown as import('@vercel/node').VercelRequest;
+
+    const actor = await resolveStaffActor(req, res, supabase as never);
+
+    expect(actor).not.toBeNull();
+    expect(actor!.clerkUserId).toBe('demo-workos-admin+11111111-1111-1111-1111-111111111111');
+    expect(supabase.__calls.filter(c => c.table === 'users' && c.op === 'select')).toHaveLength(1);
+  });
+});
+
 describe('resolveMemberActor — demo-mode bootstrap (Members Portal)', () => {
   afterEach(() => {
     delete process.env.VITE_ENABLE_DEMO_MODE;
