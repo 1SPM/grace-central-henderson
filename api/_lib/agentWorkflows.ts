@@ -15,6 +15,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { bucketLedgerRows, detectReconciliationAnomalies } from './webhooks/reconcile.js';
+import { PLATFORM_FEE_BPS, PLATFORM_FEE_PERCENT } from './billing/givingFee.js';
 
 export interface AgentFinding {
   action_type: string;
@@ -163,6 +164,68 @@ async function runShepherdMemberCare(supabase: SupabaseClient, churchId: string)
   };
 }
 
+interface LedgerRowForSteward {
+  id: string; church_id: string; source: string; kind: string; direction: 'credit' | 'debit';
+  amount_micro_usd: number; occurred_at: string;
+  metadata: Record<string, unknown> | null;
+}
+
+interface PlatformFeeMismatch {
+  id: string; occurredAt: string; detail: string;
+  expected: number; actual: number; reference: string | null;
+}
+
+// Ground truth is whatever Stripe actually applied to the transaction
+// (recorded into ledger metadata by the webhook handlers — see
+// webhooks/stripe-handlers.ts), not the rate constant alone: this catches
+// both a future code drift AND any transaction Stripe itself charged
+// incorrectly. Rows with no recorded fee data (older than this check, or
+// a non-donation credit) are skipped rather than flagged — silence there
+// means "nothing to compare," not "compliant."
+function detectPlatformFeeMismatches(rows: LedgerRowForSteward[]): PlatformFeeMismatch[] {
+  const mismatches: PlatformFeeMismatch[] = [];
+
+  for (const row of rows) {
+    if (row.source !== 'stripe' || row.kind !== 'donation' || row.direction !== 'credit') continue;
+    const meta = row.metadata ?? {};
+
+    const feeAmountCents = meta.platform_fee_amount_cents;
+    if (typeof feeAmountCents === 'number') {
+      const grossCents = row.amount_micro_usd / 10_000;
+      const expectedCents = Math.floor((grossCents * PLATFORM_FEE_BPS) / 10_000);
+      if (feeAmountCents !== expectedCents) {
+        mismatches.push({
+          id: row.id,
+          occurredAt: row.occurred_at,
+          detail: 'one_time_fee_amount',
+          expected: expectedCents,
+          actual: feeAmountCents,
+          reference: typeof meta.stripe_payment_intent_id === 'string' ? meta.stripe_payment_intent_id : null,
+        });
+      }
+      continue;
+    }
+
+    const feePercent = meta.platform_fee_percent;
+    if (typeof feePercent === 'number') {
+      if (Math.abs(feePercent - PLATFORM_FEE_PERCENT) > 1e-9) {
+        mismatches.push({
+          id: row.id,
+          occurredAt: row.occurred_at,
+          detail: 'recurring_fee_percent',
+          expected: PLATFORM_FEE_PERCENT,
+          actual: feePercent,
+          reference: typeof meta.stripe_subscription_id === 'string' ? meta.stripe_subscription_id : null,
+        });
+      }
+    }
+    // Neither field present: pre-dates fee-recording or not a card
+    // charge we take a percentage of — nothing to verify, skip.
+  }
+
+  return mismatches;
+}
+
 async function runStewardFinancialOperations(supabase: SupabaseClient, churchId: string): Promise<AgentWorkflowResult> {
   // Same math as the nightly reconcile-stripe cron (api/_lib/webhooks/
   // reconcile.ts) — reused, not reimplemented — just scoped to one
@@ -176,42 +239,56 @@ async function runStewardFinancialOperations(supabase: SupabaseClient, churchId:
 
   const { data: rows } = await supabase
     .from('ledger_entries')
-    .select('church_id, source, kind, direction, amount_micro_usd, occurred_at')
+    .select('id, church_id, source, kind, direction, amount_micro_usd, occurred_at, metadata')
     .eq('church_id', churchId)
     .gte('occurred_at', trailingStart.toISOString())
     .order('occurred_at', { ascending: true })
     .limit(2000);
 
-  const allRows = (rows ?? []) as {
-    church_id: string; source: string; kind: string;
-    direction: 'credit' | 'debit'; amount_micro_usd: number; occurred_at: string;
-  }[];
+  const allRows = (rows ?? []) as LedgerRowForSteward[];
   const yesterdayIso = yesterdayStart.toISOString();
   const yesterdayEndIso = yesterdayEnd.toISOString();
   const yesterdayRows = allRows.filter(r => r.occurred_at >= yesterdayIso && r.occurred_at < yesterdayEndIso);
   const trailingRows = allRows.filter(r => r.occurred_at < yesterdayIso);
 
   const anomalies = detectReconciliationAnomalies(bucketLedgerRows(yesterdayRows), bucketLedgerRows(trailingRows));
+  const feeMismatches = detectPlatformFeeMismatches(allRows);
 
-  const findings: AgentFinding[] = anomalies.map(a => ({
-    action_type: 'flag_reconciliation_anomaly',
-    target_entity_type: 'ledger_reconciliation',
-    target_entity_id: null,
-    payload: {
-      source: a.source,
-      date: a.date,
-      kind: a.kind,
-      detail: a.detail,
-      today_usd: a.todayMicroUsd / 1_000_000,
-      trailing_avg_usd: a.trailingAvgMicroUsd / 1_000_000,
-    },
-  }));
+  const findings: AgentFinding[] = [
+    ...anomalies.map(a => ({
+      action_type: 'flag_reconciliation_anomaly',
+      target_entity_type: 'ledger_reconciliation',
+      target_entity_id: null,
+      payload: {
+        source: a.source,
+        date: a.date,
+        kind: a.kind,
+        detail: a.detail,
+        today_usd: a.todayMicroUsd / 1_000_000,
+        trailing_avg_usd: a.trailingAvgMicroUsd / 1_000_000,
+      },
+    })),
+    ...feeMismatches.map(m => ({
+      action_type: 'flag_platform_fee_mismatch',
+      target_entity_type: 'ledger_entry',
+      target_entity_id: m.id,
+      payload: {
+        detail: m.detail,
+        expected: m.expected,
+        actual: m.actual,
+        occurred_at: m.occurredAt,
+        stripe_reference: m.reference,
+      },
+    })),
+  ];
+
+  const parts: string[] = [];
+  if (anomalies.length) parts.push(`${anomalies.length} reconciliation anomal${anomalies.length === 1 ? 'y' : 'ies'} in yesterday's giving ledger`);
+  if (feeMismatches.length) parts.push(`${feeMismatches.length} transaction${feeMismatches.length === 1 ? '' : 's'} in the trailing window where the applied platform fee doesn't match the expected ${PLATFORM_FEE_PERCENT}% rate`);
 
   return {
     findings,
-    summary: anomalies.length
-      ? `Found ${anomalies.length} reconciliation anomal${anomalies.length === 1 ? 'y' : 'ies'} in yesterday's giving ledger.`
-      : 'No reconciliation anomalies found in the trailing 7-day ledger window.',
+    summary: parts.length ? `Found ${parts.join(', ')}.` : 'No reconciliation anomalies or platform-fee mismatches found in the trailing 7-day ledger window.',
   };
 }
 

@@ -33,13 +33,11 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { readBody, str, int_, email_ } from '../_lib/validation.js';
 import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
+import { PLATFORM_FEE_BPS } from '../_lib/billing/givingFee.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-/** Platform fee in basis points. 75 = 0.75%. Matches SettingsGiving display. */
-const PLATFORM_FEE_BPS = 75;
 
 const SCHEMA = {
   church_slug: str({ required: true, max: 100, pattern: /^[a-z0-9-]+$/ }),

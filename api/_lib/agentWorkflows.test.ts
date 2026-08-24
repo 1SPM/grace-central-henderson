@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
 import { getWorkflow } from './agentWorkflows.js';
 import { FIXTURE_CHURCH_ID } from '../../tests/fixtures/shared-platform.js';
+import { PLATFORM_FEE_BPS, PLATFORM_FEE_PERCENT } from './billing/givingFee.js';
 
 describe('getWorkflow("grace") — WorkOS Orchestrator', () => {
   it('reports zero findings and a calm summary when nothing needs attention', async () => {
@@ -164,6 +165,88 @@ describe('getWorkflow("steward") — Financial Operations', () => {
 
     expect(result.findings).toHaveLength(0);
     expect(result.summary).toMatch(/no reconciliation anomalies/i);
+  });
+
+  it('flags a one-time donation whose recorded platform fee does not match the expected rate', async () => {
+    const row = {
+      id: 'le1',
+      church_id: FIXTURE_CHURCH_ID,
+      source: 'stripe',
+      kind: 'donation',
+      direction: 'credit' as const,
+      amount_micro_usd: 100_000_000, // $100.00 gift
+      occurred_at: dayOffset(2),
+      // Expected at PLATFORM_FEE_BPS=75 is floor(10000 * 75 / 10000) = 75c.
+      // Recorded actual is 50c — drift, e.g. from a stale rate at charge time.
+      metadata: { stripe_payment_intent_id: 'pi_drift', platform_fee_amount_cents: 50 },
+    };
+
+    const supabase = createMockSupabase({ tables: { ledger_entries: () => ({ data: [row] }) } });
+    const workflow = getWorkflow('steward')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    const feeFindings = result.findings.filter(f => f.action_type === 'flag_platform_fee_mismatch');
+    expect(feeFindings).toHaveLength(1);
+    expect(feeFindings[0].target_entity_id).toBe('le1');
+    expect(feeFindings[0].payload).toMatchObject({
+      detail: 'one_time_fee_amount',
+      expected: Math.floor((10_000 * PLATFORM_FEE_BPS) / 10_000),
+      actual: 50,
+      stripe_reference: 'pi_drift',
+    });
+    expect(result.summary).toContain("doesn't match the expected");
+  });
+
+  it('flags a recurring donation whose recorded platform fee percent does not match the expected rate', async () => {
+    const row = {
+      id: 'le2',
+      church_id: FIXTURE_CHURCH_ID,
+      source: 'stripe',
+      kind: 'donation',
+      direction: 'credit' as const,
+      amount_micro_usd: 25_000_000,
+      occurred_at: dayOffset(3),
+      metadata: { stripe_subscription_id: 'sub_drift', platform_fee_percent: 2.5 },
+    };
+
+    const supabase = createMockSupabase({ tables: { ledger_entries: () => ({ data: [row] }) } });
+    const workflow = getWorkflow('steward')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    const feeFindings = result.findings.filter(f => f.action_type === 'flag_platform_fee_mismatch');
+    expect(feeFindings).toHaveLength(1);
+    expect(feeFindings[0].payload).toMatchObject({
+      detail: 'recurring_fee_percent',
+      expected: PLATFORM_FEE_PERCENT,
+      actual: 2.5,
+      stripe_reference: 'sub_drift',
+    });
+  });
+
+  it('does not flag donations correctly charged at the current rate, or rows recorded before fee-tracking existed', async () => {
+    const correctOneTime = {
+      id: 'le3', church_id: FIXTURE_CHURCH_ID, source: 'stripe', kind: 'donation', direction: 'credit' as const,
+      amount_micro_usd: 100_000_000, occurred_at: dayOffset(2),
+      metadata: { stripe_payment_intent_id: 'pi_ok', platform_fee_amount_cents: Math.floor((10_000 * PLATFORM_FEE_BPS) / 10_000) },
+    };
+    const correctRecurring = {
+      id: 'le4', church_id: FIXTURE_CHURCH_ID, source: 'stripe', kind: 'donation', direction: 'credit' as const,
+      amount_micro_usd: 25_000_000, occurred_at: dayOffset(3),
+      metadata: { stripe_subscription_id: 'sub_ok', platform_fee_percent: PLATFORM_FEE_PERCENT },
+    };
+    const preInstrumentation = {
+      id: 'le5', church_id: FIXTURE_CHURCH_ID, source: 'stripe', kind: 'donation', direction: 'credit' as const,
+      amount_micro_usd: 10_000_000, occurred_at: dayOffset(4),
+      metadata: { stripe_payment_intent_id: 'pi_old' }, // written before fee-recording shipped
+    };
+
+    const supabase = createMockSupabase({
+      tables: { ledger_entries: () => ({ data: [correctOneTime, correctRecurring, preInstrumentation] }) },
+    });
+    const workflow = getWorkflow('steward')!;
+    const result = await workflow(supabase as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings.filter(f => f.action_type === 'flag_platform_fee_mismatch')).toHaveLength(0);
   });
 });
 

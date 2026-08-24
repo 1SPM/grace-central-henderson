@@ -3,6 +3,8 @@ import { useAgentCommandCentre } from '../../hooks/useAgentCommandCentre';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { StatusBadge } from '../ui/StatusBadge';
 import { AgentFindingsPanel } from './AgentFindingsPanel';
+import { useMinistryAreas } from '../../hooks/useMinistryAreas';
+import { ROOM_LABEL, roleLabel } from './AreaPairing';
 
 const STATUS_LABEL: Record<string, string> = {
   not_implemented: 'Not yet implemented',
@@ -31,6 +33,9 @@ function formatTime(iso: string | null): string {
 
 export function AgentCommandCentre() {
   const { agents, isLoading, error, forbidden, runningKey, runAgent } = useAgentCommandCentre();
+  // Same map the Campus and the Overview read, so an agent's card names the
+  // area and the person it supports rather than floating free of the church.
+  const { areas } = useMinistryAreas();
   const { has } = useWorkOsPermissions();
   const canManage = has('agents.manage');
 
@@ -67,6 +72,19 @@ export function AgentCommandCentre() {
             </div>
 
             <p className="text-xs text-gray-500 dark:text-dark-400 mt-2">{agent.description}</p>
+
+            {areas.filter(a => a.agent_key === agent.key).map(a => (
+              <div key={a.key} className="mt-2 text-[11px] text-gray-500 dark:text-dark-400" data-testid={`agent-supports-${agent.key}`}>
+                <span className="uppercase tracking-wide text-[10px] text-gray-400 dark:text-dark-500">Supports</span>{' '}
+                <span className="text-gray-700 dark:text-dark-200">{a.name}</span>
+                {' · '}
+                {a.owner
+                  ? <span>{a.owner.name}</span>
+                  : <span className="text-amber-700 dark:text-amber-400">no owner yet ({roleLabel(a.default_role_key)})</span>}
+                {' · '}
+                <span>{ROOM_LABEL[a.room_id] ?? a.room_id}</span>
+              </div>
+            ))}
 
             {agent.latest_run ? (
               <div className="mt-3 text-xs text-gray-500 dark:text-dark-400 space-y-0.5">

@@ -86,6 +86,17 @@ export function useWorkOrders() {
     return data.work_order;
   }, [getAuthToken, list]);
 
+  /** Assign or clear the accountable human. `null` unassigns. */
+  const setOwner = useCallback(async (id: string, ownerUserId: string | null): Promise<WorkOrder> => {
+    const data = await workosFetch<CreateResponse>(`/api/work-orders?id=${encodeURIComponent(id)}`, getAuthToken, {
+      method: 'PATCH',
+      // Explicit null, not omitted — that is what clears the column.
+      body: JSON.stringify({ owner_user_id: ownerUserId }),
+    });
+    await list();
+    return data.work_order;
+  }, [getAuthToken, list]);
+
   const addTask = useCallback(async (input: { work_order_id: string; title: string; description?: string; priority?: string; owner_user_id?: string; due_date?: string }) => {
     return workosFetch<{ task: WorkOrderTask }>('/api/work-orders/tasks', getAuthToken, {
       method: 'POST',
@@ -141,7 +152,7 @@ export function useWorkOrders() {
     list,
     getDetail,
     create,
-    updateStatus,
+    updateStatus, setOwner,
     addTask,
     updateTask,
     addDependency,

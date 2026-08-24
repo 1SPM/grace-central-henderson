@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ClipboardList, Kanban, ClipboardCheck, Bot, History } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Kanban, ClipboardCheck, Bot, Map as MapIcon, History } from 'lucide-react';
 import { HubPageHeader } from '../ui/HubPageHeader';
-import { parseWorkOsTab, parseWorkOsId, openWorkOs, type WorkOsTab } from '../../lib/workosNav';
+import { parseWorkOsTab, parseWorkOsId, parseCampusRoom, openWorkOs, type WorkOsTab } from '../../lib/workosNav';
 import { ExecutiveOverview } from './ExecutiveOverview';
 import { WorkOrderList } from './WorkOrderList';
 import { WorkOrderDetail } from './WorkOrderDetail';
@@ -9,6 +9,7 @@ import { TaskBoard } from './TaskBoard';
 import { ApprovalCentre } from './ApprovalCentre';
 import { AgentCommandCentre } from './AgentCommandCentre';
 import { AuditTimeline } from './AuditTimeline';
+import { CampusView } from './CampusView';
 import type { View } from '../../types';
 
 const TABS: { id: WorkOsTab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -17,6 +18,7 @@ const TABS: { id: WorkOsTab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'tasks', label: 'Task Board', icon: Kanban },
   { id: 'approvals', label: 'Approvals', icon: ClipboardCheck },
   { id: 'agents', label: 'Agents', icon: Bot },
+  { id: 'campus', label: 'Campus', icon: MapIcon },
   { id: 'audit', label: 'Audit', icon: History },
 ];
 
@@ -28,11 +30,13 @@ interface WorkOsHubProps {
 export function WorkOsHub({ setView, defaultTab }: WorkOsHubProps) {
   const [tab, setTab] = useState<WorkOsTab>(defaultTab ?? parseWorkOsTab());
   const [selectedWorkOrderId, setSelectedWorkOrderId] = useState<string | null>(parseWorkOsId());
+  const [campusRoom, setCampusRoom] = useState<string | null>(parseCampusRoom());
 
   useEffect(() => {
     const onHashChange = () => {
       setTab(parseWorkOsTab());
       setSelectedWorkOrderId(parseWorkOsId());
+      setCampusRoom(parseCampusRoom());
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
@@ -97,6 +101,7 @@ export function WorkOsHub({ setView, defaultTab }: WorkOsHubProps) {
         {tab === 'tasks' && <TaskBoard onOpenWorkOrder={handleOpenWorkOrder} />}
         {tab === 'approvals' && <ApprovalCentre />}
         {tab === 'agents' && <AgentCommandCentre />}
+        {tab === 'campus' && <CampusView key={campusRoom ?? 'campus'} setView={setView} defaultRoom={campusRoom} />}
         {tab === 'audit' && <AuditTimeline />}
       </div>
     </div>

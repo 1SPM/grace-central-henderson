@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClipboardList, Plus, Sparkles } from 'lucide-react';
+import { useChurchStaff } from '../../hooks/useChurchStaff';
 import { useWorkOrders } from '../../hooks/useWorkOrders';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { WorkOrderCreateModal } from './WorkOrderCreateModal';
@@ -36,6 +37,7 @@ interface WorkOrderListProps {
 export function WorkOrderList({ onOpen }: WorkOrderListProps) {
   const { workOrders, isLoading, forbidden, error, list, create, createPilotReadinessDemo } = useWorkOrders();
   const { has } = useWorkOsPermissions();
+  const { nameFor } = useChurchStaff();
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState<WorkOrderStatus | ''>('');
   const [isSeedingDemo, setIsSeedingDemo] = useState(false);
@@ -134,6 +136,10 @@ export function WorkOrderList({ onOpen }: WorkOrderListProps) {
                 <p className="text-sm font-medium text-gray-900 dark:text-dark-100 truncate">{wo.title}</p>
                 <p className="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
                   {wo.ministry ?? 'No ministry set'} · Priority: {wo.priority}
+                  {' · '}
+                  {wo.owner_user_id
+                    ? <span>{nameFor(wo.owner_user_id) ?? 'Former staff member'}</span>
+                    : <span className="text-amber-700 dark:text-amber-400">Unowned</span>}
                   {wo.due_date ? ` · Due ${new Date(wo.due_date).toLocaleDateString()}` : ''}
                 </p>
               </div>

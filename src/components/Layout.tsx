@@ -36,6 +36,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { useDecisionQueue } from '../hooks/useDecisionQueue';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
+import { ViewAsLeader } from './auth/ViewAsLeader';
 
 interface LayoutProps {
   currentView: View;
@@ -572,6 +573,13 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
               </div>
             </div>
           )}
+
+          {/* "View as [team member]" — a real signed-in master admin only;
+              self-gated (including its own border/spacing), so it renders
+              nothing at all for anyone else. Deliberately independent of the
+              isDemo block above: it must keep working on
+              gracecrm-centralhenderson.org, which is never in demo mode. */}
+          {!sidebarCollapsed && <ViewAsLeader />}
         </div>
       </aside>
 

@@ -1,8 +1,8 @@
 import type { View } from '../types';
 
-export type WorkOsTab = 'overview' | 'work-orders' | 'tasks' | 'approvals' | 'agents' | 'audit';
+export type WorkOsTab = 'overview' | 'work-orders' | 'tasks' | 'approvals' | 'agents' | 'campus' | 'audit';
 
-const VALID_TABS: WorkOsTab[] = ['overview', 'work-orders', 'tasks', 'approvals', 'agents', 'audit'];
+const VALID_TABS: WorkOsTab[] = ['overview', 'work-orders', 'tasks', 'approvals', 'agents', 'campus', 'audit'];
 
 function hashParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -19,6 +19,18 @@ export function parseWorkOsTab(): WorkOsTab {
 
 export function parseWorkOsId(): string | null {
   return hashParams().get('id');
+}
+
+/** Optional room context for the Campus tab. */
+export function parseCampusRoom(): string | null {
+  return hashParams().get('room');
+}
+
+/** Address one campus room without inventing a second routing system. */
+export function campusHash(room?: string | null): string {
+  const params = new URLSearchParams({ tab: 'campus' });
+  if (room) params.set('room', room);
+  return `#/workos?${params.toString()}`;
 }
 
 export function workosHash(tab: WorkOsTab = 'overview', id?: string | null): string {

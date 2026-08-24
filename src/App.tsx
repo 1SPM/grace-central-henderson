@@ -718,7 +718,7 @@ function App() {
       )}
 
 
-      <AskGrace hideDock={view === 'leadership' || view === 'grace'} />
+      <AskGrace hideDock={view === 'leadership' || view === 'grace'} setView={setView} />
 
       {modals.showQuickTask && <QuickTaskForm people={people} onSave={handlers.addTask} onClose={modals.closeQuickTask} />}
       {modals.showQuickPrayer && <QuickPrayerForm people={people} onSave={handlers.addPrayer} onClose={modals.closeQuickPrayer} />}

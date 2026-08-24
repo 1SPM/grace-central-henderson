@@ -102,6 +102,9 @@ export interface StaffActor {
   accountStatus: string;
   role: string; // legacy JWT role claim, kept for callers still on the coarse model
   permissions: Set<string>;
+  /** The people row carrying this staff member's public identity (bio,
+   * photo, Verified Leader stats — see migration 067), when they have one. */
+  personId: string | null;
 }
 
 export interface MemberActor {
@@ -125,6 +128,20 @@ export interface MemberActor {
  * to their own identity, not the shared anonymous demo actor. */
 function hasBearerToken(req: VercelRequest): boolean {
   return !!req.headers.authorization?.startsWith('Bearer ');
+}
+
+/**
+ * The "view as [team member]" header, if present and shaped like a
+ * synthetic demo-leader clerk_id. Namespaced to demo-leader- so this can
+ * never be used to select an arbitrary real account: a caller can only
+ * ever name one of the synthetic per-leader rows the seed created — and,
+ * per resolveStaffActor above, only a caller who already holds
+ * admin.manage_settings through their own real session may use it at all.
+ */
+function viewAsClerkId(req: VercelRequest): string | null {
+  const raw = req.headers['x-grace-view-as'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value && value.startsWith('demo-leader-') ? value : null;
 }
 
 /**
@@ -155,7 +172,7 @@ export async function resolveStaffActor(
 
   const { data: userRow, error } = await supabase
     .from('users')
-    .select('id, account_status')
+    .select('id, account_status, person_id')
     .eq('clerk_id', auth.clerkUserId)
     .eq('church_id', auth.churchId)
     .maybeSingle();
@@ -189,6 +206,48 @@ export async function resolveStaffActor(
 
   const permissions = await loadPermissionKeys(supabase, userRow.id, auth.churchId);
 
+  // "View as [team member]" — a real, already-authenticated master admin
+  // (the pastor) previewing another staff member's own scoped view. Gated
+  // on the CALLING actor's own resolved permission, not on the header
+  // alone, and never on the demo bypass above: gracecrm-centralhenderson.org
+  // is a real client domain with no anonymous staff access (see
+  // src/config/tenant.ts's isDemoModeActive — deliberately excludes it
+  // after a past incident), so this must require a real Clerk session,
+  // not just an unauthenticated header a visitor could send directly to
+  // the API. Every use is logged: it is a real actor exercising a real
+  // privilege, not a cosmetic UI toggle.
+  const targetClerkId = viewAsClerkId(req);
+  if (targetClerkId && permissions.has('admin.manage_settings')) {
+    const { data: targetRow } = await supabase
+      .from('users')
+      .select('id, account_status, person_id')
+      .eq('clerk_id', targetClerkId)
+      .eq('church_id', auth.churchId)
+      .maybeSingle();
+
+    if (targetRow && targetRow.account_status === 'active') {
+      const targetPermissions = await loadPermissionKeys(supabase, targetRow.id, auth.churchId);
+      const ctx = securityContext(req);
+      await logSecurityEvent(supabase, {
+        eventType: 'authz.view_as', severity: 'info',
+        churchId: auth.churchId, actorClerkId: auth.clerkUserId, ip: ctx.ip, route: ctx.route,
+        detail: { admin_user_id: userRow.id, viewed_as_user_id: targetRow.id },
+      });
+      return {
+        kind: 'staff',
+        userId: targetRow.id,
+        clerkUserId: targetClerkId,
+        churchId: auth.churchId,
+        accountStatus: targetRow.account_status,
+        role: targetPermissions.has('admin.manage_settings') ? 'admin' : 'staff',
+        permissions: targetPermissions,
+        personId: targetRow.person_id ?? null,
+      };
+    }
+    // An unrecognized or inactive view-as target falls through to the
+    // caller's own real identity below, rather than failing the request.
+  }
+
   return {
     kind: 'staff',
     userId: userRow.id,
@@ -197,6 +256,7 @@ export async function resolveStaffActor(
     accountStatus: userRow.account_status,
     role: auth.role,
     permissions,
+    personId: (userRow as { person_id?: string | null }).person_id ?? null,
   };
 }
 
@@ -293,6 +353,7 @@ async function resolveDemoStaffActor(
     accountStatus: userRow.account_status,
     role: 'admin',
     permissions,
+    personId: null,
   };
 }
 

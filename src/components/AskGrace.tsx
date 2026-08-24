@@ -6,10 +6,18 @@ import { useGraceSpeech } from '../hooks/useGraceSpeech';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
+import { FloatingWindow } from './ui/FloatingWindow';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { CampusView } from './workos/CampusView';
+import { useDecisionQueue } from '../hooks/useDecisionQueue';
+import type { View } from '../types';
 
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
   onClose?: () => void;
+  /** True when the floating GRACE window is maximized — gates the header
+   *  orb's click-to-speak affordance (see header render below). */
+  fullscreen?: boolean;
 }
 
 function executedSummary(a: PendingAction): string {
@@ -114,7 +122,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
   return { listening, supported, start, stop };
 }
 
-export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
+export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const { speak, stop, speakingId, supported: speechSupported, provider, notice: voiceNotice } = useGraceSpeech();
@@ -123,7 +131,22 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevLoadingRef = useRef(chat.loading);
-  const voice = useVoiceInput((text) => setInput(prev => prev ? `${prev} ${text}` : text));
+  // Voice-triggered send: a spoken utterance auto-sends the moment
+  // recognition ends (you stopped talking) — but voice dictated into
+  // text you'd already typed just appends, since you may not be done
+  // composing. voiceAppendModeRef is set right before voice.start() (see
+  // toggleVoice below); handleSendRef always points at the latest
+  // handleSend so this callback (created once, at mount) never goes stale.
+  const voiceAppendModeRef = useRef(false);
+  const handleSendRef = useRef<(query: string) => void>(() => {});
+  const voice = useVoiceInput((text) => {
+    if (voiceAppendModeRef.current) {
+      setInput(prev => prev ? `${prev} ${text}` : text);
+      return;
+    }
+    setInput('');
+    handleSendRef.current(text);
+  });
 
   useEffect(() => {
     if (variant === 'panel') inputRef.current?.focus();
@@ -144,6 +167,21 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     const timer = window.setTimeout(() => {
       speak(greeting.content, greeting.id);
     }, 500);
+    return () => window.clearTimeout(timer);
+  }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
+
+  // Speak the short "I'm here" re-greeting GraceChatContext appends on a
+  // same-session re-open (see openPanel) — the full-greeting effect above
+  // only fires once per session, so this is what voices every reopen after.
+  const lastSpokenRegreetIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (variant !== 'panel' || !aiSettings.voiceReadback || !speechSupported) return;
+    const last = chat.messages[chat.messages.length - 1];
+    if (!last || last.role !== 'assistant' || last.source !== 'regreet') return;
+    if (lastSpokenRegreetIdRef.current === last.id) return;
+    lastSpokenRegreetIdRef.current = last.id;
+
+    const timer = window.setTimeout(() => speak(last.content, last.id), 300);
     return () => window.clearTimeout(timer);
   }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
 
@@ -169,8 +207,6 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     }
   }, [chat.loading, chat.messages, aiSettings.voiceReadback, speechSupported, speak]);
 
-  if (!aiSettings.aiAssistant) return null;
-
   const handleSend = async (query: string) => {
     if (!query.trim() || chat.loading) return;
     stop();
@@ -179,9 +215,27 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     await chat.sendMessage(query);
   };
 
+  // Keep handleSendRef current — read by the voice-input callback above,
+  // which is created once (inside useVoiceInput) and would otherwise
+  // close over a stale handleSend from an earlier render.
+  useEffect(() => {
+    handleSendRef.current = handleSend;
+  });
+
+  if (!aiSettings.aiAssistant) return null;
+
   const handleClose = () => {
     stop();
     onClose?.();
+  };
+
+  const toggleVoice = () => {
+    if (voice.listening) {
+      voice.stop();
+      return;
+    }
+    voiceAppendModeRef.current = input.trim().length > 0;
+    voice.start();
   };
 
   const wrapperClass = variant === 'inline'
@@ -197,7 +251,19 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <GraceOrb size="xs" />
+          {fullscreen && voice.supported ? (
+            <button
+              type="button"
+              onClick={toggleVoice}
+              aria-label={voice.listening ? 'Stop listening' : 'Ask Grace something — click to speak'}
+              title={voice.listening ? 'Stop listening' : 'Click to speak'}
+              className="appearance-none bg-transparent border-0 p-0 m-0 rounded-full cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <GraceOrb size="xs" listening={voice.listening} />
+            </button>
+          ) : (
+            <GraceOrb size="xs" listening={voice.listening} />
+          )}
           <div className="flex flex-col leading-tight">
             <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
             {speechSupported && provider !== 'none' && (
@@ -359,7 +425,7 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
           {voice.supported && (
             <button
               type="button"
-              onClick={voice.listening ? voice.stop : voice.start}
+              onClick={toggleVoice}
               className={`p-1.5 rounded-lg transition-colors ${voice.listening
                 ? 'bg-brand-500 hover:bg-brand-600 text-white'
                 : 'text-gray-500 hover:bg-stone-200/60 dark:hover:bg-dark-700'}`}
@@ -843,6 +909,12 @@ export function AvatarSkyPanel() {
 
 interface AskGraceProps {
   hideDock?: boolean;
+  /**
+   * Lets the campus inside the GRACE window navigate the app behind it.
+   * Optional so existing mounts/tests keep working; without it, surface
+   * links still rewrite the hash, they just can't switch the View state.
+   */
+  setView?: (v: View) => void;
 }
 
 function useIsOnGracePage(): boolean {
@@ -863,10 +935,30 @@ function useIsOnGracePage(): boolean {
   return onGrace;
 }
 
-export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
+const CAMPUS_COLLAPSED_KEY = 'grace-window-campus-collapsed';
+
+export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
+  // Read for the Mini Mode pill's live badge only — a lightweight,
+  // permission-aware hook already used elsewhere; a caller with no relevant
+  // permission simply gets an empty queue back, never an error.
+  const { counts: minimizedCounts } = useDecisionQueue();
+  // Collapsing the campus makes the GRACE window a plain chat window.
+  // Remembered per device: someone who wants chat-only should get it every
+  // time, not have to re-collapse on each open.
+  const [campusCollapsed, setCampusCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try { return window.localStorage.getItem(CAMPUS_COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const toggleCampus = useCallback(() => {
+    setCampusCollapsed(prev => {
+      const next = !prev;
+      try { window.localStorage.setItem(CAMPUS_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* storage blocked */ }
+      return next;
+    });
+  }, []);
   const onGracePage = useIsOnGracePage();
   const shouldHideDock = hideDock || onGracePage;
 
@@ -918,30 +1010,88 @@ export function AskGrace({ hideDock = false }: AskGraceProps = {}) {
         </div>
       )}
 
-      {chat.panelOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40" onClick={chat.closePanel} />
-          <aside
-            className="fixed z-50 bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 shadow-2xl
-              inset-0 sm:inset-auto
-              sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2
-              sm:w-[min(780px,calc(100vw-48px))] sm:h-[min(640px,calc(100vh-96px))]
-              sm:rounded-2xl sm:border sm:border-stone-300/70 sm:dark:border-white/5
-              overflow-hidden flex"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-          >
-            <GraceAdminSidePanel
-              salutation={chat.salutation}
-              tags={chat.quickTags}
-              onTagClick={(prompt) => void chat.sendMessage(prompt)}
-              loading={chat.loading}
-            />
-            <div className="flex-1 min-w-0">
-              <AskGraceChat variant="panel" onClose={chat.closePanel} />
+      {/* The GRACE window: the 2D campus and the chat as one floating,
+          draggable, resizable, fullscreen-able unit. Non-modal on purpose —
+          the app stays live behind it, which is what makes moving it useful. */}
+      <FloatingWindow
+        open={chat.panelOpen}
+        onClose={chat.closePanel}
+        storageKey="grace-window-geometry"
+        aria-label="GRACE — campus and chat"
+        minimizedContent={
+          <>
+            <GraceOrb size="xs" />
+            <span className="text-xs font-semibold text-gray-900 dark:text-dark-100 truncate">GRACE</span>
+            {minimizedCounts.total > 0 && (
+              <span
+                className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white shrink-0 ${minimizedCounts.critical > 0 ? 'bg-brand-600' : 'bg-amber-500'}`}
+                title={`${minimizedCounts.total} awaiting a decision`}
+              >
+                {minimizedCounts.total}
+              </span>
+            )}
+          </>
+        }
+        headerActions={({ width }) => (
+          // Hidden when the window is too narrow to show a campus anyway —
+          // a toggle for something that cannot appear is just confusing.
+          width >= 900 ? (
+            <button
+              type="button"
+              onClick={toggleCampus}
+              title={campusCollapsed ? 'Show the campus' : 'Hide the campus'}
+              aria-label={campusCollapsed ? 'Show the campus' : 'Hide the campus'}
+              aria-pressed={campusCollapsed}
+              data-testid="grace-campus-toggle"
+              className="p-1.5 rounded-lg text-gray-500 dark:text-dark-300 hover:bg-black/5 dark:hover:bg-white/10"
+            >
+              {campusCollapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+            </button>
+          ) : null
+        )}
+        title={
+          <>
+            <GraceOrb size="xs" />
+            <span className="text-sm font-semibold text-gray-900 dark:text-dark-100 truncate">GRACE</span>
+            <span className="hidden sm:inline text-xs text-gray-500 dark:text-dark-400 truncate">Virtual Campus · Ask Grace</span>
+          </>
+        }
+      >
+        {({ width, fullscreen }) => {
+          // The campus needs real width to be worth drawing; in a narrow
+          // window the chat is the point, so the map yields entirely. It
+          // also yields when the user has collapsed it by hand.
+          const showCampus = width >= 900 && !campusCollapsed;
+          // With the campus hidden, the window becomes the classic GRACE unit —
+          // orb + quick tags + chat — so the rail needs far less room to earn
+          // its place than it does when it is competing with a map.
+          const showBrandRail = showCampus ? (fullscreen || width >= 1240) : width >= 700;
+          return (
+            <div className="flex h-full min-h-0">
+              {showBrandRail && (
+                <GraceAdminSidePanel
+                  salutation={chat.salutation}
+                  tags={chat.quickTags}
+                  onTagClick={(prompt) => void chat.sendMessage(prompt)}
+                  loading={chat.loading}
+                />
+              )}
+              {showCampus && (
+                <div className="flex-1 min-w-0 relative border-r border-stone-300/60 dark:border-white/10">
+                  <CampusView
+                    embedded
+                    setView={setView ?? (() => {})}
+                    onNavigated={chat.closePanel}
+                  />
+                </div>
+              )}
+              <div className={showCampus ? 'w-[380px] shrink-0 min-w-0' : 'flex-1 min-w-0'}>
+                <AskGraceChat variant="panel" onClose={chat.closePanel} fullscreen={fullscreen} />
+              </div>
             </div>
-          </aside>
-        </>
-      )}
+          );
+        }}
+      </FloatingWindow>
     </>
   );
 }

@@ -21,6 +21,26 @@ export class WorkOsApiError extends Error {
 
 export type GetAuthToken = () => Promise<string | null>;
 
+/**
+ * "View as [team member]" selection — see src/components/auth/
+ * ViewAsLeader.tsx. Sent alongside a real bearer token: the backend
+ * (api/_lib/authz.ts resolveStaffActor) only honors this header for a
+ * caller whose own real session already holds admin.manage_settings, so
+ * it is a privileged admin's preview tool, never an anonymous bypass.
+ */
+const VIEW_AS_STORAGE_KEY = 'grace-view-as-clerk-id';
+
+export function getViewAsActor(): string | null {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem(VIEW_AS_STORAGE_KEY);
+}
+
+export function setViewAsActor(clerkId: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (clerkId) window.localStorage.setItem(VIEW_AS_STORAGE_KEY, clerkId);
+  else window.localStorage.removeItem(VIEW_AS_STORAGE_KEY);
+}
+
 export async function workosFetch<T>(
   path: string,
   getAuthToken: GetAuthToken,
@@ -32,6 +52,8 @@ export async function workosFetch<T>(
     ...(options.headers as Record<string, string> | undefined),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
+  const viewAsActor = getViewAsActor();
+  if (viewAsActor) headers['x-grace-view-as'] = viewAsActor;
 
   const response = await fetch(path, { ...options, headers });
   const body = await response.json().catch(() => ({}));
