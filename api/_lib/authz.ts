@@ -131,13 +131,15 @@ function hasBearerToken(req: VercelRequest): boolean {
 }
 
 /**
- * The demo "sign in as [leader]" header, if present and shaped like a
+ * The "view as [team member]" header, if present and shaped like a
  * synthetic demo-leader clerk_id. Namespaced to demo-leader- so this can
- * never be used to select a real account: a visitor can only ever choose
- * among the synthetic rows the demo bootstrap itself created.
+ * never be used to select an arbitrary real account: a caller can only
+ * ever name one of the synthetic per-leader rows the seed created — and,
+ * per resolveStaffActor above, only a caller who already holds
+ * admin.manage_settings through their own real session may use it at all.
  */
-function demoActorClerkId(req: VercelRequest): string | null {
-  const raw = req.headers['x-grace-demo-actor'];
+function viewAsClerkId(req: VercelRequest): string | null {
+  const raw = req.headers['x-grace-view-as'];
   const value = Array.isArray(raw) ? raw[0] : raw;
   return value && value.startsWith('demo-leader-') ? value : null;
 }
@@ -204,6 +206,48 @@ export async function resolveStaffActor(
 
   const permissions = await loadPermissionKeys(supabase, userRow.id, auth.churchId);
 
+  // "View as [team member]" — a real, already-authenticated master admin
+  // (the pastor) previewing another staff member's own scoped view. Gated
+  // on the CALLING actor's own resolved permission, not on the header
+  // alone, and never on the demo bypass above: gracecrm-centralhenderson.org
+  // is a real client domain with no anonymous staff access (see
+  // src/config/tenant.ts's isDemoModeActive — deliberately excludes it
+  // after a past incident), so this must require a real Clerk session,
+  // not just an unauthenticated header a visitor could send directly to
+  // the API. Every use is logged: it is a real actor exercising a real
+  // privilege, not a cosmetic UI toggle.
+  const targetClerkId = viewAsClerkId(req);
+  if (targetClerkId && permissions.has('admin.manage_settings')) {
+    const { data: targetRow } = await supabase
+      .from('users')
+      .select('id, account_status, person_id')
+      .eq('clerk_id', targetClerkId)
+      .eq('church_id', auth.churchId)
+      .maybeSingle();
+
+    if (targetRow && targetRow.account_status === 'active') {
+      const targetPermissions = await loadPermissionKeys(supabase, targetRow.id, auth.churchId);
+      const ctx = securityContext(req);
+      await logSecurityEvent(supabase, {
+        eventType: 'authz.view_as', severity: 'info',
+        churchId: auth.churchId, actorClerkId: auth.clerkUserId, ip: ctx.ip, route: ctx.route,
+        detail: { admin_user_id: userRow.id, viewed_as_user_id: targetRow.id },
+      });
+      return {
+        kind: 'staff',
+        userId: targetRow.id,
+        clerkUserId: targetClerkId,
+        churchId: auth.churchId,
+        accountStatus: targetRow.account_status,
+        role: targetPermissions.has('admin.manage_settings') ? 'admin' : 'staff',
+        permissions: targetPermissions,
+        personId: targetRow.person_id ?? null,
+      };
+    }
+    // An unrecognized or inactive view-as target falls through to the
+    // caller's own real identity below, rather than failing the request.
+  }
+
   return {
     kind: 'staff',
     userId: userRow.id,
@@ -233,40 +277,6 @@ async function resolveDemoStaffActor(
   if (!churchId) {
     res.status(503).json({ error: 'demo_church_not_configured' });
     return null;
-  }
-
-  // Individual "sign in as" for the demo: the shared demo-workos-admin
-  // actor below is the default (and everything after this block is
-  // unchanged for that default). A visitor who picked a specific leader
-  // from the demo sign-in switcher (src/components/auth/DemoLeaderSignIn)
-  // sends that leader's synthetic clerk_id here instead — scoped to
-  // demo-leader-* and this request's own church so the header can never
-  // select a real account or another tenant's row.
-  const requestedActor = demoActorClerkId(req);
-  if (requestedActor) {
-    const { data: leaderRow } = await supabase
-      .from('users')
-      .select('id, account_status, person_id')
-      .eq('clerk_id', requestedActor)
-      .eq('church_id', churchId)
-      .maybeSingle();
-
-    if (leaderRow && leaderRow.account_status === 'active') {
-      const permissions = await loadPermissionKeys(supabase, leaderRow.id, churchId);
-      return {
-        kind: 'staff',
-        userId: leaderRow.id,
-        clerkUserId: requestedActor,
-        churchId,
-        accountStatus: leaderRow.account_status,
-        role: permissions.has('admin.manage_settings') ? 'admin' : 'staff',
-        permissions,
-        personId: leaderRow.person_id ?? null,
-      };
-    }
-    // An unrecognized or inactive demo-actor header falls through to the
-    // shared admin actor below rather than failing the request — a stale
-    // localStorage value from a previous seed must not 403 the demo.
   }
 
   // clerk_id is globally unique (users_clerk_id_key), not scoped per
