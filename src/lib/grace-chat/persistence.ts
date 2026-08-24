@@ -4,6 +4,26 @@ import { TENANT_DEFAULT_SETTINGS } from '../../config/tenant';
 export const GRACE_MESSAGES_STORAGE_KEY = 'grace-chat-messages-v1';
 export const MESSAGES_PERSIST_LIMIT = 50;
 
+/** sessionStorage key — cleared each browser session, so the full greeting
+ *  plays again next time even though chat history persists across sessions. */
+export const GRACE_PANEL_SESSION_KEY = 'grace-panel-launched-session';
+
+const RETURN_GREETINGS = [
+  "I'm here — what's next?",
+  "I'm here.",
+  "What's next?",
+  "Back again — what can I help with?",
+];
+
+/**
+ * Short acknowledgment for the 2nd+ panel open in the same session — a
+ * live assistant doesn't re-introduce itself every time you glance over.
+ */
+export function pickReturnGreeting(): GraceMessage {
+  const content = RETURN_GREETINGS[Math.floor(Math.random() * RETURN_GREETINGS.length)];
+  return { id: `regreet-${Date.now()}`, role: 'assistant', content, source: 'regreet' };
+}
+
 function greetingFallback(data: GraceData, salutation?: string): GraceMessage {
   const churchName = data.churchName || TENANT_DEFAULT_SETTINGS.profile.name;
   const opener = salutation
