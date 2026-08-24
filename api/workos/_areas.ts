@@ -27,7 +27,10 @@ import { requirePermission, resolveStaffActor } from '../_lib/authz.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
 import { AGENT_REGISTRY } from '../_lib/agentRegistry.js';
-import { AREA_KEYS, getArea, resolveAreas, staffDisplayName, type AssignmentRow, type StaffRow, type WorkOrderRow } from '../_lib/ministryAreas.js';
+import {
+  AREA_KEYS, getArea, resolveAreas, attachNextEvents, staffDisplayName,
+  type AssignmentRow, type StaffRow, type WorkOrderRow, type CalendarEventRow,
+} from '../_lib/ministryAreas.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -68,7 +71,9 @@ async function getAreas(
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return; // 401/403 already sent
 
-  const [{ data: assignments }, { data: staff }, { data: workOrders }] = await Promise.all([
+  const nowIso = new Date().toISOString();
+
+  const [{ data: assignments }, { data: staff }, { data: workOrders }, { data: events }] = await Promise.all([
     supabase
       .from('ministry_assignments')
       .select('area_key, owner_user_id, agent_key, campus_room, updated_at')
@@ -84,6 +89,11 @@ async function getAreas(
       .select('ministry, owner_user_id, status')
       .eq('church_id', actor.churchId)
       .not('status', 'in', '(completed,cancelled)'),
+    supabase
+      .from('calendar_events')
+      .select('title, start_date, category')
+      .eq('church_id', actor.churchId)
+      .gte('start_date', nowIso),
   ]);
 
   const staffRows: StaffRow[] = ((staff ?? []) as unknown as {
