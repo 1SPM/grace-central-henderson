@@ -6,6 +6,10 @@ interface PermissionsResponse {
   user_id: string;
   church_id: string;
   permissions: string[];
+  person_id: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  is_master_admin: boolean;
 }
 
 /**
@@ -16,6 +20,8 @@ interface PermissionsResponse {
 export function useWorkOsPermissions() {
   const { getAuthToken, isSignedIn, isLoaded } = useAuthContext();
   const [permissions, setPermissions] = useState<Set<string>>(new Set());
+  const [personId, setPersonId] = useState<string | null>(null);
+  const [isMasterAdmin, setIsMasterAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -23,8 +29,12 @@ export function useWorkOsPermissions() {
     try {
       const data = await workosFetch<PermissionsResponse>('/api/workos/permissions', getAuthToken);
       setPermissions(new Set(data.permissions));
+      setPersonId(data.person_id);
+      setIsMasterAdmin(data.is_master_admin);
     } catch {
       setPermissions(new Set());
+      setPersonId(null);
+      setIsMasterAdmin(false);
     } finally {
       setIsLoading(false);
     }
@@ -37,5 +47,5 @@ export function useWorkOsPermissions() {
 
   const has = useCallback((key: string) => permissions.has(key), [permissions]);
 
-  return { permissions, has, isLoading, refresh };
+  return { permissions, has, personId, isMasterAdmin, isLoading, refresh };
 }

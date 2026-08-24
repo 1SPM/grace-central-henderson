@@ -17,6 +17,7 @@ import { useDecisionQueue } from '../../hooks/useDecisionQueue';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
 import { AreaPairing } from './AreaPairing';
 import { primarySurface, type AreaSurface } from '../../lib/ministryAreas';
+import { getLeaderPhotoByPersonId } from '../../config/centralHendersonLeaders';
 import { StatusBadge } from '../ui/StatusBadge';
 import type { View } from '../../types';
 import { CampusRenderer, type AgentStatusKind, type CampusAgent } from './campus/CampusRenderer';
@@ -128,7 +129,16 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
   // there soon. Independent of, and drawn separate from, agent status.
   useEffect(() => {
     rendererRef.current?.setRoomMeta(
-      areas.map(a => ({ roomId: a.room_id, color: a.accent_color, hasEvent: Boolean(a.next_event) })),
+      areas.map(a => ({
+        roomId: a.room_id,
+        color: a.accent_color,
+        hasEvent: Boolean(a.next_event),
+        // The room's accountable human, drawn as their own portrait rather
+        // than a generic pin — only when they're also a public Verified
+        // Leader (getLeaderPhotoByPersonId returns undefined otherwise,
+        // which setRoomMeta treats as "no portrait for this room").
+        ownerPhoto: a.owner?.person_id ? getLeaderPhotoByPersonId(a.owner.person_id) : undefined,
+      })),
     );
   }, [areas, ready]);
 
