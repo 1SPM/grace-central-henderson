@@ -34,6 +34,7 @@ import { GraceOrb } from './grace/GraceOrb';
 import { useGraceChat } from '../contexts/GraceChatContext';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useDecisionQueue } from '../hooks/useDecisionQueue';
+import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
 import { ViewAsLeader } from './auth/ViewAsLeader';
@@ -182,6 +183,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const grace = useGraceChat();
   const { user, signOut } = useAuthContext();
   const { counts: decisionQueueCounts } = useDecisionQueue();
+  const { hasWorkosAccess } = useWorkOsPermissions();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
   const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
@@ -362,7 +364,16 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                 <div className="hidden lg:block mx-auto w-5 border-t border-white/20 mb-1" />
               )}
               <div className="space-y-0.5">
-                {section.items.map((item) => {
+                {section.items
+                  // GRACE WorkOS is privileged — Senior Pastor / System
+                  // Administrator only (migration 068). Hidden here rather
+                  // than shown-and-blocked: the server-side gate is what
+                  // actually protects it (WorkOsHub.tsx has its own
+                  // fallback for a stale link/bookmark), this just keeps a
+                  // staff member from seeing a nav item that leads nowhere
+                  // useful for them.
+                  .filter(item => item.view !== 'workos' || hasWorkosAccess)
+                  .map((item) => {
                   const isActive = currentView === item.view ||
                     (item.view === 'feed' && actionCenterSubViews.includes(currentView)) ||
                     (item.view === 'giving' && givingSubViews.includes(currentView)) ||
