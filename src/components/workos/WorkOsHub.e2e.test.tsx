@@ -65,7 +65,15 @@ describe('WorkOS end-to-end: Impact Card Pilot Readiness demonstration', () => {
       const method = opts?.method ?? 'GET';
 
       if (url === '/api/workos/permissions') {
-        return Promise.resolve(jsonResponse({ permissions: ['work_orders.view', 'work_orders.manage'] }));
+        // GRACE WorkOS is pastor-privileged (migration 068) — this
+        // demonstration walks the real Work Order creation/management
+        // flow, which now only a Senior Pastor / System Administrator can
+        // reach at all.
+        return Promise.resolve(jsonResponse({
+          permissions: ['work_orders.view', 'work_orders.manage', 'workos.access'],
+          has_workos_access: true,
+          hierarchy_tier: 'pastor',
+        }));
       }
       if (url === '/api/work-orders/pilot-readiness' && method === 'POST') {
         pilotWorkOrderCreated = true;
