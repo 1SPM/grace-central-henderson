@@ -5,22 +5,28 @@ import { openLeadership } from './leadershipNav';
 import { openCare } from './careNav';
 import { openSettings, type SettingsTab } from './settingsNav';
 
-export type ActionCenterTab = 'followups' | 'mail' | 'birthdays' | 'live' | 'volunteers';
+export type ActionCenterTab = 'mywork' | 'followups' | 'mail' | 'birthdays' | 'live' | 'volunteers';
 
+// "My Work" reads first — what GRACE's agents are doing on your behalf,
+// and whether you need to step in, is the thing worth checking before
+// anything else here. Mirrors GRACE WorkOS putting Agents first for the
+// pastor (src/components/workos/WorkOsHub.tsx).
 export function parseActionCenterTab(): ActionCenterTab {
-  if (typeof window === 'undefined') return 'followups';
+  if (typeof window === 'undefined') return 'mywork';
   const hash = window.location.hash;
   const qIndex = hash.indexOf('?');
-  if (qIndex < 0) return 'followups';
+  if (qIndex < 0) return 'mywork';
   const tab = new URLSearchParams(hash.slice(qIndex + 1)).get('tab');
+  if (tab === 'followups') return 'followups';
   if (tab === 'mail') return 'mail';
   if (tab === 'birthdays') return 'birthdays';
   if (tab === 'live') return 'live';
   if (tab === 'volunteers') return 'volunteers';
-  return 'followups';
+  return 'mywork';
 }
 
-export function actionCenterHash(tab: ActionCenterTab = 'followups'): string {
+export function actionCenterHash(tab: ActionCenterTab = 'mywork'): string {
+  if (tab === 'followups') return '#/actions?tab=followups';
   if (tab === 'mail') return '#/actions?tab=mail';
   if (tab === 'birthdays') return '#/actions?tab=birthdays';
   if (tab === 'live') return '#/actions?tab=live';

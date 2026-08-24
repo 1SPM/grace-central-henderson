@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react';
-import { Cake, ListTodo, Mail, Radio, UserCheck, Zap } from 'lucide-react';
+import { Bot, Cake, ListTodo, Mail, Radio, UserCheck, Zap } from 'lucide-react';
 import { ActionFeed } from './ActionFeed';
+import { MyWorkPanel } from './MyWorkPanel';
 import { MailInbox } from './MailInbox';
 import { useMailInboxStats } from '../hooks/useMailInboxStats';
 import { ListSkeleton } from './ui/ViewSkeleton';
@@ -58,6 +59,7 @@ interface ActionCenterProps {
 }
 
 const TABS: { id: ActionCenterTab; label: string; icon: typeof ListTodo }[] = [
+  { id: 'mywork', label: 'My Work', icon: Bot },
   { id: 'followups', label: 'Tasks & follow-ups', icon: ListTodo },
   { id: 'mail', label: 'Mail', icon: Mail },
   { id: 'birthdays', label: 'Birthdays', icon: Cake },
@@ -101,7 +103,7 @@ export function ActionCenter({
   }, [defaultTab]);
 
   useEffect(() => {
-    if (defaultTab && defaultTab !== 'followups') {
+    if (defaultTab && defaultTab !== 'mywork') {
       window.history.replaceState(null, '', actionCenterHash(defaultTab));
     }
   }, [defaultTab]);
@@ -137,7 +139,7 @@ export function ActionCenter({
                 Action Center
               </h1>
               <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Tasks, follow-ups, mail, birthdays, live service & volunteers — one place for pastoral operations.
+                Your assignments and GRACE's agent activity, plus tasks, mail, birthdays, live service & volunteers.
               </p>
             </div>
           </div>
@@ -182,6 +184,7 @@ export function ActionCenter({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
+        {tab === 'mywork' && <MyWorkPanel />}
         {tab === 'followups' && (
           <ActionFeed
             people={people}
