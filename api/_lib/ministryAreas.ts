@@ -357,7 +357,7 @@ export interface ResolvedArea {
   surfaces: AreaSurface[];
   queueKinds: string[];
   /** Accountable human. null = nobody assigned yet (an honest gap). */
-  owner: { user_id: string; name: string; title: string | null } | null;
+  owner: { user_id: string; name: string; title: string | null; person_id: string | null } | null;
   /** Role that should hold it when `owner` is null. */
   default_role_key: RoleKey;
   agent_key: string | null;
@@ -385,6 +385,10 @@ export interface StaffRow {
   first_name: string | null;
   last_name: string | null;
   title?: string | null;
+  /** The people row carrying this staff member's public identity, when
+   * they have one — see migration 067. Lets the Campus draw a leader's
+   * own portrait instead of a generic owner initial. */
+  person_id?: string | null;
 }
 
 export interface WorkOrderRow {
@@ -460,7 +464,12 @@ export function resolveAreas(
       surfaces: area.surfaces,
       queueKinds: area.queueKinds,
       owner: ownerRow
-        ? { user_id: ownerRow.id, name: staffDisplayName(ownerRow), title: ownerRow.title ?? null }
+        ? {
+            user_id: ownerRow.id,
+            name: staffDisplayName(ownerRow),
+            title: ownerRow.title ?? null,
+            person_id: ownerRow.person_id ?? null,
+          }
         : null,
       default_role_key: area.defaultRoleKey,
       agent_key: row && row.agent_key !== null ? row.agent_key : area.defaultAgentKey,

@@ -29,9 +29,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return;
 
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('first_name, last_name')
+    .eq('id', actor.userId)
+    .maybeSingle();
+
   return res.status(200).json({
     user_id: actor.userId,
     church_id: actor.churchId,
     permissions: Array.from(actor.permissions).sort(),
+    person_id: actor.personId,
+    first_name: userRow?.first_name ?? null,
+    last_name: userRow?.last_name ?? null,
+    // Same gate PUT /api/workos/areas already uses for "may reassign who's
+    // accountable" — reusing it here instead of inventing a parallel
+    // "master admin" permission keeps the two checks impossible to drift.
+    is_master_admin: actor.permissions.has('admin.manage_settings'),
   });
 }

@@ -80,7 +80,7 @@ async function getAreas(
       .eq('church_id', actor.churchId),
     supabase
       .from('users')
-      .select('id, first_name, last_name, staff_profiles(title, ministry)')
+      .select('id, first_name, last_name, person_id, staff_profiles(title, ministry)')
       .eq('church_id', actor.churchId)
       .eq('account_status', 'active')
       .order('first_name'),
@@ -97,13 +97,14 @@ async function getAreas(
   ]);
 
   const staffRows: StaffRow[] = ((staff ?? []) as unknown as {
-    id: string; first_name: string | null; last_name: string | null;
+    id: string; first_name: string | null; last_name: string | null; person_id: string | null;
     staff_profiles?: { title: string | null }[] | null;
   }[]).map(u => ({
     id: u.id,
     first_name: u.first_name,
     last_name: u.last_name,
     title: profileTitle(u.staff_profiles),
+    person_id: u.person_id,
   }));
 
   const areas = attachNextEvents(

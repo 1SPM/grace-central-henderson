@@ -110,8 +110,9 @@ export class CampusRenderer {
   private theme: 'light' | 'dark' = 'light';
   private destroyed = false;
   private ready = false;
-  private roomMeta = new Map<string, { colors: string[]; hasEvent: boolean }>();
+  private roomMeta = new Map<string, { colors: string[]; hasEvent: boolean; ownerPhoto?: string }>();
   private bounceEndAt = new Map<string, number>();
+  private portraitCache = new Map<string, HTMLImageElement | 'error'>();
   private furnitureSorted = FURNITURE.filter(f => !f.decor).slice().sort((a, b) => (a.y + spriteFootprint(a.sprite).h) - (b.y + spriteFootprint(b.sprite).h));
 
   constructor(private canvas: HTMLCanvasElement, private events: RendererEvents = {}) {
@@ -249,15 +250,37 @@ export class CampusRenderer {
    * Rooms shared by more than one area (e.g. Giving + Impact Card) get one
    * strip segment per area rather than picking a winner.
    */
-  setRoomMeta(entries: { roomId: string; color: string; hasEvent: boolean }[]): void {
-    const next = new Map<string, { colors: string[]; hasEvent: boolean }>();
+  setRoomMeta(entries: { roomId: string; color: string; hasEvent: boolean; ownerPhoto?: string }[]): void {
+    const next = new Map<string, { colors: string[]; hasEvent: boolean; ownerPhoto?: string }>();
     for (const e of entries) {
       const cur = next.get(e.roomId) ?? { colors: [], hasEvent: false };
       cur.colors.push(e.color);
       cur.hasEvent = cur.hasEvent || e.hasEvent;
+      // A room can host more than one area's color strip, but only shows
+      // one portrait — the first owner found for it is what's drawn.
+      if (!cur.ownerPhoto && e.ownerPhoto) cur.ownerPhoto = e.ownerPhoto;
       next.set(e.roomId, cur);
     }
     this.roomMeta = next;
+  }
+
+  /**
+   * Lazily loads and caches a leader portrait by URL. Canvas2D needs a
+   * decoded HTMLImageElement to draw, so the first call for a given URL
+   * kicks off loading and returns null (drawn next frame — this renderer's
+   * raf loop redraws continuously, so no extra invalidation is needed);
+   * later calls return the cached image, or null permanently on error.
+   */
+  private getPortrait(url: string): HTMLImageElement | null {
+    const cached = this.portraitCache.get(url);
+    if (cached === 'error') return null;
+    if (cached) return cached;
+    const img = new Image();
+    img.decoding = 'async';
+    img.onerror = () => this.portraitCache.set(url, 'error');
+    img.src = url;
+    this.portraitCache.set(url, img);
+    return null;
   }
 
   /** A brief lift-and-scale pulse — the agent equivalent of Gather's "wave",
@@ -781,6 +804,29 @@ export class CampusRenderer {
         ctx.beginPath();
         ctx.arc(pillX + pillW + 6, s.y - 10, 3, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      // The room's accountable human, when they're also a public Verified
+      // Leader — their own portrait sits just left of the label pill, the
+      // same treatment agent sprites get, so a room reads as "owned by a
+      // person" at a glance rather than only through the roster panel.
+      if (meta?.ownerPhoto) {
+        const img = this.getPortrait(meta.ownerPhoto);
+        if (img && img.complete && img.naturalWidth > 0) {
+          const r = 9;
+          const px = pillX - r - 3, py = s.y;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(px, py, r, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, px - r, py - r, r * 2, r * 2);
+          ctx.restore();
+          ctx.strokeStyle = th.labelBg;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(px, py, r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
     }
   }

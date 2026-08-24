@@ -29,7 +29,7 @@ describe('resolveAreas (the shared pairing, resolved per church)', () => {
       [],
     );
     const giving = areas.find(a => a.key === 'giving')!;
-    expect(giving.owner).toEqual({ user_id: 'u-naomi', name: 'Naomi Ito', title: 'Director of Finance' });
+    expect(giving.owner).toEqual({ user_id: 'u-naomi', name: 'Naomi Ito', title: 'Director of Finance', person_id: null });
     expect(giving.agent_key).toBe('verity');
     expect(giving.room_id).toBe('conference');
     expect(giving.source).toEqual({ owner: 'assigned', agent: 'assigned', room: 'assigned' });
