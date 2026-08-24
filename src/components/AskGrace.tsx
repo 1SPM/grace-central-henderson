@@ -15,6 +15,9 @@ import type { View } from '../types';
 interface AskGraceChatProps {
   variant?: 'panel' | 'inline' | 'full';
   onClose?: () => void;
+  /** True when the floating GRACE window is maximized — gates the header
+   *  orb's click-to-speak affordance (see header render below). */
+  fullscreen?: boolean;
 }
 
 function executedSummary(a: PendingAction): string {
@@ -119,7 +122,7 @@ function useVoiceInput(onTranscript: (text: string) => void) {
   return { listening, supported, start, stop };
 }
 
-export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) {
+export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const { speak, stop, speakingId, supported: speechSupported, provider, notice: voiceNotice } = useGraceSpeech();
@@ -149,6 +152,21 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
     const timer = window.setTimeout(() => {
       speak(greeting.content, greeting.id);
     }, 500);
+    return () => window.clearTimeout(timer);
+  }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
+
+  // Speak the short "I'm here" re-greeting GraceChatContext appends on a
+  // same-session re-open (see openPanel) — the full-greeting effect above
+  // only fires once per session, so this is what voices every reopen after.
+  const lastSpokenRegreetIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (variant !== 'panel' || !aiSettings.voiceReadback || !speechSupported) return;
+    const last = chat.messages[chat.messages.length - 1];
+    if (!last || last.role !== 'assistant' || last.source !== 'regreet') return;
+    if (lastSpokenRegreetIdRef.current === last.id) return;
+    lastSpokenRegreetIdRef.current = last.id;
+
+    const timer = window.setTimeout(() => speak(last.content, last.id), 300);
     return () => window.clearTimeout(timer);
   }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
 
@@ -202,7 +220,19 @@ export function AskGraceChat({ variant = 'panel', onClose }: AskGraceChatProps) 
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-4 border-b border-stone-300/60 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <GraceOrb size="xs" />
+          {fullscreen && voice.supported ? (
+            <button
+              type="button"
+              onClick={voice.listening ? voice.stop : voice.start}
+              aria-label={voice.listening ? 'Stop listening' : 'Ask Grace something — click to speak'}
+              title={voice.listening ? 'Stop listening' : 'Click to speak'}
+              className="appearance-none bg-transparent border-0 p-0 m-0 rounded-full cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <GraceOrb size="xs" listening={voice.listening} />
+            </button>
+          ) : (
+            <GraceOrb size="xs" listening={voice.listening} />
+          )}
           <div className="flex flex-col leading-tight">
             <span className="serif text-lg text-slate-900 dark:text-dark-100 leading-none">Ask Grace</span>
             {speechSupported && provider !== 'none' && (
@@ -1025,7 +1055,7 @@ export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
                 </div>
               )}
               <div className={showCampus ? 'w-[380px] shrink-0 min-w-0' : 'flex-1 min-w-0'}>
-                <AskGraceChat variant="panel" onClose={chat.closePanel} />
+                <AskGraceChat variant="panel" onClose={chat.closePanel} fullscreen={fullscreen} />
               </div>
             </div>
           );

@@ -4,7 +4,7 @@ import { generateAIText, generateAIStreamed } from '../lib/services/ai';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
-import { buildGreeting, loadStoredMessages, persistMessages } from '../lib/grace-chat/persistence';
+import { buildGreeting, loadStoredMessages, persistMessages, pickReturnGreeting, GRACE_PANEL_SESSION_KEY } from '../lib/grace-chat/persistence';
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
 import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
@@ -331,8 +331,20 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     if (seed && seed.trim()) {
       // Defer to next tick so panel renders before we send
       setTimeout(() => void sendMessage(seed), 0);
+      return;
     }
-     
+    // Bare launch (no starter prompt) — the full greeting already covers
+    // "first time"; a live assistant doesn't repeat the whole spiel every
+    // time you glance back over, so re-opens this session get a short
+    // acknowledgment instead. Session-scoped (sessionStorage), not
+    // forever (chat history itself persists in localStorage across days).
+    if (typeof window !== 'undefined') {
+      if (window.sessionStorage.getItem(GRACE_PANEL_SESSION_KEY)) {
+        setMessages(m => [...m, pickReturnGreeting()]);
+      } else {
+        window.sessionStorage.setItem(GRACE_PANEL_SESSION_KEY, '1');
+      }
+    }
   }, []);
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
