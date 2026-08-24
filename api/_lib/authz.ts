@@ -102,6 +102,9 @@ export interface StaffActor {
   accountStatus: string;
   role: string; // legacy JWT role claim, kept for callers still on the coarse model
   permissions: Set<string>;
+  /** The people row carrying this staff member's public identity (bio,
+   * photo, Verified Leader stats — see migration 067), when they have one. */
+  personId: string | null;
 }
 
 export interface MemberActor {
@@ -125,6 +128,18 @@ export interface MemberActor {
  * to their own identity, not the shared anonymous demo actor. */
 function hasBearerToken(req: VercelRequest): boolean {
   return !!req.headers.authorization?.startsWith('Bearer ');
+}
+
+/**
+ * The demo "sign in as [leader]" header, if present and shaped like a
+ * synthetic demo-leader clerk_id. Namespaced to demo-leader- so this can
+ * never be used to select a real account: a visitor can only ever choose
+ * among the synthetic rows the demo bootstrap itself created.
+ */
+function demoActorClerkId(req: VercelRequest): string | null {
+  const raw = req.headers['x-grace-demo-actor'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value && value.startsWith('demo-leader-') ? value : null;
 }
 
 /**
@@ -155,7 +170,7 @@ export async function resolveStaffActor(
 
   const { data: userRow, error } = await supabase
     .from('users')
-    .select('id, account_status')
+    .select('id, account_status, person_id')
     .eq('clerk_id', auth.clerkUserId)
     .eq('church_id', auth.churchId)
     .maybeSingle();
@@ -197,6 +212,7 @@ export async function resolveStaffActor(
     accountStatus: userRow.account_status,
     role: auth.role,
     permissions,
+    personId: (userRow as { person_id?: string | null }).person_id ?? null,
   };
 }
 
@@ -217,6 +233,40 @@ async function resolveDemoStaffActor(
   if (!churchId) {
     res.status(503).json({ error: 'demo_church_not_configured' });
     return null;
+  }
+
+  // Individual "sign in as" for the demo: the shared demo-workos-admin
+  // actor below is the default (and everything after this block is
+  // unchanged for that default). A visitor who picked a specific leader
+  // from the demo sign-in switcher (src/components/auth/DemoLeaderSignIn)
+  // sends that leader's synthetic clerk_id here instead — scoped to
+  // demo-leader-* and this request's own church so the header can never
+  // select a real account or another tenant's row.
+  const requestedActor = demoActorClerkId(req);
+  if (requestedActor) {
+    const { data: leaderRow } = await supabase
+      .from('users')
+      .select('id, account_status, person_id')
+      .eq('clerk_id', requestedActor)
+      .eq('church_id', churchId)
+      .maybeSingle();
+
+    if (leaderRow && leaderRow.account_status === 'active') {
+      const permissions = await loadPermissionKeys(supabase, leaderRow.id, churchId);
+      return {
+        kind: 'staff',
+        userId: leaderRow.id,
+        clerkUserId: requestedActor,
+        churchId,
+        accountStatus: leaderRow.account_status,
+        role: permissions.has('admin.manage_settings') ? 'admin' : 'staff',
+        permissions,
+        personId: leaderRow.person_id ?? null,
+      };
+    }
+    // An unrecognized or inactive demo-actor header falls through to the
+    // shared admin actor below rather than failing the request — a stale
+    // localStorage value from a previous seed must not 403 the demo.
   }
 
   // clerk_id is globally unique (users_clerk_id_key), not scoped per
@@ -293,6 +343,7 @@ async function resolveDemoStaffActor(
     accountStatus: userRow.account_status,
     role: 'admin',
     permissions,
+    personId: null,
   };
 }
 
