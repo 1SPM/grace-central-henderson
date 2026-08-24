@@ -65,11 +65,20 @@ export interface MinistryArea {
   queueKinds: string[];
   /** Confidential-tier: counts and presence only, never subject detail. */
   confidential?: boolean;
+  /**
+   * A distinguishing hex accent for this area — room-label underline and
+   * panel borders, never a status pip. Status color is semantic (ran /
+   * never run / failed) and must stay legible on its own; area color is a
+   * second, independent channel so a room is recognizable before you read
+   * its label, the way a physical office uses department signage color.
+   */
+  accentColor: string;
 }
 
 export const MINISTRY_AREAS: MinistryArea[] = [
   {
     key: 'oversight',
+    accentColor: '#3B53BB',
     name: 'Church Oversight',
     purpose: 'The desk where decisions land: approvals awaiting a decision, related-party reviews, and the week ahead.',
     ministry: 'Oversight',
@@ -85,6 +94,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'operations',
+    accentColor: '#64748B',
     name: 'Operations & Work Orders',
     purpose: 'How work gets planned, assigned, and finished: Work Orders, the Task Board, and completion evidence.',
     ministry: 'Operations',
@@ -100,6 +110,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'member_care',
+    accentColor: '#7C3AED',
     name: 'Pastoral Care',
     purpose: 'Care requests, crisis response, and prayer. Every crisis path ends with a person, never an agent.',
     ministry: 'Care & Counseling',
@@ -117,6 +128,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'membership',
+    accentColor: '#2563EB',
     name: 'Membership & Records',
     purpose: 'The congregation record itself: people, households, tags, forms, and data quality.',
     ministry: 'Member Services',
@@ -133,6 +145,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'newcomers',
+    accentColor: '#0EA5E9',
     name: 'Newcomers & Welcome',
     purpose: 'First visits through to membership: the connect card, check-in, follow-up, and stalled invitations.',
     ministry: 'Welcome',
@@ -149,6 +162,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'communications',
+    accentColor: '#0891B2',
     name: 'Communications',
     purpose: 'Everything the church sends: mail, announcements, and templates. Drafts stay drafts until a person sends them.',
     ministry: 'Communications',
@@ -164,6 +178,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'worship',
+    accentColor: '#A16207',
     name: 'Sunday & Worship',
     purpose: 'The service itself: order of service, attendance, the live console, and the calendar.',
     ministry: 'Worship',
@@ -180,6 +195,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'music',
+    accentColor: '#C2410C',
     name: 'Music & Arts',
     purpose: 'Worship teams and the skills register that says who can serve where.',
     ministry: 'Music & Arts',
@@ -194,6 +210,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'volunteers',
+    accentColor: '#0D9488',
     name: 'Volunteers & Serving',
     purpose: 'Turning willingness into a placement: serving roles, interest submissions, and small groups.',
     ministry: 'Volunteers',
@@ -209,6 +226,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'children',
+    accentColor: '#DB2777',
     name: 'Children & Youth',
     purpose: 'Nursery and youth: check-in, and the family records behind it.',
     ministry: 'Children & Youth',
@@ -223,6 +241,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'giving',
+    accentColor: '#166534',
     name: 'Giving & Stewardship',
     purpose: 'Campaigns, the giving ledger, statements, and reconciliation.',
     ministry: 'Finance',
@@ -238,6 +257,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'impact_card',
+    accentColor: '#059669',
     name: 'Impact Card Operations',
     purpose: 'Member card accounts: applications, KYC review, and transfers that need a human.',
     ministry: 'Impact Card Operations',
@@ -251,6 +271,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'discipleship',
+    accentColor: '#4F46E5',
     name: 'Growth & Engagement',
     purpose: 'Milestones, the discipleship pathway, and how members are actually engaging.',
     ministry: 'Discipleship',
@@ -266,6 +287,7 @@ export const MINISTRY_AREAS: MinistryArea[] = [
   },
   {
     key: 'privacy',
+    accentColor: '#78716C',
     name: 'Privacy & Compliance',
     purpose: 'Consent records, data-subject requests, agent findings, and the audit trail.',
     ministry: 'Compliance',
@@ -317,7 +339,7 @@ export function areaForRoom(roomId: string): MinistryArea | undefined {
   return areasForRoom(roomId)[0];
 }
 
-export function primarySurface(area: MinistryArea): AreaSurface {
+export function primarySurface(area: { surfaces: AreaSurface[] }): AreaSurface {
   return area.surfaces.find(s => s.primary) ?? area.surfaces[0];
 }
 
@@ -340,6 +362,8 @@ export interface ResolvedArea {
   default_role_key: RoleKey;
   agent_key: string | null;
   room_id: string;
+  /** Room-label underline / panel-border color. Never applied to a status pip. */
+  accent_color: string;
   source: { owner: 'default' | 'assigned'; agent: 'default' | 'assigned'; room: 'default' | 'assigned' };
   updated_at: string | null;
 }
@@ -368,9 +392,22 @@ export interface WorkOrderRow {
   owner_user_id: string | null;
 }
 
+export interface NextEventInfo {
+  title: string;
+  start_date: string;
+  category: string;
+}
+
 export interface ResolvedAreaWithCounts extends ResolvedArea {
   open_work_orders: number;
   unowned_work_orders: number;
+  /**
+   * The soonest calendar_events row whose category maps to this area, within
+   * the lookahead window. Always present (never an absent key) — null means
+   * genuinely nothing upcoming, set by resolveAreas() and left as-is unless
+   * attachNextEvents() finds a real match.
+   */
+  next_event: NextEventInfo | null;
 }
 
 export function staffDisplayName(u: StaffRow): string {
@@ -428,6 +465,7 @@ export function resolveAreas(
       default_role_key: area.defaultRoleKey,
       agent_key: row && row.agent_key !== null ? row.agent_key : area.defaultAgentKey,
       room_id: row?.campus_room ?? area.defaultRoom,
+      accent_color: area.accentColor,
       source: {
         // "assigned" means a person made this choice AND it still resolves.
         owner: ownerRow ? 'assigned' : 'default',
@@ -437,6 +475,72 @@ export function resolveAreas(
       updated_at: row?.updated_at ?? null,
       open_work_orders: bucket.open,
       unowned_work_orders: bucket.unowned,
+      next_event: null,
     };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Calendar — "what's coming up here"
+// ---------------------------------------------------------------------------
+
+/**
+ * calendar_events.category -> ministry area, for the campus's "what's coming
+ * up here" badge. Deliberately partial: 'holiday', 'event', and 'other' are
+ * not placed on any specific ministry's desk, so an event in one of those
+ * categories shows nowhere rather than being guessed onto the wrong room.
+ */
+export const EVENT_CATEGORY_AREA: Record<string, string> = {
+  service: 'worship',
+  baptism: 'worship',
+  meeting: 'operations',
+  wedding: 'member_care',
+  funeral: 'member_care',
+  dedication: 'member_care',
+  counseling: 'member_care',
+  rehearsal: 'music',
+  outreach: 'volunteers',
+  'small-group': 'discipleship',
+  class: 'discipleship',
+};
+
+const NEXT_EVENT_LOOKAHEAD_DAYS = 14;
+
+export interface CalendarEventRow {
+  title: string;
+  start_date: string;
+  category: string;
+}
+
+/**
+ * Layer the soonest matching upcoming event onto each area.
+ *
+ * Pure — `now` is an explicit argument rather than read off the clock, same
+ * reason the rest of this module avoids IO: it keeps this unit-testable
+ * without faking the system clock. Filters defensively on `now`/the
+ * lookahead window itself, so the caller only needs to scope events to the
+ * right church, not pre-sort or pre-filter them.
+ */
+export function attachNextEvents<T extends ResolvedAreaWithCounts>(
+  areas: T[],
+  events: CalendarEventRow[],
+  now: Date,
+): T[] {
+  const nowMs = now.getTime();
+  const cutoffMs = nowMs + NEXT_EVENT_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000;
+  const byArea = new Map<string, CalendarEventRow>();
+
+  for (const ev of events) {
+    const areaKey = EVENT_CATEGORY_AREA[ev.category];
+    if (!areaKey) continue;
+    const t = new Date(ev.start_date).getTime();
+    if (Number.isNaN(t) || t < nowMs || t > cutoffMs) continue;
+    const existing = byArea.get(areaKey);
+    if (!existing || t < new Date(existing.start_date).getTime()) byArea.set(areaKey, ev);
+  }
+
+  return areas.map(a => {
+    const ev = byArea.get(a.key);
+    return ev ? { ...a, next_event: { title: ev.title, start_date: ev.start_date, category: ev.category } } : a;
   });
 }

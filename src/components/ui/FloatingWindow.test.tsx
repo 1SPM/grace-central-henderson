@@ -158,4 +158,57 @@ describe('FloatingWindow (the GRACE window shell)', () => {
     fireEvent.pointerUp(action, { clientX: 700, clientY: 200, pointerId: 4 });
     expect(win.style.left).toBe(before);
   });
+
+  it('minimizes to a small pill and restores on a plain click (no drag)', () => {
+    renderWindow({ minimizedContent: <span>MINI</span> });
+    fireEvent.click(screen.getByRole('button', { name: /^minimize$/i }));
+
+    const pill = screen.getByTestId('floating-window');
+    expect(pill.getAttribute('data-minimized')).toBe('true');
+    expect(screen.getByText('MINI')).toBeInTheDocument();
+    // full-window chrome is gone
+    expect(screen.queryByTestId('floating-window-resize')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /fullscreen/i })).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(pill, { clientX: 100, clientY: 100, pointerId: 1 });
+    fireEvent.pointerUp(pill, { clientX: 100, clientY: 100, pointerId: 1 });
+    expect(screen.getByTestId('floating-window').getAttribute('data-minimized')).toBeNull();
+  });
+
+  it('a real drag on the minimized pill moves it and does NOT restore', () => {
+    renderWindow();
+    fireEvent.click(screen.getByRole('button', { name: /^minimize$/i }));
+    const pill = screen.getByTestId('floating-window');
+    const before = pill.style.left;
+
+    fireEvent.pointerDown(pill, { clientX: 100, clientY: 100, pointerId: 2 });
+    fireEvent.pointerMove(pill, { clientX: 180, clientY: 140, pointerId: 2 });
+    fireEvent.pointerUp(pill, { clientX: 180, clientY: 140, pointerId: 2 });
+
+    const after = screen.getByTestId('floating-window');
+    expect(after.getAttribute('data-minimized')).toBe('true'); // still minimized
+    expect(after.style.left).not.toBe(before);
+  });
+
+  it('the pill\'s own Close button closes without restoring first', () => {
+    const { onClose } = renderWindow();
+    fireEvent.click(screen.getByRole('button', { name: /^minimize$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^close$/i }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('minimized state persists per storageKey across remount', () => {
+    const { unmount } = renderWindow({ storageKey: 'test-mini-geo' });
+    fireEvent.click(screen.getByRole('button', { name: /^minimize$/i }));
+    unmount();
+
+    renderWindow({ storageKey: 'test-mini-geo' });
+    expect(screen.getByTestId('floating-window').getAttribute('data-minimized')).toBe('true');
+  });
+
+  it('falls back to `title` in the pill when minimizedContent is not given', () => {
+    renderWindow({ title: <span>Full Title</span> });
+    fireEvent.click(screen.getByRole('button', { name: /^minimize$/i }));
+    expect(screen.getByText('Full Title')).toBeInTheDocument();
+  });
 });

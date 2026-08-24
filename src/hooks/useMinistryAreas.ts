@@ -8,12 +8,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { workosFetch, WorkOsApiError } from '../lib/services/workos';
-import type { AreaSurface, ResolvedArea, RoleKey } from '../lib/ministryAreas';
+import type { AreaSurface, ResolvedAreaWithCounts, RoleKey } from '../lib/ministryAreas';
 
-export interface AreaWithCounts extends ResolvedArea {
-  open_work_orders: number;
-  unowned_work_orders: number;
-}
+// Re-exported under the hook's existing name so nothing else in the app
+// has to change; the shape now comes from one place instead of two.
+export type AreaWithCounts = ResolvedAreaWithCounts;
 
 export interface StaffOption { user_id: string; name: string; title: string | null }
 export interface AgentOption { key: string; name: string; role: string; implemented: boolean }

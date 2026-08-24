@@ -11,10 +11,11 @@
  */
 import { Compass, ArrowUpRight, Lock, SlidersHorizontal } from 'lucide-react';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
-import { AreaPairing } from './AreaPairing';
+import { AreaPairing, AreaAccentDot } from './AreaPairing';
 import { campusHash } from '../../lib/workosNav';
 import { settingsHash } from '../../lib/settingsNav';
 import type { View } from '../../types';
+import { primarySurface } from '../../lib/ministryAreas';
 
 interface MinistryAreasPanelProps {
   setView: (v: View) => void;
@@ -63,12 +64,17 @@ export function MinistryAreasPanel({ setView }: MinistryAreasPanelProps) {
 
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
         {areas.map(area => {
-          const primary = area.surfaces.find(s => s.primary) ?? area.surfaces[0];
+          const primary = primarySurface(area);
           return (
-            <li key={area.key} className="rounded-lg border border-gray-200 dark:border-dark-700 p-3">
+            <li
+              key={area.key}
+              className="rounded-lg border border-gray-200 dark:border-dark-700 p-3 border-l-[3px]"
+              style={{ borderLeftColor: area.accent_color }}
+            >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-1">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-dark-100 flex items-center gap-1.5">
+                    <AreaAccentDot color={area.accent_color} />
                     {area.name}
                     {area.confidential && <Lock size={10} className="text-violet-600 dark:text-violet-400" aria-label="Confidential-tier" />}
                   </p>

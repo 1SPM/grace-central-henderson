@@ -96,10 +96,14 @@ async function getAreas(
     title: profileTitle(u.staff_profiles),
   }));
 
-  const areas = resolveAreas(
-    (assignments ?? []) as unknown as AssignmentRow[],
-    staffRows,
-    (workOrders ?? []) as unknown as WorkOrderRow[],
+  const areas = attachNextEvents(
+    resolveAreas(
+      (assignments ?? []) as unknown as AssignmentRow[],
+      staffRows,
+      (workOrders ?? []) as unknown as WorkOrderRow[],
+    ),
+    (events ?? []) as unknown as CalendarEventRow[],
+    new Date(nowIso),
   );
 
   return res.status(200).json({

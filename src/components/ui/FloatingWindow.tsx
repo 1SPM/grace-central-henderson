@@ -8,6 +8,9 @@
  *   - drag by the header (pointer capture, so fast drags don't drop)
  *   - resize by the bottom-right handle
  *   - fullscreen toggle; double-clicking the header does the same
+ *   - Mini Mode: shrinks to a small draggable pill (Gather's "stay present
+ *     while you work elsewhere") — click it to restore, drag it to move it;
+ *     a real drag never restores, only a plain click does
  *   - Esc closes
  *   - geometry (position, size, fullscreen) persists per storageKey
  *   - clamped so the header can never leave the viewport
@@ -19,7 +22,7 @@
  * would make dragging pointless.
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Maximize2, Minimize2, X } from 'lucide-react';
+import { Maximize2, Minimize2, Minus, X } from 'lucide-react';
 
 export interface FloatingWindowSize {
   width: number;
@@ -33,6 +36,9 @@ interface Geometry {
   w: number;
   h: number;
   full: boolean;
+  /** Mini Mode — shrunk to a small persistent pill. Independent of `full`:
+   *  restoring returns to whatever windowed/fullscreen state preceded it. */
+  min: boolean;
 }
 
 interface FloatingWindowProps {
@@ -54,11 +60,17 @@ interface FloatingWindowProps {
    * the window is (e.g. the campus collapse toggle).
    */
   headerActions?: ReactNode | ((size: FloatingWindowSize) => ReactNode);
+  /** Rendered inside the Mini Mode pill instead of `title`. Falls back to
+   *  `title` when omitted — pass this when the pill should show something
+   *  livelier (e.g. a count badge) than the full window's title bar. */
+  minimizedContent?: ReactNode;
   'aria-label'?: string;
 }
 
 const HEADER_H = 44;           // px — kept on-screen by the clamp
 const EDGE_KEEP = 96;          // px of the window that must stay reachable
+const MINI_W = 240;            // px — the Mini Mode pill's fixed size
+const MINI_H = 56;
 
 function clampGeometry(g: Geometry, minW: number, minH: number): Geometry {
   const vw = window.innerWidth, vh = window.innerHeight;
@@ -67,6 +79,16 @@ function clampGeometry(g: Geometry, minW: number, minH: number): Geometry {
   const x = Math.min(Math.max(g.x, EDGE_KEEP - w), vw - EDGE_KEEP);
   const y = Math.min(Math.max(g.y, 0), vh - HEADER_H);
   return { ...g, x, y, w, h };
+}
+
+/** The Mini Mode pill stays fully on-screen — unlike a real window, there is
+ *  no "grab the visible sliver" reason to let it hang off an edge. */
+function clampMini(x: number, y: number): { x: number; y: number } {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  return {
+    x: Math.min(Math.max(x, 8), Math.max(8, vw - MINI_W - 8)),
+    y: Math.min(Math.max(y, 8), Math.max(8, vh - MINI_H - 8)),
+  };
 }
 
 function loadGeometry(key: string | undefined, fallback: Geometry, minW: number, minH: number): Geometry {
@@ -95,6 +117,7 @@ export function FloatingWindow({
   minWidth = 680,
   minHeight = 440,
   headerActions,
+  minimizedContent,
   'aria-label': ariaLabel,
 }: FloatingWindowProps) {
   const defaults = useCallback((): Geometry => {
@@ -102,7 +125,7 @@ export function FloatingWindow({
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
     const w = Math.min(initialWidth, vw - 32);
     const h = Math.min(initialHeight, vh - 48);
-    return { x: Math.max(16, (vw - w) / 2), y: Math.max(16, (vh - h) / 2), w, h, full: false };
+    return { x: Math.max(16, (vw - w) / 2), y: Math.max(16, (vh - h) / 2), w, h, full: false, min: false };
   }, [initialWidth, initialHeight]);
 
   const [geo, setGeo] = useState<Geometry>(() => loadGeometry(storageKey, defaults(), minWidth, minHeight));
@@ -112,7 +135,7 @@ export function FloatingWindow({
   // always starts long after the last commit, so the ref is current when
   // beginDrag reads it for its base geometry.
   useEffect(() => { geoRef.current = geo; }, [geo]);
-  const dragRef = useRef<{ mode: 'move' | 'resize'; startX: number; startY: number; base: Geometry } | null>(null);
+  const dragRef = useRef<{ mode: 'move' | 'resize'; startX: number; startY: number; base: Geometry; moved: boolean } | null>(null);
 
   const persist = useCallback((g: Geometry) => {
     if (!storageKey) return;
@@ -138,19 +161,27 @@ export function FloatingWindow({
   }, [open, onClose]);
 
   const beginDrag = useCallback((mode: 'move' | 'resize') => (e: React.PointerEvent) => {
-    if (geoRef.current.full || isNarrowViewport) return;
-    // Window buttons live inside the header; don't let them start a drag.
+    const g = geoRef.current;
+    if ((g.full && !g.min) || isNarrowViewport) return;
+    // Window buttons live inside the header (or the Mini Mode pill); don't
+    // let them start a drag.
     if (mode === 'move' && (e.target as HTMLElement).closest('button')) return;
     e.preventDefault();
     // jsdom has no pointer capture; in browsers it keeps fast drags attached.
     try { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); } catch { /* not supported */ }
-    dragRef.current = { mode, startX: e.clientX, startY: e.clientY, base: geoRef.current };
+    dragRef.current = { mode, startX: e.clientX, startY: e.clientY, base: g, moved: false };
   }, [isNarrowViewport]);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     const d = dragRef.current;
     if (!d) return;
     const dx = e.clientX - d.startX, dy = e.clientY - d.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true;
+    if (d.base.min) {
+      const pos = clampMini(d.base.x + dx, d.base.y + dy);
+      setGeo({ ...d.base, ...pos });
+      return;
+    }
     const next = d.mode === 'move'
       ? { ...d.base, x: d.base.x + dx, y: d.base.y + dy }
       : { ...d.base, w: d.base.w + dx, h: d.base.h + dy };
@@ -158,8 +189,14 @@ export function FloatingWindow({
   }, [minWidth, minHeight]);
 
   const endDrag = useCallback(() => {
-    if (!dragRef.current) return;
+    const d = dragRef.current;
+    if (!d) return;
     dragRef.current = null;
+    if (d.mode === 'move' && d.base.min && !d.moved) {
+      // No real movement while minimized — a click, not a drag. Restore.
+      setGeo(g => { const next = { ...g, min: false }; persist(next); return next; });
+      return;
+    }
     // Functional read: the definitive latest geometry, even if the final
     // pointermove's state update has not been committed to the ref yet.
     setGeo(g => { persist(g); return g; });
@@ -173,7 +210,52 @@ export function FloatingWindow({
     });
   }, [persist]);
 
+  const toggleMinimize = useCallback(() => {
+    setGeo(g => {
+      const next = { ...g, min: !g.min };
+      persist(next);
+      return next;
+    });
+  }, [persist]);
+
   if (!open) return null;
+
+  const minimized = geo.min && !isNarrowViewport;
+
+  if (minimized) {
+    return (
+      <section
+        role="dialog"
+        aria-modal="false"
+        aria-label={ariaLabel}
+        data-testid="floating-window"
+        data-minimized="true"
+        onPointerDown={beginDrag('move')}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        className="fixed z-50 rounded-full shadow-2xl border border-stone-300/70 dark:border-white/10 bg-[var(--paper-sink,#f7f5ef)] dark:bg-dark-900 select-none cursor-grab active:cursor-grabbing"
+        style={{ left: geo.x, top: geo.y, width: MINI_W, height: MINI_H, touchAction: 'none' }}
+      >
+        <div className="w-full h-full flex items-center gap-2 pl-3 pr-2">
+          {/* pointer-events-none: clicks land on the pill (restore), not on
+              whatever's inside — the badge is a display, not a control. */}
+          <div className="flex-1 min-w-0 flex items-center gap-2 pointer-events-none">
+            {minimizedContent ?? title}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close"
+            aria-label="Close"
+            className="p-1 rounded-full text-gray-500 dark:text-dark-300 hover:bg-black/10 dark:hover:bg-white/10 shrink-0"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   const fullscreen = geo.full || isNarrowViewport;
   const size: FloatingWindowSize = fullscreen
@@ -202,6 +284,17 @@ export function FloatingWindow({
       >
         <div className="flex-1 min-w-0 flex items-center gap-2">{title}</div>
         {typeof headerActions === 'function' ? headerActions(size) : headerActions}
+        {!isNarrowViewport && (
+          <button
+            type="button"
+            onClick={toggleMinimize}
+            title="Minimize"
+            aria-label="Minimize"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-dark-300 hover:bg-black/5 dark:hover:bg-white/10"
+          >
+            <Minus size={14} />
+          </button>
+        )}
         {!isNarrowViewport && (
           <button
             type="button"

@@ -16,7 +16,7 @@ import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { useDecisionQueue } from '../../hooks/useDecisionQueue';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
 import { AreaPairing } from './AreaPairing';
-import type { AreaSurface } from '../../lib/ministryAreas';
+import { primarySurface, type AreaSurface } from '../../lib/ministryAreas';
 import { StatusBadge } from '../ui/StatusBadge';
 import type { View } from '../../types';
 import { CampusRenderer, type AgentStatusKind, type CampusAgent } from './campus/CampusRenderer';
@@ -122,6 +122,31 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
   );
   useEffect(() => { rendererRef.current?.setAgents(campusAgents); }, [campusAgents, ready]);
   useEffect(() => { rendererRef.current?.setSelection(selectedRoom, selectedAgent); }, [selectedRoom, selectedAgent]);
+
+  // Each ministry area's own identity on the map — a color strip under its
+  // room's label and a dot when something on the calendar is coming up
+  // there soon. Independent of, and drawn separate from, agent status.
+  useEffect(() => {
+    rendererRef.current?.setRoomMeta(
+      areas.map(a => ({ roomId: a.room_id, color: a.accent_color, hasEvent: Boolean(a.next_event) })),
+    );
+  }, [areas, ready]);
+
+  // Bounce an agent's sprite when its latest run just finished — the
+  // Gather-"wave" equivalent: something landed, worth a glance, not a
+  // modal. Diffed against the previous poll so nothing bounces on first
+  // load (the ref starts empty, so every key looks "already seen — same").
+  const lastFinishedAtRef = useRef<Map<string, string | null>>(new Map());
+  useEffect(() => {
+    for (const a of agents) {
+      const finishedAt = a.latest_run?.finished_at ?? null;
+      const prev = lastFinishedAtRef.current.get(a.key);
+      if (prev !== undefined && finishedAt !== null && finishedAt !== prev) {
+        rendererRef.current?.bounce(a.key);
+      }
+      lastFinishedAtRef.current.set(a.key, finishedAt);
+    }
+  }, [agents]);
 
   const room: CampusRoom | null = selectedRoom ? roomById(selectedRoom) ?? null : null;
   // The ministry area assigned to this room is the north star. The static
@@ -260,6 +285,20 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
               </div>
               <p className="text-xs text-gray-600 dark:text-dark-300 mt-2">{area?.purpose ?? dept.blurb}</p>
 
+              {/* Action-first: the one thing worth doing at this desk, up
+                  top and impossible to miss — everything else below is
+                  detail, not the next step. */}
+              {areasInRoom[0] && (
+                <button
+                  type="button"
+                  onClick={() => go(primarySurface(areasInRoom[0]))}
+                  className="mt-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm"
+                >
+                  <span className="truncate">Open {primarySurface(areasInRoom[0]).label}</span>
+                  <ArrowUpRight size={13} className="shrink-0" />
+                </button>
+              )}
+
               {/* The pairing — identical markup to the WorkOS Overview. */}
               {areasInRoom.map((a, i) => (
                 <div key={a.key} className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-800">
@@ -334,7 +373,7 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
                     <p className="mt-2 text-[11px] text-gray-400 dark:text-dark-500">{agent.implemented ? 'No executions recorded yet.' : 'This agent workflow has not been built yet.'}</p>
                   )}
                   {canManage && agent.implemented && (
-                    <button type="button" onClick={() => void runAgent(agent.key)} disabled={runningKey === agent.key} className="mt-2 w-full px-3 py-1.5 text-xs font-medium border border-gray-300 dark:border-dark-600 rounded-lg text-gray-700 dark:text-dark-200 disabled:opacity-50 bg-white dark:bg-dark-850">
+                    <button type="button" onClick={() => void runAgent(agent.key)} disabled={runningKey === agent.key} className="mt-2 w-full px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 shadow-sm">
                       {runningKey === agent.key ? 'Running…' : 'Run now'}
                     </button>
                   )}

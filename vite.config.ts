@@ -196,6 +196,15 @@ export default defineConfig(({ mode }) => {
           target: apiTarget,
           changeOrigin: true,
           secure: false,
+          // src/lib/ministryAreas.ts re-exports api/_lib/ministryAreas.ts so
+          // the browser and the API share one definition. In dev, Vite
+          // serves that sibling file at its root-relative path —
+          // /api/_lib/ministryAreas.ts — which collides with this proxy's
+          // prefix and gets forwarded to the backend instead of served as a
+          // module, breaking every page that imports it. No real API route
+          // is ever registered under api/_lib/ (see api/[...path].ts), so
+          // bypassing the proxy for that one prefix is safe.
+          bypass: (req) => (req.url?.startsWith('/api/_lib/') ? req.url : undefined),
         },
         '/webhooks': {
           target: apiTarget,

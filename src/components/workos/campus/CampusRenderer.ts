@@ -68,6 +68,19 @@ interface Actor {
 
 const WALK_SPEED = TILE * 2.2;   // px per second (agents)
 const PLAYER_SPEED = TILE * 4.5; // px per second (visitor)
+const BOUNCE_DURATION = 0.7;     // seconds — the "a finding just landed" pulse
+
+/**
+ * The eased lift+scale for a bounce that started `elapsed` seconds ago.
+ * Pure and exported so the animation curve is unit-testable without a
+ * canvas: a full sine arc (0 -> 1 -> 0) over BOUNCE_DURATION, peaking at a
+ * 10px lift and 18% scale-up halfway through. Returns null once finished.
+ */
+export function computeBounce(elapsed: number, duration = BOUNCE_DURATION): { lift: number; scale: number } | null {
+  if (elapsed < 0 || elapsed >= duration) return null;
+  const wave = Math.sin((elapsed / duration) * Math.PI);
+  return { lift: -wave * 10, scale: 1 + wave * 0.18 };
+}
 
 const THEME = {
   light: { grass: '#cfe3c3', grassDot: '#bcd4ad', path: '#d9dde8', outside: '#e5e9f2', label: '#1c2434', labelBg: 'rgba(255,255,255,0.82)', wallCap: '#f6f3ea', wallShade: 'rgba(20,24,40,0.18)', select: '#3B53BB', hover: 'rgba(59,83,187,0.18)', confidential: 'rgba(124,58,237,0.10)' },
@@ -97,6 +110,8 @@ export class CampusRenderer {
   private theme: 'light' | 'dark' = 'light';
   private destroyed = false;
   private ready = false;
+  private roomMeta = new Map<string, { colors: string[]; hasEvent: boolean }>();
+  private bounceEndAt = new Map<string, number>();
   private furnitureSorted = FURNITURE.filter(f => !f.decor).slice().sort((a, b) => (a.y + spriteFootprint(a.sprite).h) - (b.y + spriteFootprint(b.sprite).h));
 
   constructor(private canvas: HTMLCanvasElement, private events: RendererEvents = {}) {
@@ -225,6 +240,32 @@ export class CampusRenderer {
   setSelection(roomId: string | null, agentKey: string | null): void {
     this.selectedRoom = roomId;
     this.selectedAgent = agentKey;
+  }
+
+  /**
+   * Per-room ministry-area identity: an accent color strip under the room
+   * label (never on a status pip — that channel stays semantic-only) and
+   * whether something from the church calendar is coming up here soon.
+   * Rooms shared by more than one area (e.g. Giving + Impact Card) get one
+   * strip segment per area rather than picking a winner.
+   */
+  setRoomMeta(entries: { roomId: string; color: string; hasEvent: boolean }[]): void {
+    const next = new Map<string, { colors: string[]; hasEvent: boolean }>();
+    for (const e of entries) {
+      const cur = next.get(e.roomId) ?? { colors: [], hasEvent: false };
+      cur.colors.push(e.color);
+      cur.hasEvent = cur.hasEvent || e.hasEvent;
+      next.set(e.roomId, cur);
+    }
+    this.roomMeta = next;
+  }
+
+  /** A brief lift-and-scale pulse — the agent equivalent of Gather's "wave",
+   *  used to draw the eye to a finding without a modal. Safe to call for an
+   *  agent not currently on screen; it is simply a no-op. */
+  bounce(agentKey: string): void {
+    if (!this.actors.some(x => x.key === agentKey)) return;
+    this.bounceEndAt.set(agentKey, performance.now() / 1000 + BOUNCE_DURATION);
   }
 
   /** Pan the camera so a room is centred. */
@@ -635,11 +676,28 @@ export class CampusRenderer {
   }
 
   private drawActor(ctx: CanvasRenderingContext2D, a: Actor, t: number): void {
-    if (a.isOrb) { this.drawOrb(ctx, a.x + TILE / 2, a.y + TILE / 2 - 10, t); return; }
+    const bounce = this.bounceOffset(a.key, t);
     ctx.save();
+    if (bounce) {
+      const cx = a.x + TILE / 2, cy = a.y + TILE / 2;
+      ctx.translate(cx, cy + bounce.lift);
+      ctx.scale(bounce.scale, bounce.scale);
+      ctx.translate(-cx, -cy);
+    }
+    if (a.isOrb) { this.drawOrb(ctx, a.x + TILE / 2, a.y + TILE / 2 - 10, t); ctx.restore(); return; }
     if (a.status === 'off') ctx.globalAlpha = 0.55;
     this.drawCharacter(ctx, a.seat.character, a.x, a.y, a.facing, a.moving, a.animT);
     ctx.restore();
+  }
+
+  /** Eased lift+scale for the current instant of an active bounce, or null. */
+  private bounceOffset(agentKey: string, t: number): { lift: number; scale: number } | null {
+    const end = this.bounceEndAt.get(agentKey);
+    if (end === undefined) return null;
+    const elapsed = BOUNCE_DURATION - (end - t);
+    const result = computeBounce(elapsed);
+    if (result === null) this.bounceEndAt.delete(agentKey);
+    return result;
   }
 
   private drawCharacter(ctx: CanvasRenderingContext2D, character: number, x: number, y: number, facing: Facing, moving: boolean, animT: number): void {
@@ -698,11 +756,32 @@ export class CampusRenderer {
       if (s.x < -100 || s.y < -30 || s.x > this.viewW() + 100 || s.y > this.viewH() + 30) continue;
       const text = room.name;
       const tw = ctx.measureText(text).width;
+      const pillX = s.x - tw / 2 - 7, pillW = tw + 14;
       ctx.fillStyle = th.labelBg;
-      this.roundRect(ctx, s.x - tw / 2 - 7, s.y - 10, tw + 14, 20, 6);
+      this.roundRect(ctx, pillX, s.y - 10, pillW, 20, 6);
       ctx.fill();
+
+      const meta = this.roomMeta.get(room.id);
+      if (meta && meta.colors.length) {
+        // One thin segment per area sharing this room — the room's own
+        // identity, independent of (and drawn separate from) agent status.
+        const segW = pillW / meta.colors.length;
+        for (let i = 0; i < meta.colors.length; i++) {
+          ctx.fillStyle = meta.colors[i];
+          this.roundRect(ctx, pillX + i * segW, s.y + 8, segW, 2.5, i === 0 || i === meta.colors.length - 1 ? 1.5 : 0);
+          ctx.fill();
+        }
+      }
+
       ctx.fillStyle = th.label;
       ctx.fillText(text, s.x, s.y + 0.5);
+
+      if (meta?.hasEvent) {
+        ctx.fillStyle = th.select;
+        ctx.beginPath();
+        ctx.arc(pillX + pillW + 6, s.y - 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 

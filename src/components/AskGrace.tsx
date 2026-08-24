@@ -9,6 +9,7 @@ import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { FloatingWindow } from './ui/FloatingWindow';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { CampusView } from './workos/CampusView';
+import { useDecisionQueue } from '../hooks/useDecisionQueue';
 import type { View } from '../types';
 
 interface AskGraceChatProps {
@@ -879,6 +880,10 @@ export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
   const { settings: aiSettings } = useAISettings();
   const chat = useGraceChat();
   const [dockValue, setDockValue] = useState('');
+  // Read for the Mini Mode pill's live badge only — a lightweight,
+  // permission-aware hook already used elsewhere; a caller with no relevant
+  // permission simply gets an empty queue back, never an error.
+  const { counts: minimizedCounts } = useDecisionQueue();
   // Collapsing the campus makes the GRACE window a plain chat window.
   // Remembered per device: someone who wants chat-only should get it every
   // time, not have to re-collapse on each open.
@@ -952,6 +957,20 @@ export function AskGrace({ hideDock = false, setView }: AskGraceProps = {}) {
         onClose={chat.closePanel}
         storageKey="grace-window-geometry"
         aria-label="GRACE — campus and chat"
+        minimizedContent={
+          <>
+            <GraceOrb size="xs" />
+            <span className="text-xs font-semibold text-gray-900 dark:text-dark-100 truncate">GRACE</span>
+            {minimizedCounts.total > 0 && (
+              <span
+                className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white shrink-0 ${minimizedCounts.critical > 0 ? 'bg-brand-600' : 'bg-amber-500'}`}
+                title={`${minimizedCounts.total} awaiting a decision`}
+              >
+                {minimizedCounts.total}
+              </span>
+            )}
+          </>
+        }
         headerActions={({ width }) => (
           // Hidden when the window is too narrow to show a campus anyway —
           // a toggle for something that cannot appear is just confusing.

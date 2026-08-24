@@ -9,7 +9,7 @@
  * What it will not do: invent a name. An area nobody owns says so, and
  * names the role that should hold it.
  */
-import { Bot, MapPin, User, AlertTriangle } from 'lucide-react';
+import { Bot, MapPin, User, AlertTriangle, CalendarClock } from 'lucide-react';
 import type { AgentOption, AreaWithCounts } from '../../hooks/useMinistryAreas';
 
 /** Human-readable names for the RBAC roles in migration 032. */
@@ -41,6 +41,28 @@ export const ROOM_LABEL: Record<string, string> = {
 
 export function roleLabel(key: string): string {
   return ROLE_LABEL[key] ?? key;
+}
+
+/** "Today · 10:00 AM" / "Sun, Aug 30 · 2:00 PM" — never a bare ISO string. */
+function formatWhen(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  if (sameDay) return `Today · ${time}`;
+  return `${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${time}`;
+}
+
+/** A small colored dot — the area's own identity, independent of agent status. */
+export function AreaAccentDot({ color, className = '' }: { color: string; className?: string }) {
+  return (
+    <span
+      className={`inline-block w-2 h-2 rounded-full shrink-0 ${className}`}
+      style={{ background: color }}
+      aria-hidden="true"
+    />
+  );
 }
 
 interface AreaPairingProps {
@@ -130,6 +152,17 @@ export function AreaPairing({ area, agents, showRoom = true, onOpenRoom, compact
             </span>
           )}
         </p>
+      )}
+
+      {/* What's coming up here, from the church calendar. Only the soonest
+          match within 14 days — never a stale or a guessed-category event. */}
+      {area.next_event && (
+        <div className={rowCls}>
+          <CalendarClock size={13} className={iconCls} />
+          <p className="text-[11px] text-gray-600 dark:text-dark-300 truncate">
+            {area.next_event.title} — {formatWhen(area.next_event.start_date)}
+          </p>
+        </div>
       )}
     </div>
   );
