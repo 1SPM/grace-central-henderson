@@ -126,4 +126,36 @@ describe('FloatingWindow (the GRACE window shell)', () => {
     expect(parseFloat(win.style.left)).toBeGreaterThanOrEqual(16);
     expect(parseFloat(win.style.top)).toBeGreaterThanOrEqual(16);
   });
+
+  it('renders headerActions and gives them the current size', () => {
+    render(
+      <FloatingWindow
+        open
+        onClose={() => {}}
+        title="t"
+        headerActions={({ width, fullscreen }) => (
+          <button type="button">{fullscreen ? 'fs' : `w:${Math.round(width)}`}</button>
+        )}
+      >
+        <div>body</div>
+      </FloatingWindow>,
+    );
+    // default width is min(1160, viewport-32) = 1160 at 1440px
+    expect(screen.getByRole('button', { name: 'w:1160' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /fullscreen/i }));
+    expect(screen.getByRole('button', { name: 'fs' })).toBeInTheDocument();
+  });
+
+  it('a headerActions button does not start a window drag', () => {
+    renderWindow({
+      headerActions: <button type="button">act</button>,
+    });
+    const win = screen.getByTestId('floating-window');
+    const before = win.style.left;
+    const action = screen.getByRole('button', { name: 'act' });
+    fireEvent.pointerDown(action, { clientX: 500, clientY: 20, pointerId: 4 });
+    fireEvent.pointerMove(screen.getByTestId('floating-window-header'), { clientX: 700, clientY: 200, pointerId: 4 });
+    fireEvent.pointerUp(action, { clientX: 700, clientY: 200, pointerId: 4 });
+    expect(win.style.left).toBe(before);
+  });
 });

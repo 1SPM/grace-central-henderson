@@ -303,4 +303,9 @@ when the window is wide or fullscreen.
   window** — in that moment the campus is a launcher.
 - Responsive inside the window: under 900px wide the campus yields entirely
   and the window is chat-only; the brand rail needs ≥1240px or fullscreen.
+- **Collapse the campus**: a header toggle hides the map, turning the window
+  into the classic GRACE unit — orb + quick-tag rail + chat. Remembered per
+  device (`grace-window-campus-collapsed`), and hidden below 900px where
+  there is no campus to toggle. With the map gone the brand rail needs far
+  less room, so it stays from 700px up rather than 1240px.
 - `#/workos?tab=campus` is unchanged — same component, two mounts.
