@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HeartHandshake, Loader2, MessageSquare, Phone, Send } from 'lucide-react';
 import type { LeaderProfile, Person, View } from '../../../types';
-import { resolveLeaderContact } from '../../../config/centralHendersonLeaders';
+import { resolveLeaderContact } from '../../../config/leadersConfig';
 import { openCare } from '../../../lib/careNav';
 import { useIntegrations } from '../../../contexts/IntegrationsContext';
 

@@ -1,6 +1,6 @@
 import { ShieldCheck } from 'lucide-react';
 import type { LeaderProfile } from '../../../types';
-import { getLeaderPhoto } from '../../../config/centralHendersonLeaders';
+import { getLeaderPhoto } from '../../../config/leadersConfig';
 
 export type LeaderAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero';
 

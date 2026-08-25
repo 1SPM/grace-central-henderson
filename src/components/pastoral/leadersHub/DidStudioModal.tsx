@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { LeaderProfile } from '../../../types';
-import type { LeaderCompanionConfig } from '../../../config/centralHendersonLeaders';
-import { getLeaderPhoto } from '../../../config/centralHendersonLeaders';
+import type { LeaderCompanionConfig } from '../../../config/leadersConfig';
+import { getLeaderPhoto, LEADERS } from '../../../config/leadersConfig';
 import '../../../styles/did-studio.css';
 
 interface DidStudioModalProps {
@@ -31,7 +31,7 @@ export function DidStudioModal({ leader, companion, open, greeting, prefill, onC
   const timeoutRef = useRef<number | null>(null);
   const pollRef = useRef<number | null>(null);
   const seededRef = useRef(false);
-  const photo = leader.photo ?? getLeaderPhoto(leader.id) ?? '/leaders/james-wilson.jpg';
+  const photo = leader.photo ?? getLeaderPhoto(leader.id) ?? LEADERS[0]?.photo;
 
   const hasDidCredentials = Boolean(companion.didAgentId && companion.didClientKey);
   // Stable per-leader id for the D-ID Frame embed's data-target-id. The

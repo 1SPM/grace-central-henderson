@@ -17,7 +17,7 @@ import { useDecisionQueue } from '../../hooks/useDecisionQueue';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
 import { AreaPairing } from './AreaPairing';
 import { primarySurface, type AreaSurface } from '../../lib/ministryAreas';
-import { getLeaderPhotoByPersonId } from '../../config/centralHendersonLeaders';
+import { getLeaderPhotoByPersonId } from '../../config/leadersConfig';
 import { StatusBadge } from '../ui/StatusBadge';
 import type { View } from '../../types';
 import { CampusRenderer, type AgentStatusKind, type CampusAgent } from './campus/CampusRenderer';

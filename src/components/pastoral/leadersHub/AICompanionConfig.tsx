@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { Activity, Brain, Play, Radio, Zap } from 'lucide-react';
 import type { LeaderProfile } from '../../../types';
 import {
-  CENTRAL_HENDERSON_COMPANION_CONFIG,
+  COMPANION_CONFIG,
   getLeaderCompanionConfig,
-} from '../../../config/centralHendersonLeaders';
+} from '../../../config/leadersConfig';
 import { demoCompanionConfig } from './demoLeadersHub';
 import { SampleDataNotice } from '../../SampleDataNotice';
 import { buildBrainState } from './companionBrainState';
@@ -43,7 +43,7 @@ export function AICompanionConfig({
   const setStudioOpen = onStudioOpenChange ?? setInternalStudioOpen;
 
   const companion = useMemo(() => getLeaderCompanionConfig(leader.id), [leader.id]);
-  const resolvedCompanion = companion ?? CENTRAL_HENDERSON_COMPANION_CONFIG[leader.id];
+  const resolvedCompanion = companion ?? COMPANION_CONFIG[leader.id];
   const [brain, setBrain] = useState(() => buildBrainState(resolvedCompanion, leader));
 
   if (!resolvedCompanion) {

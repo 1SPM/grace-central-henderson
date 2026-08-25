@@ -3,7 +3,7 @@ import { ChevronLeft, Crown, Settings2, UserX } from 'lucide-react';
 import type { LeaderProfile, PastoralSession, Person, View } from '../../../types';
 import type { LeaderOnboardingData } from '../LeaderOnboardingWizard';
 import { LeaderManagement } from '../LeaderManagement';
-import { CENTRAL_HENDERSON_LEADERS } from '../../../config/centralHendersonLeaders';
+import { LEADERS } from '../../../config/leadersConfig';
 import { useLeadershipActivity } from '../../../hooks/useLeadershipActivity';
 import { useWorkOsPermissions } from '../../../hooks/useWorkOsPermissions';
 import {
@@ -54,7 +54,7 @@ export function LeadersHubContent({
   const { data: activity } = useLeadershipActivity();
   const { personId: myPersonId, isMasterAdmin, isLoading: permsLoading } = useWorkOsPermissions();
 
-  const roster = leaders.length > 0 ? leaders : CENTRAL_HENDERSON_LEADERS;
+  const roster = leaders.length > 0 ? leaders : LEADERS;
   const fallbackLeaderId =
     roster.find(l => l.hasAiCompanion !== false)?.id ?? roster[0]?.id ?? null;
   const myLeader = myPersonId ? roster.find(l => l.personId === myPersonId) ?? null : null;

@@ -3,7 +3,10 @@ import { Icon, type IconName } from './Icon';
 import type { GraceData, GPerson } from './useGraceData';
 import type { RedesignActions, InteractionType } from './actions';
 import { PersonAvatar } from './PersonAvatar';
-import { getLeaderByPersonId, isCentralStaffPerson } from '../../config/centralHendersonLeaders';
+import { getLeaderByPersonId, isTenantStaffPerson } from '../../config/leadersConfig';
+import { getTenant } from '../../config/tenant';
+
+const STAFF_FILTER_LABEL = getTenant().id === 'faithful' ? 'Staff' : 'Central Staff';
 
 const INTER_ICON: Record<string, IconName> = { note: 'book', call: 'phone', email: 'mail', visit: 'user', text: 'chat', prayer: 'pray' };
 
@@ -77,7 +80,7 @@ function MemberDetail({ person, interactions, actions, onBack }: { person: GPers
           </div>
         </div>
         <div className="actions">
-          {isCentralStaffPerson(person.id) && getLeaderByPersonId(person.id) && (
+          {isTenantStaffPerson(person.id) && getLeaderByPersonId(person.id) && (
             <a className="btn btn-sm" href={`#/leadership?leader=${getLeaderByPersonId(person.id)!.id}`}>
               Leadership
             </a>
@@ -150,12 +153,12 @@ export function RedesignPeople({ data, actions, onAddPerson }: { data: GraceData
     {
       id: 'leader',
       label: 'Leaders',
-      n: data.people.filter(p => p.status === 'leader' && !isCentralStaffPerson(p.id)).length,
+      n: data.people.filter(p => p.status === 'leader' && !isTenantStaffPerson(p.id)).length,
     },
     {
       id: 'central-staff',
-      label: 'Central Staff',
-      n: data.people.filter(p => isCentralStaffPerson(p.id)).length,
+      label: STAFF_FILTER_LABEL,
+      n: data.people.filter(p => isTenantStaffPerson(p.id)).length,
     },
   ], [data.people]);
 
@@ -163,8 +166,8 @@ export function RedesignPeople({ data, actions, onAddPerson }: { data: GraceData
     const query = q.trim().toLowerCase();
     return data.people.filter(p => {
       if (filter === 'member' && !(p.status === 'member' || p.status === 'regular')) return false;
-      if (filter === 'leader' && (p.status !== 'leader' || isCentralStaffPerson(p.id))) return false;
-      if (filter === 'central-staff' && !isCentralStaffPerson(p.id)) return false;
+      if (filter === 'leader' && (p.status !== 'leader' || isTenantStaffPerson(p.id))) return false;
+      if (filter === 'central-staff' && !isTenantStaffPerson(p.id)) return false;
       if (filter !== 'all' && filter !== 'member' && filter !== 'leader' && filter !== 'central-staff' && p.status !== filter) return false;
       if (query && !p.name.toLowerCase().includes(query) && !p.email.toLowerCase().includes(query)) return false;
       return true;

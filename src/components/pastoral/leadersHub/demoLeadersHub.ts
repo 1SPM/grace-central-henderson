@@ -1,15 +1,15 @@
 import type { LeaderProfile } from '../../../types';
-import {
-  CENTRAL_HENDERSON_LEADER_STATS,
-  type LeaderHubStats,
-} from '../../../config/centralHendersonLeaders';
+import { LEADER_STATS, type LeaderHubStats } from '../../../config/leadersConfig';
+import { getTenant } from '../../../config/tenant';
 
 /**
- * Leaders Hub stats — reads from canonical Central Henderson config
+ * Leaders Hub stats — reads from the tenant-resolved leader config
  * with deterministic fallback for ad-hoc leaders.
  */
 
 export type { LeaderHubStats };
+
+const IS_FAITHFUL = getTenant().id === 'faithful';
 
 function hashCode(str: string): number {
   let h = 0;
@@ -18,8 +18,8 @@ function hashCode(str: string): number {
 }
 
 export function getLeaderHubStats(leader: LeaderProfile): LeaderHubStats {
-  if (CENTRAL_HENDERSON_LEADER_STATS[leader.id]) {
-    return CENTRAL_HENDERSON_LEADER_STATS[leader.id];
+  if (LEADER_STATS[leader.id]) {
+    return LEADER_STATS[leader.id];
   }
   const h = hashCode(leader.id);
   return {
@@ -46,7 +46,7 @@ export interface DispatchRoute {
   status: 'Routing' | 'Live' | 'Paused';
 }
 
-export const demoDispatchMatrix: DispatchRoute[] = [
+const CENTRAL_DISPATCH_MATRIX: DispatchRoute[] = [
   { service: 'Marriage & family', leaderAi: 'Pastor James Wilson — AI twin', escalation: 'Crisis keywords → live pastor', status: 'Routing' },
   { service: 'Mental health & crisis', leaderAi: 'Pastor Sarah Chen — AI twin', escalation: 'Always pages on-call within 5 min', status: 'Live' },
   { service: 'Grief support', leaderAi: 'Elder Ruth Abramowitz — AI twin', escalation: 'Escalate after 3 exchanges', status: 'Routing' },
@@ -54,6 +54,17 @@ export const demoDispatchMatrix: DispatchRoute[] = [
   { service: 'Youth & parenting', leaderAi: 'Sister Maria Rodriguez — AI twin', escalation: 'Minor safety → mandatory live + log', status: 'Routing' },
   { service: 'Family counseling', leaderAi: 'Pastor Michael Hayes — AI twin', escalation: 'Domestic signals → instant page', status: 'Routing' },
 ];
+
+const FAITHFUL_DISPATCH_MATRIX: DispatchRoute[] = [
+  { service: 'Pastoral care & counseling', leaderAi: 'Pastor Naomi Larsson — AI twin', escalation: 'Crisis keywords → live pastor', status: 'Routing' },
+  { service: 'Crisis & mental health', leaderAi: 'Pastor Elena Castillo-Brooks — AI twin', escalation: 'Always pages on-call within 5 min', status: 'Live' },
+  { service: 'Grief support', leaderAi: 'Pastor Naomi Larsson — AI twin', escalation: 'Escalate after 3 exchanges', status: 'Routing' },
+  { service: 'Online campus care', leaderAi: 'Pastor Renata Kessler — AI twin', escalation: 'Repeat crisis mentions → live team', status: 'Live' },
+  { service: 'Youth & family', leaderAi: 'Pastor Zuri Adebayo — AI twin', escalation: 'Minor safety → mandatory live + log', status: 'Routing' },
+  { service: 'Kids ministry support', leaderAi: 'Caleb Voss — AI twin', escalation: 'Safety concerns → instant escalation', status: 'Routing' },
+];
+
+export const demoDispatchMatrix: DispatchRoute[] = IS_FAITHFUL ? FAITHFUL_DISPATCH_MATRIX : CENTRAL_DISPATCH_MATRIX;
 
 export interface CareLogEntry {
   time: string;
@@ -64,7 +75,7 @@ export interface CareLogEntry {
   outcome: string;
 }
 
-export const demoCareLog: CareLogEntry[] = [
+const CENTRAL_CARE_LOG: CareLogEntry[] = [
   { time: '8:14 AM', member: 'Anonymous', service: 'Mental health', handledBy: 'AI', leader: 'Pastor Sarah twin', outcome: 'Comforted · resources shared' },
   { time: '9:02 AM', member: 'James Okafor', service: 'Marriage', handledBy: 'AI', leader: 'Pastor Michael twin', outcome: 'Pre-marital resources shared' },
   { time: '10:41 AM', member: 'Maria Santos', service: 'Marriage', handledBy: 'Live', leader: 'Pastor James Wilson', outcome: 'Session booked Thursday' },
@@ -72,6 +83,17 @@ export const demoCareLog: CareLogEntry[] = [
   { time: '1:20 PM', member: 'Robert Chen', service: 'Grief', handledBy: 'AI', leader: 'Elder Ruth twin', outcome: 'Prayer sent · follow-up set' },
   { time: '2:08 PM', member: 'Amara Williams', service: 'Parenting', handledBy: 'Live', leader: 'Sister Maria Rodriguez', outcome: 'In conversation now' },
 ];
+
+const FAITHFUL_CARE_LOG: CareLogEntry[] = [
+  { time: '8:14 AM', member: 'Anonymous', service: 'Mental health', handledBy: 'AI', leader: 'Pastor Elena twin', outcome: 'Comforted · resources shared' },
+  { time: '9:02 AM', member: 'James Carter', service: 'Pastoral care', handledBy: 'AI', leader: 'Pastor Naomi twin', outcome: 'Prayer resources shared' },
+  { time: '10:41 AM', member: 'Maria Santos', service: 'Youth & family', handledBy: 'Live', leader: 'Pastor Zuri Adebayo', outcome: 'Session booked Thursday' },
+  { time: '11:55 AM', member: 'Anonymous', service: 'Crisis', handledBy: 'AI', leader: 'Pastor Elena twin', outcome: 'Escalated → live call placed' },
+  { time: '1:20 PM', member: 'Robert Kim', service: 'Grief', handledBy: 'AI', leader: 'Pastor Naomi twin', outcome: 'Prayer sent · follow-up set' },
+  { time: '2:08 PM', member: 'Amara Bell', service: 'Online campus', handledBy: 'Live', leader: 'Pastor Renata Kessler', outcome: 'In conversation now' },
+];
+
+export const demoCareLog: CareLogEntry[] = IS_FAITHFUL ? FAITHFUL_CARE_LOG : CENTRAL_CARE_LOG;
 
 // ── Leader inbox ──────────────────────────────────────────────────
 
@@ -94,9 +116,9 @@ export const demoInbox: InboxMessage[] = [
   { id: 'msg-6', from: 'Anonymous member', initials: '?', preview: 'Is it okay to come to recovery group even if I slipped this week?', time: '6 hrs ago', state: 'ai-replied', topic: 'Recovery' },
 ];
 
-// ── AI companion config (global defaults; per-leader in centralHendersonLeaders) ──
+// ── AI companion config (global defaults; per-leader in leadersConfig) ──
 
-export const demoCompanionConfig = {
+const CENTRAL_COMPANION_CONFIG = {
   brain: {
     persona: 'Warm, pastoral, scripture-grounded. Mirrors Pastor James Wilson\'s teaching style and favorite passages.',
     knowledgeBase: ['Sermon archive (2019–2026)', 'Marriage course curriculum', 'Church statement of faith', 'Benevolence policy'],
@@ -133,3 +155,43 @@ export const demoCompanionConfig = {
     { time: 'Yesterday 3:15 PM', event: 'Knowledge base synced — 2 new sermons indexed' },
   ],
 };
+
+const FAITHFUL_COMPANION_CONFIG = {
+  brain: {
+    persona: 'Warm, pastoral, scripture-grounded. Mirrors Pastor Elena\'s teaching style and favorite passages.',
+    knowledgeBase: ['Sermon archive', 'Church statement of faith', 'Volunteer handbook', 'Care & benevolence policy'],
+    boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
+    voiceModel: 'Standard pastoral voice (demo)',
+    greeting:
+      "Good morning — I'm Pastor Elena. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Executive Pastor',
+    personality: 'Warm and Pastoral',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded' as const,
+    creativity: 50,
+    knowledgeText: '',
+  },
+  triggers: [
+    { label: 'Self-harm or crisis language', action: 'Page on-call pastor + share 988 line', enabled: true },
+    { label: 'Abuse disclosure', action: 'Mandatory live escalation + log for compliance', enabled: true },
+    { label: 'Repeated relapse mentions', action: 'Notify care team within 15 min', enabled: true },
+    { label: 'Financial hardship', action: 'Offer benevolence intake form', enabled: true },
+    { label: 'After 5 AI exchanges', action: 'Offer a live appointment', enabled: false },
+  ],
+  channels: [
+    { label: 'Member app DMs', enabled: true },
+    { label: '24-hr care line (voice)', enabled: true },
+    { label: 'SMS / text-to-care', enabled: true },
+    { label: 'Email replies', enabled: false },
+    { label: 'Sunday kiosk', enabled: false },
+  ],
+  activity: [
+    { time: 'Today 2:08 PM', event: 'Handled online-campus question, shared next-steps link (4 turns)' },
+    { time: 'Today 11:55 AM', event: 'Escalated crisis conversation to Pastor Naomi — live call' },
+    { time: 'Today 9:02 AM', event: 'Drafted pastoral-care resource plan from counseling playbook' },
+    { time: 'Yesterday 8:31 PM', event: 'After-hours grief support, scheduled follow-up prayer' },
+    { time: 'Yesterday 3:15 PM', event: 'Knowledge base synced — 2 new sermons indexed' },
+  ],
+};
+
+export const demoCompanionConfig = IS_FAITHFUL ? FAITHFUL_COMPANION_CONFIG : CENTRAL_COMPANION_CONFIG;

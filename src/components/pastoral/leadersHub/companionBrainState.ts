@@ -1,4 +1,4 @@
-import type { LeaderCompanionConfig } from '../../../config/centralHendersonLeaders';
+import type { LeaderCompanionConfig } from '../../../config/leadersConfig';
 import type { LeaderProfile } from '../../../types';
 import { demoCompanionConfig } from './demoLeadersHub';
 
