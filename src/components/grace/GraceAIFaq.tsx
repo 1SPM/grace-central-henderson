@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { GRACE_AI_FAQ } from '../../config/centralHendersonLeaders';
+import { GRACE_AI_FAQ } from '../../config/leadersConfig';
 
 interface GraceAIFaqProps {
   audience?: 'admin' | 'member' | 'both';

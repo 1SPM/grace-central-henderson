@@ -4,7 +4,7 @@
  * @see https://centralchurch.online/locations/henderson/
  */
 import type { ChurchSettings } from '../hooks/useChurchSettings';
-import { WATCH_LIVE_VIDEO_URL } from '../lib/watchCatalog';
+import { WATCH_LIVE_VIDEO_URL } from '../lib/watchAssets';
 
 export const CENTRAL_HENDERSON_TIMEZONE = 'America/Los_Angeles';
 

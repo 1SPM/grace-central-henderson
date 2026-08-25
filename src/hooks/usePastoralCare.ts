@@ -7,7 +7,7 @@ import {
   sendCareMessage,
 } from '../lib/services/careApi';
 import { createLogger } from '../utils/logger';
-import { CENTRAL_HENDERSON_LEADERS } from '../config/centralHendersonLeaders';
+import { LEADERS } from '../config/leadersConfig';
 import type {
   LeaderProfile,
   HelpRequest,
@@ -22,7 +22,7 @@ const log = createLogger('pastoral-care');
 
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
-const INITIAL_LEADERS: LeaderProfile[] = CENTRAL_HENDERSON_LEADERS;
+const INITIAL_LEADERS: LeaderProfile[] = LEADERS;
 
 // AI response templates per category
 const AI_RESPONSES: Record<HelpCategory, string[]> = {

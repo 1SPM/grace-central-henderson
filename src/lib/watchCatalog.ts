@@ -4,12 +4,18 @@
  */
 
 import type { WatchSermonRow } from './database.types';
+import { getTenant } from '../config/tenant';
+import { WATCH_LIVE_VIDEO_URL, WATCH_THUMBNAIL_BASE, MEMBER_WATCH_PREVIEW_PATH } from './watchAssets';
 
-export const WATCH_LIVE_VIDEO_URL = '/previews/assets/watch/video/Church-Stage-video.mp4';
+export { WATCH_LIVE_VIDEO_URL, WATCH_THUMBNAIL_BASE, MEMBER_WATCH_PREVIEW_PATH };
 
-export const WATCH_THUMBNAIL_BASE = '/previews/assets/watch';
-
-export const MEMBER_WATCH_PREVIEW_PATH = '/previews/grace_member_portal_central.html#watch';
+// Sermon speaker names for the demo/fallback catalog below — tenant-resolved so
+// Faithful never shows Central Henderson's real clergy names, or vice versa.
+const IS_FAITHFUL_CATALOG = getTenant().id === 'faithful';
+const CATALOG_SPEAKER = IS_FAITHFUL_CATALOG ? 'Pastor Elena Castillo-Brooks' : 'Pastor James Wilson';
+const CATALOG_SPEAKER_2 = IS_FAITHFUL_CATALOG ? 'Pastor Naomi Larsson' : 'Deacon Marcus Collins';
+const CATALOG_SPEAKER_3 = IS_FAITHFUL_CATALOG ? 'Pastor Zuri Adebayo' : 'Pastor Sarah Chen';
+const CATALOG_SPEAKER_4 = IS_FAITHFUL_CATALOG ? 'Pastor Renata Kessler' : 'Pastor Michael Hayes';
 
 export interface WatchCatalogEntry {
   catalogId: string;
@@ -41,7 +47,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Part 3 — The Power of Forgiveness',
     seriesTitle: 'HONOR EACH OTHER',
     partLabel: 'Part 3',
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-05-18',
     durationSeconds: 3134,
     viewCount: 1200,
@@ -54,7 +60,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Part 2 — Speaking Life',
     seriesTitle: 'HONOR EACH OTHER',
     partLabel: 'Part 2',
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-05-11',
     durationSeconds: 2980,
     viewCount: 980,
@@ -67,7 +73,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Part 1 — The Foundation',
     seriesTitle: 'HONOR EACH OTHER',
     partLabel: 'Part 1',
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-05-04',
     durationSeconds: 3050,
     viewCount: 1100,
@@ -79,7 +85,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Rooted in Grace',
     seriesTitle: 'ROOTS',
     partLabel: null,
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-04-27',
     durationSeconds: 2890,
     viewCount: 870,
@@ -92,7 +98,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Help The Broken',
     seriesTitle: 'COMPASSION',
     partLabel: 'Week 2',
-    speaker: 'Deacon Marcus Collins',
+    speaker: CATALOG_SPEAKER_2,
     preachedAt: '2025-04-20',
     durationSeconds: 2760,
     viewCount: 740,
@@ -104,7 +110,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Speaking Blessings',
     seriesTitle: 'COMPASSION',
     partLabel: 'Week 1',
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-04-13',
     durationSeconds: 2820,
     viewCount: 810,
@@ -116,7 +122,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Fruit Of The Spirit',
     seriesTitle: 'LIVING FAITH',
     partLabel: null,
-    speaker: 'Pastor Sarah Chen',
+    speaker: CATALOG_SPEAKER_3,
     preachedAt: '2025-04-06',
     durationSeconds: 2950,
     viewCount: 920,
@@ -128,7 +134,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Unchanging Truth',
     seriesTitle: 'LIVING FAITH',
     partLabel: null,
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-03-30',
     durationSeconds: 3010,
     viewCount: 880,
@@ -140,7 +146,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Plot Of The Bible',
     seriesTitle: 'STORY OF GOD',
     partLabel: 'Part 1',
-    speaker: 'Pastor Michael Hayes',
+    speaker: CATALOG_SPEAKER_4,
     preachedAt: '2025-03-23',
     durationSeconds: 2880,
     viewCount: 760,
@@ -152,7 +158,7 @@ export const WATCH_CATALOG: WatchCatalogEntry[] = [
     title: 'Fathers Day — Speaking Life',
     seriesTitle: 'FAMILY',
     partLabel: null,
-    speaker: 'Pastor James Wilson',
+    speaker: CATALOG_SPEAKER,
     preachedAt: '2025-03-16',
     durationSeconds: 2700,
     viewCount: 690,

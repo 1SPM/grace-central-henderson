@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Bot, Play, Star, User } from 'lucide-react';
 import type { LeaderProfile, Person, View } from '../../../types';
 import { getLeaderHubStats } from './demoLeadersHub';
-import { getLeaderCompanionConfig } from '../../../config/centralHendersonLeaders';
+import { getLeaderCompanionConfig } from '../../../config/leadersConfig';
 import { LeaderAvatar } from './LeaderAvatar';
 import { LeaderContactTab } from './LeaderContactTab';
 import { AICompanionConfig } from './AICompanionConfig';

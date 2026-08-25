@@ -39,7 +39,7 @@ export const FAITHFUL_CHURCH_DEFAULT_SETTINGS: ChurchSettings = {
     currentSeries: {
       title: 'Walking in Faith',
       part: 'Part 3',
-      speaker: 'Pastor James Wilson',
+      speaker: 'Pastor Elena Castillo-Brooks',
     },
   },
   graceFacts: FAITHFUL_CHURCH_GRACE_FACTS,

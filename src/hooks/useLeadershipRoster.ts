@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { LeaderProfile, Person } from '../types';
-import { getLeaderPhoto, getLeaderPhotoByPersonId } from '../config/centralHendersonLeaders';
+import { getLeaderPhoto, getLeaderPhotoByPersonId } from '../config/leadersConfig';
 
 function isPastoralTitle(title: string): boolean {
   const t = title.toLowerCase();

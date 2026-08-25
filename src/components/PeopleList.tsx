@@ -10,7 +10,7 @@ import { SavedFilters, SavedFilter } from './SavedFilters';
 import { useToast } from './Toast';
 import { MemberAvatar } from './ui/MemberAvatar';
 import { CSVImportWizard } from './CSVImportWizard';
-import { isPastoralStaffRecord } from '../config/centralHendersonLeaders';
+import { isPastoralStaffRecord } from '../config/leadersConfig';
 
 type SortOption = 'name-asc' | 'name-desc' | 'status' | 'newest' | 'oldest';
 type PeopleStatusFilter = MemberStatus | 'all' | 'central-staff';

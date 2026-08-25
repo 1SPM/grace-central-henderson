@@ -3,7 +3,7 @@ import { Home, Sparkles, Users, Users2 } from 'lucide-react';
 import { PeopleList } from './PeopleList';
 import { Groups } from './Groups';
 import { ListSkeleton } from './ui/ViewSkeleton';
-import { CENTRAL_HENDERSON_LEADERS } from '../config/centralHendersonLeaders';
+import { LEADERS } from '../config/leadersConfig';
 import { countLeadershipBadges } from '../hooks/useLeadershipRoster';
 
 const SkillsDatabase = lazy(() => import('./SkillsDatabase').then(m => ({ default: m.SkillsDatabase })));
@@ -62,7 +62,7 @@ export function Congregation({
     () => new Set(people.filter(p => p.familyId).map(p => p.familyId)).size,
     [people],
   );
-  const centralStaffKpi = useMemo(() => countLeadershipBadges(CENTRAL_HENDERSON_LEADERS), []);
+  const centralStaffKpi = useMemo(() => countLeadershipBadges(LEADERS), []);
 
   useEffect(() => {
     if (defaultTab) setTab(defaultTab);

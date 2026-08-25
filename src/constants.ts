@@ -1,5 +1,5 @@
 import { Person, Task, SmallGroup, PrayerRequest, Interaction, Attendance, CalendarEvent, Giving } from './types';
-import { getLeaderPhotoByPersonId } from './config/centralHendersonLeaders';
+import { getLeaderPhotoByPersonId } from './config/leadersConfig';
 import type {
   AgentLog,
   AgentStats,

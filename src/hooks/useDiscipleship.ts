@@ -16,19 +16,22 @@ import type { DiscipleshipMilestone, MilestoneType, Person } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { logMemberActivity } from '../lib/services/memberActivity';
 import { createLogger } from '../utils/logger';
+import { getTenant } from '../config/tenant';
 
 const log = createLogger('useDiscipleship');
 
 // ---------------------------------------------------------------------------
 // Demo seed (used when Supabase is not configured)
 // ---------------------------------------------------------------------------
+const DEMO_LEAD_PASTOR = getTenant().id === 'faithful' ? 'Pastor Elena Castillo-Brooks' : 'Pastor James Wilson';
+
 const DEMO_MILESTONES: DiscipleshipMilestone[] = [
   // Maya Thompson — "Beginning" stage (first_visit only, step-request on attended_class)
   {
     id: 'dm-maya-1', churchId: 'demo', personId: 'maya-001',
     milestoneType: 'first_visit', completedAt: '2022-01-09T00:00:00Z',
     notes: 'Welcome Sunday — came alone, introduced herself after service',
-    verifiedBy: 'Pastor James Wilson', createdAt: '2022-01-09T00:00:00Z',
+    verifiedBy: DEMO_LEAD_PASTOR, createdAt: '2022-01-09T00:00:00Z',
   },
   {
     id: 'dm-1', churchId: 'demo', personId: 'person-1',

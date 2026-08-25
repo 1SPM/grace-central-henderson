@@ -10,10 +10,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
+import { getTenant } from '../config/tenant';
 import type { Announcement, AnnouncementCategory } from '../types';
 import type { AnnouncementRow } from '../lib/database.types';
 
 const log = createLogger('announcements');
+
+// Offline-fallback author names — tenant-resolved so a Supabase outage never
+// shows Central Henderson's real pastor's name on the Faithful demo tenant, or vice versa.
+const IS_FAITHFUL_DEMO = getTenant().id === 'faithful';
+const DEMO_LEAD_PASTOR = IS_FAITHFUL_DEMO ? 'Pastor Elena Castillo-Brooks' : 'Pastor James Wilson';
+const DEMO_LEAD_PASTOR_FIRST = IS_FAITHFUL_DEMO ? 'Pastor Elena' : 'Pastor James';
+const DEMO_CARE_STAFF = IS_FAITHFUL_DEMO ? 'Pastor Naomi Larsson' : 'Deacon Marcus Collins';
 
 const now = new Date().toISOString();
 const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -29,7 +37,7 @@ const DEMO_ANNOUNCEMENTS: Announcement[] = [
     pinned: true,
     publishedAt: now,
     expiresAt: nextWeek,
-    createdBy: 'Pastor James Wilson',
+    createdBy: DEMO_LEAD_PASTOR,
     createdAt: now,
   },
   {
@@ -40,7 +48,7 @@ const DEMO_ANNOUNCEMENTS: Announcement[] = [
     category: 'general',
     pinned: false,
     publishedAt: weekAgo,
-    createdBy: 'Deacon Marcus Collins',
+    createdBy: DEMO_CARE_STAFF,
     createdAt: weekAgo,
   },
   {
@@ -51,18 +59,18 @@ const DEMO_ANNOUNCEMENTS: Announcement[] = [
     category: 'update',
     pinned: false,
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Pastor James Wilson',
+    createdBy: DEMO_LEAD_PASTOR,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: 'ann-4',
     churchId: 'demo-church',
     title: 'Baptism Sunday — Coming Up',
-    body: 'We’re celebrating baptisms this Sunday! If you or a family member would like to be baptized, stop by the welcome desk or message Pastor James this week.',
+    body: `We’re celebrating baptisms this Sunday! If you or a family member would like to be baptized, stop by the welcome desk or message ${DEMO_LEAD_PASTOR_FIRST} this week.`,
     category: 'celebration',
     pinned: false,
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Pastor James Wilson',
+    createdBy: DEMO_LEAD_PASTOR,
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
