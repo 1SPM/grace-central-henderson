@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { workosFetch, WorkOsApiError } from '../lib/services/workos';
 
@@ -56,6 +56,14 @@ export function useAgentCommandCentre() {
   const [forbidden, setForbidden] = useState(false);
   const [runningKey, setRunningKey] = useState<string | null>(null);
   const [runErrors, setRunErrors] = useState<Map<string, string>>(new Map());
+  // Per-key attempt counter so two overlapping runAgent calls for the SAME
+  // key (fast double-click, keyboard repeat) can't let a slow, superseded
+  // call's outcome overwrite a faster later call's outcome — e.g. an older
+  // in-flight run finally failing after a newer run for the same agent has
+  // already succeeded must not resurrect a stale error. A ref (not state)
+  // because it's read-modify-write inside async callbacks and must never
+  // trigger its own re-render.
+  const runAttemptRef = useRef(new Map<string, number>());
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -75,6 +83,10 @@ export function useAgentCommandCentre() {
   useEffect(() => { void refresh(); }, [refresh]);
 
   const runAgent = useCallback(async (agentKey: string): Promise<RunResponse | null> => {
+    const attemptId = (runAttemptRef.current.get(agentKey) ?? 0) + 1;
+    runAttemptRef.current.set(agentKey, attemptId);
+    const isLatestAttempt = () => runAttemptRef.current.get(agentKey) === attemptId;
+
     setRunningKey(agentKey);
     setRunErrors(prev => {
       if (!prev.has(agentKey)) return prev;
@@ -87,13 +99,13 @@ export function useAgentCommandCentre() {
         method: 'POST',
         body: JSON.stringify({ agent_key: agentKey }),
       });
-      await refresh();
+      if (isLatestAttempt()) await refresh();
       return data;
     } catch (err) {
-      setRunErrors(prev => new Map(prev).set(agentKey, runErrorMessage(err)));
+      if (isLatestAttempt()) setRunErrors(prev => new Map(prev).set(agentKey, runErrorMessage(err)));
       return null;
     } finally {
-      setRunningKey(null);
+      if (isLatestAttempt()) setRunningKey(null);
     }
   }, [getAuthToken, refresh]);
 
