@@ -7,10 +7,12 @@
  * calls, no randomness, no simulated latency. This is what the WorkOS
  * spec means by "controlled local or server-side workflows" — a scanner,
  * not an autonomous actor. None of these workflows mutate product data;
- * every action they record is an observation (requires_approval: false,
- * status: 'executed' immediately) that a human then acts on elsewhere in
- * the dashboard (Work Order status changes, approval decisions, etc. all
- * go through their own permission-gated routes).
+ * every action they record is an observation that a human then acts on
+ * elsewhere in the dashboard (Work Order status changes, approval
+ * decisions, etc. all go through their own permission-gated routes).
+ * A future workflow that proposes a mutation must set
+ * requires_approval: true on the finding — the run endpoint records it
+ * as 'proposed' and never auto-executes it.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -22,6 +24,19 @@ export interface AgentFinding {
   target_entity_type: string;
   target_entity_id: string | null;
   payload: Record<string, unknown>;
+  /**
+   * A finding that proposes a real mutation must declare it. Omitted or
+   * false = pure observation, recorded as executed immediately. True =
+   * never auto-executed: actionRowForFinding maps it to status
+   * 'proposed' with no executed_at, and — because no consumer of
+   * 'proposed' agent_actions rows exists yet (nothing links an approvals
+   * row or executes on approval, and persistWorkflowFindings is
+   * observation-only) — the run endpoint currently fails the run loudly
+   * rather than writing a proposal nothing will ever read. Build that
+   * pipeline, then remove the endpoint guard, before shipping the first
+   * workflow that sets this flag.
+   */
+  requires_approval?: boolean;
 }
 
 export interface AgentWorkflowResult {
@@ -302,4 +317,37 @@ const WORKFLOWS: Record<string, Workflow> = {
 
 export function getWorkflow(agentKey: string): Workflow | undefined {
   return WORKFLOWS[agentKey];
+}
+
+/**
+ * Maps a workflow finding onto the agent_actions row fields that encode
+ * its approval lifecycle. The invariant this encodes: an approval-
+ * requiring finding is recorded as 'proposed' with no executed_at and is
+ * never auto-executed; an observation executes immediately. Kept as a
+ * pure function so the invariant is unit-testable (agentWorkflows.test.ts)
+ * instead of living only inside the run endpoint's insert call.
+ */
+export function actionRowForFinding(finding: AgentFinding, now: Date) {
+  // Boolean(), not === true: a truthy-but-not-literal-true leak must
+  // fail closed into 'proposed', never auto-execute.
+  const proposed = Boolean(finding.requires_approval);
+  return {
+    action_type: finding.action_type,
+    target_entity_type: finding.target_entity_type,
+    target_entity_id: finding.target_entity_id,
+    payload: finding.payload,
+    requires_approval: proposed,
+    status: proposed ? 'proposed' : 'executed',
+    executed_at: proposed ? null : now.toISOString(),
+  };
+}
+
+/**
+ * Every runnable workflow key, for the registry↔workflow binding test —
+ * the registry's `implemented` flags and this map must never drift
+ * (a mismatch is a live "Run now" button that 501s, or a runnable agent
+ * the UI presents as unbuilt).
+ */
+export function listWorkflowKeys(): string[] {
+  return Object.keys(WORKFLOWS);
 }
