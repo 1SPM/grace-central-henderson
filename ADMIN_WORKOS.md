@@ -85,17 +85,22 @@ in a future build-out but was never granted decide rights).
 
 ## 6. Agent Command Centre
 
-Registry of the 11 named agents (`api/_lib/agentRegistry.ts`). **3 have a
-real, recorded workflow** (`grace`, `verity`, `sentinel` —
-`api/_lib/agentWorkflows.ts`): each reads real tables (overdue tasks,
-blocked Work Orders, stale approvals, missing contact info, unowned Work
-Orders, stale data-subject requests) and writes real `agent_runs` +
-`agent_actions` rows. **The other 8 are registered but show "Not yet
+Registry of the 16 named agents (`api/_lib/agentRegistry.ts`). **5 have a
+real, recorded workflow** (`grace`, `verity`, `sentinel`, `shepherd`,
+`steward` — `api/_lib/agentWorkflows.ts`): each reads real tables
+(overdue tasks, blocked Work Orders, stale approvals, missing contact
+info, unowned Work Orders, stale data-subject requests, unassigned care
+requests, ledger reconciliation) and writes real `agent_runs` +
+`agent_actions` rows. The registry's `implemented` flags and the
+workflow map are bound by a test
+(`api/_lib/agentRegistryBinding.test.ts`) so they cannot drift — a
+mismatch previously shipped a live "Run now" button that 501'd (Steve).
+**The other 11 are registered but show "Not yet
 implemented — no executions recorded"** rather than fabricated activity —
 this was a deliberate scope decision (see TECH_DEBT.md TD-046), not an
 oversight; the spec explicitly permits "controlled local or server-side
 workflows" over full autonomy, and explicitly requires real recorded
-execution over animated mock activity. None of the three implemented
+execution over animated mock activity. None of the five implemented
 workflows call an LLM, use randomness, or simulate latency — they are
 scanners, not autonomous actors, matching the "calm, credible,
 operational" tone requirement.
