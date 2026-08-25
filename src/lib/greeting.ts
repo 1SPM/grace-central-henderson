@@ -2,7 +2,7 @@ import type { User } from '../lib/services/auth';
 
 /** Interim display name until Clerk provides a real first name (VITE_TEMP_NAME). */
 export const TEMP_DISPLAY_NAME =
-  import.meta.env.VITE_TEMP_NAME?.trim() || 'Nick';
+  import.meta.env.VITE_TEMP_NAME?.trim() || 'James';
 
 export function greetingWord(hour: number): string {
   if (hour < 12) return 'Good morning';
@@ -40,7 +40,7 @@ export function getChurchHour(timezone: string, now = new Date()): number {
   return parseInt(fmt.format(now), 10);
 }
 
-/** Full time-of-day greeting for GRACE panels, e.g. "Good evening, Pastor Nick". */
+/** Full time-of-day greeting for GRACE panels, e.g. "Good evening, Pastor James". */
 export function resolveGraceSalutation(
   hour: number,
   firstName?: string | null,

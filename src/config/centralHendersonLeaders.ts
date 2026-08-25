@@ -7,6 +7,9 @@ import type { LeaderHubStats, LeaderCompanionConfig, GraceFaqItem } from './lead
 
 export type { LeaderHubStats, LeaderCompanionConfig, GraceFaqItem };
 
+/** Leader id of the tenant's top-of-hierarchy master admin — used to deep-link the sidebar admin profile. */
+export const MASTER_ADMIN_LEADER_ID = 'ch-leader-james-wilson';
+
 /** Person IDs for Central Staff rows in people table (seed + SAMPLE_PEOPLE). */
 export const CENTRAL_STAFF_PERSON_IDS = [
   '00000000-0000-0000-0000-000000000101',

@@ -28,6 +28,7 @@ export const LEADER_PHOTOS: Record<string, string> = IS_FAITHFUL
   ? faithful.FAITHFUL_CHURCH_LEADER_PHOTOS
   : central.CENTRAL_HENDERSON_LEADER_PHOTOS;
 export const GRACE_AI_FAQ: GraceFaqItem[] = IS_FAITHFUL ? faithful.FAITHFUL_GRACE_AI_FAQ : central.GRACE_AI_FAQ;
+export const MASTER_ADMIN_LEADER_ID: string = IS_FAITHFUL ? faithful.MASTER_ADMIN_LEADER_ID : central.MASTER_ADMIN_LEADER_ID;
 
 export function getLeaderPhoto(leaderId: string): string | undefined {
   return IS_FAITHFUL ? faithful.getLeaderPhoto(leaderId) : central.getLeaderPhoto(leaderId);
