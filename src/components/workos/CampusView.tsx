@@ -68,7 +68,7 @@ interface CampusViewProps {
 
 export function CampusView({ setView, defaultRoom, embedded = false, onNavigated }: CampusViewProps) {
   const { theme } = useTheme();
-  const { agents, isLoading, error, forbidden, runningKey, runErrors, runAgent } = useAgentCommandCentre();
+  const { agents, isLoading, error, forbidden, runningKeys, runErrors, runAgent } = useAgentCommandCentre();
   const { has } = useWorkOsPermissions();
   const { counts } = useDecisionQueue();
   const { areas, agents: agentOptions } = useMinistryAreas();
@@ -386,8 +386,8 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
                     <p className="mt-2 text-[11px] text-brand-600 dark:text-brand-400" data-testid="campus-agent-run-error">{runErrors.get(agent.key)}</p>
                   )}
                   {canManage && agent.implemented && (
-                    <button type="button" onClick={() => void runAgent(agent.key)} disabled={runningKey === agent.key} className="mt-2 w-full px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 shadow-sm">
-                      {runningKey === agent.key ? 'Running…' : 'Run now'}
+                    <button type="button" onClick={() => void runAgent(agent.key)} disabled={runningKeys.has(agent.key)} className="mt-2 w-full px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 shadow-sm">
+                      {runningKeys.has(agent.key) ? 'Running…' : 'Run now'}
                     </button>
                   )}
                   <button type="button" onClick={() => go({ label: 'Agents', view: 'workos', hash: '#/workos?tab=agents' })} className="mt-2 w-full text-[11px] text-gray-500 dark:text-dark-400 inline-flex items-center justify-center gap-1 hover:underline">
