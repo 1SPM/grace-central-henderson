@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
-import { getWorkflow } from './agentWorkflows.js';
+import { actionRowForFinding, getWorkflow } from './agentWorkflows.js';
 import { FIXTURE_CHURCH_ID } from '../../tests/fixtures/shared-platform.js';
 import { PLATFORM_FEE_BPS, PLATFORM_FEE_PERCENT } from './billing/givingFee.js';
 
@@ -254,5 +254,36 @@ describe('getWorkflow — unimplemented agents', () => {
   it('returns undefined for an agent with no real workflow (never fabricates one)', () => {
     expect(getWorkflow('herald')).toBeUndefined();
     expect(getWorkflow('welcome')).toBeUndefined();
+  });
+});
+
+describe('actionRowForFinding — approval lifecycle invariant', () => {
+  const now = new Date('2026-08-25T12:00:00.000Z');
+  const base = {
+    action_type: 'propose_reassign',
+    target_entity_type: 'work_order',
+    target_entity_id: 'wo-1',
+    payload: { title: 'Youth retreat planning' },
+  };
+
+  it('an approval-requiring finding is recorded as proposed and never auto-executed', () => {
+    const row = actionRowForFinding({ ...base, requires_approval: true }, now);
+    expect(row.requires_approval).toBe(true);
+    expect(row.status).toBe('proposed');
+    expect(row.executed_at).toBeNull();
+  });
+
+  it('a plain observation executes immediately (flag omitted)', () => {
+    const row = actionRowForFinding(base, now);
+    expect(row.requires_approval).toBe(false);
+    expect(row.status).toBe('executed');
+    expect(row.executed_at).toBe(now.toISOString());
+  });
+
+  it('requires_approval: false behaves identically to omitted', () => {
+    const row = actionRowForFinding({ ...base, requires_approval: false }, now);
+    expect(row.requires_approval).toBe(false);
+    expect(row.status).toBe('executed');
+    expect(row.executed_at).toBe(now.toISOString());
   });
 });

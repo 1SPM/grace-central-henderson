@@ -14,7 +14,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { getAgentDefinition } from '../_lib/agentRegistry.js';
-import { getWorkflow } from '../_lib/agentWorkflows.js';
+import { actionRowForFinding, getWorkflow } from '../_lib/agentWorkflows.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -66,19 +66,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await workflow(supabase, actor.churchId);
 
     if (result.findings.length > 0) {
-      await supabase.from('agent_actions').insert(
+      // Fail closed: no approvals consumer exists yet (nothing reads
+      // 'proposed' agent_actions rows, links an approvals row, or
+      // executes on approval). Until that pipeline is built, a workflow
+      // emitting an approval-requiring finding is a configuration error
+      // — fail the run loudly rather than stranding the proposal as a
+      // row nothing will ever read while reporting success.
+      const needingApproval = result.findings.filter(f => f.requires_approval);
+      if (needingApproval.length > 0) {
+        throw new Error(
+          `workflow '${body.agent_key}' emitted ${needingApproval.length} requires_approval finding(s) but no approvals consumer exists for agent_actions — build the approval pipeline before shipping a mutating workflow`,
+        );
+      }
+
+      // Observations execute immediately; an approval-requiring finding
+      // is recorded as 'proposed' and never auto-executed (invariant
+      // lives in actionRowForFinding + its unit tests). Note that
+      // persistWorkflowFindings below is observation-only and does not
+      // read requires_approval — see AgentFinding.requires_approval.
+      const { error: actionsInsertErr } = await supabase.from('agent_actions').insert(
         result.findings.map(f => ({
           agent_run_id: run.id,
           church_id: actor.churchId,
-          action_type: f.action_type,
-          target_entity_type: f.target_entity_type,
-          target_entity_id: f.target_entity_id,
-          payload: f.payload,
-          requires_approval: false,
-          status: 'executed',
-          executed_at: new Date().toISOString(),
+          ...actionRowForFinding(f, new Date()),
         })),
       );
+      if (actionsInsertErr) {
+        throw new Error(`agent_actions insert failed: ${actionsInsertErr.message}`);
+      }
       // Additive: also persist each finding into the accountable
       // agent_findings lifecycle (independent of the agent_actions log
       // above, which is a run-history record, not a triage queue).
