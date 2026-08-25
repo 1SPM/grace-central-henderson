@@ -40,7 +40,7 @@ const RUN_ERROR_MESSAGE: Record<string, string> = {
   service_not_configured: 'Agent runs are unavailable right now.',
 };
 
-function runErrorMessage(err: unknown): string {
+export function runErrorMessage(err: unknown): string {
   if (err instanceof WorkOsApiError) {
     if (err.status === 403) return "Your role doesn't include permission to run agents.";
     return RUN_ERROR_MESSAGE[err.message] ?? err.message;

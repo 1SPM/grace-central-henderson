@@ -105,6 +105,67 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     expect(screen.getByText('Run now')).not.toBeDisabled();
   });
 
+  it('shows the permission message when a run is rejected as unauthorized', async () => {
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+        }));
+      }
+      if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
+        return Promise.resolve(jsonResponse({ error: 'forbidden' }, 403));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Run now'));
+
+    await waitFor(() => expect(screen.getByTestId('agent-run-error-grace')).toHaveTextContent(
+      "Your role doesn't include permission to run agents.",
+    ));
+  });
+
+  it('keeps one agent\'s run error off another agent\'s card', async () => {
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [
+            { key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
+            { key: 'steward', name: 'Steward', role: 'Financial Operations', description: 'y', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
+          ],
+        }));
+      }
+      if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
+        const body = JSON.parse(opts.body as string);
+        if (body.agent_key === 'grace') return Promise.resolve(jsonResponse({ error: 'agent_run_failed' }, 500));
+        return Promise.resolve(jsonResponse({
+          run: { id: 'run-3', agent_key: 'steward', status: 'succeeded', started_at: null, finished_at: null, created_at: '2026-08-25T00:00:00.000Z', output: null, error: null, work_order_id: null },
+          summary: 'ok',
+          finding_count: 0,
+        }));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Steward')).toBeInTheDocument());
+
+    const runButtons = screen.getAllByText('Run now');
+    fireEvent.click(runButtons[0]);
+
+    await waitFor(() => expect(screen.getByTestId('agent-run-error-grace')).toBeInTheDocument());
+    expect(screen.queryByTestId('agent-run-error-steward')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByText('Run now')[1]);
+    await waitFor(() => expect(screen.queryByTestId('agent-run-error-steward')).not.toBeInTheDocument());
+    // Steward's successful run must not clear Grace's still-standing error.
+    expect(screen.getByTestId('agent-run-error-grace')).toBeInTheDocument();
+  });
+
   it('clears a prior run error on the next attempt', async () => {
     let runAttempt = 0;
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
