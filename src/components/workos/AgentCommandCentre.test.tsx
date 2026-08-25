@@ -79,6 +79,62 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     expect(screen.getByText('Run now')).toBeInTheDocument();
   });
 
+  it('shows the server error and re-enables the button when a run fails, without an unhandled rejection', async () => {
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+        }));
+      }
+      if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
+        return Promise.resolve(jsonResponse({ error: 'agent_run_failed' }, 500));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Run now'));
+
+    await waitFor(() => expect(screen.getByTestId('agent-run-error-grace')).toBeInTheDocument());
+    expect(screen.getByTestId('agent-run-error-grace')).toHaveTextContent(
+      'The run failed. Try again, or check with an administrator if it keeps happening.',
+    );
+    // The button resets rather than staying stuck on "Running…".
+    expect(screen.getByText('Run now')).not.toBeDisabled();
+  });
+
+  it('clears a prior run error on the next attempt', async () => {
+    let runAttempt = 0;
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+        }));
+      }
+      if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
+        runAttempt += 1;
+        if (runAttempt === 1) return Promise.resolve(jsonResponse({ error: 'agent_run_failed' }, 500));
+        return Promise.resolve(jsonResponse({
+          run: { id: 'run-2', agent_key: 'grace', status: 'succeeded', started_at: null, finished_at: null, created_at: '2026-08-25T00:00:00.000Z', output: null, error: null, work_order_id: null },
+          summary: 'ok',
+          finding_count: 0,
+        }));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Run now'));
+    await waitFor(() => expect(screen.getByTestId('agent-run-error-grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Run now'));
+    await waitFor(() => expect(screen.queryByTestId('agent-run-error-grace')).not.toBeInTheDocument());
+  });
+
   it('hides "Run now" when the caller lacks agents.manage (role-visibility)', async () => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('/api/agents/workos-registry')) {

@@ -40,12 +40,13 @@ interface AgentCardProps {
   config: AgentConfig | undefined;
   canManage: boolean;
   running: boolean;
+  runError: string | undefined;
   saving: boolean;
   onRun: () => void;
   onSave: (instructions: string, tasks: string[]) => Promise<unknown>;
 }
 
-function AgentCard({ agent, supports, config, canManage, running, saving, onRun, onSave }: AgentCardProps) {
+function AgentCard({ agent, supports, config, canManage, running, runError, saving, onRun, onSave }: AgentCardProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [instructions, setInstructions] = useState(config?.instructions ?? '');
   const [tasks, setTasks] = useState<string[]>(config?.tasks ?? []);
@@ -123,6 +124,10 @@ function AgentCard({ agent, supports, config, canManage, running, saving, onRun,
           )}
         </div>
       ) : null}
+
+      {runError && (
+        <p className="mt-2 text-xs text-brand-600 dark:text-brand-400" data-testid={`agent-run-error-${agent.key}`}>{runError}</p>
+      )}
 
       <div className="mt-3 flex gap-2">
         {canManage && agent.implemented && (
@@ -217,7 +222,7 @@ function AgentCard({ agent, supports, config, canManage, running, saving, onRun,
 }
 
 export function AgentCommandCentre() {
-  const { agents, isLoading, error, forbidden, runningKey, runAgent } = useAgentCommandCentre();
+  const { agents, isLoading, error, forbidden, runningKey, runErrors, runAgent } = useAgentCommandCentre();
   // Same map the Campus and the Overview read, so an agent's card names the
   // area and the person it supports rather than floating free of the church.
   const { areas } = useMinistryAreas();
@@ -251,6 +256,7 @@ export function AgentCommandCentre() {
             config={configs.get(agent.key)}
             canManage={canManage}
             running={runningKey === agent.key}
+            runError={runErrors.get(agent.key)}
             saving={savingKey === agent.key}
             onRun={() => void runAgent(agent.key)}
             onSave={(instructions, tasks) => save(agent.key, instructions, tasks)}

@@ -68,7 +68,7 @@ interface CampusViewProps {
 
 export function CampusView({ setView, defaultRoom, embedded = false, onNavigated }: CampusViewProps) {
   const { theme } = useTheme();
-  const { agents, isLoading, error, forbidden, runningKey, runAgent } = useAgentCommandCentre();
+  const { agents, isLoading, error, forbidden, runningKey, runErrors, runAgent } = useAgentCommandCentre();
   const { has } = useWorkOsPermissions();
   const { counts } = useDecisionQueue();
   const { areas, agents: agentOptions } = useMinistryAreas();
@@ -381,6 +381,9 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
                     </div>
                   ) : (
                     <p className="mt-2 text-[11px] text-gray-400 dark:text-dark-500">{agent.implemented ? 'No executions recorded yet.' : 'This agent workflow has not been built yet.'}</p>
+                  )}
+                  {runErrors.get(agent.key) && (
+                    <p className="mt-2 text-[11px] text-brand-600 dark:text-brand-400" data-testid="campus-agent-run-error">{runErrors.get(agent.key)}</p>
                   )}
                   {canManage && agent.implemented && (
                     <button type="button" onClick={() => void runAgent(agent.key)} disabled={runningKey === agent.key} className="mt-2 w-full px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 shadow-sm">
