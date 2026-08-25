@@ -348,7 +348,7 @@ export function CampusView({ setView, defaultRoom, embedded = false, onNavigated
                 <ul className="space-y-1.5">
                   {agentsInRoom.map(a => (
                     <li key={a.key}>
-                      <button type="button" onClick={() => setSelectedAgent(a.key)} className={`w-full text-left px-2 py-1.5 rounded-lg border flex items-center justify-between gap-2 ${selectedAgent === a.key ? 'border-brand-400 bg-brand-50 dark:bg-brand-900/20' : 'border-gray-200 dark:border-dark-700 hover:bg-slate-50 dark:hover:bg-dark-800'}`}>
+                      <button type="button" onClick={() => setSelectedAgent(a.key)} data-testid={`campus-agent-seat-${a.key}`} className={`w-full text-left px-2 py-1.5 rounded-lg border flex items-center justify-between gap-2 ${selectedAgent === a.key ? 'border-brand-400 bg-brand-50 dark:bg-brand-900/20' : 'border-gray-200 dark:border-dark-700 hover:bg-slate-50 dark:hover:bg-dark-800'}`}>
                         <span className="min-w-0">
                           <span className="block text-xs font-medium text-gray-800 dark:text-dark-100 truncate">{a.name}</span>
                           <span className="block text-[11px] text-gray-500 dark:text-dark-400 truncate">{a.role}</span>
