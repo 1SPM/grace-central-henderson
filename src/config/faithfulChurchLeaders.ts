@@ -22,7 +22,11 @@ export const FAITHFUL_STAFF_PERSON_IDS = [
   'eed0f87a-7022-46d2-bec3-9a5ca10918d4', // Caleb Voss
   '5f81c441-0181-4bc6-8e84-973f6b8fc9cb', // Zuri Adebayo
   '91783906-c90e-4de8-a10d-942e1651b380', // Mira Okonkwo
+  'f9f6fc40-8ab6-4e72-9ae7-2292f25a4784', // Pastor James (master admin)
 ] as const;
+
+/** Leader id of the tenant's top-of-hierarchy master admin — used to deep-link the sidebar admin profile. */
+export const MASTER_ADMIN_LEADER_ID = 'faithful-leader-pastor-james';
 
 /** Synthetic (GAN-generated, thispersondoesnotexist) headshots — see public/demo-faces/README.md. */
 export const FAITHFUL_CHURCH_LEADER_PHOTOS: Record<string, string> = {
@@ -34,6 +38,7 @@ export const FAITHFUL_CHURCH_LEADER_PHOTOS: Record<string, string> = {
   'faithful-leader-caleb-voss': '/demo-faces/f196.jpg',
   'faithful-leader-zuri-adebayo': '/demo-faces/f197.jpg',
   'faithful-leader-mira-okonkwo': '/demo-faces/f198.jpg',
+  [MASTER_ADMIN_LEADER_ID]: '/demo-faces/f199.jpg',
 };
 
 /** Photo URL for a canonical Faithful leader id. */
@@ -50,6 +55,7 @@ const PERSON_ID_TO_LEADER_ID: Record<string, string> = {
   [FAITHFUL_STAFF_PERSON_IDS[5]]: 'faithful-leader-caleb-voss',
   [FAITHFUL_STAFF_PERSON_IDS[6]]: 'faithful-leader-zuri-adebayo',
   [FAITHFUL_STAFF_PERSON_IDS[7]]: 'faithful-leader-mira-okonkwo',
+  [FAITHFUL_STAFF_PERSON_IDS[8]]: MASTER_ADMIN_LEADER_ID,
 };
 
 /** Photo URL for a Faithful staff person row (maps personId → leader roster). */
@@ -235,6 +241,28 @@ export const FAITHFUL_CHURCH_LEADERS: LeaderProfile[] = [
     anchors: '"Let your light shine before others." — Matthew 5:16',
     createdAt: '2023-01-09T00:00:00Z',
   },
+  {
+    id: MASTER_ADMIN_LEADER_ID,
+    personId: FAITHFUL_STAFF_PERSON_IDS[8],
+    displayName: 'Pastor James',
+    title: 'Master Admin Pastor',
+    photo: FAITHFUL_CHURCH_LEADER_PHOTOS[MASTER_ADMIN_LEADER_ID],
+    bio: 'Oversees the full ministry team and holds top-level administrative access across GRACE — the pastor at the top of Faithful\'s leadership hierarchy.',
+    expertiseAreas: ['general', 'faith-questions', 'marriage', 'crisis'],
+    credentials: ['M.Div — Fuller Theological Seminary', 'Certified Biblical Counselor'],
+    yearsOfPractice: 20,
+    personalityTraits: ['Warm', 'Decisive', 'Scripture-focused', 'Encouraging'],
+    spiritualFocusAreas: ['Discipleship', 'Preaching', 'Vision & Leadership'],
+    language: 'English',
+    isVerified: true,
+    isAvailable: true,
+    isActive: true,
+    sessionType: 'recurring',
+    sessionFrequency: 'Weekly',
+    suitableFor: ['Adults', 'Couples', 'Families', 'Staff'],
+    anchors: '"Bear one another\'s burdens, and so fulfill the law of Christ." — Galatians 6:2',
+    createdAt: '2018-01-01T00:00:00Z',
+  },
 ];
 
 export const FAITHFUL_CHURCH_LEADER_STATS: Record<string, LeaderHubStats> = {
@@ -359,6 +387,22 @@ export const FAITHFUL_CHURCH_LEADER_STATS: Record<string, LeaderHubStats> = {
     contactPhone: '(555) 010-0198',
     contactEmail: 'mira.okonkwo@faithfulchurch.example',
   },
+  [MASTER_ADMIN_LEADER_ID]: {
+    sessions: 58,
+    aiPct: 83,
+    rating: 4.9,
+    dms: 12,
+    blessings: 27,
+    availability: ['live', 'live', 'live', 'live', 'live', 'ai', 'ai'],
+    dmThreshold: '5 sessions + Enlightened tier for live DM',
+    hours: 'Mon–Fri · 9a–6p',
+    liveOverride: false,
+    todaysBlessing:
+      '"The Lord bless you and keep you; the Lord make his face shine on you." — Numbers 6:24-25.',
+    careAssignments: ['Prayer & guidance', 'Crisis triage', 'Sunday follow-up'],
+    contactPhone: '(555) 010-0199',
+    contactEmail: 'pastor.james@faithfulchurch.example',
+  },
 };
 
 export const FAITHFUL_CHURCH_COMPANION_CONFIG: Record<string, LeaderCompanionConfig> = {
@@ -465,6 +509,25 @@ export const FAITHFUL_CHURCH_COMPANION_CONFIG: Record<string, LeaderCompanionCon
     llm: 'GPT-4.1',
     knowledgeGrounding: 'Ungrounded',
     creativity: 50,
+    divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
+  },
+  [MASTER_ADMIN_LEADER_ID]: {
+    persona:
+      'Warm, pastoral, scripture-grounded. Speaks with a settled, senior-pastor voice — compassionate, clear, and encouraging. Never diagnoses; always points to hope and practical next steps.',
+    knowledgeBase: ['Sermon archive', 'Church statement of faith', 'Faithful service guide', 'Staff & volunteer handbook'],
+    boundaries: ['No medical or legal advice', 'No financial transactions', 'Mandatory escalation on self-harm signals', 'Never claims to be human'],
+    // Reuses the existing D-ID Studio agent already authorized for grace-crm-two.vercel.app
+    // and grace-crm.dev in its Allowed Domains. Owner is renaming the agent's own
+    // display name in D-ID Studio to avoid it reading as a different tenant's pastor.
+    voiceModel: 'Cloned voice — approved 2026-03-12 (consent on file)',
+    greeting: "Good morning — I'm Pastor James. What's on your heart today? You can speak or type — I'm listening.",
+    agentRole: 'Master Admin Pastor',
+    personality: 'Warm and Pastoral',
+    llm: 'GPT-4.1',
+    knowledgeGrounding: 'Ungrounded',
+    creativity: 50,
+    didAgentId: 'v2_agt_nxzGwxew',
+    didClientKey: 'ck_cwyMiGIkm7BTZr1lrSmAO',
     divinityAvatarUrl: 'https://link.divinityagi.com/Individual',
   },
 };

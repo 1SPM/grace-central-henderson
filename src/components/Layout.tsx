@@ -37,6 +37,8 @@ import { useDecisionQueue } from '../hooks/useDecisionQueue';
 import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
 import { navigateView } from '../lib/actionCenterNav';
 import { resolveAddressee } from '../lib/greeting';
+import { openLeadership } from '../lib/leadershipNav';
+import { MASTER_ADMIN_LEADER_ID } from '../config/leadersConfig';
 import { ViewAsLeader } from './auth/ViewAsLeader';
 
 interface LayoutProps {
@@ -186,7 +188,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
   const { hasWorkosAccess } = useWorkOsPermissions();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
-  const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'N'}`;
+  const avatarInitials = `${user?.firstName?.charAt(0) || 'P'}${user?.lastName?.charAt(0) || 'J'}`;
   const logoUrl = branding?.logoUrl;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -504,13 +506,18 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
         {/* Footer */}
         <div className={`px-3 py-2 border-t border-white/15 space-y-0.5 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
-          {/* Signed-in admin profile */}
+          {/* Signed-in admin profile — links to the master admin's Leadership profile */}
           <div
             className={`mb-2 pb-2 border-b border-white/15 ${
               sidebarCollapsed ? 'lg:flex lg:justify-center lg:pb-2' : ''
             }`}
           >
-            <div className={`flex items-center gap-2.5 ${sidebarCollapsed ? 'lg:justify-center' : 'px-1 py-1'}`}>
+            <button
+              type="button"
+              onClick={() => openLeadership('team', setView, MASTER_ADMIN_LEADER_ID)}
+              title="Open your Leadership profile"
+              className={`flex items-center gap-2.5 w-full text-left rounded-lg hover:bg-white/10 transition-colors ${sidebarCollapsed ? 'lg:justify-center' : 'px-1 py-1'}`}
+            >
               <AdminUserAvatar name={addressee} initials={avatarInitials} />
               <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                 <p className="text-sm font-semibold text-white truncate">{addressee}</p>
@@ -519,7 +526,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
                   {adminRoleLabel(user?.role)}
                 </span>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Collapse toggle - desktop only */}
