@@ -38,7 +38,8 @@ export const FAITHFUL_CHURCH_LEADER_PHOTOS: Record<string, string> = {
   'faithful-leader-caleb-voss': '/demo-faces/f196.jpg',
   'faithful-leader-zuri-adebayo': '/demo-faces/f197.jpg',
   'faithful-leader-mira-okonkwo': '/demo-faces/f198.jpg',
-  [MASTER_ADMIN_LEADER_ID]: '/demo-faces/f199.jpg',
+  // Real, consented photo (not synthetic) — see public/leaders-faithful/README.md.
+  [MASTER_ADMIN_LEADER_ID]: '/leaders-faithful/pastor-james.jpg',
 };
 
 /** Photo URL for a canonical Faithful leader id. */
