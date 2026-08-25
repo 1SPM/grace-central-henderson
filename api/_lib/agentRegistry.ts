@@ -99,7 +99,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     name: 'Steve',
     role: 'Platform Strategy Agent',
     description: 'Evaluates proposed features, plans, and product decisions against the VWS platform strategy: platform coherence, commercial defensibility, privacy, and Central Church pilot readiness. Runs strategic reviews — not database scans.',
-    implemented: true,
+    implemented: false,
   },
   {
     key: 'charles',
