@@ -24,7 +24,9 @@ export interface AgentSeat {
 }
 
 export const AGENT_SEATS: Record<string, AgentSeat> = {
-  // Grace presides in the Fellowship Hall (rendered as the GRACE orb, not a sprite).
+  // Cadence (registry key 'grace') sits in the Fellowship Hall. It is drawn
+  // as an ordinary sprite: the orb is the product nucleus's visual language
+  // and a registry scanner must not borrow it.
   grace:    { room: 'fellowship', tile: { x: 22, y: 52 }, character: 0, facing: 'down', wander: 3 },
 
   // Ministry desks

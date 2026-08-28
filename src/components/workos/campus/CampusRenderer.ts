@@ -63,7 +63,6 @@ interface Actor {
   nextDecisionAt: number;
   animT: number;
   status: AgentStatusKind;
-  isOrb: boolean;
 }
 
 const WALK_SPEED = TILE * 2.2;   // px per second (agents)
@@ -213,7 +212,7 @@ export class CampusRenderer {
         key: a.key, name: a.name, seat, x, y, tx: x, ty: y,
         facing: seat.facing ?? 'down', moving: false,
         nextDecisionAt: 1 + Math.random() * 3, animT: Math.random() * 10,
-        status: a.status, isOrb: a.key === 'grace',
+        status: a.status,
       });
     }
     this.actors = next;
@@ -707,7 +706,6 @@ export class CampusRenderer {
       ctx.scale(bounce.scale, bounce.scale);
       ctx.translate(-cx, -cy);
     }
-    if (a.isOrb) { this.drawOrb(ctx, a.x + TILE / 2, a.y + TILE / 2 - 10, t); ctx.restore(); return; }
     if (a.status === 'off') ctx.globalAlpha = 0.55;
     this.drawCharacter(ctx, a.seat.character, a.x, a.y, a.facing, a.moving, a.animT);
     ctx.restore();
@@ -733,24 +731,6 @@ export class CampusRenderer {
     const frame = Math.floor(animT * fps) % def.framesPerDir;
     const sx = strip.x + (DIR_INDEX[facing] * def.framesPerDir + frame) * def.frameW;
     ctx.drawImage(this.atlas, sx, strip.y, def.frameW, def.frameH, x, y - (def.frameH - TILE), def.frameW, def.frameH);
-  }
-
-  private drawOrb(ctx: CanvasRenderingContext2D, cx: number, cy: number, t: number): void {
-    const r = 13 + Math.sin(t * 2) * 1.5;
-    const glow = ctx.createRadialGradient(cx, cy, 2, cx, cy, r * 2.2);
-    glow.addColorStop(0, 'rgba(143,163,242,0.55)');
-    glow.addColorStop(1, 'rgba(143,163,242,0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(cx, cy, r * 2.2, 0, Math.PI * 2); ctx.fill();
-    const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, 1, cx, cy, r);
-    g.addColorStop(0, '#fff7e6');
-    g.addColorStop(0.35, '#a7b7f5');
-    g.addColorStop(0.7, '#4C68CD');
-    g.addColorStop(1, '#253374');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
   }
 
   private drawVisitorMarker(ctx: CanvasRenderingContext2D, t: number): void {
@@ -837,7 +817,7 @@ export class CampusRenderer {
     ctx.font = '500 11px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     for (const a of this.actors) {
-      const s = this.worldToScreen(a.x + TILE / 2, a.y - (a.isOrb ? 22 : 30));
+      const s = this.worldToScreen(a.x + TILE / 2, a.y - 30);
       const tw = ctx.measureText(a.name).width;
       ctx.fillStyle = th.labelBg;
       this.roundRect(ctx, s.x - tw / 2 - 5, s.y - 15, tw + 10, 16, 5);

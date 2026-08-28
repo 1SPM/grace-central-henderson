@@ -95,7 +95,7 @@ GRACE today is a staff CRM with AI and WorkOS bolted on. The three interfaces ex
 | **Ask GRACE (member)** | Separate portal assistant with its own tool runtime. |
 | **Ask GRACE (static previews)** | Separate HTML companion. Not the same backend. |
 | **Virtual Campus** | Thin 2D campus map. Deep-links into existing CRM/WorkOS rooms. Mounted as a WorkOS tab and inside Ask Grace. Does not invent capabilities. |
-| **Specialized agents** | 16 registered; 5 implemented (Grace, Shepherd, Steward, Sentinel, Verity). Implemented agents are scanners, not LLM orchestrators. The registry entry named “Grace” is a WorkOS scanner, not the product nucleus. |
+| **Specialized agents** | 16 registered; 5 implemented (Cadence, Shepherd, Steward, Sentinel, Verity). Implemented agents are scanners, not LLM orchestrators. The scanner formerly displayed as “Grace” is now **Cadence** — see section 8. |
 | **Governance** | Decision Queue, Approval Centre, audit timeline, and RBAC exist on WorkOS routes. Ask GRACE does not route through them. Legacy CRM routes are still on older auth. |
 | **Member portal** | Split: React `/portal` plus static HTML still used as demo URLs. |
 | **Impact Card** | Demo / simulated. Mock i2C adapter. Locked for beta. |
@@ -172,28 +172,26 @@ Pilot readiness still wins. Execution stays separate from the picture.
 
 **GRACE (product nucleus)** is the intelligence layer in the visual.
 
-**Grace (WorkOS agent)** is a registered scanner that reviews Work Orders, tasks, and approvals.
+**Cadence (WorkOS agent)** is a registered scanner that reviews Work Orders,
+tasks, and approvals for anything overdue, blocked, or stale.
 
-Until slice 2, they stay distinct. Do not present the registry entry as the intelligence layer.
+**✅ Resolved 2026-08-28.** This section previously recorded the trap as *already
+broken in shipped code*: the registry entry was named "Grace," and
+`CampusRenderer.ts` drew it with the nucleus's own visual language
+(`isOrb: a.key === 'grace'`), so the campus showed an orb labelled Grace while
+the architecture page showed an orb labelled GRACE. Both are fixed — the agent
+displays as **Cadence · Operations Scanner**, and the `isOrb` special case (and
+the now-dead `drawOrb`) are gone, so it is drawn as an ordinary sprite.
 
-**⚠️ This rule is already broken in shipped code.** `CampusRenderer.ts` draws the
-registry scanner with the nucleus's own visual language:
-
-```ts
-status: a.status, isOrb: a.key === 'grace',
-```
-
-and `campusAssignments.ts` says so plainly — *"Grace presides in the Fellowship
-Hall (rendered as the GRACE orb, not a sprite)."* So the virtual campus already
-shows an orb labelled Grace, and this page shows an orb labelled GRACE at the
-centre of the architecture. A pilot user will reasonably conclude they are the
-same thing.
-
-**Fix before pilot users learn the current name.** Rename the registry entry to
-describe its actual job (it scans Work Orders, tasks, and approvals) and drop
-the `isOrb` special case. Touches `agentRegistry.ts`, `agentWorkflows.ts` (the
-`WORKFLOWS` key), `campusAssignments.ts`, `CampusRenderer.ts`, and the binding
-test from PR #153. Cheap now; expensive once a client has learned it.
+**The stored key remains `grace`, deliberately.** It is never rendered — only
+`name` and `role` reach a user — and it is the join key for live history:
+`agent_runs`, `agent_configs`, `agent_findings.agent_id`, and the
+agent-prefixed `agent_findings.dedup_key`. At the time of the rename production
+held 31 rows under that key (28 findings, 2 runs, 1 saved config). Renaming the
+column value would have orphaned that history and silently broken finding dedup
+— a data migration on a live tenant bought nothing a user could see. If the key
+is ever renamed, it needs a migration covering all four locations, including
+string surgery on `dedup_key`.
 
 ---
 

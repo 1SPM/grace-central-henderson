@@ -163,7 +163,7 @@ export const DEPARTMENTS: Record<string, CampusDepartment> = {
   fellowship: {
     id: 'fellowship',
     name: 'Fellowship Hall',
-    blurb: 'The staff meeting. Grace presides: the Monday brief, the Action Center, events, and the WorkOS overview.',
+    blurb: 'The staff meeting: the Monday brief, the Action Center, events, and the WorkOS overview.',
     routes: [
       { label: 'Executive Overview', view: 'workos', hash: '#/workos' },
       { label: 'Action Center', view: 'feed', hash: '#/actions' },

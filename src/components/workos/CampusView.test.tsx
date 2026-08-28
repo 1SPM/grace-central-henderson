@@ -67,8 +67,8 @@ function jsonResponse(body: unknown, status = 200) {
 
 const GRACE_AGENT = {
   key: 'grace',
-  name: 'Grace',
-  role: 'WorkOS Orchestrator',
+  name: 'Cadence',
+  role: 'Operations Scanner',
   description: 'Scans Work Orders.',
   implemented: true,
   latest_run: null,

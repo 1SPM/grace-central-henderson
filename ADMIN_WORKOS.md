@@ -87,7 +87,9 @@ in a future build-out but was never granted decide rights).
 
 Registry of the 16 named agents (`api/_lib/agentRegistry.ts`). **5 have a
 real, recorded workflow** (`grace`, `verity`, `sentinel`, `shepherd`,
-`steward` — `api/_lib/agentWorkflows.ts`): each reads real tables
+`steward` — `api/_lib/agentWorkflows.ts`; `grace` is the stored key,
+displayed as **Cadence** since 2026-08-28 so it is not mistaken for the
+GRACE product nucleus): each reads real tables
 (overdue tasks, blocked Work Orders, stale approvals, missing contact
 info, unowned Work Orders, stale data-subject requests, unassigned care
 requests, ledger reconciliation) and writes real `agent_runs` +
