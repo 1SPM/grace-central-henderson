@@ -33,6 +33,15 @@ Root on `grace-crm-two.vercel.app` and `grace-crm.dev` serves the white-label CR
 
 > ⚠️ **One repo → one Vercel project.** A duplicate project (`grace-central-henderson`, serving grace-central-henderson.vercel.app) previously auto-deployed from this same repo with divergent env vars — it served a broken copy of the app and caused the Ask Grace "Not found" confusion (see UX review 2026-07-06). It was removed on consolidation. Never attach a second Vercel project to this repo.
 
+## Architecture
+
+| Surface | URL |
+|---------|-----|
+| **Intelligence layer** (north-star visual) | `/grace-intelligence.html` |
+| **Platform landing** | `/grace-platform.html` |
+
+Outer systems on the intelligence page are labeled live / partial / later. Do not read that visual as a claim that every capability is shipped.
+
 ## Shared config
 
 Hub pages load [`public/grace-links.js`](../public/grace-links.js) so button targets stay in sync with this document.
