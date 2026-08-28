@@ -250,6 +250,65 @@ describe('getWorkflow("steward") — Financial Operations', () => {
   });
 });
 
+describe('getWorkflow("verity") — proposing a Work Order owner', () => {
+  const UNOWNED = { id: 'wo-1', title: 'Youth retreat planning', ministry: 'Care & Counseling' };
+
+  function verityMock(opts: { assignments?: unknown[]; existingActions?: unknown[]; ministry?: string } = {}) {
+    return createMockSupabase({
+      tables: {
+        people: () => ({ data: [] }),
+        work_orders: () => ({ data: [{ ...UNOWNED, ministry: opts.ministry ?? UNOWNED.ministry }] }),
+        ministry_assignments: () => ({ data: opts.assignments ?? [{ area_key: 'member_care', owner_user_id: 'user-1' }] }),
+        agent_actions: () => ({ data: opts.existingActions ?? [] }),
+        users: () => ({ data: [{ id: 'user-1', first_name: 'Fatoumata', last_name: 'Diallo' }] }),
+      },
+    });
+  }
+
+  it('joins work_orders.ministry (a label) to area_key (a slug) via areaForMinistry, and names the person', async () => {
+    // The label "Care & Counseling" must resolve to area key 'member_care'.
+    // Joining the label straight onto area_key matches nothing, which would
+    // make the whole proposal path silently dead.
+    const workflow = getWorkflow('verity')!;
+    const result = await workflow(verityMock() as never, FIXTURE_CHURCH_ID);
+
+    const proposal = result.findings.find(f => f.action_type === 'assign_work_order_owner');
+    expect(proposal, 'the ministry label should have resolved to an area').toBeDefined();
+    expect(proposal!.requires_approval).toBe(true);
+    expect(proposal!.payload.owner_user_id).toBe('user-1');
+    // A pastor has to see who is being assigned, not a UUID.
+    expect(proposal!.payload.owner_name).toBe('Fatoumata Diallo');
+  });
+
+  it('falls back to a plain observation when the ministry has no assigned owner', async () => {
+    const workflow = getWorkflow('verity')!;
+    const result = await workflow(verityMock({ assignments: [] }) as never, FIXTURE_CHURCH_ID);
+
+    expect(result.findings.map(f => f.action_type)).toContain('flag_unowned_work_order');
+    expect(result.findings.some(f => f.requires_approval)).toBe(false);
+  });
+
+  it('does not re-propose a Work Order whose proposal was already decided', async () => {
+    // Without this, every run resurrects a proposal the pastor already
+    // rejected and stacks duplicate approvals in the Decision Queue.
+    const workflow = getWorkflow('verity')!;
+    const result = await workflow(
+      verityMock({ existingActions: [{ target_entity_id: 'wo-1', status: 'rejected' }] }) as never,
+      FIXTURE_CHURCH_ID,
+    );
+
+    expect(result.findings.some(f => f.action_type === 'assign_work_order_owner')).toBe(false);
+    expect(result.findings.map(f => f.action_type)).toContain('flag_unowned_work_order');
+  });
+
+  // NOT covered here: that a 'failed' action is retryable while
+  // proposed/approved/executed/rejected are not. That distinction lives in
+  // the query's `.in('status', [...])`, and this mock's filter methods are
+  // no-ops that return the builder unchanged — so a test asserting it would
+  // be asserting the fixture, not the code. It needs an integration test
+  // against a real database to mean anything.
+});
+
 describe('getWorkflow — unimplemented agents', () => {
   it('returns undefined for an agent with no real workflow (never fabricates one)', () => {
     expect(getWorkflow('herald')).toBeUndefined();

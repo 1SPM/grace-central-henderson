@@ -39,7 +39,16 @@ export function ApprovalCentre() {
   async function handleDecide(id: string, decision: ApprovalDecision) {
     setDecisionError(null);
     try {
-      await decide(id, decision, notes[id]);
+      const { agentAction } = await decide(id, decision, notes[id]);
+      // The decision was recorded, but the action it authorised may have
+      // refused — usually because the world moved between proposal and
+      // approval. Saying nothing here would show a success badge over a
+      // change that never happened.
+      if (agentAction?.status === 'failed') {
+        setDecisionError(
+          `Decision recorded, but the action could not be carried out (${agentAction.reason ?? 'unknown reason'}). Nothing was changed.`,
+        );
+      }
     } catch (err) {
       setDecisionError(err instanceof Error ? err.message : 'Could not record the decision.');
     }

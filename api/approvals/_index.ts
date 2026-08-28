@@ -14,6 +14,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
+import { executeAgentAction } from '../_lib/agentActionExecutors.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, bool_ } from '../_lib/validation.js';
@@ -147,6 +148,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const decidedAt = new Date().toISOString();
+    // Conditional on status='pending', not just id: the check above and
+    // this write are not atomic together, so two concurrent PATCHes could
+    // both pass it. Losing the race must mean losing the decision — and,
+    // more importantly, not running the executor a second time.
     const { data: approval, error } = await supabase
       .from('approvals')
       .update({
@@ -158,9 +163,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
       .eq('id', id)
       .eq('church_id', actor.churchId)
+      .eq('status', 'pending')
       .select()
-      .single();
-    if (error || !approval) return res.status(500).json({ error: 'update_failed' });
+      .maybeSingle();
+    if (error) return res.status(500).json({ error: 'update_failed' });
+    if (!approval) return res.status(409).json({ error: 'already_decided' });
+
+    // An agent-proposed action is carried out here and nowhere else: the
+    // agent only recorded a proposal, and this decision is the one thing
+    // that can turn it into a change. A favourable decision runs the
+    // registered executor; anything else marks the action rejected so it
+    // stops reading as outstanding. An execution failure is recorded as
+    // 'failed' with a reason rather than swallowed — an approved action
+    // that silently did nothing is the worst outcome for a decision-maker.
+    let agentAction: { action_id: string; status: string; reason?: string } | null = null;
+    if (approval.entity_type === 'agent_action' && approval.entity_id) {
+      const favorable = ['approve', 'approve_with_changes'].includes(body.decision);
+      const { data: action, error: actionReadErr } = await supabase
+        .from('agent_actions')
+        .select('id, church_id, action_type, target_entity_type, target_entity_id, payload, status, approval_id, requires_approval')
+        .eq('id', approval.entity_id)
+        .eq('church_id', actor.churchId)
+        .maybeSingle();
+      if (actionReadErr) return res.status(500).json({ error: 'agent_action_read_failed' });
+
+      // Only act on an action that actually points back at THIS approval.
+      // Without it, a mis-linked row (see the run endpoint's partial-failure
+      // path) could be executed under an approval that was never its own —
+      // and the 035 CHECK would then reject the status write silently.
+      const linked = action
+        && action.status === 'proposed'
+        && (!action.requires_approval || action.approval_id === approval.id);
+
+      if (action && linked) {
+        if (!favorable) {
+          const { error } = await supabase.from('agent_actions').update({ status: 'rejected' })
+            .eq('id', action.id).eq('church_id', actor.churchId).eq('status', 'proposed');
+          agentAction = error
+            ? { action_id: action.id, status: 'failed', reason: 'reject_write_failed' }
+            : { action_id: action.id, status: 'rejected' };
+        } else {
+          const outcome = await executeAgentAction(supabase, action);
+          // Conditional on status='proposed' so a concurrent decision
+          // cannot double-write, and the error is checked: an approved
+          // action whose status write failed must not be reported as done.
+          const { data: written, error: writeErr } = await supabase
+            .from('agent_actions')
+            .update({
+              status: outcome.ok ? 'executed' : 'failed',
+              executed_at: outcome.ok ? decidedAt : null,
+            })
+            .eq('id', action.id)
+            .eq('church_id', actor.churchId)
+            .eq('status', 'proposed')
+            .select('id')
+            .maybeSingle();
+          if (writeErr || !written) {
+            agentAction = { action_id: action.id, status: 'failed', reason: 'status_write_failed' };
+          } else {
+            agentAction = outcome.ok
+              ? { action_id: action.id, status: 'executed' }
+              : { action_id: action.id, status: 'failed', reason: outcome.reason };
+          }
+        }
+      }
+    }
 
     // A favorable decision on a Work-Order-linked approval resumes work;
     // anything else returns it to planning so it can be revised.
@@ -181,7 +248,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       actorUserId: actor.userId,
       subjectType: 'approval',
       subjectId: id,
-      payload: { decision: body.decision, work_order_id: approval.work_order_id },
+      payload: { decision: body.decision, work_order_id: approval.work_order_id, agent_action: agentAction },
     });
     await recordAudit(supabase, {
       churchId: actor.churchId,
@@ -197,7 +264,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       method: 'PATCH',
     });
 
-    return res.status(200).json({ approval });
+    return res.status(200).json({ approval, agent_action: agentAction });
   }
 
   return res.status(405).json({ error: 'method_not_allowed' });

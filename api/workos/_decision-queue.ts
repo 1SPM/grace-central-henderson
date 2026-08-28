@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     has('approvals.view')
       ? supabase
           .from('approvals')
-          .select('id, status, risk_level, entity_type, entity_id, created_at, related_party_flagged, related_party_reviewed_at')
+          .select('id, status, risk_level, entity_type, entity_id, proposed_action, created_at, related_party_flagged, related_party_reviewed_at')
           .eq('church_id', churchId)
           .eq('status', 'pending')
           .limit(200)
