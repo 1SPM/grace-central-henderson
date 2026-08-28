@@ -18,9 +18,20 @@ export interface AgentDefinition {
 
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
+    // Renamed from "Grace" (2026-08-28). The product nucleus is GRACE; a
+    // registry scanner sharing that name taught users the two were the
+    // same thing — and the campus reinforced it by drawing this agent as
+    // the GRACE orb. See docs/GRACE_INTELLIGENCE_LAYER.md section 8.
+    //
+    // The stored key stays 'grace' deliberately. It is never rendered —
+    // only `name` and `role` reach a user — and it is the join key for
+    // live history: agent_runs, agent_configs, agent_findings.agent_id,
+    // and the agent-prefixed agent_findings.dedup_key. Renaming the key
+    // would orphan that history and silently break finding dedup, for no
+    // user-visible gain.
     key: 'grace',
-    name: 'Grace',
-    role: 'WorkOS Orchestrator',
+    name: 'Cadence',
+    role: 'Operations Scanner',
     description: 'Scans open Work Orders, tasks, and approvals for items that need attention and records what it finds.',
     implemented: true,
   },
