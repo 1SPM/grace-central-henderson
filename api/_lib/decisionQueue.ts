@@ -57,6 +57,9 @@ export interface ApprovalRow {
   risk_level: string;
   entity_type: string;
   entity_id: string;
+  /** The human-readable sentence the requester wrote. Preferred over the
+   *  raw entity_type: a queue of "agent_action" rows is undecidable. */
+  proposed_action?: string | null;
   created_at: string;
   related_party_flagged: boolean;
   related_party_reviewed_at: string | null;
@@ -142,7 +145,9 @@ export function computeDecisionQueue(inputs: DecisionQueueInputs, now: Date): De
     items.push({
       id: a.id,
       kind: 'approval',
-      title: `Approval awaiting decision — ${a.entity_type}`,
+      title: a.proposed_action?.trim()
+        ? `Approval awaiting decision — ${a.proposed_action.trim()}`
+        : `Approval awaiting decision — ${a.entity_type}`,
       detail: `Risk: ${a.risk_level}`,
       severity: a.risk_level === HIGHEST_RISK_LEVEL ? 'critical' : 'high',
       created_at: a.created_at,

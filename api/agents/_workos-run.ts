@@ -15,6 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { getAgentDefinition } from '../_lib/agentRegistry.js';
 import { actionRowForFinding, getWorkflow } from '../_lib/agentWorkflows.js';
+import { isExecutableActionType } from '../_lib/agentActionExecutors.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -26,6 +27,28 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SCHEMA = {
   agent_key: str({ required: true, max: 40, pattern: /^[a-z-]+$/ }),
 };
+
+/**
+ * One human-readable line for the Approval Centre and Decision Queue. A
+ * pastor should be able to decide without opening the payload — an
+ * approval that reads "assign_work_order_owner" is not a decision anyone
+ * can make responsibly.
+ */
+function describeProposedAction(action: {
+  action_type: string;
+  target_entity_type: string | null;
+  payload: Record<string, unknown>;
+}): string {
+  const p = action.payload ?? {};
+  if (action.action_type === 'assign_work_order_owner') {
+    const title = typeof p.work_order_title === 'string' ? p.work_order_title : 'an unowned Work Order';
+    const owner = typeof p.owner_name === 'string' ? p.owner_name : 'the ministry owner';
+    const ministry = typeof p.ministry === 'string' ? ` (${p.ministry})` : '';
+    return `Assign ${owner} as owner of "${title}"${ministry}`;
+  }
+  const target = action.target_entity_type ? ` on ${action.target_entity_type}` : '';
+  return `${action.action_type.replace(/_/g, ' ')}${target}`;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -66,16 +89,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await workflow(supabase, actor.churchId);
 
     if (result.findings.length > 0) {
-      // Fail closed: no approvals consumer exists yet (nothing reads
-      // 'proposed' agent_actions rows, links an approvals row, or
-      // executes on approval). Until that pipeline is built, a workflow
-      // emitting an approval-requiring finding is a configuration error
-      // — fail the run loudly rather than stranding the proposal as a
-      // row nothing will ever read while reporting success.
-      const needingApproval = result.findings.filter(f => f.requires_approval);
-      if (needingApproval.length > 0) {
+      // Still fail closed, but on a narrower and permanent condition: an
+      // approval-requiring finding whose action_type has no executor
+      // registered in agentActionExecutors.ts. Approving such a proposal
+      // would silently do nothing, which is worse in a pastor's Decision
+      // Queue than refusing at the source.
+      const unexecutable = result.findings
+        .filter(f => f.requires_approval && !isExecutableActionType(f.action_type))
+        .map(f => f.action_type);
+      if (unexecutable.length > 0) {
         throw new Error(
-          `workflow '${body.agent_key}' emitted ${needingApproval.length} requires_approval finding(s) but no approvals consumer exists for agent_actions — build the approval pipeline before shipping a mutating workflow`,
+          `workflow '${body.agent_key}' proposed action type(s) with no executor: ${[...new Set(unexecutable)].join(', ')} — register one in agentActionExecutors.ts before proposing it`,
         );
       }
 
@@ -84,16 +108,77 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // lives in actionRowForFinding + its unit tests). Note that
       // persistWorkflowFindings below is observation-only and does not
       // read requires_approval — see AgentFinding.requires_approval.
-      const { error: actionsInsertErr } = await supabase.from('agent_actions').insert(
-        result.findings.map(f => ({
-          agent_run_id: run.id,
-          church_id: actor.churchId,
-          ...actionRowForFinding(f, new Date()),
-        })),
-      );
-      if (actionsInsertErr) {
-        throw new Error(`agent_actions insert failed: ${actionsInsertErr.message}`);
+      // Observations are written in one shot. Proposals are written one at
+      // a time, approval FIRST, so a partial failure can never leave a
+      // 'proposed' action with no approvals row — an orphan invisible to
+      // the Decision Queue is exactly the stranded-proposal problem this
+      // pipeline exists to remove. Ordering it this way makes the worst
+      // case a pending approval pointing at an action that was never
+      // written, which the decide endpoint treats as a no-op.
+      const observations = result.findings.filter(f => !f.requires_approval);
+      const proposals = result.findings.filter(f => f.requires_approval);
+
+      if (observations.length > 0) {
+        const { error: obsErr } = await supabase.from('agent_actions').insert(
+          observations.map(f => ({
+            agent_run_id: run.id,
+            church_id: actor.churchId,
+            ...actionRowForFinding(f, new Date()),
+          })),
+        );
+        if (obsErr) throw new Error(`agent_actions insert failed: ${obsErr.message}`);
       }
+
+      for (const finding of proposals) {
+        const row = actionRowForFinding(finding, new Date());
+        const { data: approval, error: approvalErr } = await supabase
+          .from('approvals')
+          .insert({
+            church_id: actor.churchId,
+            entity_type: 'agent_action',
+            entity_id: null, // set once the action row exists
+            proposed_action: describeProposedAction({
+              action_type: finding.action_type,
+              target_entity_type: finding.target_entity_type,
+              payload: finding.payload,
+            }),
+            requested_by_agent: body.agent_key,
+            affected_resources: finding.target_entity_id
+              ? [{ type: finding.target_entity_type, id: finding.target_entity_id }]
+              : [],
+            supporting_evidence: [{ agent_run_id: run.id, payload: finding.payload }],
+            risk_level: 'low',
+          })
+          .select()
+          .single();
+        if (approvalErr || !approval) {
+          throw new Error(`approval creation failed: ${approvalErr?.message ?? 'no row'}`);
+        }
+
+        const { data: action, error: actionErr } = await supabase
+          .from('agent_actions')
+          .insert({
+            agent_run_id: run.id,
+            church_id: actor.churchId,
+            ...row,
+            approval_id: approval.id,
+          })
+          .select('id')
+          .single();
+        if (actionErr || !action) {
+          throw new Error(`agent_actions insert failed: ${actionErr?.message ?? 'no row'}`);
+        }
+
+        const { error: linkErr } = await supabase
+          .from('approvals')
+          .update({ entity_id: action.id })
+          .eq('id', approval.id)
+          .eq('church_id', actor.churchId);
+        if (linkErr) {
+          throw new Error(`approval link failed for action ${action.id}: ${linkErr.message}`);
+        }
+      }
+
       // Additive: also persist each finding into the accountable
       // agent_findings lifecycle (independent of the agent_actions log
       // above, which is a run-history record, not a triage queue).
