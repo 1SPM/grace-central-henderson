@@ -91,7 +91,7 @@ describe('useAgentCommandCentre — runAgent same-key race (adversarial-review f
       // The fast call has resolved (succeeded); the slow call is still
       // in flight. No error should be recorded yet.
       expect(result.current.runErrors.get('grace')).toBeUndefined();
-      expect(result.current.runningKey).toBeNull();
+      expect(result.current.runningKeys.has('grace')).toBe(false);
 
       resolveSlowRun(jsonResponse({ error: 'agent_run_failed' }, 500));
       await slowPromise;
@@ -101,6 +101,77 @@ describe('useAgentCommandCentre — runAgent same-key race (adversarial-review f
     expect(slowResult).toBeNull();
     // The superseded slow failure must not overwrite the fast success.
     expect(result.current.runErrors.get('grace')).toBeUndefined();
-    expect(result.current.runningKey).toBeNull();
+    expect(result.current.runningKeys.has('grace')).toBe(false);
+  });
+
+  it('two different agents running concurrently each keep their own spinner instead of sharing one runningKey', async () => {
+    // Regression test for the pre-existing bug flagged during adversarial
+    // review of the same-key race fix above: runningKey used to be a single
+    // `string | null` shared across ALL agents, so starting agent B while
+    // agent A was still in flight cleared A's spinner early, and A's own
+    // `finally` could later wipe out the fact that B was still running.
+    let resolveGrace!: (v: Response) => void;
+    const graceRun = new Promise<Response>(resolve => { resolveGrace = resolve; });
+    let resolveMercy!: (v: Response) => void;
+    const mercyRun = new Promise<Response>(resolve => { resolveMercy = resolve; });
+
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) return Promise.resolve(jsonResponse({ agents: [] }));
+      if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
+        const body = JSON.parse(String(opts.body)) as { agent_key: string };
+        return body.agent_key === 'grace' ? graceRun : mercyRun;
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+
+    const { result } = renderHook(() => useAgentCommandCentre());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    let graceResult: unknown;
+    let mercyResult: unknown;
+    let gracePromise!: Promise<unknown>;
+    let mercyPromise!: Promise<unknown>;
+    // Fire both synchronously in one act() so React batches the two
+    // setRunningKeys calls into a single flush, rather than wrapping the
+    // whole exchange (including the pending-promise waitFor below) in one
+    // outer async act() — a nested, still-open outer act suppresses the
+    // inner flush that waitFor depends on, so it never observes the update.
+    act(() => {
+      gracePromise = result.current.runAgent('grace').then(r => { graceResult = r; });
+      mercyPromise = result.current.runAgent('mercy').then(r => { mercyResult = r; });
+    });
+
+    // Both are in flight — both spinners should show.
+    await waitFor(() => {
+      expect(result.current.runningKeys.has('grace')).toBe(true);
+      expect(result.current.runningKeys.has('mercy')).toBe(true);
+    });
+
+    act(() => {
+      resolveMercy(jsonResponse({
+        run: { id: 'run-mercy', agent_key: 'mercy', status: 'succeeded', started_at: null, finished_at: null, created_at: '2026-08-25T00:00:00.000Z', output: null, error: null, work_order_id: null },
+        summary: 'ok',
+        finding_count: 0,
+      }));
+    });
+    await act(async () => { await mercyPromise; });
+
+    // Mercy finished; grace is still running and must still show its spinner.
+    expect(result.current.runningKeys.has('mercy')).toBe(false);
+    expect(result.current.runningKeys.has('grace')).toBe(true);
+
+    act(() => {
+      resolveGrace(jsonResponse({
+        run: { id: 'run-grace', agent_key: 'grace', status: 'succeeded', started_at: null, finished_at: null, created_at: '2026-08-25T00:00:00.000Z', output: null, error: null, work_order_id: null },
+        summary: 'ok',
+        finding_count: 0,
+      }));
+    });
+    await act(async () => { await gracePromise; });
+
+    expect(graceResult).not.toBeNull();
+    expect(mercyResult).not.toBeNull();
+    expect(result.current.runningKeys.has('grace')).toBe(false);
+    expect(result.current.runningKeys.has('mercy')).toBe(false);
   });
 });

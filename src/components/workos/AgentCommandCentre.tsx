@@ -42,11 +42,12 @@ interface AgentCardProps {
   running: boolean;
   runError: string | undefined;
   saving: boolean;
+  saveError: string | undefined;
   onRun: () => void;
-  onSave: (instructions: string, tasks: string[]) => Promise<unknown>;
+  onSave: (instructions: string, tasks: string[]) => Promise<AgentConfig | null>;
 }
 
-function AgentCard({ agent, supports, config, canManage, running, runError, saving, onRun, onSave }: AgentCardProps) {
+function AgentCard({ agent, supports, config, canManage, running, runError, saving, saveError, onRun, onSave }: AgentCardProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [instructions, setInstructions] = useState(config?.instructions ?? '');
   const [tasks, setTasks] = useState<string[]>(config?.tasks ?? []);
@@ -70,8 +71,8 @@ function AgentCard({ agent, supports, config, canManage, running, runError, savi
   }
 
   async function handleSave() {
-    await onSave(instructions, tasks);
-    setSettingsOpen(false);
+    const saved = await onSave(instructions, tasks);
+    if (saved) setSettingsOpen(false);
   }
 
   return (
@@ -207,6 +208,10 @@ function AgentCard({ agent, supports, config, canManage, running, runError, savi
             </div>
           </div>
 
+          {saveError && (
+            <p className="text-xs text-brand-600 dark:text-brand-400" data-testid={`agent-save-error-${agent.key}`}>{saveError}</p>
+          )}
+
           <button
             type="button"
             onClick={() => void handleSave()}
@@ -222,12 +227,12 @@ function AgentCard({ agent, supports, config, canManage, running, runError, savi
 }
 
 export function AgentCommandCentre() {
-  const { agents, isLoading, error, forbidden, runningKey, runErrors, runAgent } = useAgentCommandCentre();
+  const { agents, isLoading, error, forbidden, runningKeys, runErrors, runAgent } = useAgentCommandCentre();
   // Same map the Campus and the Overview read, so an agent's card names the
   // area and the person it supports rather than floating free of the church.
   const { areas } = useMinistryAreas();
   const { has } = useWorkOsPermissions();
-  const { configs, savingKey, save } = useAgentSettings();
+  const { configs, savingKey, saveErrors, save } = useAgentSettings();
   const canManage = has('agents.manage');
 
   if (forbidden) {
@@ -255,9 +260,10 @@ export function AgentCommandCentre() {
             supports={areas.filter(a => a.agent_key === agent.key)}
             config={configs.get(agent.key)}
             canManage={canManage}
-            running={runningKey === agent.key}
+            running={runningKeys.has(agent.key)}
             runError={runErrors.get(agent.key)}
             saving={savingKey === agent.key}
+            saveError={saveErrors.get(agent.key)}
             onRun={() => void runAgent(agent.key)}
             onSave={(instructions, tasks) => save(agent.key, instructions, tasks)}
           />

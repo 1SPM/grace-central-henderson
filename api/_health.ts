@@ -20,6 +20,10 @@ export default function handler(_req: VercelRequest, res: VercelResponse) {
     supabase: Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
     gemini: Boolean(process.env.GEMINI_API_KEY),
     agents: true,
-    auth: authStatus,
+    // Only `configured` is public. demoMode is deliberately withheld: this
+    // endpoint is unauthenticated, so echoing it back handed anyone a
+    // reliable oracle for whether the anonymous demo bypass was live on a
+    // given host (see TECH_DEBT.md TD-043).
+    auth: { configured: authStatus.configured },
   });
 }

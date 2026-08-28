@@ -54,7 +54,7 @@ export function useAgentCommandCentre() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [forbidden, setForbidden] = useState(false);
-  const [runningKey, setRunningKey] = useState<string | null>(null);
+  const [runningKeys, setRunningKeys] = useState<Set<string>>(new Set());
   const [runErrors, setRunErrors] = useState<Map<string, string>>(new Map());
   // Per-key attempt counter so two overlapping runAgent calls for the SAME
   // key (fast double-click, keyboard repeat) can't let a slow, superseded
@@ -87,7 +87,7 @@ export function useAgentCommandCentre() {
     runAttemptRef.current.set(agentKey, attemptId);
     const isLatestAttempt = () => runAttemptRef.current.get(agentKey) === attemptId;
 
-    setRunningKey(agentKey);
+    setRunningKeys(prev => new Set(prev).add(agentKey));
     setRunErrors(prev => {
       if (!prev.has(agentKey)) return prev;
       const next = new Map(prev);
@@ -105,9 +105,16 @@ export function useAgentCommandCentre() {
       if (isLatestAttempt()) setRunErrors(prev => new Map(prev).set(agentKey, runErrorMessage(err)));
       return null;
     } finally {
-      if (isLatestAttempt()) setRunningKey(null);
+      if (isLatestAttempt()) {
+        setRunningKeys(prev => {
+          if (!prev.has(agentKey)) return prev;
+          const next = new Set(prev);
+          next.delete(agentKey);
+          return next;
+        });
+      }
     }
   }, [getAuthToken, refresh]);
 
-  return { agents, isLoading, error, forbidden, runningKey, runErrors, refresh, runAgent };
+  return { agents, isLoading, error, forbidden, runningKeys, runErrors, refresh, runAgent };
 }
