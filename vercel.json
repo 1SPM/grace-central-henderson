@@ -23,7 +23,7 @@
   ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/[...path]?path=:path*" },
-    { "source": "/((?!api/|grace_central_henderson_members_card_ios_app\\.html|grace_faithful_church_members_card_ios_app\\.html|members-card\\.html|whitelabel-hub\\.html|grace-platform\\.html|previews/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|grace_central_henderson_members_card_ios_app\\.html|grace_faithful_church_members_card_ios_app\\.html|members-card\\.html|whitelabel-hub\\.html|grace-platform\\.html|grace-intelligence\\.html|previews/).*)", "destination": "/index.html" }
   ],
   "crons": [
     { "path": "/api/cron/ai-anomaly", "schedule": "0 5 * * *" },
@@ -47,6 +47,12 @@
     },
     {
       "source": "/members-card.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/grace-intelligence.html",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
@@ -80,7 +86,7 @@
       ]
     },
     {
-      "source": "/((?!grace_central_henderson_members_card_ios_app\\.html|grace_faithful_church_members_card_ios_app\\.html|members-card\\.html|whitelabel-hub\\.html|grace-platform\\.html|previews/).*)",
+      "source": "/((?!grace_central_henderson_members_card_ios_app\\.html|grace_faithful_church_members_card_ios_app\\.html|members-card\\.html|whitelabel-hub\\.html|grace-platform\\.html|grace-intelligence\\.html|previews/).*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
