@@ -349,7 +349,13 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it('auto-activates for gracecrm-centralhenderson.org (Central Henderson\'s own church_id) when no bearer token is present', async () => {
+  // Regression (TD-043, 2026-08-28): this test previously asserted the
+  // OPPOSITE — that the demo bootstrap auto-activates on Central
+  // Henderson's own hostname — which locked an unauthenticated
+  // system_administrator path onto a live tenant into the suite as
+  // intended behaviour. The bypass may only ever activate on a demo host
+  // (DEMO_HOSTS). See api/_lib/authz.demo.test.ts.
+  it('does NOT auto-activate for gracecrm-centralhenderson.org (a live client) — falls through to real Clerk auth', async () => {
     delete process.env.VITE_ENABLE_DEMO_MODE;
     const { resolveStaffActor } = await import('./authz.js');
 
@@ -365,9 +371,10 @@ describe('resolveStaffActor — demo-mode bootstrap', () => {
 
     const actor = await resolveStaffActor(makeReqWithHost('gracecrm-centralhenderson.org'), res, supabase as never);
 
-    expect(actor).not.toBeNull();
-    expect(actor!.churchId).toBe('11111111-1111-1111-1111-111111111111');
-    expect(res.status).not.toHaveBeenCalled();
+    expect(actor).toBeNull();
+    expect(res.status).toHaveBeenCalledWith(401);
+    // No demo users row is created for a real tenant.
+    expect(supabase.__calls.filter(c => c.table === 'users' && c.op === 'insert')).toHaveLength(0);
   });
 
   it('does NOT auto-activate for a genuinely unmapped host — falls through to real Clerk auth and 401s with no token', async () => {
@@ -523,21 +530,26 @@ describe('resolveStaffActor — "view as [team member]" (x-grace-view-as)', () =
     });
     const res = makeRes();
 
-    // No Authorization header (so hasBearerToken is false, and
-    // gracecrm-centralhenderson.org's own demo bypass takes over) — but a
-    // crafted x-grace-view-as header IS present, exactly what an attacker
-    // hitting the API directly (bypassing the app's own sign-in gate)
-    // would send. It must be fully ignored: the anonymous path only ever
-    // resolves the single shared demo-workos-admin actor, never a named
-    // individual, regardless of any header sent.
+    // No Authorization header (so hasBearerToken is false, and the demo
+    // host's bypass takes over) — but a crafted x-grace-view-as header IS
+    // present, exactly what an attacker hitting the API directly
+    // (bypassing the app's own sign-in gate) would send. It must be fully
+    // ignored: the anonymous path only ever resolves the single shared
+    // demo-workos-admin actor, never a named individual, regardless of any
+    // header sent.
+    //
+    // Uses a demo host deliberately: as of TD-043's 2026-08-28 correction
+    // the bypass no longer activates on a live client's hostname at all,
+    // so exercising this on grace-crm.dev is the only way to reach the
+    // anonymous path this test is about.
     const req = {
-      headers: { host: 'gracecrm-centralhenderson.org', 'x-grace-view-as': 'demo-leader-james-wilson+11111111-1111-1111-1111-111111111111' },
+      headers: { host: 'grace-crm.dev', 'x-grace-view-as': 'demo-leader-james-wilson+22222222-2222-2222-2222-222222222222' },
     } as unknown as import('@vercel/node').VercelRequest;
 
     const actor = await resolveStaffActor(req, res, supabase as never);
 
     expect(actor).not.toBeNull();
-    expect(actor!.clerkUserId).toBe('demo-workos-admin+11111111-1111-1111-1111-111111111111');
+    expect(actor!.clerkUserId).toBe('demo-workos-admin+22222222-2222-2222-2222-222222222222');
     expect(supabase.__calls.filter(c => c.table === 'users' && c.op === 'select')).toHaveLength(1);
   });
 });

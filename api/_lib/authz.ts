@@ -46,25 +46,24 @@ import { logSecurityEvent, securityContext } from './securityLog.js';
 // at the same time. isDemoModeActive() below closes that gap by also
 // auto-enabling for the known-demo hostnames in HOST_CHURCH_IDS.
 //
-// gracecrm-centralhenderson.org is in that map too (Central Henderson's
-// own church_id), so the public "Open Demo CRM" / "Open Member Portal"
-// links on members-card.html work for an anonymous visitor. That's safe
-// only because resolveStaffActor/resolveMemberActor additionally require
-// "no bearer token present" before taking the demo path (see
-// hasBearerToken below) — a request that already carries a real, valid
-// Clerk session is never downgraded to the shared anonymous demo actor.
-// isDemoModeActive() itself deliberately stays host/env-based only and
-// does NOT check for a bearer token, since api/neobank also consumes it
-// for an unrelated purpose.
+// isDemoModeActive() reads DEMO_HOSTS — never HOST_CHURCH_IDS. Those two
+// maps answer different questions and must not be conflated: see the
+// DEMO_HOSTS comment below for why that distinction is load-bearing.
 const DEMO_MODE = process.env.VITE_ENABLE_DEMO_MODE === 'true';
 const DEMO_CHURCH_ID = process.env.VITE_DEFAULT_CHURCH_ID;
 
 // Mirrors HOST_TENANTS in src/config/tenant.ts. Vercel env vars are
 // per-environment, not per-custom-domain, and this project deliberately
-// stays a single deployment (see docs/DEPLOY.md) — so which church the
-// demo bypass writes to has to be resolved from the request hostname,
-// not a shared env var, or every white-label host would silently share
-// Central Henderson's data.
+// stays a single deployment (see docs/DEPLOY.md) — so which church a
+// hostname belongs to has to be resolved from the request hostname, not a
+// shared env var, or every white-label host would silently share Central
+// Henderson's data.
+//
+// This map answers ONE question: "which church owns this hostname?" It is
+// consumed by resolveChurchByHost.ts for the public, token-less Connect
+// Card intake, which legitimately needs the real client's hostname here.
+// It deliberately does NOT decide whether the demo bypass is available —
+// that is DEMO_HOSTS below.
 export const HOST_CHURCH_IDS: Record<string, string> = {
   'grace-crm-two.vercel.app': '22222222-2222-2222-2222-222222222222',
   'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
@@ -72,26 +71,94 @@ export const HOST_CHURCH_IDS: Record<string, string> = {
   'gracecrm-centralhenderson.org': '11111111-1111-1111-1111-111111111111',
 };
 
+/**
+ * Hostnames on which the anonymous demo bypass may activate — demo tenants
+ * ONLY, never a real client.
+ *
+ * This is deliberately a separate list from HOST_CHURCH_IDS rather than a
+ * filter over it. Deriving demo-mode from HOST_CHURCH_IDS is what caused
+ * the bypass this list fixes: because Central Henderson's own hostname has
+ * to be in HOST_CHURCH_IDS for the Connect Card to resolve its church, an
+ * unauthenticated request to that live tenant's domain satisfied
+ * isDemoModeActive() and was handed a system_administrator demo actor by
+ * resolveDemoStaffActor (and a shared member row by
+ * resolveDemoMemberActor). Having no credentials was what opened the path;
+ * presenting a real token closed it. TD-043 asserted this could not happen
+ * — it could, and did.
+ *
+ * Adding a real client's hostname here re-opens that hole. Only ever add a
+ * hostname whose church_id is a demo tenant. Enforced by authz.demo.test.ts.
+ */
+export const DEMO_HOSTS: ReadonlySet<string> = new Set([
+  'grace-crm-two.vercel.app',
+  'grace-crm.dev',
+  'www.grace-crm.dev',
+]);
+
+/**
+ * Church ids belonging to a REAL tenant — every host in HOST_CHURCH_IDS
+ * that is not a demo host. Derived, so adding a client to HOST_CHURCH_IDS
+ * automatically protects it and the two lists can never drift apart.
+ *
+ * This is the backstop that makes the bypass safe independently of
+ * configuration. Host gating alone does not close the hole:
+ * `VITE_ENABLE_DEMO_MODE` on its own satisfies isDemoModeActive() for
+ * *every* host, and docs/DEPLOY.md documents that var as `true` in
+ * Production alongside `VITE_DEFAULT_CHURCH_ID` = Central Henderson — a
+ * live client. Under that documented config, an unauthenticated caller
+ * would otherwise be handed a system_administrator actor on real
+ * congregation data from any hostname, since resolveDemoChurchId fell
+ * back to that env var.
+ *
+ * Known limit: a real tenant that is NOT in HOST_CHURCH_IDS (one resolved
+ * via the churches.hosts DB lookup in resolveChurchByHost.ts) is not in
+ * this set. Its hostname is still blocked by DEMO_HOSTS gating; only a
+ * deliberate VITE_DEFAULT_CHURCH_ID misconfiguration could name it. The
+ * re-entry trigger in TECH_DEBT.md TD-043 covers that case.
+ */
+const NON_DEMO_CHURCH_IDS: ReadonlySet<string> = new Set(
+  Object.entries(HOST_CHURCH_IDS)
+    .filter(([host]) => !DEMO_HOSTS.has(host))
+    .map(([, churchId]) => churchId),
+);
+
 /** True for the global env-var opt-in, or for a request whose Host header
- * is one of the known demo hosts above. See the DEMO_MODE comment.
- * Exported so every route's demo bootstrap (not just the WorkOS staff-actor
- * path here) shares one hostname-aware check — a route rolling its own
- * `process.env.VITE_ENABLE_DEMO_MODE === 'true'` copy silently loses the
- * HOST_CHURCH_IDS fallback and 401s on the public demo hosts whenever that
+ * is a known demo host (DEMO_HOSTS — demo tenants only, never a real
+ * client). Exported so every route's demo bootstrap (not just the WorkOS
+ * staff-actor path here) shares one hostname-aware check — a route rolling
+ * its own `process.env.VITE_ENABLE_DEMO_MODE === 'true'` copy silently
+ * loses the host fallback and 401s on the public demo hosts whenever that
  * env var isn't set in the Vercel production environment (see api/neobank). */
 export function isDemoModeActive(req: VercelRequest): boolean {
   const host = req.headers.host;
-  return DEMO_MODE || (!!host && host in HOST_CHURCH_IDS);
+  return DEMO_MODE || (!!host && DEMO_HOSTS.has(host));
 }
 
 /**
  * Resolves which church the demo bypass should act as, based on the
  * request's Host header. Unmapped hosts fall back to VITE_DEFAULT_CHURCH_ID.
+ *
+ * Never resolves to a real tenant's church. Two independent guards,
+ * because either alone is insufficient:
+ *
+ *  - Host gating: only a DEMO_HOSTS hostname resolves via HOST_CHURCH_IDS,
+ *    so a live client's own domain can never resolve to its own church.
+ *  - Env gating: `VITE_DEFAULT_CHURCH_ID` is refused if it names a real
+ *    tenant (NON_DEMO_CHURCH_IDS). docs/DEPLOY.md documents that var as
+ *    Central Henderson with `VITE_ENABLE_DEMO_MODE=true` in Production,
+ *    and the env var alone satisfies isDemoModeActive() for every host —
+ *    so honouring it unconditionally would hand an unauthenticated caller
+ *    a system_administrator actor on real congregation data from any
+ *    hostname. That is exactly the P0 this function now blocks.
+ *
+ * Returning undefined is safe: both callers fail closed
+ * (`demo_church_not_configured`, 503).
  */
 export function resolveDemoChurchId(req: VercelRequest): string | undefined {
   const host = req.headers.host;
-  if (host && HOST_CHURCH_IDS[host]) return HOST_CHURCH_IDS[host];
-  return DEMO_CHURCH_ID;
+  if (host && DEMO_HOSTS.has(host)) return HOST_CHURCH_IDS[host];
+  if (DEMO_CHURCH_ID && !NON_DEMO_CHURCH_IDS.has(DEMO_CHURCH_ID)) return DEMO_CHURCH_ID;
+  return undefined;
 }
 
 export interface StaffActor {
