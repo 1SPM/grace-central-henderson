@@ -39,16 +39,26 @@ vi.mock('../../hooks/useWorkOsPermissions', () => ({
   useWorkOsPermissions: () => ({ has: (p: string) => (p === 'agents.manage' ? permState.canManage : true) }),
 }));
 
+// Mutable so the "desk count" test below can supply non-zero by_kind
+// counts (mocks are hoisted module-level and shared across every test in
+// this file).
+const decisionQueueState = vi.hoisted(() => ({
+  counts: { total: 0, critical: 0, by_kind: {} as Record<string, number> },
+}));
 vi.mock('../../hooks/useDecisionQueue', () => ({
-  useDecisionQueue: () => ({ counts: { total: 0, critical: 0, by_kind: {} }, items: [], isLoading: false, error: null }),
+  useDecisionQueue: () => ({ counts: decisionQueueState.counts, items: [], isLoading: false, error: null }),
 }));
 
 // Empty areas is a real, honest state (per this codebase's own "no
 // fabricated activity" convention) — it just means agent room placement
 // falls back to the static AGENT_SEATS map, which is what campusAssignments.ts
 // seats 'grace' in ('fellowship'), matching the defaultRoom used below.
+// Mutable so the "ministry-area override" test below can supply a non-empty
+// areas array without its own vi.mock (mocks are hoisted module-level and
+// shared across every test in this file).
+const ministryAreasState = vi.hoisted(() => ({ areas: [] as unknown[], agents: [] as unknown[] }));
 vi.mock('../../hooks/useMinistryAreas', () => ({
-  useMinistryAreas: () => ({ areas: [], agents: [] }),
+  useMinistryAreas: () => ministryAreasState,
 }));
 
 function jsonResponse(body: unknown, status = 200) {
@@ -70,6 +80,8 @@ describe('CampusView — room/agent panel run-error display', () => {
   const fetchMock = vi.fn();
   beforeEach(() => {
     permState.canManage = true;
+    ministryAreasState.areas = [];
+    decisionQueueState.counts = { total: 0, critical: 0, by_kind: {} };
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockReset();
   });
@@ -171,6 +183,84 @@ describe('CampusView — room/agent panel run-error display', () => {
 
     fireEvent.click(screen.getByText('Run now'));
     await waitFor(() => expect(screen.queryByTestId('campus-agent-run-error')).not.toBeInTheDocument());
+  });
+
+  it('seats an agent in its ministry-area room override instead of its AGENT_SEATS default', async () => {
+    // 'grace' defaults to 'fellowship' (campusAssignments.ts AGENT_SEATS). A
+    // ministry area that names 'grace' as its agent_key and 'lobby' as its
+    // room_id is the real mechanism Settings -> Ministry Areas reassignment
+    // uses in production (CampusView.tsx's roomByAgentKey, built from
+    // areas[].agent_key/room_id, takes priority over the static seat).
+    ministryAreasState.areas = [{
+      key: 'test-area',
+      name: 'Test Area',
+      purpose: 'Exercises the ministry-area room override.',
+      ministry: 'test',
+      confidential: false,
+      surfaces: [{ label: 'Test Surface', view: 'dashboard', hash: '#/dashboard', primary: true }],
+      queueKinds: [],
+      owner: null,
+      default_role_key: 'ministry_leader',
+      agent_key: 'grace',
+      room_id: 'lobby',
+      accent_color: '#000000',
+      source: { owner: 'default', agent: 'assigned', room: 'assigned' },
+      updated_at: null,
+      open_work_orders: 0,
+      unowned_work_orders: 0,
+      next_event: null,
+    }];
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({ agents: [GRACE_AGENT] }));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+
+    render(<CampusView setView={vi.fn()} defaultRoom="lobby" />);
+
+    await waitFor(() => expect(screen.getByTestId('campus-room-panel')).toBeInTheDocument());
+    expect(screen.getByTestId('campus-agent-seat-grace')).toBeInTheDocument();
+  });
+
+  it('shows the desk count badge, summing Decision Queue counts for the room\'s area\'s queueKinds', async () => {
+    // deskCount = areasInRoom.reduce over each area's queueKinds, looking
+    // each kind up in useDecisionQueue().counts.by_kind (CampusView.tsx
+    // ~line 174-177). Needs both a non-empty areasInRoom (via the
+    // ministry-area override above) and a non-zero by_kind count for a
+    // kind actually listed in the area's queueKinds — the current fixture
+    // areas are otherwise empty, so this path is never hit without both.
+    ministryAreasState.areas = [{
+      key: 'test-area',
+      name: 'Test Area',
+      purpose: 'Exercises the desk-count badge.',
+      ministry: 'test',
+      confidential: false,
+      surfaces: [{ label: 'Test Surface', view: 'dashboard', hash: '#/dashboard', primary: true }],
+      queueKinds: ['agent_finding'],
+      owner: null,
+      default_role_key: 'ministry_leader',
+      agent_key: 'grace',
+      room_id: 'lobby',
+      accent_color: '#000000',
+      source: { owner: 'default', agent: 'assigned', room: 'assigned' },
+      updated_at: null,
+      open_work_orders: 0,
+      unowned_work_orders: 0,
+      next_event: null,
+    }];
+    decisionQueueState.counts = { total: 3, critical: 0, by_kind: { agent_finding: 3 } };
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({ agents: [GRACE_AGENT] }));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+
+    render(<CampusView setView={vi.fn()} defaultRoom="lobby" />);
+
+    await waitFor(() => expect(screen.getByTestId('campus-room-panel')).toBeInTheDocument());
+    expect(screen.getByText('3 waiting')).toBeInTheDocument();
   });
 
   it('hides "Run now" for a caller without agents.manage', async () => {

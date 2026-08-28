@@ -282,6 +282,78 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     await waitFor(() => expect(screen.queryByLabelText('Instructions')).not.toBeInTheDocument());
   });
 
+  it('shows the server error and keeps the settings panel open when a save fails', async () => {
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+        }));
+      }
+      if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
+        return Promise.resolve(jsonResponse({
+          configs: [{ agent_key: 'grace', instructions: null, tasks: [], updated_at: null }],
+        }));
+      }
+      if (url.includes('/api/workos/agent-settings') && opts?.method === 'PUT') {
+        return Promise.resolve(jsonResponse({ error: 'write_failed' }, 500));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('agent-settings-toggle-grace'));
+    await screen.findByLabelText('Instructions');
+
+    fireEvent.click(screen.getByText('Save instructions & tasks'));
+
+    await waitFor(() => expect(screen.getByTestId('agent-save-error-grace')).toBeInTheDocument());
+    expect(screen.getByTestId('agent-save-error-grace')).toHaveTextContent(
+      'Could not save changes. Try again in a moment.',
+    );
+    // The panel stays open and the button resets rather than losing the draft.
+    expect(screen.getByLabelText('Instructions')).toBeInTheDocument();
+    expect(screen.getByText('Save instructions & tasks')).not.toBeDisabled();
+  });
+
+  it('clears a prior save error on the next attempt', async () => {
+    let putAttempt = 0;
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/agents/workos-registry')) {
+        return Promise.resolve(jsonResponse({
+          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+        }));
+      }
+      if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
+        return Promise.resolve(jsonResponse({
+          configs: [{ agent_key: 'grace', instructions: null, tasks: [], updated_at: null }],
+        }));
+      }
+      if (url.includes('/api/workos/agent-settings') && opts?.method === 'PUT') {
+        putAttempt += 1;
+        if (putAttempt === 1) return Promise.resolve(jsonResponse({ error: 'write_failed' }, 500));
+        const body = JSON.parse(opts.body as string);
+        return Promise.resolve(jsonResponse({ config: { agent_key: body.agent_key, instructions: body.instructions, tasks: body.tasks, updated_at: '2026-08-25T00:00:00.000Z' } }));
+      }
+      return Promise.resolve(jsonResponse({ permissions: ['agents.manage'] }));
+    });
+
+    render(<AgentCommandCentre />);
+    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('agent-settings-toggle-grace'));
+    await screen.findByLabelText('Instructions');
+
+    fireEvent.click(screen.getByText('Save instructions & tasks'));
+    await waitFor(() => expect(screen.getByTestId('agent-save-error-grace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Save instructions & tasks'));
+    await waitFor(() => expect(screen.queryByTestId('agent-save-error-grace')).not.toBeInTheDocument());
+    // Second attempt succeeded, so the panel closes.
+    await waitFor(() => expect(screen.queryByLabelText('Instructions')).not.toBeInTheDocument());
+  });
+
   it('removes a task from the draft before saving', async () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
