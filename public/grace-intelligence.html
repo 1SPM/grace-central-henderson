@@ -112,6 +112,13 @@
     .lede p {
       font-size: 16.5px; color: rgba(255,255,255,.74); line-height: 1.65;
     }
+    .lede p em { font-style: normal; color: var(--gold); font-weight: 600 }
+    .lede-note {
+      margin-top: 10px;
+      font-size: 12.5px !important; line-height: 1.55 !important;
+      color: rgba(255,255,255,.5) !important;
+    }
+    .lede-note b { color: rgba(255,255,255,.72); font-weight: 600 }
 
     /* ---- composition ---- */
     .stage-wrap { position: relative; z-index: 2; margin: 8px 0 8px }
@@ -161,6 +168,11 @@
       text-transform: uppercase; color: rgba(168,218,240,.55); margin-bottom: 1px;
     }
     .node[data-status="later"] .node-kicker { color: var(--gold-soft) }
+    .node-label small {
+      display: block; margin-top: 2px;
+      font-size: 9.5px; font-weight: 500; letter-spacing: .01em;
+      color: rgba(255,255,255,.5); line-height: 1.25;
+    }
 
     .core {
       position: absolute;
@@ -283,6 +295,35 @@
       margin: 6px 0 28px; position: relative; z-index: 2;
       font-size: 12px; color: rgba(255,255,255,.55);
     }
+    /* The fourth capability. Sees/understands/acts is a capability claim;
+       "shows its work" is the trust claim, and it is the one most fully
+       built (append-only audit_logs / platform_events / security_events). */
+    .fourth-verb {
+      position: relative; z-index: 2;
+      max-width: 760px; margin: 0 auto 14px;
+      padding: 16px 22px;
+      border-radius: 16px;
+      border: 1px solid rgba(196,165,116,.34);
+      background: linear-gradient(180deg, rgba(196,165,116,.07), rgba(12,25,41,.4));
+      text-align: center;
+    }
+    .fourth-verb b {
+      display: block;
+      font-family: var(--display); font-size: 19px; font-weight: 480;
+      color: var(--gold); margin-bottom: 5px;
+    }
+    .fourth-verb span {
+      display: block; font-size: 13.5px; line-height: 1.55;
+      color: rgba(255,255,255,.7);
+    }
+    .boundary-note {
+      position: relative; z-index: 2;
+      max-width: 760px; margin: 0 auto 30px;
+      text-align: center; font-size: 12.5px; line-height: 1.55;
+      color: rgba(255,255,255,.5);
+    }
+    .boundary-note a { color: rgba(168,218,240,.85); text-decoration: underline; text-underline-offset: 2px }
+    .boundary-note a:hover { color: var(--sky-light) }
     .flow-key i {
       display: inline-block; width: 28px; height: 1px; margin: 0 8px 3px 0;
       vertical-align: middle; background: rgba(168,218,240,.45);
@@ -307,9 +348,31 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
+    .iface-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-bottom: 8px;
+    }
     .iface-tag {
       font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-      color: var(--sky-light); margin-bottom: 8px;
+      color: var(--sky-light);
+    }
+    /* The perimeter carried Live/Partial/Later from the start; the three
+       interfaces did not. They are the load-bearing claim on this page, so
+       they are the last place a status should be implied rather than stated. */
+    .iface-status {
+      flex-shrink: 0;
+      padding: 3px 9px; border-radius: 999px;
+      font-size: 9.5px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase;
+      border: 1px solid rgba(168,218,240,.3);
+      color: rgba(168,218,240,.9);
+      background: rgba(12,25,41,.5);
+    }
+    .iface[data-status="live"] .iface-status {
+      border-color: rgba(68,158,202,.55); color: var(--sky-light);
+      box-shadow: 0 0 10px rgba(68,158,202,.18);
+    }
+    .iface[data-status="partial"] .iface-status {
+      border-color: rgba(143,180,212,.4); color: rgba(199,220,235,.85);
     }
     .iface h2 {
       font-family: var(--display); font-size: 22px; font-weight: 480;
@@ -366,6 +429,12 @@
       .nav-links a:not(.nav-cta) { display: none }
       .stage { display: none }
       .flow-key { display: none }
+      /* The mobile petal list already carries the fourth verb, so this
+         panel would restate it verbatim. The boundary note is NOT
+         duplicated anywhere and is the most important sentence on the
+         page for a church board, so it stays. */
+      .fourth-verb { display: none }
+      .boundary-note { margin-top: 4px }
       .mobile-petals { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 8px 0 22px }
       .mobile-core {
         display: flex; flex-direction: column; align-items: center; gap: 16px;
@@ -429,7 +498,8 @@
       <header class="lede">
         <span class="eyebrow">Architecture north star</span>
         <h1>GRACE — the intelligence layer that <em>understands, oversees, and orchestrates</em> the church’s digital operations.</h1>
-        <p>GRACE is the trained operational intelligence of the church. The CRM, portal, wallets, agents, APIs, digital twin, and infrastructure are the environment it coordinates — not the product center.</p>
+        <p>GRACE is the <em>governed</em> operational intelligence of the church. The CRM, portal, wallets, agents, APIs, virtual campus, and infrastructure are the environment it coordinates — not the product center.</p>
+        <p class="lede-note">Every capability below is marked <b>Live</b>, <b>Partial</b>, or <b>Later</b>. We would rather tell you exactly where the product is than let a diagram imply more than it should.</p>
       </header>
 
       <div class="mobile-core">
@@ -442,7 +512,7 @@
       </div>
 
       <div class="stage-wrap">
-        <div class="stage" role="img" aria-label="GRACE at the center of a governed church operating environment. Three interfaces sit in the foreground: CRM Workspace, Digital Twin, and Ask GRACE. Outer systems are connected capabilities, some live and some on the roadmap.">
+        <div class="stage" role="img" aria-label="GRACE at the center of a governed church operating environment. Three interfaces sit in the foreground: CRM Workspace, Virtual Campus, and Ask GRACE. Outer systems are connected capabilities, some live and some on the roadmap.">
           <svg class="rig" viewBox="0 0 1100 680" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <marker id="inArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -489,7 +559,7 @@
             </div>
             <div class="petal petal-acts">
               <b>GRACE acts</b>
-              <span>Approved tools, with human accountability.</span>
+              <span>Approved tools. Consequential actions stop at a named human.</span>
             </div>
           </div>
 
@@ -503,22 +573,22 @@
             <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Live</span>Communications</span></div>
           </div>
           <div class="node n3" data-status="partial">
-            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Partial</span>Specialized agents</span></div>
+            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Partial</span>Specialized agents<small>5 of 16 registry agents built, read-only. A separate nightly lane creates tasks and logs contacts.</small></span></div>
           </div>
           <div class="node n4" data-status="partial">
             <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Partial</span>Hierarchy, programs, workflows</span></div>
           </div>
           <div class="node n5" data-status="partial">
-            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Partial</span>Digital twin / virtual campus</span></div>
+            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Partial</span>Virtual campus<small>Spatial lens over the CRM</small></span></div>
           </div>
           <div class="node n6" data-status="live">
             <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Live</span>Databases and APIs</span></div>
           </div>
           <div class="node n7" data-status="live">
-            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Live</span>Local and cloud infrastructure</span></div>
+            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Live</span>Cloud infrastructure</span></div>
           </div>
           <div class="node n8" data-status="later">
-            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Later</span>Impact Card and wallet</span></div>
+            <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Later</span>Impact Card and wallet<small>Demo / simulated — requires a card agreement</small></span></div>
           </div>
           <div class="node n9" data-status="later">
             <div class="node-chip"><span class="node-dot"></span><span class="node-label"><span class="node-kicker">Later</span>Future physical systems</span></div>
@@ -531,28 +601,51 @@
         <span><i class="out"></i>Approved actions out through governance</span>
       </p>
 
+      <div class="fourth-verb">
+        <b>And GRACE shows its work.</b>
+        <span>Answers are scoped to the asker’s authority, consequential actions stop at a named human who is recorded by name, and the audit trail they land on is append-only at the database — updates and deletes are blocked by trigger, not by convention. Permissions, approval, and audit are not wrapped around the product; they are the product.</span>
+      </div>
+
+      <p class="boundary-note">
+        GRACE does measure engagement — attendance, giving, serving — and will tell staff who has gone quiet.
+        That is the job. What it will never do is infer or score anyone’s <em>spiritual</em> state, diagnose,
+        or claim pastoral authority. Crisis language is caught by a deterministic check that runs before any model
+        call, never by a model’s judgement. The line, and what sits on each side of it, is written down in
+        <a href="https://github.com/1SPM/grace-central-henderson/blob/main/docs/AI_BOUNDARIES.md">our AI boundaries policy</a>.
+      </p>
+
       <div class="mobile-petals">
         <div class="m-petal"><b>GRACE sees</b><span>Data, member activity, workflows, authorized financial metrics, programs, communications, permissions, infrastructure, and system state.</span></div>
         <div class="m-petal"><b>GRACE understands</b><span>This church’s structure, people, policies, objectives, institutional knowledge, permissions, and operating context.</span></div>
-        <div class="m-petal"><b>GRACE acts</b><span>Through approved tools and specialized agents, with visible human approval and accountability wherever required.</span></div>
+        <div class="m-petal"><b>GRACE acts</b><span>Through approved tools and specialized agents. Consequential actions stop at a named human. Exceptions a church switches on deliberately: scheduled emails (birthday and anniversary greetings, giving thank-yous, a five-message new-member series) and a nightly pass that creates staff follow-up tasks.</span></div>
+        <div class="m-petal"><b>GRACE shows its work</b><span>Answers scoped to the asker’s authority, the deciding human recorded by name, and an audit trail that is append-only at the database — updates and deletes blocked by trigger.</span></div>
       </div>
 
       <p class="triad-kicker">Three interfaces · one intelligence</p>
       <div class="triad">
-        <article class="iface">
-          <div class="iface-tag">Interface 01</div>
+        <article class="iface" data-status="live">
+          <div class="iface-head">
+            <div class="iface-tag">Interface 01</div>
+            <span class="iface-status">Live</span>
+          </div>
           <h2>CRM Workspace</h2>
           <p>The conventional staff and operational surface. People, care, Sunday prep, giving, and workflows — <em>the same intelligence</em>, in the language of the church office.</p>
         </article>
-        <article class="iface">
-          <div class="iface-tag">Interface 02</div>
-          <h2>Digital Twin</h2>
-          <p>A visual spatial view of the church’s operating environment. Rooms and ministries as a lens over live state — <em>not a second system of record</em>.</p>
+        <article class="iface" data-status="partial">
+          <div class="iface-head">
+            <div class="iface-tag">Interface 02</div>
+            <span class="iface-status">Partial</span>
+          </div>
+          <h2>Virtual Campus</h2>
+          <p>A visual spatial view of the operating environment. Rooms and ministries as a lens over live state — <em>not a second system of record</em>. Today it navigates and shows real agent status; it carries no facilities or occupancy data.</p>
         </article>
-        <article class="iface">
-          <div class="iface-tag">Interface 03</div>
+        <article class="iface" data-status="partial">
+          <div class="iface-head">
+            <div class="iface-tag">Interface 03</div>
+            <span class="iface-status">Partial</span>
+          </div>
           <h2>Ask GRACE</h2>
-          <p>Natural-language command and orchestration. GRACE proposes; permissions, approval, and audit decide what actually runs.</p>
+          <p>Natural language over the same state. For staff, it reads only what your role can already see and drafts changes you press <em>Execute</em> on. Members get a separate assistant, scoped to their own record. Routing proposals through the Decision Queue and Approval Centre is the next slice — <em>not current behaviour</em>.</p>
         </article>
       </div>
       <p class="same-line">Not three products. <strong>Three ways people meet the same operational intelligence.</strong></p>
@@ -562,12 +655,12 @@
         <div class="m-node">CRM and staff workspace <span class="m-status">Live</span></div>
         <div class="m-node">Member portal and accounts <span class="m-status">Partial</span></div>
         <div class="m-node">Communications <span class="m-status">Live</span></div>
-        <div class="m-node">Specialized agents <span class="m-status">Partial</span></div>
+        <div class="m-node">Specialized agents — 5 of 16 built, read-only scanners <span class="m-status">Partial</span></div>
         <div class="m-node">Hierarchy, programs, workflows <span class="m-status">Partial</span></div>
-        <div class="m-node">Digital twin / virtual campus <span class="m-status">Partial</span></div>
+        <div class="m-node">Virtual campus — spatial lens over the CRM <span class="m-status">Partial</span></div>
         <div class="m-node">Databases and APIs <span class="m-status">Live</span></div>
-        <div class="m-node">Local and cloud infrastructure <span class="m-status">Live</span></div>
-        <div class="m-node">Impact Card and wallet <span class="m-status">Later</span></div>
+        <div class="m-node">Cloud infrastructure <span class="m-status">Live</span></div>
+        <div class="m-node">Impact Card and wallet — demo / simulated, requires a card agreement <span class="m-status">Later</span></div>
         <div class="m-node">Future physical systems <span class="m-status">Later</span></div>
       </div>
 
@@ -578,8 +671,11 @@
       </div>
       <p class="note">
         Outer systems are GRACE’s governed operational environment — not a claim that every capability is already live.
-        Impact Card remains demo/simulated for beta. Physical systems and VR campus stay on the long-term path.
-        Human approval stays in the loop wherever action requires it.
+        Impact Card remains demo/simulated for beta and needs a card agreement before it is real. Physical systems and
+        self-hosted infrastructure stay on the long-term path. Consequential actions stop at a named human. The exceptions are disclosed rather than buried: a church can switch
+        on scheduled emails (birthday and anniversary greetings, giving thank-yous, and a five-message new-member
+        welcome series), and a nightly pass creates staff follow-up tasks. Outbound SMS to members is always
+        human-initiated; the one automated SMS is a crisis alert to on-call staff, which is deliberate.
       </p>
     </div>
   </main>
