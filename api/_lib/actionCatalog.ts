@@ -36,8 +36,13 @@
 /** Verb grouping — also how the chat prompt and a palette present actions. */
 export type ActionGroup = 'create' | 'update' | 'delete' | 'send';
 
-/** Which door exposes this action. An action may be reachable from several. */
-export type ActionSurface = 'chat' | 'agent';
+/**
+ * Which door exposes this action. An action may be reachable from several —
+ * 'palette' was added when the command palette became the third caller, and
+ * is deliberately a SUPERSET relationship rather than a separate list: an
+ * action reachable two ways is one action, not two.
+ */
+export type ActionSurface = 'chat' | 'agent' | 'palette';
 
 /**
  * How much a mistake costs.
@@ -86,24 +91,24 @@ const GROUP_ORDER: readonly ActionGroup[] = ['create', 'update', 'delete', 'send
 export const ACTION_CATALOG: readonly ActionDefinition[] = [
   // ---- create ----------------------------------------------------------
   {
-    type: 'add_person', label: 'Add person', group: 'create', surfaces: ['chat'],
+    type: 'add_person', label: 'Add person', group: 'create', surfaces: ['chat', 'palette'],
     consequence: 'low', permission: 'people.manage',
     requiresApproval: false, audited: false, reversible: true,
     promptExample: '{"type":"add_person","firstName":"X","lastName":"Y","status":"visitor"}',
   },
   {
-    type: 'add_task', label: 'Add task', group: 'create', surfaces: ['chat'],
+    type: 'add_task', label: 'Add task', group: 'create', surfaces: ['chat', 'palette'],
     consequence: 'low', permission: 'tasks.manage',
     requiresApproval: false, audited: false, reversible: true,
     promptExample: '{"type":"add_task","title":"X","personName":"optional","priority":"medium","dueDate":"YYYY-MM-DD"}',
   },
   {
-    type: 'add_prayer', label: 'Add prayer request', group: 'create', surfaces: ['chat'],
+    type: 'add_prayer', label: 'Add prayer request', group: 'create', surfaces: ['chat', 'palette'],
     consequence: 'low', permission: 'care.manage',    requiresApproval: false, audited: false, reversible: true,
     promptExample: '{"type":"add_prayer","content":"X","personName":"existing"}',
   },
   {
-    type: 'add_note', label: 'Add note', group: 'create', surfaces: ['chat'],
+    type: 'add_note', label: 'Add note', group: 'create', surfaces: ['chat', 'palette'],
     consequence: 'low', permission: 'people.manage',
     requiresApproval: false, audited: false, reversible: true,
     promptExample: '{"type":"add_note","content":"X","personName":"existing"}',
