@@ -55,23 +55,19 @@ const UNION_MEMBERS: Record<ActionType, true> = {
 };
 
 /**
- * Consequential actions that do NOT write an audit row today.
+ * Consequential actions that do NOT write an audit row today: none.
  *
- * This is a RECORD OF A GAP, not an approved design. Every entry is an
- * action a staff member can trigger through Ask GRACE that deletes church
- * data or sends a message out of the building, leaving nothing in
- * audit_logs — while the agent door cannot assign a Work Order owner
- * without a pastor's decision and an audit row in the same transaction.
+ * It started as five: every Ask GRACE action that deleted church data or
+ * sent a message out of the building did so with nothing in audit_logs,
+ * while the agent door could not assign a Work Order owner without a
+ * pastor's decision and an audit row in the same transaction.
  *
- * The list is pinned so it cannot grow by accident: a NEW destructive or
- * external action that skips auditing fails this test, and closing the gap
- * means deleting entries here deliberately. Tracked as TD-061.
+ * The list is now empty, and the test below is what keeps it that way: a
+ * NEW destructive or external action that skips auditing fails CI. Leaving
+ * the mechanism in place after closing the gap is the point — the gap was
+ * never a decision anyone made, it was one that accumulated. TD-061.
  */
-const KNOWN_UNAUDITED_CONSEQUENTIAL = [
-  'delete_prayer',
-  'delete_task',
-  'send_email',
-].sort();
+const KNOWN_UNAUDITED_CONSEQUENTIAL: string[] = [];
 
 const sorted = (xs: string[]) => [...xs].sort();
 

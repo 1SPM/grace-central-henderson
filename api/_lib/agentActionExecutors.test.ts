@@ -23,6 +23,7 @@
  * falling back to the non-atomic path it was built to replace.
  */
 import { describe, it, expect, vi } from 'vitest';
+import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
 import {
   executeAgentAction,
   isExecutableActionType,
@@ -182,5 +183,62 @@ describe('assign_work_order_owner — atomic execution', () => {
       if (result.ok) return;
       expect(result.reason).toBe('atomic_execution_malformed_result');
     }
+  });
+});
+
+describe('delete_person — the gated, irreversible one', () => {
+  // Added when the mock fixture gained .delete(). Until then this executor
+  // shipped (PR #171) with no unit coverage at all — the approvals plumbing
+  // around it was tested, the thing it actually does was not.
+  const CHURCH = FIXTURE_CHURCH_ID;
+  const PERSON = { id: '00000000-0000-4000-8000-0000000000d1', first_name: 'Dana', last_name: 'Reyes', email: 'd@x.test', phone: null, status: 'member' };
+
+  const personAction = (over: Partial<AgentActionRow> = {}): AgentActionRow => ({
+    id: 'act-1', church_id: CHURCH, action_type: 'delete_person',
+    target_entity_type: 'person', target_entity_id: PERSON.id, payload: {}, ...over,
+  });
+
+  function db(opts: { person?: unknown; deleted?: unknown } = {}) {
+    return createMockSupabase({
+      tables: {
+        people: (op: string) => (op === 'select'
+          ? { data: 'person' in opts ? opts.person : PERSON }
+          : { data: 'deleted' in opts ? opts.deleted : { id: PERSON.id } }),
+      },
+    });
+  }
+
+  it('snapshots the person BEFORE deleting them', async () => {
+    // Once the row is gone there is nothing left to describe. Without this,
+    // the audit row would record that someone was deleted while being
+    // unable to say who — which is not an audit trail, it is a counter.
+    const supabase = db();
+    const result = await executeAgentAction(supabase as never, personAction(), context());
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.mutation?.before).toMatchObject({ first_name: 'Dana', last_name: 'Reyes' });
+    expect(result.mutation?.after).toBeNull();
+    expect(supabase.__calls.filter(c => c.table === 'people' && c.op === 'delete')).toHaveLength(1);
+  });
+
+  it('refuses when the person is already gone, and deletes nothing', async () => {
+    const supabase = db({ person: null });
+    const result = await executeAgentAction(supabase as never, personAction(), context());
+
+    expect(result).toEqual({ ok: false, reason: 'person_not_found' });
+    expect(supabase.__calls.filter(c => c.table === 'people' && c.op === 'delete')).toHaveLength(0);
+  });
+
+  it('does not claim success when the delete matched no rows', async () => {
+    const supabase = db({ deleted: null });
+    const result = await executeAgentAction(supabase as never, personAction(), context());
+    expect(result).toEqual({ ok: false, reason: 'person_already_removed' });
+  });
+
+  it('refuses a proposal with no target rather than guessing', async () => {
+    const supabase = db();
+    const result = await executeAgentAction(supabase as never, personAction({ target_entity_id: null }), context());
+    expect(result).toEqual({ ok: false, reason: 'no_target_person' });
   });
 });

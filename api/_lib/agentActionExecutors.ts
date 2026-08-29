@@ -330,10 +330,101 @@ const sendSmsAction: Executor = async (supabase, action) => {
   };
 };
 
+
+/**
+ * Delete a task.
+ *
+ * Runs immediately — no approval — but server-side, so it produces an
+ * audit_logs row. That is the whole difference from before: the deletion
+ * itself is unchanged, what changed is that it is now recorded somewhere
+ * that cannot be edited afterwards.
+ */
+const deleteTask: Executor = async (supabase, action) => {
+  const taskId = action.target_entity_id;
+  if (!taskId) return { ok: false, reason: 'no_target_task' };
+
+  // Snapshot first: after the delete there is nothing left to describe, and
+  // an audit row saying only "a task was deleted" answers no useful question.
+  const { data: task, error: readErr } = await supabase
+    .from('tasks')
+    .select('id, title, person_id, due_date, priority, completed')
+    .eq('id', taskId)
+    .eq('church_id', action.church_id)
+    .maybeSingle();
+  if (readErr) return { ok: false, reason: 'task_read_failed' };
+  if (!task) return { ok: false, reason: 'task_not_found' };
+
+  const { data: deleted, error: delErr } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskId)
+    .eq('church_id', action.church_id)
+    .select('id')
+    .maybeSingle();
+  if (delErr) return { ok: false, reason: 'task_delete_failed' };
+  if (!deleted) return { ok: false, reason: 'task_already_removed' };
+
+  return {
+    ok: true,
+    detail: `Deleted task: ${task.title}`,
+    mutation: {
+      entityType: 'task',
+      entityId: taskId,
+      before: task as Record<string, unknown>,
+      after: null,
+    },
+  };
+};
+
+/**
+ * Delete a prayer request.
+ *
+ * Immediate, like deleteTask, and audited for the same reason. The snapshot
+ * deliberately includes `content` and `is_private`: a deleted prayer request
+ * is pastoral material, and "something was removed from someone's care
+ * record" is not an account of what happened.
+ */
+const deletePrayer: Executor = async (supabase, action) => {
+  const prayerId = action.target_entity_id;
+  if (!prayerId) return { ok: false, reason: 'no_target_prayer' };
+
+  const { data: prayer, error: readErr } = await supabase
+    .from('prayer_requests')
+    .select('id, person_id, content, is_private, is_answered')
+    .eq('id', prayerId)
+    .eq('church_id', action.church_id)
+    .maybeSingle();
+  if (readErr) return { ok: false, reason: 'prayer_read_failed' };
+  if (!prayer) return { ok: false, reason: 'prayer_not_found' };
+
+  const { data: deleted, error: delErr } = await supabase
+    .from('prayer_requests')
+    .delete()
+    .eq('id', prayerId)
+    .eq('church_id', action.church_id)
+    .select('id')
+    .maybeSingle();
+  if (delErr) return { ok: false, reason: 'prayer_delete_failed' };
+  if (!deleted) return { ok: false, reason: 'prayer_already_removed' };
+
+  return {
+    ok: true,
+    detail: 'Deleted a prayer request',
+    mutation: {
+      entityType: 'prayer_request',
+      entityId: prayerId,
+      before: prayer as Record<string, unknown>,
+      after: null,
+    },
+  };
+};
+
 const ACTION_EXECUTORS: Record<string, Executor> = {
   assign_work_order_owner: assignWorkOrderOwner,
   delete_person: deletePerson,
   send_sms: sendSmsAction,
+  delete_task: deleteTask,
+  delete_prayer: deletePrayer,
 };
 
 /** True when an action_type can actually be carried out if approved. */

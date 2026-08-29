@@ -62,6 +62,52 @@ async function logGraceAction(
 
 
 /**
+ * Run an immediate (ungated) action on the server so it produces an audit row.
+ *
+ * The mutation deliberately does NOT happen in the browser any more. A client
+ * that deletes a row itself and then reports it for auditing is not audited:
+ * the report can be skipped, altered, or lost when the tab closes, and
+ * nothing downstream can tell the difference.
+ *
+ * Returns false on any failure so the chat card does not show as executed.
+ */
+async function executeServerSide(args: {
+  actionType: string;
+  targetEntityId: string;
+  pushAssistantMessage: (content: string) => void;
+}): Promise<boolean> {
+  try {
+    const res = await fetch('/api/actions/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: args.actionType, target_entity_id: args.targetEntityId }),
+    });
+    const data = await res.json().catch(() => ({} as { reason?: string; error?: string; audit_incomplete?: boolean }));
+    if (!res.ok) {
+      args.pushAssistantMessage(
+        res.status === 403
+          ? "You don't have permission to do that."
+          : `That didn't go through: ${data.reason ?? data.error ?? `HTTP ${res.status}`}`
+      );
+      return false;
+    }
+    if (data.audit_incomplete) {
+      // The change happened but the trail did not. The person who asked for
+      // it is the one who needs to know, immediately.
+      args.pushAssistantMessage(
+        'Done — but its audit entry could not be written. It has been flagged; tell an administrator.'
+      );
+    }
+    return true;
+  } catch (err) {
+    args.pushAssistantMessage(
+      `I couldn't reach the server: ${err instanceof Error ? err.message : 'unknown error'}`
+    );
+    return false;
+  }
+}
+
+/**
  * Send a gated action to the approvals queue instead of doing it.
  *
  * The chat door has no authority of its own here: the server re-checks the
@@ -230,14 +276,22 @@ const handlers: Record<ActionType, ActionHandler> = {
     return true;
   },
 
+  // Still one click — but the delete now happens server-side so it lands in
+  // audit_logs. The Interaction note below is kept: it is what a pastor
+  // actually reads on the person, and the audit row answers a different
+  // question (who did this, when) for a different reader.
   delete_task: async ({ action, tasks, handlers, pushAssistantMessage }) => {
-    if (!handlers.onDeleteTask) return false;
     if (!action.taskId) {
       pushAssistantMessage(`I couldn't find a task matching "${action.taskTitle ?? ''}".`);
       return false;
     }
     const task = tasks.find(t => t.id === action.taskId);
-    await handlers.onDeleteTask(action.taskId);
+    const ran = await executeServerSide({
+      actionType: 'delete_task',
+      targetEntityId: action.taskId,
+      pushAssistantMessage,
+    });
+    if (!ran) return false;
     await logGraceAction(handlers, task?.personId, 'note', `Grace deleted task: ${task?.title ?? ''}`);
     return true;
   },
@@ -264,13 +318,17 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   delete_prayer: async ({ action, prayers, handlers, pushAssistantMessage }) => {
-    if (!handlers.onDeletePrayer) return false;
     if (!action.prayerId) {
       pushAssistantMessage('I couldn\'t find an active prayer for that person.');
       return false;
     }
     const prayer = prayers.find(p => p.id === action.prayerId);
-    await handlers.onDeletePrayer(action.prayerId);
+    const ran = await executeServerSide({
+      actionType: 'delete_prayer',
+      targetEntityId: action.prayerId,
+      pushAssistantMessage,
+    });
+    if (!ran) return false;
     await logGraceAction(handlers, prayer?.personId, 'note', 'Grace deleted a prayer request');
     return true;
   },

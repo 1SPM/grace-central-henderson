@@ -160,7 +160,7 @@ export const ACTION_CATALOG: readonly ActionDefinition[] = [
   {
     type: 'delete_task', label: 'Delete task', group: 'delete', surfaces: ['chat'],
     consequence: 'destructive', permission: 'tasks.manage',
-    requiresApproval: false, audited: false, reversible: false,
+    requiresApproval: false, audited: true, reversible: false,
     promptExample: '{"type":"delete_task","taskTitle":"existing"}',
   },
   {
@@ -176,7 +176,7 @@ export const ACTION_CATALOG: readonly ActionDefinition[] = [
   {
     type: 'delete_prayer', label: 'Delete prayer request', group: 'delete', surfaces: ['chat'],
     consequence: 'destructive', permission: 'care.manage',
-    requiresApproval: false, audited: false, reversible: false,
+    requiresApproval: false, audited: true, reversible: false,
     promptExample: '{"type":"delete_prayer","personName":"existing"}',
   },
 
@@ -184,7 +184,7 @@ export const ACTION_CATALOG: readonly ActionDefinition[] = [
   {
     type: 'send_email', label: 'Send email', group: 'send', surfaces: ['chat'],
     consequence: 'external', permission: 'communications.send',
-    requiresApproval: false, audited: false, reversible: false,
+    requiresApproval: false, audited: true, reversible: false,
     promptExample: '{"type":"send_email","personName":"existing","subject":"X","body":"plain-text body, can be multi-line"}',
   },
   {
