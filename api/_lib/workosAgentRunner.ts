@@ -17,7 +17,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AGENT_REGISTRY } from './agentRegistry.js';
-import { actionRowForFinding, getWorkflow } from './agentWorkflows.js';
+import { actionRowForFinding, getWorkflow, type AgentFinding } from './agentWorkflows.js';
+import { isExecutableActionType } from './agentActionExecutors.js';
 import { persistWorkflowFindings } from './agentWorkflowFindings.js';
 import { emitPlatformEvent } from './platformEvents.js';
 
@@ -28,6 +29,118 @@ export interface WorkosAgentRunOutcome {
   summary?: string;
   findingCount?: number;
   error?: string;
+}
+
+/**
+ * Write a run's findings: observations as executed rows, proposals as
+ * 'proposed' rows carried to a human by a linked approvals row.
+ *
+ * This lives here, not in the HTTP endpoint, because BOTH lanes must do it
+ * identically. When it lived only in the endpoint, the cron lane silently
+ * had a different (and by then stale) rule — a divergence that only shows
+ * up at 06:30 when nobody is watching.
+ */
+async function writeFindings(
+  supabase: SupabaseClient,
+  churchId: string,
+  agentKey: string,
+  runId: string,
+  findings: AgentFinding[],
+  now: Date,
+): Promise<void> {
+  // Fail closed on a permanent condition: an approval-requiring finding
+  // whose action_type has no executor registered in
+  // agentActionExecutors.ts. Approving such a proposal would silently do
+  // nothing, which is worse in a pastor's Decision Queue than refusing at
+  // the source.
+  const unexecutable = findings
+    .filter(f => f.requires_approval && !isExecutableActionType(f.action_type))
+    .map(f => f.action_type);
+  if (unexecutable.length > 0) {
+    throw new Error(
+      `workflow '${agentKey}' proposed action type(s) with no executor: ${[...new Set(unexecutable)].join(', ')} — register one in agentActionExecutors.ts before proposing it`,
+    );
+  }
+
+  // Observations are written in one shot. Proposals are written one at a
+  // time, approval FIRST, so a partial failure can never leave a
+  // 'proposed' action with no approvals row — an orphan invisible to the
+  // Decision Queue is the stranded-proposal problem this pipeline exists
+  // to remove.
+  const observations = findings.filter(f => !f.requires_approval);
+  const proposals = findings.filter(f => f.requires_approval);
+
+  if (observations.length > 0) {
+    const { error } = await supabase.from('agent_actions').insert(
+      observations.map(f => ({
+        agent_run_id: runId,
+        church_id: churchId,
+        ...actionRowForFinding(f, now),
+      })),
+    );
+    if (error) throw new Error(`agent_actions insert failed: ${error.message}`);
+  }
+
+  for (const finding of proposals) {
+    const row = actionRowForFinding(finding, now);
+    const { data: approval, error: approvalErr } = await supabase
+      .from('approvals')
+      .insert({
+        church_id: churchId,
+        entity_type: 'agent_action',
+        entity_id: null, // set once the action row exists
+        proposed_action: describeProposedAction(finding),
+        requested_by_agent: agentKey,
+        affected_resources: finding.target_entity_id
+          ? [{ type: finding.target_entity_type, id: finding.target_entity_id }]
+          : [],
+        supporting_evidence: [{ agent_run_id: runId, payload: finding.payload }],
+        risk_level: 'low',
+      })
+      .select()
+      .single();
+    if (approvalErr || !approval) {
+      throw new Error(`approval creation failed: ${approvalErr?.message ?? 'no row'}`);
+    }
+
+    const { data: action, error: actionErr } = await supabase
+      .from('agent_actions')
+      .insert({ agent_run_id: runId, church_id: churchId, ...row, approval_id: approval.id })
+      .select('id')
+      .single();
+    if (actionErr || !action) {
+      throw new Error(`agent_actions insert failed: ${actionErr?.message ?? 'no row'}`);
+    }
+
+    const { error: linkErr } = await supabase
+      .from('approvals')
+      .update({ entity_id: action.id })
+      .eq('id', approval.id)
+      .eq('church_id', churchId);
+    if (linkErr) throw new Error(`approval link failed for action ${action.id}: ${linkErr.message}`);
+  }
+}
+
+/**
+ * One human-readable line for the Approval Centre and Decision Queue. A
+ * pastor should be able to decide without opening the payload — an
+ * approval that reads "assign_work_order_owner" is not a decision anyone
+ * can make responsibly.
+ */
+export function describeProposedAction(finding: {
+  action_type: string;
+  target_entity_type: string | null;
+  payload: Record<string, unknown>;
+}): string {
+  const p = finding.payload ?? {};
+  if (finding.action_type === 'assign_work_order_owner') {
+    const title = typeof p.work_order_title === 'string' ? p.work_order_title : 'an unowned Work Order';
+    const owner = typeof p.owner_name === 'string' ? p.owner_name : 'the ministry owner';
+    const ministry = typeof p.ministry === 'string' ? ` (${p.ministry})` : '';
+    return `Assign ${owner} as owner of "${title}"${ministry}`;
+  }
+  const target = finding.target_entity_type ? ` on ${finding.target_entity_type}` : '';
+  return `${finding.action_type.replace(/_/g, ' ')}${target}`;
 }
 
 /** Every registry agent that has a runnable workflow. */
@@ -76,33 +189,7 @@ export async function runWorkosAgentForChurch(
     const result = await workflow(supabase, churchId);
 
     if (result.findings.length > 0) {
-      // Same fail-closed posture as api/agents/_workos-run.ts: nothing
-      // consumes 'proposed' agent_actions rows yet, so a workflow that
-      // emits an approval-requiring finding would strand it in a table
-      // nobody reads while the run reported success. Scheduling a scan
-      // must not quietly widen what an agent is allowed to do.
-      //
-      // NOTE: PR #163 builds that consumer. When it lands, this guard
-      // narrows to "no registered executor" and the HTTP endpoint should
-      // be pointed at this runner so the two lanes share one path — see
-      // the PR description. Until then the check is duplicated in both,
-      // deliberately, rather than leaving the cron lane unguarded.
-      const needingApproval = result.findings.filter(f => f.requires_approval);
-      if (needingApproval.length > 0) {
-        throw new Error(
-          `workflow '${agentKey}' emitted ${needingApproval.length} requires_approval finding(s) but no approvals consumer exists for agent_actions`,
-        );
-      }
-
-      const { error: actionsErr } = await supabase.from('agent_actions').insert(
-        result.findings.map(f => ({
-          agent_run_id: run.id,
-          church_id: churchId,
-          ...actionRowForFinding(f, now),
-        })),
-      );
-      if (actionsErr) throw new Error(`agent_actions insert failed: ${actionsErr.message}`);
-
+      await writeFindings(supabase, churchId, agentKey, run.id, result.findings, now);
       await persistWorkflowFindings(supabase, churchId, agentKey, result.findings);
     }
 
