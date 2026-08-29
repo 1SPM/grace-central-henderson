@@ -41,8 +41,24 @@ export interface AgentActionRow {
   payload: Record<string, unknown>;
 }
 
+/**
+ * What the executor changed, so the caller can write a normal audit_logs
+ * row against the mutated entity — not just against the approval.
+ *
+ * Without this, an agent-driven assignment would be the only Work Order
+ * write in the product with no Work Order audit entry: reconstructing
+ * "what did the agent change" would mean chaining approvals -> platform
+ * events -> agent_actions.payload, and only if you knew the chain existed.
+ */
+export interface ExecutorMutation {
+  entityType: string;
+  entityId: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+}
+
 export type ExecutorResult =
-  | { ok: true; detail: string }
+  | { ok: true; detail: string; mutation?: ExecutorMutation }
   | { ok: false; reason: string };
 
 type Executor = (supabase: SupabaseClient, action: AgentActionRow) => Promise<ExecutorResult>;
@@ -92,15 +108,31 @@ const assignWorkOrderOwner: Executor = async (supabase, action) => {
   if (!owner) return { ok: false, reason: 'owner_not_in_church' };
   if (owner.account_status !== 'active') return { ok: false, reason: 'owner_not_active' };
 
-  const { error: updateErr } = await supabase
+  // `.select()` so a lost race is distinguishable from a successful write:
+  // a zero-row update returns no data, and supabase-js reports no error for
+  // it. Without this an executor would report success for a write that
+  // changed nothing.
+  const { data: updated, error: updateErr } = await supabase
     .from('work_orders')
     .update({ owner_user_id: proposedOwnerId })
     .eq('id', workOrderId)
     .eq('church_id', action.church_id)
-    .is('owner_user_id', null); // atomic: lose the race rather than overwrite
+    .is('owner_user_id', null) // atomic: lose the race rather than overwrite
+    .select('id, owner_user_id')
+    .maybeSingle();
   if (updateErr) return { ok: false, reason: 'work_order_update_failed' };
+  if (!updated) return { ok: false, reason: 'already_owned' };
 
-  return { ok: true, detail: `Assigned owner ${proposedOwnerId} to work order ${workOrderId}` };
+  return {
+    ok: true,
+    detail: `Assigned owner ${proposedOwnerId} to work order ${workOrderId}`,
+    mutation: {
+      entityType: 'work_order',
+      entityId: workOrderId,
+      before: { owner_user_id: null },
+      after: { owner_user_id: proposedOwnerId },
+    },
+  };
 };
 
 const ACTION_EXECUTORS: Record<string, Executor> = {

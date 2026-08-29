@@ -97,14 +97,12 @@ function supabaseFor(opts: {
       work_orders: (op: string) => {
         if (op === 'select') {
           return {
-            data: {
-              id: WORK_ORDER_ID,
-              owner_user_id: opts.workOrderOwner ?? null,
-              status: 'planning',
-            },
+            data: { id: WORK_ORDER_ID, owner_user_id: opts.workOrderOwner ?? null, status: 'planning' },
           };
         }
-        return { data: null };
+        // The executor re-reads the row it wrote so a lost race (zero rows
+        // updated) is distinguishable from a successful write.
+        return { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } };
       },
       platform_events: () => ({ data: { id: 'evt-1' } }),
       audit_logs: () => ({ data: null }),
@@ -180,6 +178,41 @@ describe('PATCH /api/approvals — agent action execution', () => {
     const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string; reason?: string } };
     expect(body.agent_action?.status).toBe('failed');
     expect(body.agent_action?.reason).toBe('already_owned');
+  });
+
+  it('audits the Work Order change itself, not only the approval decision', async () => {
+    // Without this, an agent-driven assignment would be the only Work Order
+    // write in the product with no Work Order audit row — reconstructing
+    // what the agent changed would mean chaining approvals -> platform
+    // events -> agent_actions.payload, and only if you knew to.
+    const supabase = supabaseFor();
+    await decide(supabase, 'approve');
+
+    const audits = supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
+    const entityTypes = audits.map(a => (a.payload as Record<string, unknown>).entity_type);
+    expect(entityTypes).toContain('approval');
+    expect(entityTypes, 'the mutated entity must have its own audit row').toContain('work_order');
+
+    const woAudit = audits.find(a => (a.payload as Record<string, unknown>).entity_type === 'work_order')!
+      .payload as Record<string, unknown>;
+    expect(woAudit.entity_id).toBe(WORK_ORDER_ID);
+    expect(woAudit.after).toEqual({ owner_user_id: OWNER_ID });
+    expect(woAudit.before).toEqual({ owner_user_id: null });
+    // The deciding human is the actor; the agent that proposed it is named
+    // in the reason, so both halves of "who did this" survive.
+    expect(String(woAudit.reason)).toContain('verity');
+    // One correlation id ties decision, event, and mutation together.
+    const approvalAudit = audits.find(a => (a.payload as Record<string, unknown>).entity_type === 'approval')!
+      .payload as Record<string, unknown>;
+    expect(woAudit.correlation_id).toBe(approvalAudit.correlation_id);
+  });
+
+  it('writes no mutation audit when the execution refused', async () => {
+    const supabase = supabaseFor({ workOrderOwner: 'someone-else' });
+    await decide(supabase, 'approve');
+
+    const audits = supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
+    expect(audits.map(a => (a.payload as Record<string, unknown>).entity_type)).not.toContain('work_order');
   });
 
   it('an already-decided approval 409s and cannot execute a second time', async () => {
