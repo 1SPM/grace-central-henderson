@@ -69,10 +69,8 @@ const UNION_MEMBERS: Record<ActionType, true> = {
  */
 const KNOWN_UNAUDITED_CONSEQUENTIAL = [
   'delete_prayer',
-  'delete_person',
   'delete_task',
   'send_email',
-  'send_sms',
 ].sort();
 
 const sorted = (xs: string[]) => [...xs].sort();
@@ -158,14 +156,30 @@ describe('catalog <-> chat prompt', () => {
 });
 
 describe('governance', () => {
-  it('requires an approval lifecycle wherever an action claims to need one', () => {
-    // requiresApproval is only meaningful on a surface that has approvals.
-    // Chat has none today, so a chat action claiming it would be a promise
-    // nothing keeps.
-    const chatClaimingApproval = actionsForSurface('chat')
-      .filter(a => a.requiresApproval).map(a => a.type);
-    expect(chatClaimingApproval,
-      'chat has no approval lifecycle — see TD-061').toEqual([]);
+  it('backs every action that requires approval with an executor', () => {
+    // This test used to assert the opposite: that no chat action could claim
+    // requiresApproval, because chat had no approval lifecycle to keep the
+    // promise. Building that lifecycle (api/actions/propose + migration 071)
+    // is what inverted it — which is exactly why it was written as a pin
+    // rather than left implicit.
+    //
+    // The invariant now is that a gated action must be RUNNABLE once
+    // approved. Without an executor, the proposal would reach a pastor,
+    // they would approve it, and nothing would happen.
+    const executors = new Set(listExecutableActionTypes());
+    const unrunnable = ACTION_CATALOG
+      .filter(a => a.requiresApproval && !executors.has(a.type))
+      .map(a => a.type);
+    expect(unrunnable,
+      'approving this would silently do nothing').toEqual([]);
+  });
+
+  it('audits everything it gates', () => {
+    // A human decision that leaves no record is the worst of both worlds:
+    // the friction of an approval with none of the accountability.
+    const gatedButUnaudited = ACTION_CATALOG
+      .filter(a => a.requiresApproval && !a.audited).map(a => a.type);
+    expect(gatedButUnaudited).toEqual([]);
   });
 
   it('pins exactly which consequential actions are still unaudited', () => {

@@ -34,6 +34,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'ai/video/start': () => import('./ai/video/_start.js'),
   'ai/video/status': () => import('./ai/video/_status.js'),
   'approvals': () => import('./approvals/_index.js'),
+  'actions/propose': () => import('./actions/_propose.js'),
   'audit/timeline': () => import('./audit/_timeline.js'),
   'automation/status': () => import('./automation/_status.js'),
   'health': () => import('./_health.js'),

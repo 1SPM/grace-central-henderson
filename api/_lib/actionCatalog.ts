@@ -164,9 +164,13 @@ export const ACTION_CATALOG: readonly ActionDefinition[] = [
     promptExample: '{"type":"delete_task","taskTitle":"existing"}',
   },
   {
+    // GATED (TD-061). Deleting a person removes their whole pastoral
+    // history, and was the one chat action that left no trace anywhere —
+    // not even the Interaction note the others write, because the person
+    // the note would attach to is the one being deleted.
     type: 'delete_person', label: 'Delete person', group: 'delete', surfaces: ['chat'],
     consequence: 'destructive', permission: 'people.manage',
-    requiresApproval: false, audited: false, reversible: false,
+    requiresApproval: true, audited: true, reversible: false,
     promptExample: '{"type":"delete_person","personName":"existing"}',
   },
   {
@@ -184,9 +188,11 @@ export const ACTION_CATALOG: readonly ActionDefinition[] = [
     promptExample: '{"type":"send_email","personName":"existing","subject":"X","body":"plain-text body, can be multi-line"}',
   },
   {
+    // GATED (TD-061). A text cannot be recalled at any price, and a wrong
+    // one to a grieving family is not an "oops".
     type: 'send_sms', label: 'Send SMS', group: 'send', surfaces: ['chat'],
     consequence: 'external', permission: 'communications.send',
-    requiresApproval: false, audited: false, reversible: false,
+    requiresApproval: true, audited: true, reversible: false,
     promptExample: '{"type":"send_sms","personName":"existing","message":"short text under 1000 chars"}',
   },
 ];
