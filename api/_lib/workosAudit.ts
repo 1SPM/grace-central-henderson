@@ -20,15 +20,22 @@
  *      still durably recorded somewhere. If the whole database is down,
  *      nothing helps; if only this write failed, the fact survives.
  *
- * What this is NOT: atomic. True transactional auditing would require the
+ * What this is NOT: atomic. True transactional auditing requires the
  * mutation and its audit row to commit together, which PostgREST cannot
  * express from the client — every supabase-js call is its own
- * transaction. That needs the mutation moved into a Postgres function
- * (this codebase has no `.rpc()` usage today) or a trigger with actor
- * context threaded through session settings. Until then the guarantee is
- * "a missing audit row is loud and recorded", not "a mutation cannot
- * commit without one". Use recordAuditOrThrow where the weaker guarantee
- * is not good enough and the caller can still safely fail.
+ * transaction. So for THIS writer the guarantee is "a missing audit row
+ * is loud and recorded", not "a mutation cannot commit without one". Use
+ * recordAuditOrThrow where that is not good enough and the caller can
+ * still safely fail.
+ *
+ * The stronger guarantee is available, but only by moving the mutation
+ * itself into Postgres. Migration 070 does that for the one path where an
+ * agent changes church data: the work_orders update, the agent_actions
+ * status write and the audit_logs insert happen in one transaction, so a
+ * failed audit rolls the change back. See
+ * api/_lib/agentActionExecutors.ts. Every future executor that mutates
+ * church data should follow it rather than this file; the rest of the
+ * ~35 call sites remain on the weaker guarantee until converted.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';

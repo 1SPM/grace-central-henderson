@@ -1,25 +1,47 @@
 /**
- * Executors are the only place an agent proposal becomes a real change,
- * so their preconditions are the safety property worth testing hardest.
- * The interesting cases are all "the world moved between propose and
- * approve" — an approval can sit for days.
+ * Executors are the only place an agent proposal becomes a real change.
+ *
+ * WHAT MOVED, AND WHY THESE TESTS LOOK DIFFERENT NOW
+ *
+ * The preconditions this file used to test ("a human assigned an owner
+ * meanwhile", "the Work Order was cancelled", "the proposed owner left")
+ * are no longer evaluated in TypeScript. Migration 070 moved them into
+ * `agent_execute_assign_work_order_owner`, under row locks, in the same
+ * transaction as the writes they guard — which is the only way the
+ * mutation and its audit row can commit or fail together.
+ *
+ * They are exercised for real in tools/agent-atomic-audit-smoke.test.ts
+ * against a live database. That file SKIPS without staging credentials,
+ * so on a default CI run those preconditions are covered by nothing here.
+ * Saying so plainly is better than a test that mocks a Postgres function
+ * and proves only that the mock returns what it was told to.
+ *
+ * What IS testable here, and is: the call contract. That the parameters
+ * reach the function, that a refusal never reads as success, that an
+ * unrecognised result fails closed, and — the deploy-ordering trap — that
+ * code running ahead of migration 070 fails loudly instead of quietly
+ * falling back to the non-atomic path it was built to replace.
  */
-import { describe, it, expect } from 'vitest';
-import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
+import { describe, it, expect, vi } from 'vitest';
 import {
   executeAgentAction,
   isExecutableActionType,
   listExecutableActionTypes,
+  ASSIGN_OWNER_RPC,
   type AgentActionRow,
+  type ExecutorContext,
 } from './agentActionExecutors.js';
 import { FIXTURE_CHURCH_ID } from '../../tests/fixtures/shared-platform.js';
 
 const OWNER_ID = '00000000-0000-4000-8000-000000000001';
 const WORK_ORDER_ID = '00000000-0000-4000-8000-000000000002';
+const ACTION_ID = '00000000-0000-4000-8000-000000000003';
+const APPROVAL_ID = '00000000-0000-4000-8000-000000000004';
+const CORRELATION_ID = '00000000-0000-4000-8000-000000000005';
 
 function action(overrides: Partial<AgentActionRow> = {}): AgentActionRow {
   return {
-    id: 'action-1',
+    id: ACTION_ID,
     church_id: FIXTURE_CHURCH_ID,
     action_type: 'assign_work_order_owner',
     target_entity_type: 'work_order',
@@ -27,6 +49,27 @@ function action(overrides: Partial<AgentActionRow> = {}): AgentActionRow {
     payload: { owner_user_id: OWNER_ID },
     ...overrides,
   };
+}
+
+function context(overrides: Partial<ExecutorContext> = {}): ExecutorContext {
+  return {
+    approvalId: APPROVAL_ID,
+    actorUserId: 'decider-user-id',
+    actorClerkId: 'user_clerk_decider',
+    correlationId: CORRELATION_ID,
+    reason: 'Agent proposal approved (proposed by verity)',
+    sourceApp: 'admin_dashboard',
+    route: '/api/approvals',
+    method: 'PATCH',
+    executedAt: '2026-08-28T12:00:00.000Z',
+    ...overrides,
+  };
+}
+
+/** Minimal client exposing only what an atomic executor uses. */
+function rpcClient(response: { data?: unknown; error?: { code?: string; message?: string } | null }) {
+  const rpc = vi.fn().mockResolvedValue({ data: response.data ?? null, error: response.error ?? null });
+  return { client: { rpc } as never, rpc };
 }
 
 describe('executor registry', () => {
@@ -37,45 +80,56 @@ describe('executor registry', () => {
   });
 
   it('never throws for an unknown action type — it reports a reason', async () => {
-    const supabase = createMockSupabase({ tables: {} });
-    const result = await executeAgentAction(supabase as never, action({ action_type: 'not_a_thing' }));
+    const { client } = rpcClient({ data: null });
+    const result = await executeAgentAction(client, action({ action_type: 'not_a_thing' }), context());
     expect(result).toEqual({ ok: false, reason: 'no_executor_for_not_a_thing' });
   });
 });
 
-describe('assign_work_order_owner', () => {
-  it('assigns the proposed owner when the Work Order is still unowned and the owner is active', async () => {
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: (op: string) => (op === 'select'
-          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
-          : { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } }),
-        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
-      },
+describe('assign_work_order_owner — atomic execution', () => {
+  it('passes the decider, the approval link and the correlation id to the function', async () => {
+    // The audit row is written INSIDE the function, so anything missing
+    // from these parameters is missing from the audit trail — there is no
+    // second chance to add it afterwards.
+    const { client, rpc } = rpcClient({
+      data: { ok: true, detail: 'Assigned', work_order_id: WORK_ORDER_ID, owner_user_id: OWNER_ID },
     });
 
-    const result = await executeAgentAction(supabase as never, action());
+    await executeAgentAction(client, action(), context());
 
-    expect(result.ok).toBe(true);
-    const updates = supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update');
-    expect(updates).toHaveLength(1);
-    expect((updates[0].payload as Record<string, unknown>).owner_user_id).toBe(OWNER_ID);
+    expect(rpc).toHaveBeenCalledWith(ASSIGN_OWNER_RPC, expect.objectContaining({
+      p_action_id: ACTION_ID,
+      p_church_id: FIXTURE_CHURCH_ID,
+      p_approval_id: APPROVAL_ID,
+      p_actor_user_id: 'decider-user-id',
+      p_actor_clerk_id: 'user_clerk_decider',
+      p_correlation_id: CORRELATION_ID,
+      p_reason: 'Agent proposal approved (proposed by verity)',
+      p_source_app: 'admin_dashboard',
+      p_route: '/api/approvals',
+      p_method: 'PATCH',
+      p_executed_at: '2026-08-28T12:00:00.000Z',
+    }));
   });
 
-  it('reports the mutation so the caller can audit the entity that changed', async () => {
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: (op: string) => (op === 'select'
-          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
-          : { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } }),
-        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
+  it('reports the mutation and claims the status and audit writes as already done', async () => {
+    const { client } = rpcClient({
+      data: {
+        ok: true,
+        detail: `Assigned owner ${OWNER_ID} to work order ${WORK_ORDER_ID}`,
+        work_order_id: WORK_ORDER_ID,
+        owner_user_id: OWNER_ID,
       },
     });
 
-    const result = await executeAgentAction(supabase as never, action());
+    const result = await executeAgentAction(client, action(), context());
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    // committedStatusAndAudit is what stops the caller writing a second
+    // audit row for the same change. If it ever stops being set on the
+    // success path, every atomic execution gets double-recorded.
+    expect(result.committedStatusAndAudit).toBe(true);
     expect(result.mutation).toEqual({
       entityType: 'work_order',
       entityId: WORK_ORDER_ID,
@@ -84,87 +138,49 @@ describe('assign_work_order_owner', () => {
     });
   });
 
-  it('does not report success when the write changed nothing (lost race)', async () => {
-    // The precondition read passes, but the conditional update matches zero
-    // rows because another decision got there first. supabase-js reports no
-    // error for a zero-row update, so without re-reading the written row
-    // the executor would claim it assigned an owner it did not assign.
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: (op: string) => (op === 'select'
-          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
-          : { data: null }),
-        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
-      },
-    });
-
-    const result = await executeAgentAction(supabase as never, action());
-
-    expect(result).toEqual({ ok: false, reason: 'already_owned' });
-  });
-
-  it('refuses when a human assigned an owner between proposal and approval', async () => {
-    // The deliberate human choice wins. An approved-but-stale proposal
-    // must never overwrite it.
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: 'someone-else', status: 'planning' } }),
-        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
-      },
-    });
-
-    const result = await executeAgentAction(supabase as never, action());
-
-    expect(result).toEqual({ ok: false, reason: 'already_owned' });
-    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
-  });
-
-  it('refuses when the Work Order was completed or cancelled meanwhile', async () => {
-    for (const status of ['completed', 'cancelled']) {
-      const supabase = createMockSupabase({
-        tables: {
-          work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: null, status } }),
-          users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
-        },
-      });
-      const result = await executeAgentAction(supabase as never, action());
-      expect(result).toEqual({ ok: false, reason: `work_order_${status}` });
+  it('surfaces a precondition refusal with the reason the function gave', async () => {
+    for (const reason of ['already_owned', 'owner_not_active', 'work_order_cancelled', 'no_proposed_owner']) {
+      const { client } = rpcClient({ data: { ok: false, reason } });
+      const result = await executeAgentAction(client, action(), context());
+      expect(result).toEqual({ ok: false, reason });
     }
   });
 
-  it('refuses when the proposed owner is no longer active', async () => {
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }),
-        users: () => ({ data: { id: OWNER_ID, account_status: 'suspended' } }),
-      },
-    });
-
-    const result = await executeAgentAction(supabase as never, action());
-
-    expect(result).toEqual({ ok: false, reason: 'owner_not_active' });
-    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
+  it('fails loudly when migration 070 has not been applied', async () => {
+    // The deploy-ordering trap. The tempting alternative — fall back to
+    // the old read-then-write path — would silently give up atomicity on
+    // exactly the deploy where nobody is watching for it.
+    for (const error of [
+      { code: 'PGRST202', message: 'Could not find the function public.agent_execute_assign_work_order_owner' },
+      { code: '42883', message: 'function does not exist' },
+      { code: undefined, message: 'Could not find the function in the schema cache' },
+    ]) {
+      const { client } = rpcClient({ error });
+      const result = await executeAgentAction(client, action(), context());
+      expect(result).toEqual({ ok: false, reason: 'atomic_executor_unavailable' });
+    }
   });
 
-  it('refuses when the proposed owner does not belong to this church', async () => {
-    const supabase = createMockSupabase({
-      tables: {
-        work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }),
-        users: () => ({ data: null }),
-      },
+  it('treats a raised exception as a failure, because it rolled everything back', async () => {
+    // This is the case the whole design exists for: the audit insert
+    // failed and took the owner assignment down with it. Nothing changed,
+    // so the only correct outcome is a failure the decider can see.
+    const { client } = rpcClient({
+      error: { code: '23514', message: 'new row for relation "audit_logs" violates check constraint' },
     });
 
-    const result = await executeAgentAction(supabase as never, action());
+    const result = await executeAgentAction(client, action(), context());
 
-    expect(result).toEqual({ ok: false, reason: 'owner_not_in_church' });
+    expect(result).toEqual({ ok: false, reason: 'atomic_execution_failed' });
   });
 
-  it('refuses a malformed proposal rather than guessing', async () => {
-    const supabase = createMockSupabase({ tables: {} });
-
-    expect(await executeAgentAction(supabase as never, action({ payload: {} })))
-      .toEqual({ ok: false, reason: 'no_proposed_owner' });
-    expect(await executeAgentAction(supabase as never, action({ target_entity_id: null })))
-      .toEqual({ ok: false, reason: 'no_target_work_order' });
+  it('fails closed on a result it cannot read rather than assuming success', async () => {
+    for (const data of [null, {}, { ok: 'yes' }, { ok: true }, { ok: true, work_order_id: WORK_ORDER_ID }]) {
+      const { client } = rpcClient({ data });
+      const result = await executeAgentAction(client, action(), context());
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.reason).toBe('atomic_execution_malformed_result');
+    }
   });
 });

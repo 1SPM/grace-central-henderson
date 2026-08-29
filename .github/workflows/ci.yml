@@ -92,6 +92,7 @@ jobs:
           tools/entitlement-billing-rls-smoke.test.ts
           tools/care-prayer-visibility-smoke.test.ts
           tools/append-only-cascade-smoke.test.ts
+          tools/agent-atomic-audit-smoke.test.ts
         env:
           SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
           SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}

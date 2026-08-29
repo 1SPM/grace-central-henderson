@@ -28,6 +28,26 @@
  * - **Non-throwing.** Return a reason; the caller records 'failed' and
  *   surfaces it. An executor that throws would leave the approval decided
  *   and the action in limbo.
+ *
+ * ATOMICITY (migration 070)
+ *
+ * An executor that mutates church data must commit that mutation, the
+ * `agent_actions` status write, and the mutation's `audit_logs` row in ONE
+ * transaction. supabase-js cannot express that — every call is its own
+ * transaction — so such an executor is a thin wrapper over a Postgres
+ * function and the preconditions above live in SQL, not here.
+ *
+ * That is a deliberate trade. Before 070 the four writes were four
+ * commits, and an interruption between the first and the last left church
+ * data altered by an agent with no audit row proving what changed. Now it
+ * cannot: if the audit insert fails, the mutation is rolled back with it.
+ *
+ * The cost is that the preconditions are no longer unit-testable against
+ * the mock fixture — they are exercised by tools/agent-atomic-audit-
+ * smoke.test.ts against a real database, which SKIPS without staging
+ * credentials. What is tested here is the call contract: that the reasons
+ * come back intact, that a missing function fails loudly rather than
+ * silently downgrading, and that a refusal is never reported as success.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -58,10 +78,76 @@ export interface ExecutorMutation {
 }
 
 export type ExecutorResult =
-  | { ok: true; detail: string; mutation?: ExecutorMutation }
+  | {
+      ok: true;
+      detail: string;
+      mutation?: ExecutorMutation;
+      /**
+       * True when the executor already committed the `agent_actions` status
+       * write AND the mutation's audit row inside its own transaction.
+       *
+       * The caller MUST NOT repeat either write when this is set. Doing so
+       * would produce a duplicate audit row for one change, and would fire
+       * a status update that the executor's transaction already made.
+       */
+      committedStatusAndAudit?: boolean;
+    }
   | { ok: false; reason: string };
 
-type Executor = (supabase: SupabaseClient, action: AgentActionRow) => Promise<ExecutorResult>;
+/**
+ * Everything an atomic executor needs to write the audit row itself.
+ *
+ * The deciding human is the actor — the agent proposed, a person decided —
+ * so this carries the decider's identity, not the agent's. `reason` is
+ * where the agent is named.
+ */
+export interface ExecutorContext {
+  /** The approval being decided. The action must point back at it. */
+  approvalId: string;
+  actorUserId: string | null;
+  actorClerkId?: string | null;
+  /** Ties this audit row to the decision's audit row and platform event. */
+  correlationId?: string | null;
+  reason: string;
+  sourceApp: string;
+  route: string;
+  method: string;
+  /** The decision timestamp, so executed_at matches decided_at exactly. */
+  executedAt: string;
+}
+
+type Executor = (
+  supabase: SupabaseClient,
+  action: AgentActionRow,
+  ctx: ExecutorContext,
+) => Promise<ExecutorResult>;
+
+/** The Postgres function backing assign_work_order_owner (migration 070). */
+export const ASSIGN_OWNER_RPC = 'agent_execute_assign_work_order_owner';
+
+/** What migration 070's function returns. Shape-checked, never trusted. */
+interface AtomicExecutionResult {
+  ok?: unknown;
+  reason?: unknown;
+  detail?: unknown;
+  work_order_id?: unknown;
+  owner_user_id?: unknown;
+}
+
+/**
+ * PostgREST cannot find the function (schema cache miss / not defined).
+ *
+ * This is the deploy-ordering failure: code shipped ahead of migration
+ * 070. It gets its own reason because the remedy is completely different
+ * from a genuine execution failure — and because the alternative, falling
+ * back to the old non-atomic path, would silently give up the guarantee
+ * this whole change exists to provide.
+ */
+function isMissingFunction(error: { code?: string; message?: string }): boolean {
+  return error.code === 'PGRST202' // PostgREST: no matching function in schema cache
+    || error.code === '42883'      // Postgres: undefined_function
+    || Boolean(error.message && /could not find the function/i.test(error.message));
+}
 
 /**
  * Assign the accountable human for a Work Order's ministry as its owner.
@@ -71,67 +157,71 @@ type Executor = (supabase: SupabaseClient, action: AgentActionRow) => Promise<Ex
  * hand in the Work Order detail view, which is part of why it is a
  * reasonable first executor: the worst case is a wrong-but-visible owner,
  * not lost or corrupted data.
+ *
+ * The preconditions (still unowned, not completed/cancelled, owner still
+ * an active user of this church) are enforced inside the function, under
+ * row locks, alongside the writes they guard — which is stronger than
+ * checking them here and hoping nothing moves in between.
  */
-const assignWorkOrderOwner: Executor = async (supabase, action) => {
-  const workOrderId = action.target_entity_id;
-  const proposedOwnerId = typeof action.payload.owner_user_id === 'string'
-    ? action.payload.owner_user_id
-    : null;
+const assignWorkOrderOwner: Executor = async (supabase, action, ctx) => {
+  const { data, error } = await supabase.rpc(ASSIGN_OWNER_RPC, {
+    p_action_id: action.id,
+    p_church_id: action.church_id,
+    p_approval_id: ctx.approvalId,
+    p_actor_user_id: ctx.actorUserId,
+    p_actor_clerk_id: ctx.actorClerkId ?? null,
+    p_correlation_id: ctx.correlationId ?? null,
+    p_reason: ctx.reason,
+    p_source_app: ctx.sourceApp,
+    p_route: ctx.route,
+    p_method: ctx.method,
+    p_executed_at: ctx.executedAt,
+  });
 
-  if (!workOrderId) return { ok: false, reason: 'no_target_work_order' };
-  if (!proposedOwnerId) return { ok: false, reason: 'no_proposed_owner' };
-
-  // Re-check the precondition: only fill a still-empty owner. If a human
-  // assigned someone between proposal and approval, theirs wins — an
-  // approved-but-stale proposal must not overwrite a deliberate choice.
-  const { data: workOrder, error: readErr } = await supabase
-    .from('work_orders')
-    .select('id, owner_user_id, status')
-    .eq('id', workOrderId)
-    .eq('church_id', action.church_id)
-    .maybeSingle();
-  if (readErr) return { ok: false, reason: 'work_order_read_failed' };
-  if (!workOrder) return { ok: false, reason: 'work_order_not_found' };
-  if (workOrder.owner_user_id) return { ok: false, reason: 'already_owned' };
-  if (['completed', 'cancelled'].includes(workOrder.status)) {
-    return { ok: false, reason: `work_order_${workOrder.status}` };
+  if (error) {
+    if (isMissingFunction(error)) {
+      console.error('[agentActionExecutors] migration 070 not applied', { rpc: ASSIGN_OWNER_RPC });
+      return { ok: false, reason: 'atomic_executor_unavailable' };
+    }
+    // A raised exception rolled the transaction back: nothing was changed
+    // and nothing was audited. That includes the case this design exists
+    // for — the audit insert failing and taking the assignment with it.
+    console.error('[agentActionExecutors] atomic execution failed', {
+      rpc: ASSIGN_OWNER_RPC,
+      action_id: action.id,
+      code: error.code,
+      error: error.message,
+    });
+    return { ok: false, reason: 'atomic_execution_failed' };
   }
 
-  // Re-check the proposed owner is still an active user in this church.
-  const { data: owner, error: ownerErr } = await supabase
-    .from('users')
-    .select('id, account_status')
-    .eq('id', proposedOwnerId)
-    .eq('church_id', action.church_id)
-    .maybeSingle();
-  if (ownerErr) return { ok: false, reason: 'owner_read_failed' };
-  if (!owner) return { ok: false, reason: 'owner_not_in_church' };
-  if (owner.account_status !== 'active') return { ok: false, reason: 'owner_not_active' };
-
-  // `.select()` so a lost race is distinguishable from a successful write:
-  // a zero-row update returns no data, and supabase-js reports no error for
-  // it. Without this an executor would report success for a write that
-  // changed nothing.
-  const { data: updated, error: updateErr } = await supabase
-    .from('work_orders')
-    .update({ owner_user_id: proposedOwnerId })
-    .eq('id', workOrderId)
-    .eq('church_id', action.church_id)
-    .is('owner_user_id', null) // atomic: lose the race rather than overwrite
-    .select('id, owner_user_id')
-    .maybeSingle();
-  if (updateErr) return { ok: false, reason: 'work_order_update_failed' };
-  if (!updated) return { ok: false, reason: 'already_owned' };
+  const result = (data ?? null) as AtomicExecutionResult | null;
+  // Never infer success from a shape we do not recognise. An unreadable
+  // result must read as a failure, not as a silent assignment.
+  if (!result || typeof result.ok !== 'boolean') {
+    console.error('[agentActionExecutors] unrecognised RPC result', { rpc: ASSIGN_OWNER_RPC, data });
+    return { ok: false, reason: 'atomic_execution_malformed_result' };
+  }
+  if (!result.ok) {
+    return { ok: false, reason: typeof result.reason === 'string' ? result.reason : 'refused' };
+  }
+  if (typeof result.work_order_id !== 'string' || typeof result.owner_user_id !== 'string') {
+    console.error('[agentActionExecutors] RPC reported ok without ids', { rpc: ASSIGN_OWNER_RPC, data });
+    return { ok: false, reason: 'atomic_execution_malformed_result' };
+  }
 
   return {
     ok: true,
-    detail: `Assigned owner ${proposedOwnerId} to work order ${workOrderId}`,
+    detail: typeof result.detail === 'string'
+      ? result.detail
+      : `Assigned owner ${result.owner_user_id} to work order ${result.work_order_id}`,
     mutation: {
       entityType: 'work_order',
-      entityId: workOrderId,
+      entityId: result.work_order_id,
       before: { owner_user_id: null },
-      after: { owner_user_id: proposedOwnerId },
+      after: { owner_user_id: result.owner_user_id },
     },
+    committedStatusAndAudit: true,
   };
 };
 
@@ -156,11 +246,12 @@ export function listExecutableActionTypes(): string[] {
 export async function executeAgentAction(
   supabase: SupabaseClient,
   action: AgentActionRow,
+  ctx: ExecutorContext,
 ): Promise<ExecutorResult> {
   const executor = ACTION_EXECUTORS[action.action_type];
   if (!executor) return { ok: false, reason: `no_executor_for_${action.action_type}` };
   try {
-    return await executor(supabase, action);
+    return await executor(supabase, action, ctx);
   } catch (err) {
     return { ok: false, reason: err instanceof Error ? err.message : 'executor_threw' };
   }

@@ -12,6 +12,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { executeAgentAction } from '../_lib/agentActionExecutors.js';
@@ -23,6 +24,19 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const DECISIONS = ['approve', 'approve_with_changes', 'return_for_revision', 'reject', 'escalate'] as const;
+
+/**
+ * The `reason` recorded on an agent-driven change's audit row.
+ *
+ * The actor on that row is the human who decided, which is correct — but
+ * "who proposed this" is the other half of the story, and the only place
+ * it survives for a reader of the Work Order's own history.
+ */
+function agentAuditReason(requestedByAgent: unknown): string {
+  return typeof requestedByAgent === 'string' && requestedByAgent
+    ? `Agent proposal approved (proposed by ${requestedByAgent})`
+    : 'Agent proposal approved';
+}
 
 const DECIDE_SCHEMA = {
   decision: str({ required: true, pattern: new RegExp(`^(${DECISIONS.join('|')})$`) }),
@@ -177,7 +191,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 'failed' with a reason rather than swallowed — an approved action
     // that silently did nothing is the worst outcome for a decision-maker.
     let agentAction: { action_id: string; status: string; reason?: string } | null = null;
+    // Set only when this endpoint still OWES an audit row for the change.
+    // An atomic executor (migration 070) already wrote its own inside the
+    // mutation's transaction; writing a second here would double-record
+    // one change.
     let agentMutation: import('../_lib/agentActionExecutors.js').ExecutorMutation | null = null;
+
+    // Generated up front, not after the fact: an atomic executor writes its
+    // audit row before this handler emits the decision's platform event, and
+    // both must carry the same id or the chain cannot be queried as one.
+    const correlationId = randomUUID();
+
     if (approval.entity_type === 'agent_action' && approval.entity_id) {
       const favorable = ['approve', 'approve_with_changes'].includes(body.decision);
       const { data: action, error: actionReadErr } = await supabase
@@ -204,25 +228,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ? { action_id: action.id, status: 'failed', reason: 'reject_write_failed' }
             : { action_id: action.id, status: 'rejected' };
         } else {
-          const outcome = await executeAgentAction(supabase, action);
-          // Conditional on status='proposed' so a concurrent decision
-          // cannot double-write, and the error is checked: an approved
-          // action whose status write failed must not be reported as done.
-          const { data: written, error: writeErr } = await supabase
-            .from('agent_actions')
-            .update({
-              status: outcome.ok ? 'executed' : 'failed',
-              executed_at: outcome.ok ? decidedAt : null,
-            })
-            .eq('id', action.id)
-            .eq('church_id', actor.churchId)
-            .eq('status', 'proposed')
-            .select('id')
-            .maybeSingle();
-          if (writeErr || !written) {
-            agentAction = { action_id: action.id, status: 'failed', reason: 'status_write_failed' };
+          const outcome = await executeAgentAction(supabase, action, {
+            approvalId: approval.id,
+            actorUserId: actor.userId,
+            actorClerkId: actor.clerkUserId,
+            correlationId,
+            // The deciding human is the actor; this names who proposed it.
+            reason: agentAuditReason(approval.requested_by_agent),
+            sourceApp: 'admin_dashboard',
+            route: '/api/approvals',
+            method: 'PATCH',
+            executedAt: decidedAt,
+          });
+
+          if (outcome.ok && outcome.committedStatusAndAudit) {
+            // The mutation, the status write and the audit row committed
+            // together. Repeating either here would undo the point of it
+            // and double-record the change — so this branch writes nothing.
+            agentAction = { action_id: action.id, status: 'executed' };
           } else {
-            if (outcome.ok) {
+            // Conditional on status='proposed' so a concurrent decision
+            // cannot double-write, and the error is checked: an approved
+            // action whose status write failed must not be reported as done.
+            const { data: written, error: writeErr } = await supabase
+              .from('agent_actions')
+              .update({
+                status: outcome.ok ? 'executed' : 'failed',
+                executed_at: outcome.ok ? decidedAt : null,
+              })
+              .eq('id', action.id)
+              .eq('church_id', actor.churchId)
+              .eq('status', 'proposed')
+              .select('id')
+              .maybeSingle();
+            if (writeErr || !written) {
+              agentAction = { action_id: action.id, status: 'failed', reason: 'status_write_failed' };
+            } else if (outcome.ok) {
               agentAction = { action_id: action.id, status: 'executed' };
               agentMutation = outcome.mutation ?? null;
             } else {
@@ -245,13 +286,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .eq('status', 'awaiting_approval'); // no-op if it moved out-of-band
     }
 
-    const { correlationId } = await emitPlatformEvent(supabase, {
+    await emitPlatformEvent(supabase, {
       churchId: actor.churchId,
       eventType: 'approval.decided',
       sourceApp: 'admin_dashboard',
       actorUserId: actor.userId,
       subjectType: 'approval',
       subjectId: id,
+      correlationId,
       payload: { decision: body.decision, work_order_id: approval.work_order_id, agent_action: agentAction },
     });
     await recordAudit(supabase, {
@@ -275,8 +317,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // reader would have to know to look for. Same correlationId as the
     // decision and the platform event, so the whole chain is one query.
     //
-    // `reason` names the agent: the deciding human is the actor, but "who
-    // proposed this" is the other half of the story.
+    // Reached only for a NON-atomic executor. An atomic one (migration
+    // 070) wrote this row inside the mutation's own transaction, which is
+    // why `agentMutation` is left null in that path — the guarantee there
+    // is not "we tried to audit it" but "it could not have committed
+    // unaudited", and this fallback must not double-write on top of it.
     let auditIncomplete = false;
     if (agentMutation) {
       const mutationAudit = await recordAudit(supabase, {
@@ -288,7 +333,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         entityId: agentMutation.entityId,
         before: agentMutation.before,
         after: agentMutation.after,
-        reason: `Agent proposal approved${approval.requested_by_agent ? ` (proposed by ${approval.requested_by_agent})` : ''}`,
+        reason: agentAuditReason(approval.requested_by_agent),
         correlationId,
         route: '/api/approvals',
         method: 'PATCH',

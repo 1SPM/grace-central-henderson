@@ -414,6 +414,15 @@
 - **Re-entry trigger:** if event volume ever approaches the 2000-row page size in a single digest window, or if `created_at` precision/uniqueness ever changes.
 - **Resolution path:** page on `(created_at, id)` as a compound cursor instead of `created_at` alone.
 
+### TD-060 — Audit writes are non-transactional everywhere except the agent mutation path
+- **Severity:** P2
+- **Location:** `api/_lib/workosAudit.ts` and its ~34 remaining call sites.
+- **Problem:** every supabase-js call is its own transaction, so a mutation and its `audit_logs` row are two separate commits. An interruption between them leaves data changed with nothing recording what changed. Migration 010 makes a written audit row impossible to alter; it says nothing about a row that was never written.
+- **Partially resolved (migration 070).** The one path where an *agent* changes church data is now atomic: `agent_execute_assign_work_order_owner` performs the `work_orders` update, the `agent_actions` status write and the `audit_logs` insert in a single transaction, so a failed audit rolls the change back. Proven by `tools/agent-atomic-audit-smoke.test.ts` — which **skips** until the `SUPABASE_TEST_*` secrets are set, so on a default CI run nothing verifies it.
+- **Risk on the remaining sites:** unquantified but bounded — `recordAudit` returns its outcome and escalates a failure to `security_events` as `audit.write_failed`/`critical` (PR #167), so a missing row is loud rather than silent. Loud is not the same as impossible.
+- **Re-entry trigger:** SOC 2 evidence-gathering, or any second executor that mutates church data — those must follow migration 070's pattern rather than `recordAudit`.
+- **Resolution path:** convert mutation sites to Postgres functions that write their own audit row, highest-consequence first (role grants, giving/ledger writes, deletions). This is a per-site project, not a refactor: each function has to re-express its preconditions in SQL, and the unit tests that covered them in TypeScript go with them.
+
 ---
 
 ## Resolved

@@ -19,8 +19,21 @@ export interface MockResponse {
 
 export type TableHandler = (op: 'select' | 'insert' | 'update' | 'upsert', payload: unknown) => MockResponse;
 
+/**
+ * A Postgres function called via `.rpc()`.
+ *
+ * Worth being clear about what a mocked RPC can and cannot prove. It can
+ * show that the caller passed the right parameters and handled the result
+ * correctly. It CANNOT show anything about what the function does — the
+ * transaction, the row locks, the rollback-on-audit-failure in migration
+ * 070 are all on the other side of this boundary. Those need a real
+ * database (tools/agent-atomic-audit-smoke.test.ts).
+ */
+export type RpcHandler = (params: Record<string, unknown> | undefined) => MockResponse;
+
 export interface MockSupabaseOptions {
   tables: Record<string, TableHandler>;
+  rpcs?: Record<string, RpcHandler>;
 }
 
 export function createMockSupabase(options: MockSupabaseOptions) {
@@ -87,6 +100,19 @@ export function createMockSupabase(options: MockSupabaseOptions) {
     from: vi.fn((table: string) => {
       if (!tableEntries.has(table)) tableEntries.set(table, buildTableEntry(table));
       return tableEntries.get(table)!;
+    }),
+    // Recorded into the same `__calls` list as table operations, with the
+    // function name in `table`, so a test can assert on the ORDER of a
+    // mixed sequence — e.g. that no audit insert followed an RPC that
+    // already wrote one.
+    rpc: vi.fn(async (fn: string, params?: Record<string, unknown>) => {
+      calls.push({ table: fn, op: 'rpc', payload: params });
+      const handler = options.rpcs?.[fn];
+      // An unstubbed RPC resolves to nothing rather than throwing, matching
+      // how an unstubbed table behaves — the code under test decides
+      // whether that is a failure.
+      const result = handler ? handler(params) : { data: null, error: null };
+      return { data: result.data ?? null, error: result.error ?? null };
     }),
     __calls: calls,
   };
