@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import type { Person } from '../types';
 import { generateAIText, generateAIStreamed } from '../lib/services/ai';
+import { buildChatActionPrompt } from '../../api/_lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
@@ -165,27 +166,7 @@ Vary your closers. Most replies need no follow-up question at all.
 
 ACTIONS — when the user asks to add or update CRM records, respond with one <action> block per item. The user reviews and confirms before saving. Status enum: visitor|regular|member|leader|inactive. Priority: low|medium|high. Date: YYYY-MM-DD.
 
-Create:
-<action>{"type":"add_person","firstName":"X","lastName":"Y","status":"visitor"}</action>
-<action>{"type":"add_task","title":"X","personName":"optional","priority":"medium","dueDate":"YYYY-MM-DD"}</action>
-<action>{"type":"add_prayer","content":"X","personName":"existing"}</action>
-<action>{"type":"add_note","content":"X","personName":"existing"}</action>
-<action>{"type":"add_event","title":"X","startDate":"YYYY-MM-DD","startTime":"HH:MM","endTime":"HH:MM","location":"optional","category":"event"}</action>
-
-Update:
-<action>{"type":"mark_task_done","taskTitle":"X","personName":"optional"}</action>
-<action>{"type":"update_task","taskTitle":"existing","title":"new title","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}</action>
-<action>{"type":"update_person_status","personName":"existing","status":"member"}</action>
-<action>{"type":"mark_prayer_answered","personName":"existing","testimony":"optional"}</action>
-
-Delete (destructive — only when user clearly asks to remove/delete):
-<action>{"type":"delete_task","taskTitle":"existing"}</action>
-<action>{"type":"delete_person","personName":"existing"}</action>
-<action>{"type":"delete_prayer","personName":"existing"}</action>
-
-Send (only when user explicitly says email/text/send/message — NOT for "follow up", which is add_task):
-<action>{"type":"send_email","personName":"existing","subject":"X","body":"plain-text body, can be multi-line"}</action>
-<action>{"type":"send_sms","personName":"existing","message":"short text under 1000 chars"}</action>
+${buildChatActionPrompt()}
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
