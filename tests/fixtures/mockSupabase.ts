@@ -17,7 +17,7 @@ export interface MockResponse {
   error?: { message: string; code?: string } | null;
 }
 
-export type TableHandler = (op: 'select' | 'insert' | 'update' | 'upsert', payload: unknown) => MockResponse;
+export type TableHandler = (op: 'select' | 'insert' | 'update' | 'upsert' | 'delete', payload: unknown) => MockResponse;
 
 /**
  * A Postgres function called via `.rpc()`.
@@ -39,7 +39,7 @@ export interface MockSupabaseOptions {
 export function createMockSupabase(options: MockSupabaseOptions) {
   const calls: { table: string; op: string; payload: unknown }[] = [];
 
-  function makeBuilder(table: string, op: 'select' | 'insert' | 'update' | 'upsert', payload: unknown) {
+  function makeBuilder(table: string, op: 'select' | 'insert' | 'update' | 'upsert' | 'delete', payload: unknown) {
     const resolve = (): MockResponse => {
       const handler = options.tables[table];
       const result = handler ? handler(op, payload) : { data: null, error: null };
@@ -92,6 +92,14 @@ export function createMockSupabase(options: MockSupabaseOptions) {
       upsert: vi.fn((payload: unknown) => {
         calls.push({ table, op: 'upsert', payload });
         return makeBuilder(table, 'upsert', payload);
+      }),
+      // Added when the first server-side delete executor needed testing.
+      // Takes no payload — the row is identified by the filters, which this
+      // fixture treats as no-ops, so a test asserts on the CALL rather than
+      // on which row would have matched.
+      delete: vi.fn(() => {
+        calls.push({ table, op: 'delete', payload: null });
+        return makeBuilder(table, 'delete', null);
       }),
     };
   }

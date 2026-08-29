@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { replyToThread } from '../_lib/agentmail-send.js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { recordAudit } from '../_lib/workosAudit.js';
 
 const STAFF_ROLES = ['admin', 'pastor', 'staff'];
 
@@ -77,5 +78,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .update({ reply_sent_at: new Date().toISOString() })
     .eq('id', row.id);
 
-  return res.status(200).json({ ok: true, agent_mail_message_id: agentMailMessageId });
+  // Same reasoning as _send.ts: audited where the send happens, so a reply
+  // is recorded on the same footing as a fresh email. Auditing only one of
+  // the two paths would make "email is audited" half true, which is worse
+  // than a claim nobody makes.
+  const { data: actorRow } = await supabase
+    .from('users')
+    .select('id')
+    .eq('clerk_id', auth.clerkUserId)
+    .eq('church_id', auth.churchId)
+    .maybeSingle();
+
+  const audit = await recordAudit(supabase, {
+    churchId: auth.churchId,
+    actorUserId: (actorRow?.id as string | undefined) ?? null,
+    actorClerkId: auth.clerkUserId,
+    action: 'send',
+    entityType: 'email',
+    entityId: agentMailMessageId ?? null,
+    before: null,
+    // Body deliberately excluded — see _send.ts.
+    after: {
+      person_id: row.person_id,
+      in_reply_to: message_id,
+      inbox_id,
+    },
+    route: '/api/agentmail/reply',
+    method: 'POST',
+  });
+
+  return res.status(200).json({
+    ok: true,
+    agent_mail_message_id: agentMailMessageId,
+    ...(audit.ok ? {} : { audit_incomplete: true }),
+  });
 }
