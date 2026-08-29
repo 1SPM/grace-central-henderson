@@ -423,6 +423,15 @@
 - **Re-entry trigger:** SOC 2 evidence-gathering, or any second executor that mutates church data — those must follow migration 070's pattern rather than `recordAudit`.
 - **Resolution path:** convert mutation sites to Postgres functions that write their own audit row, highest-consequence first (role grants, giving/ledger writes, deletions). This is a per-site project, not a refactor: each function has to re-express its preconditions in SQL, and the unit tests that covered them in TypeScript go with them.
 
+### TD-061 — Chat-door actions are unpermissioned and unaudited
+- **Severity:** P2
+- **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.
+- **Problem:** the 14 Ask GRACE actions execute through React callbacks against the browser Supabase client. `grep -c "audit\|approval"` on the handler returns **0**. So a staff member can have GRACE `delete_person`, `delete_prayer`, `send_email` or `send_sms` in one click with **no `audit_logs` row and no server-side permission check** — while the agent door cannot assign a Work Order owner without a decision from a holder of `approvals.decide` and an audit row committed in the same transaction (migration 070). Same product, opposite rules, because the two action lists were maintained separately.
+- **Risk:** the accountability claim GRACE is positioned on ("every consequential action stops at a named human, every action lands on an append-only trail") is not true of the AI door, which is the door most likely to be demonstrated. Scoping is real — the browser client is RLS-scoped — so this is an *auditability and authorization-depth* gap, not an open door.
+- **Pinned, not merely noted:** `api/_lib/actionCatalogBinding.test.ts` holds the exact list in `KNOWN_UNAUDITED_CONSEQUENTIAL`. A new destructive or external action that skips auditing fails CI; closing the gap means deleting entries from that list deliberately.
+- **Re-entry trigger:** SOC 2 evidence-gathering, any new destructive/external chat action, or the first time a pastor asks "who deleted this record?"
+- **Resolution path:** route the consequential subset through the existing approvals + audit path the agent door already uses (`api/approvals/_index.ts`, `api/_lib/workosAudit.ts`), using the catalog's `permission` / `requiresApproval` / `consequence` fields. Whether each one becomes *gated* or merely *audited* is a product decision per action type; auditing is the non-negotiable half.
+
 ---
 
 ## Resolved
