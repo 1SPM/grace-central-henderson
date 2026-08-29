@@ -1,6 +1,5 @@
 import type { Person, Task, PrayerRequest, Interaction, MemberStatus, EventCategory } from '../../types';
 import type { PendingAction, ActionType } from '../grace-actions';
-import { smsService } from '../services/sms';
 
 export interface ReplyContext {
   inbox_message_row_id: string;
@@ -59,6 +58,60 @@ async function logGraceAction(
 ): Promise<void> {
   if (!personId || !handlers.onAddInteraction) return;
   await handlers.onAddInteraction({ personId, type, content, createdBy: 'Grace' });
+}
+
+
+/**
+ * Send a gated action to the approvals queue instead of doing it.
+ *
+ * The chat door has no authority of its own here: the server re-checks the
+ * caller's permission from the catalog, records the request in audit_logs,
+ * and the action runs only when someone holding approvals.decide says so.
+ *
+ * Returns false on failure so the chat card does NOT show as executed — the
+ * single worst outcome would be telling a pastor the text went out when it
+ * did not, or that a deletion happened when it is still pending.
+ */
+async function proposeForApproval(args: {
+  actionType: string;
+  targetEntityId: string;
+  payload: Record<string, unknown>;
+  pushAssistantMessage: (content: string) => void;
+  pendingMessage: string;
+}): Promise<boolean> {
+  try {
+    const res = await fetch('/api/actions/propose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action_type: args.actionType,
+        target_entity_id: args.targetEntityId,
+        payload: args.payload,
+      }),
+    });
+    const data = await res.json().catch(() => ({} as { error?: string; status?: string }));
+    if (!res.ok) {
+      args.pushAssistantMessage(
+        res.status === 403
+          ? "You don't have permission to request that."
+          : `I couldn't send that for approval: ${data.error ?? `HTTP ${res.status}`}`
+      );
+      return false;
+    }
+    args.pushAssistantMessage(
+      data.status === 'already_pending'
+        ? 'That one is already waiting in the Decision Queue.'
+        : args.pendingMessage
+    );
+    // True means "the request was handled", not "the change happened" — the
+    // message above is explicit about which, so the card cannot read as done.
+    return true;
+  } catch (err) {
+    args.pushAssistantMessage(
+      `I couldn't reach the approvals service: ${err instanceof Error ? err.message : 'unknown error'}`
+    );
+    return false;
+  }
 }
 
 const handlers: Record<ActionType, ActionHandler> = {
@@ -189,14 +242,25 @@ const handlers: Record<ActionType, ActionHandler> = {
     return true;
   },
 
-  delete_person: async ({ action, handlers, pushAssistantMessage }) => {
-    if (!handlers.onDeletePerson) return false;
+  // GATED (TD-061). Deleting a person is irreversible, takes their whole
+  // pastoral history with it, and used to leave no record anywhere — the
+  // Interaction note the other actions write would attach to the very person
+  // being removed. It now goes to a human holding approvals.decide.
+  delete_person: async ({ action, people, pushAssistantMessage }) => {
     if (!action.personId) {
       pushAssistantMessage('I couldn\'t find a matching person.');
       return false;
     }
-    await handlers.onDeletePerson(action.personId);
-    return true;
+    const person = people.find(p => p.id === action.personId);
+    return proposeForApproval({
+      actionType: 'delete_person',
+      targetEntityId: action.personId,
+      payload: { person_name: person ? `${person.firstName} ${person.lastName}`.trim() : undefined },
+      pushAssistantMessage,
+      pendingMessage: person
+        ? `Deleting ${person.firstName} ${person.lastName} needs approval. I've sent it to the Decision Queue.`
+        : 'That deletion needs approval. I\'ve sent it to the Decision Queue.',
+    });
   },
 
   delete_prayer: async ({ action, prayers, handlers, pushAssistantMessage }) => {
@@ -292,7 +356,7 @@ const handlers: Record<ActionType, ActionHandler> = {
     return true;
   },
 
-  send_sms: async ({ action, people, handlers, pushAssistantMessage }) => {
+  send_sms: async ({ action, people, pushAssistantMessage }) => {
     const person = people.find(p => p.id === action.personId);
     if (!person) {
       pushAssistantMessage('I need a matching person to text.');
@@ -307,22 +371,16 @@ const handlers: Record<ActionType, ActionHandler> = {
       pushAssistantMessage('Text message is empty.');
       return false;
     }
-    const result = await smsService.send({ to: person.phone, message: text });
-    if (!result.success) {
-      pushAssistantMessage(`Text failed: ${result.error || 'unknown error'}`);
-      return false;
-    }
-    if (handlers.onAddInteraction) {
-      await handlers.onAddInteraction({
-        personId: person.id,
-        type: 'text',
-        content: text,
-        createdBy: 'Grace',
-        sentVia: 'twilio',
-        messageId: result.messageId,
-      });
-    }
-    return true;
+    // GATED (TD-061). A text leaves the building and cannot be recalled, so
+    // it waits for a human decision. The message body travels in the payload
+    // and is sent by the executor after approval — not from here.
+    return proposeForApproval({
+      actionType: 'send_sms',
+      targetEntityId: person.id,
+      payload: { message: text, person_name: `${person.firstName} ${person.lastName}`.trim() },
+      pushAssistantMessage,
+      pendingMessage: `That text to ${person.firstName} needs approval. I've sent it to the Decision Queue.`,
+    });
   },
 };
 

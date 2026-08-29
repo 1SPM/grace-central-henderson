@@ -51,6 +51,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { sendSms } from './sms/send.js';
 
 export interface AgentActionRow {
   id: string;
@@ -225,8 +226,114 @@ const assignWorkOrderOwner: Executor = async (supabase, action, ctx) => {
   };
 };
 
+
+/**
+ * Delete a person, once a human has approved it.
+ *
+ * Gated because it is irreversible and takes the whole pastoral history
+ * with it — and because, before TD-061, this was the one chat action that
+ * left no record anywhere at all.
+ *
+ * NOT atomic in the migration-070 sense: the delete and its audit row are
+ * separate commits, so the guarantee here is the weaker "a missing audit is
+ * loud and recorded" (see workosAudit.ts, TD-060). The audit is written by
+ * the approvals endpoint from the `mutation` returned below. Making this
+ * atomic means a Postgres function like 070's, and the `before` snapshot
+ * makes that worth doing — but it is not this change.
+ */
+const deletePerson: Executor = async (supabase, action) => {
+  const personId = action.target_entity_id;
+  if (!personId) return { ok: false, reason: 'no_target_person' };
+
+  // Snapshot BEFORE deleting. Once the row is gone there is nothing left to
+  // describe it, so an audit row without this would record that someone was
+  // deleted while being unable to say who.
+  const { data: person, error: readErr } = await supabase
+    .from('people')
+    .select('id, first_name, last_name, email, phone, status')
+    .eq('id', personId)
+    .eq('church_id', action.church_id)
+    .maybeSingle();
+  if (readErr) return { ok: false, reason: 'person_read_failed' };
+  if (!person) return { ok: false, reason: 'person_not_found' };
+
+  const { data: deleted, error: delErr } = await supabase
+    .from('people')
+    .delete()
+    .eq('id', personId)
+    .eq('church_id', action.church_id)
+    .select('id')
+    .maybeSingle();
+  // Migration 054 is what makes this succeed for anyone with activity,
+  // giving or event history; without it the append-only triggers reject
+  // the FK cascade's internal UPDATE.
+  if (delErr) return { ok: false, reason: 'person_delete_failed' };
+  if (!deleted) return { ok: false, reason: 'person_already_removed' };
+
+  return {
+    ok: true,
+    detail: `Deleted ${person.first_name} ${person.last_name}`,
+    mutation: {
+      entityType: 'person',
+      entityId: personId,
+      before: person as Record<string, unknown>,
+      after: null,
+    },
+  };
+};
+
+/**
+ * Send a text message, once a human has approved it.
+ *
+ * Gated because it leaves the building and cannot be recalled. The
+ * precondition re-check matters more here than elsewhere: an approval can
+ * sit for days, and a number that has since been removed means the message
+ * must not be guessed at a stale one.
+ */
+const sendSmsAction: Executor = async (supabase, action) => {
+  const personId = action.target_entity_id;
+  const message = typeof action.payload.message === 'string' ? action.payload.message.trim() : '';
+  if (!personId) return { ok: false, reason: 'no_target_person' };
+  if (!message) return { ok: false, reason: 'empty_message' };
+
+  const { data: person, error: readErr } = await supabase
+    .from('people')
+    .select('id, first_name, last_name, phone')
+    .eq('id', personId)
+    .eq('church_id', action.church_id)
+    .maybeSingle();
+  if (readErr) return { ok: false, reason: 'person_read_failed' };
+  if (!person) return { ok: false, reason: 'person_not_found' };
+  if (!person.phone) return { ok: false, reason: 'person_has_no_phone' };
+
+  // Reuses the same Twilio path api/sms/_send.ts uses — one sender, so an
+  // approved text cannot diverge from a hand-sent one.
+  const outcome = await sendSms({ to: person.phone as string, message });
+  if (!outcome.ok) {
+    // 'not_configured' and 'invalid_phone' are refusals, not breakages; both
+    // must read as a failed action rather than a silent no-op, because the
+    // decider was told a text would go out.
+    return { ok: false, reason: outcome.skipped ? `sms_${outcome.reason}` : 'sms_send_failed' };
+  }
+
+  return {
+    ok: true,
+    detail: `Texted ${person.first_name} ${person.last_name}`,
+    mutation: {
+      entityType: 'person',
+      entityId: personId,
+      before: null,
+      // The body is recorded deliberately: "a text was sent" without its
+      // contents is not an account of what happened.
+      after: { sms_message: message, message_id: outcome.message_id },
+    },
+  };
+};
+
 const ACTION_EXECUTORS: Record<string, Executor> = {
   assign_work_order_owner: assignWorkOrderOwner,
+  delete_person: deletePerson,
+  send_sms: sendSmsAction,
 };
 
 /** True when an action_type can actually be carried out if approved. */
