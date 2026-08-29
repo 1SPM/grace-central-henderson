@@ -10,10 +10,22 @@
  *  - a failed execution is recorded as 'failed' with a reason, never
  *    silently reported as done
  *  - deciding twice cannot execute twice
+ *
+ * SINCE MIGRATION 070 the execution itself is one Postgres function call,
+ * so the assertions moved with it. The endpoint no longer writes the
+ * work_orders row, the agent_actions status, or the mutation's audit row
+ * on the success path — the function commits all three together. What
+ * this file now guards is that the endpoint does NOT repeat any of them
+ * (a second audit row would double-record one change) while still doing
+ * all of it on the paths where the function did nothing.
+ *
+ * What a mocked RPC cannot prove is what happens inside the transaction.
+ * That is tools/agent-atomic-audit-smoke.test.ts, against a real database.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../tests/fixtures/shared-platform.js';
+import { ASSIGN_OWNER_RPC } from '../_lib/agentActionExecutors.js';
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
@@ -61,23 +73,26 @@ const PROPOSED_ACTION = {
   status: 'proposed',
 };
 
+/** What migration 070's function returns when it did the work. */
+const RPC_EXECUTED = {
+  ok: true,
+  detail: `Assigned owner ${OWNER_ID} to work order ${WORK_ORDER_ID}`,
+  work_order_id: WORK_ORDER_ID,
+  owner_user_id: OWNER_ID,
+};
+
 function supabaseFor(opts: {
   approvalStatus?: string;
   actionStatus?: string;
-  workOrderOwner?: string | null;
-  ownerAccountStatus?: string;
+  /** Stand in for whatever the function decided — refusal or breakage. */
+  rpcResult?: { data?: unknown; error?: { message: string; code?: string } };
 } = {}) {
   return createMockSupabase({
+    rpcs: {
+      [ASSIGN_OWNER_RPC]: () => opts.rpcResult ?? { data: RPC_EXECUTED },
+    },
     tables: {
-      users: (op: string) => {
-        // resolveStaffActor looks the caller up; the executor looks the
-        // proposed owner up. Both hit `users`; the executor's row is the
-        // one carrying account_status for OWNER_ID.
-        if (op === 'select') {
-          return { data: { id: FIXTURE_STAFF_USER.id, account_status: opts.ownerAccountStatus ?? 'active' } };
-        }
-        return { data: null };
-      },
+      users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),
       user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
       role_permissions: () => ({ data: [{ permissions: { key: 'approvals.decide' } }] }),
       approvals: (op: string) => {
@@ -90,20 +105,11 @@ function supabaseFor(opts: {
         if (op === 'select') {
           return { data: { ...PROPOSED_ACTION, status: opts.actionStatus ?? 'proposed', approval_id: APPROVAL_ID, requires_approval: true } };
         }
-        // The status write-back is conditional + re-read, so it must
-        // resolve a row for a successful write.
+        // The non-atomic status write-back is conditional + re-read, so it
+        // must resolve a row for a successful write.
         return { data: { id: ACTION_ID } };
       },
-      work_orders: (op: string) => {
-        if (op === 'select') {
-          return {
-            data: { id: WORK_ORDER_ID, owner_user_id: opts.workOrderOwner ?? null, status: 'planning' },
-          };
-        }
-        // The executor re-reads the row it wrote so a lost race (zero rows
-        // updated) is distinguishable from a successful write.
-        return { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } };
-      },
+      work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }),
       platform_events: () => ({ data: { id: 'evt-1' } }),
       audit_logs: () => ({ data: null }),
     },
@@ -131,88 +137,111 @@ async function decide(supabase: ReturnType<typeof supabaseFor>, decision: string
   return res;
 }
 
+const rpcCalls = (supabase: ReturnType<typeof supabaseFor>) =>
+  supabase.__calls.filter(c => c.table === ASSIGN_OWNER_RPC && c.op === 'rpc');
+const auditInserts = (supabase: ReturnType<typeof supabaseFor>) =>
+  supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
+const actionUpdates = (supabase: ReturnType<typeof supabaseFor>) =>
+  supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
+
 describe('PATCH /api/approvals — agent action execution', () => {
-  it('a favourable decision executes the action and records it as executed', async () => {
+  it('a favourable decision executes the action exactly once and reports it executed', async () => {
     const supabase = supabaseFor();
     const res = await decide(supabase, 'approve');
 
-    // The Work Order was actually assigned — the proposal became a change.
-    const woUpdates = supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update');
-    expect(woUpdates).toHaveLength(1);
-    expect((woUpdates[0].payload as Record<string, unknown>).owner_user_id).toBe(OWNER_ID);
-
-    const actionUpdates = supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
-    expect(actionUpdates).toHaveLength(1);
-    const payload = actionUpdates[0].payload as Record<string, unknown>;
-    expect(payload.status).toBe('executed');
-    expect(payload.executed_at).toBeTruthy();
-
+    expect(rpcCalls(supabase)).toHaveLength(1);
     const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string } };
     expect(body.agent_action?.status).toBe('executed');
   });
 
-  it('an unfavourable decision rejects the action and changes nothing', async () => {
+  it('does not repeat the writes the function already committed', async () => {
+    // The whole value of migration 070 is that the mutation, the status
+    // write and the audit row share one transaction. Writing any of them
+    // again here would double-record the change and defeat the point.
+    const supabase = supabaseFor();
+    await decide(supabase, 'approve');
+
+    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
+    expect(actionUpdates(supabase)).toHaveLength(0);
+    const entityTypes = auditInserts(supabase).map(a => (a.payload as Record<string, unknown>).entity_type);
+    expect(entityTypes).toContain('approval'); // the decision is still audited here
+    expect(entityTypes, 'the mutation audit belongs to the transaction, not this handler')
+      .not.toContain('work_order');
+  });
+
+  it('hands the function everything the audit row needs, including the shared correlation id', async () => {
+    // The mutation's audit row is written inside the function, so anything
+    // missing from these parameters is missing from the trail permanently.
+    // The correlation id in particular must match the decision's own audit
+    // row, or the chain cannot be read back as one operation.
+    const supabase = supabaseFor();
+    await decide(supabase, 'approve');
+
+    const params = rpcCalls(supabase)[0].payload as Record<string, unknown>;
+    expect(params.p_action_id).toBe(ACTION_ID);
+    expect(params.p_church_id).toBe(FIXTURE_CHURCH_ID);
+    expect(params.p_approval_id).toBe(APPROVAL_ID);
+    expect(params.p_actor_user_id).toBe(FIXTURE_STAFF_USER.id);
+    // The deciding human is the actor; the proposing agent is named in the
+    // reason, so both halves of "who did this" survive on one row.
+    expect(String(params.p_reason)).toContain('verity');
+
+    const approvalAudit = auditInserts(supabase)
+      .find(a => (a.payload as Record<string, unknown>).entity_type === 'approval')!
+      .payload as Record<string, unknown>;
+    expect(params.p_correlation_id).toBe(approvalAudit.correlation_id);
+    expect(params.p_correlation_id).toBeTruthy();
+  });
+
+  it('an unfavourable decision rejects the action and never calls the function', async () => {
     for (const decision of ['reject', 'return_for_revision', 'escalate']) {
       const supabase = supabaseFor();
       await decide(supabase, decision);
 
-      expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
-      const actionUpdates = supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
-      expect(actionUpdates, decision).toHaveLength(1);
-      expect((actionUpdates[0].payload as Record<string, unknown>).status).toBe('rejected');
+      expect(rpcCalls(supabase), decision).toHaveLength(0);
+      expect(actionUpdates(supabase), decision).toHaveLength(1);
+      expect((actionUpdates(supabase)[0].payload as Record<string, unknown>).status).toBe('rejected');
     }
   });
 
-  it('records a failed execution as failed with a reason rather than reporting success', async () => {
-    // The Work Order gained an owner between proposal and approval.
-    const supabase = supabaseFor({ workOrderOwner: 'someone-else' });
+  it('records a refused execution as failed with the reason the function gave', async () => {
+    // A precondition the function refused on — e.g. the Work Order gained
+    // an owner between proposal and approval. It wrote nothing, so the
+    // endpoint owes the 'failed' status write.
+    const supabase = supabaseFor({ rpcResult: { data: { ok: false, reason: 'already_owned' } } });
     const res = await decide(supabase, 'approve');
 
-    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
-    const actionUpdates = supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
-    expect(actionUpdates).toHaveLength(1);
-    const payload = actionUpdates[0].payload as Record<string, unknown>;
-    expect(payload.status).toBe('failed');
-    expect(payload.executed_at).toBeNull();
+    const updates = actionUpdates(supabase);
+    expect(updates).toHaveLength(1);
+    expect((updates[0].payload as Record<string, unknown>).status).toBe('failed');
+    expect((updates[0].payload as Record<string, unknown>).executed_at).toBeNull();
 
     const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string; reason?: string } };
     expect(body.agent_action?.status).toBe('failed');
     expect(body.agent_action?.reason).toBe('already_owned');
   });
 
-  it('audits the Work Order change itself, not only the approval decision', async () => {
-    // Without this, an agent-driven assignment would be the only Work Order
-    // write in the product with no Work Order audit row — reconstructing
-    // what the agent changed would mean chaining approvals -> platform
-    // events -> agent_actions.payload, and only if you knew to.
-    const supabase = supabaseFor();
+  it('writes no mutation audit when the execution refused', async () => {
+    const supabase = supabaseFor({ rpcResult: { data: { ok: false, reason: 'already_owned' } } });
     await decide(supabase, 'approve');
 
-    const audits = supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
-    const entityTypes = audits.map(a => (a.payload as Record<string, unknown>).entity_type);
-    expect(entityTypes).toContain('approval');
-    expect(entityTypes, 'the mutated entity must have its own audit row').toContain('work_order');
-
-    const woAudit = audits.find(a => (a.payload as Record<string, unknown>).entity_type === 'work_order')!
-      .payload as Record<string, unknown>;
-    expect(woAudit.entity_id).toBe(WORK_ORDER_ID);
-    expect(woAudit.after).toEqual({ owner_user_id: OWNER_ID });
-    expect(woAudit.before).toEqual({ owner_user_id: null });
-    // The deciding human is the actor; the agent that proposed it is named
-    // in the reason, so both halves of "who did this" survive.
-    expect(String(woAudit.reason)).toContain('verity');
-    // One correlation id ties decision, event, and mutation together.
-    const approvalAudit = audits.find(a => (a.payload as Record<string, unknown>).entity_type === 'approval')!
-      .payload as Record<string, unknown>;
-    expect(woAudit.correlation_id).toBe(approvalAudit.correlation_id);
+    expect(auditInserts(supabase).map(a => (a.payload as Record<string, unknown>).entity_type))
+      .not.toContain('work_order');
   });
 
-  it('writes no mutation audit when the execution refused', async () => {
-    const supabase = supabaseFor({ workOrderOwner: 'someone-else' });
-    await decide(supabase, 'approve');
+  it('fails loudly, not silently, when migration 070 is missing', async () => {
+    // Code deployed ahead of the migration. This must read as a failure
+    // the decider can see — not as a quiet fallback to the non-atomic
+    // path, and above all not as a success.
+    const supabase = supabaseFor({
+      rpcResult: { error: { code: 'PGRST202', message: 'Could not find the function' } },
+    });
+    const res = await decide(supabase, 'approve');
 
-    const audits = supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
-    expect(audits.map(a => (a.payload as Record<string, unknown>).entity_type)).not.toContain('work_order');
+    const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string; reason?: string } };
+    expect(body.agent_action?.status).toBe('failed');
+    expect(body.agent_action?.reason).toBe('atomic_executor_unavailable');
+    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
   });
 
   it('an already-decided approval 409s and cannot execute a second time', async () => {
@@ -220,15 +249,15 @@ describe('PATCH /api/approvals — agent action execution', () => {
     const res = await decide(supabase, 'approve');
 
     expect(res.status).toHaveBeenCalledWith(409);
-    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
-    expect(supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update')).toHaveLength(0);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+    expect(actionUpdates(supabase)).toHaveLength(0);
   });
 
   it('does not re-execute an action that is no longer proposed', async () => {
     const supabase = supabaseFor({ actionStatus: 'executed' });
     await decide(supabase, 'approve');
 
-    expect(supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update')).toHaveLength(0);
-    expect(supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update')).toHaveLength(0);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+    expect(actionUpdates(supabase)).toHaveLength(0);
   });
 });
