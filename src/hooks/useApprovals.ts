@@ -12,7 +12,7 @@ interface ListResponse { approvals: Approval[] }
  * that, or the pastor sees a success badge over a no-op.
  */
 export interface AgentActionOutcome { action_id: string; status: string; reason?: string }
-interface DecideResponse { approval: Approval; agent_action?: AgentActionOutcome | null }
+interface DecideResponse { approval: Approval; agent_action?: AgentActionOutcome | null; audit_incomplete?: boolean }
 
 export function useApprovals() {
   const { getAuthToken } = useAuthContext();
@@ -48,7 +48,11 @@ export function useApprovals() {
       body: JSON.stringify({ decision, decision_notes: decisionNotes }),
     });
     await list();
-    return { approval: data.approval, agentAction: data.agent_action ?? null };
+    return {
+      approval: data.approval,
+      agentAction: data.agent_action ?? null,
+      auditIncomplete: data.audit_incomplete === true,
+    };
   }, [getAuthToken, list]);
 
   const markRelatedPartyReviewed = useCallback(async (id: string) => {

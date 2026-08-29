@@ -39,7 +39,7 @@ export function ApprovalCentre() {
   async function handleDecide(id: string, decision: ApprovalDecision) {
     setDecisionError(null);
     try {
-      const { agentAction } = await decide(id, decision, notes[id]);
+      const { agentAction, auditIncomplete } = await decide(id, decision, notes[id]);
       // The decision was recorded, but the action it authorised may have
       // refused — usually because the world moved between proposal and
       // approval. Saying nothing here would show a success badge over a
@@ -47,6 +47,12 @@ export function ApprovalCentre() {
       if (agentAction?.status === 'failed') {
         setDecisionError(
           `Decision recorded, but the action could not be carried out (${agentAction.reason ?? 'unknown reason'}). Nothing was changed.`,
+        );
+      } else if (auditIncomplete) {
+        // The change went through; its audit row did not. Worth saying out
+        // loud on the one path where an agent altered church data.
+        setDecisionError(
+          'The change was applied, but its audit entry could not be written. It has been flagged for review — tell an administrator.',
         );
       }
     } catch (err) {

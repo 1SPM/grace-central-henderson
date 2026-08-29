@@ -277,8 +277,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     //
     // `reason` names the agent: the deciding human is the actor, but "who
     // proposed this" is the other half of the story.
+    let auditIncomplete = false;
     if (agentMutation) {
-      await recordAudit(supabase, {
+      const mutationAudit = await recordAudit(supabase, {
         churchId: actor.churchId,
         actorUserId: actor.userId,
         actorClerkId: actor.clerkUserId,
@@ -292,9 +293,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         route: '/api/approvals',
         method: 'PATCH',
       });
+      // The change is committed; the trail is not. Say so rather than
+      // returning a clean success — this is the one path where an agent
+      // altered church data, and "we changed it but cannot prove what"
+      // is exactly what a decision-maker needs to hear immediately.
+      auditIncomplete = !mutationAudit.ok;
     }
 
-    return res.status(200).json({ approval, agent_action: agentAction });
+    return res.status(200).json({
+      approval,
+      agent_action: agentAction,
+      ...(auditIncomplete ? { audit_incomplete: true } : {}),
+    });
   }
 
   return res.status(405).json({ error: 'method_not_allowed' });
