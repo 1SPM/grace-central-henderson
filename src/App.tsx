@@ -289,10 +289,29 @@ function App() {
     return () => { newDonationRef.current = null; };
   }, [agentHandleNewDonation]);
 
+  /**
+   * Dispatch a command-palette action to the capture modal that owns it.
+   *
+   * The palette finds the action; these modals already know how to gather and
+   * validate its fields, so there is no second form system. The mapping is
+   * bound to the catalog by src/lib/paletteActions.test.ts — a palette action
+   * with no case here would be a row that does nothing.
+   */
+  const runPaletteAction = useCallback((actionType: string) => {
+    switch (actionType) {
+      case 'add_person': modals.openPersonForm(); break;
+      case 'add_task': modals.openQuickTask(); break;
+      case 'add_prayer': modals.openQuickPrayer(); break;
+      case 'add_note': modals.openQuickNote(); break;
+    }
+  }, [modals]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
+      // Cmd/Ctrl+K is bound in Layout.tsx, deliberately without this guard so
+      // it works mid-typing. Do not add a second binding here.
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
 
       switch (e.key.toLowerCase()) {
@@ -714,6 +733,7 @@ function App() {
           onSelectPrayer={() => setView('prayer')}
           onNavigate={(v) => navigateView(v, setView)}
           onClose={modals.closeSearch}
+          onRunAction={runPaletteAction}
         />
       )}
 

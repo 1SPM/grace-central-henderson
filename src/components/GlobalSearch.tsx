@@ -10,6 +10,8 @@ import { generateAIText } from '../lib/services/ai';
 import { useAISettings } from '../hooks/useAISettings';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { sundayHash, type SundayTab } from '../lib/sundayNav';
+import { visiblePaletteActions, PALETTE_ACTION_UI } from '../lib/paletteActions';
+import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
 
 interface GlobalSearchProps {
   people: Person[];
@@ -20,16 +22,30 @@ interface GlobalSearchProps {
   onSelectPrayer: () => void;
   onNavigate: (view: View) => void;
   onClose: () => void;
+  /** Dispatch a catalog action — opens the matching quick-capture modal. */
+  onRunAction: (actionType: string) => void;
 }
 
 type SearchResult = {
-  type: 'view' | 'person' | 'task' | 'prayer';
+  type: 'view' | 'person' | 'task' | 'prayer' | 'action';
   id: string;
   title: string;
   subtitle: string;
   icon: React.ReactNode;
   view?: View;
   sundayTab?: SundayTab;
+  /** For 'action' rows: the catalog action type this dispatches. */
+  actionType?: string;
+  /** The single-key shortcut that already does this, surfaced to be learned. */
+  shortcut?: string;
+};
+
+/** Icon per palette action. Icons are this file's concern, not the catalog's. */
+const ACTION_ICONS: Record<string, React.ReactNode> = {
+  add_person: <User size={16} />,
+  add_task: <CheckSquare size={16} />,
+  add_prayer: <Heart size={16} />,
+  add_note: <FileText size={16} />,
 };
 
 // Primary views exposed to the command palette. Lean, not all 52.
@@ -81,9 +97,11 @@ export function GlobalSearch({
   onSelectTask,
   onSelectPrayer,
   onNavigate,
-  onClose
+  onClose,
+  onRunAction
 }: GlobalSearchProps) {
   const { settings: aiSettings } = useAISettings();
+  const { permissions } = useWorkOsPermissions();
   const [mode, setMode] = useState<Mode>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -94,10 +112,33 @@ export function GlobalSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Default suggestions shown when the palette opens with no query
-  const defaultResults: SearchResult[] = useMemo(
+  // Actions this user can run, from the catalog. Discoverability only — see
+  // visiblePaletteActions; these dispatch through the same client-side path
+  // the chat door uses, which has no server-side check yet (TD-061).
+  const actionResults: SearchResult[] = useMemo(
     () =>
-      NAV_ITEMS.slice(0, 8).map(item => ({
+      visiblePaletteActions(permissions).map(action => {
+        const ui = PALETTE_ACTION_UI[action.type];
+        return {
+          type: 'action' as const,
+          id: action.type,
+          title: action.label,
+          subtitle: ui.hint,
+          icon: <span className="text-gray-500 dark:text-gray-400">{ACTION_ICONS[action.type]}</span>,
+          actionType: action.type,
+          shortcut: ui.shortcut,
+        };
+      }),
+    [permissions]
+  );
+
+  // Default suggestions shown when the palette opens with no query.
+  // Actions lead: the palette's job is as much "what can I do" as "where do
+  // I go", and the n/t/p/m shortcuts were otherwise undiscoverable.
+  const defaultResults: SearchResult[] = useMemo(
+    () => [
+      ...actionResults,
+      ...NAV_ITEMS.slice(0, 8).map(item => ({
         type: 'view' as const,
         id: item.sundayTab ? `sunday-${item.sundayTab}` : item.view,
         title: item.label,
@@ -106,7 +147,8 @@ export function GlobalSearch({
         view: item.view,
         sundayTab: item.sundayTab,
       })),
-    []
+    ],
+    [actionResults]
   );
 
   // Memoize person lookup map for O(1) access
@@ -143,7 +185,17 @@ export function GlobalSearch({
     const q = query.toLowerCase();
     const searchResults: SearchResult[] = [];
 
-    // Views first — match on label (exact prefix boosted)
+    // Actions first — typing "task" should offer to CREATE one, not only to
+    // navigate to the list. This is the palette earning the fourth-door
+    // description: the same vocabulary the agents and Ask GRACE use, reached
+    // deterministically and without a model call.
+    actionResults.forEach(action => {
+      if (action.title.toLowerCase().includes(q) || action.subtitle.toLowerCase().includes(q)) {
+        searchResults.push(action);
+      }
+    });
+
+    // Views next — match on label (exact prefix boosted)
     NAV_ITEMS.forEach(item => {
       if (item.label.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q)) {
         searchResults.push({
@@ -231,6 +283,12 @@ export function GlobalSearch({
         break;
       case 'prayer':
         onSelectPrayer();
+        break;
+      case 'action':
+        // Hands off to the existing quick-capture modal rather than
+        // collecting arguments here. The palette's job is to find the action;
+        // the modal already knows how to gather and validate its fields.
+        if (result.actionType) onRunAction(result.actionType);
         break;
     }
     onClose();
@@ -409,7 +467,7 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Jump to… or search people, tasks, prayers"
+                placeholder="Do something, jump somewhere, or search people and tasks"
                 className="flex-1 bg-transparent text-gray-900 dark:text-dark-100 focus:outline-none placeholder:text-gray-400 dark:placeholder:text-dark-500"
               />
             </div>
@@ -418,7 +476,7 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
               <div className="flex-1 overflow-y-auto p-2">
                 {!query && (
                   <div className="px-3 pt-1 pb-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                    Jump to
+                    Actions and shortcuts
                   </div>
                 )}
                 {visibleResults.map((result, index) => {
@@ -443,6 +501,15 @@ If you can't help directly, suggest what you CAN do: draft messages, find people
                       </div>
                       {result.type === 'view' ? (
                         <ArrowRight size={14} className={`${isActive ? 'text-gray-500' : 'text-gray-300 dark:text-gray-600'}`} />
+                      ) : result.type === 'action' ? (
+                        // Show the single-key shortcut that already does this.
+                        // These bindings existed but were invisible; naming
+                        // them here is how they get learned.
+                        result.shortcut ? (
+                          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-700 rounded text-[10px] text-gray-500 dark:text-gray-400">
+                            {result.shortcut}
+                          </kbd>
+                        ) : null
                       ) : (
                         <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">{result.type}</span>
                       )}
