@@ -122,8 +122,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       entity_type: 'agent_action',
       proposed_action: describeProposal(actionType, payload),
       requested_by_user_id: actor.userId,
-      // Names the surface, not a person: "who asked" is the user above.
-      requested_by_agent: 'grace_chat',
+      // Deliberately NOT requested_by_agent. 'grace_chat' is a surface, not
+      // an agent, and setting it made the Approval Centre render "Requested
+      // by agent: grace_chat" for something a staff member asked for. On a
+      // screen whose entire job is attribution, that is the wrong sentence:
+      // a pastor weighs "an agent wants to delete Dana" differently from
+      // "someone on staff asked to delete Dana". The surface is recorded on
+      // agent_actions.origin_surface, where it belongs.
       risk_level: definition.consequence === 'external' ? 'high' : 'medium',
       status: 'pending',
     })
