@@ -39,6 +39,8 @@ function supabaseForStaffWithPermissions(permissionKeys: string[]) {
       // (with approval_id already set), then links entity_id back.
       agent_actions: () => ({ data: { id: 'action-1' } }),
       approvals: () => ({ data: { id: 'approval-1' } }),
+      platform_events: () => ({ data: { id: 'evt-1' } }),
+      audit_logs: () => ({ data: null }),
       agent_findings: () => ({ data: [] }),
     },
   });

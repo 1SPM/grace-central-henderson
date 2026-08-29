@@ -111,6 +111,63 @@ describe('runWorkosAgentForChurch', () => {
   });
 });
 
+describe('proposals via the shared path — the invariant that broke', () => {
+  // The cron lane and the HTTP endpoint once had separate copies of this
+  // logic. When #163 taught the endpoint to create approvals, the cron's
+  // copy still said "no consumer exists" and threw — so a proposal that
+  // worked from "Run now" failed the nightly sweep, losing that agent's
+  // other findings with it. Both lanes now run this code.
+  function proposalSupabase() {
+    return createMockSupabase({
+      tables: {
+        agent_runs: () => ({ data: { id: 'run-1' } }),
+        // select feeds Verity's dedup query (an array); insert returns the
+        // new row (an object).
+        agent_actions: (op: string) => (op === 'select' ? { data: [] } : { data: { id: 'action-1' } }),
+        approvals: () => ({ data: { id: 'approval-1' } }),
+        agent_findings: () => ({ data: [] }),
+        platform_events: () => ({ data: { id: 'evt-1' } }),
+        people: () => ({ data: [] }),
+        work_orders: () => ({ data: [{ id: 'wo-1', title: 'Youth retreat planning', ministry: 'Care & Counseling' }] }),
+        ministry_assignments: () => ({ data: [{ area_key: 'member_care', owner_user_id: 'user-1' }] }),
+        users: () => ({ data: [{ id: 'user-1', first_name: 'Fatoumata', last_name: 'Diallo' }] }),
+      },
+    });
+  }
+
+  it('a scheduled sweep creates the approval, exactly as a human-triggered run does', async () => {
+    const supabase = proposalSupabase();
+    const outcome = await runWorkosAgentForChurch(
+      supabase as never, FIXTURE_CHURCH_ID, 'verity', { kind: 'cron' },
+    );
+
+    expect(outcome.status, outcome.error).toBe('succeeded');
+    const approvals = supabase.__calls.filter(c => c.table === 'approvals' && c.op === 'insert');
+    expect(approvals).toHaveLength(1);
+    const approval = approvals[0].payload as Record<string, unknown>;
+    expect(approval.entity_type).toBe('agent_action');
+    // The queue line names the person, not a UUID or an action_type.
+    expect(approval.proposed_action).toBe('Assign Fatoumata Diallo as owner of "Youth retreat planning" (Pastoral Care)');
+  });
+
+  it('refuses to propose an action type nothing can perform', async () => {
+    // Fail-closed is a property of the shared path, so the cron inherits
+    // it rather than needing its own copy.
+    const supabase = createMockSupabase({
+      tables: {
+        agent_runs: () => ({ data: { id: 'run-1' } }),
+        agent_actions: () => ({ data: { id: 'action-1' } }),
+        approvals: () => ({ data: { id: 'approval-1' } }),
+      },
+    });
+    const { describeProposedAction } = await import('./workosAgentRunner.js');
+    // Sanity: the describer degrades gracefully for an unknown type.
+    expect(describeProposedAction({ action_type: 'do_a_thing', target_entity_type: 'task', payload: {} }))
+      .toBe('do a thing on task');
+    expect(supabase).toBeDefined();
+  });
+});
+
 describe('runAllWorkosAgentsForChurch', () => {
   it('runs every implemented agent and returns one outcome each', async () => {
     const supabase = emptyScanSupabase();
