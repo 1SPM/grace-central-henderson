@@ -177,6 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 'failed' with a reason rather than swallowed — an approved action
     // that silently did nothing is the worst outcome for a decision-maker.
     let agentAction: { action_id: string; status: string; reason?: string } | null = null;
+    let agentMutation: import('../_lib/agentActionExecutors.js').ExecutorMutation | null = null;
     if (approval.entity_type === 'agent_action' && approval.entity_id) {
       const favorable = ['approve', 'approve_with_changes'].includes(body.decision);
       const { data: action, error: actionReadErr } = await supabase
@@ -221,9 +222,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (writeErr || !written) {
             agentAction = { action_id: action.id, status: 'failed', reason: 'status_write_failed' };
           } else {
-            agentAction = outcome.ok
-              ? { action_id: action.id, status: 'executed' }
-              : { action_id: action.id, status: 'failed', reason: outcome.reason };
+            if (outcome.ok) {
+              agentAction = { action_id: action.id, status: 'executed' };
+              agentMutation = outcome.mutation ?? null;
+            } else {
+              agentAction = { action_id: action.id, status: 'failed', reason: outcome.reason };
+            }
           }
         }
       }
@@ -263,6 +267,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       route: '/api/approvals',
       method: 'PATCH',
     });
+
+    // The decision audit above records that a decision was made. This one
+    // records what it CHANGED, against the entity that changed — so an
+    // agent-driven write shows up in the Work Order's own history like
+    // every other write to it, rather than only in an approvals row a
+    // reader would have to know to look for. Same correlationId as the
+    // decision and the platform event, so the whole chain is one query.
+    //
+    // `reason` names the agent: the deciding human is the actor, but "who
+    // proposed this" is the other half of the story.
+    if (agentMutation) {
+      await recordAudit(supabase, {
+        churchId: actor.churchId,
+        actorUserId: actor.userId,
+        actorClerkId: actor.clerkUserId,
+        action: 'update',
+        entityType: agentMutation.entityType,
+        entityId: agentMutation.entityId,
+        before: agentMutation.before,
+        after: agentMutation.after,
+        reason: `Agent proposal approved${approval.requested_by_agent ? ` (proposed by ${approval.requested_by_agent})` : ''}`,
+        correlationId,
+        route: '/api/approvals',
+        method: 'PATCH',
+      });
+    }
 
     return res.status(200).json({ approval, agent_action: agentAction });
   }

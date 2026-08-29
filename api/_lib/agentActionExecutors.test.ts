@@ -47,7 +47,9 @@ describe('assign_work_order_owner', () => {
   it('assigns the proposed owner when the Work Order is still unowned and the owner is active', async () => {
     const supabase = createMockSupabase({
       tables: {
-        work_orders: () => ({ data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }),
+        work_orders: (op: string) => (op === 'select'
+          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
+          : { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } }),
         users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
       },
     });
@@ -58,6 +60,47 @@ describe('assign_work_order_owner', () => {
     const updates = supabase.__calls.filter(c => c.table === 'work_orders' && c.op === 'update');
     expect(updates).toHaveLength(1);
     expect((updates[0].payload as Record<string, unknown>).owner_user_id).toBe(OWNER_ID);
+  });
+
+  it('reports the mutation so the caller can audit the entity that changed', async () => {
+    const supabase = createMockSupabase({
+      tables: {
+        work_orders: (op: string) => (op === 'select'
+          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
+          : { data: { id: WORK_ORDER_ID, owner_user_id: OWNER_ID } }),
+        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
+      },
+    });
+
+    const result = await executeAgentAction(supabase as never, action());
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.mutation).toEqual({
+      entityType: 'work_order',
+      entityId: WORK_ORDER_ID,
+      before: { owner_user_id: null },
+      after: { owner_user_id: OWNER_ID },
+    });
+  });
+
+  it('does not report success when the write changed nothing (lost race)', async () => {
+    // The precondition read passes, but the conditional update matches zero
+    // rows because another decision got there first. supabase-js reports no
+    // error for a zero-row update, so without re-reading the written row
+    // the executor would claim it assigned an owner it did not assign.
+    const supabase = createMockSupabase({
+      tables: {
+        work_orders: (op: string) => (op === 'select'
+          ? { data: { id: WORK_ORDER_ID, owner_user_id: null, status: 'planning' } }
+          : { data: null }),
+        users: () => ({ data: { id: OWNER_ID, account_status: 'active' } }),
+      },
+    });
+
+    const result = await executeAgentAction(supabase as never, action());
+
+    expect(result).toEqual({ ok: false, reason: 'already_owned' });
   });
 
   it('refuses when a human assigned an owner between proposal and approval', async () => {
