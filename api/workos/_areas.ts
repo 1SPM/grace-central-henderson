@@ -76,7 +76,7 @@ async function getAreas(
   const [{ data: assignments }, { data: staff }, { data: workOrders }, { data: events }] = await Promise.all([
     supabase
       .from('ministry_assignments')
-      .select('area_key, owner_user_id, agent_key, campus_room, updated_at')
+      .select('area_key, owner_user_id, agent_key, campus_room, display_name, updated_at')
       .eq('church_id', actor.churchId),
     supabase
       .from('users')
@@ -220,9 +220,18 @@ async function putArea(
     patch.campus_room = room;
   }
 
+  // Cosmetic only — no FK, no permission implications, just what this
+  // church calls the area. Same null-clears-override / absent-leaves-alone
+  // semantics as the other three links.
+  const nameLink = readLink(raw, 'display_name', /^.{1,60}$/);
+  if ('invalid' in nameLink) return res.status(400).json({ error: 'invalid_request', detail: 'display_name must be 1-60 characters or null' });
+  if (nameLink.present) {
+    patch.display_name = nameLink.value;
+  }
+
   const { data: before } = await supabase
     .from('ministry_assignments')
-    .select('area_key, owner_user_id, agent_key, campus_room')
+    .select('area_key, owner_user_id, agent_key, campus_room, display_name')
     .eq('church_id', actor.churchId)
     .eq('area_key', area.key)
     .maybeSingle();
@@ -230,7 +239,7 @@ async function putArea(
   const { data: saved, error } = await supabase
     .from('ministry_assignments')
     .upsert(patch, { onConflict: 'church_id,area_key' })
-    .select('area_key, owner_user_id, agent_key, campus_room, updated_at')
+    .select('area_key, owner_user_id, agent_key, campus_room, display_name, updated_at')
     .single();
 
   if (error) {
