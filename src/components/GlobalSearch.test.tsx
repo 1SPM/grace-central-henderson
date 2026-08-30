@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GlobalSearch } from './GlobalSearch';
 
-const mockCanAccess = vi.hoisted(() => ({ current: (_view: string) => true }));
+const mockCanAccess = vi.hoisted(() => ({ current: (_view: string): boolean => true }));
 
 vi.mock('../hooks/useRouteGuard', () => ({
   useRouteGuard: () => ({ canAccess: (view: string) => mockCanAccess.current(view), getBlockedMessage: () => null }),
