@@ -202,7 +202,14 @@ export async function retrieveMemories(
     }
   }
 
-  return [...byId.values()].slice(0, 15);
+  // Chronological, oldest first — the model reads top-to-bottom, so the
+  // most recent note (most likely to reflect the current state when two
+  // notes conflict, e.g. a corrected date) lands last, closest to the
+  // question. See buildMemoryBlock's explicit "trust the most recent"
+  // instruction below — sort order and instruction work together.
+  return [...byId.values()]
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .slice(-15);
 }
 
 /**
@@ -217,7 +224,7 @@ export function buildMemoryBlock(memories: GraceMemoryRow[]): string {
     const label = m.source === 'user_stated' ? 'you said' : 'noted from chat';
     return `- [${date}, ${label}] ${m.content}`;
   });
-  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. Attribute memories as "you told me…", never state them as database facts.\n${lines.join('\n')}`;
+  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded, oldest to newest) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. If two notes below conflict with each other (e.g. a corrected date), trust the one with the more recent date — it supersedes the earlier one. Attribute memories as "you told me…", never state them as database facts.\n${lines.join('\n')}`;
 }
 
 // ---------------------------------------------------------------------

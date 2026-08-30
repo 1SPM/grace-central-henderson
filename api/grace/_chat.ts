@@ -89,10 +89,16 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ conversation: null, messages: [] });
   }
 
+  // church_id/user_id are redundant with conversation.id here (a
+  // conversation can only ever have been created scoped to this actor —
+  // see getOrCreateConversation) but filtering on them anyway is cheap
+  // insurance against a future write path breaking that invariant.
   const { data: messages } = await supabase
     .from('grace_messages')
     .select('id, role, content, created_at')
     .eq('conversation_id', (conversation as { id: string }).id)
+    .eq('church_id', actor.churchId)
+    .eq('user_id', actor.userId)
     .order('created_at', { ascending: true })
     .limit(50);
 
@@ -161,6 +167,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     .from('grace_messages')
     .select('role, content')
     .eq('conversation_id', conversation.id)
+    .eq('church_id', actor.churchId)
+    .eq('user_id', actor.userId)
     .order('created_at', { ascending: false })
     .limit(HISTORY_TURN_LIMIT + 1); // +1 to exclude the user message just inserted
   const history = ((historyRows ?? []) as Array<{ role: string; content: string }>)

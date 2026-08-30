@@ -253,8 +253,18 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   // the hydration effect below resolves; cleared by clearMessages to
   // start a fresh server conversation.
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
-  const hydratedRef = useRef(false);
-  const importedBrainRef = useRef(false);
+  // Keyed by the userId it hydrated/imported for (not a bare boolean) so a
+  // genuine identity change without a full remount — e.g. sign-out then
+  // sign-in as a different staff member in the same tab — re-runs both
+  // effects instead of silently skipping them for the new user.
+  const hydratedForUserRef = useRef<string | null>(null);
+  const importedBrainForUserRef = useRef<string | null>(null);
+  // Set the instant a real send starts. Guards the hydration effect below:
+  // hydration is an async GET fired on mount, and if the user sends a
+  // message (e.g. clicking a starter chip, which auto-sends) before that
+  // GET resolves, applying the hydrated snapshot afterward would silently
+  // wipe the message they just sent back out of view.
+  const hasSentRef = useRef(false);
 
   useEffect(() => {
     persistMessages(messages, data.userId);
@@ -265,13 +275,22 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   // the localStorage fallback — this is the actual "close the browser,
   // come back tomorrow" proof. Runs once per userId.
   useEffect(() => {
-    if (!data.userId || hydratedRef.current) return;
-    hydratedRef.current = true;
+    if (!data.userId || hydratedForUserRef.current === data.userId) return;
+    hydratedForUserRef.current = data.userId;
     let cancelled = false;
     void hydrateGraceConversation().then(result => {
-      if (cancelled || result.messages.length === 0) return;
+      if (cancelled || result.messages.length === 0 || hasSentRef.current) return;
       setConversationId(result.conversationId ?? undefined);
-      setMessages(result.messages.map(m => ({ id: m.id, role: m.role, content: m.content })));
+      setMessages(result.messages.map(m => {
+        // Historical assistant replies may contain raw <action> blocks —
+        // parseActions strips them to plain text. Deliberately NOT
+        // re-attaching the parsed action cards: whether the user already
+        // executed them before closing the browser isn't persisted, and
+        // offering a stale, possibly-already-run action back up would risk
+        // a duplicate CRM write, not just a display glitch.
+        const { cleanText } = parseActions(m.content);
+        return { id: m.id, role: m.role, content: cleanText };
+      }));
     });
     return () => { cancelled = true; };
   }, [data.userId]);
@@ -282,10 +301,10 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   // accepts this when the user has zero server memories, so it's safe to
   // call unconditionally here.
   useEffect(() => {
-    if (!data.userId || importedBrainRef.current || typeof window === 'undefined') return;
+    if (!data.userId || importedBrainForUserRef.current === data.userId || typeof window === 'undefined') return;
     const stored = deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
     if (stored.length === 0) return;
-    importedBrainRef.current = true;
+    importedBrainForUserRef.current = data.userId;
     void importBrainEntries(stored.map(e => e.text)).then(result => {
       if (result && result.imported > 0) {
         window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, '[]');
@@ -368,6 +387,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
 
   const sendMessage = useCallback(async (query: string) => {
     if (!query.trim()) return;
+    hasSentRef.current = true;
     const userMsgId = `u-${Date.now()}`;
     const assistantMsgId = `a-${Date.now() + 1}`;
     const isBrief = query.trim() === MONDAY_BRIEF_PROMPT.trim();
