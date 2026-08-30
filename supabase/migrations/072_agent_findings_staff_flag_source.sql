@@ -1,5 +1,5 @@
 -- GRACE — widen agent_findings.source to allow staff-initiated flags
--- Migration: 071_agent_findings_staff_flag_source.sql
+-- Migration: 072_agent_findings_staff_flag_source.sql
 --
 -- api/workos/_my-work.ts lets a staff member flag an agent's work for
 -- pastor review, inserting agent_findings with source: 'staff_flag'.

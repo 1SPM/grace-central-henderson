@@ -89,3 +89,41 @@ describe('ApprovalCentre (approval test)', () => {
     expect(screen.queryByText('Approve')).not.toBeInTheDocument();
   });
 });
+
+describe('requester attribution', () => {
+  // A chat proposal carries a staff user id, and historically also an agent
+  // label. Reading out the agent in that case credits a person's decision to
+  // software — on the one screen whose whole job is saying who wanted this.
+  const fetchMock = vi.fn();
+  beforeEach(() => { vi.stubGlobal('fetch', fetchMock); fetchMock.mockReset(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  function renderWith(approval: Record<string, unknown>) {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/approvals')) return Promise.resolve(jsonResponse({ approvals: [approval] }));
+      return Promise.resolve(jsonResponse({ permissions: ['approvals.decide'] }));
+    });
+    render(<ApprovalCentre />);
+  }
+
+  const chatProposal = {
+    ...PENDING_APPROVAL,
+    id: 'ap-chat',
+    work_order_id: null,
+    entity_type: 'agent_action',
+    proposed_action: 'Delete Dana Reyes and their history',
+    requested_by_user_id: 'user-1',
+    requested_by_agent: 'grace_chat',
+  };
+
+  it('names a staff member when a human asked, even with an agent label present', async () => {
+    renderWith(chatProposal);
+    expect(await screen.findByText(/Requested by a staff member/)).toBeInTheDocument();
+    expect(screen.queryByText(/agent: grace_chat/)).not.toBeInTheDocument();
+  });
+
+  it('still names the agent when nobody human asked', async () => {
+    renderWith({ ...chatProposal, requested_by_user_id: null, requested_by_agent: 'verity' });
+    expect(await screen.findByText(/agent: verity/)).toBeInTheDocument();
+  });
+});

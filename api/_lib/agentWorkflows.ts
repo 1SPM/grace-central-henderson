@@ -17,6 +17,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { bucketLedgerRows, detectReconciliationAnomalies } from './webhooks/reconcile.js';
+import { areaForMinistry } from './ministryAreas.js';
 import { PLATFORM_FEE_BPS, PLATFORM_FEE_PERCENT } from './billing/givingFee.js';
 
 export interface AgentFinding {
@@ -27,14 +28,14 @@ export interface AgentFinding {
   /**
    * A finding that proposes a real mutation must declare it. Omitted or
    * false = pure observation, recorded as executed immediately. True =
-   * never auto-executed: actionRowForFinding maps it to status
-   * 'proposed' with no executed_at, and — because no consumer of
-   * 'proposed' agent_actions rows exists yet (nothing links an approvals
-   * row or executes on approval, and persistWorkflowFindings is
-   * observation-only) — the run endpoint currently fails the run loudly
-   * rather than writing a proposal nothing will ever read. Build that
-   * pipeline, then remove the endpoint guard, before shipping the first
-   * workflow that sets this flag.
+   * never auto-executed by the agent: actionRowForFinding maps it to
+   * status 'proposed' with no executed_at, the run endpoint creates a
+   * linked approvals row so it reaches a human, and only a favourable
+   * decision in api/approvals runs the registered executor
+   * (api/_lib/agentActionExecutors.ts). The run still fails closed for an
+   * action_type with no registered executor — proposing something the
+   * system cannot perform would put an un-actionable item in a pastor's
+   * Decision Queue.
    */
   requires_approval?: boolean;
 }
@@ -89,10 +90,69 @@ async function runGraceOrchestrator(supabase: SupabaseClient, churchId: string):
 }
 
 async function runVerityQualityReview(supabase: SupabaseClient, churchId: string): Promise<AgentWorkflowResult> {
-  const [{ data: unreachable }, { data: unownedWorkOrders }] = await Promise.all([
+  const [{ data: unreachable }, { data: unownedWorkOrders }, { data: assignments }] = await Promise.all([
     supabase.from('people').select('id, first_name, last_name').eq('church_id', churchId).in('status', ['member', 'leader']).is('email', null).is('phone', null).limit(25),
-    supabase.from('work_orders').select('id, title').eq('church_id', churchId).not('status', 'in', '(completed,cancelled)').is('owner_user_id', null).limit(25),
+    supabase.from('work_orders').select('id, title, ministry').eq('church_id', churchId).not('status', 'in', '(completed,cancelled)').is('owner_user_id', null).limit(25),
+    supabase.from('ministry_assignments').select('area_key, owner_user_id').eq('church_id', churchId).not('owner_user_id', 'is', null),
   ]);
+
+  // Where the Work Order's ministry has a named accountable human, Verity
+  // proposes them as owner instead of only flagging the gap — the one
+  // change it can suggest that a human can approve in a single click.
+  // Everything else stays an observation. See AgentFinding.requires_approval.
+  //
+  // The join needs BOTH halves of MinistryArea and they are different
+  // vocabularies: `work_orders.ministry` carries a human label ("Care &
+  // Counseling"), `ministry_assignments.area_key` carries the slug
+  // ("member_care"). areaForMinistry() is the bridge; joining the label
+  // straight onto area_key silently matches nothing.
+  const ownerByAreaKey = new Map<string, string>(
+    (assignments ?? []).map(a => [a.area_key, a.owner_user_id as string]),
+  );
+  const proposals = (unownedWorkOrders ?? []).flatMap(w => {
+    const area = areaForMinistry(w.ministry);
+    const ownerUserId = area ? ownerByAreaKey.get(area.key) : undefined;
+    return ownerUserId ? [{ workOrder: w, area, ownerUserId }] : [];
+  });
+
+  // Don't re-propose something already decided. agent_actions has no dedup
+  // of its own (unlike agent_findings), so without this every run would
+  // resurrect a proposal the pastor already rejected and stack duplicate
+  // approvals in the Decision Queue. 'failed' is deliberately absent —
+  // a failed execution (transient error, owner suspended that day) is the
+  // one case worth offering again.
+  const settledTargets = new Set<string>();
+  if (proposals.length > 0) {
+    const { data: existing } = await supabase
+      .from('agent_actions')
+      .select('target_entity_id, status')
+      .eq('church_id', churchId)
+      .eq('action_type', 'assign_work_order_owner')
+      .in('status', ['proposed', 'approved', 'executed', 'rejected'])
+      .in('target_entity_id', proposals.map(p => p.workOrder.id));
+    for (const row of existing ?? []) {
+      if (row.target_entity_id) settledTargets.add(row.target_entity_id);
+    }
+  }
+
+  // The approval line has to name the person. A pastor cannot responsibly
+  // approve "assign the ministry owner" — resolve the display name here,
+  // where the row is already being read, rather than leaving the UI to
+  // render a bare UUID.
+  const liveProposals = proposals.filter(p => !settledTargets.has(p.workOrder.id));
+  const ownerNames = new Map<string, string>();
+  if (liveProposals.length > 0) {
+    const { data: owners } = await supabase
+      .from('users')
+      .select('id, first_name, last_name')
+      .eq('church_id', churchId)
+      .in('id', [...new Set(liveProposals.map(p => p.ownerUserId))]);
+    for (const o of owners ?? []) {
+      const name = [o.first_name, o.last_name].filter(Boolean).join(' ').trim();
+      if (name) ownerNames.set(o.id, name);
+    }
+  }
+  const proposedByWorkOrderId = new Map(liveProposals.map(p => [p.workOrder.id, p]));
 
   const findings: AgentFinding[] = [
     ...(unreachable ?? []).map(p => ({
@@ -101,12 +161,30 @@ async function runVerityQualityReview(supabase: SupabaseClient, churchId: string
       target_entity_id: p.id,
       payload: { name: `${p.first_name} ${p.last_name}` },
     })),
-    ...(unownedWorkOrders ?? []).map(w => ({
-      action_type: 'flag_unowned_work_order',
-      target_entity_type: 'work_order',
-      target_entity_id: w.id,
-      payload: { title: w.title },
-    })),
+    ...(unownedWorkOrders ?? []).map(w => {
+      const proposal = proposedByWorkOrderId.get(w.id);
+      if (!proposal) {
+        return {
+          action_type: 'flag_unowned_work_order',
+          target_entity_type: 'work_order',
+          target_entity_id: w.id,
+          payload: { title: w.title },
+        };
+      }
+      return {
+        action_type: 'assign_work_order_owner',
+        target_entity_type: 'work_order',
+        target_entity_id: w.id,
+        payload: {
+          title: w.title,
+          work_order_title: w.title,
+          ministry: proposal.area.name,
+          owner_user_id: proposal.ownerUserId,
+          owner_name: ownerNames.get(proposal.ownerUserId) ?? null,
+        },
+        requires_approval: true,
+      };
+    }),
   ];
 
   const parts: string[] = [];

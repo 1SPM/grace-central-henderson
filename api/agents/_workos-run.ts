@@ -14,11 +14,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { getAgentDefinition } from '../_lib/agentRegistry.js';
-import { actionRowForFinding, getWorkflow } from '../_lib/agentWorkflows.js';
+import { runWorkosAgentForChurch } from '../_lib/workosAgentRunner.js';
+import { getWorkflow } from '../_lib/agentWorkflows.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
-import { persistWorkflowFindings } from '../_lib/agentWorkflowFindings.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -48,78 +48,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(501).json({ error: 'agent_not_implemented', agent_key: body.agent_key });
   }
 
-  const startedAt = new Date().toISOString();
-  const { data: run, error: runInsertErr } = await supabase
-    .from('agent_runs')
-    .insert({
-      church_id: actor.churchId,
-      agent_key: body.agent_key,
-      status: 'running',
-      input: { triggered_by: actor.userId },
-      started_at: startedAt,
-    })
-    .select()
-    .single();
-  if (runInsertErr || !run) return res.status(500).json({ error: 'run_create_failed' });
+  // The run itself is the shared path (api/_lib/workosAgentRunner.ts) so
+  // this endpoint and the nightly cron can never diverge on what a run
+  // writes. What stays here is what is genuinely specific to a human
+  // request: the permission gate above, and the actor-attributed audit
+  // trail below.
+  const outcome = await runWorkosAgentForChurch(
+    supabase,
+    actor.churchId,
+    body.agent_key,
+    { kind: 'user', userId: actor.userId },
+  );
 
+  if (outcome.status === 'failed') {
+    if (outcome.error === 'run_create_failed') return res.status(500).json({ error: 'run_create_failed' });
+    console.error('[agents/workos-run] workflow failed', { agent_key: body.agent_key, error: outcome.error });
+    return res.status(500).json({ error: 'agent_run_failed' });
+  }
+
+  // The run and its rows are already committed. Attribution must not be
+  // able to undo that: a failed event/audit write is logged, not turned
+  // into a 500 that tells the operator their successful run failed.
+  // (Previously this sat inside the run's try/catch, so an event failure
+  // marked the whole run 'failed' — the opposite of the truth.)
   try {
-    const result = await workflow(supabase, actor.churchId);
-
-    if (result.findings.length > 0) {
-      // Fail closed: no approvals consumer exists yet (nothing reads
-      // 'proposed' agent_actions rows, links an approvals row, or
-      // executes on approval). Until that pipeline is built, a workflow
-      // emitting an approval-requiring finding is a configuration error
-      // — fail the run loudly rather than stranding the proposal as a
-      // row nothing will ever read while reporting success.
-      const needingApproval = result.findings.filter(f => f.requires_approval);
-      if (needingApproval.length > 0) {
-        throw new Error(
-          `workflow '${body.agent_key}' emitted ${needingApproval.length} requires_approval finding(s) but no approvals consumer exists for agent_actions — build the approval pipeline before shipping a mutating workflow`,
-        );
-      }
-
-      // Observations execute immediately; an approval-requiring finding
-      // is recorded as 'proposed' and never auto-executed (invariant
-      // lives in actionRowForFinding + its unit tests). Note that
-      // persistWorkflowFindings below is observation-only and does not
-      // read requires_approval — see AgentFinding.requires_approval.
-      const { error: actionsInsertErr } = await supabase.from('agent_actions').insert(
-        result.findings.map(f => ({
-          agent_run_id: run.id,
-          church_id: actor.churchId,
-          ...actionRowForFinding(f, new Date()),
-        })),
-      );
-      if (actionsInsertErr) {
-        throw new Error(`agent_actions insert failed: ${actionsInsertErr.message}`);
-      }
-      // Additive: also persist each finding into the accountable
-      // agent_findings lifecycle (independent of the agent_actions log
-      // above, which is a run-history record, not a triage queue).
-      await persistWorkflowFindings(supabase, actor.churchId, body.agent_key, result.findings);
-    }
-
-    const finishedAt = new Date().toISOString();
-    const { data: updatedRun } = await supabase
-      .from('agent_runs')
-      .update({
-        status: 'succeeded',
-        output: { summary: result.summary, finding_count: result.findings.length },
-        finished_at: finishedAt,
-      })
-      .eq('id', run.id)
-      .select()
-      .single();
-
     const { correlationId } = await emitPlatformEvent(supabase, {
       churchId: actor.churchId,
       eventType: 'agent.run.completed',
       sourceApp: 'workos',
       actorUserId: actor.userId,
       subjectType: 'agent_run',
-      subjectId: run.id,
-      payload: { agent_key: body.agent_key, finding_count: result.findings.length },
+      subjectId: outcome.runId!,
+      payload: { agent_key: body.agent_key, finding_count: outcome.findingCount ?? 0 },
     });
     await recordAudit(supabase, {
       churchId: actor.churchId,
@@ -127,21 +87,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       actorClerkId: actor.clerkUserId,
       action: 'agent_run',
       entityType: 'agent_run',
-      entityId: run.id,
-      after: { agent_key: body.agent_key, summary: result.summary, finding_count: result.findings.length },
+      entityId: outcome.runId!,
+      after: { agent_key: body.agent_key, summary: outcome.summary, finding_count: outcome.findingCount ?? 0 },
       sourceApp: 'workos',
       correlationId,
       route: '/api/agents/workos-run',
       method: 'POST',
     });
-
-    return res.status(200).json({ run: updatedRun ?? run, summary: result.summary, finding_count: result.findings.length });
   } catch (err) {
-    await supabase
-      .from('agent_runs')
-      .update({ status: 'failed', error: err instanceof Error ? err.message : 'unknown_error', finished_at: new Date().toISOString() })
-      .eq('id', run.id);
-    console.error('[agents/workos-run] workflow failed', { agent_key: body.agent_key, error: err });
-    return res.status(500).json({ error: 'agent_run_failed' });
+    console.error('[agents/workos-run] attribution write failed', { agent_key: body.agent_key, run_id: outcome.runId, err });
   }
+
+  return res.status(200).json({
+    run: { id: outcome.runId, agent_key: body.agent_key, status: 'succeeded' },
+    summary: outcome.summary,
+    finding_count: outcome.findingCount ?? 0,
+  });
 }

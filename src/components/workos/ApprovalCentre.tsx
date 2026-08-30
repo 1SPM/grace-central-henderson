@@ -39,7 +39,22 @@ export function ApprovalCentre() {
   async function handleDecide(id: string, decision: ApprovalDecision) {
     setDecisionError(null);
     try {
-      await decide(id, decision, notes[id]);
+      const { agentAction, auditIncomplete } = await decide(id, decision, notes[id]);
+      // The decision was recorded, but the action it authorised may have
+      // refused — usually because the world moved between proposal and
+      // approval. Saying nothing here would show a success badge over a
+      // change that never happened.
+      if (agentAction?.status === 'failed') {
+        setDecisionError(
+          `Decision recorded, but the action could not be carried out (${agentAction.reason ?? 'unknown reason'}). Nothing was changed.`,
+        );
+      } else if (auditIncomplete) {
+        // The change went through; its audit row did not. Worth saying out
+        // loud on the one path where an agent altered church data.
+        setDecisionError(
+          'The change was applied, but its audit entry could not be written. It has been flagged for review — tell an administrator.',
+        );
+      }
     } catch (err) {
       setDecisionError(err instanceof Error ? err.message : 'Could not record the decision.');
     }
@@ -93,7 +108,7 @@ export function ApprovalCentre() {
         <EmptyState
           icon={<ClipboardCheck size={22} />}
           title={statusFilter === 'pending' ? 'Nothing needs your approval right now' : 'No approvals found'}
-          description="Approval requests appear here when a Work Order or agent proposes an action that needs sign-off."
+          description="Approval requests appear here when a Work Order, an agent, or a staff member using Ask GRACE proposes an action that needs sign-off."
         />
       ) : (
         <div className="space-y-3">
@@ -103,7 +118,12 @@ export function ApprovalCentre() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{a.proposed_action}</p>
                   <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                    Requested by {a.requested_by_agent ? `agent: ${a.requested_by_agent}` : 'a staff member'} · {new Date(a.requested_at).toLocaleString()}
+                    {/* A human requester wins over an agent label. A row can
+                        carry both, and reading out the agent in that case
+                        would credit a person's decision to software. */}
+                    Requested by {a.requested_by_user_id
+                      ? 'a staff member'
+                      : a.requested_by_agent ? `agent: ${a.requested_by_agent}` : 'unknown'} · {new Date(a.requested_at).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

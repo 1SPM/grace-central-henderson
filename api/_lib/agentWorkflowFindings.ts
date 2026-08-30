@@ -15,6 +15,7 @@ const ACTION_TYPE_TITLES: Record<string, string> = {
   flag_stale_approval: 'Approval pending over 48 hours',
   flag_missing_contact_info: 'Member with no email or phone on file',
   flag_unowned_work_order: 'Work Order with no owner assigned',
+  assign_work_order_owner: 'Work Order with no owner — an owner is proposed, awaiting approval',
   flag_stale_data_subject_request: 'Data-subject request pending over 7 days',
   flag_unassigned_care_request: 'Care request awaiting assignment or response',
   flag_reconciliation_anomaly: 'Giving ledger reconciliation anomaly',

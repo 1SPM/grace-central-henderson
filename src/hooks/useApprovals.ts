@@ -4,7 +4,15 @@ import { workosFetch, WorkOsApiError } from '../lib/services/workos';
 import type { Approval, ApprovalDecision, ApprovalStatus } from '../types/shared-platform';
 
 interface ListResponse { approvals: Approval[] }
-interface DecideResponse { approval: Approval }
+/**
+ * A decision on an agent-proposed action also carries the outcome of
+ * actually performing it. An approved action whose executor refused
+ * (the Work Order was assigned by hand meanwhile, the proposed owner left)
+ * comes back as status 'failed' with a reason — the caller must surface
+ * that, or the pastor sees a success badge over a no-op.
+ */
+export interface AgentActionOutcome { action_id: string; status: string; reason?: string }
+interface DecideResponse { approval: Approval; agent_action?: AgentActionOutcome | null; audit_incomplete?: boolean }
 
 export function useApprovals() {
   const { getAuthToken } = useAuthContext();
@@ -40,7 +48,11 @@ export function useApprovals() {
       body: JSON.stringify({ decision, decision_notes: decisionNotes }),
     });
     await list();
-    return data.approval;
+    return {
+      approval: data.approval,
+      agentAction: data.agent_action ?? null,
+      auditIncomplete: data.audit_incomplete === true,
+    };
   }, [getAuthToken, list]);
 
   const markRelatedPartyReviewed = useCallback(async (id: string) => {

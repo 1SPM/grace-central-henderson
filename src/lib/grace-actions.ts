@@ -1,4 +1,5 @@
 import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
+import { actionTypesForSurface } from '../../api/_lib/actionCatalog';
 
 export type ActionType =
   | 'add_task'
@@ -45,22 +46,13 @@ export interface PendingAction {
   message?: string;
 }
 
-const ACTION_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
-  'add_task',
-  'add_prayer',
-  'add_note',
-  'add_person',
-  'add_event',
-  'mark_task_done',
-  'update_task',
-  'update_person_status',
-  'mark_prayer_answered',
-  'delete_task',
-  'delete_person',
-  'delete_prayer',
-  'send_email',
-  'send_sms',
-]);
+// Derived from the catalog rather than restated here. This set and the
+// ActionType union above were two hand-maintained copies of the same facts in
+// one file, and the prompt that teaches the model to emit them was a third
+// copy in another file entirely. actionCatalogBinding.test.ts now holds the
+// union and the catalog together; this removes the copy that had no
+// enforcement at all.
+const ACTION_TYPES: ReadonlySet<string> = new Set(actionTypesForSurface('chat'));
 
 const EVENT_CATEGORIES: ReadonlySet<EventCategory> = new Set<EventCategory>([
   'service', 'meeting', 'event', 'small-group', 'holiday', 'wedding',

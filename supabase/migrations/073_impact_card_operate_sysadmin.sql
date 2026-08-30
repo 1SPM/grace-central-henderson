@@ -1,5 +1,5 @@
 -- GRACE — grant impact_card.operate to system_administrator
--- Migration: 072_impact_card_operate_sysadmin.sql
+-- Migration: 073_impact_card_operate_sysadmin.sql
 --
 -- Migration 046 minted impact_card.operate and granted it to
 -- senior_pastor, finance, and impact_card_operations but missed

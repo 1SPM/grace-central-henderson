@@ -48,8 +48,8 @@ describe('AgentCommandCentre (agent-run display test)', () => {
           agents: [
             {
               key: 'grace',
-              name: 'Grace',
-              role: 'WorkOS Orchestrator',
+              name: 'Cadence',
+              role: 'Operations Scanner',
               description: 'Scans Work Orders.',
               implemented: true,
               latest_run: {
@@ -83,7 +83,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
@@ -93,7 +93,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Run now'));
 
@@ -109,7 +109,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
@@ -119,7 +119,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Run now'));
 
@@ -133,7 +133,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
           agents: [
-            { key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
+            { key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
             { key: 'steward', name: 'Steward', role: 'Financial Operations', description: 'y', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
           ],
         }));
@@ -151,7 +151,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
     await waitFor(() => expect(screen.getByText('Steward')).toBeInTheDocument());
 
     const runButtons = screen.getAllByText('Run now');
@@ -171,7 +171,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/agents/workos-run') && opts?.method === 'POST') {
@@ -187,7 +187,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Run now'));
     await waitFor(() => expect(screen.getByTestId('agent-run-error-grace')).toBeInTheDocument());
@@ -201,7 +201,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
           agents: [
-            { key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
+            { key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' },
           ],
         }));
       }
@@ -210,7 +210,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
 
     render(<AgentCommandCentre />);
 
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
     expect(screen.queryByText('Run now')).not.toBeInTheDocument();
   });
 
@@ -218,7 +218,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       return Promise.resolve(jsonResponse({ permissions: ['agents.view'] }));
@@ -226,7 +226,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
 
     render(<AgentCommandCentre />);
 
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
     expect(screen.queryByTestId('agent-settings-toggle-grace')).not.toBeInTheDocument();
   });
 
@@ -235,7 +235,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
@@ -252,7 +252,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     // Existing config summary shows collapsed before opening.
     await waitFor(() => expect(screen.getByText('Watch for overdue approvals.')).toBeInTheDocument());
@@ -286,7 +286,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
@@ -301,7 +301,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('agent-settings-toggle-grace'));
     await screen.findByLabelText('Instructions');
@@ -322,7 +322,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
@@ -340,7 +340,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('agent-settings-toggle-grace'));
     await screen.findByLabelText('Instructions');
@@ -358,7 +358,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
       if (url.includes('/api/agents/workos-registry')) {
         return Promise.resolve(jsonResponse({
-          agents: [{ key: 'grace', name: 'Grace', role: 'WorkOS Orchestrator', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
+          agents: [{ key: 'grace', name: 'Cadence', role: 'Operations Scanner', description: 'x', implemented: true, latest_run: null, run_count_last_200: 0, status: 'not_yet_run' }],
         }));
       }
       if (url.includes('/api/workos/agent-settings') && (!opts?.method || opts.method === 'GET')) {
@@ -370,7 +370,7 @@ describe('AgentCommandCentre (agent-run display test)', () => {
     });
 
     render(<AgentCommandCentre />);
-    await waitFor(() => expect(screen.getByText('Grace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cadence')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('agent-settings-toggle-grace'));
     await screen.findByText('Task A');
 

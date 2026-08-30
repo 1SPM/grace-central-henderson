@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { sendFresh } from '../_lib/agentmail-send.js';
 import { requireClerkAuth } from '../_lib/auth-helper.js';
+import { recordAudit } from '../_lib/workosAudit.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -89,10 +90,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  // Audited here rather than at the caller, because this is where the send
+  // actually happens — every surface that emails through this route gets the
+  // record, not just Ask GRACE (TD-061).
+  //
+  // The Interaction row above and this one answer different questions for
+  // different readers: that one is pastoral history on the person, editable
+  // and gone if they are deleted; this one is append-only and says who sent
+  // what, when. Neither replaces the other.
+  //
+  // This route runs in the coarse requireClerkAuth lane, which carries a
+  // Clerk id but no users.id — so the actor is resolved here. On failure the
+  // audit still records the Clerk id rather than being skipped: a partly
+  // attributed record beats none (TD-038/040 tracks the lane split).
+  const { data: actorRow } = await supabase
+    .from('users')
+    .select('id')
+    .eq('clerk_id', auth.clerkUserId)
+    .eq('church_id', auth.churchId)
+    .maybeSingle();
+
+  const audit = await recordAudit(supabase, {
+    churchId: auth.churchId,
+    actorUserId: (actorRow?.id as string | undefined) ?? null,
+    actorClerkId: auth.clerkUserId,
+    action: 'send',
+    entityType: 'email',
+    entityId: result.message_id ?? null,
+    before: null,
+    // Subject and recipient, not the body: enough to reconstruct what was
+    // sent to whom, without copying pastoral correspondence into a second
+    // table that has a different retention and access story.
+    after: {
+      to: recipientEmail,
+      subject: subject.trim(),
+      person_id: resolvedPersonId,
+      thread_id: result.thread_id ?? null,
+    },
+    route: '/api/agentmail/send',
+    method: 'POST',
+  });
+
   return res.status(200).json({
     ok: true,
     message_id: result.message_id,
     thread_id: result.thread_id,
     person_id: resolvedPersonId,
+    ...(audit.ok ? {} : { audit_incomplete: true }),
   });
 }
