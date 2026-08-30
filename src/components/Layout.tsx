@@ -28,6 +28,7 @@ import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
 import { DemoEnvironmentBanner } from './DemoEnvironmentBanner';
 import { NotificationCenter } from './NotificationCenter';
+import { ActionBar } from './ActionBar';
 import { LiveClockDisplay } from './dashboard/ClockCalendarBanner';
 import { TENANT_TIMEZONE, churchShortName } from '../config/tenant';
 import { GraceOrb } from './grace/GraceOrb';
@@ -184,7 +185,7 @@ function AdminUserAvatar({ name, initials }: { name: string; initials: string })
 export function Layout({ currentView, setView, children, onOpenSearch, isDemo = false, churchId, timezone, churchName, branding, sidebarAddon }: LayoutProps) {
   const grace = useGraceChat();
   const { user, signOut } = useAuthContext();
-  const { counts: decisionQueueCounts } = useDecisionQueue();
+  const { items: decisionQueueItems, counts: decisionQueueCounts, isLoading: decisionQueueLoading } = useDecisionQueue();
   const { hasWorkosAccess } = useWorkOsPermissions();
   const addressee = resolveAddressee(user?.firstName, user?.role);
   const displayChurch = churchShortName(churchName || 'Central Henderson Church');
@@ -683,6 +684,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
         <DemoEnvironmentBanner />
         <TrialBanner />
+        <ActionBar items={decisionQueueItems} isLoading={decisionQueueLoading} currentView={currentView} />
         <main className="flex-1 overflow-auto">
           {children}
         </main>
