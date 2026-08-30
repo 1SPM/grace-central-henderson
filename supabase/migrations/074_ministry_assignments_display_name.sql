@@ -25,3 +25,11 @@ ALTER TABLE ministry_assignments ADD CONSTRAINT ministry_assignments_display_nam
 
 COMMENT ON COLUMN ministry_assignments.display_name IS
   'Church-chosen override of this area''s display name. NULL = use the coded default in api/_lib/ministryAreas.ts.';
+
+-- Rollback: drops the column and its check constraint. Destructive to any
+-- display_name values already set — every church reverts to the coded
+-- default name, with no way to recover what was there.
+-- begin;
+--   alter table ministry_assignments drop constraint if exists ministry_assignments_display_name_length;
+--   alter table ministry_assignments drop column if exists display_name;
+-- commit;

@@ -19,3 +19,13 @@ SELECT r.id, p.id
 FROM roles r, permissions p
 WHERE r.key = 'system_administrator' AND r.church_id IS NULL AND p.key = 'impact_card.operate'
 ON CONFLICT DO NOTHING;
+
+-- Rollback: removes exactly the grant this migration added, restoring the
+-- migration-046 gap. Reintroduces the bug this migration fixed — confirm
+-- that is actually wanted before running.
+-- begin;
+--   delete from role_permissions
+--   using roles r, permissions p
+--   where role_permissions.role_id = r.id and role_permissions.permission_id = p.id
+--     and r.key = 'system_administrator' and r.church_id is null and p.key = 'impact_card.operate';
+-- commit;

@@ -16,3 +16,12 @@ ALTER TABLE agent_findings ADD CONSTRAINT agent_findings_source_check
 
 COMMENT ON COLUMN agent_findings.source IS
   'Who/what generated this finding: cron runner observation, Command Centre workflow run, synchronous crisis event, or a staff member flagging agent work via My Work.';
+
+-- Rollback: narrows the CHECK back to its pre-migration set. Only safe if
+-- no 'staff_flag' rows exist yet — check first with:
+--   select count(*) from agent_findings where source = 'staff_flag';
+-- begin;
+--   alter table agent_findings drop constraint if exists agent_findings_source_check;
+--   alter table agent_findings add constraint agent_findings_source_check
+--     check (source in ('cron','workflow','event'));
+-- commit;
