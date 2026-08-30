@@ -100,7 +100,43 @@ export function MinistryAreasSettings() {
                 {justSaved === area.key && <span className="text-[11px] text-emerald-600 dark:text-emerald-400 shrink-0">Saved</span>}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
+                {/* Area name — cosmetic only, what this church calls it. */}
+                <div>
+                  <label className={labelCls} htmlFor={`name-${area.key}`}>
+                    Area name{' '}
+                    {area.source.name === 'default' ? (
+                      <span className="normal-case text-gray-400">· default</span>
+                    ) : canManage ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void save(area.key, { display_name: null })}
+                        className="normal-case text-gray-400 hover:underline disabled:opacity-50"
+                      >
+                        · reset to default
+                      </button>
+                    ) : null}
+                  </label>
+                  <input
+                    id={`name-${area.key}`}
+                    // Remounts after a successful save/refresh so the field
+                    // picks up the new resolved name without hand-rolled
+                    // controlled-state sync.
+                    key={`${area.key}-${area.name}`}
+                    type="text"
+                    defaultValue={area.name}
+                    disabled={!canManage || busy}
+                    maxLength={60}
+                    className={selectCls}
+                    onBlur={e => {
+                      const next = e.target.value.trim();
+                      if (!next || next === area.name) return;
+                      void save(area.key, { display_name: next });
+                    }}
+                  />
+                </div>
+
                 {/* Accountable human */}
                 <div>
                   <label className={labelCls} htmlFor={`owner-${area.key}`}>

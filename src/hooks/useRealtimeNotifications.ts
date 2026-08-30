@@ -14,6 +14,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
+import type { AttentionState } from '../lib/attentionPolicy';
 
 const log = createLogger('realtime');
 
@@ -24,6 +25,18 @@ export interface LiveNotification {
   body: string;
   createdAt: string;
   read: boolean;
+}
+
+/**
+ * Classifies a notification's kind into the shared attention vocabulary.
+ * Only 'crisis' is urgent — inbox/agent/portal items are routine
+ * observations, not judgment calls awaiting a decision, so they land as
+ * informational rather than needs_review. Named and exported so the bell
+ * (NotificationCenter) and any future consumer share one definition of
+ * "urgent" instead of each hand-rolling `kind === 'crisis'`.
+ */
+export function attentionForNotification(kind: LiveNotification['kind']): AttentionState {
+  return kind === 'crisis' ? 'urgent' : 'informational';
 }
 
 const MAX_NOTIFICATIONS = 50;

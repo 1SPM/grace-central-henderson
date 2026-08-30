@@ -17,6 +17,7 @@ and never reformats code.
 | Unit tests (incl. authorization tests) | `test` | vitest (`test:run`) |
 | RLS policy tests | `rls-policy-tests` | cross-tenant / escalation / read-restriction / entitlement smokes |
 | RLS lint (migrations enable RLS) | `rls-lint` | `tools/lint-rls.ts` |
+| Rollback lint (migrations document a rollback) | `rollback-lint` | `tools/lint-rollback.ts` |
 | Build validation | `build` | `npm run build` |
 | Service-role usage in frontend | `frontend-safety` | `tools/check-frontend-safety.ts` |
 | Public-prefix secret exposure | `frontend-safety` | `tools/check-frontend-safety.ts` |
@@ -27,6 +28,7 @@ and never reformats code.
 - Any gitleaks hit
 - Type error, lint error, failing unit/authorization test, build failure
 - RLS-lint failure (a new table without RLS enabled)
+- Rollback-lint failure (a migration numbered above the baseline with no documented rollback)
 - `frontend-safety` finding — a service-role key read in `src/`, or a
   `VITE_`/`NEXT_PUBLIC_`-prefixed name that looks secret
 - CodeQL **high/critical**

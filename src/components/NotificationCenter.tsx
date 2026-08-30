@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bell, AlertTriangle, Mail, Smartphone, CheckCheck, Bot } from 'lucide-react';
-import { useRealtimeNotifications, type LiveNotification } from '../hooks/useRealtimeNotifications';
+import { useRealtimeNotifications, attentionForNotification, type LiveNotification } from '../hooks/useRealtimeNotifications';
 
 interface NotificationCenterProps {
   churchId?: string;
@@ -39,8 +39,10 @@ export function NotificationCenter({ churchId, onNavigate }: NotificationCenterP
   // Red is reserved for something actually urgent. A routine unread inbox
   // message or agent note shouldn't carry the same alarm color as a
   // crisis flag — otherwise red stops meaning anything by the time it's
-  // needed for a real one.
-  const hasUrgentUnread = notifications.some(n => !n.read && n.kind === 'crisis');
+  // needed for a real one. attentionForNotification is the shared,
+  // named definition of "urgent" (see attentionPolicy.ts) rather than a
+  // bespoke check local to this component.
+  const hasUrgentUnread = notifications.some(n => !n.read && attentionForNotification(n.kind) === 'urgent');
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 

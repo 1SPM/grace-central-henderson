@@ -364,7 +364,7 @@ export interface ResolvedArea {
   room_id: string;
   /** Room-label underline / panel-border color. Never applied to a status pip. */
   accent_color: string;
-  source: { owner: 'default' | 'assigned'; agent: 'default' | 'assigned'; room: 'default' | 'assigned' };
+  source: { owner: 'default' | 'assigned'; agent: 'default' | 'assigned'; room: 'default' | 'assigned'; name: 'default' | 'assigned' };
   updated_at: string | null;
 }
 
@@ -377,6 +377,7 @@ export interface AssignmentRow {
   owner_user_id: string | null;
   agent_key: string | null;
   campus_room: string | null;
+  display_name?: string | null;
   updated_at?: string | null;
 }
 
@@ -457,7 +458,7 @@ export function resolveAreas(
 
     return {
       key: area.key,
-      name: area.name,
+      name: row?.display_name ?? area.name,
       purpose: area.purpose,
       ministry: area.ministry,
       confidential: area.confidential === true,
@@ -480,6 +481,7 @@ export function resolveAreas(
         owner: ownerRow ? 'assigned' : 'default',
         agent: row?.agent_key != null ? 'assigned' : 'default',
         room: row?.campus_room != null ? 'assigned' : 'default',
+        name: row?.display_name != null ? 'assigned' : 'default',
       },
       updated_at: row?.updated_at ?? null,
       open_work_orders: bucket.open,

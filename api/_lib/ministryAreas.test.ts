@@ -19,7 +19,8 @@ describe('resolveAreas (the shared pairing, resolved per church)', () => {
     expect(giving.default_role_key).toBe('finance');
     expect(giving.agent_key).toBe('steward');
     expect(giving.room_id).toBe('admin_work');
-    expect(giving.source).toEqual({ owner: 'default', agent: 'default', room: 'default' });
+    expect(giving.name).toBe('Giving & Stewardship');
+    expect(giving.source).toEqual({ owner: 'default', agent: 'default', room: 'default', name: 'default' });
   });
 
   it('applies an override and marks each changed link as assigned', () => {
@@ -32,10 +33,36 @@ describe('resolveAreas (the shared pairing, resolved per church)', () => {
     expect(giving.owner).toEqual({ user_id: 'u-naomi', name: 'Naomi Ito', title: 'Director of Finance', person_id: null });
     expect(giving.agent_key).toBe('verity');
     expect(giving.room_id).toBe('conference');
-    expect(giving.source).toEqual({ owner: 'assigned', agent: 'assigned', room: 'assigned' });
+    expect(giving.source).toEqual({ owner: 'assigned', agent: 'assigned', room: 'assigned', name: 'default' });
     expect(giving.updated_at).toBe('2026-08-23T00:00:00Z');
     // untouched areas keep their defaults
     expect(areas.find(a => a.key === 'member_care')!.source.owner).toBe('default');
+  });
+
+  it('applies a church-chosen display name override and marks it as assigned', () => {
+    const areas = resolveAreas(
+      [{ area_key: 'children', owner_user_id: null, agent_key: null, campus_room: null, display_name: 'Kids Ministry' }],
+      STAFF,
+      [],
+    );
+    const children = areas.find(a => a.key === 'children')!;
+    expect(children.name).toBe('Kids Ministry');
+    expect(children.source.name).toBe('assigned');
+    // links nobody touched are untouched by the name override
+    expect(children.source.owner).toBe('default');
+    expect(children.source.agent).toBe('default');
+    expect(children.source.room).toBe('default');
+  });
+
+  it('a NULL display_name falls back to the coded default name — the restore-to-default path', () => {
+    const areas = resolveAreas(
+      [{ area_key: 'children', owner_user_id: null, agent_key: null, campus_room: null, display_name: null }],
+      STAFF,
+      [],
+    );
+    const children = areas.find(a => a.key === 'children')!;
+    expect(children.name).toBe(MINISTRY_AREAS.find(a => a.key === 'children')!.name);
+    expect(children.source.name).toBe('default');
   });
 
   it('an owner who is no longer active staff resolves to an honest gap, not a dangling id', () => {

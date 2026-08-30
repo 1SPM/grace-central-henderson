@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, User, CheckSquare, Heart, Sparkles, Send, Loader2, RefreshCw, Copy, Check,
   LayoutDashboard, Users, Crown, DollarSign, Megaphone, Church, UserCheck, BookOpen,
-  BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet,
+  BarChart3, TrendingUp, ArrowRight, ListTodo, Home, Wallet, Workflow,
   FileText, Tag, Settings, Smartphone, Mail,
 } from 'lucide-react';
 import { Person, Task, PrayerRequest, View } from '../types';
@@ -12,6 +12,7 @@ import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { sundayHash, type SundayTab } from '../lib/sundayNav';
 import { visiblePaletteActions, PALETTE_ACTION_UI } from '../lib/paletteActions';
 import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
+import { useRouteGuard } from '../hooks/useRouteGuard';
 
 interface GlobalSearchProps {
   people: Person[];
@@ -57,6 +58,7 @@ const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.Reac
   { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, archive, attendance & announcements', icon: <Church size={16} /> },
   { view: 'sunday-prep', label: 'Sermon Archive', subtitle: 'Sunday Service Tools · Past messages', icon: <BookOpen size={16} />, sundayTab: 'archive' },
   { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'GRACE Banking card program & member usage', icon: <Wallet size={16} /> },
+  { view: 'workos', label: 'GRACE WorkOS', subtitle: 'Work orders, approvals, agents & audit trail', icon: <Workflow size={16} /> },
   { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
   { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Crisis dispatch, weddings, funerals & legacy planning', icon: <Heart size={16} /> },
   { view: 'discipleship-engagement', label: 'Growth & Engagement', subtitle: 'Pathways, portal signals & spiritual growth', icon: <TrendingUp size={16} /> },
@@ -102,6 +104,15 @@ export function GlobalSearch({
 }: GlobalSearchProps) {
   const { settings: aiSettings } = useAISettings();
   const { permissions } = useWorkOsPermissions();
+  const { canAccess } = useRouteGuard();
+
+  // Views this user can actually open. Advertising a view here that
+  // ViewRenderer then blocks is the exact anti-pattern a launcher must
+  // avoid — searchable-but-denied is worse than not-listed.
+  const visibleNavItems = useMemo(
+    () => NAV_ITEMS.filter(item => canAccess(item.view)),
+    [canAccess]
+  );
   const [mode, setMode] = useState<Mode>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -138,7 +149,7 @@ export function GlobalSearch({
   const defaultResults: SearchResult[] = useMemo(
     () => [
       ...actionResults,
-      ...NAV_ITEMS.slice(0, 8).map(item => ({
+      ...visibleNavItems.slice(0, 8).map(item => ({
         type: 'view' as const,
         id: item.sundayTab ? `sunday-${item.sundayTab}` : item.view,
         title: item.label,
@@ -148,7 +159,7 @@ export function GlobalSearch({
         sundayTab: item.sundayTab,
       })),
     ],
-    [actionResults]
+    [actionResults, visibleNavItems]
   );
 
   // Memoize person lookup map for O(1) access
@@ -196,7 +207,7 @@ export function GlobalSearch({
     });
 
     // Views next — match on label (exact prefix boosted)
-    NAV_ITEMS.forEach(item => {
+    visibleNavItems.forEach(item => {
       if (item.label.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q)) {
         searchResults.push({
           type: 'view',

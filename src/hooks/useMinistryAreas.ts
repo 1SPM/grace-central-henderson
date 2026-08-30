@@ -30,6 +30,7 @@ export interface AreaPatch {
   owner_user_id?: string | null;
   agent_key?: string | null;
   campus_room?: string | null;
+  display_name?: string | null;
 }
 
 export type { AreaSurface, RoleKey };

@@ -3,6 +3,7 @@ import { Send, Loader2, X, Check, CheckSquare, Heart, StickyNote, UserPlus, Plus
 import type { Person, MemberStatus, EventCategory } from '../types';
 import { useAISettings } from '../hooks/useAISettings';
 import { useGraceSpeech } from '../hooks/useGraceSpeech';
+import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
@@ -57,24 +58,6 @@ function renderWithLinks(text: string) {
   );
 }
 
-interface MinimalRecognition {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-}
-
-function getSpeechRecognitionCtor(): (new () => MinimalRecognition) | null {
-  if (typeof window === 'undefined') return null;
-  const w = window as unknown as Record<string, unknown>;
-  const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
-  return (Ctor as new () => MinimalRecognition) || null;
-}
-
 /** Skip TTS for configuration / error strings — not useful read aloud. */
 function shouldAutoSpeakReply(content: string): boolean {
   const text = content.trim();
@@ -83,44 +66,6 @@ function shouldAutoSpeakReply(content: string): boolean {
 }
 
 const VOICE_GREETING_SESSION_KEY = 'grace-admin-voice-greeted';
-
-function useVoiceInput(onTranscript: (text: string) => void) {
-  const [listening, setListening] = useState(false);
-  const recognitionRef = useRef<MinimalRecognition | null>(null);
-  const supported = !!getSpeechRecognitionCtor();
-
-  const start = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) return;
-    const rec = new Ctor();
-    rec.lang = navigator.language || 'en-US';
-    rec.interimResults = false;
-    rec.continuous = false;
-    rec.onresult = (e) => {
-      const results = Array.from(e.results) as ArrayLike<{ transcript: string }>[];
-      const transcript = results
-        .map(r => r[0]?.transcript || '')
-        .join(' ')
-        .trim();
-      if (transcript) onTranscript(transcript);
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => {
-      setListening(false);
-      console.warn('[Ask Grace] Speech recognition error — allow mic in browser settings or check Permissions-Policy.');
-    };
-    recognitionRef.current = rec;
-    setListening(true);
-    rec.start();
-  }, [onTranscript]);
-
-  const stop = useCallback(() => {
-    recognitionRef.current?.stop();
-    setListening(false);
-  }, []);
-
-  return { listening, supported, start, stop };
-}
 
 export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }: AskGraceChatProps) {
   const { settings: aiSettings } = useAISettings();
