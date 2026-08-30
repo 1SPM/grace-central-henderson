@@ -22,24 +22,75 @@ The CRM, member portal, wallets, agents, APIs, virtual campus, and infrastructur
 
 > GRACE — the intelligence layer that understands, oversees, and orchestrates the church’s digital operations.
 
-Four simultaneous capabilities — three describe what it can do, the fourth is why that is safe to allow:
+### GRACE — The Governed Operational Learning Loop
 
-- **Sees** — data, member activity, workflows, authorized financial metrics, programs, communications, permissions, infrastructure, and system state.
-- **Understands** — this church’s structure, people, policies, objectives, institutional knowledge, permissions, and operating context.
-- **Acts** — through approved tools and specialized agents. Consequential
-  actions stop at a named human. One honest exception: a small set of opt-in
-  scheduled emails (birthday/anniversary greetings, a new-member drip, giving
-  thank-yous) send without a human in the loop once a church enables them
-  (`api/cron/_agents.ts` → `api/cron/_send-pending-emails.ts`), including a
-  five-message new-member drip. A nightly pass also creates staff follow-up
-  tasks and logs contacts (`api/_lib/agents/runner.ts`). Outbound SMS *to
-  members* is always human-initiated; the one automated SMS is the crisis alert
-  to on-call staff (`crisisNotify.ts`), which is deliberate.
-- **Shows its work** — answers are scoped to the asker's authority,
-  consequential actions stop at a named human, and every action lands on an
-  append-only audit trail (`audit_logs`, `platform_events`, `security_events`,
-  all trigger-enforced). Three verbs are a capability claim; this fourth one is
-  the trust claim, and it is the verb GRACE has most fully built.
+> GRACE is the church’s governed operational intelligence: it learns which
+> approved ways of working best help this particular church serve
+> people — while church leaders retain authority over data, decisions, and
+> action.
+
+Five stages, left to right, each with a status tag. **Live** = shipped and
+running in production today. **Partial** = a real mechanism exists but not
+the full stage as described. **Later** = roadmap language, no code behind it
+yet — stated here so the pitch doesn't get ahead of the product.
+
+1. **GRACE sees** — *Live.* Church systems, context, permissions, policies,
+   and current needs: data, member activity, workflows, authorized financial
+   metrics, programs, communications, permissions, infrastructure, and system
+   state.
+2. **GRACE understands** — *Partial.* Interprets each task against this
+   church’s structure, people, policies, objectives, institutional knowledge,
+   permissions, and operating context. The gap: no single shared church
+   context object yet — admin chat, member assistant, and agents each carry
+   their own partial understanding (see §4).
+3. **GRACE proposes** — *Partial.* Options, not autonomy — but today that
+   means one proposed action awaiting a decision, not a compared set of
+   draft plans. `POST /api/actions/propose` re-checks the caller's catalog
+   permission server-side, logs the request to `audit_logs`, and writes an
+   `agent_actions` + `approvals` pair (migration 071). "Selects approved
+   playbooks and generates multiple draft actions or plans" is target
+   language: there is no playbook library or playbook-selection mechanism in
+   the codebase today — only fictional playbook references in demo content
+   (`centralHendersonLeaders.ts`, `faithfulChurchLeaders.ts`,
+   `demoLeadersHub.ts`).
+4. **People decide** — *Live.* A named, accountable holder of
+   `approvals.decide` approves, edits, delegates, or rejects every
+   consequential proposal through the Decision Queue / Approval Centre:
+   `approve`, `approve_with_changes`, `return_for_revision`, `reject`,
+   `escalate` (`ApprovalCentre.tsx`). This is the gate that makes "options,
+   not autonomy" true today, not just in the pitch.
+5. **GRACE acts** — *Live, with named exceptions.* Executes through the same
+   executor registry the agent door uses and records the result on an
+   append-only audit trail. One honest exception carried forward from the
+   prior framing: a small set of opt-in scheduled emails (birthday/anniversary
+   greetings, a new-member drip, giving thank-yous) send without a human in
+   the loop once a church enables them (`api/cron/_agents.ts` →
+   `api/cron/_send-pending-emails.ts`), including a five-message new-member
+   drip. A nightly pass also creates staff follow-up tasks and logs contacts
+   (`api/_lib/agents/runner.ts`). Outbound SMS *to members* is always
+   human-initiated; the one automated SMS is the crisis alert to on-call
+   staff (`crisisNotify.ts`), which is deliberate. These are pre-approved,
+   not autonomous — the church switched them on; they are not GRACE deciding
+   on its own.
+
+**Controlled playbook improvement (outer loop)** — *Later, not built.*
+Measuring outcomes against church-defined criteria (helpfulness, accuracy,
+policy compliance, effort, ministry impact) and returning only reviewed,
+versioned, tenant-safe improvements to an approved playbook library is
+roadmap language. No playbook library, versioning system, or outcomes-scoring
+loop exists in the codebase today. This belongs in the same "Later" tier as
+the rest of §6 — a direction GRACE is built to grow into, not a claim about
+what it does now.
+
+**Always-on guardrails** — the trust claim that makes the four stages above
+safe to allow, and the verb GRACE has most fully built regardless of the
+stage-by-stage status above: church-owned data, role-based access, answers
+scoped to the asker's authority, consequential actions stopping at a named
+human, and every action landing on an append-only audit trail (`audit_logs`,
+`platform_events`, `security_events`, all trigger-enforced). Approval
+thresholds and privacy boundaries are enforced through the same RBAC and RLS
+mechanisms; full reversibility of every action is not yet a system-wide
+guarantee and should not be pitched as one.
 
 **Boundary that belongs in the pitch, not the footnotes — stated precisely,
 because the loose version is false.** GRACE *does* measure engagement and *does*

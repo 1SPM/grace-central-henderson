@@ -245,22 +245,25 @@
 
     .petal {
       position: absolute;
-      width: 42%;
+      width: 32%;
       text-align: center;
       transform: translate(-50%, -50%);
     }
     .petal b {
-      display: block;
-      font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
       color: var(--sky-light); margin-bottom: 4px;
     }
+    .petal[data-status="partial"] b { color: #c7dceb }
     .petal span {
       display: block;
-      font-size: 11px; color: rgba(255,255,255,.68); line-height: 1.3;
+      font-size: 10.5px; color: rgba(255,255,255,.68); line-height: 1.3;
     }
     .petal-sees { left: 50%; top: 14% }
-    .petal-understands { left: 13%; top: 52% }
-    .petal-acts { left: 87%; top: 52% }
+    .petal-understands { left: 84%; top: 39% }
+    .petal-proposes { left: 71%; top: 79% }
+    .petal-decide { left: 29%; top: 79% }
+    .petal-acts { left: 16%; top: 39% }
 
     @keyframes orbPulse {
       0%, 100% { transform: scale(1); opacity: .85 }
@@ -316,6 +319,16 @@
       display: block; font-size: 13.5px; line-height: 1.55;
       color: rgba(255,255,255,.7);
     }
+    /* The outer loop is the one stage that is roadmap, not product — the
+       dashed border and dimmer gold keep it visually distinct from the
+       "most fully built" claim above it, not just labeled distinct. */
+    .fourth-verb[data-status="later"] {
+      border-style: dashed;
+      border-color: rgba(196,165,116,.22);
+      background: linear-gradient(180deg, rgba(196,165,116,.03), rgba(12,25,41,.35));
+    }
+    .fourth-verb[data-status="later"] b { color: var(--gold-soft) }
+    .fourth-verb[data-status="later"] em { font-style: italic; color: var(--gold-soft) }
     .boundary-note {
       position: relative; z-index: 2;
       max-width: 760px; margin: 0 auto 30px;
@@ -450,10 +463,18 @@
         border: 1px solid rgba(168,218,240,.14);
       }
       .m-petal b {
-        display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+        display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+        font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
         color: var(--sky-light); margin-bottom: 4px;
       }
       .m-petal span { font-size: 13.5px; color: rgba(255,255,255,.72) }
+      .m-tag {
+        flex-shrink: 0; font-size: 9.5px; letter-spacing: .1em;
+        color: rgba(255,255,255,.4); font-weight: 600;
+      }
+      .m-petal.is-later { border-style: dashed; border-color: rgba(196,165,116,.24) }
+      .m-petal.is-later b { color: var(--gold-soft) }
+      .m-petal.is-later .m-tag { color: var(--gold-soft) }
       .triad { grid-template-columns: 1fr }
       .mobile-ring { display: grid; gap: 8px; margin-top: 28px; position: relative; z-index: 2 }
       .mobile-ring h3 {
@@ -512,7 +533,7 @@
       </div>
 
       <div class="stage-wrap">
-        <div class="stage" role="img" aria-label="GRACE at the center of a governed church operating environment. Three interfaces sit in the foreground: CRM Workspace, Virtual Campus, and Ask GRACE. Outer systems are connected capabilities, some live and some on the roadmap.">
+        <div class="stage" role="img" aria-label="GRACE at the center of a governed church operating environment, drawn as a five-stage loop: GRACE sees, GRACE understands, GRACE proposes, people decide, and GRACE acts, feeding back into what GRACE sees next. Outer systems are connected capabilities, some live and some on the roadmap.">
           <svg class="rig" viewBox="0 0 1100 680" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <marker id="inArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -549,17 +570,25 @@
               <div class="orb-core"><div class="orb-mist"></div></div>
               <span class="orb-name">GRACE</span>
             </div>
-            <div class="petal petal-sees">
-              <b>GRACE sees</b>
+            <div class="petal petal-sees" data-status="live">
+              <b><span class="swatch live"></span>1 · GRACE sees</b>
               <span>Activity, workflows, metrics, and system state.</span>
             </div>
-            <div class="petal petal-understands">
-              <b>GRACE understands</b>
+            <div class="petal petal-understands" data-status="partial">
+              <b><span class="swatch partial"></span>2 · GRACE understands</b>
               <span>This church’s people, policies, and context.</span>
             </div>
-            <div class="petal petal-acts">
-              <b>GRACE acts</b>
-              <span>Approved tools. Consequential actions stop at a named human.</span>
+            <div class="petal petal-proposes" data-status="partial">
+              <b><span class="swatch partial"></span>3 · GRACE proposes</b>
+              <span>One proposed action today, not compared draft plans.</span>
+            </div>
+            <div class="petal petal-decide" data-status="live">
+              <b><span class="swatch live"></span>4 · People decide</b>
+              <span>A named human approves, edits, delegates, or rejects.</span>
+            </div>
+            <div class="petal petal-acts" data-status="live">
+              <b><span class="swatch live"></span>5 · GRACE acts</b>
+              <span>Approved tools execute. A few pre-approved sends bypass review.</span>
             </div>
           </div>
 
@@ -606,6 +635,11 @@
         <span>Answers are scoped to the asker’s authority, consequential actions stop at a named human who is recorded by name, and the audit trail they land on is append-only at the database — updates and deletes are blocked by trigger, not by convention. Permissions, approval, and audit are not wrapped around the product; they are the product.</span>
       </div>
 
+      <div class="fourth-verb" data-status="later">
+        <b>The loop closes with <em>controlled playbook improvement</em> — later, not built.</b>
+        <span>The direction: measure outcomes against church-defined criteria — helpfulness, accuracy, policy compliance, effort, ministry impact — and return only reviewed, versioned, tenant-safe improvements to an approved playbook library. No playbook library, versioning system, or outcomes-scoring loop exists in the product today. Said here plainly, not implied by the diagram.</span>
+      </div>
+
       <p class="boundary-note">
         GRACE does measure engagement — attendance, giving, serving — and will tell staff who has gone quiet.
         That is the job. What it will never do is infer or score anyone’s <em>spiritual</em> state, diagnose,
@@ -615,10 +649,13 @@
       </p>
 
       <div class="mobile-petals">
-        <div class="m-petal"><b>GRACE sees</b><span>Data, member activity, workflows, authorized financial metrics, programs, communications, permissions, infrastructure, and system state.</span></div>
-        <div class="m-petal"><b>GRACE understands</b><span>This church’s structure, people, policies, objectives, institutional knowledge, permissions, and operating context.</span></div>
-        <div class="m-petal"><b>GRACE acts</b><span>Through approved tools and specialized agents. Consequential actions stop at a named human. Exceptions a church switches on deliberately: scheduled emails (birthday and anniversary greetings, giving thank-yous, a five-message new-member series) and a nightly pass that creates staff follow-up tasks.</span></div>
-        <div class="m-petal"><b>GRACE shows its work</b><span>Answers scoped to the asker’s authority, the deciding human recorded by name, and an audit trail that is append-only at the database — updates and deletes blocked by trigger.</span></div>
+        <div class="m-petal"><b>1 · GRACE sees<span class="m-tag">Live</span></b><span>Data, member activity, workflows, authorized financial metrics, programs, communications, permissions, infrastructure, and system state.</span></div>
+        <div class="m-petal"><b>2 · GRACE understands<span class="m-tag">Partial</span></b><span>This church’s structure, people, policies, objectives, institutional knowledge, permissions, and operating context. No single shared church context object yet.</span></div>
+        <div class="m-petal"><b>3 · GRACE proposes<span class="m-tag">Partial</span></b><span>Options, not autonomy — today, one proposed action awaiting a decision, not a compared set of draft plans. There is no playbook-selection mechanism yet.</span></div>
+        <div class="m-petal"><b>4 · People decide<span class="m-tag">Live</span></b><span>A named, accountable human approves, edits, delegates, or rejects every consequential proposal through the Decision Queue and Approval Centre.</span></div>
+        <div class="m-petal"><b>5 · GRACE acts<span class="m-tag">Live</span></b><span>Through approved tools and specialized agents. Consequential actions stop at a named human. Exceptions a church switches on deliberately: scheduled emails (birthday and anniversary greetings, giving thank-yous, a five-message new-member series) and a nightly pass that creates staff follow-up tasks.</span></div>
+        <div class="m-petal"><b>GRACE shows its work<span class="m-tag">Live</span></b><span>Answers scoped to the asker’s authority, the deciding human recorded by name, and an audit trail that is append-only at the database — updates and deletes blocked by trigger.</span></div>
+        <div class="m-petal is-later"><b>Controlled playbook improvement<span class="m-tag">Later</span></b><span>The loop closes by measuring outcomes against church-defined criteria and returning reviewed, versioned improvements to an approved playbook library. No playbook library or outcomes-scoring loop exists today.</span></div>
       </div>
 
       <p class="triad-kicker">Three interfaces · one intelligence</p>
