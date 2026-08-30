@@ -22,7 +22,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/[...path]?path=:path*" },
+    { "source": "/api/:path*", "destination": "/api/[...path]" },
     { "source": "/((?!api/|grace_central_henderson_members_card_ios_app\\.html|grace_faithful_church_members_card_ios_app\\.html|members-card\\.html|whitelabel-hub\\.html|grace-platform\\.html|grace-intelligence\\.html|previews/).*)", "destination": "/index.html" }
   ],
   "crons": [
