@@ -1,5 +1,5 @@
 import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
-import { actionTypesForSurface } from '../../api/_lib/actionCatalog';
+import { actionTypesForSurface } from './actionCatalog';
 
 export type ActionType =
   | 'add_task'

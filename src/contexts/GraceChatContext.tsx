@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person } from '../types';
 import { sendGraceTurn, hydrateGraceConversation, importBrainEntries } from '../lib/services/graceChat';
-import { buildChatActionPrompt } from '../../api/_lib/actionCatalog';
+import { buildChatActionPrompt } from '../lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
