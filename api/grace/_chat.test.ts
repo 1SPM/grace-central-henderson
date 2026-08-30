@@ -90,6 +90,8 @@ interface SupabaseOpts {
   conversationId?: string | null;
   budgetExceeded?: boolean;
   people?: Array<{ id: string; first_name: string; last_name: string }>;
+  /** TD-065 regression seam: fail only the assistant-role grace_messages insert. */
+  failAssistantInsert?: boolean;
 }
 
 function supabaseFor(opts: SupabaseOpts = {}) {
@@ -101,12 +103,18 @@ function supabaseFor(opts: SupabaseOpts = {}) {
       grace_conversations: (op) => op === 'select'
         ? { data: opts.conversationId ? { id: opts.conversationId } : null }
         : { data: { id: 'conv-new' } },
-      grace_messages: (op) => op === 'select'
-        ? { data: [] }
-        : { data: { id: `msg-${Math.random().toString(36).slice(2)}` } },
+      grace_messages: (op, payload) => {
+        if (op === 'select') return { data: [] };
+        const row = payload as Record<string, unknown>;
+        if (opts.failAssistantInsert && row.role === 'assistant') {
+          return { data: null, error: { message: 'simulated insert failure' } };
+        }
+        return { data: { id: `msg-${Math.random().toString(36).slice(2)}` } };
+      },
       grace_memories: (op) => op === 'select'
         ? { data: opts.existingMemories ?? [] }
         : { data: { id: 'mem-new', content: 'saved', source: 'user_stated', person_ids: [], created_at: '2026-08-30T00:00:00.000Z' } },
+      security_events: () => ({ data: { id: 'sec-evt-1' } }),
       people: () => ({ data: opts.people ?? [] }),
       church_ai_budgets: () => ({ data: { monthly_cap_micro_usd: opts.budgetExceeded ? 100 : 100_000_000, hard_cutoff_multiplier: 1.1 } }),
       token_usage: () => ({ data: opts.budgetExceeded ? [{ cost_micro_usd: 1_000_000, created_at: new Date().toISOString() }] : [] }),
@@ -247,5 +255,63 @@ describe('POST /api/grace/chat — acceptance: automatic retrieval', () => {
     const streamUnrelated = mockClaudeStream(['ok']);
     await post(supabaseFor({ existingMemories: [], people }), { message: 'what events are coming up this week', dataContext: '' }, streamUnrelated.fetchImpl);
     expect(streamUnrelated.capture.prompt).not.toContain('Bill prefers Saturday morning meetings');
+  });
+});
+
+describe('POST /api/grace/chat — TD-064: extraction is awaited to completion, not raced against a timeout', () => {
+  it('a fact the extraction pass finds is actually saved before the handler returns', async () => {
+    const fetchImpl = vi.fn().mockImplementation(async (_url: string, init: { body: string }) => {
+      const body = JSON.parse(init.body) as { stream?: boolean; messages: Array<{ content: string }> };
+      if (body.stream) {
+        const encoder = new TextEncoder();
+        const frames = [
+          sseFrame({ type: 'message_start', message: { usage: { input_tokens: 10 } } }),
+          sseFrame({ type: 'content_block_delta', delta: { type: 'text_delta', text: 'Got it.' } }),
+          sseFrame({ type: 'message_delta', usage: { output_tokens: 5 } }),
+        ];
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) { for (const f of frames) controller.enqueue(encoder.encode(f)); controller.close(); },
+        });
+        return { ok: true, body: stream };
+      }
+      // Extraction call: unlike the shared mockClaudeStream helper (always
+      // returns "no facts"), this one returns a real fact — the previous
+      // Promise.race([extraction, 3s timeout]) could abandon this mid-write
+      // under real latency; a plain await cannot, even in this instant mock.
+      return {
+        ok: true,
+        json: async () => ({
+          content: [{ type: 'text', text: '[{"content":"prefers evening meetings","person_names":[]}]' }],
+          usage: {},
+        }),
+      };
+    });
+
+    const supabase = supabaseFor();
+    await post(supabase, { message: 'just so you know, I prefer evening meetings going forward', dataContext: '' }, fetchImpl);
+
+    const memoryInsert = supabase.__calls.find(c => c.table === 'grace_memories' && c.op === 'insert');
+    expect(memoryInsert).toBeDefined();
+    expect((memoryInsert!.payload as Record<string, unknown>).source).toBe('ai_extracted');
+    expect((memoryInsert!.payload as Record<string, unknown>).content).toBe('prefers evening meetings');
+  });
+});
+
+describe('POST /api/grace/chat — TD-065: a failed assistant-message write is surfaced, not swallowed', () => {
+  it('logs a security event and still completes the turn when the insert fails', async () => {
+    const stream = mockClaudeStream(['Sure, here you go.']);
+
+    const supabase = supabaseFor({ failAssistantInsert: true });
+    const res = await post(supabase, { message: 'what tasks are overdue', dataContext: '' }, stream.fetchImpl);
+
+    // The client still gets the correct streamed answer — the failure is
+    // in persistence, not in the turn itself.
+    expect(res.written.join('')).toBe('Sure, here you go.');
+
+    const secEvent = supabase.__calls.find(c => c.table === 'security_events' && c.op === 'insert');
+    expect(secEvent).toBeDefined();
+    const payload = secEvent!.payload as Record<string, unknown>;
+    expect(payload.event_type).toBe('grace_chat.message_write_failed');
+    expect(payload.severity).toBe('elevated');
   });
 });

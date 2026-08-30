@@ -29,6 +29,7 @@ import { callClaudeStream, DEFAULT_CLAUDE_MODEL } from '../_lib/ai/adapters/clau
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { parseRememberDirective, saveMemory, retrieveMemories, buildMemoryBlock, runExtraction } from '../_lib/grace-memory.js';
 import { retrieveChurchKnowledge, buildKnowledgeBlock } from '../_lib/grace-knowledge.js';
+import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -44,7 +45,6 @@ const MODEL = DEFAULT_CLAUDE_MODEL;
 
 const DATA_CONTEXT_MAX_CHARS = 40_000;
 const HISTORY_TURN_LIMIT = 12;
-const EXTRACTION_TIMEOUT_MS = 3_000;
 
 const SCHEMA = {
   message: str({ required: true, min: 1, max: 4000 }),
@@ -229,7 +229,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   }
   res.end();
 
-  const { data: assistantMsgRow } = await supabase
+  const { data: assistantMsgRow, error: assistantMsgError } = await supabase
     .from('grace_messages')
     .insert({
       conversation_id: conversation.id,
@@ -243,17 +243,43 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     })
     .select('id')
     .single();
+
+  // TD-065: a failed write here used to vanish silently — the user already
+  // has the correct answer on screen (streamed above), but the turn would
+  // never appear in persisted history and would never reach extraction.
+  // Loud, not fatal: the turn is already delivered, so there's nothing left
+  // to roll back — just make the loss visible instead of pretending it
+  // didn't happen.
+  if (assistantMsgError) {
+    console.error('[grace/_chat] assistant message insert failed', {
+      conversation_id: conversation.id,
+      error: assistantMsgError.message,
+    });
+    await logSecurityEvent(supabase, {
+      eventType: 'grace_chat.message_write_failed',
+      severity: 'elevated',
+      churchId: actor.churchId,
+      actorClerkId: actor.clerkUserId,
+      ...securityContext(req),
+      detail: { conversation_id: conversation.id, role: 'assistant', reason: 'grace_messages_insert_failed' },
+    });
+  }
+
   await supabase.from('grace_conversations').update({ last_message_at: new Date().toISOString() }).eq('id', conversation.id);
 
+  // TD-064: this used to be raced against a 3s timeout, which lost almost
+  // every time under real gateway + DB overhead — res.end() above already
+  // delivered the response, so nothing downstream is waiting on this; a
+  // plain await just lets extraction actually finish rather than being
+  // abandoned mid-write.
   const assistantMessageId = (assistantMsgRow as { id: string } | null)?.id;
   if (userMessageId && assistantMessageId && streamedText) {
-    const extraction = runExtraction({
+    await runExtraction({
       supabase, churchId: actor.churchId, userId: actor.userId,
       userMessage: message, assistantReply: streamedText,
       sourceMessageId: userMessageId, sourceConversationId: conversation.id,
       apiKey: ANTHROPIC_API_KEY, workspaceId: ANTHROPIC_WORKSPACE_ID,
     });
-    await Promise.race([extraction, new Promise(resolve => setTimeout(resolve, EXTRACTION_TIMEOUT_MS))]);
   }
 }
 
