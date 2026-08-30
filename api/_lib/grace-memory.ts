@@ -262,6 +262,8 @@ export interface RunExtractionInput {
   sourceMessageId: string;
   sourceConversationId: string;
   apiKey: string;
+  /** Only needed if apiKey is an identity-linked key — see claude.ts. */
+  workspaceId?: string;
   /** Test seam — same DI pattern as callClaude's own fetchImpl. */
   fetchImpl?: typeof fetch;
 }
@@ -295,7 +297,7 @@ export async function runExtraction(input: RunExtractionInput): Promise<GraceMem
       provider: 'claude',
       model: DEFAULT_CLAUDE_MODEL,
     },
-    () => callClaude({ apiKey: input.apiKey, prompt, maxTokens: 300, temperature: 0.2, fetchImpl: input.fetchImpl }),
+    () => callClaude({ apiKey: input.apiKey, workspaceId: input.workspaceId, prompt, maxTokens: 300, temperature: 0.2, fetchImpl: input.fetchImpl }),
   );
 
   if (!result.allowed || !result.provider.success || !result.provider.text) return [];

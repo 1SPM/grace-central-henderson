@@ -35,6 +35,9 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // elsewhere in the app — swapping providers again means adding one more
 // adapter under api/_lib/ai/adapters/ and changing these two lines.
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+// Only needed if ANTHROPIC_API_KEY is an identity-linked key — omit for a
+// standard workspace/org-wide key.
+const ANTHROPIC_WORKSPACE_ID = process.env.ANTHROPIC_WORKSPACE_ID;
 const PROVIDER = 'claude';
 const MODEL = DEFAULT_CLAUDE_MODEL;
 
@@ -194,7 +197,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const result = await generateStreamed(
     { supabase, churchId: actor.churchId, feature: 'ask-grace', provider: PROVIDER, model: MODEL, actorClerkId: actor.clerkUserId },
     (chunk) => { streamedText += chunk; res.write(chunk); },
-    (onChunk) => callClaudeStream({ apiKey: ANTHROPIC_API_KEY, model: MODEL, prompt, maxTokens: 1200 }, onChunk),
+    (onChunk) => callClaudeStream({ apiKey: ANTHROPIC_API_KEY, workspaceId: ANTHROPIC_WORKSPACE_ID, model: MODEL, prompt, maxTokens: 1200 }, onChunk),
   );
 
   if (!result.allowed) {
@@ -244,7 +247,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       supabase, churchId: actor.churchId, userId: actor.userId,
       userMessage: message, assistantReply: streamedText,
       sourceMessageId: userMessageId, sourceConversationId: conversation.id,
-      apiKey: ANTHROPIC_API_KEY,
+      apiKey: ANTHROPIC_API_KEY, workspaceId: ANTHROPIC_WORKSPACE_ID,
     });
     await Promise.race([extraction, new Promise(resolve => setTimeout(resolve, EXTRACTION_TIMEOUT_MS))]);
   }

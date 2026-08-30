@@ -18,7 +18,20 @@ export interface ClaudeCallOptions {
   systemPrompt?: string;
   maxTokens?: number;                   // default 1500
   temperature?: number;                 // default 0.6
+  /** Required by Anthropic when apiKey is an identity-linked key — omit
+   *  for a standard workspace/org-wide key. */
+  workspaceId?: string;
   fetchImpl?: typeof fetch;
+}
+
+function claudeHeaders(opts: ClaudeCallOptions): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-api-key': opts.apiKey,
+    'anthropic-version': '2023-06-01',
+  };
+  if (opts.workspaceId) headers['anthropic-workspace-id'] = opts.workspaceId;
+  return headers;
 }
 
 interface ClaudeResponse {
@@ -38,11 +51,7 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<ProviderCallR
   try {
     r = await fetchImpl('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': opts.apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      headers: claudeHeaders(opts),
       body: JSON.stringify({
         model,
         max_tokens: opts.maxTokens ?? 1500,
@@ -119,11 +128,7 @@ export async function callClaudeStream(
   try {
     r = await fetchImpl('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': opts.apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      headers: claudeHeaders(opts),
       body: JSON.stringify({
         model,
         max_tokens: opts.maxTokens ?? 1500,
