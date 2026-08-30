@@ -89,6 +89,14 @@ change: the system's job stops at "flag for a qualified human," full stop.
    and the closure together — real audit evidence, not a status flip
    with no trail.
 
+## Staff Ask GRACE memory (ADR-014)
+
+This document was written for the member-facing companion. ADR-014 (`DECISIONS.md`) extends the same "no judgments about a member" boundary to the staff assistant's new persistent memory:
+
+- Grace's memory (`grace_memories`) may only record facts the **staff user** stated about their own plans, commitments, or context ("my meeting with Bill is Thursday"). It may never record an AI-formed inference, judgment, or score about a church member — the same boundary as above, just applied to a new storage layer instead of a new claim.
+- A memory is never presented as church data. It is retrieved and injected into the prompt as "things you told me," explicitly subordinate to live church records — if a memory conflicts with a database fact, the database wins, every time.
+- The member-facing portal assistant (`api/portal/_assistant.ts`) remains deliberately non-persistent — this section does not change that. Only the staff-facing Ask GRACE gained memory.
+
 ## What this phase does NOT claim
 
 - No promise of response time.

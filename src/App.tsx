@@ -672,6 +672,7 @@ function App() {
         churchTimezone={churchSettings?.timezone}
         userFirstName={user?.firstName}
         userRole={user?.role}
+        userId={user?.id}
         onAddTask={handlers.addTask}
         onAddPrayer={handlers.addPrayer}
         onAddInteraction={handlers.addInteraction}

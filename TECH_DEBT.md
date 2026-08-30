@@ -423,6 +423,14 @@
 - **Re-entry trigger:** SOC 2 evidence-gathering, or any second executor that mutates church data — those must follow migration 070's pattern rather than `recordAudit`.
 - **Resolution path:** convert mutation sites to Postgres functions that write their own audit row, highest-consequence first (role grants, giving/ledger writes, deletions). This is a per-site project, not a refactor: each function has to re-express its preconditions in SQL, and the unit tests that covered them in TypeScript go with them.
 
+### TD-062 — Ask GRACE system prompt is composed client-side and trusted by the server
+- **Severity:** P2
+- **Location:** `src/contexts/GraceChatContext.tsx` (`buildDataContext`), `api/grace/_chat.ts`.
+- **Problem:** the staff chat turn endpoint accepts the church-data context (`dataContext`) verbatim from the browser and appends it to the model prompt server-side, rather than composing it from the database like the member assistant does (`api/_lib/ai/assistant-runtime.ts`'s `SYSTEM_INSTRUCTION`, which is server-composed only and explicitly calls out client-composed prompts as the anti-pattern to avoid). A malicious or compromised client could inject arbitrary instructions into the "church data" block.
+- **Risk:** bounded — RLS + `resolveStaffActor` still scope every actual database read/write the model or the user can trigger; a poisoned dataContext can influence what Grace *says*, not what it's authorized to *do*. But it is real prompt-injection surface on a route that just gained persistent memory writes (ADR-014), which raises the value of a successful injection (e.g. tricking the extraction pass into writing a bogus memory).
+- **Re-entry trigger:** before Ask GRACE gains any new server-side action capability beyond the existing proposal/approval flow, or if `grace/chat` starts trusting `dataContext` for anything beyond display.
+- **Resolution path:** port `buildDataContext`'s aggregation logic server-side (it already runs against the same tables the API can read), following `assistant-runtime.ts`'s pattern. Deferred out of ADR-014's scope because it's a materially larger diff than the memory feature needed and the founder was explicit about not rebuilding working code in this pass.
+
 ### TD-061 — Chat-door actions are unpermissioned and unaudited — **RESOLVED**
 - **Severity:** P2
 - **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.

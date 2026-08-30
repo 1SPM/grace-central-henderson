@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person } from '../types';
-import { generateAIText, generateAIStreamed } from '../lib/services/ai';
+import { sendGraceTurn, hydrateGraceConversation, importBrainEntries } from '../lib/services/graceChat';
 import { buildChatActionPrompt } from '../../api/_lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
@@ -8,7 +8,7 @@ import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
 import { buildGreeting, loadStoredMessages, persistMessages, pickReturnGreeting, GRACE_PANEL_SESSION_KEY } from '../lib/grace-chat/persistence';
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
-import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
+import { deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY } from '../lib/grace-brain';
 import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
 import { useAISettings } from '../hooks/useAISettings';
@@ -242,26 +242,56 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   );
 
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
-    const stored = loadStoredMessages();
+    const stored = loadStoredMessages(data.userId);
     if (stored) return stored;
     return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || TENANT_TIMEZONE)))];
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
-  const [brainEntries, setBrainEntries] = useState<GraceBrainEntry[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
-  });
+  // Server conversation id (ADR-014) — undefined until the first turn or
+  // the hydration effect below resolves; cleared by clearMessages to
+  // start a fresh server conversation.
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const hydratedRef = useRef(false);
+  const importedBrainRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, serializeBrainEntries(brainEntries));
-  }, [brainEntries]);
+    persistMessages(messages, data.userId);
+  }, [messages, data.userId]);
 
+  // Cross-session recall (ADR-014): on mount, load the caller's most
+  // recent server conversation and use it as the transcript instead of
+  // the localStorage fallback — this is the actual "close the browser,
+  // come back tomorrow" proof. Runs once per userId.
   useEffect(() => {
-    persistMessages(messages);
-  }, [messages]);
+    if (!data.userId || hydratedRef.current) return;
+    hydratedRef.current = true;
+    let cancelled = false;
+    void hydrateGraceConversation().then(result => {
+      if (cancelled || result.messages.length === 0) return;
+      setConversationId(result.conversationId ?? undefined);
+      setMessages(result.messages.map(m => ({ id: m.id, role: m.role, content: m.content })));
+    });
+    return () => { cancelled = true; };
+  }, [data.userId]);
+
+  // One-time migration: the pre-server-memory "remember that…" entries
+  // lived only in localStorage (src/lib/grace-brain.ts). Carry them into
+  // server memory once so demo continuity isn't lost — the API only
+  // accepts this when the user has zero server memories, so it's safe to
+  // call unconditionally here.
+  useEffect(() => {
+    if (!data.userId || importedBrainRef.current || typeof window === 'undefined') return;
+    const stored = deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
+    if (stored.length === 0) return;
+    importedBrainRef.current = true;
+    void importBrainEntries(stored.map(e => e.text)).then(result => {
+      if (result && result.imported > 0) {
+        window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, '[]');
+      }
+    });
+  }, [data.userId]);
 
   // If the only message is the auto-greeting and live data shifts (e.g., a task is added),
   // refresh it so opening the panel still feels current.
@@ -305,8 +335,6 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     [suggestions],
   );
 
-  const brainContext = useMemo(() => buildBrainContext(brainEntries), [brainEntries]);
-
   const openPanel = useCallback((seed?: string) => {
     setPanelOpen(true);
     if (seed && seed.trim()) {
@@ -333,6 +361,9 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const clearMessages = useCallback(() => {
     setMessages([buildGreeting(data, salutation)]);
     setReplyContext(null);
+    // Starting a fresh transcript starts a fresh server conversation too —
+    // otherwise the next turn would silently append to the old thread.
+    setConversationId(undefined);
   }, [data, salutation]);
 
   const sendMessage = useCallback(async (query: string) => {
@@ -347,18 +378,10 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
-    const memoryToSave = parseBrainDirective(query);
-    if (memoryToSave) {
-      setBrainEntries(entries => addBrainEntry(entries, memoryToSave));
-      setMessages(m => m.map(msg =>
-        msg.id === assistantMsgId
-          ? { ...msg, content: `Remembered: ${memoryToSave}` }
-          : msg
-      ));
-      setLoading(false);
-      return;
-    }
-
+    // "remember that…" is now handled server-side (api/grace/_chat.ts) so
+    // it's written with provenance to grace_memories instead of
+    // localStorage — this client short-circuit list keeps only the
+    // detections that stay purely local (no persistence involved).
     if (isOverdueTasksQuery(query)) {
       setMessages(m => m.map(msg =>
         msg.id === assistantMsgId
@@ -405,47 +428,34 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       return;
     }
 
-    const recentHistory = messages
-      .filter(m => m.id !== 'greet' && m.content.trim())
-      .slice(-6)
-      .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
-      .join('\n');
-
-    const basePrompt = brainContext
-      ? `${dataContext}\n\n${brainContext}`
-      : dataContext;
-
-    const prompt = recentHistory
-      ? `${basePrompt}\n\nRecent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${recentHistory}\n\nUser question: ${query}`
-      : `${basePrompt}\n\nUser question: ${query}`;
-
     try {
-      let streamed = false;
-      const streamResult = await generateAIStreamed({
-        prompt,
-        maxTokens: 1200,
+      // Server composes memory + conversation history and persists both
+      // sides of the turn (ADR-014) — the client sends only the church-data
+      // context it already had assembled plus the current conversation id.
+      const turnResult = await sendGraceTurn({
+        message: query,
+        conversationId,
+        dataContext,
         onChunk: (chunk) => {
-          streamed = true;
           setMessages(m => m.map(msg =>
             msg.id === assistantMsgId ? { ...msg, content: msg.content + chunk } : msg
           ));
         },
       });
 
-      if (streamResult.error) {
+      if (turnResult.conversationId && turnResult.conversationId !== conversationId) {
+        setConversationId(turnResult.conversationId);
+      }
+
+      if (turnResult.error) {
         // Never surface raw API/transport errors (e.g. "Not found", "401") as
         // if Grace said them — always reply with a graceful, actionable line.
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(streamResult.error) } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(turnResult.error) } : msg
         ));
-      } else if (!streamed) {
-        // Fallback to non-streaming when the server didn't honor stream mode
-        const result = await generateAIText({ prompt, maxTokens: 1200 });
-        const text = result.success && result.text
-          ? result.text
-          : friendlyAIFailure(result.error);
+      } else if (!turnResult.streamed) {
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: text } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure() } : msg
         ));
       }
 
@@ -469,7 +479,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, brainContext, data.people, data.tasks, data.prayers, messages]);
+  }, [dataContext, conversationId, data.people, data.tasks, data.prayers]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>

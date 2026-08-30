@@ -1,7 +1,16 @@
 import type { GraceMessage, GraceData } from './types';
 import { TENANT_DEFAULT_SETTINGS } from '../../config/tenant';
 
-export const GRACE_MESSAGES_STORAGE_KEY = 'grace-chat-messages-v1';
+/**
+ * v1 was a single un-namespaced key shared by every user on a machine —
+ * on a shared workstation, switching staff accounts inherited the
+ * previous user's transcript. v2 is namespaced by users.id and is only a
+ * fallback now that the server persists conversations (ADR-014); v1
+ * transcripts are not migrated, they're simply superseded.
+ */
+export function messagesStorageKey(userId?: string): string {
+  return userId ? `grace-chat-messages-v2:${userId}` : 'grace-chat-messages-v2:anon';
+}
 export const MESSAGES_PERSIST_LIMIT = 50;
 
 /** sessionStorage key — cleared each browser session, so the full greeting
@@ -87,11 +96,16 @@ export function buildGreeting(data: GraceData, salutation?: string): GraceMessag
 /**
  * Restore prior chat messages from localStorage if any. Returns null on missing,
  * empty, or malformed data so the caller can fall back to a fresh greeting.
+ *
+ * This is now the OFFLINE FALLBACK only — the source of truth is the
+ * server (api/grace/_chat.ts GET), which GraceChatContext hydrates from
+ * on mount. This still matters for the brief window before that hydrate
+ * resolves, and for local dev without the API running.
  */
-export function loadStoredMessages(): GraceMessage[] | null {
+export function loadStoredMessages(userId?: string): GraceMessage[] | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(GRACE_MESSAGES_STORAGE_KEY);
+    const raw = window.localStorage.getItem(messagesStorageKey(userId));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
@@ -105,13 +119,13 @@ export function loadStoredMessages(): GraceMessage[] | null {
  * Persist messages to localStorage, trimmed to the most recent N. Storage
  * full or disabled errors are swallowed — chat keeps working in-session.
  */
-export function persistMessages(messages: GraceMessage[]): void {
+export function persistMessages(messages: GraceMessage[], userId?: string): void {
   if (typeof window === 'undefined') return;
   const trimmed = messages.length > MESSAGES_PERSIST_LIMIT
     ? messages.slice(-MESSAGES_PERSIST_LIMIT)
     : messages;
   try {
-    window.localStorage.setItem(GRACE_MESSAGES_STORAGE_KEY, JSON.stringify(trimmed));
+    window.localStorage.setItem(messagesStorageKey(userId), JSON.stringify(trimmed));
   } catch {
     // storage full / disabled — ignore
   }

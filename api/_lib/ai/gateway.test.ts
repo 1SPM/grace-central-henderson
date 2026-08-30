@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { generate } from './gateway.js';
+import { generate, generateStreamed } from './gateway.js';
 import { buildUsageRow } from './usage.js';
 
 /**
@@ -144,6 +144,56 @@ describe('ai/gateway — budget refusals', () => {
     expect(r.allowed).toBe(false);
     if (!r.allowed) expect(r.reason).toBe('hard_cut');
     expect(callProvider).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================
+// generateStreamed — ADR-014 (Grace staff memory)
+// ============================================
+
+describe('ai/gateway — generateStreamed', () => {
+  it('refuses before the first chunk when over budget, and never calls the provider', async () => {
+    const { client } = makeStatefulSupabase({
+      cap: 1000,
+      multiplier: 1.10,
+      usage: [{ cost_micro_usd: 1000, created_at: '2026-05-15T00:00:00Z' }],
+    });
+    const callProviderStream = vi.fn();
+    const onChunk = vi.fn();
+
+    const r = await generateStreamed(
+      { supabase: client, churchId: 'c-1', feature: 'ask-grace', provider: 'gemini', model: 'gemini-2.5-flash' },
+      onChunk,
+      callProviderStream,
+    );
+
+    expect(r.allowed).toBe(false);
+    if (!r.allowed) expect(r.reason).toBe('over_cap');
+    expect(callProviderStream).not.toHaveBeenCalled();
+    expect(onChunk).not.toHaveBeenCalled();
+  });
+
+  it('streams chunks through onChunk and records usage from the final result', async () => {
+    const { client, state } = makeStatefulSupabase({ cap: 100_000_000, multiplier: 1.10 });
+    const callProviderStream = vi.fn().mockImplementation(async (onChunk: (t: string) => void) => {
+      onChunk('Hello');
+      onChunk(' there');
+      return { success: true, text: 'Hello there', promptTokens: 200, completionTokens: 50 };
+    });
+    const chunks: string[] = [];
+
+    const r = await generateStreamed(
+      { supabase: client, churchId: 'c-1', feature: 'ask-grace', provider: 'gemini', model: 'gemini-2.5-flash' },
+      (c) => chunks.push(c),
+      callProviderStream,
+    );
+
+    expect(r.allowed).toBe(true);
+    expect(chunks).toEqual(['Hello', ' there']);
+    if (r.allowed) expect(r.provider.text).toBe('Hello there');
+
+    await new Promise((res) => setImmediate(res));
+    expect(state.usage).toHaveLength(1);
   });
 });
 
