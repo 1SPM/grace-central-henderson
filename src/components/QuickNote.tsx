@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Search, MessageSquare, Loader2, FileText, Phone, Mail, Home, MessageCircle, Heart } from 'lucide-react';
 import { Person, Interaction } from '../types';
 import { createLogger } from '../utils/logger';
+import { useVoiceInput } from '../hooks/useVoiceInput';
+import { GraceOrb } from './grace/GraceOrb';
 
 const log = createLogger('quick-note');
 
@@ -23,6 +25,19 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
   useEffect(() => {
     searchInputRef.current?.focus();
   }, []);
+
+  // Dictation appends to whatever's already typed, same as Ask Grace's
+  // append mode — this is a person composing a note, not issuing a
+  // one-shot command, so voice should never silently overwrite a draft.
+  // See DECISIONS.md ADR-013: browser-native recognition only, no audio
+  // ever leaves the browser.
+  const voice = useVoiceInput(useCallback((text: string) => {
+    setContent(prev => prev ? `${prev} ${text}` : text);
+  }, []));
+  const toggleVoice = () => {
+    if (voice.listening) voice.stop();
+    else voice.start();
+  };
 
   const filteredPeople = search
     ? people.filter(
@@ -184,15 +199,40 @@ export function QuickNote({ people, onSave, onClose }: QuickNoteProps) {
           </div>
 
           {/* Note Content */}
-          <textarea
-            ref={contentRef}
-            placeholder={selectedPerson ? `Add a ${noteType} note...` : 'Select a person above to start writing...'}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={4}
-            disabled={!selectedPerson}
-            className={`w-full px-4 py-3 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${!selectedPerson ? 'opacity-50 cursor-not-allowed' : ''}`}
-          />
+          <div className="relative">
+            <textarea
+              ref={contentRef}
+              placeholder={
+                voice.listening
+                  ? 'Listening…'
+                  : selectedPerson
+                    ? `Add a ${noteType} note...`
+                    : 'Select a person above to start writing...'
+              }
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={4}
+              disabled={!selectedPerson}
+              className={`w-full px-4 py-3 pr-12 border border-gray-200 dark:border-dark-700 bg-stone-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${!selectedPerson ? 'opacity-50 cursor-not-allowed' : ''}`}
+            />
+            {voice.supported && (
+              <button
+                type="button"
+                onClick={toggleVoice}
+                disabled={!selectedPerson}
+                aria-label={voice.listening ? 'Stop dictating' : 'Dictate this note'}
+                title={voice.listening ? 'Stop dictating' : 'Dictate this note'}
+                className="absolute top-3 right-3 appearance-none bg-transparent border-0 p-0 m-0 rounded-full cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <GraceOrb size="xs" listening={voice.listening} />
+              </button>
+            )}
+          </div>
+          {voice.supported && (
+            <p className="text-[11px] text-gray-400 dark:text-dark-500 -mt-2">
+              🎙 Your browser's own speech recognition — nothing is sent to GRACE until you save.
+            </p>
+          )}
         </div>
 
         {/* Footer */}

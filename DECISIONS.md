@@ -241,3 +241,42 @@ Per-tenant monthly budget cap defaults to $50. At 100% the gateway returns 402; 
 **Alternatives considered.**
 - *Permission-aware RLS on every new table now* — rejected: meaningfully more migration surface for a foundation phase, and the marginal safety gain over the API-layer check is smaller for lower-consequence tables. Revisit if/when the Members Portal starts issuing its own Supabase-scoped requests instead of going through the API exclusively.
 - PII redaction must be configured in Sentry (`beforeSend`) before any production traffic.
+
+---
+
+## ADR-013 — Voice/document intake: draft-only, into the existing quick-capture review gate
+
+- **Date:** 2026-08-29
+- **Status:** Accepted (phase one only — browser-native voice into `QuickNote`. Bulletin/document OCR and any server-side transcription provider remain Proposed and need this ADR revisited before either ships.)
+
+**Context.** A staff member's hands are often not free to type — during a hallway conversation, driving between visits, or right after a phone call. The product ask is optional voice dictation and document/OCR extraction feeding GRACE, with non-negotiable safeguards: review before save, explicit disclosure, tenant-scoped handling, defined retention, no automatic creation of authoritative pastoral records, no training on sensitive care content without explicit policy, and a clear distinction between raw source, AI draft, and human-approved record. This ADR is discovery, not a green light to wire a transcription or OCR provider — no model integration ships from this decision.
+
+**Decision.**
+
+*First use case, and only this one for phase one:* "turn a staff voice note into a draft follow-up." Specifically `add_note` from the existing action catalog (`api/_lib/actionCatalog.ts`) — already `consequence: 'low'`, editable, non-authoritative, and already reachable from the command palette (`paletteActions.ts`, this session's Do Launcher slice) via `QuickNote.tsx`, an empty modal the staff member fills in and submits themselves.
+
+That existing modal *is* the review gate this feature needs, not a new one to build. And — this is what makes phase one buildable as more than a stub — **GRACE already has a working, shipped voice-capture mechanism**: `useVoiceInput` in `src/components/AskGrace.tsx` wraps the browser's own `SpeechRecognition` API (Web Speech API). No audio is ever sent to a GRACE-controlled server or any AI provider — the browser (Chrome/Safari/Edge's own built-in recognizer) does the speech-to-text, and only the resulting text string reaches the app. This is a genuinely different, lower-risk data flow than a server-side transcription integration, and it's why the safeguards below are achievable without a new provider relationship: extract that hook into `src/hooks/useVoiceInput.ts` (it's currently private to `AskGrace.tsx`) so `QuickNote.tsx` can reuse it, add a mic control that appends recognized speech into the existing `content` textarea, and change nothing else — the transcript lands in the same field the staff member would have typed into, and nothing reaches `notes` until they press the modal's own Save.
+
+Bulletin/document OCR and meeting-note service-planning drafts are explicitly deferred past phase one — see Alternatives. So is any *server-side* transcription provider (Whisper, a Gemini audio input, etc.) — phase one's data-flow story only holds because there isn't one yet.
+
+*Consent:* a persistent, always-visible disclosure line under the field while the mic control is present — not a one-time dismissible toast, since "explicit" should mean seen every time, not seen once and forgotten. Says plainly that the browser's own speech recognition is doing the listening, that nothing is sent to GRACE until Save is pressed, and that leaving means nothing was recorded. The mic control is hidden entirely (not shown disabled) in a browser without Web Speech API support — never a false promise.
+
+Formal, trackable consent (a real `ConsentType` row, the same shape member-facing consent already uses in `src/types/shared-platform.ts` / `/api/consents` / `usePortalConsents.ts`, extended to a staff actor) is deferred to whenever phase two adds a data flow actually worth formally consenting to — a server-side provider, or persisted raw audio. Phase one's data flow is "browser API a user already implicitly consents to by clicking a mic icon and speaking into it," the same posture `AskGrace.tsx`'s existing voice input already has today with no separate consent record.
+
+*Data flow:* voice → browser's own recognizer → text → the modal's `content` state → (only on Save) the `notes`/`interactions` table, unchanged from typing. No audio is captured, buffered, or transmitted by GRACE code at any point — `MinimalRecognition` in `AskGrace.tsx` only ever receives a `transcript` string from the browser, never audio data.
+
+*Retention:* nothing new to retain — there is no raw-source row, because there is no raw source GRACE ever holds. The transcript lives only in the textarea's in-memory state until Save or Cancel.
+
+*Training:* not applicable to phase one for the same reason — GRACE never receives the audio, so there is nothing for GRACE (or any provider we integrate) to train on. This ADR's "no training without explicit policy and consent" commitment becomes load-bearing the moment phase two introduces a real audio upload.
+
+**Consequences.**
+- Phase one ships zero new database tables, zero new API routes, and zero new third-party integrations — the only new code is one extracted hook and one mic control on one existing modal.
+- Because there's no server-side speech step, phase one cannot do anything a `SpeechRecognition`-capable browser doesn't already do — no higher accuracy, no background/offline capture, no non-English-if-the-browser-doesn't-support-it. Real server-side transcription (better accuracy, works where Web Speech API doesn't, e.g. some desktop Safari/Firefox builds) is a phase-two decision with a real third-party data flow and needs this ADR revisited, not silently extended.
+- The distinction between raw source / AI draft / human-approved record is enforced by what does *not* exist yet: no raw-source row, no draft row, only the modal's in-memory state until a human's Save makes it a record.
+- Bulletin OCR is not available in phase one even though the product ask lists it — a real gap if a pastor's first request is "read me this flyer," not "take dictation."
+
+**Alternatives considered.**
+- *Auto-create the note directly from the transcript, skip the modal* — rejected outright: this is exactly the "automatic creation of an authoritative record" the guardrails forbid, and it is also the one place a misheard word becomes a wrong fact on file with no human having looked at it.
+- *Bulletin/document OCR first instead of voice* — rejected for phase one. A photographed bulletin or sign-in sheet is more likely to contain other people's names, faces, and — for a children's ministry check-in sheet — minors, than a staff member's own dictated sentence; the sensitivity profile is worse, and there's no equivalent "browser already does this locally" option for OCR the way there is for speech, so it would be phase one's first real new provider relationship. Revisit once the consent/data-flow pattern for a genuine provider integration exists.
+- *Wire a real server-side transcription provider now* — rejected: the prompt that generated this ADR explicitly asks for discovery before build, and this is the one place that line is easy to blur, since "just call Whisper" is a small diff. The browser-native path was chosen specifically because it lets phase one ship something real without crossing that line.
+- *A dedicated intake review queue (raw capture → pending → approved), separate from the quick-capture modals* — rejected for phase one as more surface than the safeguards require. Revisit if a future use case needs to survive across a browser session (e.g. a long meeting note drafted over several minutes) rather than fitting in one capture-then-review pass.
