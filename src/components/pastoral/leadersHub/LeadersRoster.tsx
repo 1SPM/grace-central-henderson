@@ -5,6 +5,7 @@ import { statsForLeader } from '../../../lib/services/leadershipApi';
 import { getLeaderHubStats } from './demoLeadersHub';
 import { countLeadershipBadges } from '../../../hooks/useLeadershipRoster';
 import { LeaderAvatar } from './LeaderAvatar';
+import { SampleDataNotice } from '../../SampleDataNotice';
 
 interface LeadersRosterProps {
   leaders: LeaderProfile[];
@@ -33,8 +34,8 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
           { label: 'Leaders', value: badges.staff, sub: 'All verified', accent: 'border-l-brand-600' },
           { label: 'Live now', value: available.length, sub: `${active.length - available.length} AI on duty`, accent: 'border-l-emerald-600' },
           { label: 'AI companions', value: `${badges.aiDeployed}/${badges.staff}`, sub: 'All deployed', accent: 'border-l-violet-600' },
-          { label: 'Sessions MTD', value: sessionsMtd, sub: '+ 22%', accent: 'border-l-blue-600' },
-          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Platform avg', star: true, accent: 'border-l-amber-500' },
+          { label: 'Sessions MTD', value: sessionsMtd, accent: 'border-l-blue-600' },
+          { label: 'Avg rating', value: avgRating.toFixed(1), sub: 'Sample', star: true, accent: 'border-l-amber-500' },
         ].map(kpi => (
           <div key={kpi.label} className={`bg-stone-100 dark:bg-dark-800 rounded-2xl border-y border-r border-l-[5px] border-gray-200 dark:border-dark-700 ${kpi.accent} p-5`}>
             <p className="section-eyebrow">{kpi.label}</p>
@@ -42,10 +43,11 @@ export function LeadersRoster({ leaders, activity, onSelectLeader }: LeadersRost
               {kpi.star && <Star size={26} className="text-amber-500 fill-amber-500" />}
               {kpi.value}
             </p>
-            <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>
+            {kpi.sub && <p className="text-[11px] text-gray-500 dark:text-dark-400 mt-1">{kpi.sub}</p>}
           </div>
         ))}
       </div>
+      <SampleDataNotice label="Sessions MTD falls back to a sample count for any leader with no live activity; Avg rating is always a sample — not live" />
 
       <div>
         <h3 className="text-sm font-bold text-gray-900 dark:text-dark-100 mb-3">Clergy &amp; Staff</h3>
