@@ -25,14 +25,18 @@ import { resolveStaffActor } from '../_lib/authz.js';
 import { readBody, str } from '../_lib/validation.js';
 import { enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 import { generateStreamed } from '../_lib/ai/gateway.js';
-import { callGeminiStream } from '../_lib/ai/adapters/gemini.js';
+import { callClaudeStream, DEFAULT_CLAUDE_MODEL } from '../_lib/ai/adapters/claude.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { parseRememberDirective, saveMemory, retrieveMemories, buildMemoryBlock, runExtraction } from '../_lib/grace-memory.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'gemini-2.5-flash';
+// Model service: Grace calls this adapter, never Anthropic's SDK directly
+// elsewhere in the app — swapping providers again means adding one more
+// adapter under api/_lib/ai/adapters/ and changing these two lines.
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const PROVIDER = 'claude';
+const MODEL = DEFAULT_CLAUDE_MODEL;
 
 const DATA_CONTEXT_MAX_CHARS = 40_000;
 const HISTORY_TURN_LIMIT = 12;
@@ -156,8 +160,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (!GEMINI_API_KEY) {
-    return res.status(503).json({ error: 'assistant_not_configured', detail: 'GEMINI_API_KEY is not set on this deployment.' });
+  if (!ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'assistant_not_configured', detail: 'ANTHROPIC_API_KEY is not set on this deployment.' });
   }
 
   const memories = await retrieveMemories(supabase, { churchId: actor.churchId, userId: actor.userId, query: message });
@@ -188,9 +192,9 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
 
   let streamedText = '';
   const result = await generateStreamed(
-    { supabase, churchId: actor.churchId, feature: 'ask-grace', provider: 'gemini', model: MODEL, actorClerkId: actor.clerkUserId },
+    { supabase, churchId: actor.churchId, feature: 'ask-grace', provider: PROVIDER, model: MODEL, actorClerkId: actor.clerkUserId },
     (chunk) => { streamedText += chunk; res.write(chunk); },
-    (onChunk) => callGeminiStream({ apiKey: GEMINI_API_KEY, model: MODEL, prompt, maxOutputTokens: 1200 }, onChunk),
+    (onChunk) => callClaudeStream({ apiKey: ANTHROPIC_API_KEY, model: MODEL, prompt, maxTokens: 1200 }, onChunk),
   );
 
   if (!result.allowed) {
@@ -240,7 +244,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       supabase, churchId: actor.churchId, userId: actor.userId,
       userMessage: message, assistantReply: streamedText,
       sourceMessageId: userMessageId, sourceConversationId: conversation.id,
-      apiKey: GEMINI_API_KEY,
+      apiKey: ANTHROPIC_API_KEY,
     });
     await Promise.race([extraction, new Promise(resolve => setTimeout(resolve, EXTRACTION_TIMEOUT_MS))]);
   }

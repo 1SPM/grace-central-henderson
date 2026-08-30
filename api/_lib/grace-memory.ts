@@ -12,7 +12,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { generate } from './ai/gateway.js';
-import { callGemini } from './ai/adapters/gemini.js';
+import { callClaude, DEFAULT_CLAUDE_MODEL } from './ai/adapters/claude.js';
 
 export interface GraceMemoryRow {
   id: string;
@@ -262,7 +262,7 @@ export interface RunExtractionInput {
   sourceMessageId: string;
   sourceConversationId: string;
   apiKey: string;
-  /** Test seam — same DI pattern as callGemini's own fetchImpl. */
+  /** Test seam — same DI pattern as callClaude's own fetchImpl. */
   fetchImpl?: typeof fetch;
 }
 
@@ -292,10 +292,10 @@ export async function runExtraction(input: RunExtractionInput): Promise<GraceMem
       supabase: input.supabase,
       churchId: input.churchId,
       feature: 'grace-memory-extract',
-      provider: 'gemini',
-      model: 'gemini-2.5-flash',
+      provider: 'claude',
+      model: DEFAULT_CLAUDE_MODEL,
     },
-    () => callGemini({ apiKey: input.apiKey, prompt, maxOutputTokens: 300, temperature: 0.2, thinkingBudget: 0, fetchImpl: input.fetchImpl }),
+    () => callClaude({ apiKey: input.apiKey, prompt, maxTokens: 300, temperature: 0.2, fetchImpl: input.fetchImpl }),
   );
 
   if (!result.allowed || !result.provider.success || !result.provider.text) return [];

@@ -149,7 +149,7 @@ describe('runExtraction', () => {
   function fetchReturning(text: string) {
     return vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ candidates: [{ content: { parts: [{ text }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 } }),
+      json: async () => ({ content: [{ type: 'text', text }], usage: { input_tokens: 10, output_tokens: 5 } }),
     }) as unknown as typeof fetch;
   }
 

@@ -16,7 +16,6 @@ import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../tests/fixtures/shar
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
-vi.mock('@google/genai', () => ({ GoogleGenAI: vi.fn() }));
 
 const BILL_ID = '88888888-8888-4888-8888-888888888888';
 
@@ -45,25 +44,45 @@ function makeRes() {
   };
 }
 
-// GoogleGenAI is invoked with `new` in the adapter — a mockImplementation
-// must be a real function (not an arrow) for `new` to work at all.
-function mockGenAI(ctor: ReturnType<typeof vi.fn>, stream: { generateContentStream: ReturnType<typeof vi.fn> }) {
-  vi.mocked(ctor).mockImplementation(function GoogleGenAIMock() {
-    return { models: stream } as never;
-  } as never);
+function sseFrame(event: Record<string, unknown>): string {
+  return `data: ${JSON.stringify(event)}\n\n`;
 }
 
-function makeGenAIStream(chunks: string[]) {
-  const capture: { contents?: string } = {};
-  const generateContentStream = vi.fn().mockImplementation(async ({ contents }: { contents: string }) => {
-    capture.contents = contents;
-    async function* gen() {
-      for (const c of chunks) yield { text: c, usageMetadata: undefined };
-      yield { text: undefined, usageMetadata: { promptTokenCount: 500, candidatesTokenCount: 50 } };
+/**
+ * Mocks Claude's streaming Messages API (used for the main turn) AND its
+ * non-streaming form (used by the post-turn extraction pass) behind one
+ * fetch stub — the two are told apart by the `stream` flag in the
+ * request body, exactly like the real endpoint hits both in one turn.
+ * `capture.prompt` records the streaming call's message content, mirroring
+ * the acceptance tests' need to inspect what was actually sent to the model.
+ */
+function mockClaudeStream(chunks: string[]) {
+  const capture: { prompt?: string } = {};
+  const generateContentStream = vi.fn();
+  const fetchImpl = vi.fn().mockImplementation(async (_url: string, init: { body: string }) => {
+    const body = JSON.parse(init.body) as { stream?: boolean; messages: Array<{ content: string }> };
+    generateContentStream();
+    if (body.stream) {
+      capture.prompt = body.messages[0].content;
+      const encoder = new TextEncoder();
+      const frames = [
+        sseFrame({ type: 'message_start', message: { usage: { input_tokens: 500 } } }),
+        ...chunks.map(c => sseFrame({ type: 'content_block_delta', delta: { type: 'text_delta', text: c } })),
+        sseFrame({ type: 'message_delta', usage: { output_tokens: 50 } }),
+      ];
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const f of frames) controller.enqueue(encoder.encode(f));
+          controller.close();
+        },
+      });
+      return { ok: true, body: stream };
     }
-    return gen();
+    // Extraction call (non-streaming) — default to no facts so it never
+    // interferes with assertions about the main turn.
+    return { ok: true, json: async () => ({ content: [{ type: 'text', text: '[]' }], usage: {} }) };
   });
-  return { generateContentStream, capture };
+  return { fetchImpl, capture, generateContentStream };
 }
 
 interface SupabaseOpts {
@@ -95,7 +114,8 @@ function supabaseFor(opts: SupabaseOpts = {}) {
   });
 }
 
-async function post(supabase: ReturnType<typeof supabaseFor>, body: unknown) {
+async function post(supabase: ReturnType<typeof supabaseFor>, body: unknown, fetchImpl?: typeof fetch) {
+  if (fetchImpl) global.fetch = fetchImpl;
   const handler = (await import('./_chat.js')).default;
   const { createClient } = await import('@supabase/supabase-js');
   vi.mocked(createClient).mockReturnValue(supabase as never);
@@ -110,13 +130,12 @@ beforeEach(async () => {
   process.env.CLERK_SECRET_KEY = 'test-secret-key';
   process.env.VITE_SUPABASE_URL = 'https://example.invalid';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
-  process.env.GEMINI_API_KEY = 'test-gemini-key';
-  // Extraction always runs a non-streaming fetch call after the turn;
-  // stub it to return "no facts" by default so it never interferes with
-  // assertions about the main turn.
+  process.env.ANTHROPIC_API_KEY = 'test-anthropic-key';
+  // Default fetch: extraction-shaped response ("no facts") so any test
+  // that doesn't care about the model call still gets something sane.
   global.fetch = vi.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ candidates: [{ content: { parts: [{ text: '[]' }] } }], usageMetadata: {} }),
+    json: async () => ({ content: [{ type: 'text', text: '[]' }], usage: {} }),
   }) as unknown as typeof fetch;
 
   const { verifyToken } = await import('@clerk/backend');
@@ -138,12 +157,10 @@ describe('POST /api/grace/chat — auth', () => {
 
 describe('POST /api/grace/chat — "remember that…" short circuit', () => {
   it('writes a user_stated memory and replies without calling the model', async () => {
-    const { GoogleGenAI } = await import('@google/genai');
-    const stream = makeGenAIStream(['should not be used']);
-    mockGenAI(GoogleGenAI, stream);
+    const stream = mockClaudeStream(['should not be used']);
 
     const supabase = supabaseFor();
-    const res = await post(supabase, { message: 'remember that my meeting with Bill is Thursday', dataContext: 'church data here' });
+    const res = await post(supabase, { message: 'remember that my meeting with Bill is Thursday', dataContext: 'church data here' }, stream.fetchImpl);
 
     expect(stream.generateContentStream).not.toHaveBeenCalled();
     expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Remembered: my meeting with Bill is Thursday'));
@@ -156,12 +173,10 @@ describe('POST /api/grace/chat — "remember that…" short circuit', () => {
 
 describe('POST /api/grace/chat — turn persistence', () => {
   it('persists both sides of the turn, scoped to church and user', async () => {
-    const { GoogleGenAI } = await import('@google/genai');
-    const stream = makeGenAIStream(['Sure, ', 'here you go.']);
-    mockGenAI(GoogleGenAI, stream);
+    const stream = mockClaudeStream(['Sure, ', 'here you go.']);
 
     const supabase = supabaseFor();
-    const res = await post(supabase, { message: 'what tasks are overdue', dataContext: 'church data' });
+    const res = await post(supabase, { message: 'what tasks are overdue', dataContext: 'church data' }, stream.fetchImpl);
 
     expect(res.written.join('')).toBe('Sure, here you go.');
 
@@ -178,12 +193,10 @@ describe('POST /api/grace/chat — turn persistence', () => {
   });
 
   it('refuses with 402 when the church AI budget is exhausted, and never calls the model', async () => {
-    const { GoogleGenAI } = await import('@google/genai');
-    const stream = makeGenAIStream(['unused']);
-    mockGenAI(GoogleGenAI, stream);
+    const stream = mockClaudeStream(['unused']);
 
     const supabase = supabaseFor({ budgetExceeded: true });
-    const res = await post(supabase, { message: 'what tasks are overdue', dataContext: '' });
+    const res = await post(supabase, { message: 'what tasks are overdue', dataContext: '' }, stream.fetchImpl);
 
     expect(stream.generateContentStream).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(402);
@@ -203,9 +216,7 @@ describe('POST /api/grace/chat — acceptance: cross-session recall', () => {
     // hands back for a select on grace_memories, exactly like a real
     // second request would read from the database.
     vi.resetModules();
-    const { GoogleGenAI } = await import('@google/genai');
-    const stream = makeGenAIStream(['Thursday at the usual spot.']);
-    mockGenAI(GoogleGenAI, stream);
+    const stream = mockClaudeStream(['Thursday at the usual spot.']);
 
     const supabaseDay2 = supabaseFor({
       existingMemories: [{
@@ -213,10 +224,10 @@ describe('POST /api/grace/chat — acceptance: cross-session recall', () => {
         person_ids: [], status: 'active', expires_at: null, created_at: '2026-08-30T00:00:00.000Z',
       }],
     });
-    await post(supabaseDay2, { message: 'when is my meeting with Bill?', dataContext: 'church data' });
+    await post(supabaseDay2, { message: 'when is my meeting with Bill?', dataContext: 'church data' }, stream.fetchImpl);
 
-    expect(stream.capture.contents).toContain('my meeting with Bill is Thursday');
-    expect(stream.capture.contents).toContain('the church data wins'); // DB-facts-win framing present
+    expect(stream.capture.prompt).toContain('my meeting with Bill is Thursday');
+    expect(stream.capture.prompt).toContain('the church data wins'); // DB-facts-win framing present
   });
 });
 
@@ -228,17 +239,13 @@ describe('POST /api/grace/chat — acceptance: automatic retrieval', () => {
     };
     const people = [{ id: BILL_ID, first_name: 'Bill', last_name: 'Johnson' }];
 
-    const { GoogleGenAI } = await import('@google/genai');
-    const streamAbout = makeGenAIStream(['ok']);
-    mockGenAI(GoogleGenAI, streamAbout);
-    await post(supabaseFor({ existingMemories: [memory], people }), { message: 'tell me about Bill Johnson', dataContext: '' });
-    expect(streamAbout.capture.contents).toContain('Bill prefers Saturday morning meetings');
+    const streamAbout = mockClaudeStream(['ok']);
+    await post(supabaseFor({ existingMemories: [memory], people }), { message: 'tell me about Bill Johnson', dataContext: '' }, streamAbout.fetchImpl);
+    expect(streamAbout.capture.prompt).toContain('Bill prefers Saturday morning meetings');
 
     vi.resetModules();
-    const { GoogleGenAI: GoogleGenAI2 } = await import('@google/genai');
-    const streamUnrelated = makeGenAIStream(['ok']);
-    mockGenAI(GoogleGenAI2, streamUnrelated);
-    await post(supabaseFor({ existingMemories: [], people }), { message: 'what events are coming up this week', dataContext: '' });
-    expect(streamUnrelated.capture.contents).not.toContain('Bill prefers Saturday morning meetings');
+    const streamUnrelated = mockClaudeStream(['ok']);
+    await post(supabaseFor({ existingMemories: [], people }), { message: 'what events are coming up this week', dataContext: '' }, streamUnrelated.fetchImpl);
+    expect(streamUnrelated.capture.prompt).not.toContain('Bill prefers Saturday morning meetings');
   });
 });
