@@ -431,6 +431,14 @@
 - **Re-entry trigger:** before Ask GRACE gains any new server-side action capability beyond the existing proposal/approval flow, or if `grace/chat` starts trusting `dataContext` for anything beyond display.
 - **Resolution path:** port `buildDataContext`'s aggregation logic server-side (it already runs against the same tables the API can read), following `assistant-runtime.ts`'s pattern. Deferred out of ADR-014's scope because it's a materially larger diff than the memory feature needed and the founder was explicit about not rebuilding working code in this pass.
 
+### TD-063 — `grace_knowledge` has no admin UI or ingestion pipeline
+- **Severity:** P3
+- **Location:** `supabase/migrations/076_grace_knowledge.sql`, `api/_lib/grace-knowledge.ts`.
+- **Problem:** ADR-015's church knowledge table has no runtime write path at all — every row (currently just Central Henderson's ten seeded rows) arrives via migration. Adding a second church, correcting a fact, or retiring a stale one all require writing a new migration rather than using a UI.
+- **Risk:** low — this is a deliberate scope limit for a one-church, one-source fixture, not a gap discovered after the fact. The risk is purely operational friction if a second church needs this before an admin UI exists.
+- **Re-entry trigger:** a second church has a reviewed source ready to onboard, or Central Henderson's own facts need a correction more often than an occasional migration can reasonably absorb.
+- **Resolution path:** a Settings-scoped admin UI over `grace_knowledge` (list/add/retire, category-constrained, `source_label` required on every row) once a second church's onboarding makes hand-written migrations impractical. Not needed for one church.
+
 ### TD-061 — Chat-door actions are unpermissioned and unaudited — **RESOLVED**
 - **Severity:** P2
 - **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.

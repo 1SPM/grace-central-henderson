@@ -97,6 +97,15 @@ This document was written for the member-facing companion. ADR-014 (`DECISIONS.m
 - A memory is never presented as church data. It is retrieved and injected into the prompt as "things you told me," explicitly subordinate to live church records — if a memory conflicts with a database fact, the database wins, every time.
 - The member-facing portal assistant (`api/portal/_assistant.ts`) remains deliberately non-persistent — this section does not change that. Only the staff-facing Ask GRACE gained memory.
 
+## Church knowledge (ADR-015)
+
+`grace_knowledge` is a second, distinct storage layer from `grace_memories` above — church-scoped, not per-user, and with no runtime write path at all. The same boundaries apply, plus two specific to this table:
+
+- `grace_knowledge` may only contain pre-approved, human-reviewed reference content (identity, mission, strategy, ownership path) — never a live financial figure, attendance count, debt figure, or any other operational metric for a campus. If a workflow ever needs a real Henderson-specific number, it must come from an authorized Henderson-specific source, not be inferred from consolidated organizational data.
+- The four-part strategy stored here is navigation/next-step language only. It must never be used as a behavioral score, ranking, or eligibility rule for any person — restated explicitly here because this is a new, distinct claim this document didn't previously need to make.
+- Injected as background context, always subordinate to `dataContext` (the live church-data block) in the prompt — same subordination rule as `grace_memories`, applied to a different kind of content.
+- Never a source for any individual member's giving history, care history, or spiritual-conversation content, even though the church's mission language touches on spiritual life — that data, where it exists, is permissioned elsewhere.
+
 ## What this phase does NOT claim
 
 - No promise of response time.

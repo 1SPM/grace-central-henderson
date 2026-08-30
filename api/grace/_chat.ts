@@ -28,6 +28,7 @@ import { generateStreamed } from '../_lib/ai/gateway.js';
 import { callClaudeStream, DEFAULT_CLAUDE_MODEL } from '../_lib/ai/adapters/claude.js';
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { parseRememberDirective, saveMemory, retrieveMemories, buildMemoryBlock, runExtraction } from '../_lib/grace-memory.js';
+import { retrieveChurchKnowledge, buildKnowledgeBlock } from '../_lib/grace-knowledge.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -167,6 +168,9 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     return res.status(503).json({ error: 'assistant_not_configured', detail: 'ANTHROPIC_API_KEY is not set on this deployment.' });
   }
 
+  const knowledgeRows = await retrieveChurchKnowledge(supabase, { churchId: actor.churchId, query: message });
+  const knowledgeBlock = buildKnowledgeBlock(knowledgeRows);
+
   const memories = await retrieveMemories(supabase, { churchId: actor.churchId, userId: actor.userId, query: message });
   const memoryBlock = buildMemoryBlock(memories);
 
@@ -184,7 +188,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
     .join('\n');
 
-  const promptParts = [dataContext, memoryBlock];
+  const promptParts = [dataContext, knowledgeBlock, memoryBlock];
   if (history) promptParts.push(`Recent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${history}`);
   promptParts.push(`User question: ${message}`);
   const prompt = promptParts.filter(Boolean).join('\n\n');
