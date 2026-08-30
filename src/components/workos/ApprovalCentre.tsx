@@ -108,7 +108,7 @@ export function ApprovalCentre() {
         <EmptyState
           icon={<ClipboardCheck size={22} />}
           title={statusFilter === 'pending' ? 'Nothing needs your approval right now' : 'No approvals found'}
-          description="Approval requests appear here when a Work Order or agent proposes an action that needs sign-off."
+          description="Approval requests appear here when a Work Order, an agent, or a staff member using Ask GRACE proposes an action that needs sign-off."
         />
       ) : (
         <div className="space-y-3">
@@ -118,7 +118,12 @@ export function ApprovalCentre() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-dark-100">{a.proposed_action}</p>
                   <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                    Requested by {a.requested_by_agent ? `agent: ${a.requested_by_agent}` : 'a staff member'} · {new Date(a.requested_at).toLocaleString()}
+                    {/* A human requester wins over an agent label. A row can
+                        carry both, and reading out the agent in that case
+                        would credit a person's decision to software. */}
+                    Requested by {a.requested_by_user_id
+                      ? 'a staff member'
+                      : a.requested_by_agent ? `agent: ${a.requested_by_agent}` : 'unknown'} · {new Date(a.requested_at).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
