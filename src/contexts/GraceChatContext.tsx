@@ -183,7 +183,7 @@ Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
 Groups: ${groupActivityLines.join(', ') || 'none'}
-Active prayers (${prayers.filter(p => !p.isAnswered && !p.isPrivate).length}): ${activePrayers.slice(0, 6).map(p => p.content.slice(0, 50)).join(' | ') || 'none'}`;
+Active prayers (${prayers.filter(p => !p.isAnswered && !p.isPrivate).length}): ${activePrayers.slice(0, 6).map(p => p.content).join(' | ') || 'none'}`;
 }
 
 function buildSuggestions(data: GraceData): string[] {

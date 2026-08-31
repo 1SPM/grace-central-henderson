@@ -471,6 +471,14 @@
 - **Resolved.** Added `!e.isPrivate` to the `upcomingEvents` filter. Unlike TD-066 there was no separate unfiltered count line to fix in parallel — `upcomingEvents` is joined directly with no companion `.length` computed elsewhere. New regression tests in `src/contexts/GraceChatContext.test.ts`.
 - **Re-entry trigger (if it regresses):** any report of an event's title appearing in an Ask GRACE reply for an event marked private in the CRM. Worth a deliberate audit for a third instance of this same shape (a boolean privacy/visibility field defined on a client type but never consulted by `buildDataContext`) before assuming this class of gap is now closed.
 
+### TD-068 — Prayer content was silently truncated mid-word before reaching the Ask GRACE prompt — **RESOLVED**
+- **Severity:** P2 (quality, not privacy — this is about content the model IS allowed to see)
+- **Location:** `src/contexts/GraceChatContext.tsx` (`buildDataContext`, the `activePrayers` line).
+- **Problem:** found by the live-judgment tier (`tools/eval-harness/live-judge/`, `pc-connect-prayer-and-giving` scenario), not by inspection. `activePrayers.slice(0, 6).map(p => p.content.slice(0, 50))` cut every prayer's content to 50 characters — the only line in `buildDataContext` with a per-item character cap; every other list (tasks, events, donors, inactive members) bounds only by item count. A seeded prayer reading "...as she grieves the sudden loss of her husband" was cut off at "...as she gr" — the model honestly reported the truncation ("the note's cut off in the system") rather than fabricating the rest, but it meant the model sometimes lacked the detail needed to reason about the prayer at all.
+- **Risk:** moderate — degrades CONNECT/INTERPRET-level answer quality for any prayer request longer than 50 characters (most real ones), independent of the model's actual reasoning ability. Contributed to a ~17% observed pass rate (1/6 real runs) on the live-judgment scenario built to test exactly this.
+- **Resolved.** Removed the per-item `.slice(0, 50)` — `activePrayers` now relies solely on the pre-existing 6-item cap to bound prompt size, matching every other list in the function. New regression test in `src/contexts/GraceChatContext.test.ts` asserts a long prayer's full text reaches the prompt.
+- **Re-entry trigger (if it regresses):** re-sample the live-judgment scenario (`npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts --samples=5`) — a dropped pass rate on `pc-connect-prayer-and-giving` without a code change elsewhere is the signal this reintroduced itself, or that a new per-item truncation was added.
+
 ### TD-061 — Chat-door actions are unpermissioned and unaudited — **RESOLVED**
 - **Severity:** P2
 - **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.

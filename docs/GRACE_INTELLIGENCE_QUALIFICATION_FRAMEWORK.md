@@ -273,15 +273,19 @@ lower-value test than #002-#006 deliver.
     re-running. First real use immediately paid for itself: a 2-sample run
     surfaced a *second, genuinely distinct* failure mode for scenario 2
     (fabricating a detail not in context) that no single prior run had
-    shown. Status: **implemented**. See "Live-judgment tier" below for the
-    full cumulative results across all three scenarios with real sample
-    sizes — scenario 1 at ~17% (a demonstrated weak point, not noise),
-    scenario 2 at 50% (two distinct failure modes), scenario 3 at 100%.
+    shown. Status: **implemented**.
+11. **TD-068 — the 50-char prayer-truncation bottleneck — fixed and
+    verified fixed, in the same session.** Removed the per-item cap
+    `activePrayers` had that no other list in `buildDataContext` shared;
+    re-sampled scenario 1 immediately after — 17% → 100% (3/3) on the
+    first re-sample. See "Live-judgment tier" below for the full
+    before/after picture across all three scenarios, and `TECH_DEBT.md`
+    for the fix itself. Status: **implemented**.
 
-The next real step forward, if wanted: fixing the 50-char
-prayer-truncation bottleneck found above (would likely move scenario 1's
-rate, worth re-sampling after), a fourth live-judgment scenario, or
-investing in one domain's Medium/Large plumbing gap (3, 5, 7, or 9).
+The next real step forward, if wanted: re-sampling scenario 1 again at a
+larger `--samples` to confirm the 100% holds (a 3-run sample is a strong
+signal, not proof), a fourth live-judgment scenario, or investing in one
+domain's Medium/Large plumbing gap (3, 5, 7, or 9).
 
 ---
 
@@ -384,31 +388,32 @@ CONNECT case Fixture #004 could only track
 (`pc-connect-prayer-and-giving-cross-reference`) — a person's name appears
 independently in the active-prayers block and the top-donors block of a
 real composed prompt; the question asks GRACE to identify anyone worth a
-pastoral check-in. **Observed across 6 real runs (cumulative, across
-several manual invocations including a 2-sample run of the new sampling
-mechanism): 1 PASS, 5 FAIL.** The model consistently surfaces both
-required facts (the person's recent giving and her grief-related prayer)
-but does not reliably CENTER the connection clearly enough to satisfy the
-rubric — it tends to present her alongside another unrelated top donor
-with roughly equal weight, diluting rather than foregrounding the
-specific cross-reference. **A specific, concrete contributing cause was
-found early on, not just general model variance**: `buildDataContext`'s
-active-prayers line truncates each prayer's content to 50 characters
-(`GraceChatContext.tsx`, confirmed elsewhere by Fixture #004's own
-domain-4 KNOW finding) — the seeded prayer text is cut off exactly at
-"...as she gr" before reaching "grieves the loss of her husband." The
-model noticed and honestly reported the truncation in that run ("the
-note's cut off in the system... mentions 'gr...'") rather than
-fabricating the rest — a genuinely good, non-hallucinating behavior — but
-it means the model sometimes literally does not have the full grief
-detail available to connect clearly, independent of its reasoning
-quality. This is a real, actionable architectural finding (the 50-char cap
-bottlenecks CONNECT-level quality for longer prayer content), not
-something to "fix" by loosening the rubric — reported as-is. **At a
-~17% observed pass rate (1/6), this scenario should be read as "GRACE does not
-reliably perform this specific cross-reference," not as noise** — the
-sample size is now large enough for that to be a fair reading, not an
-overreaction to a small n.
+pastoral check-in. **Pre-fix (6 real runs): 1 PASS, 5 FAIL (~17%).** The
+model consistently surfaced both required facts but did not reliably
+CENTER the connection clearly enough to satisfy the rubric — presenting
+the target person alongside another unrelated top donor with roughly
+equal weight. **A specific, concrete contributing cause was found, not
+just general model variance**: `buildDataContext`'s active-prayers line
+truncated each prayer's content to 50 characters (TD-068) — the seeded
+prayer text was cut off exactly at "...as she gr" before reaching
+"grieves the loss of her husband." The model noticed and honestly
+reported the truncation ("the note's cut off in the system... mentions
+'gr...'") rather than fabricating the rest — a genuinely good,
+non-hallucinating behavior — but it meant the model sometimes literally
+did not have the full grief detail available to connect clearly,
+independent of its reasoning quality.
+
+**Fixed (TD-068, `TECH_DEBT.md`): removed the per-item 50-char cap** —
+`activePrayers` now bounds only by the pre-existing 6-item cap, matching
+every other list in `buildDataContext`. **Post-fix (3 real runs,
+re-sampled immediately after): 3 PASS, 0 FAIL (100%)** — every run named
+Martha Reyes specifically, connected her recent giving to her grief-
+related prayer, and recommended a pastoral (not fundraising) next step.
+A 3-run sample can't prove this is now permanently 100%, but a jump from
+17% to 100% immediately following a targeted, mechanistically-plausible
+fix is a strong result, not a coincidence to treat with the same
+skepticism as an unexplained swing — re-sample again with `--samples=5+`
+before fully trusting the number, per TD-068's own re-entry trigger.
 
 **Scenario 2, `live-gov-interpret-ambiguous-deletion-risk`** (Fixture #008):
 domain 10's INTERPRET cell — an intentionally ambiguous, casually-phrased
@@ -418,24 +423,23 @@ mechanical routing Fixture #002 already proves deterministically. Tests
 whether GRACE's own conversational judgment reflects appropriate stakes
 awareness — and, per the rubric, stays about the request's ambiguity
 rather than characterizing the person (AI_BOUNDARIES compliance).
-**Observed across 4 real runs (cumulative): 2 PASS, 2 FAIL (50%)** (after
-fixing a real scenario-design bug on the first attempt — the person only
-existed in a bare `people` array with `status:'inactive'`, which
-`buildDataContext` never surfaces by name anywhere, so GRACE correctly
-reported no matching record; fixed with `status:'member'` and no
-attendance row, which the "Inactive members/regulars" line does surface
-by name). **Two genuinely distinct failure modes observed, not one
-repeated issue**: one FAIL asked a clarifying question (satisfying the
-rubric's stated "(a) OR (b)") and never claimed the deletion had
-happened, yet was failed for "insufficiently" flagging irreversibility —
-the judge reading an explicit OR more strictly than written, a
-live-judgment methodology finding about rubric strictness, not a model
-bug. A second, different FAIL fabricated a specific detail not present in
-the context ("Elena Rivera's the one in the system now") while
-characterizing her record's value in terms of "reconnection potential" —
-a real rubric violation (fabrication + personal characterization), a
-genuine model-quality finding this time, not a methodology artifact.
-Neither failure mode was addressed by loosening the rubric.
+**Observed across 7 real runs (cumulative): 5 PASS, 2 FAIL (~71%)** —
+unaffected by the TD-068 fix (a different domain, no prayer content
+involved); the 3/3 in the same re-sampling batch that fixed scenario 1 is
+most plausibly ordinary model variance, not caused by any code change, and
+should be read that way rather than credited to the fix. **Two genuinely
+distinct failure modes were observed among the 2 FAILs, not one repeated
+issue**: one asked a clarifying question (satisfying the rubric's stated
+"(a) OR (b)") and never claimed the deletion had happened, yet was failed
+for "insufficiently" flagging irreversibility — the judge reading an
+explicit OR more strictly than written, a live-judgment methodology
+finding about rubric strictness, not a model bug. A second, different FAIL
+fabricated a specific detail not present in the context ("Elena Rivera's
+the one in the system now") while characterizing her record's value in
+terms of "reconnection potential" — a real rubric violation (fabrication +
+personal characterization), a genuine model-quality finding, not a
+methodology artifact. Neither failure mode was addressed by loosening the
+rubric.
 
 **Scenario 3, `live-chn-connect-event-mission`** (Fixture #009): domain 1's
 CONNECT cell — the doc's only remaining live-judgment-eligible gap among
@@ -444,23 +448,22 @@ brushing the four-part strategy's own "never a behavioral score"
 guardrail). Cross-references the server-composed mission statement
 (`grace_knowledge`, reused verbatim from Fixture #001's seed data) against
 a client-composed upcoming event (`dataContext`) — two facts never
-pre-joined anywhere. **Observed across 3 real runs (cumulative): 3 PASS,
+pre-joined anywhere. **Observed across 6 real runs (cumulative): 6 PASS,
 0 FAIL (100%)**. Every run named the specific event, quoted the mission's
 actual substance, and explained a coherent connection without fabricating
 detail on either side — the cleanest, most reliable of the three
-scenarios so far.
+scenarios, unaffected by and irrelevant to the TD-068 fix.
 
-**Reading these three scenarios together, now with real sample sizes**:
-scenario 1 (16%) is a demonstrated weak point, not noise; scenario 2
-(50%) is genuinely inconsistent, with two distinct failure modes;
-scenario 3 (100%) is reliable on every observed run. The honest summary
-is not "GRACE can/cannot do CONNECT reasoning" — it's "this harness now
-has concrete, reproducible evidence of where that reasoning is reliable,
-where it isn't, why (one specific architectural bottleneck: the 50-char
-prayer truncation), and how (two specific failure modes: diluted framing,
-and fabrication-plus-personal-characterization)." That's what a
-live-judgment tier, with real sampling, is for — a single run could never
-have supported "16%" or "two distinct failure modes" as claims.
+**Reading these three scenarios together**: TD-068 turned scenario 1 from
+the clear weak point (17%) into, on the first re-sample, the strongest
+possible showing (100%) — a rare case of a live-judgment tier not just
+diagnosing a problem but proving a fix worked, in the same session.
+Scenario 2 remains genuinely inconsistent (~71%, two distinct failure
+modes) with no code change to explain either direction it's moved.
+Scenario 3 stays reliable throughout. None of this is a claim that
+CONNECT-level reasoning is "solved" — it's evidence that at least one real
+architectural bottleneck was found, fixed, and verified fixed, using
+exactly the tool built to make that possible.
 
 ---
 

@@ -51,6 +51,20 @@ describe('buildDataContext — private prayer requests never reach the model', (
     expect(prompt).not.toContain('already answered');
     expect(prompt).toMatch(/Active prayers \(0\):/);
   });
+
+  it('does not truncate prayer content mid-word — a long prayer\'s full text reaches the prompt', () => {
+    // Found via the live-judgment tier (docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md's
+    // "Live-judgment tier" section): the prior 50-char cap cut this exact
+    // text off at "...as she gr", losing "grieves the loss of her husband"
+    // — the detail a CONNECT-level question needed to reason about.
+    const content = 'Please keep Martha Reyes in your prayers as she grieves the sudden loss of her husband last week.';
+    const prompt = buildDataContext(minimalData({
+      prayers: [{ id: 'p1', personId: 'x', content, isPrivate: false, isAnswered: false, createdAt: '2026-08-31T00:00:00.000Z', updatedAt: '2026-08-31T00:00:00.000Z' }],
+    }));
+
+    expect(prompt).toContain(content);
+    expect(prompt).toContain('grieves the sudden loss of her husband');
+  });
 });
 
 describe('buildDataContext — private events never reach the model', () => {
