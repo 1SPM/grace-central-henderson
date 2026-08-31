@@ -103,7 +103,9 @@ jobs:
           tools/eval-harness/fixtures/fixture-004-pastoral-care.cases.test.ts
           tools/eval-harness/fixtures/fixture-005-events-calendar.cases.test.ts
           tools/eval-harness/fixtures/fixture-006-staff-work.cases.test.ts
+          tools/eval-harness/central-henderson-exam/central-henderson-exam.test.ts
       - run: npx tsx tools/eval-harness/run-all.ts
+      - run: npx tsx tools/eval-harness/central-henderson-exam/run-exam.ts
 
   rls-policy-tests:
     name: RLS Policy Tests (staging)
