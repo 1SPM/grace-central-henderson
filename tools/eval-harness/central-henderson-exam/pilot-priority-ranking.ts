@@ -8,10 +8,13 @@
  * invites exactly the kind of quiet drift this framework's own design
  * principles warn against.
  *
- * This ranking is the input to a LATER discovery/workshop instrument —
- * not built here (explicit non-goal). Nothing in this file changes any
- * product behavior; it only orders gaps already documented in
- * knowledge-gap-map.ts.
+ * This ranking is the input to docs/CENTRAL_HENDERSON_DISCOVERY_WORKSHOP_GUIDE.md
+ * — a facilitator's guide (internal-prep draft, not yet used with Central
+ * Henderson) that turns these ranked gaps into discussion prompts for a
+ * real session with their staff. If that session reprioritizes anything,
+ * update this file to match and note their stated reason, not just
+ * "per discussion." Nothing in this file changes any product behavior; it
+ * only orders gaps already documented in knowledge-gap-map.ts.
  */
 import type { KnowledgeDomain } from '../types.js';
 
