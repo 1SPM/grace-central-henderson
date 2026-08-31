@@ -298,6 +298,51 @@ harness's own `renderCapabilityBaseline()` output whenever either changes;
 it remains hand-maintained prose, not auto-generated, so a mismatch is a
 prompt to update this doc, not a bug in the harness.
 
+### Live-judgment tier
+
+`tools/eval-harness/live-judge/` implements the framework's other half —
+CONNECT/INTERPRET/RECOMMEND-reasoning/ANTICIPATE claims the deterministic
+tier structurally cannot prove (§4). Zero live-model-behavior testing
+existed anywhere in this codebase before this.
+
+**Run it (real, paid Claude API calls — deliberate, not automatic):**
+```bash
+npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts
+```
+
+**Not wired into CI, on purpose.** Every result is tagged `advisory: true`
+and is never a build gate — a real model call graded by a second real model
+call is non-deterministic by construction, and CI-gating on it would make
+required checks flaky by design, exactly what "advisory, never conflated
+with hard-fixture pass/fail" (§4) exists to prevent. `live-judge.runner.ts`
+(the file vitest actually executes) is deliberately NOT named `*.test.ts`/
+`*.spec.ts`, so the main `vitest.config.ts`'s `include` glob never discovers
+it — `npm run test:run` and the required `eval-harness`/`test` CI jobs never
+touch this directory. It has its own narrowly-scoped
+`vitest.livejudge.config.ts`, invoked only by `run.ts`.
+
+**Shape:** `judge.ts`'s `runLiveJudgeCase()` drives the REAL, unmocked
+`api/grace/_chat.ts` route (real prompt composition via the now-exported
+`buildDataContext`, real Supabase auth/persistence mocking exactly like the
+deterministic tier, but the real global `fetch` — nothing about the model
+call itself is mocked), then makes a second real Claude call (same model as
+production, `DEFAULT_CLAUDE_MODEL`) asking it to grade the first call's
+answer against the case's plain-prose `rubric`, returning a parsed
+`{verdict, reasoning}`. A missing `ANTHROPIC_API_KEY` skips gracefully
+rather than erroring.
+
+**First scenario, `live-pc-connect-prayer-and-giving`**: proves the exact
+CONNECT case Fixture #004 could only track
+(`pc-connect-prayer-and-giving-cross-reference`) — a person's name appears
+independently in the active-prayers block and the top-donors block of a
+real composed prompt; the question asks GRACE to identify anyone worth a
+pastoral check-in. Verified PASS on first successful run: the model named
+the person specifically and connected both facts without fabricating
+detail. **This is a single successful run, not a statistical claim** — an
+advisory result observed once, not a guaranteed-reproducible property; the
+live-judge tier has no retry/sampling logic, and a single PASS should be
+read as "worked this time," not "always works."
+
 ---
 
 ## GRACE Capability Baseline — 2026-08-31

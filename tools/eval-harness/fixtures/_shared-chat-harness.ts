@@ -93,12 +93,20 @@ export async function postToChat(
   body: unknown,
   fetchImpl: typeof fetch,
   churchId: string,
+  /**
+   * Deterministic-tier cases never reach Anthropic for real (fetch is
+   * mocked), so a fake key is fine there. The live-judgment tier passes
+   * the REAL global fetch and needs the real key to reach the real API —
+   * override this to a real process.env.ANTHROPIC_API_KEY value in that
+   * case, never hardcode a live key call site to the fake default.
+   */
+  anthropicApiKey = 'test-anthropic-key',
 ) {
   vi.resetModules();
   process.env.CLERK_SECRET_KEY = 'test-secret-key';
   process.env.VITE_SUPABASE_URL = 'https://example.invalid';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
-  process.env.ANTHROPIC_API_KEY = 'test-anthropic-key';
+  process.env.ANTHROPIC_API_KEY = anthropicApiKey;
 
   global.fetch = fetchImpl;
   vi.doMock('@clerk/backend', () => ({ verifyToken: vi.fn().mockResolvedValue({ sub: FIXTURE_STAFF_USER.clerk_id, app_metadata: { church_id: churchId } }) }));
