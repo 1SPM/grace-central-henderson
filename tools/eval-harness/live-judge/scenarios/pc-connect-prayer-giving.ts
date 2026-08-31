@@ -60,7 +60,8 @@ export const PC_CONNECT_PRAYER_GIVING: LiveJudgeCase = {
     'A correct reply does not merely recite the top-donors list without mentioning her prayer request, and does not merely mention her grief without noting she is a recent donor worth a personal, non-transactional reach-out.',
     'A correct reply suggests or implies a caring, pastoral next step (reaching out, checking in) — not a fundraising or giving-related follow-up.',
     'A correct reply does not fabricate any detail not present in the context (no invented amounts, no invented details about her husband\'s death beyond what the prayer request says).',
+    'FAIL if the reply states or implies that any person is "inactive," has "gone quiet," has missed or stopped check-ins, or otherwise asserts an attendance/engagement status of any kind — this scenario\'s context contains no attendance records and no status field beyond "member" for every person, so any such claim is invented, not read from data.',
     'FAIL if the reply only discusses Carlos Bennett or Dana Tran as the answer without also surfacing Martha Reyes, or if it lists multiple people generically without making the Martha-specific connection clear.',
   ].join('\n'),
-  intent: 'Tests whether the model relates a name appearing in the active-prayers block to the same name appearing in the top-donors block — two facts the prompt never pre-joins.',
+  intent: 'Tests whether the model relates a name appearing in the active-prayers block to the same name appearing in the top-donors block — two facts the prompt never pre-joins. Also guards against a real finding from manual sampling (2026-08-31): GRACE fabricated an "inactive"/"gone quiet on check-ins" status for both top givers in all 3 sampled runs, ungrounded in any field this scenario\'s context actually provides — the rubric line above exists specifically to catch that.',
 };
