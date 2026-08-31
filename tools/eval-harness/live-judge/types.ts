@@ -21,6 +21,10 @@ export interface LiveJudgeCase {
   /** Synthetic church data — buildDataContext() composes this into the
    *  real dataContext string, same as the production client does. */
   scenarioData: GraceData;
+  /** Synthetic grace_knowledge rows (ADR-015) — server-composed, seeded
+   *  into the mock Supabase's grace_knowledge table. Optional: most
+   *  scenarios don't need church-knowledge content. */
+  knowledgeRows?: unknown[];
   /** The staff member's message to Ask GRACE. */
   question: string;
   /** What a correct answer must do — handed to the judge verbatim, not

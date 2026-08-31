@@ -49,7 +49,7 @@ export async function runLiveJudgeCase(c: LiveJudgeCase): Promise<LiveJudgeResul
 
   let modelAnswer: string;
   try {
-    const supabase = supabaseFor({});
+    const supabase = supabaseFor({ knowledgeRows: c.knowledgeRows });
     // The real, unmocked global fetch — this is what makes the call reach
     // Anthropic's API for real. Everything else (Clerk, Supabase) stays
     // mocked, same as every deterministic case. postToChat replaces
