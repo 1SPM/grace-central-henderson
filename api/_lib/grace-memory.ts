@@ -169,6 +169,12 @@ export async function retrieveMemories(
     byId.set(row.id, row);
   }
 
+  // Real OR: {type: 'websearch'} routes through websearch_to_tsquery, which
+  // treats a bare `|` as punctuation (dropped) rather than an operator and
+  // implicitly ANDs the remaining words — a multi-concept query would then
+  // only match a row containing every word at once. Omitting `type` routes
+  // through plain to_tsquery, which parses `|` as OR — the semantics
+  // tokenizeQuery's join(' | ') actually intends.
   const tsQuery = tokenizeQuery(opts.query).join(' | ');
   if (tsQuery) {
     const { data: relevant } = await supabase
@@ -177,7 +183,7 @@ export async function retrieveMemories(
       .eq('church_id', opts.churchId)
       .eq('user_id', opts.userId)
       .eq('status', 'active')
-      .textSearch('content_tsv', tsQuery, { type: 'websearch' })
+      .textSearch('content_tsv', tsQuery)
       .limit(8);
     for (const row of activeFilter((relevant ?? []) as Array<GraceMemoryRow & { status: string; expires_at: string | null }>)) {
       byId.set(row.id, row);

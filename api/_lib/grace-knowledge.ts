@@ -52,6 +52,12 @@ export async function retrieveChurchKnowledge(
     byId.set(row.id, row);
   }
 
+  // Real OR: {type: 'websearch'} routes through websearch_to_tsquery, which
+  // treats a bare `|` as punctuation (dropped) rather than an operator and
+  // implicitly ANDs the remaining words — a multi-concept query would then
+  // only match a row containing every word at once, which none do. Omitting
+  // `type` routes through Postgres's plain `to_tsquery`, which parses `|`
+  // as OR — the semantics tokenizeQuery's join(' | ') actually intends.
   const tsQuery = tokenizeQuery(opts.query).join(' | ');
   if (tsQuery) {
     const { data: relevant } = await supabase
@@ -59,7 +65,7 @@ export async function retrieveChurchKnowledge(
       .select('id, category, title, content, source_label')
       .eq('church_id', opts.churchId)
       .eq('status', 'active')
-      .textSearch('content_tsv', tsQuery, { type: 'websearch' })
+      .textSearch('content_tsv', tsQuery)
       .limit(8);
     for (const row of (relevant ?? []) as GraceKnowledgeRow[]) {
       byId.set(row.id, row);
