@@ -94,7 +94,7 @@ T = testable now · P = partial · F = future capability
 | 3. Ministry/discipleship | **P** — group names/counts real, but "activity stats" are hardcoded demo data (`getDemoCommunityDataForCRM()`) **even in production** | **F** | **F** | **F** — `discipleship_milestones`/`ministry_assignments` never reach chat | **F** — no catalog actions target this domain | **F** | **F** |
 | 4. Pastoral care | **T** — unanswered, non-private prayer content (truncated, capped), proven by Fixture #004 (also fixed TD-066: private prayers previously leaked into this) | **T** — `grace_memories` person_ids matching, proven by Fixture #004 | **P** — corrected from an earlier T by Fixture #004: both prayer and giving facts reach the prompt, but that proves KNOW-level presence, not that the model relates them — requires live judgment, not yet built | **F** — `crisis_flagged` isn't in the client `PrayerRequest` type; structurally invisible to chat, plus brushes the AI_BOUNDARIES personal-judgment ban | **T** — prayer CRUD actions, catalog shape proven by Fixture #004 | **T** — `delete_prayer` server-routed and proven; `add_prayer`/`mark_prayer_answered` are chat-door-only (documented finding, Fixture #004) | **F** |
 | 5. Sunday/worship | **P** — service times real; upcoming events show generic titles with no category, so a service and any other event look identical to the model | **F** | **F** | **F** — `SundayPrep`/`VolunteerScheduling` state never reaches chat; volunteer assignments aren't persisted to Supabase | **F** — no actions | **F** | **F** |
-| 6. Events/calendar | **T** — title + date only | **F** | **F** — location/capacity/RSVP never in prompt | **F** | **T** — `add_event` | **T** — same | **F** — no rooms/resources table exists at all; room-conflict ANTICIPATE is architecturally impossible |
+| 6. Events/calendar | **T** — title + date only, capped to 7 days, private events excluded (TD-067), proven by Fixture #005 | **F** | **F** — location/capacity/RSVP never in prompt | **F** | **T** — `add_event`, catalog shape proven by Fixture #005 | **T** — but `add_event` is chat-door-only with zero server-routed action in this domain at all (starker than domains 2/4, which each had one) — proven/documented by Fixture #005 | **F** — no rooms/resources table exists at all; room-conflict ANTICIPATE is architecturally impossible |
 | 7. Giving/finance | **P** — MTD/30d totals, top-5 donors real; but the persona prompt coaches fluency in pledges/campaigns/funds the model has zero data for | **F** | **F** | **F** | **F** — zero catalog actions | **F** | **F** |
 | 8. Staff/work | **P** — open task titles only, no assignee/priority/due date; `isOverdueTasksQuery` is a deterministic client-side short-circuit worth its own fixture | **F** | **F** | **F** — Work Orders/Decision Queue entirely unwired into `GraceChatProvider` | **T** — task CRUD actions | **T** — same, `delete_task` audited not gated | **F** — `assign_work_order_owner` (the most mature action-authorization pattern in the codebase) is agent-only by design, unreachable from chat |
 | 9. Communications | **F** — zero visibility into announcements/scheduled_messages/consents | **F** | **F** | **F** | **P** — `send_email`/`send_sms` exist but recommending outreach with no visibility into what's already sent or who opted out is a correctness risk | **T** — both actions exercise ungated and gated external-consequence paths | **F** |
@@ -214,8 +214,15 @@ they're scannable without reading the whole matrix:
    CONNECT was T, should have been P — the live-judgment harness genuinely
    doesn't exist yet, so that cell can't be more than tracked). Status:
    **implemented**, see the Capability Baseline update below.
+4. **Fixture #005 — domain 6 (events/calendar), KNOW/RECOMMEND/ACT.**
+   REMEMBER/CONNECT/INTERPRET correctly stay `future` (no grid correction
+   needed — no analogous mechanism to person-tagged memory exists for
+   events). Found and fixed a third instance of the TD-066 privacy-field
+   shape (TD-067), found this time by a deliberate sweep rather than by
+   accident. Status: **implemented**, see the Capability Baseline update
+   below.
 
-All three scoped to the deterministic tier only — none needed the
+All four scoped to the deterministic tier only — none needed the
 live-judgment harness, which still doesn't exist. Build that harness only
 when a CONNECT-level (or deeper) claim is actually wanted to be proven, not
 just tracked — domain 4's prayer+giving cross-reference (now represented,
@@ -223,8 +230,11 @@ unproven, as `pc-connect-prayer-and-giving-cross-reference`) is the
 best-grounded candidate whenever that's prioritized. Do not start domains
 3, 5, 7, or 9 yet — each needs Medium/Large plumbing first, or a fixture
 there would only prove "GRACE correctly declines to know things it has no
-data for," a narrower, lower-value test than #002/#003/#004 deliver
-immediately.
+data for," a narrower, lower-value test than #002-#005 deliver
+immediately. Domain 8 (staff/work) is the last domain reachable without
+new plumbing — its KNOW cell is only Partial (task titles only, no
+assignee/priority/due date), so a Fixture #006 there would prove less at
+KNOW than #002-#005 did, but RECOMMEND/ACT are both Testable.
 
 ---
 
@@ -347,4 +357,23 @@ each time a new fixture lands, so the baseline's history stays legible.
   prayer it creates, so a prayer asked to be created private via chat silently isn't — lower
   severity than TD-066 (no existing privacy designation is violated, it's a missing default),
   flagged for a separate decision rather than fixed in this pass.
+
+**Update — 2026-08-31 (Fixture #005):**
+- **Domain 6 (events/calendar): KNOW, RECOMMEND, ACT (documented, no server-routed action exists)** —
+  proven by Fixture #005 (`tools/eval-harness/fixtures/fixture-005-events-calendar.cases.ts`).
+  REMEMBER/CONNECT/INTERPRET correctly stay `future` — no grid correction needed there, unlike
+  Fixture #004's CONNECT downgrade — because `grace_memories`' person-name matching has no
+  equivalent for events.
+- **A third instance of the same privacy-field gap, found and fixed before the fixture was
+  built (TD-067, RESOLVED).** `CalendarEvent.isPrivate` existed but `buildDataContext` never
+  checked it — a private event's title reached the prompt the same as a public one. Lower
+  severity than TD-066 (title only, not full content), but the same shape of bug, found by
+  deliberately sweeping every `GraceData`-consumed type for a third instance after fixing
+  TD-066 rather than waiting to trip over it fixture-by-fixture. The sweep found no further
+  instance — `isPrivate`/similar fields exist only on `PrayerRequest` and `CalendarEvent`.
+- **ACT-level finding here is starker than domains 2/4**: `add_event` is not just chat-door-only,
+  it is the *only* events-domain catalog action — no delete/update-event action exists at all,
+  so this domain has zero server-routed actions to contrast the finding against (domains 2/4
+  each had one — `delete_person`/`delete_prayer`). Represented as
+  `ec-act-no-server-routed-action-exists`, `isArchitecturalFinding: true`.
   is deliberately narrower than the grid.

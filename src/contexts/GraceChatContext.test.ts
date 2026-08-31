@@ -52,3 +52,29 @@ describe('buildDataContext — private prayer requests never reach the model', (
     expect(prompt).toMatch(/Active prayers \(0\):/);
   });
 });
+
+describe('buildDataContext — private events never reach the model', () => {
+  it('excludes a private event\'s title from the prompt, same category of gap as the prayer fix', () => {
+    const now = new Date();
+    const soon = new Date(now.getTime() + 2 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [
+        { id: 'e1', title: 'Confidential elder discipline meeting', startDate: soon, allDay: true, category: 'event', isPrivate: true },
+        { id: 'e2', title: 'Fall Festival', startDate: soon, allDay: true, category: 'event', isPrivate: false },
+      ],
+    }));
+
+    expect(prompt).not.toContain('Confidential elder discipline meeting');
+    expect(prompt).toContain('Fall Festival');
+  });
+
+  it('an event with no isPrivate field at all still appears (undefined is falsy, not excluded)', () => {
+    const now = new Date();
+    const soon = new Date(now.getTime() + 2 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [{ id: 'e1', title: 'Regular Sunday Service', startDate: soon, allDay: true, category: 'event' }],
+    }));
+
+    expect(prompt).toContain('Regular Sunday Service');
+  });
+});

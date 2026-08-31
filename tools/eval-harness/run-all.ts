@@ -33,8 +33,9 @@ const CASE_TEST_FILES = [
   'tools/eval-harness/fixtures/fixture-002-governance-authority.cases.test.ts',
   'tools/eval-harness/fixtures/fixture-003-people-households.cases.test.ts',
   'tools/eval-harness/fixtures/fixture-004-pastoral-care.cases.test.ts',
+  'tools/eval-harness/fixtures/fixture-005-events-calendar.cases.test.ts',
 ];
-const OUTPUT_FILES = ['fixture-001-central-henderson.json', 'fixture-002-governance-authority.json', 'fixture-003-people-households.json', 'fixture-004-pastoral-care.json'];
+const OUTPUT_FILES = ['fixture-001-central-henderson.json', 'fixture-002-governance-authority.json', 'fixture-003-people-households.json', 'fixture-004-pastoral-care.json', 'fixture-005-events-calendar.json'];
 
 function regenerateResults() {
   try {

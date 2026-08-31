@@ -96,8 +96,10 @@ export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     .slice(0, 15)
     .map(p => `${p.firstName} ${p.lastName}`);
 
+  // Private events (weddings/funerals/sensitive planning) never reach the
+  // model — same category of gap as the prayer-content fix (TD-066).
   const upcomingEvents = events
-    .filter(e => new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow)
+    .filter(e => !e.isPrivate && new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow)
     .slice(0, 10)
     .map(e => `${e.title} — ${new Date(e.startDate).toLocaleDateString()}`);
 

@@ -463,6 +463,14 @@
 - **Resolved.** Added `&& !p.isPrivate` to both the `activePrayers` filter (`GraceChatContext.tsx`) and the "Active prayers (N)" count that reports alongside it — the count now matches what's actually shown, rather than revealing a private-prayer count via a mismatch between the two. `buildDataContext` was exported (previously module-private) so this could be tested directly rather than only through a full component render; a new regression test (`src/contexts/GraceChatContext.test.ts`) proves a private prayer's content is excluded, the count reflects the exclusion, and the pre-existing `isAnswered` filter still works alongside it.
 - **Re-entry trigger (if it regresses):** any report of prayer content appearing in an Ask GRACE reply for a prayer marked private in the CRM.
 
+### TD-067 — Private calendar events reached the Ask GRACE prompt like public ones — **RESOLVED**
+- **Severity:** P1 (privacy)
+- **Location:** `src/contexts/GraceChatContext.tsx` (`buildDataContext`, the `upcomingEvents` filter).
+- **Problem:** discovered while grounding Fixture #005 (events_calendar), immediately after fixing the identical-shaped TD-066 for prayers. `CalendarEvent` has an `isPrivate?: boolean` field (`src/types.ts`), used nowhere in `buildDataContext` — `upcomingEvents` filtered only on the date window. A private event's title (weddings/funerals/sensitive planning per `linkedEntityType`, or any event a staff member marked private) reached the prompt the same as a public one.
+- **Risk:** moderate — title-only exposure, not full content like TD-066, but a private event's title alone can be sensitive (a confidential staff meeting, an unannounced service, a surprise).
+- **Resolved.** Added `!e.isPrivate` to the `upcomingEvents` filter. Unlike TD-066 there was no separate unfiltered count line to fix in parallel — `upcomingEvents` is joined directly with no companion `.length` computed elsewhere. New regression tests in `src/contexts/GraceChatContext.test.ts`.
+- **Re-entry trigger (if it regresses):** any report of an event's title appearing in an Ask GRACE reply for an event marked private in the CRM. Worth a deliberate audit for a third instance of this same shape (a boolean privacy/visibility field defined on a client type but never consulted by `buildDataContext`) before assuming this class of gap is now closed.
+
 ### TD-061 — Chat-door actions are unpermissioned and unaudited — **RESOLVED**
 - **Severity:** P2
 - **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.
