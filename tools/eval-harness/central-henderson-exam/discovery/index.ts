@@ -19,3 +19,4 @@ export * from './authority-sensitivity-map.js';
 export * from './show-us-dont-tell-us.js';
 export * from './source-register.js';
 export * from './workshop-outputs.js';
+export * from './workshop-playbook.js';
