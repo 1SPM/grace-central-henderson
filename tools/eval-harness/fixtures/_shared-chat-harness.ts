@@ -63,7 +63,15 @@ export function mockClaudeStream(chunks: string[]) {
   return { fetchImpl, capture };
 }
 
-export function supabaseFor(opts: { knowledgeRows?: unknown[] } = {}) {
+export interface SupabaseForOpts {
+  knowledgeRows?: unknown[];
+  /** Fixture #003 (people/households REMEMBER): person rows for name-matching in retrieveMemories. */
+  people?: Array<{ id: string; first_name: string; last_name: string }>;
+  /** Fixture #003 (people/households REMEMBER): pre-existing grace_memories rows. */
+  existingMemories?: Array<{ id: string; content: string; source: string; person_ids: string[]; status: string; expires_at: string | null; created_at: string }>;
+}
+
+export function supabaseFor(opts: SupabaseForOpts = {}) {
   return createMockSupabase({
     tables: {
       users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active', person_id: null } }),
@@ -71,9 +79,9 @@ export function supabaseFor(opts: { knowledgeRows?: unknown[] } = {}) {
       role_permissions: () => ({ data: [{ permissions: { key: 'ask_grace.use' } }] }),
       grace_conversations: (op) => op === 'select' ? { data: null } : { data: { id: 'conv-new' } },
       grace_messages: (op) => op === 'select' ? { data: [] } : { data: { id: `msg-${Math.random().toString(36).slice(2)}` } },
-      grace_memories: (op) => op === 'select' ? { data: [] } : { data: { id: 'mem-new', content: 'saved', source: 'user_stated', person_ids: [], created_at: '2026-08-30T00:00:00.000Z' } },
+      grace_memories: (op) => op === 'select' ? { data: opts.existingMemories ?? [] } : { data: { id: 'mem-new', content: 'saved', source: 'user_stated', person_ids: [], created_at: '2026-08-30T00:00:00.000Z' } },
       grace_knowledge: () => ({ data: opts.knowledgeRows ?? [] }),
-      people: () => ({ data: [] }),
+      people: () => ({ data: opts.people ?? [] }),
       church_ai_budgets: () => ({ data: { monthly_cap_micro_usd: 100_000_000, hard_cutoff_multiplier: 1.1 } }),
       token_usage: () => ({ data: [] }),
     },

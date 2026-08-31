@@ -29,7 +29,7 @@ const F: Classification = 'future';
 const ROWS: Record<KnowledgeDomain, Row> = {
   //                       KNOW REMEMBER CONNECT INTERPRET RECOMMEND ACT ANTICIPATE
   church_identity:            [T, T, P, P, F, F, F],
-  people_households:          [T, P, F, F, T, T, F],
+  people_households:          [T, T, F, F, T, T, F], // REMEMBER flipped P→T by Fixture #003 (2026-08-31)
   ministry_discipleship:      [P, F, F, F, F, F, F],
   pastoral_care:               [T, P, T, F, T, T, F],
   sunday_worship:              [P, F, F, F, F, F, F],

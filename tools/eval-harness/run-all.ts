@@ -31,8 +31,9 @@ const OUT_DIR = join(process.cwd(), 'tools/eval-harness/.output');
 const CASE_TEST_FILES = [
   'tools/eval-harness/fixtures/fixture-001-central-henderson.cases.test.ts',
   'tools/eval-harness/fixtures/fixture-002-governance-authority.cases.test.ts',
+  'tools/eval-harness/fixtures/fixture-003-people-households.cases.test.ts',
 ];
-const OUTPUT_FILES = ['fixture-001-central-henderson.json', 'fixture-002-governance-authority.json'];
+const OUTPUT_FILES = ['fixture-001-central-henderson.json', 'fixture-002-governance-authority.json', 'fixture-003-people-households.json'];
 
 function regenerateResults() {
   try {

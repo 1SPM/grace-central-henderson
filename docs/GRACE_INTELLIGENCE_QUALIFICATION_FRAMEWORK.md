@@ -90,7 +90,7 @@ T = testable now · P = partial · F = future capability
 | Domain | KNOW | REMEMBER | CONNECT | INTERPRET | RECOMMEND | ACT | ANTICIPATE |
 |---|---|---|---|---|---|---|---|
 | 1. Church identity | **T** — Fixture #001 | **T** — Fixture #001 | **P** | **P** | **F** | **F** | **F** |
-| 2. People/households | **T** — status counts, inactivity, birthdays in `dataContext` | **P** — mechanism exists, no per-person fixture yet | **F** — `households` never queried | **F** | **T** — `add_person`/`add_note`/`update_person_status` | **T** — same + `delete_person` (gated) | **F** |
+| 2. People/households | **T** — status counts, inactivity, birthdays in `dataContext` | **T** — `grace_memories` person_ids matching, proven by Fixture #003 | **F** — `households` never queried | **F** | **T** — `add_person`/`add_note`/`update_person_status` | **T** — same + `delete_person` (gated) | **F** |
 | 3. Ministry/discipleship | **P** — group names/counts real, but "activity stats" are hardcoded demo data (`getDemoCommunityDataForCRM()`) **even in production** | **F** | **F** | **F** — `discipleship_milestones`/`ministry_assignments` never reach chat | **F** — no catalog actions target this domain | **F** | **F** |
 | 4. Pastoral care | **T** — unanswered prayer content (truncated, capped) | **P** — mechanism exists, no care-specific fixture | **T-ish** — prayer+giving CONNECT example above is buildable today | **F** — `crisis_flagged` isn't in the client `PrayerRequest` type; structurally invisible to chat, plus brushes the AI_BOUNDARIES personal-judgment ban | **T** — prayer CRUD actions | **T** — same, execute-only, none gated | **F** |
 | 5. Sunday/worship | **P** — service times real; upcoming events show generic titles with no category, so a service and any other event look identical to the model | **F** | **F** | **F** — `SundayPrep`/`VolunteerScheduling` state never reaches chat; volunteer assignments aren't persisted to Supabase | **F** — no actions | **F** | **F** |
@@ -203,7 +203,8 @@ they're scannable without reading the whole matrix:
    ACT** — explicitly skip CONNECT/INTERPRET/ANTICIPATE for now.
    Second-most mechanically complete domain, and a second REMEMBER-level
    data point that isn't church-identity data — distinguishes "the pattern
-   generalizes" from "it happened to work once." Not yet started.
+   generalizes" from "it happened to work once." Status: **implemented**,
+   see the Capability Baseline update below.
 
 Both scoped to the deterministic tier only — neither needs the
 live-judgment harness. Defer that harness build until a CONNECT-level
@@ -283,4 +284,28 @@ each time a new fixture lands, so the baseline's history stays legible.
   `api/actions/propose.test.ts` it builds on.
 - Everything else in the 10×7 grid remains **unproven by test** as of this
   date, regardless of its T/P/F design classification in §2. The baseline
+  is deliberately narrower than the grid.
+
+**Update — 2026-08-31 (Fixture #003):**
+- **Domain 2 (people/households): KNOW (data-wiring only), REMEMBER, RECOMMEND (catalog shape only)** —
+  proven by Fixture #003 (`tools/eval-harness/fixtures/fixture-003-people-households.cases.ts`).
+  KNOW and RECOMMEND are proven at a narrower boundary than domains 1/10: KNOW proves
+  `GraceChatProvider` is wired with people/tasks/prayers/attendance data, not the exact
+  composed prompt string (`buildDataContext` is client-side and not exported — see the
+  fixture file's header). RECOMMEND proves the catalog/permission shape a recommendation
+  would route through, not live-model reasoning quality (same "mechanical half only"
+  boundary as domain 10's own RECOMMEND cell).
+- `framework-grid.ts`'s `people_households` REMEMBER cell flipped P→T, earned by this
+  fixture (a second REMEMBER-level data point outside church-identity data, using the
+  same `grace_memories`/`resolvePersonIds` mechanism `api/grace/_chat.test.ts`'s
+  pre-existing "automatic retrieval" acceptance test already proved) — see §2's table,
+  also updated.
+- **New architectural finding**: domain 2's ACT-level catalog actions are NOT uniformly
+  server-routed. Only `delete_person` (gated) goes through `/api/actions/execute`/`propose`
+  (already proven by Fixture #002). `add_person`, `add_note`, and `update_person_status`
+  run entirely through a client-side-only dispatcher (`src/lib/grace-chat/handlers.ts`'s
+  `runActionHandler`) with no catalog permission check, no approval, no audit row at the
+  point of dispatch — matching `actionCatalog.ts`'s own TD-061 framing (pre-existing,
+  documented, not a new hole). Represented as `ph-act-chat-door-bypasses-server-pipeline`,
+  `isArchitecturalFinding: true` — does not count toward domain 2's ACT cell being PROVEN.
   is deliberately narrower than the grid.
