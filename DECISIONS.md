@@ -332,3 +332,24 @@ RLS is SELECT-only, scoped `church_id = get_church_id()`, no write policy — sa
 **Alternatives considered.**
 - *A general multi-church knowledge-ingestion pipeline* — rejected for this slice: no second church has a reviewed source yet, and building ingestion tooling for a fixture set of ten rows is premature. Revisit if a second church needs this.
 - *Embeddings/pgvector retrieval* — rejected, same reasoning as ADR-014: not installed on the live project, and a bounded, human-curated row set doesn't need semantic search to be relevant.
+
+## ADR-016 — GRACE Intelligence Qualification Framework (standing evaluation model)
+
+- **Date:** 2026-08-31
+- **Status:** Accepted
+
+**Context.** Fixture #001 (ADR-015) proved a reusable pattern for testing what Ask GRACE knows and how it applies that knowledge, source-scoped and provenance-tracked. This ADR generalizes that pattern into a standing evaluation framework for future GRACE intelligence work, so capability claims about staff Ask GRACE can be qualified against a shared taxonomy instead of asserted ad hoc.
+
+**Decision.** Adopt the framework documented in [`docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md`](docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md) as the standing qualification standard for staff Ask GRACE (`api/grace/_chat.ts`) going forward: 10 knowledge domains × 7 knowledge-sophistication levels (KNOW → REMEMBER → CONNECT → INTERPRET → RECOMMEND → ACT → ANTICIPATE), 9 cross-cutting judgment axes, and a deterministic-vs-live-judgment scoring model. This is a **second, independent axis** from the existing GRACE operational/accountability loop (`docs/GRACE_INTELLIGENCE_LAYER.md`'s sees → understands → proposes → decide → acts) — knowledge sophistication is not the same question as who is allowed to act, and the two are not to be collapsed into one scale.
+
+This ADR explicitly does **not** redefine ADR-014 (Memory V1) or ADR-015 (Central Henderson church knowledge). Those remain the source of truth for what is actually built and how it works; this ADR only establishes how future capability claims about Ask GRACE get qualified and tested. Scope matches ADR-014/015: staff Ask GRACE only, not the member portal assistant, the demo companion, or the marketing visual.
+
+**Consequences.**
+- New GRACE intelligence work on staff Ask GRACE should be classified against this framework's grid before being described as "done" — a capability is only as proven as its lowest untested level below the claimed ceiling (the "gaps below ceiling" rollup rule).
+- The framework document carries a dated "Capability Baseline" section reflecting only what is actually proven by a passing test, updated incrementally as new fixtures land — not the grid's broader T/P/F design classification.
+- Live-model-judgment testing (CONNECT/INTERPRET/RECOMMEND's reasoning half/ANTICIPATE) has no infrastructure yet; results from that tier, once built, are tagged advisory and never conflated with deterministic pass/fail.
+- Fixtures under this framework must not expand permissions, add actions, or otherwise change product behavior to make a test pass — the fixture measures the current system, it does not define the intended answer in advance.
+
+**Alternatives considered.**
+- *Score capability on a single ladder combined with the accountability loop* — rejected: conflates "does the model understand this" with "is the system allowed to act on it," which are genuinely different failure modes with different fixes.
+- *Skip a written framework and evaluate capability case-by-case* — rejected: Fixture #001 already showed the case-by-case pattern generalizes cleanly; writing it down once avoids re-deriving domain/level definitions for every future fixture.
