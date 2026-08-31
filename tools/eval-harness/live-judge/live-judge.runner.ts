@@ -22,9 +22,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runLiveJudgeCase } from './judge.js';
 import { PC_CONNECT_PRAYER_GIVING } from './scenarios/pc-connect-prayer-giving.js';
+import { GOV_INTERPRET_AMBIGUOUS_DELETION_RISK } from './scenarios/gov-interpret-ambiguous-deletion-risk.js';
 import type { LiveJudgeCase, LiveJudgeResult } from './types.js';
 
-const CASES: LiveJudgeCase[] = [PC_CONNECT_PRAYER_GIVING];
+const CASES: LiveJudgeCase[] = [PC_CONNECT_PRAYER_GIVING, GOV_INTERPRET_AMBIGUOUS_DELETION_RISK];
 
 let results: LiveJudgeResult[];
 
