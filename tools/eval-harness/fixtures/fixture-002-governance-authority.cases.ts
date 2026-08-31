@@ -287,4 +287,54 @@ export const FIXTURE_002_CASES: EvalCase[] = [
       return executed && proposed ? pass(evidence) : fail(evidence, 'execute/propose happy-path routing did not behave as expected');
     },
   }),
+
+  base({
+    id: 'gov-connect-sensitivity-label-unenforced',
+    level: 'CONNECT',
+    classification: 'testable',
+    proofBoundary: 'static_catalog',
+    isArchitecturalFinding: true,
+    actor: 'unauthenticated',
+    // Not a model cross-referencing two prompt facts (the framework's
+    // usual CONNECT sense) — this connects two facts ABOUT THE SYSTEM:
+    // (1) migration 032 seeds a real, meaningfully-differentiated
+    // permissions.sensitivity label per permission (care.view/care.manage
+    // are 'confidential', giving_financial.* is 'restricted', groups.view/
+    // events.view are 'public' — not a placeholder default everywhere),
+    // and (2) requirePermission/loadPermissionKeys (api/_lib/authz.ts —
+    // the only runtime consumer of the permissions table) never selects
+    // that column. Kept at the framework doc's own §2 CONNECT slot for
+    // domain 10 (matches the original design note verbatim: "tests a
+    // labeling gap, not real enforcement") rather than relabeling the
+    // level unilaterally — isArchitecturalFinding means it never inflates
+    // PROVEN regardless.
+    permissionRequirements: 'sensitivity is a real, differentiated label with zero effect on any authorization decision today.',
+    expectedBehavior: 'DOCUMENTED FINDING: permissions.sensitivity is seeded with real, differentiated values (confidential/restricted/internal/public), but no runtime code path ever reads it — two people granted care.view (confidential) vs groups.view (public) are treated identically by requirePermission.',
+    run: async () => {
+      const migrationSrc = readFileSync(join(process.cwd(), 'supabase/migrations/032_rbac_roles_permissions.sql'), 'utf8');
+      const careSensitivity = migrationSrc.match(/'care\.view',\s*'care',\s*'view',\s*'(\w+)'/)?.[1];
+      const groupsSensitivity = migrationSrc.match(/'groups\.view',\s*'groups',\s*'view',\s*'(\w+)'/)?.[1];
+      const seededMeaningfully = careSensitivity === 'confidential' && groupsSensitivity === 'public' && careSensitivity !== groupsSensitivity;
+
+      const authzSrc = readFileSync(join(process.cwd(), 'api/_lib/authz.ts'), 'utf8');
+      const loadPermissionKeysMatch = authzSrc.match(/export async function loadPermissionKeys[\s\S]*?\n}/);
+      const loadPermissionKeysBody = loadPermissionKeysMatch?.[0] ?? '';
+      const selectsSensitivity = loadPermissionKeysBody.includes('sensitivity');
+      // No other query against the permissions table exists anywhere in
+      // the app (confirmed by direct repo search while grounding this
+      // case) — loadPermissionKeys is the only runtime consumer.
+      const noOtherPermissionsTableQuery = !authzSrc.includes("from('permissions')") && !authzSrc.includes('from("permissions")');
+
+      const evidence = [
+        `care.view seeded sensitivity: ${careSensitivity}`,
+        `groups.view seeded sensitivity: ${groupsSensitivity}`,
+        `seeding is meaningfully differentiated, not a placeholder: ${seededMeaningfully}`,
+        `loadPermissionKeys selects sensitivity: ${selectsSensitivity}`,
+        `no other permissions-table query in authz.ts: ${noOtherPermissionsTableQuery}`,
+      ];
+      return seededMeaningfully && !selectsSensitivity && noOtherPermissionsTableQuery
+        ? pass(evidence)
+        : fail(evidence, 'the documented labeling gap no longer matches the code — re-verify whether sensitivity is now enforced somewhere, or the seed data changed shape');
+    },
+  }),
 ];

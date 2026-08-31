@@ -43,4 +43,9 @@ describe('Fixture #002 (governance/security/authority) via the eval harness', ()
     const finding = results.find(r => r.id === 'gov-know-send-email-permission-finding');
     expect(finding?.isArchitecturalFinding).toBe(true);
   });
+
+  it('the sensitivity-label finding case is flagged as an architectural finding, not a plain pass', () => {
+    const finding = results.find(r => r.id === 'gov-connect-sensitivity-label-unenforced');
+    expect(finding?.isArchitecturalFinding).toBe(true);
+  });
 });

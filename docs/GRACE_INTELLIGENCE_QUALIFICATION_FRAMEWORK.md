@@ -98,7 +98,7 @@ T = testable now · P = partial · F = future capability
 | 7. Giving/finance | **P** — MTD/30d totals, top-5 donors real; but the persona prompt coaches fluency in pledges/campaigns/funds the model has zero data for | **F** | **F** | **F** | **F** — zero catalog actions | **F** | **F** |
 | 8. Staff/work | **P** — open task titles only, no assignee/priority/due date, proven as a limitation by Fixture #006; `isOverdueTasksQuery` is a *separate*, deterministic client-side short-circuit (also proven — real due dates, no model call) that doesn't change the general path's P grade | **F** | **F** | **F** — Work Orders/Decision Queue entirely unwired into `GraceChatProvider` | **T** — task CRUD actions, catalog shape proven by Fixture #006 | **T** — `delete_task` audited, server-routed, and cross-referenced (proven by Fixture #002); `add_task`/`mark_task_done`/`update_task` are chat-door-only (documented finding, Fixture #006) | **F** — `assign_work_order_owner` (the most mature action-authorization pattern in the codebase) is agent-only by design, unreachable from chat |
 | 9. Communications | **F** — zero visibility into announcements/scheduled_messages/consents | **F** | **F** | **F** | **P** — `send_email`/`send_sms` exist but recommending outreach with no visibility into what's already sent or who opted out is a correctness risk | **T** — both actions exercise ungated and gated external-consequence paths | **F** |
-| 10. Governance/security | **T** — permission-denial via `authz.ts`, route-level | **T** — `security_events`/`audit_logs`, append-only, `audit.view`-gated | **T** — but tests a labeling gap (`permissions.sensitivity` unenforced), not real enforcement | **P** — consequence-tier judgment gradable against the catalog directly | **T** — the catalog + `requiresApproval` routing | **T** — full execute/propose pipeline, provenance rows | **F** — no autonomous playbook-improvement loop to anticipate against |
+| 10. Governance/security | **T** — permission-denial via `authz.ts`, route-level | **T** — `security_events`/`audit_logs`, append-only, `audit.view`-gated | **T** — a labeling gap (`permissions.sensitivity` seeded meaningfully, never read by any runtime path), proven as a documented finding by Fixture #007 (`gov-connect-sensitivity-label-unenforced`) — not real enforcement, and never counts toward PROVEN | **P** — consequence-tier judgment gradable against the catalog directly | **T** — the catalog + `requiresApproval` routing | **T** — full execute/propose pipeline, provenance rows | **F** — no autonomous playbook-improvement loop to anticipate against |
 
 **Honest read.** Domains 2, 4, 6, 8, 10 have a real KNOW→ACT path because
 they have both prompt-visible data and matching catalog actions. Domains 3
@@ -228,23 +228,38 @@ they're scannable without reading the whole matrix:
    without inflating that grade. Status: **implemented**, see the
    Capability Baseline update below.
 
-All five scoped to the deterministic tier only — none needed the
-live-judgment harness, which still doesn't exist. Build that harness only
-when a CONNECT-level (or deeper) claim is actually wanted to be proven, not
-just tracked — domain 4's prayer+giving cross-reference (now represented,
-unproven, as `pc-connect-prayer-and-giving-cross-reference`) is the
-best-grounded candidate whenever that's prioritized.
+All five scoped to the deterministic tier only.
 
 **Domains 1, 2, 4, 6, 8, and 10 are now all covered at the deterministic
 tier.** Every domain reachable without new plumbing has a fixture. Do not
 start domains 3, 5, 7, or 9 — each needs Medium/Large plumbing first (per
 §5's architectural-impact sizing), or a fixture there would only prove
 "GRACE correctly declines to know things it has no data for," a narrower,
-lower-value test than #002-#006 deliver. The next real step forward is not
-a seventh KNOW/RECOMMEND/ACT-shaped fixture — it's building the
-live-judgment harness (needed for any CONNECT/INTERPRET/RECOMMEND-reasoning/
-ANTICIPATE claim) or investing in one domain's Medium/Large plumbing gap,
-whichever is actually prioritized next.
+lower-value test than #002-#006 deliver.
+
+6. **The live-judgment harness** (`tools/eval-harness/live-judge/`) —
+   built, not just recommended. Proves CONNECT-level (and deeper) claims
+   the deterministic tier structurally cannot, via a real Claude call
+   graded by a second real Claude call, every result tagged `advisory`,
+   never CI-gated. First scenario
+   (`live-pc-connect-prayer-and-giving`) proves domain 4's
+   `pc-connect-prayer-and-giving-cross-reference` — verified PASS on a
+   real run. See the "Live-judgment tier" subsection below.
+7. **Fixture #007 — a missed deterministic gap, not a new domain.**
+   Domain 10's CONNECT cell was graded `T` in §2 with a note ("tests a
+   labeling gap: `permissions.sensitivity` unenforced") describing a
+   static code check, not a live-judgment scenario — but no case existed
+   against it after Fixture #002 shipped. Closed by
+   `gov-connect-sensitivity-label-unenforced`, added to the existing
+   `fixture-002-governance-authority.cases.ts` (domain 10 already has its
+   own fixture file; this isn't a new domain, so it lives there rather
+   than fragmenting one domain across two numbered fixtures).
+   `isArchitecturalFinding: true` — proves the labeling gap is real and
+   current, never inflates the cell to PROVEN. Status: **implemented**.
+
+The next real step forward, if wanted: a second live-judgment scenario
+(INTERPRET-level candidates exist in domains 1 and 10 per §2/§3), or
+investing in one domain's Medium/Large plumbing gap (3, 5, 7, or 9).
 
 ---
 
@@ -452,4 +467,20 @@ each time a new fixture lands, so the baseline's history stays legible.
   `delete_task`'s existing server-routed proof (`gov-remember-provenance`,
   `gov-act-execute-and-propose-happy-path`) as the contrast case, avoiding duplicate coverage
   that could drift independently of the original.
-  is deliberately narrower than the grid.
+
+**Update — 2026-08-31 (live-judgment tier + Fixture #007):**
+- **Live-judgment tier built**, `tools/eval-harness/live-judge/`. First scenario
+  (`live-pc-connect-prayer-and-giving`) verified PASS on a real run, proving domain 4's
+  tracked-but-unproven `pc-connect-prayer-and-giving-cross-reference`. Advisory only — this is
+  one observed result, not added to any PROVEN cell in this deterministic-tier baseline, and
+  never will be (the two tiers report separately, on purpose).
+- **Domain 10 (governance/security/authority): a missed CONNECT-level gap closed.** Fixture #007
+  (`gov-connect-sensitivity-label-unenforced`, in the existing
+  `fixture-002-governance-authority.cases.ts`) proves `permissions.sensitivity` is seeded with
+  real, meaningfully-differentiated values (`care.view`/`care.manage` = confidential,
+  `giving_financial.*` = restricted, `groups.view`/`events.view` = public) but read by no
+  runtime code path — `loadPermissionKeys` (`api/_lib/authz.ts`, the only runtime consumer of
+  the `permissions` table) never selects that column. `isArchitecturalFinding: true` — this does
+  not move `governance_security_authority/CONNECT` to PROVEN; it remains NOT YET PROVEN, exactly
+  as before, because a documented finding is not a capability proof. What changed is that the
+  finding is now itself proven current, not merely asserted in this doc's prose.
