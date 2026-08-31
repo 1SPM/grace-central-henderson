@@ -31,7 +31,7 @@ const ROWS: Record<KnowledgeDomain, Row> = {
   church_identity:            [T, T, P, P, F, F, F],
   people_households:          [T, T, F, F, T, T, F], // REMEMBER flipped P→T by Fixture #003 (2026-08-31)
   ministry_discipleship:      [P, F, F, F, F, F, F],
-  pastoral_care:               [T, P, T, F, T, T, F],
+  pastoral_care:               [T, T, P, F, T, T, F], // REMEMBER flipped P→T, CONNECT corrected T→P by Fixture #004 (2026-08-31)
   sunday_worship:              [P, F, F, F, F, F, F],
   events_calendar:             [T, F, F, F, T, T, F],
   giving_finance:              [P, F, F, F, F, F, F],

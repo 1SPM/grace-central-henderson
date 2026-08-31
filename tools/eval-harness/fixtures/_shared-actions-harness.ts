@@ -25,7 +25,9 @@ export function makeRes() {
   };
 }
 
-export function executeSupabaseFor(opts: { permission?: string; taskFound?: boolean } = {}) {
+const PRAYER_ID = '00000000-0000-4000-8000-0000000000e3';
+
+export function executeSupabaseFor(opts: { permission?: string; taskFound?: boolean; prayerFound?: boolean } = {}) {
   const TASK_ID = '00000000-0000-4000-8000-0000000000e1';
   return createMockSupabase({
     tables: {
@@ -40,11 +42,21 @@ export function executeSupabaseFor(opts: { permission?: string; taskFound?: bool
         }
         return { data: { id: TASK_ID } };
       },
+      prayer_requests: (op: string) => {
+        if (op === 'select') {
+          return opts.prayerFound === false
+            ? { data: null }
+            : { data: { id: PRAYER_ID, person_id: null, content: 'Please pray for my mother\'s surgery', is_private: true, is_answered: false } };
+        }
+        return { data: { id: PRAYER_ID } };
+      },
       platform_events: () => ({ data: { id: 'evt-1' } }),
       audit_logs: () => ({ data: null }),
     },
   });
 }
+
+export const PRAYER_ID_FOR_TESTS = PRAYER_ID;
 
 export function proposeSupabaseFor(opts: { permission?: string } = {}) {
   const PERSON_ID = '00000000-0000-4000-8000-0000000000e2';

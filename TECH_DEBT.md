@@ -455,6 +455,14 @@
 - **Resolved.** The insert's `error` is now checked; on failure it's logged (`console.error`) and recorded as a `security_events` row (`grace_chat.message_write_failed`, severity `elevated`) via the existing `logSecurityEvent` helper — same pattern `workosAudit.ts` already uses for `audit.write_failed`. Loud, not fatal: the turn is already delivered to the user, so there's nothing to roll back, just something to make visible. A new regression test (`api/grace/_chat.test.ts`, "TD-065") simulates a failed assistant insert and asserts the security event fires while the turn still completes normally for the user.
 - **Re-entry trigger (if it regresses):** a report of Ask GRACE "forgetting" something it just said, with no corresponding `security_events` row to explain why.
 
+### TD-066 — Private prayer requests reached the Ask GRACE prompt like public ones — **RESOLVED**
+- **Severity:** P1 (privacy)
+- **Location:** `src/contexts/GraceChatContext.tsx` (`buildDataContext`, the `activePrayers` filter and its count).
+- **Problem:** discovered while grounding Fixture #004 (pastoral_care) of the GRACE Intelligence Qualification Framework's evaluation harness. `buildDataContext` filtered prayer requests only on `isAnswered` — nothing checked `isPrivate` anywhere in the function. A prayer a staff member or member-portal submitter marked private was included in the prompt sent to Claude's API on the same terms as a public one (content truncated to 50 characters, not excluded). This ran on ordinary use, not just under adversarial phrasing — any unanswered private prayer in the church's data reached the model on every chat turn.
+- **Risk:** high — pastoral prayer content is the most sensitive category of data this app handles, and this affected the live product, not just a fixture's proof boundary.
+- **Resolved.** Added `&& !p.isPrivate` to both the `activePrayers` filter (`GraceChatContext.tsx`) and the "Active prayers (N)" count that reports alongside it — the count now matches what's actually shown, rather than revealing a private-prayer count via a mismatch between the two. `buildDataContext` was exported (previously module-private) so this could be tested directly rather than only through a full component render; a new regression test (`src/contexts/GraceChatContext.test.ts`) proves a private prayer's content is excluded, the count reflects the exclusion, and the pre-existing `isAnswered` filter still works alongside it.
+- **Re-entry trigger (if it regresses):** any report of prayer content appearing in an Ask GRACE reply for a prayer marked private in the CRM.
+
 ### TD-061 — Chat-door actions are unpermissioned and unaudited — **RESOLVED**
 - **Severity:** P2
 - **Location:** `src/lib/grace-chat/handlers.ts` (executes), `src/lib/grace-actions.ts` (parses), catalogued in `api/_lib/actionCatalog.ts`.

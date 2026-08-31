@@ -92,7 +92,7 @@ T = testable now · P = partial · F = future capability
 | 1. Church identity | **T** — Fixture #001 | **T** — Fixture #001 | **P** | **P** | **F** | **F** | **F** |
 | 2. People/households | **T** — status counts, inactivity, birthdays in `dataContext` | **T** — `grace_memories` person_ids matching, proven by Fixture #003 | **F** — `households` never queried | **F** | **T** — `add_person`/`add_note`/`update_person_status` | **T** — same + `delete_person` (gated) | **F** |
 | 3. Ministry/discipleship | **P** — group names/counts real, but "activity stats" are hardcoded demo data (`getDemoCommunityDataForCRM()`) **even in production** | **F** | **F** | **F** — `discipleship_milestones`/`ministry_assignments` never reach chat | **F** — no catalog actions target this domain | **F** | **F** |
-| 4. Pastoral care | **T** — unanswered prayer content (truncated, capped) | **P** — mechanism exists, no care-specific fixture | **T-ish** — prayer+giving CONNECT example above is buildable today | **F** — `crisis_flagged` isn't in the client `PrayerRequest` type; structurally invisible to chat, plus brushes the AI_BOUNDARIES personal-judgment ban | **T** — prayer CRUD actions | **T** — same, execute-only, none gated | **F** |
+| 4. Pastoral care | **T** — unanswered, non-private prayer content (truncated, capped), proven by Fixture #004 (also fixed TD-066: private prayers previously leaked into this) | **T** — `grace_memories` person_ids matching, proven by Fixture #004 | **P** — corrected from an earlier T by Fixture #004: both prayer and giving facts reach the prompt, but that proves KNOW-level presence, not that the model relates them — requires live judgment, not yet built | **F** — `crisis_flagged` isn't in the client `PrayerRequest` type; structurally invisible to chat, plus brushes the AI_BOUNDARIES personal-judgment ban | **T** — prayer CRUD actions, catalog shape proven by Fixture #004 | **T** — `delete_prayer` server-routed and proven; `add_prayer`/`mark_prayer_answered` are chat-door-only (documented finding, Fixture #004) | **F** |
 | 5. Sunday/worship | **P** — service times real; upcoming events show generic titles with no category, so a service and any other event look identical to the model | **F** | **F** | **F** — `SundayPrep`/`VolunteerScheduling` state never reaches chat; volunteer assignments aren't persisted to Supabase | **F** — no actions | **F** | **F** |
 | 6. Events/calendar | **T** — title + date only | **F** | **F** — location/capacity/RSVP never in prompt | **F** | **T** — `add_event` | **T** — same | **F** — no rooms/resources table exists at all; room-conflict ANTICIPATE is architecturally impossible |
 | 7. Giving/finance | **P** — MTD/30d totals, top-5 donors real; but the persona prompt coaches fluency in pledges/campaigns/funds the model has zero data for | **F** | **F** | **F** | **F** — zero catalog actions | **F** | **F** |
@@ -206,13 +206,25 @@ they're scannable without reading the whole matrix:
    generalizes" from "it happened to work once." Status: **implemented**,
    see the Capability Baseline update below.
 
-Both scoped to the deterministic tier only — neither needs the
-live-judgment harness. Defer that harness build until a CONNECT-level
-fixture is actually wanted (domain 4's prayer+giving cross-reference is the
-best-grounded candidate whenever prioritized). Do not start domains 3, 5,
-7, or 9 yet — each needs Medium/Large plumbing first, or a fixture there
-would only prove "GRACE correctly declines to know things it has no data
-for," a narrower, lower-value test than #002/#003 deliver immediately.
+3. **Fixture #004 — domain 4 (pastoral care), KNOW/REMEMBER/RECOMMEND/ACT**
+   (CONNECT tracked but not proven — see the Capability Baseline update
+   below). Chosen as the richest remaining domain after #002/#003. Found
+   and fixed a real, live privacy defect (TD-066) along the way, and
+   corrected an earlier overclaim in this doc's own §2 grid (domain 4
+   CONNECT was T, should have been P — the live-judgment harness genuinely
+   doesn't exist yet, so that cell can't be more than tracked). Status:
+   **implemented**, see the Capability Baseline update below.
+
+All three scoped to the deterministic tier only — none needed the
+live-judgment harness, which still doesn't exist. Build that harness only
+when a CONNECT-level (or deeper) claim is actually wanted to be proven, not
+just tracked — domain 4's prayer+giving cross-reference (now represented,
+unproven, as `pc-connect-prayer-and-giving-cross-reference`) is the
+best-grounded candidate whenever that's prioritized. Do not start domains
+3, 5, 7, or 9 yet — each needs Medium/Large plumbing first, or a fixture
+there would only prove "GRACE correctly declines to know things it has no
+data for," a narrower, lower-value test than #002/#003/#004 deliver
+immediately.
 
 ---
 
@@ -308,4 +320,31 @@ each time a new fixture lands, so the baseline's history stays legible.
   point of dispatch — matching `actionCatalog.ts`'s own TD-061 framing (pre-existing,
   documented, not a new hole). Represented as `ph-act-chat-door-bypasses-server-pipeline`,
   `isArchitecturalFinding: true` — does not count toward domain 2's ACT cell being PROVEN.
+
+**Update — 2026-08-31 (Fixture #004):**
+- **Domain 4 (pastoral care): KNOW, REMEMBER, RECOMMEND (catalog shape only), ACT (delete_prayer only)** —
+  proven by Fixture #004 (`tools/eval-harness/fixtures/fixture-004-pastoral-care.cases.ts`).
+- **Real privacy defect found and fixed (TD-066, RESOLVED) — not just documented.** Grounding
+  this fixture found that `buildDataContext()` (`src/contexts/GraceChatContext.tsx`) included
+  private prayer requests' content in the live Ask GRACE prompt on the same terms as public
+  ones — no `isPrivate` check existed anywhere in the function. This ran on ordinary use, not
+  adversarial phrasing. Fixed before the fixture was built (`&& !p.isPrivate` added to both the
+  filter and its reported count), with a direct regression test
+  (`src/contexts/GraceChatContext.test.ts`) independent of the harness. `buildDataContext` was
+  exported (previously module-private) as a direct consequence of making this fixable and
+  testable — not weakened, not worked around.
+- `framework-grid.ts`'s `pastoral_care` REMEMBER cell flipped P→T (earned, same REMEMBER
+  pattern as Fixture #003) and CONNECT flipped **T→P** — a correction, not an upgrade: the
+  original T assumed "both facts present in the prompt" was sufficient proof of a CONNECT-level
+  capability; building the case for real showed that's KNOW-level evidence, not proof the model
+  relates the facts. Represented as `pc-connect-prayer-and-giving-cross-reference`,
+  `requiresLiveJudgment: true`, deliberately no `run()` — reports NOT_RUN, never a fabricated
+  pass. See §2's table, also updated.
+- **New architectural finding (documented, not fixed)**: same chat-door pattern as domain 2 —
+  `add_prayer`/`mark_prayer_answered` bypass the server pipeline; only `delete_prayer` is
+  server-routed (proven above). A smaller, related, unfixed gap noted as evidence within that
+  same finding case: the chat-door `add_prayer` handler hardcodes `isPrivate: false` on every
+  prayer it creates, so a prayer asked to be created private via chat silently isn't — lower
+  severity than TD-066 (no existing privacy designation is violated, it's a missing default),
+  flagged for a separate decision rather than fixed in this pass.
   is deliberately narrower than the grid.

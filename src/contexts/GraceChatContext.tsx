@@ -60,7 +60,7 @@ interface GraceChatContextValue {
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
-function buildDataContext(data: GraceData, voiceMode?: boolean): string {
+export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName, churchProfile, graceFacts, userFirstName, userRole } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -111,7 +111,9 @@ function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     .map(p => `${p.firstName} ${p.lastName} (${new Date(p.birthDate!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
 
   const openTasks = tasks.filter(t => !t.completed).slice(0, 15);
-  const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 10);
+  // Private prayer requests never reach the model — same category of data
+  // as giving/care/spiritual-conversation content elsewhere in this app.
+  const activePrayers = prayers.filter(p => !p.isAnswered && !p.isPrivate).slice(0, 10);
 
   const { posts: communityPosts, connections: communityConnections } = getDemoCommunityDataForCRM();
   const groupActivityLines = groups.slice(0, 8).map(g => {
@@ -179,7 +181,7 @@ Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
 Groups: ${groupActivityLines.join(', ') || 'none'}
-Active prayers (${prayers.filter(p => !p.isAnswered).length}): ${activePrayers.slice(0, 6).map(p => p.content.slice(0, 50)).join(' | ') || 'none'}`;
+Active prayers (${prayers.filter(p => !p.isAnswered && !p.isPrivate).length}): ${activePrayers.slice(0, 6).map(p => p.content.slice(0, 50)).join(' | ') || 'none'}`;
 }
 
 function buildSuggestions(data: GraceData): string[] {
