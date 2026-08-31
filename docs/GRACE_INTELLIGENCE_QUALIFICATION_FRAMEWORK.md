@@ -215,6 +215,58 @@ for," a narrower, lower-value test than #002/#003 deliver immediately.
 
 ---
 
+## Evaluation harness
+
+`tools/eval-harness/` implements this framework's **deterministic tier**
+(§4) as reusable infrastructure — not new GRACE capability. It measures
+what the current system does; it does not expand what the system does.
+
+**Run it:**
+```bash
+npx tsx tools/eval-harness/run-all.ts          # human report + capability baseline
+npx tsx tools/eval-harness/run-all.ts --json    # machine-readable EvalResult[]
+```
+Also wired into CI as the `eval-harness` job (`.github/workflows/ci.yml`),
+gating `build` alongside `frontend-safety`/`rls-lint`.
+
+**Shape:** a fixture-agnostic engine (`types.ts`, `scoring.ts`, `runner.ts`)
+that consumes a declarative `EvalCase[]` — id, domain, level,
+classification, proof boundary, safety/finding flags, and an optional
+`run()` that returns a PASS/PARTIAL/FAIL outcome with evidence. A future
+church fixture is a new `fixtures/*.cases.ts` file; the engine itself never
+changes for that. Safety/authority violations are structurally
+non-averageable (`combineWithSafetyOverride` in `scoring.ts` discards
+factual correctness entirely on a violation), and a case requiring live-
+model judgment with no `run()` reports as `NOT_RUN`, never a fabricated
+pass — the harness's central guardrail, itself unit-tested in
+`runner.test.ts`.
+
+**Proof-boundary labeling** (`ProofBoundary` in `types.ts`) — every case
+states honestly what its pass actually rests on:
+- `mock` — `tests/fixtures/mockSupabase.ts`, whose `.eq()`/`.in()`/etc.
+  filters are no-ops. Proves the code path was exercised with the right
+  shape of call; cannot prove real RLS/church-scope enforcement.
+- `live_db` — a real Postgres/RLS guarantee. This harness's deterministic
+  tier builds no such case itself; see the existing `tools/*-smoke.test.ts`
+  files for that layer.
+- `static_catalog` — a check against static in-process source (the action
+  catalog, a source file's literal text), no Supabase mock involved.
+
+**Fixture #001 and #002** are represented here (`fixtures/fixture-001-*`,
+`fixtures/fixture-002-*`) without weakening their original assertions —
+each harness case duplicates the literal guardrail strings/assertions from
+its authoritative `.test.ts` file (which remains the real regression gate,
+left unmodified) rather than importing from or replacing it. A harness
+case failing while its authoritative test still passes means the harness's
+copy has gone stale — fix the copy, never loosen it to match.
+
+The Capability Baseline section below should be cross-checked against the
+harness's own `renderCapabilityBaseline()` output whenever either changes;
+it remains hand-maintained prose, not auto-generated, so a mismatch is a
+prompt to update this doc, not a bug in the harness.
+
+---
+
 ## GRACE Capability Baseline — 2026-08-31
 
 What has an actual passing, committed test behind it as of this date — not

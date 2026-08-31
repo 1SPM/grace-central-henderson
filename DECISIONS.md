@@ -349,6 +349,7 @@ This ADR explicitly does **not** redefine ADR-014 (Memory V1) or ADR-015 (Centra
 - The framework document carries a dated "Capability Baseline" section reflecting only what is actually proven by a passing test, updated incrementally as new fixtures land — not the grid's broader T/P/F design classification.
 - Live-model-judgment testing (CONNECT/INTERPRET/RECOMMEND's reasoning half/ANTICIPATE) has no infrastructure yet; results from that tier, once built, are tagged advisory and never conflated with deterministic pass/fail.
 - Fixtures under this framework must not expand permissions, add actions, or otherwise change product behavior to make a test pass — the fixture measures the current system, it does not define the intended answer in advance.
+- The framework's deterministic tier is implemented as reusable infrastructure in `tools/eval-harness/` (a fixture-agnostic `EvalCase`/runner engine, plus Fixture #001 and #002 represented as cases without weakening their original `.test.ts` assertions) — see the framework doc's "Evaluation harness" section.
 
 **Alternatives considered.**
 - *Score capability on a single ladder combined with the accountability loop* — rejected: conflates "does the model understand this" with "is the system allowed to act on it," which are genuinely different failure modes with different fixes.

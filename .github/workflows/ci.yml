@@ -84,6 +84,23 @@ jobs:
       - run: npx vitest run tools/check-frontend-safety.test.ts
       - run: npx tsx tools/check-frontend-safety.ts
 
+  eval-harness:
+    name: Eval Harness (deterministic capability baseline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: >
+          npx vitest run
+          tools/eval-harness/runner.test.ts
+          tools/eval-harness/fixtures/fixture-001-central-henderson.cases.test.ts
+          tools/eval-harness/fixtures/fixture-002-governance-authority.cases.test.ts
+      - run: npx tsx tools/eval-harness/run-all.ts
+
   rls-policy-tests:
     name: RLS Policy Tests (staging)
     runs-on: ubuntu-latest
@@ -151,7 +168,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test, security-smoke, rls-lint, rollback-lint, frontend-safety, rls-policy-tests, gitleaks, audit]
+    needs: [lint-and-typecheck, test, security-smoke, rls-lint, rollback-lint, frontend-safety, eval-harness, rls-policy-tests, gitleaks, audit]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
