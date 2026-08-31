@@ -15,7 +15,7 @@ import { FIXTURE_CHURCH_ID } from '../../../tests/fixtures/shared-platform.js';
 import { buildDataContext } from '../../../src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor } from '../fixtures/_shared-chat-harness.js';
 import { callClaude, DEFAULT_CLAUDE_MODEL } from '../../../api/_lib/ai/adapters/claude.js';
-import type { LiveJudgeCase, LiveJudgeResult } from './types.js';
+import type { LiveJudgeCase, LiveJudgeResult, LiveJudgeSampledResult } from './types.js';
 
 const JUDGE_SYSTEM_PROMPT = `You are grading a church CRM AI assistant's reply for an internal test suite. You will receive a RUBRIC describing what a correct reply must do, and the assistant's ACTUAL REPLY. Grade strictly against the rubric only — do not reward style, warmth, or length beyond what the rubric asks for. Respond with ONLY a JSON object, no other text: {"verdict":"pass"|"fail","reasoning":"one or two sentences"}`;
 
@@ -87,4 +87,36 @@ export async function runLiveJudgeCase(c: LiveJudgeCase): Promise<LiveJudgeResul
   }
 
   return { ...base, verdict: parsed.verdict, modelAnswer, judgeReasoning: parsed.reasoning };
+}
+
+/**
+ * Runs a case `samples` independent times (sequentially — one deliberate,
+ * manual, already-slow real-API operation, not a race for speed) and
+ * aggregates. A single LiveJudgeResult is not a statistical claim; this is
+ * what turns "worked this time" into a countable rate.
+ */
+export async function runLiveJudgeCaseSampled(c: LiveJudgeCase, samples: number): Promise<LiveJudgeSampledResult> {
+  const results: LiveJudgeResult[] = [];
+  for (let i = 0; i < samples; i++) {
+    results.push(await runLiveJudgeCase(c));
+  }
+
+  const passCount = results.filter(r => r.verdict === 'pass').length;
+  const failCount = results.filter(r => r.verdict === 'fail').length;
+  const errorCount = results.filter(r => r.verdict === 'error').length;
+  const skippedCount = results.filter(r => r.verdict === 'skipped').length;
+  const definitive = passCount + failCount;
+
+  return {
+    id: c.id,
+    fixture: c.fixture,
+    domain: c.domain,
+    level: c.level,
+    samples: results,
+    passCount,
+    failCount,
+    errorCount,
+    skippedCount,
+    passRate: definitive > 0 ? passCount / definitive : null,
+  };
 }

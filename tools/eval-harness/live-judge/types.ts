@@ -45,3 +45,28 @@ export interface LiveJudgeResult {
   judgeReasoning?: string;
   detail?: string;
 }
+
+/**
+ * N independent runs of the same case, aggregated. A single LiveJudgeResult
+ * was never meant to be read as "always works" — this is what makes that
+ * variance visible and countable instead of something only noticed by
+ * manually re-running (see Fixtures #001/#002's scenarios once run more
+ * than once: 1-PASS/3-FAIL and 1-PASS/1-FAIL respectively).
+ *
+ * passRate is pass / (pass + fail) — DEFINITIVE verdicts only. error/
+ * skipped runs are surfaced in their own counts, never silently folded
+ * into either side of the rate (an API error is not a judged failure).
+ */
+export interface LiveJudgeSampledResult {
+  id: string;
+  fixture: string;
+  domain: KnowledgeDomain;
+  level: IntelligenceLevel;
+  samples: LiveJudgeResult[];
+  passCount: number;
+  failCount: number;
+  errorCount: number;
+  skippedCount: number;
+  /** null when there are zero definitive (pass/fail) verdicts to rate. */
+  passRate: number | null;
+}

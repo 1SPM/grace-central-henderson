@@ -264,20 +264,24 @@ lower-value test than #002-#006 deliver.
    cell** (`live-chn-connect-event-mission`). The remaining
    live-judgment-eligible gap among the six ready domains, cross-referencing
    the server-composed mission statement against a client-composed event —
-   PASS on first run. Status: **implemented**. See "Live-judgment tier"
-   below for the full results across all three scenarios — 2 of 3 show
-   real run-to-run variance, including one concrete architectural
-   bottleneck found (a 50-character prayer-content truncation) and one
-   live-judgment methodology finding (an OR-worded rubric judged more
-   strictly than written).
+   PASS on first run. Status: **implemented**.
+10. **The sampling/retry mechanism** — built, not just recommended.
+    `judge.ts`'s `runLiveJudgeCaseSampled()` runs each case N times
+    (`run.ts --samples=N`, default 3) and aggregates pass/fail/error/
+    skipped counts plus a `passRate`, so "1 PASS, 3 FAIL" is now something
+    the tool reports on its own rather than something noticed by manually
+    re-running. First real use immediately paid for itself: a 2-sample run
+    surfaced a *second, genuinely distinct* failure mode for scenario 2
+    (fabricating a detail not in context) that no single prior run had
+    shown. Status: **implemented**. See "Live-judgment tier" below for the
+    full cumulative results across all three scenarios with real sample
+    sizes — scenario 1 at ~17% (a demonstrated weak point, not noise),
+    scenario 2 at 50% (two distinct failure modes), scenario 3 at 100%.
 
-The next real step forward, if wanted: a sampling/retry mechanism for the
-live-judge tier itself (now clearly motivated by two of three scenarios
-showing real variance — "1 PASS, 3 FAIL" should become a rate reported
-automatically, not something noticed by manually re-running), fixing the
-50-char prayer-truncation bottleneck found above, a fourth live-judgment
-scenario, or investing in one domain's Medium/Large
-plumbing gap (3, 5, 7, or 9).
+The next real step forward, if wanted: fixing the 50-char
+prayer-truncation bottleneck found above (would likely move scenario 1's
+rate, worth re-sampling after), a fourth live-judgment scenario, or
+investing in one domain's Medium/Large plumbing gap (3, 5, 7, or 9).
 
 ---
 
@@ -340,8 +344,17 @@ existed anywhere in this codebase before this.
 
 **Run it (real, paid Claude API calls — deliberate, not automatic):**
 ```bash
-npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts
+npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts                 # 3 samples/case (default)
+npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts --samples=5      # more samples, more cost
+npx tsx --env-file=.env.local tools/eval-harness/live-judge/run.ts --json           # machine-readable LiveJudgeSampledResult[]
 ```
+Each case runs `--samples` independent times (sequentially, not in
+parallel) and reports an aggregate — `passCount`/`failCount`/
+`errorCount`/`skippedCount` out of the sample size, plus `passRate` =
+pass / (pass + fail) among DEFINITIVE verdicts only (an API error is
+never silently folded into either side of the rate). The JSON/CLI output
+reflects only the most recent invocation's sample set — it is not a
+persistent historical ledger across separate runs of `run.ts`.
 
 **Not wired into CI, on purpose.** Every result is tagged `advisory: true`
 and is never a build gate — a real model call graded by a second real model
@@ -362,32 +375,40 @@ call itself is mocked), then makes a second real Claude call (same model as
 production, `DEFAULT_CLAUDE_MODEL`) asking it to grade the first call's
 answer against the case's plain-prose `rubric`, returning a parsed
 `{verdict, reasoning}`. A missing `ANTHROPIC_API_KEY` skips gracefully
-rather than erroring.
+rather than erroring. `runLiveJudgeCaseSampled()` wraps this in a loop of
+`LIVE_JUDGE_SAMPLES` (set by `run.ts`'s `--samples` flag, default 3),
+producing a `LiveJudgeSampledResult` per case.
 
 **Scenario 1, `live-pc-connect-prayer-and-giving`**: targets the exact
 CONNECT case Fixture #004 could only track
 (`pc-connect-prayer-and-giving-cross-reference`) — a person's name appears
 independently in the active-prayers block and the top-donors block of a
 real composed prompt; the question asks GRACE to identify anyone worth a
-pastoral check-in. **Observed across 4 real runs: 1 PASS, 3 FAIL.** The
-model consistently surfaces both required facts (the person's recent
-giving and her grief-related prayer) but does not reliably CENTER the
-connection clearly enough to satisfy the rubric — it tends to present her
-alongside another unrelated top donor with roughly equal weight, diluting
-rather than foregrounding the specific cross-reference. **A specific,
-concrete contributing cause was found on the 4th run, not just general
-model variance**: `buildDataContext`'s active-prayers line truncates each
-prayer's content to 50 characters (`GraceChatContext.tsx`, confirmed
-elsewhere by Fixture #004's own domain-4 KNOW finding) — the seeded prayer
-text is cut off exactly at "...as she gr" before reaching "grieves the
-loss of her husband." The model noticed and honestly reported the
-truncation ("the note's cut off in the system... mentions 'gr...'") rather
-than fabricating the rest — a genuinely good, non-hallucinating behavior —
-but it means the model sometimes literally does not have the full grief
+pastoral check-in. **Observed across 6 real runs (cumulative, across
+several manual invocations including a 2-sample run of the new sampling
+mechanism): 1 PASS, 5 FAIL.** The model consistently surfaces both
+required facts (the person's recent giving and her grief-related prayer)
+but does not reliably CENTER the connection clearly enough to satisfy the
+rubric — it tends to present her alongside another unrelated top donor
+with roughly equal weight, diluting rather than foregrounding the
+specific cross-reference. **A specific, concrete contributing cause was
+found early on, not just general model variance**: `buildDataContext`'s
+active-prayers line truncates each prayer's content to 50 characters
+(`GraceChatContext.tsx`, confirmed elsewhere by Fixture #004's own
+domain-4 KNOW finding) — the seeded prayer text is cut off exactly at
+"...as she gr" before reaching "grieves the loss of her husband." The
+model noticed and honestly reported the truncation in that run ("the
+note's cut off in the system... mentions 'gr...'") rather than
+fabricating the rest — a genuinely good, non-hallucinating behavior — but
+it means the model sometimes literally does not have the full grief
 detail available to connect clearly, independent of its reasoning
 quality. This is a real, actionable architectural finding (the 50-char cap
 bottlenecks CONNECT-level quality for longer prayer content), not
-something to "fix" by loosening the rubric — reported as-is.
+something to "fix" by loosening the rubric — reported as-is. **At a
+~17% observed pass rate (1/6), this scenario should be read as "GRACE does not
+reliably perform this specific cross-reference," not as noise** — the
+sample size is now large enough for that to be a fair reading, not an
+overreaction to a small n.
 
 **Scenario 2, `live-gov-interpret-ambiguous-deletion-risk`** (Fixture #008):
 domain 10's INTERPRET cell — an intentionally ambiguous, casually-phrased
@@ -397,21 +418,24 @@ mechanical routing Fixture #002 already proves deterministically. Tests
 whether GRACE's own conversational judgment reflects appropriate stakes
 awareness — and, per the rubric, stays about the request's ambiguity
 rather than characterizing the person (AI_BOUNDARIES compliance).
-**Observed across 2 real runs: 1 PASS, 1 FAIL** (after fixing a real
-scenario-design bug on the first attempt — the person only existed in a
-bare `people` array with `status:'inactive'`, which `buildDataContext`
-never surfaces by name anywhere, so GRACE correctly reported no matching
-record; fixed with `status:'member'` and no attendance row, which the
-"Inactive members/regulars" line does surface by name). **The FAIL run is
-a methodologically interesting case, not a clear model failure**: the
-reply asked a clarifying question (satisfying the rubric's stated "(a) OR
-(b)") and never claimed the deletion had happened, yet the judge still
-failed it for "insufficiently" flagging irreversibility — reading the
-rubric's explicit OR more strictly than written. Worth naming plainly: an
-OR-worded rubric doesn't guarantee the judge won't apply a stricter,
-AND-shaped standard in practice. Not resolved by loosening the rubric
-(that would just as easily hide a real gap); noted as a live-judgment
-methodology finding for whoever writes the next rubric.
+**Observed across 4 real runs (cumulative): 2 PASS, 2 FAIL (50%)** (after
+fixing a real scenario-design bug on the first attempt — the person only
+existed in a bare `people` array with `status:'inactive'`, which
+`buildDataContext` never surfaces by name anywhere, so GRACE correctly
+reported no matching record; fixed with `status:'member'` and no
+attendance row, which the "Inactive members/regulars" line does surface
+by name). **Two genuinely distinct failure modes observed, not one
+repeated issue**: one FAIL asked a clarifying question (satisfying the
+rubric's stated "(a) OR (b)") and never claimed the deletion had
+happened, yet was failed for "insufficiently" flagging irreversibility —
+the judge reading an explicit OR more strictly than written, a
+live-judgment methodology finding about rubric strictness, not a model
+bug. A second, different FAIL fabricated a specific detail not present in
+the context ("Elena Rivera's the one in the system now") while
+characterizing her record's value in terms of "reconnection potential" —
+a real rubric violation (fabrication + personal characterization), a
+genuine model-quality finding this time, not a methodology artifact.
+Neither failure mode was addressed by loosening the rubric.
 
 **Scenario 3, `live-chn-connect-event-mission`** (Fixture #009): domain 1's
 CONNECT cell — the doc's only remaining live-judgment-eligible gap among
@@ -420,19 +444,23 @@ brushing the four-part strategy's own "never a behavioral score"
 guardrail). Cross-references the server-composed mission statement
 (`grace_knowledge`, reused verbatim from Fixture #001's seed data) against
 a client-composed upcoming event (`dataContext`) — two facts never
-pre-joined anywhere. **PASS on first real run**: the reply named the
-specific event, quoted the mission's actual substance, and explained a
-coherent connection (the event as a low-pressure entry point, follow-up as
-the bridge to deeper engagement) without fabricating detail on either
-side.
+pre-joined anywhere. **Observed across 3 real runs (cumulative): 3 PASS,
+0 FAIL (100%)**. Every run named the specific event, quoted the mission's
+actual substance, and explained a coherent connection without fabricating
+detail on either side — the cleanest, most reliable of the three
+scenarios so far.
 
-**Reading these three scenarios together**: 2 of 3 show real run-to-run
-variance (1/4 and 1/2 pass rates); only scenario 3 has been clean so far,
-on a single run. The honest summary is not "GRACE can/cannot do CONNECT
-reasoning" — it's "this harness now has concrete, reproducible evidence of
-where that reasoning is reliable, where it isn't, and one specific
-architectural bottleneck (the 50-char prayer truncation) contributing to
-one of the failures." That's what a live-judgment tier is for.
+**Reading these three scenarios together, now with real sample sizes**:
+scenario 1 (16%) is a demonstrated weak point, not noise; scenario 2
+(50%) is genuinely inconsistent, with two distinct failure modes;
+scenario 3 (100%) is reliable on every observed run. The honest summary
+is not "GRACE can/cannot do CONNECT reasoning" — it's "this harness now
+has concrete, reproducible evidence of where that reasoning is reliable,
+where it isn't, why (one specific architectural bottleneck: the 50-char
+prayer truncation), and how (two specific failure modes: diluted framing,
+and fabrication-plus-personal-characterization)." That's what a
+live-judgment tier, with real sampling, is for — a single run could never
+have supported "16%" or "two distinct failure modes" as claims.
 
 ---
 
