@@ -87,14 +87,22 @@ export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     })
     .filter(Boolean);
 
+  // With zero attendance rows at all, "not in attendedRecently" is true for
+  // every member/regular — that's an absence of data, not evidence of
+  // inactivity, and must not be presented to the model as if it were (found
+  // via the live-judgment tier: GRACE confidently narrated "gone quiet on
+  // check-ins" for people with no attendance tracking whatsoever).
+  const hasAttendanceData = attendance.length > 0;
   const attendedRecently = new Set(
     attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId)
   );
-  const inactivePeople = people
-    .filter(p => p.status === 'member' || p.status === 'regular')
-    .filter(p => !attendedRecently.has(p.id))
-    .slice(0, 15)
-    .map(p => `${p.firstName} ${p.lastName}`);
+  const inactivePeople = hasAttendanceData
+    ? people
+        .filter(p => p.status === 'member' || p.status === 'regular')
+        .filter(p => !attendedRecently.has(p.id))
+        .slice(0, 15)
+        .map(p => `${p.firstName} ${p.lastName}`)
+    : [];
 
   // Private events (weddings/funerals/sensitive planning) never reach the
   // model — same category of gap as the prayer-content fix (TD-066).
@@ -178,7 +186,7 @@ Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
 Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
 Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
-Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}
+Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${hasAttendanceData ? `${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}` : 'attendance not tracked in this system — do not claim anyone is inactive or has missed check-ins'}
 Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
@@ -208,7 +216,12 @@ function buildSuggestions(data: GraceData): string[] {
   const attendedRecently = new Set(
     attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId),
   );
-  const inactive = people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length;
+  // Same fix as buildDataContext: no attendance rows means no evidence of
+  // inactivity, not zero inactive people — don't surface the "who hasn't
+  // attended" suggestion when we have no attendance data to answer it from.
+  const inactive = attendance.length > 0
+    ? people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length
+    : 0;
 
   const candidates: Array<{ score: number; text: string }> = [];
   if (overdue > 0) candidates.push({ score: 100, text: `What tasks are overdue?` });

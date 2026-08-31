@@ -92,3 +92,37 @@ describe('buildDataContext — private events never reach the model', () => {
     expect(prompt).toContain('Regular Sunday Service');
   });
 });
+
+describe('buildDataContext — inactivity claims require real attendance data', () => {
+  // Found via the live-judgment tier: with zero attendance rows, every
+  // member/regular landed in "Inactive members/regulars" by default (no
+  // record != recently attended), and the model narrated that as a
+  // confident "gone quiet on check-ins" claim with nothing behind it.
+  it('does not label anyone inactive when the attendance array is empty', () => {
+    const prompt = buildDataContext(minimalData({
+      people: [
+        { id: 'p1', firstName: 'Martha', lastName: 'Reyes', email: '', phone: '', status: 'member', tags: [], smallGroups: [] },
+        { id: 'p2', firstName: 'Carlos', lastName: 'Bennett', email: '', phone: '', status: 'regular', tags: [], smallGroups: [] },
+      ],
+      attendance: [],
+    }));
+
+    expect(prompt).not.toContain('Martha Reyes');
+    expect(prompt).not.toContain('Carlos Bennett');
+    expect(prompt).toMatch(/Inactive members\/regulars: attendance not tracked in this system/);
+  });
+
+  it('still correctly identifies an inactive person when real attendance data exists', () => {
+    const recentDate = new Date().toISOString().slice(0, 10);
+    const prompt = buildDataContext(minimalData({
+      people: [
+        { id: 'p1', firstName: 'Martha', lastName: 'Reyes', email: '', phone: '', status: 'member', tags: [], smallGroups: [] },
+        { id: 'p2', firstName: 'Carlos', lastName: 'Bennett', email: '', phone: '', status: 'regular', tags: [], smallGroups: [] },
+      ],
+      attendance: [{ id: 'a1', personId: 'p1', eventType: 'sunday', date: recentDate, checkedInAt: recentDate }],
+    }));
+
+    expect(prompt).not.toContain('Martha Reyes,');
+    expect(prompt).toMatch(/Inactive members\/regulars: Carlos Bennett/);
+  });
+});
