@@ -96,7 +96,7 @@ T = testable now · P = partial · F = future capability
 | 5. Sunday/worship | **P** — service times real; upcoming events show generic titles with no category, so a service and any other event look identical to the model | **F** | **F** | **F** — `SundayPrep`/`VolunteerScheduling` state never reaches chat; volunteer assignments aren't persisted to Supabase | **F** — no actions | **F** | **F** |
 | 6. Events/calendar | **T** — title + date only, capped to 7 days, private events excluded (TD-067), proven by Fixture #005 | **F** | **F** — location/capacity/RSVP never in prompt | **F** | **T** — `add_event`, catalog shape proven by Fixture #005 | **T** — but `add_event` is chat-door-only with zero server-routed action in this domain at all (starker than domains 2/4, which each had one) — proven/documented by Fixture #005 | **F** — no rooms/resources table exists at all; room-conflict ANTICIPATE is architecturally impossible |
 | 7. Giving/finance | **P** — MTD/30d totals, top-5 donors real; but the persona prompt coaches fluency in pledges/campaigns/funds the model has zero data for | **F** | **F** | **F** | **F** — zero catalog actions | **F** | **F** |
-| 8. Staff/work | **P** — open task titles only, no assignee/priority/due date; `isOverdueTasksQuery` is a deterministic client-side short-circuit worth its own fixture | **F** | **F** | **F** — Work Orders/Decision Queue entirely unwired into `GraceChatProvider` | **T** — task CRUD actions | **T** — same, `delete_task` audited not gated | **F** — `assign_work_order_owner` (the most mature action-authorization pattern in the codebase) is agent-only by design, unreachable from chat |
+| 8. Staff/work | **P** — open task titles only, no assignee/priority/due date, proven as a limitation by Fixture #006; `isOverdueTasksQuery` is a *separate*, deterministic client-side short-circuit (also proven — real due dates, no model call) that doesn't change the general path's P grade | **F** | **F** | **F** — Work Orders/Decision Queue entirely unwired into `GraceChatProvider` | **T** — task CRUD actions, catalog shape proven by Fixture #006 | **T** — `delete_task` audited, server-routed, and cross-referenced (proven by Fixture #002); `add_task`/`mark_task_done`/`update_task` are chat-door-only (documented finding, Fixture #006) | **F** — `assign_work_order_owner` (the most mature action-authorization pattern in the codebase) is agent-only by design, unreachable from chat |
 | 9. Communications | **F** — zero visibility into announcements/scheduled_messages/consents | **F** | **F** | **F** | **P** — `send_email`/`send_sms` exist but recommending outreach with no visibility into what's already sent or who opted out is a correctness risk | **T** — both actions exercise ungated and gated external-consequence paths | **F** |
 | 10. Governance/security | **T** — permission-denial via `authz.ts`, route-level | **T** — `security_events`/`audit_logs`, append-only, `audit.view`-gated | **T** — but tests a labeling gap (`permissions.sensitivity` unenforced), not real enforcement | **P** — consequence-tier judgment gradable against the catalog directly | **T** — the catalog + `requiresApproval` routing | **T** — full execute/propose pipeline, provenance rows | **F** — no autonomous playbook-improvement loop to anticipate against |
 
@@ -221,20 +221,30 @@ they're scannable without reading the whole matrix:
    shape (TD-067), found this time by a deliberate sweep rather than by
    accident. Status: **implemented**, see the Capability Baseline update
    below.
+5. **Fixture #006 — domain 8 (staff/work), KNOW/RECOMMEND/ACT.** The last
+   domain reachable without new plumbing. KNOW's Partial grade held (a
+   real capability limit, not a coverage gap); a second, separate
+   deterministic mechanism (`isOverdueTasksQuery`) was proven alongside it
+   without inflating that grade. Status: **implemented**, see the
+   Capability Baseline update below.
 
-All four scoped to the deterministic tier only — none needed the
+All five scoped to the deterministic tier only — none needed the
 live-judgment harness, which still doesn't exist. Build that harness only
 when a CONNECT-level (or deeper) claim is actually wanted to be proven, not
 just tracked — domain 4's prayer+giving cross-reference (now represented,
 unproven, as `pc-connect-prayer-and-giving-cross-reference`) is the
-best-grounded candidate whenever that's prioritized. Do not start domains
-3, 5, 7, or 9 yet — each needs Medium/Large plumbing first, or a fixture
-there would only prove "GRACE correctly declines to know things it has no
-data for," a narrower, lower-value test than #002-#005 deliver
-immediately. Domain 8 (staff/work) is the last domain reachable without
-new plumbing — its KNOW cell is only Partial (task titles only, no
-assignee/priority/due date), so a Fixture #006 there would prove less at
-KNOW than #002-#005 did, but RECOMMEND/ACT are both Testable.
+best-grounded candidate whenever that's prioritized.
+
+**Domains 1, 2, 4, 6, 8, and 10 are now all covered at the deterministic
+tier.** Every domain reachable without new plumbing has a fixture. Do not
+start domains 3, 5, 7, or 9 — each needs Medium/Large plumbing first (per
+§5's architectural-impact sizing), or a fixture there would only prove
+"GRACE correctly declines to know things it has no data for," a narrower,
+lower-value test than #002-#006 deliver. The next real step forward is not
+a seventh KNOW/RECOMMEND/ACT-shaped fixture — it's building the
+live-judgment harness (needed for any CONNECT/INTERPRET/RECOMMEND-reasoning/
+ANTICIPATE claim) or investing in one domain's Medium/Large plumbing gap,
+whichever is actually prioritized next.
 
 ---
 
@@ -376,4 +386,25 @@ each time a new fixture lands, so the baseline's history stays legible.
   so this domain has zero server-routed actions to contrast the finding against (domains 2/4
   each had one — `delete_person`/`delete_prayer`). Represented as
   `ec-act-no-server-routed-action-exists`, `isArchitecturalFinding: true`.
+
+**Update — 2026-08-31 (Fixture #006):**
+- **Domain 8 (staff/work): KNOW (a genuine limitation, proven as such — not upgraded),
+  RECOMMEND, ACT (`delete_task` cross-referenced from Fixture #002, `add_task`/
+  `mark_task_done`/`update_task` documented as chat-door-only)** — proven by Fixture #006
+  (`tools/eval-harness/fixtures/fixture-006-staff-work.cases.ts`). No grid corrections this
+  time — unlike Fixtures #003/#004's earned upgrades, domain 8 KNOW's Partial grade reflects a
+  real capability limit (the general prompt only ever includes a task's title;
+  `dueDate`/`priority`/`assignedTo` never reach it), not an untested mechanism.
+- **A second, separate KNOW-level mechanism was proven alongside that limitation, not folded
+  into its grade**: `src/lib/grace-actions.ts`'s `isOverdueTasksQuery`/`getOverdueTasks`/
+  `formatOverdueTasksResponse` is a deterministic client-side short-circuit for "what's
+  overdue"-shaped questions — it never calls the model, and does have real due-date data. It
+  only covers one specific query shape, so it doesn't change the general path's Partial grade,
+  but it's a genuinely stronger, fully-provable guarantee worth its own case rather than being
+  silently absorbed into — or ignored by — the general KNOW cell's grading.
+- ACT-level ties back to Fixture #002 rather than re-testing `delete_task`'s HTTP route a third
+  time: `sw-act-add-and-update-are-chat-door-only` proves the three chat-door actions and cites
+  `delete_task`'s existing server-routed proof (`gov-remember-provenance`,
+  `gov-act-execute-and-propose-happy-path`) as the contrast case, avoiding duplicate coverage
+  that could drift independently of the original.
   is deliberately narrower than the grid.

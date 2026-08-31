@@ -128,7 +128,15 @@ export function renderCapabilityBaseline(results: EvalResult[]): string {
       } else if (cellResults.length === 0) {
         status = 'NOT YET PROVEN';
       } else if (cellResults.some(isProven)) {
-        status = cellResults.every(isProven) ? 'PROVEN' : 'PARTIAL';
+        // The grid's own classification is a CEILING, not just a starting
+        // point: a cell the framework itself only ever called 'partial'
+        // (a genuine capability limit — e.g. staff/work KNOW only ever
+        // sees a task's title) must never render PROVEN just because every
+        // case at that cell happens to pass. A passing case can prove a
+        // documented limitation is real and correctly bounded; it cannot
+        // upgrade that limitation into a full capability. Only 'testable'
+        // cells can reach PROVEN.
+        status = cellResults.every(isProven) ? (gridClass === 'partial' ? 'PARTIAL' : 'PROVEN') : 'PARTIAL';
       } else if (cellResults.some(r => r.outcome.grade === 'PARTIAL')) {
         status = 'PARTIAL';
       } else {

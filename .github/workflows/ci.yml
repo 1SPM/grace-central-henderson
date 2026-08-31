@@ -102,6 +102,7 @@ jobs:
           tools/eval-harness/fixtures/fixture-003-people-households.cases.test.ts
           tools/eval-harness/fixtures/fixture-004-pastoral-care.cases.test.ts
           tools/eval-harness/fixtures/fixture-005-events-calendar.cases.test.ts
+          tools/eval-harness/fixtures/fixture-006-staff-work.cases.test.ts
       - run: npx tsx tools/eval-harness/run-all.ts
 
   rls-policy-tests:

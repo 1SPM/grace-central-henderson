@@ -43,6 +43,20 @@ describe('runCases — requiresLiveJudgment guardrail', () => {
   });
 });
 
+describe('renderCapabilityBaseline — grid classification is a ceiling', () => {
+  it('a grid-partial cell never renders PROVEN even when every case at it passes', async () => {
+    // people_households/REMEMBER is 'testable' in framework-grid.ts; use a
+    // cell the grid marks 'partial' instead — church_identity/CONNECT is
+    // 'partial' — to prove a fully-passing case still caps at PARTIAL.
+    const results = await runCases([
+      baseCase({ id: 'documents-a-real-limit', level: 'CONNECT', classification: 'testable', run: async () => pass(['limitation correctly bounded']) }),
+    ]);
+    const baseline = renderCapabilityBaseline(results);
+    expect(baseline).toContain('church_identity / CONNECT: PARTIAL');
+    expect(baseline).not.toContain('church_identity / CONNECT: PROVEN');
+  });
+});
+
 describe('runCases — isArchitecturalFinding guardrail', () => {
   it('a passing finding-case never counts toward PROVEN', async () => {
     const results = await runCases([
