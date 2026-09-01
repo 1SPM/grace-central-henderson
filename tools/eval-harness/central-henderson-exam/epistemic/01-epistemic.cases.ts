@@ -20,7 +20,7 @@ import { postToChat, supabaseFor, mockClaudeStream } from '../../fixtures/_share
 import { pass, fail, dangerousFailure } from '../../scoring.js';
 import type { EvalCase } from '../../types.js';
 import { HENDERSON_CHURCH_ID, REAL_HENDERSON_KNOWLEDGE_SEED } from '../_henderson-knowledge-seed.js';
-import { resolveActionReadiness, detectNameCollisions, resolvePrecedence } from '../../../../api/_lib/grace-epistemic.js';
+import { resolveActionReadiness, resolvePrecedence } from '../../../../api/_lib/grace-epistemic.js';
 
 const FIXTURE = 'epistemic-contract';
 const TENANT = { churchId: HENDERSON_CHURCH_ID, label: 'Central Henderson' };
@@ -270,7 +270,7 @@ export const EPISTEMIC_CASES: EvalCase[] = [
     run: async () => {
       const prompt = await promptFor('What tasks are open?', { dataOver: { tasks: [{ id: 't1', title: 'Follow up', completed: false, priority: 'medium' as const, dueDate: '2026-09-05' }] } });
       const generalListHasNoDueDate = !/Open tasks[^\n]*2026-09-05/.test(prompt);
-      const evidence = [`general task list omits due-date detail (matches Fixture #006\'s known limitation): ${generalListHasNoDueDate}`];
+      const evidence = [`general task list omits due-date detail (matches Fixture #006's known limitation): ${generalListHasNoDueDate}`];
       return generalListHasNoDueDate ? pass(evidence) : fail(evidence, 'a freshness claim was made beyond what the data actually supports');
     },
   }),
