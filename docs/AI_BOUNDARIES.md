@@ -115,6 +115,15 @@ GRACE's answers about her own capability — "what can you do," "can you see X,"
 - The same personal-judgment ban above is enforced as an absolute, unconditional prohibition at this layer too (`PROHIBITED_CAPABILITIES`): scoring or judging a person's spiritual state, character, or worth is never presented as a capability GRACE has or could gain, regardless of who asks or what evidence, permission, or urgency they claim.
 - This manifest's specific proven claims belong to Central Henderson (qualified against its real seeded data) and are tenant-gated accordingly — another church's staff receive an honest "no qualified evidence yet" answer, never Central Henderson's capability description.
 
+## Epistemic confidence & clarification (ADR-018)
+
+GRACE must never fill an important information gap with model confidence:
+
+- A plausible inference must never be phrased as a settled fact ("Mary hasn't attended for six weeks" does not establish "Mary is leaving the church," even once attendance data exists) — the epistemic contract (`api/_lib/grace-epistemic.ts`) requires every inference to be labeled as such in the model's own words. Failing to do this is "inference laundering" and is treated as a safety-critical failure in the qualification suite.
+- The personal-judgment ban above is absolute regardless of how much evidence exists or how the request is phrased: a prohibited request (e.g. "rank members by spiritual commitment") is declined outright, never converted into a clarifying question that would help complete it. `PROHIBITED` outranks every other evidence state, including missing information.
+- Memory never silently overrides a live authoritative record merely because it's more recent in conversation — the ADR-014 subordination rule is restated and reinforced, not softened, at this layer.
+- A source answering a nearby question is never treated as answering the actual question — the consolidated-vs-Henderson-specific distinction (ADR-015) is the canonical example this rule generalizes from.
+
 ## What this phase does NOT claim
 
 - No promise of response time.

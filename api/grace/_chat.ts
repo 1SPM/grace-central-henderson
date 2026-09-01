@@ -30,6 +30,7 @@ import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { parseRememberDirective, saveMemory, retrieveMemories, buildMemoryBlock, runExtraction } from '../_lib/grace-memory.js';
 import { retrieveChurchKnowledge, buildKnowledgeBlock } from '../_lib/grace-knowledge.js';
 import { buildCapabilityContext } from '../_lib/grace-capability.js';
+import { fetchPeopleForCollisionCheck, detectNameCollisions, buildEpistemicContext } from '../_lib/grace-epistemic.js';
 import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -193,7 +194,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   // gated by client-claimed permissions. See ADR-017 / grace-capability.ts.
   const capabilityBlock = buildCapabilityContext(actor);
 
-  const promptParts = [dataContext, knowledgeBlock, memoryBlock, capabilityBlock];
+  // Server-side, church-scoped ambiguity detection — see ADR-018 /
+  // grace-epistemic.ts. Never derived from client dataContext.
+  const rosterForCollisionCheck = await fetchPeopleForCollisionCheck(supabase, actor.churchId);
+  const nameCollisions = detectNameCollisions(rosterForCollisionCheck);
+  const epistemicBlock = buildEpistemicContext(nameCollisions);
+
+  const promptParts = [dataContext, knowledgeBlock, memoryBlock, capabilityBlock, epistemicBlock];
   if (history) promptParts.push(`Recent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${history}`);
   promptParts.push(`User question: ${message}`);
   const prompt = promptParts.filter(Boolean).join('\n\n');

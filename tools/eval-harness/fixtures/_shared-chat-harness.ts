@@ -71,6 +71,18 @@ export interface SupabaseForOpts {
   existingMemories?: Array<{ id: string; content: string; source: string; person_ids: string[]; status: string; expires_at: string | null; created_at: string }>;
   /** Self-awareness fixture (Prompt 9): the actor's granted permission keys — defaults to the baseline 'ask_grace.use' so every existing caller is unaffected. An empty array simulates an authenticated-but-unpermissioned actor. */
   permissions?: string[];
+  /**
+   * Epistemic contract fixture (Prompt 10): simulates an ALREADY-EXISTING
+   * conversation with prior turns, so multi-turn history reaches the
+   * prompt via the real server-side query path (grace_messages), not a
+   * client-submitted field the route doesn't even accept. The mock can't
+   * filter by the specific conversationId requested (see mockSupabase.ts's
+   * header — handlers see op+payload, not .eq() filter values), so any
+   * conversationId in the request body will resolve to this same fixed
+   * conversation when set — sufficient for proving history composition,
+   * not a replacement for _chat.test.ts's own conversationId-scoping proof.
+   */
+  existingConversationMessages?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
 export function supabaseFor(opts: SupabaseForOpts = {}) {
@@ -80,8 +92,20 @@ export function supabaseFor(opts: SupabaseForOpts = {}) {
       users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active', person_id: null } }),
       user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
       role_permissions: () => ({ data: permissionKeys.map(key => ({ permissions: { key } })) }),
-      grace_conversations: (op) => op === 'select' ? { data: null } : { data: { id: 'conv-new' } },
-      grace_messages: (op) => op === 'select' ? { data: [] } : { data: { id: `msg-${Math.random().toString(36).slice(2)}` } },
+      grace_conversations: (op) => op === 'select'
+        ? { data: opts.existingConversationMessages ? { id: 'existing-conv' } : null }
+        : { data: { id: 'conv-new' } },
+      grace_messages: (op) => {
+        if (op !== 'select') return { data: { id: `msg-${Math.random().toString(36).slice(2)}` } };
+        if (!opts.existingConversationMessages) return { data: [] };
+        // _chat.ts's real query is DESC-ordered and does .slice(1).reverse()
+        // to drop the just-inserted current message and restore chronological
+        // order — the mock can't see that insert, so a placeholder stands in
+        // for it as the "newest" row; everything after is the configured
+        // prior history, newest-first, so slice(1).reverse() recovers it in
+        // the original chronological order the test author wrote.
+        return { data: [{ role: 'user', content: '(current message placeholder)' }, ...[...opts.existingConversationMessages].reverse()] };
+      },
       grace_memories: (op) => op === 'select' ? { data: opts.existingMemories ?? [] } : { data: { id: 'mem-new', content: 'saved', source: 'user_stated', person_ids: [], created_at: '2026-08-30T00:00:00.000Z' } },
       grace_knowledge: () => ({ data: opts.knowledgeRows ?? [] }),
       people: () => ({ data: opts.people ?? [] }),
