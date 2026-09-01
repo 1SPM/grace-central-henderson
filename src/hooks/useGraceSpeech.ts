@@ -102,6 +102,11 @@ export function composeSpeechText(text: string): string {
     .replace(/\s[—–]\s|—|–/g, ', ')
     .replace(/\s&\s/g, ' and ')
     .replace(/\bw\/\s?/gi, 'with ')
+    // Clock times: ":00" is read digit-by-digit by TTS ("two oh-oh"). On the
+    // hour the minutes carry nothing — drop them before an am/pm ("2:00 p.m."
+    // → "2 p.m."), otherwise say o'clock. Non-zero minutes already read fine.
+    .replace(/\b(\d{1,2}):00(?=\s*[ap]\.?m\.?\b)/gi, '$1')
+    .replace(/\b(\d{1,2}):00\b/g, "$1 o'clock")
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+,/g, ',')
     .trim();
