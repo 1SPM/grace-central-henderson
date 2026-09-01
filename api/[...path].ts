@@ -71,6 +71,8 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'giving/donor-portal-callback': () => import('./giving/_donor-portal-callback.js'),
   'giving/request-donor-portal': () => import('./giving/_request-donor-portal.js'),
   'giving/text-to-give': () => import('./giving/_text-to-give.js'),
+  'grace/chat': () => import('./grace/_chat.js'),
+  'grace/memories': () => import('./grace/_memories.js'),
   'grace/draft-reply': () => import('./grace/_draft-reply.js'),
   'grace/tts': () => import('./grace/_tts.js'),
   'grace/tts/health': () => import('./grace/_tts-health.js'),

@@ -8,14 +8,7 @@ import { useState } from 'react';
 import { Bot, Flag, ArrowUpRight } from 'lucide-react';
 import { useMyWork, type MyWorkAgentActivity, type MyWorkOrder, type MyWorkArea } from '../hooks/useMyWork';
 import { StatusBadge } from './ui/StatusBadge';
-
-const STATUS_VARIANT: Record<string, 'default' | 'info' | 'success' | 'urgent' | 'low'> = {
-  queued: 'info',
-  running: 'info',
-  succeeded: 'success',
-  failed: 'urgent',
-  cancelled: 'low',
-};
+import { agentWorkStatusLabel, agentWorkStatusVariant, AGENT_WORK_BOUNDARY_STATEMENT } from '../lib/agentWorkStatus';
 
 function formatTime(iso: string | null): string {
   if (!iso) return '—';
@@ -32,7 +25,7 @@ function AgentActivityRow({ activity }: { activity: MyWorkAgentActivity | null }
       <div className="min-w-0">
         <span className="font-medium text-gray-700 dark:text-dark-200">{activity.agent_name}</span>
         {' · '}
-        <StatusBadge variant={STATUS_VARIANT[activity.status] ?? 'default'}>{activity.status.replace('_', ' ')}</StatusBadge>
+        <StatusBadge variant={agentWorkStatusVariant(activity.status)}>{agentWorkStatusLabel(activity.status)}</StatusBadge>
         {activity.summary && <p className="text-gray-500 dark:text-dark-400 mt-0.5">{activity.summary}</p>}
         {activity.error && <p className="text-brand-600 dark:text-brand-400 mt-0.5">{activity.error}</p>}
         <p className="text-[11px] text-gray-400 dark:text-dark-500 mt-0.5">Last activity: {formatTime(activity.finished_at)}</p>
@@ -136,7 +129,7 @@ export function MyWorkPanel() {
     <div className="p-4 sm:p-6 space-y-6">
       <p className="text-sm text-gray-500 dark:text-dark-400">
         What's on your plate, and what GRACE's agents are doing on your behalf. Flag anything that
-        needs your Senior Pastor's attention — it lands directly in their queue.
+        needs your Senior Pastor's attention — it lands directly in their queue. {AGENT_WORK_BOUNDARY_STATEMENT}
       </p>
 
       {areas.length > 0 && (

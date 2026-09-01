@@ -173,3 +173,122 @@ export async function generate(
 
   return { allowed: true, budget, provider: result, latencyMs, moderation: moderationSummary };
 }
+
+// ---------------------------------------------------------------------
+// Streaming variant — added for ADR-014 (Grace staff memory) so Ask
+// GRACE's turn endpoint can keep its streamed UX while still going
+// through budget + moderation + usage like every other gateway call.
+//
+// Chunks are handed to the caller as they arrive via onChunk, so this
+// cannot block on the full response the way generate() does. The
+// consequence: OUTPUT moderation runs post-hoc, after the full text has
+// already been streamed to the client — it can flag and log, but it
+// cannot un-send what the caller already received. This is a deliberate,
+// documented gap versus generate()'s output moderation, which blocks
+// before any text reaches the caller. See ADR-014 in DECISIONS.md.
+// ---------------------------------------------------------------------
+
+export type StreamProviderCall = (onChunk: (text: string) => void) => Promise<ProviderCallResult>;
+
+export async function generateStreamed(
+  req: GatewayRequest,
+  onChunk: (text: string) => void,
+  callProviderStream: StreamProviderCall,
+): Promise<GatewayResult> {
+  const budget = await checkBudget(req.supabase, req.churchId, req.now);
+  const mod = req.moderateImpl ?? moderate;
+
+  if (budget.status !== 'ok') {
+    void recordUsage(req.supabase, {
+      churchId: req.churchId,
+      provider: req.provider,
+      model: req.model,
+      feature: req.feature,
+      promptTokens: 0,
+      completionTokens: 0,
+      success: false,
+      errorCode: budget.status === 'hard_cut' ? 'budget_hard_cut' : 'budget_over_cap',
+      latencyMs: 0,
+      requestId: req.requestId,
+      actorClerkId: req.actorClerkId,
+    });
+    return { allowed: false, budget, reason: budget.status };
+  }
+
+  let inputModeration: ModerationResult | undefined;
+  if (req.moderateInput) {
+    inputModeration = await mod(req.moderateInput);
+    if (inputModeration.flagged) {
+      void recordUsage(req.supabase, {
+        churchId: req.churchId,
+        provider: req.provider,
+        model: req.model,
+        feature: req.feature,
+        promptTokens: 0,
+        completionTokens: 0,
+        success: false,
+        errorCode: 'moderation_input',
+        latencyMs: 0,
+        requestId: req.requestId,
+        actorClerkId: req.actorClerkId,
+      });
+      return { allowed: false, budget, reason: 'moderation_input', moderation: inputModeration };
+    }
+  }
+
+  const started = Date.now();
+  let result: ProviderCallResult;
+  try {
+    result = await callProviderStream(onChunk);
+  } catch (err) {
+    result = {
+      success: false,
+      error: err instanceof Error ? err.message : 'provider call threw',
+      errorCode: 'provider_exception',
+    };
+  }
+  const latencyMs = Date.now() - started;
+
+  // Post-hoc, log-only: cannot redact chunks already sent to the caller.
+  let outputModeration: ModerationResult | undefined;
+  if (req.moderateOutput && result.success && result.text) {
+    outputModeration = await mod(result.text);
+    if (outputModeration.flagged) {
+      void recordUsage(req.supabase, {
+        churchId: req.churchId,
+        provider: req.provider,
+        model: req.model,
+        feature: req.feature,
+        promptTokens: result.promptTokens ?? 0,
+        completionTokens: result.completionTokens ?? 0,
+        success: result.success,
+        errorCode: 'moderation_output_flagged_post_hoc',
+        latencyMs,
+        requestId: req.requestId,
+        actorClerkId: req.actorClerkId,
+      });
+      return { allowed: true, budget, provider: result, latencyMs, moderation: { input: inputModeration, output: outputModeration } };
+    }
+  }
+
+  void recordUsage(req.supabase, {
+    churchId: req.churchId,
+    provider: req.provider,
+    model: req.model,
+    feature: req.feature,
+    promptTokens: result.promptTokens ?? 0,
+    completionTokens: result.completionTokens ?? 0,
+    success: result.success,
+    errorCode: result.errorCode,
+    latencyMs,
+    requestId: req.requestId,
+    actorClerkId: req.actorClerkId,
+  });
+
+  const moderationSummary: { input?: ModerationResult; output?: ModerationResult } | undefined =
+    inputModeration || outputModeration
+      ? { input: inputModeration, output: outputModeration }
+      : undefined;
+
+  return { allowed: true, budget, provider: result, latencyMs, moderation: moderationSummary };
+}

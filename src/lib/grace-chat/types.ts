@@ -33,6 +33,9 @@ export interface GraceData {
   graceFacts?: string;
   userFirstName?: string;
   userRole?: User['role'];
+  /** users.id (not the Clerk id) — scopes server-side memory + the
+   *  localStorage fallback transcript to this staff member (ADR-014). */
+  userId?: string;
   /** IANA timezone for salutation clock (e.g. America/Los_Angeles). */
   churchTimezone?: string;
 }

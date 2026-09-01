@@ -5,6 +5,9 @@ import {
   resolvePerson,
   resolveTask,
   resolvePrayer,
+  countPersonMatches,
+  countTaskMatches,
+  countPrayerMatches,
   hydrateAction,
   isTaskBatchFollowUp,
   buildTaskCompletionActions,
@@ -190,6 +193,101 @@ describe('resolvePrayer', () => {
   });
 });
 
+// ADR-018 action-resolution safety closure: resolvePerson/resolveTask/
+// resolvePrayer above are UNCHANGED (same signature, same first-match
+// behavior, all 41 pre-existing tests still pass) — these are the new,
+// additive companions that make ambiguity visible instead of silently
+// picking a winner.
+describe('countPersonMatches', () => {
+  it('returns every candidate at the SAME tier resolvePerson would pick from — the existing "Sarah"/"Sarah Kim" fixture is a real collision at the first-name tier', () => {
+    // resolvePerson('Sarah', people) deterministically returns p1 (first in
+    // array) per the pre-existing test above — this proves that "winner"
+    // was really an arbitrary pick among 2 real candidates.
+    const matches = countPersonMatches('Sarah', people);
+    expect(matches.map(p => p.id).sort()).toEqual(['p1', 'p3']);
+  });
+
+  it('a full-name match is unambiguous even when the first name collides', () => {
+    expect(countPersonMatches('Sarah Kim', people)).toHaveLength(1);
+    expect(countPersonMatches('Sarah Kim', people)[0].id).toBe('p1');
+  });
+
+  it('zero matches for a name nobody has', () => {
+    expect(countPersonMatches('Nobody', people)).toHaveLength(0);
+  });
+
+  it('empty/undefined name returns no candidates', () => {
+    expect(countPersonMatches(undefined, people)).toHaveLength(0);
+    expect(countPersonMatches('', people)).toHaveLength(0);
+  });
+});
+
+describe('countTaskMatches', () => {
+  const openCollisionTasks: Task[] = [
+    { id: 't1', title: 'Follow up', completed: false, dueDate: '2026-05-01', priority: 'medium', category: 'follow-up', createdAt: '2026-04-01' },
+    { id: 't2', title: 'Follow up', completed: false, dueDate: '2026-05-02', priority: 'low', category: 'follow-up', createdAt: '2026-04-02' },
+    { id: 't3', title: 'Follow up', completed: true, dueDate: '2026-04-01', priority: 'medium', category: 'follow-up', createdAt: '2026-03-01' },
+  ];
+
+  it('detects a genuine open-task title collision (completed tasks excluded)', () => {
+    const matches = countTaskMatches('Follow up', undefined, openCollisionTasks, people);
+    expect(matches.map(t => t.id).sort()).toEqual(['t1', 't2']);
+  });
+
+  it('a unique open title is unambiguous', () => {
+    const tasks: Task[] = [{ id: 't1', title: 'Unique title', completed: false, dueDate: '2026-05-01', priority: 'medium', category: 'follow-up', createdAt: '2026-04-01' }];
+    expect(countTaskMatches('Unique title', undefined, tasks, people)).toHaveLength(1);
+  });
+
+  it('falls back to person-based matching when title does not match, and stays a single match for a unique person', () => {
+    const tasks: Task[] = [{ id: 't1', personId: 'p1', title: 'Something else', completed: false, dueDate: '2026-05-01', priority: 'medium', category: 'follow-up', createdAt: '2026-04-01' }];
+    expect(countTaskMatches('not a real task', 'Sarah Kim', tasks, people)).toHaveLength(1);
+  });
+
+  it('an ambiguous PERSON reference also makes the resulting task lookup ambiguous', () => {
+    const tasks: Task[] = [
+      { id: 't1', personId: 'p1', title: 'Task for p1', completed: false, dueDate: '2026-05-01', priority: 'medium', category: 'follow-up', createdAt: '2026-04-01' },
+      { id: 't2', personId: 'p3', title: 'Task for p3', completed: false, dueDate: '2026-05-02', priority: 'medium', category: 'follow-up', createdAt: '2026-04-02' },
+    ];
+    // "Sarah" alone collides between p1 and p3 (see countPersonMatches above)
+    const matches = countTaskMatches('not a real task', 'Sarah', tasks, people);
+    expect(matches.map(t => t.id).sort()).toEqual(['t1', 't2']);
+  });
+
+  it('zero matches when nothing fits', () => {
+    expect(countTaskMatches('xyz', 'Nobody', openCollisionTasks, people)).toHaveLength(0);
+  });
+});
+
+describe('countPrayerMatches', () => {
+  it('detects a genuine active-prayer collision for an ambiguous person reference', () => {
+    const prayers: PrayerRequest[] = [
+      { id: 'pr1', personId: 'p1', content: 'surgery', isPrivate: false, isAnswered: false, createdAt: '2026-04-01', updatedAt: '2026-04-01' },
+      { id: 'pr2', personId: 'p3', content: 'job search', isPrivate: false, isAnswered: false, createdAt: '2026-04-02', updatedAt: '2026-04-02' },
+    ];
+    const matches = countPrayerMatches(undefined, 'Sarah', prayers, people);
+    expect(matches.map(p => p.id).sort()).toEqual(['pr1', 'pr2']);
+  });
+
+  it('an unambiguous full-name person reference stays a single match', () => {
+    const prayers: PrayerRequest[] = [{ id: 'pr1', personId: 'p1', content: 'surgery', isPrivate: false, isAnswered: false, createdAt: '2026-04-01', updatedAt: '2026-04-01' }];
+    expect(countPrayerMatches(undefined, 'Sarah Kim', prayers, people)).toHaveLength(1);
+  });
+
+  it('excludes answered prayers from collision detection', () => {
+    const prayers: PrayerRequest[] = [
+      { id: 'pr1', personId: 'p1', content: 'surgery', isPrivate: false, isAnswered: false, createdAt: '2026-04-01', updatedAt: '2026-04-01' },
+      { id: 'pr2', personId: 'p3', content: 'old', isPrivate: false, isAnswered: true, createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+    ];
+    expect(countPrayerMatches(undefined, 'Sarah', prayers, people)).toHaveLength(1);
+  });
+
+  it('falls back to content substring when person is not given', () => {
+    const prayers: PrayerRequest[] = [{ id: 'pr1', personId: 'p1', content: 'job search', isPrivate: false, isAnswered: false, createdAt: '2026-04-01', updatedAt: '2026-04-01' }];
+    expect(countPrayerMatches('job search', undefined, prayers, people)).toHaveLength(1);
+  });
+});
+
 describe('deterministic task follow-up actions', () => {
   const tasks: Task[] = [
     { id: 't1', title: 'Thank Christopher Hall for first gift', completed: false, dueDate: '2026-05-01', priority: 'high', category: 'follow-up', createdAt: '2026-04-01' },
@@ -328,5 +426,51 @@ describe('hydrateAction', () => {
   it('leaves missing references empty rather than crashing', () => {
     const out = hydrateAction({ type: 'mark_task_done', taskTitle: 'no such task' }, ctx);
     expect(out.taskId).toBeUndefined();
+  });
+
+  // ADR-018 action-resolution safety closure — fail closed on ambiguity.
+  it('a bare first name that collides between two real people sets personAmbiguous and leaves personId unset (never the arbitrary first match)', () => {
+    const out = hydrateAction({ type: 'add_note', personName: 'Sarah', content: 'x' }, ctx);
+    expect(out.personAmbiguous).toBe(true);
+    expect(out.personId).toBeUndefined();
+    expect(out.personCandidates?.sort()).toEqual(['Sarah Kim', 'Sarah Lopez']);
+    // Original, unresolved text is preserved — never silently rewritten to one candidate's full name.
+    expect(out.personName).toBe('Sarah');
+  });
+
+  it('a full name (unambiguous, even with a first-name collision elsewhere in the roster) resolves normally', () => {
+    const out = hydrateAction({ type: 'add_note', personName: 'Sarah Kim', content: 'x' }, ctx);
+    expect(out.personAmbiguous).toBeUndefined();
+    expect(out.personId).toBe('p1');
+  });
+
+  it('an open-task title collision sets taskAmbiguous and leaves taskId unset', () => {
+    const collidingCtx = {
+      people, prayers,
+      tasks: [
+        { id: 'ta', title: 'Follow up', completed: false, dueDate: '2026-05-01', priority: 'medium' as const, category: 'follow-up' as const, createdAt: '2026-04-01' },
+        { id: 'tb', title: 'Follow up', completed: false, dueDate: '2026-05-02', priority: 'low' as const, category: 'follow-up' as const, createdAt: '2026-04-02' },
+      ],
+    };
+    const out = hydrateAction({ type: 'mark_task_done', taskTitle: 'Follow up' }, collidingCtx);
+    expect(out.taskAmbiguous).toBe(true);
+    expect(out.taskId).toBeUndefined();
+    expect(out.taskCandidates?.sort()).toEqual(['Follow up', 'Follow up']);
+  });
+
+  it('an active-prayer collision (via an ambiguous person reference) sets prayerAmbiguous and leaves prayerId unset, without echoing prayer content as a disambiguation hint', () => {
+    const collidingCtx = {
+      people, tasks,
+      prayers: [
+        { id: 'pra', personId: 'p1', content: 'surgery detail one', isPrivate: false, isAnswered: false, createdAt: '2026-04-01', updatedAt: '2026-04-01' },
+        { id: 'prb', personId: 'p3', content: 'surgery detail two', isPrivate: false, isAnswered: false, createdAt: '2026-04-02', updatedAt: '2026-04-02' },
+      ],
+    };
+    const out = hydrateAction({ type: 'mark_prayer_answered', personName: 'Sarah' }, collidingCtx);
+    expect(out.prayerAmbiguous).toBe(true);
+    expect(out.prayerId).toBeUndefined();
+    // PendingAction has no prayerCandidates field at all (unlike person/task) —
+    // prayer content is sensitive and must never be used to disambiguate.
+    expect('prayerCandidates' in out).toBe(false);
   });
 });

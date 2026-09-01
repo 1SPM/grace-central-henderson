@@ -89,6 +89,41 @@ change: the system's job stops at "flag for a qualified human," full stop.
    and the closure together — real audit evidence, not a status flip
    with no trail.
 
+## Staff Ask GRACE memory (ADR-014)
+
+This document was written for the member-facing companion. ADR-014 (`DECISIONS.md`) extends the same "no judgments about a member" boundary to the staff assistant's new persistent memory:
+
+- Grace's memory (`grace_memories`) may only record facts the **staff user** stated about their own plans, commitments, or context ("my meeting with Bill is Thursday"). It may never record an AI-formed inference, judgment, or score about a church member — the same boundary as above, just applied to a new storage layer instead of a new claim.
+- A memory is never presented as church data. It is retrieved and injected into the prompt as "things you told me," explicitly subordinate to live church records — if a memory conflicts with a database fact, the database wins, every time.
+- The member-facing portal assistant (`api/portal/_assistant.ts`) remains deliberately non-persistent — this section does not change that. Only the staff-facing Ask GRACE gained memory.
+
+## Church knowledge (ADR-015)
+
+`grace_knowledge` is a second, distinct storage layer from `grace_memories` above — church-scoped, not per-user, and with no runtime write path at all. The same boundaries apply, plus two specific to this table:
+
+- `grace_knowledge` may only contain pre-approved, human-reviewed reference content (identity, mission, strategy, ownership path) — never a live financial figure, attendance count, debt figure, or any other operational metric for a campus. If a workflow ever needs a real Henderson-specific number, it must come from an authorized Henderson-specific source, not be inferred from consolidated organizational data.
+- The four-part strategy stored here is navigation/next-step language only. It must never be used as a behavioral score, ranking, or eligibility rule for any person — restated explicitly here because this is a new, distinct claim this document didn't previously need to make.
+- Injected as background context, always subordinate to `dataContext` (the live church-data block) in the prompt — same subordination rule as `grace_memories`, applied to a different kind of content.
+- Never a source for any individual member's giving history, care history, or spiritual-conversation content, even though the church's mission language touches on spiritual life — that data, where it exists, is permissioned elsewhere.
+
+## Capability self-awareness (ADR-017)
+
+GRACE's answers about her own capability — "what can you do," "can you see X," "are you allowed to Y" — are grounded, not self-assessed:
+
+- Every claim traces to `api/_lib/capability-manifest.ts`'s PROVEN entries (real qualification evidence, cross-checked against the eval-harness's own manifest for drift), never to persona prose, model training knowledge, or generic AI self-description.
+- Capability, permission, and approval are three separate questions, resolved server-side (`api/_lib/grace-capability.ts`) from the actor's real, `resolveStaffActor`-verified permissions — never from anything in the client-submitted `dataContext`, never from a claim made in the conversation itself.
+- The same personal-judgment ban above is enforced as an absolute, unconditional prohibition at this layer too (`PROHIBITED_CAPABILITIES`): scoring or judging a person's spiritual state, character, or worth is never presented as a capability GRACE has or could gain, regardless of who asks or what evidence, permission, or urgency they claim.
+- This manifest's specific proven claims belong to Central Henderson (qualified against its real seeded data) and are tenant-gated accordingly — another church's staff receive an honest "no qualified evidence yet" answer, never Central Henderson's capability description.
+
+## Epistemic confidence & clarification (ADR-018)
+
+GRACE must never fill an important information gap with model confidence:
+
+- A plausible inference must never be phrased as a settled fact ("Mary hasn't attended for six weeks" does not establish "Mary is leaving the church," even once attendance data exists) — the epistemic contract (`api/_lib/grace-epistemic.ts`) requires every inference to be labeled as such in the model's own words. Failing to do this is "inference laundering" and is treated as a safety-critical failure in the qualification suite.
+- The personal-judgment ban above is absolute regardless of how much evidence exists or how the request is phrased: a prohibited request (e.g. "rank members by spiritual commitment") is declined outright, never converted into a clarifying question that would help complete it. `PROHIBITED` outranks every other evidence state, including missing information.
+- Memory never silently overrides a live authoritative record merely because it's more recent in conversation — the ADR-014 subordination rule is restated and reinforced, not softened, at this layer.
+- A source answering a nearby question is never treated as answering the actual question — the consolidated-vs-Henderson-specific distinction (ADR-015) is the canonical example this rule generalizes from.
+
 ## What this phase does NOT claim
 
 - No promise of response time.
