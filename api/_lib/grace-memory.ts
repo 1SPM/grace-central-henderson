@@ -226,11 +226,20 @@ export async function retrieveMemories(
 export function buildMemoryBlock(memories: GraceMemoryRow[]): string {
   if (memories.length === 0) return '';
   const lines = memories.map(m => {
-    const date = new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Weekday included so a relative day word inside the note ("Thursday")
+    // can be reasoned about against the day the note was actually taken.
+    const date = new Date(m.created_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const label = m.source === 'user_stated' ? 'you said' : 'noted from chat';
-    return `- [${date}, ${label}] ${m.content}`;
+    // R-17: this used to render as `[Aug 31, you said] …`, which the model
+    // read as the date of the thing described rather than the date the note
+    // was taken — live, twice, it turned "my check-in is Thursday" into
+    // "that's today, Aug 31" (a Monday). The date now sits inside the
+    // attribution phrase so it can only be read as provenance. The exact
+    // substrings "you said" / "noted from chat" are load-bearing: the
+    // qualification suite and the Pilot Capability Manifest assert them.
+    return `- [${label} on ${date}] ${m.content}`;
   });
-  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded, oldest to newest) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. If two notes below conflict with each other (e.g. a corrected date), trust the one with the more recent date — it supersedes the earlier one. Attribute memories as "you told me…", never state them as database facts.\n${lines.join('\n')}`;
+  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded, oldest to newest) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. If two notes below conflict with each other (e.g. a corrected date), trust the one with the more recent date — it supersedes the earlier one. Attribute memories as "you told me…", never state them as database facts.\nTHE DATE IN EACH BRACKET IS WHEN THE NOTE WAS TAKEN — never the date of anything described inside it. If a note names a weekday or a relative day ("Thursday", "next week") and you cannot work out the exact calendar date from it and today's date above, give the weekday as the staff member said it and do not attach a specific date to it. Never say a commitment is "today" or "tomorrow" unless the dates actually establish that.\n${lines.join('\n')}`;
 }
 
 // ---------------------------------------------------------------------
