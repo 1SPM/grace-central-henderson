@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense, type ReactNode } from 'react';
-import type { View } from './types';
+import type { Person, View } from './types';
 import { resolveAddressee } from './lib/greeting';
 import { navigateView } from './lib/actionCenterNav';
 import { isStaffRole } from './lib/services/auth';
@@ -541,6 +541,38 @@ function App() {
   }
   if (!isDemoModeEnabled && isClerkConfigured && !isSignedIn) { return <SignInPage />; }
 
+  // Shared GraceChatProvider props — the desktop shell and GRACE Mobile
+  // mount the same chat brain with identical data + action handlers.
+  const graceChatProps = {
+    people,
+    tasks,
+    giving,
+    events,
+    groups,
+    prayers,
+    attendance: [...attendanceFromDb, ...attendanceRecords],
+    churchName: churchSettings?.profile?.name,
+    churchId,
+    churchProfile: churchSettings?.profile,
+    graceFacts: churchSettings?.graceFacts,
+    churchTimezone: churchSettings?.timezone,
+    userFirstName: user?.firstName,
+    userRole: user?.role,
+    userId: user?.id,
+    onAddTask: handlers.addTask,
+    onAddPrayer: handlers.addPrayer,
+    onAddInteraction: handlers.addInteraction,
+    onAddPerson: handlers.savePerson,
+    onAddEvent: handlers.addEvent,
+    onToggleTask: toggleTask,
+    onUpdateTask: updateTask,
+    onDeleteTask: deleteTask,
+    onDeletePerson: deletePerson,
+    onDeletePrayer: deletePrayer,
+    onUpdatePersonStatus: (id: string, status: Person['status']) => updatePerson(id, { status }),
+    onMarkPrayerAnswered: markPrayerAnswered,
+  };
+
   // Standalone GRACE Mobile (no admin sidebar/layout, staff-gated)
   if (isMobileRoute) {
     const churchName = churchSettings?.profile?.name || 'GRACE';
@@ -575,22 +607,26 @@ function App() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
           </div>
         }>
-          <div className="h-screen">
-            <GraceMobile
-              view={view}
-              onNavigate={setView}
-              renderView={(v) => renderAdminView(v, setView)}
-              churchName={churchName}
-              branding={branding}
-              userName={mobileUserName}
-              roleLabel={mobileRoleLabel}
-              people={people}
-              tasks={tasks}
-              giving={giving}
-              events={events}
-              prayers={prayers}
-            />
-          </div>
+          <GraceChatProvider {...graceChatProps}>
+            <div className="h-screen">
+              <GraceMobile
+                view={view}
+                onNavigate={setView}
+                renderView={(v) => renderAdminView(v, setView)}
+                churchName={churchName}
+                churchId={churchId}
+                churchTimezone={churchSettings?.timezone}
+                branding={branding}
+                userName={mobileUserName}
+                roleLabel={mobileRoleLabel}
+                people={people}
+                tasks={tasks}
+                giving={giving}
+                events={events}
+                prayers={prayers}
+              />
+            </div>
+          </GraceChatProvider>
           <PWAInstallPrompt />
         </Suspense>
       </ErrorBoundary>
@@ -657,35 +693,7 @@ function App() {
         onboarding={churchSettings?.onboarding}
         saveOnboarding={saveOnboarding}
       >
-      <GraceChatProvider
-        people={people}
-        tasks={tasks}
-        giving={giving}
-        events={events}
-        groups={groups}
-        prayers={prayers}
-        attendance={[...attendanceFromDb, ...attendanceRecords]}
-        churchName={churchSettings?.profile?.name}
-        churchId={churchId}
-        churchProfile={churchSettings?.profile}
-        graceFacts={churchSettings?.graceFacts}
-        churchTimezone={churchSettings?.timezone}
-        userFirstName={user?.firstName}
-        userRole={user?.role}
-        userId={user?.id}
-        onAddTask={handlers.addTask}
-        onAddPrayer={handlers.addPrayer}
-        onAddInteraction={handlers.addInteraction}
-        onAddPerson={handlers.savePerson}
-        onAddEvent={handlers.addEvent}
-        onToggleTask={toggleTask}
-        onUpdateTask={updateTask}
-        onDeleteTask={deleteTask}
-        onDeletePerson={deletePerson}
-        onDeletePrayer={deletePrayer}
-        onUpdatePersonStatus={(id, status) => updatePerson(id, { status })}
-        onMarkPrayerAnswered={markPrayerAnswered}
-      >
+      <GraceChatProvider {...graceChatProps}>
       <Layout
         currentView={view}
         setView={setView}

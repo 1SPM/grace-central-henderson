@@ -182,7 +182,7 @@ ${buildChatActionPrompt()}
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
-Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
+Church: ${resolvedChurch} · Today: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
 Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
 Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
@@ -624,4 +624,13 @@ export function useGraceChat() {
   const ctx = useContext(GraceChatContext);
   if (!ctx) throw new Error('useGraceChat must be used inside GraceChatProvider');
   return ctx;
+}
+
+/**
+ * Null when no GraceChatProvider is mounted — lets surfaces that may render
+ * outside the provider (GRACE Mobile's Ask screen in previews/tests)
+ * degrade to a static fallback instead of crashing.
+ */
+export function useGraceChatOptional() {
+  return useContext(GraceChatContext);
 }

@@ -11,10 +11,10 @@ import {
 
 const PREVIEW_TABS: { id: GraceMobileTab; label: string }[] = [
   { id: 'home', label: 'Home' },
-  { id: 'actions', label: 'Actions' },
+  { id: 'brief', label: 'Brief' },
   { id: 'people', label: 'People' },
   { id: 'sunday', label: 'Sunday' },
-  { id: 'giving', label: 'Giving' },
+  { id: 'work', label: 'Work' },
 ];
 
 interface GraceMobilePreviewProps {
