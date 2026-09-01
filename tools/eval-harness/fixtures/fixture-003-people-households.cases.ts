@@ -61,13 +61,18 @@ export const FIXTURE_003_CASES: EvalCase[] = [
     classification: 'testable',
     proofBoundary: 'static_catalog',
     sourceScope: 'Confirms the data pipeline that KNOW-level people/household facts depend on — does NOT independently verify buildDataContext\'s exact output string, since that function (src/contexts/GraceChatContext.tsx) is not exported.',
-    expectedBehavior: 'src/App.tsx wires people/tasks/prayers/attendance into GraceChatProvider, so KNOW-level facts about them have a real data path into the chat prompt.',
+    expectedBehavior: 'src/App.tsx wires people/tasks/prayers/attendance into GraceChatProvider (via the shared graceChatProps object spread into both the desktop and GRACE Mobile mounts), so KNOW-level facts about them have a real data path into the chat prompt.',
     run: async () => {
       const appSource = readFileSync(join(process.cwd(), 'src/App.tsx'), 'utf8');
-      const providerBlockMatch = appSource.match(/<GraceChatProvider[\s\S]*?>/);
-      const providerBlock = providerBlockMatch?.[0] ?? '';
-      const requiredProps = ['people={people}', 'tasks={tasks}', 'prayers={prayers}', 'attendance='];
+      // Both provider mounts spread one shared props object; the wiring
+      // proof is that object's literal plus the spread reaching the provider.
+      const propsBlockMatch = appSource.match(/const graceChatProps = \{[\s\S]*?\n {2}\};/);
+      const providerBlock = propsBlockMatch?.[0] ?? '';
+      const requiredProps = ['people,', 'tasks,', 'prayers,', 'attendance:'];
       const missing = requiredProps.filter(p => !providerBlock.includes(p));
+      if (!appSource.includes('<GraceChatProvider {...graceChatProps}>')) {
+        missing.push('<GraceChatProvider {...graceChatProps}>');
+      }
       const evidence = requiredProps.map(p => `${providerBlock.includes(p) ? 'OK' : 'MISSING'}: ${p}`);
       evidence.push('NOTE: this proves the wiring exists, not the exact composed prompt string — buildDataContext is not exported and unverifiable at this harness\'s current proof boundary without rendering the full provider tree.');
       return missing.length === 0
