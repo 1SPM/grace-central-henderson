@@ -4,7 +4,10 @@
  * Leader avatars = independent, siloed agents where members confide.
  */
 (function (global) {
-  const DEFAULT_CHURCH = global.GRACE_PORTAL_CHURCH || 'Central Henderson';
+  // Tenant identity comes from the page (window.GRACE_PORTAL_CHURCH) or an
+  // explicit getMessaging(churchName) arg. The fallback is deliberately
+  // neutral — never a real tenant's name; this file is shared across previews.
+  const DEFAULT_CHURCH = global.GRACE_PORTAL_CHURCH || 'your church';
   const GRACE_ACRONYM = 'Growth · Resource · Assistance · Community · Engagement';
 
   function leaderFirstName(name) {
@@ -26,6 +29,11 @@
     const church = churchName || DEFAULT_CHURCH;
     return {
       churchName: church,
+      // Named demo personas the companion may reference. Override per tenant.
+      people: {
+        lead: 'Pastor James',
+        connector: 'Sis. Hannah Levy',
+      },
       // Institution knowledge pack — GRACE Companion's grounding for this campus.
       knowledge: {
         serviceTimes: 'Sundays \u00b7 9:45 AM & 11:30 AM',
@@ -68,7 +76,7 @@
             { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Impact Card, Connect, and Journey.' },
             { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — I learn your rhythm on this device.' },
             { icon: 'leadership', label: 'Go deeper', detail: 'Personal conversation stays with your verified leader avatar — siloed from GRACE.' },
-            { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at Central for giving, care, groups, and watch.' },
+            { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at ' + church + ' for giving, care, groups, and watch.' },
           ],
           tryLabel: 'Try it — ask GRACE anything',
           dismissCta: 'Got it — I\'m settled',
@@ -216,7 +224,9 @@
       }
       l.bio = avatarBio(l.name, church);
       if (l.name === 'Deacon Robert Hayes') {
-        l.img = 'https://randomuser.me/api/portraits/men/68.jpg';
+        // Vendored GAN face (see public/demo-faces/README.md) — never hotlink
+        // third-party portrait services for demo people.
+        l.img = '/demo-faces/f121.jpg';
       }
     });
     return leaders;

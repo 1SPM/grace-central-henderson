@@ -1,5 +1,5 @@
 /**
- * GRACE Companion — floating chat layer shared by all Central Henderson previews.
+ * GRACE Companion — floating chat layer shared by all GRACE member portal previews.
  *
  * GRACE is the ethical, self-learning companion with agency over the app
  * experience: she navigates, acts, remembers your rhythm, and talks.
@@ -37,9 +37,17 @@
   let thinking = false;
   let greeted = false;
 
+  /** Tenant slug for localStorage namespacing — both portals share the
+   *  /previews/ origin, so every key must carry the church it belongs to.
+   *  ('Central Henderson' → 'central-henderson' keeps existing data.) */
+  function tenantSlug() {
+    const name = (M && M.churchName) || global.GRACE_PORTAL_CHURCH || 'church';
+    return String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
   /* ══ MEMORY ENGINE — self-learning, scoped to this institution ══ */
   const Memory = {
-    key: 'grace.companion.central-henderson',
+    key: 'grace.companion.church',
     data: null,
     load() {
       try {
@@ -95,9 +103,9 @@
     }
   };
 
-  /* ══ ADMIN INBOX — unknown questions recorded for the Central team ══ */
+  /* ══ ADMIN INBOX — unknown questions recorded for the church team ══ */
   const AdminInbox = {
-    key: 'grace.admin.inbox.central-henderson',
+    key: 'grace.admin.inbox.church',
     list() {
       try { return JSON.parse(localStorage.getItem(this.key)) || []; } catch (e) { return []; }
     },
@@ -440,7 +448,7 @@
       else if (/finance|money|debt/i.test(lower)) area = 'financial stewardship';
       return {
         intent: 'care', handoff: true, nav: 'ai', navLabel: 'Meet your leaders',
-        text: 'I can match you with the right person' + (area ? ' for ' + area : '') + '. Pastor James leads the house, and Sis. Hannah Levy walks closely with members \u2014 each verified leader has a private, siloed avatar I never see into, with human follow-up available. Shall I take you to them?'
+        text: 'I can match you with the right person' + (area ? ' for ' + area : '') + '. ' + ((M.people && M.people.lead) || 'Pastor James') + ' leads the house, and ' + ((M.people && M.people.connector) || 'Sis. Hannah Levy') + ' walks closely with members \u2014 each verified leader has a private, siloed avatar I never see into, with human follow-up available. Shall I take you to them?'
       };
     }
     if (RX.techHelp.test(lower)) {
@@ -620,8 +628,8 @@
     }
     if (RX.membership.test(lower)) {
       return {
-        intent: 'care', handoff: true, nav: 'ai', navLabel: 'Meet Sis. Hannah Levy',
-        text: 'I\u2019d love to help you take that step. Sis. Hannah Levy walks with everyone exploring membership and baptism at ' + M.churchName + ' \u2014 her avatar can answer your questions privately, and a real person follows up. Shall I introduce you?'
+        intent: 'care', handoff: true, nav: 'ai', navLabel: 'Meet ' + ((M.people && M.people.connector) || 'Sis. Hannah Levy'),
+        text: 'I\u2019d love to help you take that step. ' + ((M.people && M.people.connector) || 'Sis. Hannah Levy') + ' walks with everyone exploring membership and baptism at ' + M.churchName + ' \u2014 her avatar can answer your questions privately, and a real person follows up. Shall I introduce you?'
       };
     }
     if (RX.ministries.test(lower)) {
@@ -952,6 +960,8 @@
     mount(adapter) {
       A = adapter;
       M = adapter.messaging;
+      Memory.key = 'grace.companion.' + tenantSlug();
+      AdminInbox.key = 'grace.admin.inbox.' + tenantSlug();
       Memory.load();
       Memory.visit();
       Voice.init(adapter);

@@ -3290,7 +3290,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="wallet-receive-details">
                 <div class="wallet-receive-row"><span>Account name</span><strong>Central Henderson · GRACE</strong></div>
                 <div class="wallet-receive-row"><span>Account #</span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
-                <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">084009519</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
+                <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">110000000</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
               </div>
               <div class="wallet-qr-box">
                 <div class="wallet-qr-placeholder">QR · GRACE Banking</div>
@@ -4316,7 +4316,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <button type="button" class="divinity-close" onclick="closeDivinitySession()" aria-label="Close">×</button>
     </div>
     <div class="divinity-body">
-      <iframe id="divinity-agent-frame" title="Divinity avatar session" allow="microphone *; camera *; autoplay *; fullscreen *; display-capture *"></iframe>
+      <iframe id="divinity-agent-frame" title="Divinity avatar session" allow="microphone https://link.divinityagi.com; camera https://link.divinityagi.com; autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
       <div class="divinity-video-overlay is-hidden" id="divinity-video-overlay">
         <button type="button" class="divinity-video-close" onclick="closeDivinityVideo()" aria-label="Close video">×</button>
         <video id="divinity-intro-video" autoplay playsinline></video>
@@ -4325,6 +4325,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   </div>
 </div>
 
+<script>
+  /* Tenant declaration — shared preview assets (grace-messaging.js,
+     grace-impact-metrics.js, grace-companion.js) read this instead of
+     hardcoding any church name. */
+  window.GRACE_PORTAL_CHURCH = 'Central Henderson';
+</script>
 <script src="grace-messaging.js"></script>
 <script src="grace-companion.js"></script>
 <script src="grace-duotone-icons.js"></script>
@@ -5672,8 +5678,9 @@ function addComment(input,areaId){
   row.className='comment-row';
   row.innerHTML=`<img class="comment-av-sm" src="https://randomuser.me/api/portraits/women/42.jpg" alt="">
     <div class="cm-bubble"><div class="cm-name">Maya Thompson</div>
-    <div class="cm-text">${input.value}</div>
+    <div class="cm-text"></div>
     <div class="cm-meta"><span>Just now</span><span class="cm-reply">Reply</span></div></div>`;
+  row.querySelector('.cm-text').textContent=input.value;
   area.appendChild(row);
   input.value='';
 }
@@ -6449,7 +6456,10 @@ function addMsg(text, isUser, nav, navLabel) {
   const navBtn = (!isUser && nav)
     ? `<br><button class="msg-nav-btn" onclick="goSection('${nav}')">${navLabel} →</button>`
     : '';
-  div.innerHTML = `${avImg}<div><div class="msg-bubble">${text}${navBtn}</div><div class="msg-time">${isUser ? 'You · ' : ''}${time}</div></div>`;
+  // User text is untrusted input — escape it; leader/system texts are
+  // page-authored and may carry intentional markup (study steps use <strong>).
+  const safeText = isUser ? String(text).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) : text;
+  div.innerHTML = `${avImg}<div><div class="msg-bubble">${safeText}${navBtn}</div><div class="msg-time">${isUser ? 'You · ' : ''}${time}</div></div>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -7662,6 +7672,15 @@ GRACE_COMPANION.mount({
 });
 </script>
 <script src="grace-impact-metrics.js"></script>
+<script>
+/* Central Henderson tenant wording — applied per-page, never in the shared
+   grace-impact-metrics.js (see the leak note in grace_member_portal_generic.html). */
+if(typeof GRACE_METRICS!=='undefined'&&GRACE_METRICS.church){
+  GRACE_METRICS.church.name='Central Henderson';
+  const mission=(GRACE_METRICS.church.coreBeliefs||[]).find(b=>b.id==='mission');
+  if(mission)mission.summary='Central Henderson exists to bless Henderson and beyond — every member has a part to play.';
+}
+</script>
 <script>if(typeof hydrateImpactAllocation==='function')hydrateImpactAllocation();if(typeof hydrateLeader==='function')hydrateLeader();if(typeof hydrateHome==='function')hydrateHome();if(typeof hydrateWatch==='function')hydrateWatch();if(typeof hydrateJourney==='function')hydrateJourney();</script>
 </body>
 </html>
