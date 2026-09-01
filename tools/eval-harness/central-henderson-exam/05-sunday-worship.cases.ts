@@ -71,7 +71,12 @@ export const SUNDAY_WORSHIP_CASES: EvalCase[] = [
       // question at the end ("User question: ...") — the question itself
       // naturally contains "scheduled to serve," which would otherwise
       // trivially match this same regex and produce a false failure.
-      const contextOnly = prompt.split('User question:')[0];
+      // Also exclude the capability-boundary block (ADR-017): since
+      // 2026-08-31 it truthfully states GRACE does NOT have volunteer-
+      // scheduling data, which legitimately contains the word "volunteer"
+      // without being volunteer/scheduling DATA — the exact same class of
+      // false-positive as the echoed question, not a real regression.
+      const contextOnly = prompt.split('User question:')[0].split('== YOUR CAPABILITY BOUNDARY')[0];
       const hasVolunteerData = /volunteer|scheduled to serve|serving team/i.test(contextOnly);
       const evidence = [`prompt context (excluding the echoed question) contains any volunteer/scheduling data: ${hasVolunteerData}`];
       return !hasVolunteerData

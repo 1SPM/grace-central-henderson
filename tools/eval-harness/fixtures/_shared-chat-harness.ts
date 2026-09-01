@@ -69,14 +69,17 @@ export interface SupabaseForOpts {
   people?: Array<{ id: string; first_name: string; last_name: string }>;
   /** Fixture #003 (people/households REMEMBER): pre-existing grace_memories rows. */
   existingMemories?: Array<{ id: string; content: string; source: string; person_ids: string[]; status: string; expires_at: string | null; created_at: string }>;
+  /** Self-awareness fixture (Prompt 9): the actor's granted permission keys — defaults to the baseline 'ask_grace.use' so every existing caller is unaffected. An empty array simulates an authenticated-but-unpermissioned actor. */
+  permissions?: string[];
 }
 
 export function supabaseFor(opts: SupabaseForOpts = {}) {
+  const permissionKeys = opts.permissions ?? ['ask_grace.use'];
   return createMockSupabase({
     tables: {
       users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active', person_id: null } }),
       user_roles: () => ({ data: [{ role_id: 'fixture-role-id' }] }),
-      role_permissions: () => ({ data: [{ permissions: { key: 'ask_grace.use' } }] }),
+      role_permissions: () => ({ data: permissionKeys.map(key => ({ permissions: { key } })) }),
       grace_conversations: (op) => op === 'select' ? { data: null } : { data: { id: 'conv-new' } },
       grace_messages: (op) => op === 'select' ? { data: [] } : { data: { id: `msg-${Math.random().toString(36).slice(2)}` } },
       grace_memories: (op) => op === 'select' ? { data: opts.existingMemories ?? [] } : { data: { id: 'mem-new', content: 'saved', source: 'user_stated', person_ids: [], created_at: '2026-08-30T00:00:00.000Z' } },

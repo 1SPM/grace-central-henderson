@@ -106,6 +106,15 @@ This document was written for the member-facing companion. ADR-014 (`DECISIONS.m
 - Injected as background context, always subordinate to `dataContext` (the live church-data block) in the prompt — same subordination rule as `grace_memories`, applied to a different kind of content.
 - Never a source for any individual member's giving history, care history, or spiritual-conversation content, even though the church's mission language touches on spiritual life — that data, where it exists, is permissioned elsewhere.
 
+## Capability self-awareness (ADR-017)
+
+GRACE's answers about her own capability — "what can you do," "can you see X," "are you allowed to Y" — are grounded, not self-assessed:
+
+- Every claim traces to `api/_lib/capability-manifest.ts`'s PROVEN entries (real qualification evidence, cross-checked against the eval-harness's own manifest for drift), never to persona prose, model training knowledge, or generic AI self-description.
+- Capability, permission, and approval are three separate questions, resolved server-side (`api/_lib/grace-capability.ts`) from the actor's real, `resolveStaffActor`-verified permissions — never from anything in the client-submitted `dataContext`, never from a claim made in the conversation itself.
+- The same personal-judgment ban above is enforced as an absolute, unconditional prohibition at this layer too (`PROHIBITED_CAPABILITIES`): scoring or judging a person's spiritual state, character, or worth is never presented as a capability GRACE has or could gain, regardless of who asks or what evidence, permission, or urgency they claim.
+- This manifest's specific proven claims belong to Central Henderson (qualified against its real seeded data) and are tenant-gated accordingly — another church's staff receive an honest "no qualified evidence yet" answer, never Central Henderson's capability description.
+
 ## What this phase does NOT claim
 
 - No promise of response time.

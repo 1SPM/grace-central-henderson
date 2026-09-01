@@ -29,6 +29,7 @@ import { callClaudeStream, DEFAULT_CLAUDE_MODEL } from '../_lib/ai/adapters/clau
 import { microUsdToUsd } from '../_lib/ai/pricing.js';
 import { parseRememberDirective, saveMemory, retrieveMemories, buildMemoryBlock, runExtraction } from '../_lib/grace-memory.js';
 import { retrieveChurchKnowledge, buildKnowledgeBlock } from '../_lib/grace-knowledge.js';
+import { buildCapabilityContext } from '../_lib/grace-capability.js';
 import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -188,7 +189,11 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
     .join('\n');
 
-  const promptParts = [dataContext, knowledgeBlock, memoryBlock];
+  // Server-composed, actor-scoped — never from client dataContext, never
+  // gated by client-claimed permissions. See ADR-017 / grace-capability.ts.
+  const capabilityBlock = buildCapabilityContext(actor);
+
+  const promptParts = [dataContext, knowledgeBlock, memoryBlock, capabilityBlock];
   if (history) promptParts.push(`Recent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${history}`);
   promptParts.push(`User question: ${message}`);
   const prompt = promptParts.filter(Boolean).join('\n\n');
