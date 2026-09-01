@@ -44,6 +44,23 @@ export interface PendingAction {
   subject?: string;
   body?: string;
   message?: string;
+  /**
+   * Set by hydrateAction (ADR-018 action-resolution safety closure) when
+   * personName/taskTitle/prayer matched MORE THAN ONE record — never
+   * when it matched zero. A handler MUST refuse to proceed while any of
+   * these are true, before any other check (including approval routing) —
+   * see handlers.ts's blockOnAmbiguity, called first in every handler that
+   * resolves an entity. personId/taskId/prayerId are deliberately left
+   * unset in the ambiguous case (never the first/arbitrary candidate), so
+   * a handler that somehow skipped the explicit check still fails closed
+   * on the existing "missing id" check rather than silently proceeding.
+   */
+  personAmbiguous?: boolean;
+  /** Full names only — safe to show for disambiguation. Never populated for tasks/prayers: a task title is fine to echo back, but prayer CONTENT is sensitive and must never be used as a disambiguation hint (item 8's "do not expose protected information merely to disambiguate"). */
+  personCandidates?: string[];
+  taskAmbiguous?: boolean;
+  taskCandidates?: string[];
+  prayerAmbiguous?: boolean;
 }
 
 // Derived from the catalog rather than restated here. This set and the
@@ -203,6 +220,78 @@ export function resolvePrayer(
   return undefined;
 }
 
+// ---------------------------------------------------------------------
+// Ambiguity detection (ADR-018 action-resolution safety closure) —
+// additive companions to resolvePerson/resolveTask/resolvePrayer above,
+// which are left completely unchanged (same signature, same first-match
+// behavior, same existing tests) so nothing that already depends on them
+// breaks. Each count* function mirrors its resolve* counterpart's exact
+// tier logic (same order, same predicates) but returns EVERY match at
+// whichever tier had a hit, instead of just the first — so
+// `.length > 1` means "resolvePerson picked one of these arbitrarily,"
+// not a new or different judgment about who matches.
+// ---------------------------------------------------------------------
+
+export function countPersonMatches(name: string | undefined, people: Person[]): Person[] {
+  if (!name) return [];
+  const lower = name.toLowerCase().trim();
+  const exact = people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase() === lower);
+  if (exact.length > 0) return exact;
+  const firstNameOnly = people.filter(p => p.firstName.toLowerCase() === lower);
+  if (firstNameOnly.length > 0) return firstNameOnly;
+  return people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
+}
+
+export function countTaskMatches(
+  title: string | undefined,
+  personName: string | undefined,
+  tasks: Task[],
+  people: Person[],
+): Task[] {
+  const open = tasks.filter(t => !t.completed);
+  if (title) {
+    const lower = title.toLowerCase().trim();
+    const exact = open.filter(t => t.title.toLowerCase() === lower);
+    if (exact.length > 0) return exact;
+    const partial = open.filter(t => t.title.toLowerCase().includes(lower));
+    if (partial.length > 0) return partial;
+  }
+  if (personName) {
+    const personCandidates = countPersonMatches(personName, people);
+    if (personCandidates.length === 1) {
+      return open.filter(t => t.personId === personCandidates[0].id);
+    }
+    if (personCandidates.length > 1) {
+      return open.filter(t => personCandidates.some(c => c.id === t.personId));
+    }
+  }
+  return [];
+}
+
+export function countPrayerMatches(
+  content: string | undefined,
+  personName: string | undefined,
+  prayers: PrayerRequest[],
+  people: Person[],
+): PrayerRequest[] {
+  const active = prayers.filter(p => !p.isAnswered);
+  if (personName) {
+    const personCandidates = countPersonMatches(personName, people);
+    if (personCandidates.length === 1) {
+      const matches = active.filter(p => p.personId === personCandidates[0].id);
+      if (matches.length > 0) return matches;
+    } else if (personCandidates.length > 1) {
+      const matches = active.filter(p => personCandidates.some(c => c.id === p.personId));
+      if (matches.length > 0) return matches;
+    }
+  }
+  if (content) {
+    const lower = content.toLowerCase().trim();
+    return active.filter(p => p.content.toLowerCase().includes(lower));
+  }
+  return [];
+}
+
 export interface HydrateContext {
   people: Person[];
   tasks: Task[];
@@ -294,30 +383,54 @@ export function formatOverdueTasksResponse(tasks: Task[], today = new Date().toI
 
 export function hydrateAction(action: PendingAction, ctx: HydrateContext): PendingAction {
   const matched = resolvePerson(action.personName, ctx.people);
+  const personCandidates = action.personName ? countPersonMatches(action.personName, ctx.people) : [];
+  const personAmbiguous = personCandidates.length > 1;
+
   let { taskId, prayerId, prayerContent, taskTitle } = action;
+  let taskAmbiguous = false;
+  let taskCandidateTitles: string[] = [];
+  let prayerAmbiguous = false;
 
   if ((action.type === 'mark_task_done' || action.type === 'update_task' || action.type === 'delete_task') && !taskId) {
-    const t = resolveTask(action.taskTitle, action.personName, ctx.tasks, ctx.people);
-    if (t) {
-      taskId = t.id;
-      taskTitle = t.title;
+    const taskMatches = countTaskMatches(action.taskTitle, action.personName, ctx.tasks, ctx.people);
+    taskAmbiguous = taskMatches.length > 1;
+    if (taskAmbiguous) {
+      taskCandidateTitles = taskMatches.map(t => t.title);
+    } else {
+      const t = resolveTask(action.taskTitle, action.personName, ctx.tasks, ctx.people);
+      if (t) {
+        taskId = t.id;
+        taskTitle = t.title;
+      }
     }
   }
   if ((action.type === 'mark_prayer_answered' || action.type === 'delete_prayer') && !prayerId) {
-    const p = resolvePrayer(action.prayerContent, action.personName, ctx.prayers, ctx.people);
-    if (p) {
-      prayerId = p.id;
-      prayerContent = p.content;
+    const prayerMatches = countPrayerMatches(action.prayerContent, action.personName, ctx.prayers, ctx.people);
+    prayerAmbiguous = prayerMatches.length > 1;
+    if (!prayerAmbiguous) {
+      const p = resolvePrayer(action.prayerContent, action.personName, ctx.prayers, ctx.people);
+      if (p) {
+        prayerId = p.id;
+        prayerContent = p.content;
+      }
     }
   }
 
   return {
     ...action,
-    personId: matched?.id ?? action.personId,
-    personName: matched ? `${matched.firstName} ${matched.lastName}` : action.personName,
+    // Deliberately unset (never the arbitrary first candidate) whenever
+    // ambiguous — a handler that skipped the explicit blockOnAmbiguity
+    // check still fails closed on the pre-existing "missing id" check.
+    personId: personAmbiguous ? undefined : (matched?.id ?? action.personId),
+    personName: personAmbiguous ? action.personName : (matched ? `${matched.firstName} ${matched.lastName}` : action.personName),
+    personAmbiguous: personAmbiguous || undefined,
+    personCandidates: personAmbiguous ? personCandidates.map(p => `${p.firstName} ${p.lastName}`.trim()) : undefined,
     taskId,
     taskTitle,
+    taskAmbiguous: taskAmbiguous || undefined,
+    taskCandidates: taskAmbiguous ? taskCandidateTitles : undefined,
     prayerId,
     prayerContent,
+    prayerAmbiguous: prayerAmbiguous || undefined,
   };
 }
