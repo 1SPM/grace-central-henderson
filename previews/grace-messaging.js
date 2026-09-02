@@ -223,9 +223,10 @@
           '. What\'s on your heart today? This is a safe space to share."';
       }
       l.bio = avatarBio(l.name, church);
-      if (l.name === 'Deacon Robert Hayes') {
+      if (l.name === 'Deacon Robert Hayes' && church !== 'Central Henderson') {
         // Vendored GAN face (see public/demo-faces/README.md) — never hotlink
-        // third-party portrait services for demo people.
+        // third-party portrait services for demo people. Demo tenants only:
+        // live tenants (Central Henderson) use real photos or initials.
         l.img = '/demo-faces/f121.jpg';
       }
     });
