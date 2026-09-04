@@ -187,17 +187,29 @@ epistemic blocks likewise remain absent by design: the reply is deterministic
 and cannot fabricate, which is the stronger guarantee. E-4 is what actually
 followed from their absence, and it is closed above.
 
-### E-6 · No rate limit, no audit — LOW
-`api/grace/_chat.ts` calls `enforceRateLimit`; this route doesn't, and it fetches
-the **entire roster** on every call. Profile reads also write no `audit_logs` or
-`security_events` row, so "who looked up whom" is unanswerable — a question a
-church will eventually ask about pastoral records.
+### E-6 · No rate limit, no audit — **FIXED**
+**Fixed, three parts.** Rate limit 20/60s per user (same `enforceRateLimit`
+shape as `_chat.ts`). Access logged to `security_events` as
+`grace.person_record_viewed` (severity `info`) with the person id and never the
+summary — `security_events` rather than `audit_logs` deliberately, matching the
+`authz.view_as` precedent, because `audit_logs` is the mutation trail and filing
+reads there would dilute the "who changed what" query. And the roster query is
+now a candidate filter that is a strict superset of all three `countPersonMatches`
+tiers, verified against the live tenant (61 rows) rather than asserted in a
+mock — including the cross-field substring case (`"rah Mit"` → Sarah Mitchell).
 
-### E-7 · Client intent detection doesn't cover the brief's own gap — LOW
-`requestedEntityMemoryName` matches only
-`^what do you remember about X$`. The brief's gap #4 — *"Brief me on Pastor
-James Wilson"* — does not match, falls through to the model, and gets the same
-answer it got before. Gap #4 is not closed by this change.
+### E-7 · Client intent detection doesn't cover the brief's own gap — **FIXED**
+**Fixed, and gap #4 is now closed.** The matcher covers "brief me on", "tell me
+about", "catch me up on", "who is", "what do you know about" and
+"the background/context/history on", and strips honorifics including stacked
+ones (*"Pastor Dr. James Wilson"* → *"James Wilson"*).
+
+The risk in broadening a client-side matcher — *"Tell me about our giving this
+month"* being captured and answered *"I couldn't find a current record for our
+giving this month"* — is closed **structurally, not by tightening the regex**:
+a `not_found` result no longer short-circuits. The route returns the status
+without persisting anything and the client continues to the model. A false
+positive costs one indexed query returning zero rows, never a worse answer.
 
 ---
 
@@ -206,7 +218,13 @@ answer it got before. Gap #4 is not closed by this change.
 | | |
 |---|---|
 | `navigation.ts` | **Land after N-2** (derive from one registry) — N-3 optional, N-4 done. |
-| `_entity-memory.ts` | **Hold.** E-1 must be fixed first. E-2 and E-3 are small and should go with it. E-4 needs a manifest decision. |
+| `_entity-memory.ts` | **Cleared.** E-1 through E-7 are all closed. |
 
-E-1 is the only finding that discloses something. Everything else is
+E-1 was the only finding that disclosed anything. Everything else was
 correctness, coherence, or auditability.
+
+**All seven closed** across `24b5081` (E-1..E-5) and `7bccee6` (E-6, E-7).
+One limitation worth carrying forward: the route's tests run against a mocked
+Supabase whose `.or()`/`.ilike()` are no-ops, so they prove the route's logic
+and nothing about the PostgREST filter or RLS. The filter was therefore checked
+against the live database directly.
