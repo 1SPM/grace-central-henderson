@@ -20,6 +20,7 @@ import { loadStripe } from '@stripe/stripe-js/pure';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Gift, Repeat, History, CreditCard, ShieldCheck } from 'lucide-react';
 import { usePortalGiving, type RecurringGiftEntry } from '../hooks/usePortalGiving';
+import { usePortalAuth } from '../PortalAuthContext';
 import { usePortalImpactCard } from '../hooks/usePortalImpactCard';
 import { microUsdToDollars } from '../../lib/services/impactCard';
 
@@ -61,6 +62,7 @@ export function PortalGiving() {
 // ---- Give -----------------------------------------------------------
 
 function GiveSection({ giving }: { giving: ReturnType<typeof usePortalGiving> }) {
+  const { getAuthToken } = usePortalAuth();
   const [open, setOpen] = useState(false);
   const [amountUsd, setAmountUsd] = useState(50);
   const [customAmount, setCustomAmount] = useState('');
@@ -119,7 +121,15 @@ function GiveSection({ giving }: { giving: ReturnType<typeof usePortalGiving> })
         person_id: giving.data!.person_id,
       };
       if (isRecurring) body.frequency = frequency;
-      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      // Authenticate the request so the server can verify person_id actually
+      // belongs to the caller, not just to some person in this church — see
+      // the attribution guard in api/giving/_create-payment-intent.ts. The
+      // public /give/<slug> page (anonymous donors) never sends person_id,
+      // so it never needs this token.
+      const token = await getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
       const respBody = await res.json();
       if (!res.ok) {
         setError(respBody.detail || respBody.error || `Could not start payment (HTTP ${res.status})`);
