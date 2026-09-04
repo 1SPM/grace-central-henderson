@@ -23,6 +23,7 @@ import {
   Wallet,
   Workflow,
   LogOut,
+  Flag,
 } from 'lucide-react';
 import { View } from '../types';
 import { TrialBanner } from './TrialBanner';
@@ -86,6 +87,7 @@ const navSections: NavSection[] = [
 // Every view is still reachable; just not promoted in daily-driver nav.
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'grace-mobile', label: 'GRACE Mobile', icon: <Smartphone size={18} /> },
+  { view: 'community-moderation', label: 'Community Moderation', icon: <Flag size={18} /> },
 ];
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
@@ -127,6 +129,7 @@ const viewLabels: Record<View, string> = {
   reports: 'Reports',
   settings: 'Settings',
   'connect-card': 'Connect Card',
+  'community-moderation': 'Community Moderation',
   directory: 'Directory',
   'child-checkin': 'Child Check-In',
   forms: 'Forms',

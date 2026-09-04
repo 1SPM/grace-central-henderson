@@ -33,6 +33,8 @@ describe('PortalCommunity (group requests / event RSVP / volunteer interest test
       if (url === '/api/portal/volunteer' && method === 'POST') return Promise.resolve(jsonResponse({ interest: { id: 'v1' }, task_id: 't2' }, 201));
       if (url === '/api/portal/contact' && method === 'POST') return Promise.resolve(jsonResponse({ task_id: 't3' }, 201));
       if (url === '/api/portal/requests' && method === 'GET') return Promise.resolve(jsonResponse({ requests: [] }));
+      if (url === '/api/community/posts' && method === 'GET') return Promise.resolve(jsonResponse({ posts: [] }));
+      if (url === '/api/community/posts' && method === 'POST') return Promise.resolve(jsonResponse({ post: { id: 'post-1', post_type: 'blessing', body: 'Grateful today', moderation_status: 'pending', created_at: '2026-01-01' } }, 201));
       return Promise.resolve(jsonResponse({}));
     });
   }
@@ -95,11 +97,27 @@ describe('PortalCommunity (group requests / event RSVP / volunteer interest test
     });
   });
 
-  it('does not render community-post or prayer-wall composer UI (disabled this phase)', async () => {
+  it('does not render a prayer-wall composer here — that lives on the Care & Prayer tab', async () => {
     setupFetch();
     render(<PortalCommunity />);
     await waitFor(() => expect(screen.getByText('Young Adults')).toBeInTheDocument());
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
+    expect(screen.getByText(/care & prayer tab/i)).toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/what's on your heart/i)).not.toBeInTheDocument();
+  });
+
+  it('composes a community post via POST /api/community/posts, restricted to composable types', async () => {
+    setupFetch();
+    render(<PortalCommunity />);
+    await waitFor(() => expect(screen.getByText('Young Adults')).toBeInTheDocument());
+
+    fireEvent.change(screen.getByPlaceholderText(/what's something good god has done/i), { target: { value: 'Grateful today' } });
+    fireEvent.click(screen.getByRole('button', { name: /^post$/i }));
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([u, o]) => u === '/api/community/posts' && o?.method === 'POST');
+      expect(call).toBeDefined();
+      expect(JSON.parse(call![1].body as string)).toMatchObject({ post_type: 'blessing', body: 'Grateful today' });
+    });
+    await waitFor(() => expect(screen.getByText(/moderator will approve it before it appears/i)).toBeInTheDocument());
   });
 });
