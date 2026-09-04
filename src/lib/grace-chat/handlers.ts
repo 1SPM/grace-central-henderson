@@ -1,5 +1,6 @@
 import type { Person, Task, PrayerRequest, Interaction, MemberStatus, EventCategory } from '../../types';
 import type { PendingAction, ActionType } from '../grace-actions';
+import { buildHeaders } from '../services/graceChat';
 
 export interface ReplyContext {
   inbox_message_row_id: string;
@@ -109,7 +110,7 @@ async function executeServerSide(args: {
   try {
     const res = await fetch('/api/actions/execute', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await buildHeaders(),
       body: JSON.stringify({ action_type: args.actionType, target_entity_id: args.targetEntityId }),
     });
     const data = await res.json().catch(() => ({} as { reason?: string; error?: string; audit_incomplete?: boolean }));
@@ -158,7 +159,7 @@ async function proposeForApproval(args: {
   try {
     const res = await fetch('/api/actions/propose', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await buildHeaders(),
       body: JSON.stringify({
         action_type: args.actionType,
         target_entity_id: args.targetEntityId,
@@ -422,7 +423,7 @@ const handlers: Record<ActionType, ActionHandler> = {
     if (replyContext) {
       const res = await fetch('/api/agentmail/reply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await buildHeaders(),
         body: JSON.stringify({
           inbox_id: replyContext.source_inbox_id,
           message_id: replyContext.source_message_id,
@@ -453,7 +454,7 @@ const handlers: Record<ActionType, ActionHandler> = {
     const subject = action.subject?.trim() || '(no subject)';
     const res = await fetch('/api/agentmail/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await buildHeaders(),
       body: JSON.stringify({ person_id: person.id, subject, text: bodyText }),
     });
     const sendData = await res.json().catch(() => ({} as { error?: string }));
