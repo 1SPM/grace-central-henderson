@@ -78,6 +78,21 @@ export interface ExecutorMutation {
   after: Record<string, unknown> | null;
 }
 
+/**
+ * The audit verb a mutation earns, read off its own snapshots rather than
+ * assumed by whichever route happened to run it. Both routes used to
+ * hardcode theirs — 'update' on the approvals path, 'delete' on direct
+ * execute — which was right for the one action each was written around and
+ * wrong the moment a second executor arrived: an APPROVED deletion was filed
+ * as an 'update', invisible to `audit_logs where action='delete'`, which is
+ * the whole point of the trail (R-18).
+ */
+export function auditActionFor(mutation: ExecutorMutation): 'create' | 'update' | 'delete' {
+  if (mutation.after === null) return 'delete';
+  if (mutation.before === null) return 'create';
+  return 'update';
+}
+
 export type ExecutorResult =
   | {
       ok: true;
