@@ -14,7 +14,14 @@ interface ListResponse { approvals: Approval[] }
 export interface AgentActionOutcome { action_id: string; status: string; reason?: string }
 interface DecideResponse { approval: Approval; agent_action?: AgentActionOutcome | null; audit_incomplete?: boolean }
 
-export function useApprovals() {
+/**
+ * @param initialStatus what the first load asks for. The Approval Centre
+ * opens on "Pending", so its first fetch must say so — mounting with an
+ * unfiltered list() showed every decided row under a dropdown that read
+ * Pending (2026-09-04 browser rehearsal: 16 decided rehearsal deletions
+ * above the one live request).
+ */
+export function useApprovals(initialStatus?: ApprovalStatus) {
   const { getAuthToken } = useAuthContext();
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +47,7 @@ export function useApprovals() {
     }
   }, [getAuthToken]);
 
-  useEffect(() => { void list(); }, [list]);
+  useEffect(() => { void list(initialStatus ? { status: initialStatus } : undefined); }, [list, initialStatus]);
 
   const decide = useCallback(async (id: string, decision: ApprovalDecision, decisionNotes?: string) => {
     const data = await workosFetch<DecideResponse>(`/api/approvals?id=${encodeURIComponent(id)}`, getAuthToken, {
