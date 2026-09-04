@@ -12,7 +12,15 @@ import { getClerkTokenProvider } from '../supabase';
 
 const log = createLogger('grace-chat-service');
 
-async function buildHeaders(): Promise<Record<string, string>> {
+/**
+ * JSON headers plus the caller's Clerk bearer token. Every fetch from the chat
+ * door to an authenticated API route must go through this — a bare
+ * `{ 'Content-Type': 'application/json' }` is a guaranteed 401 in the real
+ * browser, which is exactly how /api/actions/propose failed on the live
+ * tenant on 2026-09-04 ("I couldn't send that for approval: missing bearer
+ * token") after passing every test that stubs Clerk.
+ */
+export async function buildHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   try {
     const provider = getClerkTokenProvider();
