@@ -47,3 +47,31 @@ export function openWorkOs(tab: WorkOsTab, setView: (view: View) => void, id?: s
   window.history.replaceState(null, '', workosHash(tab, id));
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
+
+/**
+ * Follow one of the app's own `#/view?…` links from a click handler.
+ *
+ * The app is not hash-routed: only WorkOsHub, Congregation and SundayPage
+ * listen for hashchange, and only to sync a tab. A plain `<a href="#/workos…">`
+ * therefore changes the URL and nothing else — which is how the dashboard's
+ * "Approvals (1)" chip was a dead link in the 2026-09-04 browser rehearsal,
+ * right after GRACE said "I've sent it to the Decision Queue".
+ *
+ * Returns false for anything that is not an in-app hash link, so the caller
+ * can let the browser have it.
+ */
+export function openHashRoute(href: string, setView: (view: View) => void): boolean {
+  const match = /^#\/([a-z-]+)(\?.*)?$/.exec(href);
+  if (!match) return false;
+  const [, view, query = ''] = match;
+  const params = new URLSearchParams(query.slice(1));
+  if (view === 'workos') {
+    const tab = params.get('tab');
+    openWorkOs((VALID_TABS as string[]).includes(tab ?? '') ? (tab as WorkOsTab) : 'agents', setView, params.get('id'));
+    return true;
+  }
+  setView(view as View);
+  window.history.replaceState(null, '', href);
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+  return true;
+}

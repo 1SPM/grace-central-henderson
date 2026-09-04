@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, ClipboardCheck, ShieldAlert } from 'lucide-react';
 import { useApprovals } from '../../hooks/useApprovals';
+import { WorkOsApiError } from '../../lib/services/workos';
 import { useWorkOsPermissions } from '../../hooks/useWorkOsPermissions';
 import { EmptyState } from '../ui/EmptyState';
 import { StatusBadge } from '../ui/StatusBadge';
@@ -14,6 +15,24 @@ const DECISIONS: { value: ApprovalDecision; label: string }[] = [
   { value: 'escalate', label: 'Escalate' },
 ];
 
+/**
+ * Server refusal codes a decider can act on, in their words. Without this
+ * the 403 from the separation-of-duty check (C-13) rendered as a bare
+ * `self_approval` above the card.
+ */
+const DECISION_REFUSALS: Record<string, string> = {
+  self_approval: 'You requested this change, so someone else has to approve it. You can still reject or escalate it yourself.',
+  already_decided: 'Someone decided this one before you did — refresh to see the outcome.',
+};
+
+function describeDecisionFailure(err: unknown): string {
+  if (err instanceof WorkOsApiError) {
+    const code = (err.body as { error?: unknown } | null)?.error;
+    if (typeof code === 'string' && code in DECISION_REFUSALS) return DECISION_REFUSALS[code];
+  }
+  return err instanceof Error ? err.message : 'Could not record the decision.';
+}
+
 const RISK_VARIANT: Record<string, 'success' | 'info' | 'warning' | 'urgent'> = {
   low: 'success',
   medium: 'info',
@@ -22,7 +41,7 @@ const RISK_VARIANT: Record<string, 'success' | 'info' | 'warning' | 'urgent'> = 
 };
 
 export function ApprovalCentre() {
-  const { approvals, isLoading, error, forbidden, list, decide, markRelatedPartyReviewed } = useApprovals();
+  const { approvals, isLoading, error, forbidden, list, decide, markRelatedPartyReviewed } = useApprovals('pending');
   const { has } = useWorkOsPermissions();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [statusFilter, setStatusFilter] = useState<'pending' | 'decided' | ''>('pending');
@@ -56,7 +75,7 @@ export function ApprovalCentre() {
         );
       }
     } catch (err) {
-      setDecisionError(err instanceof Error ? err.message : 'Could not record the decision.');
+      setDecisionError(describeDecisionFailure(err));
     }
   }
 
