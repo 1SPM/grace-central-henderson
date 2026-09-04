@@ -437,7 +437,7 @@
     if (RX.crisis.test(lower)) {
       return {
         intent: 'care', care: true, nav: 'outreach', navLabel: 'Open Care now',
-        text: 'I hear you, ' + name() + ', and I\u2019m taking this seriously. I\u2019m routing you to live pastoral care right now \u2014 a real person at ' + M.churchName + ' will be with you. If you are in immediate danger, please call or text 988. You are not alone.'
+        text: 'I hear you, ' + name() + ', and I want you to have real help right now. If you are in immediate danger, please call or text 988 (Suicide \u0026 Crisis Lifeline) or call 911. This is a preview, so I can\u2019t reach anyone at ' + M.churchName + ' on your behalf yet \u2014 please also call the church office directly, or reach out to someone you trust nearby. You are not alone.'
       };
     }
     if (RX.leaderByNeed.test(lower)) {

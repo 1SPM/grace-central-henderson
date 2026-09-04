@@ -920,6 +920,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
   text-shadow:0 1px 0 rgba(255,255,255,.3),0 2px 5px rgba(0,0,0,.2);
   white-space:nowrap;
 }
+.pf-demo-badge{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;color:#3a2a00;background:#ffcf4d;text-shadow:none;vertical-align:middle;}
 .pf-card-back{
   transform:rotateY(180deg);
   background:linear-gradient(160deg,#1a1a1a 0%,#000 100%);
@@ -2117,14 +2118,14 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                     <div class="pf-gc-front-mid">
                       <img class="pf-gc-cmark" src="assets/central-c-mark.png" alt="" aria-hidden="true">
                     </div>
-                    <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834</div>
+                    <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834<span class="pf-demo-badge">DEMO</span></div>
                   </div>
                 </div>
                 <div class="pf-card-face pf-card-back">
                   <div class="pf-gc-back">
                     <img class="pf-gc-wordmark-back" src="assets/central-church-wordmark.png" alt="Central Church">
                     <div class="pf-card-back-stripe"></div>
-                    <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
+                    <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV (demo)</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
                     <div class="pf-card-back-info">Issued by Central Henderson · Powered by GRACE<br>Qualified purchases can support church causes</div>
                   </div>
                 </div>
@@ -3220,14 +3221,14 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                       <div class="pf-gc-front-mid">
                         <img class="pf-gc-cmark" src="assets/central-c-mark.png" alt="" aria-hidden="true">
                       </div>
-                      <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834</div>
+                      <div class="pf-gc-num">5244 &nbsp;•••• &nbsp;•••• &nbsp;1834<span class="pf-demo-badge">DEMO</span></div>
                     </div>
                   </div>
                   <div class="pf-card-face pf-card-back">
                     <div class="pf-gc-back">
                       <img class="pf-gc-wordmark-back" src="assets/central-church-wordmark.png" alt="Central Church">
                       <div class="pf-card-back-stripe"></div>
-                      <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
+                      <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV (demo)</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
                       <div class="pf-card-back-info">Issued by Central Henderson · Powered by GRACE<br>Qualified purchases can support church causes</div>
                     </div>
                   </div>
@@ -3289,8 +3290,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div class="wallet-receive-details">
                 <div class="wallet-receive-row"><span>Account name</span><strong>Central Henderson · GRACE</strong></div>
-                <div class="wallet-receive-row"><span>Account #</span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
-                <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">110000000</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
+                <div class="wallet-receive-row"><span>Account # <span class="pf-demo-badge">DEMO</span></span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
+                <div class="wallet-receive-row"><span>Routing # <span class="pf-demo-badge">DEMO</span></span><strong id="wallet-routing-num">110000000</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
               </div>
               <div class="wallet-qr-box">
                 <div class="wallet-qr-placeholder">QR · GRACE Banking</div>
@@ -4776,11 +4777,8 @@ function closeCrisisSupport(){
 }
 function alertPastoralCare(){
   closeCrisisSupport();
-  LEADER_STATE.pendingFollowUps++;
-  prependLeaderActivity({icon:'prayer',title:'Care dispatch',detail:'urgent request routed live',time:'Just now'});
-  syncLeaderKpis();
   sendCmd('I need pastoral care support','care');
-  showPortalToast('On-call pastoral care alerted — a leader will respond','🙏');
+  showPortalToast('This is a preview — no alert was sent. Please use a hotline above, or call the church office directly.','ℹ️');
 }
 
 /* ===== Divinity avatar session (intro video → live D-ID agent) ===== */
@@ -6104,6 +6102,10 @@ setInterval(()=>{
 },30000);
 
 /* ── AI HUB LOGIC ── */
+/* OWNER ACTION (members-portal audit, Phase 0): Pastor James Wilson's row below
+   carries a live D-ID agent credential (didAgentId, didClientKey) committed in this
+   public static file. Rotate it in the D-ID dashboard and load it from a small
+   non-committed config include instead of inlining it here. */
 const aiLeaders = [
   {name:'Pastor James Wilson',title:'Senior Pastor',role:'Central Henderson · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',didAgentId:'v2_agt_nxzGwxew',didClientKey:'ck_cwyMiGIkm7BTZr1lrSmAO',introVideoUrl:'assets/watch/video/Maya-welcome-to-Central.mp4',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
   {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23818CF8%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2364748B%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20fill%3D%27url%28%23g%29%27%2F%3E%3Ctext%20x%3D%2732%27%20y%3D%2732%27%20dy%3D%27.36em%27%20text-anchor%3D%27middle%27%20font-family%3D%27-apple-system%2CSegoe%20UI%2CHelvetica%2CArial%2Csans-serif%27%20font-size%3D%2724%27%20font-weight%3D%27500%27%20fill%3D%27%23FFFFFF%27%3ESM%3C%2Ftext%3E%3C%2Fsvg%3E',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},

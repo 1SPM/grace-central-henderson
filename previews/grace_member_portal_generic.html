@@ -942,6 +942,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
   text-shadow:0 1px 0 rgba(255,255,255,.3),0 2px 5px rgba(0,0,0,.2);
   white-space:nowrap;
 }
+.pf-demo-badge{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;color:#3a2a00;background:#ffcf4d;text-shadow:none;vertical-align:middle;}
 .pf-card-back{
   transform:rotateY(180deg);
   background:linear-gradient(160deg,#1a1a1a 0%,#000 100%);
@@ -2162,7 +2163,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                   <div class="pf-gc-back">
                     <img class="pf-gc-wordmark-back" src="assets/faithful-church-logo-wht.png" alt="Faithful Church">
                     <div class="pf-card-back-stripe"></div>
-                    <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
+                    <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV (demo)</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
                     <div class="pf-card-back-info">Issued by Faithful Church · Powered by GRACE<br>Qualified purchases can support church causes</div>
                   </div>
                 </div>
@@ -3260,7 +3261,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                     <div class="pf-gc-back">
                       <img class="pf-gc-wordmark-back" src="assets/faithful-church-logo-wht.png" alt="Faithful Church">
                       <div class="pf-card-back-stripe"></div>
-                      <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
+                      <div class="pf-card-back-sig"><div class="pf-card-back-cvv-lbl">CVV (demo)</div><div class="pf-card-back-cvv" onclick="event.stopPropagation();pfRevealCvv(event)">•••</div></div>
                       <div class="pf-card-back-info">Issued by Faithful Church · Powered by GRACE<br>Qualified purchases can support church causes</div>
                     </div>
                   </div>
@@ -3322,8 +3323,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div class="wallet-receive-details">
                 <div class="wallet-receive-row"><span>Account name</span><strong>Faithful Church · GRACE</strong></div>
-                <div class="wallet-receive-row"><span>Account #</span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
-                <div class="wallet-receive-row"><span>Routing #</span><strong id="wallet-routing-num">110000000</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
+                <div class="wallet-receive-row"><span>Account # <span class="pf-demo-badge">DEMO</span></span><strong id="wallet-acct-num">8800123456789</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-acct-num')">Copy</button></div>
+                <div class="wallet-receive-row"><span>Routing # <span class="pf-demo-badge">DEMO</span></span><strong id="wallet-routing-num">110000000</strong><button type="button" class="wallet-copy-btn" onclick="copyWalletDetail('wallet-routing-num')">Copy</button></div>
               </div>
               <div class="wallet-qr-box">
                 <div class="wallet-qr-placeholder">QR · GRACE Banking</div>
@@ -4780,11 +4781,8 @@ function closeCrisisSupport(){
 }
 function alertPastoralCare(){
   closeCrisisSupport();
-  LEADER_STATE.pendingFollowUps++;
-  prependLeaderActivity({icon:'prayer',title:'Care dispatch',detail:'urgent request routed live',time:'Just now'});
-  syncLeaderKpis();
   sendCmd('I need pastoral care support','care');
-  showPortalToast('On-call pastoral care alerted — a leader will respond','🙏');
+  showPortalToast('This is a preview — no alert was sent. Please use a hotline above, or call the church office directly.','ℹ️');
 }
 
 /* ===== Divinity avatar session (intro video → live D-ID agent) ===== */

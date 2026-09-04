@@ -28,6 +28,9 @@
     .card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); overflow: hidden }
     .card-body { padding: 24px 24px 20px }
     .card-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--red); background: rgba(200,16,46,.08); border-radius: 6px; padding: 3px 8px; margin-bottom: 12px }
+    .card-badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px }
+    .card-badge-row .card-badge { margin-bottom: 0 }
+    .card-badge--preview { color: var(--muted); background: var(--gray); border: 1px solid var(--border) }
     .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px }
     .card p { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 20px }
     .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0 }
@@ -159,14 +162,17 @@
           </div>
         </div>
         <div class="card-footer">
-          <a id="demo-crm-link" href="https://gracecrm-centralhenderson.org/app#/dashboard" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Demo CRM &rarr;</a>
+          <a id="demo-crm-link" href="https://grace-crm.dev/app#/dashboard" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Demo CRM &rarr;</a>
         </div>
       </div>
       <div class="card">
         <div class="card-body">
-          <span class="card-badge">Mobile App</span>
+          <div class="card-badge-row">
+            <span class="card-badge">Mobile App</span>
+            <span class="card-badge card-badge--preview">Design Preview</span>
+          </div>
           <h3>My GRACE Members Portal</h3>
-          <p>iOS-style mobile prototype &mdash; complete member experience with leadership roster, giving flows, care dispatch, and community engagement.</p>
+          <p>iOS-style design preview of the member experience &mdash; leadership roster, giving flows, care dispatch, and community engagement. Not connected to your account &mdash; nothing you do here is saved.</p>
           <div class="card-tags">
             <span class="tag">Grace Impact&trade;</span>
             <span class="tag">Pulse&trade;</span>
@@ -182,9 +188,12 @@
         <div class="card-body">
           <div class="card-split">
             <div class="card-main">
-              <span class="card-badge">New iOS App</span>
+              <div class="card-badge-row">
+                <span class="card-badge">New iOS App</span>
+                <span class="card-badge card-badge--preview">Design Preview</span>
+              </div>
               <h3>New iOS Members Card App</h3>
-              <p>Redesigned Central Henderson mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+              <p>Redesigned Central Henderson mobile design preview &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens. Not connected to your account &mdash; nothing you do here is saved.</p>
               <div class="card-tags">
                 <span class="tag">iOS Native</span>
                 <span class="tag">Members Card</span>
