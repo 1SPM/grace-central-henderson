@@ -16,6 +16,8 @@ import { TENANT_DEFAULT_SETTINGS, TENANT_TIMEZONE } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
+import { resolveWorkspaceNavigation } from '../lib/grace-chat/navigation';
+import { useRouteGuard } from '../hooks/useRouteGuard';
 
 /**
  * Map any backend/transport failure to a graceful assistant reply.
@@ -139,7 +141,6 @@ export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     : nextBeyondWindow
       ? `none in the next 7 days — the next scheduled event is ${nextBeyondWindow.title} on ${new Date(nextBeyondWindow.startDate).toLocaleDateString()}`
       : 'no events are scheduled in this church\'s calendar — say that plainly; do not describe recurring services or holidays as if they were scheduled entries';
-
 
   const upcomingBirthdays = people
     .filter(p => {
@@ -281,6 +282,10 @@ function computeSalutation(data: GraceData, hour24: number): string {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+  // The Cmd+K palette filters its own workspace list through this same guard.
+  // Chat navigating where the palette refuses to offer would be the parity
+  // promise running backwards, so the resolver gets the guard too.
+  const { canAccess } = useRouteGuard();
   const tz = data.churchTimezone || TENANT_TIMEZONE;
   const { zoned } = useChurchClock(tz);
   const salutation = useMemo(
@@ -445,6 +450,19 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
+    // Navigation is an immediate, read-only UI transition.  Do it before the
+    // model call so "Open …" changes the route even if the AI service is
+    // unavailable, and so the reply never pretends a summary is navigation.
+    const navigation = resolveWorkspaceNavigation(query, canAccess);
+    if (navigation && data.onNavigate) {
+      data.onNavigate(navigation.view);
+      setMessages(m => m.map(msg =>
+        msg.id === assistantMsgId ? { ...msg, content: `Opened ${navigation.label}.` } : msg
+      ));
+      setLoading(false);
+      return;
+    }
+
     // "remember that…" is now handled server-side (api/grace/_chat.ts) so
     // it's written with provenance to grace_memories instead of
     // localStorage — this client short-circuit list keeps only the
@@ -546,7 +564,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, conversationId, data.people, data.tasks, data.prayers]);
+  }, [dataContext, conversationId, data.people, data.tasks, data.prayers, data.onNavigate, canAccess]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>

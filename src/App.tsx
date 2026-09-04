@@ -559,6 +559,7 @@ function App() {
     userFirstName: user?.firstName,
     userRole: user?.role,
     userId: user?.id,
+    onNavigate: setView,
     onAddTask: handlers.addTask,
     onAddPrayer: handlers.addPrayer,
     onAddInteraction: handlers.addInteraction,
