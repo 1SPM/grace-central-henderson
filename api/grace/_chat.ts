@@ -20,7 +20,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { resolveStaffActor } from '../_lib/authz.js';
 import { readBody, str } from '../_lib/validation.js';
 import { enforceRateLimit } from '../_lib/rateLimit/limiter.js';
@@ -32,6 +32,7 @@ import { retrieveChurchKnowledge, buildKnowledgeBlock } from '../_lib/grace-know
 import { buildCapabilityContext } from '../_lib/grace-capability.js';
 import { fetchPeopleForCollisionCheck, detectNameCollisions, buildEpistemicContext } from '../_lib/grace-epistemic.js';
 import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
+import { getOrCreateConversation } from '../_lib/grace-conversation.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,33 +54,6 @@ const SCHEMA = {
   conversationId: str({ required: false }),
   dataContext: str({ required: false, max: DATA_CONTEXT_MAX_CHARS }),
 };
-
-async function getOrCreateConversation(
-  supabase: SupabaseClient,
-  churchId: string,
-  userId: string,
-  conversationId: string | undefined,
-  firstMessage: string,
-): Promise<{ id: string } | null> {
-  if (conversationId) {
-    const { data } = await supabase
-      .from('grace_conversations')
-      .select('id')
-      .eq('id', conversationId)
-      .eq('church_id', churchId)
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (data) return data as { id: string };
-  }
-
-  const { data, error } = await supabase
-    .from('grace_conversations')
-    .insert({ church_id: churchId, user_id: userId, title: firstMessage.slice(0, 80) })
-    .select('id')
-    .single();
-  if (error || !data) return null;
-  return data as { id: string };
-}
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!, { auth: { persistSession: false } });

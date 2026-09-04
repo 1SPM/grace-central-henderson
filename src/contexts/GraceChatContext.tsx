@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person } from '../types';
-import { sendGraceTurn, hydrateGraceConversation, importBrainEntries } from '../lib/services/graceChat';
+import { sendGraceTurn, hydrateGraceConversation, importBrainEntries, retrieveEntityMemory } from '../lib/services/graceChat';
 import { buildChatActionPrompt } from '../lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
@@ -18,6 +18,7 @@ import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type Grace
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
 import { resolveWorkspaceNavigation } from '../lib/grace-chat/navigation';
 import { useRouteGuard } from '../hooks/useRouteGuard';
+import { requestedEntityMemoryName } from '../lib/grace-chat/entityMemory';
 
 /**
  * Map any backend/transport failure to a graceful assistant reply.
@@ -459,6 +460,22 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       setMessages(m => m.map(msg =>
         msg.id === assistantMsgId ? { ...msg, content: `Opened ${navigation.label}.` } : msg
       ));
+      setLoading(false);
+      return;
+    }
+
+    const entityName = requestedEntityMemoryName(query);
+    if (entityName) {
+      // Pass the thread so the server writes this turn into the SAME
+      // conversation the model turns use — a deterministic answer that never
+      // reaches grace_messages leaves the next turn with no referent (E-5).
+      const result = await retrieveEntityMemory(entityName, { conversationId, question: query });
+      if (result.conversationId && result.conversationId !== conversationId) {
+        setConversationId(result.conversationId);
+      }
+      setMessages(m => m.map(msg => msg.id === assistantMsgId
+        ? { ...msg, content: result.reply ?? "I couldn't retrieve that current record just now. Please try again." }
+        : msg));
       setLoading(false);
       return;
     }

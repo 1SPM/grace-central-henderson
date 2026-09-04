@@ -146,3 +146,35 @@ export async function importBrainEntries(texts: string[]): Promise<{ imported: n
     return null;
   }
 }
+
+export interface EntityMemoryResult {
+  reply: string | null;
+  /** Server-resolved thread this turn was written to, so the next turn appends. */
+  conversationId?: string;
+}
+
+/** Read-only canonical profile summary; authorization is enforced server-side. */
+export async function retrieveEntityMemory(
+  name: string,
+  opts: { conversationId?: string; question?: string } = {},
+): Promise<EntityMemoryResult> {
+  try {
+    const response = await fetch('/api/grace/entity-memory', {
+      method: 'POST',
+      headers: await buildHeaders(),
+      body: JSON.stringify({ name, conversationId: opts.conversationId, question: opts.question }),
+    });
+    const conversationId = response.headers.get('X-Conversation-Id') ?? undefined;
+    if (!response.ok) {
+      return {
+        reply: response.status === 403 ? "You don't have permission to view that person's record." : null,
+        conversationId,
+      };
+    }
+    const data = await response.json() as { reply?: unknown };
+    return { reply: typeof data.reply === 'string' ? data.reply : null, conversationId };
+  } catch (e) {
+    log.error('Grace entity memory error', e);
+    return { reply: null };
+  }
+}

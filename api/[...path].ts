@@ -72,6 +72,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'giving/request-donor-portal': () => import('./giving/_request-donor-portal.js'),
   'giving/text-to-give': () => import('./giving/_text-to-give.js'),
   'grace/chat': () => import('./grace/_chat.js'),
+  'grace/entity-memory': () => import('./grace/_entity-memory.js'),
   'grace/memories': () => import('./grace/_memories.js'),
   'grace/draft-reply': () => import('./grace/_draft-reply.js'),
   'grace/tts': () => import('./grace/_tts.js'),
