@@ -56,7 +56,11 @@
       videoUrl: '/previews/assets/watch/video/Church-Stage-video.mp4',
     },
     church: {
-      name: 'Central Henderson',
+      // Tenant identity comes from the page: set window.GRACE_PORTAL_CHURCH
+      // before this script loads (and re-apply any tenant-specific belief
+      // wording in a per-page override). Never hardcode a tenant name here —
+      // this file is shared across every member portal preview.
+      name: (typeof window !== 'undefined' && window.GRACE_PORTAL_CHURCH) || 'your church',
       values: ['Grace', 'Honor', 'Community', 'Generosity', 'Mission'],
       coreBeliefs: [
         {
@@ -86,7 +90,7 @@
         {
           id: 'mission',
           title: 'Sent Locally',
-          summary: 'Central Henderson exists to bless Henderson and beyond — every member has a part to play.',
+          summary: 'We exist to bless our city and beyond — every member has a part to play.',
           anchor: 'Matthew 28:19',
         },
       ],
