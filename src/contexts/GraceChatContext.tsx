@@ -106,10 +106,40 @@ export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
 
   // Private events (weddings/funerals/sensitive planning) never reach the
   // model — same category of gap as the prayer-content fix (TD-066).
-  const upcomingEvents = events
-    .filter(e => !e.isPrivate && new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow)
+  //
+  // ONLY REAL CALENDAR ROWS REACH THE MODEL. The Dashboard and Sunday tools
+  // render mergeCalendarWithRhythm(), which injects generated holidays and a
+  // synthetic "Sunday Service" for every Sunday of the year. That is defensible
+  // as a visual backdrop the user can see is a pattern; it is NOT defensible as
+  // conversational fact. Measured against the live Central Henderson tenant,
+  // feeding the merged array here made GRACE report three "upcoming events"
+  // — Labor Day, Membership Class, Sunday Service — when the church had ZERO
+  // real events in the window. Same failure class as the inactivity
+  // fabrication (77760fb) and the memory-date fabrication (022a9ea): a
+  // confident answer assembled from something the church never entered.
+  //
+  // The real complaint that prompted the merge — "GRACE said the calendar was
+  // clear" — is answered below by widening the horizon truthfully instead:
+  // a day-start boundary so an event earlier TODAY still counts (the Dashboard
+  // uses `day >= todayStart`), and an explicit next-event lookahead when the
+  // 7-day window is empty, so GRACE can say what IS coming rather than "none".
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const futureEvents = events
+    .filter(e => !e.isPrivate && new Date(e.startDate) >= startOfToday)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  const upcomingEvents = futureEvents
+    .filter(e => new Date(e.startDate) <= sevenDaysFromNow)
     .slice(0, 10)
     .map(e => `${e.title} — ${new Date(e.startDate).toLocaleDateString()}`);
+  // Truthful empty state, in the same shape as the attendance line below:
+  // say what the system actually holds, never imply the church has no plans.
+  const nextBeyondWindow = futureEvents.find(e => new Date(e.startDate) > sevenDaysFromNow);
+  const eventsLine = upcomingEvents.length > 0
+    ? upcomingEvents.join(' | ')
+    : nextBeyondWindow
+      ? `none in the next 7 days — the next scheduled event is ${nextBeyondWindow.title} on ${new Date(nextBeyondWindow.startDate).toLocaleDateString()}`
+      : 'no events are scheduled in this church\'s calendar — say that plainly; do not describe recurring services or holidays as if they were scheduled entries';
+
 
   const upcomingBirthdays = people
     .filter(p => {
@@ -187,7 +217,7 @@ People: ${people.length} total (${people.filter(p => p.status === 'visitor').len
 Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
 Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
 Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${hasAttendanceData ? `${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}` : 'attendance not tracked in this system — do not claim anyone is inactive or has missed check-ins'}
-Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
+Upcoming events (7d): ${eventsLine}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
 Groups: ${groupActivityLines.join(', ') || 'none'}
