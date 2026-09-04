@@ -6,6 +6,7 @@ import { getLeaderCompanionConfig } from '../../../config/leadersConfig';
 import { LeaderAvatar } from './LeaderAvatar';
 import { LeaderContactTab } from './LeaderContactTab';
 import { AICompanionConfig } from './AICompanionConfig';
+import { SampleDataNotice } from '../../SampleDataNotice';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -101,6 +102,7 @@ export function LeaderProfileView({
           </div>
 
           <div className="lg:col-span-3 space-y-4">
+            <SampleDataNotice label="Sessions, rating, blessings, and human-reply counts below are samples — not live" />
             <div className="grid grid-cols-2 gap-4">
               {kpiCards.map(kpi => (
                 <div

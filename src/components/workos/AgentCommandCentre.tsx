@@ -8,26 +8,7 @@ import { AgentFindingsPanel } from './AgentFindingsPanel';
 import { useMinistryAreas } from '../../hooks/useMinistryAreas';
 import { ROOM_LABEL, roleLabel } from './AreaPairing';
 import type { AreaWithCounts } from '../../hooks/useMinistryAreas';
-
-const STATUS_LABEL: Record<string, string> = {
-  not_implemented: 'Not yet implemented',
-  not_yet_run: 'Not yet run',
-  queued: 'Queued',
-  running: 'Running',
-  succeeded: 'Ran successfully',
-  failed: 'Last run failed',
-  cancelled: 'Cancelled',
-};
-
-const STATUS_VARIANT: Record<string, 'default' | 'info' | 'success' | 'urgent' | 'low'> = {
-  not_implemented: 'low',
-  not_yet_run: 'default',
-  queued: 'info',
-  running: 'info',
-  succeeded: 'success',
-  failed: 'urgent',
-  cancelled: 'low',
-};
+import { agentWorkStatusLabel, agentWorkStatusVariant, AGENT_WORK_BOUNDARY_STATEMENT } from '../../lib/agentWorkStatus';
 
 function formatTime(iso: string | null): string {
   if (!iso) return '—';
@@ -87,7 +68,7 @@ function AgentCard({ agent, supports, config, canManage, running, runError, savi
             <p className="text-xs text-gray-500 dark:text-dark-400 truncate">{agent.role}</p>
           </div>
         </div>
-        <StatusBadge variant={STATUS_VARIANT[agent.status] ?? 'default'}>{STATUS_LABEL[agent.status] ?? agent.status}</StatusBadge>
+        <StatusBadge variant={agentWorkStatusVariant(agent.status)}>{agentWorkStatusLabel(agent.status)}</StatusBadge>
       </div>
 
       <p className="text-xs text-gray-500 dark:text-dark-400 mt-2">{agent.description}</p>
@@ -249,8 +230,7 @@ export function AgentCommandCentre() {
     <div className="p-4 sm:p-6">
       <p className="text-sm text-gray-500 dark:text-dark-400 mb-4">
         Each agent below either has a real, recorded run history or is registered but not yet built —
-        nothing shown here is simulated activity. Instructions and tasks are what you've told the agent
-        to do; the agent won't act outside its area of responsibility on its own.
+        nothing shown here is simulated activity. {AGENT_WORK_BOUNDARY_STATEMENT}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {agents.map(agent => (

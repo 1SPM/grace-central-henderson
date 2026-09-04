@@ -13,6 +13,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { createPortalRequestTask } from '../_lib/portalRequestTask.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -37,6 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
   const member = await resolveMemberActor(req, res, supabase);
   if (!member) return;
+  if (await enforcePortalWriteLimit(res, 'volunteer', member.personId)) return;
 
   const body = readBody(req, res, SCHEMA);
   if (!body) return;

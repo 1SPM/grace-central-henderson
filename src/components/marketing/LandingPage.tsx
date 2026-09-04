@@ -10,7 +10,7 @@ import { MarketingShell } from './MarketingShell';
 import { MarketingHeader } from './MarketingHeader';
 import { MarketingFooter } from './MarketingFooter';
 
-const MEMBER_PORTAL_MOCKUP = '/previews/assets/Memebers portal cell.png';
+const MEMBER_PORTAL_MOCKUP = '/previews/assets/members-portal-phone.png';
 
 export function LandingPage() {
   return (

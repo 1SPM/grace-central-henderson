@@ -21,7 +21,7 @@
  * paletteActions.test.ts fails if the two lists disagree, so "deliberately
  * absent" cannot quietly become "forgotten".
  */
-import { actionsForSurface, type ActionDefinition } from '../../api/_lib/actionCatalog';
+import { actionsForSurface, type ActionDefinition } from './actionCatalog';
 
 /** The single-key shortcut App.tsx already binds for this action, if any. */
 export interface PaletteActionUi {

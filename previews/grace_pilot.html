@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start with a pilot — GRACE</title>
+<meta name="description" content="A 90-day, one-campus GRACE pilot. Fixed fee, credited against year one, no lock-in.">
+</head>
+<body>
+<!-- ARTIFACT-BODY-START -->
+<style>
+  :root {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
+    --confirmed: #047857; --confirmed-wash: #ECFDF5;
+    --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+      --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+      --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
+      --confirmed: #34D399; --confirmed-wash: rgba(52,211,153,.10);
+      --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+    --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+    --accent: #60A5FA; --accent-strong: #93C5FD; --accent-wash: rgba(96,165,250,.14);
+    --confirmed: #34D399; --confirmed-wash: rgba(52,211,153,.10);
+    --negative: #F87171; --negative-wash: rgba(248,113,113,.10); --focus: #60A5FA;
+  }
+  :root[data-theme="light"] {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-strong: #1E40AF; --accent-wash: #EFF6FF;
+    --confirmed: #047857; --confirmed-wash: #ECFDF5;
+    --negative: #B91C1C; --negative-wash: #FEF2F2; --focus: #2563EB;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px 72px; }
+  .back { display: inline-block; font-size: 13.5px; color: var(--muted); text-decoration: none; margin-bottom: 22px; }
+  .back:hover { color: var(--ink-soft); }
+  .back:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  h1 { font-family: "Fraunces", Georgia, serif; font-weight: 300;
+       font-size: clamp(30px, 5vw, 42px); line-height: 1.14; margin: 0 0 12px; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--ink-soft); margin: 0 0 26px; max-width: 56ch; }
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 500; font-size: 20px; margin: 32px 0 10px; }
+  p { margin: 0 0 14px; }
+  .body { color: var(--ink-soft); max-width: 62ch; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 22px 0; }
+  .fact { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .fact .k { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .fact .v { font-family: "Fraunces", Georgia, serif; font-size: 19px; margin-top: 3px; }
+
+  ul.ticks { list-style: none; padding: 0; margin: 8px 0 0; }
+  ul.ticks li { position: relative; padding-left: 26px; margin-bottom: 9px; color: var(--ink-soft); font-size: 14.5px; }
+  ul.ticks li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--confirmed); font-weight: 700; }
+  ul.crosses { list-style: none; padding: 0; margin: 8px 0 0; }
+  ul.crosses li { position: relative; padding-left: 26px; margin-bottom: 9px; color: var(--ink-soft); font-size: 14.5px; }
+  ul.crosses li::before { content: "✕"; position: absolute; left: 0; top: 0; color: var(--negative); font-weight: 700; }
+
+  .straight { background: var(--negative-wash); border: 1px solid var(--line); border-left: 3px solid var(--negative);
+              border-radius: 12px; padding: 16px 18px; margin: 22px 0; }
+  .straight b { display: block; margin-bottom: 4px; color: var(--ink); }
+  .straight p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .good { background: var(--confirmed-wash); border-left-color: var(--confirmed); }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 8px 0 0; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 34px; margin-bottom: 12px; color: var(--ink-soft); font-size: 14.5px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-wash); color: var(--accent-strong); font-size: 12px; font-weight: 700;
+    display: grid; place-items: center;
+  }
+  ol.steps li b { color: var(--ink); }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 26px 0 8px; }
+  @media (max-width: 560px) { .actions { grid-template-columns: 1fr; } }
+  .btn { display: block; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px;
+         padding: 14px 18px; border-radius: 11px; border: 1px solid var(--accent); cursor: pointer; }
+  .btn-primary { background: var(--accent); color: var(--ground); }
+  .btn-secondary { background: transparent; color: var(--accent-strong); border-color: var(--line); }
+  .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .btn small { display: block; font-weight: 500; font-size: 12.5px; opacity: .85; margin-top: 3px; }
+  .or { text-align: center; font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .or a { color: var(--accent-strong); }
+
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  footer a { color: var(--accent-strong); }
+</style>
+
+<div class="wrap">
+  <a class="back" href="/enterprise-pricing">← Back to enterprise pricing</a>
+
+  <h1>Start with a pilot</h1>
+  <p class="lede">Replacing the systems a church runs on is a big decision to make from a demo. So don't. Take one campus for 90 days, keep everything else exactly as it is, and decide afterwards with real numbers.</p>
+
+  <div class="facts">
+    <div class="fact"><div class="k">Length</div><div class="v">90 days</div></div>
+    <div class="fact"><div class="k">Scope</div><div class="v">One campus</div></div>
+    <div class="fact"><div class="k">Fee</div><div class="v">Fixed</div></div>
+    <div class="fact"><div class="k">Commitment after</div><div class="v">None</div></div>
+  </div>
+
+  <div class="straight good">
+    <b>The fee is credited back in full.</b>
+    <p>If you expand within 60 days of the pilot closing, everything you paid for it comes off your first year. If the success criteria aren't met, the unearned portion is refunded. There is no auto-renewal to forget about.</p>
+  </div>
+
+  <h2>What we set up</h2>
+  <ul class="ticks">
+    <li>One record per person across the systems in scope, reconciled against your current data</li>
+    <li>Migration of church-management records, group rosters, and volunteer schedules</li>
+    <li>Email and SMS to your pilot-campus audiences</li>
+    <li>Volunteer scheduling for the ministries you nominate</li>
+    <li>Training for your named administrators, plus written runbooks they keep</li>
+  </ul>
+
+  <h2>What we deliberately leave alone</h2>
+  <ul class="crosses">
+    <li>Your online giving and payment processing</li>
+    <li>Donor payment methods, recurring gifts, and merchant accounts</li>
+    <li>Anything your congregation sees on a giving page</li>
+    <li>Campuses and ministries outside the pilot</li>
+  </ul>
+  <p class="body" style="margin-top:12px;">That first exclusion is deliberate and it costs us money. At most churches above roughly $2M in giving, our published platform fee would cost you more than the software saves. We would rather leave your giving where it is than move it onto pricing that doesn't serve you. If we later bring you enterprise pricing that does, you can weigh it on its own merits.</p>
+
+  <h2>How it gets measured</h2>
+  <p class="body">We agree the criteria at kickoff and review them together at day 90. <b>You hold the scorecard.</b></p>
+  <ul class="ticks">
+    <li>Share of pilot-campus people resolved to a single record</li>
+    <li>Data accuracy against your source of record, on a sample you choose</li>
+    <li>Administrative hours logged by your staff in weeks 1–2 versus weeks 11–12</li>
+    <li>Named administrators active weekly</li>
+    <li>Communications delivered without a deliverability incident</li>
+  </ul>
+  <p class="body" style="margin-top:12px;">We are not claiming a giving increase during the pilot and won't ask you to attribute one to us. We take no credit for outcomes we can't measure.</p>
+
+  <h2>Your data, throughout</h2>
+  <ul class="ticks">
+    <li>You own all congregant and donor data at every point</li>
+    <li>Full export in open formats within 5 business days of any written request, during or after the pilot, whether or not you continue</li>
+    <li>Complete deletion within 30 days of a written request, with written confirmation</li>
+    <li>We never sell or share it, or use it for anything beyond running your pilot</li>
+  </ul>
+
+  <h2>At day 90</h2>
+  <ol class="steps">
+    <li><b>Expand.</b> We scope more campuses and put terms in writing, with your pilot fee credited.</li>
+    <li><b>Extend.</b> A defined extension if something specific needs more runway.</li>
+    <li><b>Stop.</b> We export your data, delete what you ask us to, and part on good terms.</li>
+  </ol>
+  <p class="body" style="margin-top:12px;">No penalty and no lock-in on any of the three.</p>
+
+  <div class="actions">
+    <a class="btn btn-primary" id="bookBtn"
+       href="https://calendly.com/virtualworshipsolutions-info/enterprise-rate"
+       target="_blank" rel="noopener noreferrer">
+      Book a 30-minute call<small>Scope a pilot for your campus</small>
+    </a>
+    <a class="btn btn-secondary" id="mailBtn" href="#">
+      Email us instead<small>We reply within one business day</small>
+    </a>
+  </div>
+  <p class="or">Or write to <a href="mailto:info@virtualworshipsolutions.com">info@virtualworshipsolutions.com</a> directly.</p>
+
+  <footer>
+    Virtual Worship Solutions · <a href="mailto:info@virtualworshipsolutions.com">info@virtualworshipsolutions.com</a><br>
+    This page describes how we structure pilots. Actual scope, fee, and terms are set out in a signed agreement.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var EMAIL = 'info@virtualworshipsolutions.com';
+  var p = new URLSearchParams(location.search);
+  var PROFILE_NAME = { single: 'Single campus', growing: 'Two sites', multisite: 'Multi-site', network: 'Church network' };
+  var size = PROFILE_NAME[p.get('profile')] || '';
+
+  function money(v) {
+    var n = parseFloat(v);
+    return isFinite(n) ? '$' + Math.round(Math.abs(n)).toLocaleString('en-US') : null;
+  }
+
+  var lines = ['Hello,', '', 'We\'d like to talk about running a 90-day pilot on one campus.', ''];
+  if (size) lines.push('Church size: ' + size);
+  if (money(p.get('giving'))) lines.push('Annual giving: ' + money(p.get('giving')));
+  if (size || money(p.get('giving'))) lines.push('');
+  lines.push('A few details about us:');
+  lines.push('  Church name:');
+  lines.push('  Campus we\'d pilot:');
+  lines.push('  Approximate records in our current system:');
+  lines.push('  Current church-management platform:');
+  lines.push('  Who would own this on our side:');
+  lines.push('');
+  lines.push('Best time to reach us:');
+  lines.push('');
+  lines.push('Thank you,');
+
+  var subject = '90-day pilot enquiry' + (size ? ' — ' + size : '');
+  document.getElementById('mailBtn').setAttribute('href',
+    'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(lines.join('\n')));
+
+  var book = document.getElementById('bookBtn');
+  var cal = new URL(book.getAttribute('href'));
+  cal.searchParams.set('a1', '90-day pilot' + (size ? ' — ' + size : ''));
+  if (money(p.get('giving'))) cal.searchParams.set('a2', 'Annual giving ' + money(p.get('giving')));
+  book.setAttribute('href', cal.toString());
+
+  // keep the calculator context alive on the way back
+  var back = document.querySelector('.back');
+  if (location.search) back.setAttribute('href', '/enterprise-pricing' + location.search);
+
+  function track(n) { (window.dataLayer = window.dataLayer || []).push({ event: n }); }
+  book.addEventListener('click', function () { track('pilot_call_booked'); });
+  document.getElementById('mailBtn').addEventListener('click', function () { track('pilot_email_opened'); });
+  track('pilot_page_viewed');
+})();
+</script>
+<!-- ARTIFACT-BODY-END -->
+</body>
+</html>

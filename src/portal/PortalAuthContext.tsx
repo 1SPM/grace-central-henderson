@@ -45,21 +45,35 @@ const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 // Hostname-derived, not a raw env var — see isDemoModeActive in config/tenant.ts.
 const isDemoModeEnabled = isDemoModeActive();
 
-// Anonymous member-portal access for a signed-out visitor on a known host.
-// Deliberately separate from isDemoModeEnabled above — that flag is
-// permanently host-locked with "no env var able to override that in
-// production" (see its own docstring) precisely because it ALSO drives
+// Anonymous member-portal access for a signed-out visitor on a known
+// DEMO host. Deliberately separate from isDemoModeEnabled above — that
+// flag is permanently host-locked with "no env var able to override that
+// in production" (see its own docstring) precisely because it ALSO drives
 // the staff app's auth mode (contexts/authMode.ts resolveAuthMode, checked
-// before Clerk config) — widening it to include
-// gracecrm-centralhenderson.org would silently switch the entire admin
-// CRM to the client-side demo bypass for every visitor on that domain,
-// not just unlock the portal preview link. This list only affects the
-// check below, and only while signed out — a real member or staff Clerk
-// session on this host always resolves to itself, never the demo actor.
-// Mirrors the server-side HOST_CHURCH_IDS allowlist in api/_lib/authz.ts
-// (resolveDemoMemberActor bootstraps the matching demo `people` row) —
-// keep both lists in sync.
-const PORTAL_DEMO_HOSTS = new Set<string>(['gracecrm-centralhenderson.org']);
+// before Clerk config), so widening it would have effects beyond this
+// portal preview link.
+//
+// CORRECTION (members-portal audit, Phase 0): this used to list
+// gracecrm-centralhenderson.org — Central Henderson's own LIVE domain —
+// on the theory that it "mirrors the server-side HOST_CHURCH_IDS
+// allowlist." That premise was wrong even when written: the server's
+// resolveMemberActor gates on DEMO_HOSTS (api/_lib/authz.ts), not
+// HOST_CHURCH_IDS, and DEMO_HOSTS deliberately EXCLUDES that host — it
+// is the fix for the exact TD-043 bypass this list was quietly
+// reopening. The practical symptom: a signed-out visitor who found
+// /portal on the live domain got the full portal shell (isSignedIn:
+// true via treatAsDemo below) while every api/portal/* call 401'd,
+// because the server correctly refused to bootstrap a demo actor for a
+// real tenant.
+//
+// Every host that legitimately needs signed-out demo access already
+// gets routed to PortalAuthProviderDemo by isDemoModeEnabled above,
+// before this component ever mounts — so this set exists only for a
+// demo host NOT already covered by that check. There is no such host
+// today. Keep this empty; if one is ever needed, it must be a host in
+// api/_lib/authz.ts's DEMO_HOSTS, never a real tenant's own domain.
+// Enforced by PortalAuthContext.test.ts.
+export const PORTAL_DEMO_HOSTS = new Set<string>([]);
 const isPortalDemoHost = typeof window !== 'undefined' && PORTAL_DEMO_HOSTS.has(window.location.hostname);
 
 function PortalAuthProviderInner({ children }: { children: ReactNode }) {

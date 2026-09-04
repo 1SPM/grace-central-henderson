@@ -63,6 +63,19 @@ const isRedesignRoute = window.location.pathname === '/redesign';
 // Members Portal — its own auth (PortalAuthContext, not the staff
 // AuthContext) and its own component tree. See src/portal/PortalRoot.tsx.
 const isPortalRoute = window.location.pathname === '/portal' || window.location.pathname.startsWith('/portal/');
+
+// index.html's <link rel="manifest"> points at the staff CRM's
+// manifest.json (start_url "/", name "GRACE Church CRM") — a member who
+// installs the portal to their home screen would get an icon that reopens
+// the staff app, not their own portal. Swap to the portal's own manifest
+// (start_url "/portal", member-facing name/branding) before the browser
+// evaluates installability. Best-effort: a missing element should never
+// block the portal from rendering.
+if (isPortalRoute) {
+  document.querySelector('link[rel="manifest"]')?.setAttribute('href', '/portal-manifest.json');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#e11d48');
+  document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'GRACE Members');
+}
 const ConnectCard = lazy(() => import('./components/ConnectCard').then(m => ({ default: m.ConnectCard })));
 const LeaderApply = lazy(() => import('./components/LeaderApply').then(m => ({ default: m.LeaderApply })));
 const VerifiedLeaders = lazy(() => import('./components/VerifiedLeaders').then(m => ({ default: m.VerifiedLeaders })));

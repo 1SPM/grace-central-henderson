@@ -168,6 +168,8 @@ GRACE today is a staff CRM with AI and WorkOS bolted on. The three interfaces ex
 
 **Missing.** One church context object — structure, people, policies, objectives, institutional knowledge, permissions — shared by every interface. Three assistant stacks means three partial understandings.
 
+**In progress (2026-08-30, ADR-014).** Staff Ask GRACE gained persistent, per-user memory (`grace_conversations`/`grace_messages`/`grace_memories`) — the first milestone of "Grace Remembers Me." This is a per-user slice, not the shared church context object step 3 below still calls for; it proves the pattern (server-side persistence, provenance, DB-facts-win) that a future church-shared memory layer ("Grace Knows the Church") would build on.
+
 ### Acts
 
 **Now.** Ask GRACE can propose CRM writes (task, person, prayer, email/SMS) and wait for Execute. WorkOS agents record findings. Humans decide in the Decision Queue and Approval Centre. Implemented agents do not auto-mutate.

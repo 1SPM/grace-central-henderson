@@ -49,6 +49,36 @@ export type ActionHandler = (ctx: HandlerContext) => Promise<boolean>;
 
 const sevenDaysFromNow = () => new Date(Date.now() + 7 * 86400_000).toISOString().split('T')[0];
 
+/**
+ * ADR-018 action-resolution safety closure: fail closed on ambiguity,
+ * before ANY other check — including approval routing. hydrateAction
+ * (grace-actions.ts) never resolves personId/taskId/prayerId to an
+ * arbitrary first match when personAmbiguous/taskAmbiguous/prayerAmbiguous
+ * is set; this is the explicit, user-visible half of that guarantee. Every
+ * handler that uses a resolved person/task/prayer calls this FIRST, so a
+ * destructive action can never proceed — let alone reach proposeForApproval
+ * — while its target identity is unresolved. Prayer content is
+ * deliberately never echoed back here (item 8: never expose protected
+ * information merely to disambiguate).
+ */
+function blockOnAmbiguity(action: PendingAction, pushAssistantMessage: (content: string) => void): boolean {
+  if (action.personAmbiguous) {
+    const list = action.personCandidates?.length ? ` I found: ${action.personCandidates.join(', ')}.` : '';
+    pushAssistantMessage(`More than one person matches "${action.personName ?? ''}".${list} Which one do you mean?`);
+    return true;
+  }
+  if (action.taskAmbiguous) {
+    const list = action.taskCandidates?.length ? ` I found: ${action.taskCandidates.join(', ')}.` : '';
+    pushAssistantMessage(`More than one open task matches "${action.taskTitle ?? ''}".${list} Which one do you mean?`);
+    return true;
+  }
+  if (action.prayerAmbiguous) {
+    pushAssistantMessage('More than one active prayer request matches that. Can you be more specific about who it\'s for?');
+    return true;
+  }
+  return false;
+}
+
 /** Audit trail — logs an Interaction attributed to Grace on the affected person. No-op without a personId. */
 async function logGraceAction(
   handlers: ChatHandlers,
@@ -179,21 +209,28 @@ const handlers: Record<ActionType, ActionHandler> = {
     return true;
   },
 
-  add_task: async ({ action, handlers }) => {
+  add_task: async ({ action, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
+    if (!action.title?.trim()) {
+      pushAssistantMessage('A task needs a title.');
+      return false;
+    }
     if (!handlers.onAddTask) return false;
+    const title = action.title.trim();
     await handlers.onAddTask({
-      title: action.title || 'Untitled task',
+      title,
       personId: action.personId,
       priority: action.priority || 'medium',
       dueDate: action.dueDate || sevenDaysFromNow(),
       completed: false,
       category: 'follow-up',
     });
-    await logGraceAction(handlers, action.personId, 'note', `Grace added task: ${action.title || 'Untitled task'}`);
+    await logGraceAction(handlers, action.personId, 'note', `Grace added task: ${title}`);
     return true;
   },
 
   add_prayer: async ({ action, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onAddPrayer) return false;
     if (!action.personId) {
       pushAssistantMessage('A prayer request needs a matching person.');
@@ -233,6 +270,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   add_note: async ({ action, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onAddInteraction) return false;
     if (!action.personId) {
       pushAssistantMessage('A note needs a matching person.');
@@ -248,6 +286,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   mark_task_done: async ({ action, tasks, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onToggleTask) return false;
     if (!action.taskId) {
       pushAssistantMessage(`I couldn't find an open task matching "${action.taskTitle ?? ''}". Try the exact title.`);
@@ -260,6 +299,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   update_task: async ({ action, tasks, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onUpdateTask) return false;
     if (!action.taskId) {
       pushAssistantMessage(`I couldn't find an open task matching "${action.taskTitle ?? ''}".`);
@@ -281,6 +321,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   // actually reads on the person, and the audit row answers a different
   // question (who did this, when) for a different reader.
   delete_task: async ({ action, tasks, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!action.taskId) {
       pushAssistantMessage(`I couldn't find a task matching "${action.taskTitle ?? ''}".`);
       return false;
@@ -301,6 +342,12 @@ const handlers: Record<ActionType, ActionHandler> = {
   // Interaction note the other actions write would attach to the very person
   // being removed. It now goes to a human holding approvals.decide.
   delete_person: async ({ action, people, pushAssistantMessage }) => {
+    // Ambiguity is checked BEFORE anything else, including approval
+    // routing below — an ambiguous target must never reach the Decision
+    // Queue at all, let alone be approved on the strength of "approval
+    // will catch it." Approval status is irrelevant until identity is
+    // uniquely resolved.
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!action.personId) {
       pushAssistantMessage('I couldn\'t find a matching person.');
       return false;
@@ -318,6 +365,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   delete_prayer: async ({ action, prayers, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!action.prayerId) {
       pushAssistantMessage('I couldn\'t find an active prayer for that person.');
       return false;
@@ -334,6 +382,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   update_person_status: async ({ action, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onUpdatePersonStatus) return false;
     if (!action.personId || !action.status) {
       pushAssistantMessage('I need a matching person and a status.');
@@ -345,6 +394,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   mark_prayer_answered: async ({ action, handlers, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     if (!handlers.onMarkPrayerAnswered) return false;
     if (!action.prayerId) {
       pushAssistantMessage('I couldn\'t find an active prayer request for that person.');
@@ -361,6 +411,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   send_email: async ({ action, people, handlers, replyContext, setReplyContext, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     const bodyText = action.body?.trim() || '';
     if (!bodyText) {
       pushAssistantMessage('Email body is empty.');
@@ -415,6 +466,7 @@ const handlers: Record<ActionType, ActionHandler> = {
   },
 
   send_sms: async ({ action, people, pushAssistantMessage }) => {
+    if (blockOnAmbiguity(action, pushAssistantMessage)) return false;
     const person = people.find(p => p.id === action.personId);
     if (!person) {
       pushAssistantMessage('I need a matching person to text.');

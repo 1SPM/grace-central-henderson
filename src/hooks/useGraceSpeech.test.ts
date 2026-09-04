@@ -40,6 +40,19 @@ describe('composeSpeechText — the Anti-List Rule', () => {
     expect(out).toContain('Giving is up, a strong month.');
   });
 
+  it('drops ":00" from on-the-hour times before am/pm so TTS never says "oh-oh"', () => {
+    expect(composeSpeechText('Your meeting with Bill is Tuesday at 2:00 p.m.')).toContain('at 2 p.m.');
+    expect(composeSpeechText('Service starts at 10:00 AM sharp.')).toContain('at 10 AM sharp.');
+  });
+
+  it('says o\'clock for on-the-hour times with no meridiem', () => {
+    expect(composeSpeechText('Doors open at 6:00 tonight.')).toContain("at 6 o'clock tonight.");
+  });
+
+  it('leaves non-zero minutes alone — TTS reads "2:45" naturally', () => {
+    expect(composeSpeechText('Rehearsal runs until 2:45 p.m.')).toContain('until 2:45 p.m.');
+  });
+
   it('expands & and w/ into spoken words', () => {
     const out = composeSpeechText('Care & giving are steady w/ no surprises.');
     expect(out).toContain('Care and giving');

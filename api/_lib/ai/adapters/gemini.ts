@@ -85,6 +85,60 @@ export async function callGemini(opts: GeminiCallOptions): Promise<ProviderCallR
 }
 
 // ---------------------------------------------------------------------
+// Streaming variant — additive, does not change callGemini() above.
+// Used by api/grace/_chat.ts (ADR-014) via gateway.generateStreamed() so
+// Ask GRACE keeps its streamed UX while still going through the gateway's
+// budget + moderation + usage pipeline. Uses the @google/genai SDK's
+// streaming call (ported from api/ai/_generate.ts) rather than the raw
+// fetch used by callGemini, since the REST :generateContent endpoint
+// doesn't stream.
+// ---------------------------------------------------------------------
+
+export async function callGeminiStream(
+  opts: GeminiCallOptions,
+  onChunk: (text: string) => void,
+): Promise<ProviderCallResult> {
+  const model = opts.model ?? 'gemini-2.5-flash';
+  try {
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: opts.apiKey });
+    const stream = await ai.models.generateContentStream({
+      model,
+      contents: opts.prompt,
+      config: {
+        maxOutputTokens: opts.maxOutputTokens ?? 1500,
+        temperature: opts.temperature ?? 0.6,
+        thinkingConfig: { thinkingBudget: opts.thinkingBudget ?? 0 },
+      },
+    });
+
+    let text = '';
+    let promptTokens: number | undefined;
+    let completionTokens: number | undefined;
+    for await (const chunk of stream) {
+      const chunkText = chunk.text;
+      if (chunkText) {
+        text += chunkText;
+        onChunk(chunkText);
+      }
+      if (chunk.usageMetadata) {
+        promptTokens = chunk.usageMetadata.promptTokenCount ?? promptTokens;
+        completionTokens = chunk.usageMetadata.candidatesTokenCount ?? completionTokens;
+      }
+    }
+
+    if (!text) return { success: false, error: 'Empty response', errorCode: 'empty_response' };
+    return { success: true, text, promptTokens: promptTokens ?? 0, completionTokens: completionTokens ?? 0 };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'gemini stream failed',
+      errorCode: 'gemini_stream_failed',
+    };
+  }
+}
+
+// ---------------------------------------------------------------------
 // Tool-calling variant — additive, does not change callGemini() above.
 // Used by the member GRACE assistant (api/_lib/ai/assistant-runtime.ts)
 // for its multi-turn tool-execution loop. Takes a full `contents` array

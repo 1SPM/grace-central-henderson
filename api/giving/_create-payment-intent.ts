@@ -34,6 +34,7 @@ import { createClient } from '@supabase/supabase-js';
 import { readBody, str, int_, email_ } from '../_lib/validation.js';
 import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
 import { PLATFORM_FEE_BPS } from '../_lib/billing/givingFee.js';
+import { verifyGivingPersonId } from '../_lib/givingAttribution.js';
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -91,18 +92,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // Attribution guard: only attach person_id if that person actually
-  // belongs to this church (prevents cross-tenant attribution spoofing).
-  let verifiedPersonId: string | null = null;
-  if (person_id) {
-    const { data: person } = await supabase
-      .from('people')
-      .select('id')
-      .eq('id', person_id)
-      .eq('church_id', church.id)
-      .maybeSingle();
-    verifiedPersonId = person?.id ?? null;
-  }
+  // Attribution guard: person_id is only attached once the caller proves,
+  // via their own Clerk session, that they ARE that person — not merely
+  // that the id belongs to someone in this church. See
+  // api/_lib/givingAttribution.ts.
+  const verifiedPersonId = await verifyGivingPersonId(req, supabase, church.id, person_id);
 
   const stripe = new Stripe(STRIPE_SECRET_KEY, {
     apiVersion: '2024-11-20.acacia' as Stripe.LatestApiVersion,

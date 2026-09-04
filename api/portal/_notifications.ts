@@ -10,6 +10,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -35,6 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'PATCH') {
+    if (await enforcePortalWriteLimit(res, 'notifications', member.personId)) return;
     const id = typeof req.query.id === 'string' ? req.query.id : undefined;
     if (!id) return res.status(400).json({ error: 'missing_id' });
 
