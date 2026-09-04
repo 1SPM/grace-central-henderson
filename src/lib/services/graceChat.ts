@@ -149,6 +149,8 @@ export async function importBrainEntries(texts: string[]): Promise<{ imported: n
 
 export interface EntityMemoryResult {
   reply: string | null;
+  /** 'not_found' means fall through to the model — see entityMemory.ts. */
+  status?: 'found' | 'ambiguous' | 'not_found';
   /** Server-resolved thread this turn was written to, so the next turn appends. */
   conversationId?: string;
 }
@@ -171,8 +173,9 @@ export async function retrieveEntityMemory(
         conversationId,
       };
     }
-    const data = await response.json() as { reply?: unknown };
-    return { reply: typeof data.reply === 'string' ? data.reply : null, conversationId };
+    const data = await response.json() as { reply?: unknown; status?: unknown };
+    const status = typeof data.status === 'string' ? data.status as EntityMemoryResult['status'] : undefined;
+    return { reply: typeof data.reply === 'string' ? data.reply : null, status, conversationId };
   } catch (e) {
     log.error('Grace entity memory error', e);
     return { reply: null };

@@ -10,6 +10,8 @@ import { createClient } from '@supabase/supabase-js';
 import { resolveStaffActor } from '../_lib/authz.js';
 import { readBody, str } from '../_lib/validation.js';
 import { getOrCreateConversation, persistTurn } from '../_lib/grace-conversation.js';
+import { enforceRateLimit } from '../_lib/rateLimit/limiter.js';
+import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 // E-3: reuse the SAME matcher the action path uses, so "ambiguous" means one
 // thing in this product. A second implementation here diverged immediately:
 // exact-full-name-only made `matches.length > 1` reachable only for identical
@@ -45,6 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return;
   if (!actor.permissions.has('people.view')) return res.status(403).json({ error: 'permission_required' });
+  // E-6: this route reads person records and was the only Ask GRACE surface
+  // with no limit at all. Same shape as api/grace/_chat.ts's own guard.
+  if (await enforceRateLimit(res, `grace:entity-memory:${actor.userId}`, 20, 60,
+    'You\u2019re looking up records quickly — please wait a moment.')) return;
   const body = readBody(req, res, SCHEMA);
   if (!body) return;
 
@@ -56,6 +62,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Persistence never blocks the answer; the reply is returned either way.
   const asked = body.question?.trim() || `What do you remember about ${body.name}?`;
   async function respond(status: string, reply: string) {
+    // E-7: a miss is not an answer. The client broadened its intent matcher on
+    // the promise that not_found falls through to the model, so persisting it
+    // here would write a dead end into history AND double-write the turn once
+    // the model answers. Only a real result becomes part of the conversation.
+    if (status === 'not_found') return res.status(200).json({ status, reply });
+
     const conversation = await getOrCreateConversation(supabase, actor!.churchId, actor!.userId, body!.conversationId, asked);
     if (conversation) {
       const ok = await persistTurn(supabase, {
@@ -68,8 +80,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ status, reply });
   }
 
+  // E-6: a candidate query, not the whole roster. countPersonMatches still
+  // decides the outcome — this only narrows what it is handed, and is a strict
+  // SUPERSET of all three of its tiers: any name it would match must contain
+  // either the whole query or one of its tokens inside first_name or
+  // last_name, including the cross-field case ("rah Mit" -> Sarah Mitchell),
+  // which is why every token is ORed on BOTH columns.
+  const needle = body.name!.trim();
+  const tokens = [needle, ...needle.split(/\s+/)].filter(t => t.length > 0);
+  const escaped = [...new Set(tokens)].map(t => t.replace(/[,.()*]/g, ' ').trim()).filter(Boolean);
+  const filter = escaped.flatMap(t => [`first_name.ilike.*${t}*`, `last_name.ilike.*${t}*`]).join(',');
   const { data: roster } = await supabase
-    .from('people').select('id, first_name, last_name, status, first_visit, join_date').eq('church_id', actor.churchId);
+    .from('people').select('id, first_name, last_name, status, first_visit, join_date')
+    .eq('church_id', actor.churchId)
+    .or(filter || 'first_name.ilike.*');
   const rows = (roster ?? []) as PersonRow[];
   const byId = new Map(rows.map(r => [r.id, r]));
   const candidates = countPersonMatches(
@@ -144,5 +168,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   //        .eq('household_id', person.household_id) …
   //   }
   lines.push('This summary excludes private pastoral, health, financial, and prayer details.');
+
+  // E-6: "who looked up whom" is a question a church will eventually ask about
+  // its pastoral records, and nothing recorded it. security_events, not
+  // audit_logs: this is an ACCESS event, matching the authz.view_as precedent
+  // — audit_logs is the mutation trail, and filing reads there would dilute
+  // the "who changed what" query it exists to answer. The person's id is
+  // recorded, never the summary that was returned.
+  await logSecurityEvent(supabase, {
+    eventType: 'grace.person_record_viewed',
+    severity: 'info',
+    churchId: actor.churchId,
+    actorClerkId: actor.clerkUserId,
+    ...securityContext(req),
+    detail: { person_id: person.id, via: 'ask_grace_entity_memory' },
+  });
+
   return respond('found', lines.join('\n'));
 }

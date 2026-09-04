@@ -30,6 +30,7 @@ function makeRes() {
 
 async function callRoute(name: string, permissionKeys: string[], tasks: unknown[] = []) {
   const inserted: unknown[] = [];
+  const securityEvents: unknown[] = [];
   vi.resetModules();
   process.env.CLERK_SECRET_KEY = 'test';
   process.env.VITE_SUPABASE_URL = 'https://example.invalid';
@@ -46,6 +47,8 @@ async function callRoute(name: string, permissionKeys: string[], tasks: unknown[
       household_members: () => ({ data: [] }),
       grace_conversations: (op) => op === 'select' ? { data: null } : { data: { id: 'conv-1' } },
       grace_messages: (op, payload) => { if (op === 'insert') inserted.push(payload); return { data: null }; },
+      security_events: (op, payload) => { if (op === 'insert') securityEvents.push(payload); return { data: null }; },
+      rate_limits: () => ({ data: null }),
     },
   });
   vi.doMock('@clerk/backend', () => ({
@@ -56,7 +59,7 @@ async function callRoute(name: string, permissionKeys: string[], tasks: unknown[
   const { res, jsonBodies, statuses } = makeRes();
   const req = { method: 'POST', headers: { authorization: 'Bearer t' }, body: { name }, query: {} } as never;
   await handler(req, res);
-  return { body: jsonBodies.at(-1) as { status?: string; reply?: string }, status: statuses.at(-1), inserted };
+  return { body: jsonBodies.at(-1) as { status?: string; reply?: string }, status: statuses.at(-1), inserted, securityEvents };
 }
 
 beforeEach(() => vi.resetModules());
@@ -140,5 +143,31 @@ describe('entity-memory — E-5: a deterministic answer is still a persisted tur
     expect(body.status).toBe('ambiguous');
     const rows = inserted.flat() as Array<{ role: string }>;
     expect(rows.map(r => r.role)).toEqual(['user', 'assistant']);
+  });
+});
+
+describe('entity-memory — E-6: the read is limited and recorded', () => {
+  it('logs the access to security_events, with the person id and never the summary', async () => {
+    const { securityEvents } = await callRoute('Bill Hoffman', ['people.view']);
+    const rows = securityEvents.flat() as Array<{ event_type: string; severity: string; detail: Record<string, unknown> }>;
+    const viewed = rows.find(r => r.event_type === 'grace.person_record_viewed');
+    expect(viewed, 'no access event recorded').toBeTruthy();
+    expect(viewed!.severity).toBe('info');
+    expect(viewed!.detail.person_id).toBe('p3');
+    // The record's contents must not be duplicated into the security log.
+    expect(JSON.stringify(viewed!.detail)).not.toContain('Status:');
+  });
+});
+
+describe('entity-memory — E-7: a miss is not an answer', () => {
+  it('does NOT persist a not_found turn, so the caller can fall through to the model', async () => {
+    const { body, inserted } = await callRoute('our giving this month', ['people.view']);
+    expect(body.status).toBe('not_found');
+    expect(inserted.flat(), 'a dead end was written into history').toHaveLength(0);
+  });
+
+  it('still persists a found turn', async () => {
+    const { inserted } = await callRoute('Bill Hoffman', ['people.view']);
+    expect(inserted.flat()).toHaveLength(2);
   });
 });

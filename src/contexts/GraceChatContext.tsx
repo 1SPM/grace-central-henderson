@@ -470,14 +470,22 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       // conversation the model turns use — a deterministic answer that never
       // reaches grace_messages leaves the next turn with no referent (E-5).
       const result = await retrieveEntityMemory(entityName, { conversationId, question: query });
-      if (result.conversationId && result.conversationId !== conversationId) {
-        setConversationId(result.conversationId);
+      // E-7: the intent matcher is deliberately generous ("Brief me on…",
+      // "Tell me about…"), which it can only afford to be because a miss is
+      // NOT an answer. "Tell me about our giving this month" looks like a
+      // person request, finds nobody, and continues to the model rather than
+      // replacing a good answer with "I couldn't find a current record for
+      // our giving this month."
+      if (result.status !== 'not_found') {
+        if (result.conversationId && result.conversationId !== conversationId) {
+          setConversationId(result.conversationId);
+        }
+        setMessages(m => m.map(msg => msg.id === assistantMsgId
+          ? { ...msg, content: result.reply ?? "I couldn't retrieve that current record just now. Please try again." }
+          : msg));
+        setLoading(false);
+        return;
       }
-      setMessages(m => m.map(msg => msg.id === assistantMsgId
-        ? { ...msg, content: result.reply ?? "I couldn't retrieve that current record just now. Please try again." }
-        : msg));
-      setLoading(false);
-      return;
     }
 
     // "remember that…" is now handled server-side (api/grace/_chat.ts) so
