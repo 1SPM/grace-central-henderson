@@ -160,6 +160,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (existing.status !== 'pending') {
       return res.status(409).json({ error: 'already_decided', status: existing.status });
     }
+    // C-13: the approval gate is a second pair of eyes, so the person who
+    // asked for the change cannot be the one who approves it. Only favourable
+    // decisions are held back — withdrawing or escalating your own request is
+    // fine — and agent proposals carry no human requester, so are unaffected.
+    if (existing.requested_by_user_id && existing.requested_by_user_id === actor.userId
+        && ['approve', 'approve_with_changes'].includes(body.decision)) {
+      return res.status(403).json({ error: 'self_approval' });
+    }
 
     const decidedAt = new Date().toISOString();
     // Conditional on status='pending', not just id: the check above and

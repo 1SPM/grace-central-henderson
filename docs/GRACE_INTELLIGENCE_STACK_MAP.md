@@ -101,7 +101,7 @@ BROWSER — action resolution (this is where "Act" actually happens)
  │         • delete_person / send_sms
  │             → POST /api/actions/propose → requirePermission → agent_actions + approvals
  │                → decided later in PATCH /api/approvals by an approvals.decide holder
- │                → executeAgentAction + audit (NO self-approval check — see C-13)
+ │                → executeAgentAction + audit (self-approval refused, 403 — C-13 closed)
  │         • send_email
  │             → POST /api/agentmail/send  (or /reply)
  │             → requireClerkAuth({allowedRoles:['admin','pastor','staff']})   ← NOT the catalog

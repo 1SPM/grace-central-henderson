@@ -58,7 +58,7 @@ receives the generic "no qualified evidence yet" block.
 
 ## cap-comms-send-sms — *Prepare a text; approval always required*
 - **Domain / level:** communications / ACT · **Evidence:** `com-act-send-audited-positive`
-- **Runtime path:** `handlers.send_sms` → `POST /api/actions/propose` → `requirePermission('communications.send')` → `agent_actions` + `approvals` → `PATCH /api/approvals` (`approvals.decide` only — NO separation of duty: the proposer may decide their own request) → `executeAgentAction` + audit
+- **Runtime path:** `handlers.send_sms` → `POST /api/actions/propose` → `requirePermission('communications.send')` → `agent_actions` + `approvals` → `PATCH /api/approvals` (`approvals.decide`, and the requester may not approve their own request — C-13 closed 2026-09-04) → `executeAgentAction` + audit
 - **Strongest proof:** **INTEGRATION** — and this is the **best-constructed path in the entire product**: catalog-driven, server-permissioned, approval-gated, audited, with `/execute` explicitly refusing it.
 - **Weakest unproven seam:** it has **never run**. `agent_actions` contains no `send_sms` row; `approvals` holds 4 pending / 2 decided rows, all from the agent door.
 - **Workshop:** **high — this is the right vehicle for demo leg 4.** **Pilot:** high.

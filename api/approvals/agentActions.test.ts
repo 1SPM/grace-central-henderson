@@ -84,6 +84,8 @@ const RPC_EXECUTED = {
 function supabaseFor(opts: {
   approvalStatus?: string;
   actionStatus?: string;
+  /** A human requester on the approval (agent proposals have none). */
+  requestedByUserId?: string;
   /** Stand in for whatever the function decided — refusal or breakage. */
   rpcResult?: { data?: unknown; error?: { message: string; code?: string } };
 } = {}) {
@@ -97,7 +99,7 @@ function supabaseFor(opts: {
       role_permissions: () => ({ data: [{ permissions: { key: 'approvals.decide' } }] }),
       approvals: (op: string) => {
         if (op === 'select') {
-          return { data: { ...PENDING_APPROVAL, status: opts.approvalStatus ?? 'pending' } };
+          return { data: { ...PENDING_APPROVAL, status: opts.approvalStatus ?? 'pending', requested_by_user_id: opts.requestedByUserId ?? null } };
         }
         return { data: { ...PENDING_APPROVAL, status: 'decided', decision: 'approve' } };
       },
@@ -143,6 +145,54 @@ const auditInserts = (supabase: ReturnType<typeof supabaseFor>) =>
   supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
 const actionUpdates = (supabase: ReturnType<typeof supabaseFor>) =>
   supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
+
+describe('PATCH /api/approvals — separation of duty (C-13)', () => {
+  // The gate is a second pair of eyes. requested_by_user_id was recorded by
+  // /api/actions/propose from the start and never read here — so a System
+  // Administrator could propose delete_person in chat and approve it
+  // seconds later. Audited, but not a second person.
+  const approvalUpdates = (supabase: ReturnType<typeof supabaseFor>) =>
+    supabase.__calls.filter(c => c.table === 'approvals' && c.op === 'update');
+
+  it('refuses to let the requester approve their own request, and changes nothing', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'approve');
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ error: 'self_approval' });
+    expect(approvalUpdates(supabase)).toHaveLength(0);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('holds approve_with_changes to the same rule', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'approve_with_changes');
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('lets the requester withdraw their own request (reject is not an approval)', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'reject');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(approvalUpdates(supabase)).toHaveLength(1);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('a different person approving proceeds exactly as before', async () => {
+    const supabase = supabaseFor({ requestedByUserId: '00000000-0000-4000-8000-00000000beef' });
+    const res = await decide(supabase, 'approve');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(1);
+  });
+
+  it('an agent proposal has no human requester and is unaffected', async () => {
+    const supabase = supabaseFor();
+    const res = await decide(supabase, 'approve');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(1);
+  });
+});
 
 describe('PATCH /api/approvals — agent action execution', () => {
   it('a favourable decision executes the action exactly once and reports it executed', async () => {
