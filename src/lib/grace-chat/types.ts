@@ -2,6 +2,7 @@ import type { Person, Task, Giving, CalendarEvent, SmallGroup, PrayerRequest, At
 import type { ChurchProfile } from '../../hooks/useChurchSettings';
 import type { User } from '../services/auth';
 import type { PendingAction } from '../grace-actions';
+import type { View } from '../../types';
 
 export interface ActionInstance {
   id: string;
@@ -38,4 +39,6 @@ export interface GraceData {
   userId?: string;
   /** IANA timezone for salutation clock (e.g. America/Los_Angeles). */
   churchTimezone?: string;
+  /** Same view transition used by the visible staff navigation. */
+  onNavigate?: (view: View) => void;
 }

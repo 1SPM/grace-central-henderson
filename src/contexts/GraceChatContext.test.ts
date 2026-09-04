@@ -93,6 +93,72 @@ describe('buildDataContext — private events never reach the model', () => {
   });
 });
 
+describe('buildDataContext — only real calendar rows reach the model', () => {
+  const ev = (over: Record<string, unknown>) => ({
+    id: 'e1', title: 'X', startDate: new Date().toISOString(),
+    allDay: true, category: 'event' as const, ...over,
+  });
+
+  it('a real upcoming event reaches the prompt (the legitimate half of the parity ask)', () => {
+    const soon = new Date(Date.now() + 2 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [ev({ id: 'real', title: 'Fall Festival', startDate: soon })],
+    }));
+    expect(prompt).toContain('Fall Festival');
+  });
+
+  it('does NOT invent recurring services or holidays the church never entered', () => {
+    // mergeCalendarWithRhythm() generates a "Sunday Service" for every Sunday
+    // of the year plus seasonal holidays. Those are a Dashboard backdrop, not
+    // church records. Measured on the live tenant, feeding them here made
+    // GRACE report Labor Day / Membership Class / Sunday Service as upcoming
+    // when the church had zero real events in the window.
+    const prompt = buildDataContext(minimalData({ events: [] }));
+    expect(prompt).not.toContain('Sunday Service');
+    expect(prompt).not.toContain('Labor Day');
+    expect(prompt).not.toContain('Membership Class');
+    expect(prompt).not.toContain('Christmas');
+    expect(prompt).not.toContain('Easter');
+  });
+
+  it('an event earlier TODAY still counts — day-start boundary, matching the Dashboard', () => {
+    const now = new Date();
+    const earlierToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 1).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [ev({ id: 'today', title: 'Morning Prayer Gathering', startDate: earlierToday })],
+    }));
+    expect(prompt).toContain('Morning Prayer Gathering');
+  });
+
+  it('an empty 7-day window names the next real event instead of saying "none"', () => {
+    const later = new Date(Date.now() + 30 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [ev({ id: 'later', title: 'Fall Retreat', startDate: later })],
+    }));
+    expect(prompt).toContain('none in the next 7 days');
+    expect(prompt).toContain('Fall Retreat');
+  });
+
+  it('no future events at all is stated plainly, and warns against describing patterns as entries', () => {
+    const past = new Date(Date.now() - 30 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [ev({ id: 'past', title: 'Summer Picnic', startDate: past })],
+    }));
+    expect(prompt).toContain('no events are scheduled in this church\'s calendar');
+    expect(prompt).toContain('do not describe recurring services or holidays');
+    expect(prompt).not.toContain('Summer Picnic');
+  });
+
+  it('private events are still excluded from the lookahead, not just the window', () => {
+    const later = new Date(Date.now() + 30 * 86400_000).toISOString();
+    const prompt = buildDataContext(minimalData({
+      events: [ev({ id: 'p', title: 'Confidential board session', startDate: later, isPrivate: true })],
+    }));
+    expect(prompt).not.toContain('Confidential board session');
+    expect(prompt).toContain('no events are scheduled in this church\'s calendar');
+  });
+});
+
 describe('buildDataContext — inactivity claims require real attendance data', () => {
   // Found via the live-judgment tier: with zero attendance rows, every
   // member/regular landed in "Inactive members/regulars" by default (no

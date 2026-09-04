@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person } from '../types';
-import { sendGraceTurn, hydrateGraceConversation, importBrainEntries } from '../lib/services/graceChat';
+import { sendGraceTurn, hydrateGraceConversation, importBrainEntries, retrieveEntityMemory } from '../lib/services/graceChat';
 import { buildChatActionPrompt } from '../lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
@@ -16,6 +16,9 @@ import { TENANT_DEFAULT_SETTINGS, TENANT_TIMEZONE } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
+import { resolveWorkspaceNavigation } from '../lib/grace-chat/navigation';
+import { useRouteGuard } from '../hooks/useRouteGuard';
+import { requestedEntityMemoryName } from '../lib/grace-chat/entityMemory';
 
 /**
  * Map any backend/transport failure to a graceful assistant reply.
@@ -106,10 +109,39 @@ export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
 
   // Private events (weddings/funerals/sensitive planning) never reach the
   // model — same category of gap as the prayer-content fix (TD-066).
-  const upcomingEvents = events
-    .filter(e => !e.isPrivate && new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow)
+  //
+  // ONLY REAL CALENDAR ROWS REACH THE MODEL. The Dashboard and Sunday tools
+  // render mergeCalendarWithRhythm(), which injects generated holidays and a
+  // synthetic "Sunday Service" for every Sunday of the year. That is defensible
+  // as a visual backdrop the user can see is a pattern; it is NOT defensible as
+  // conversational fact. Measured against the live Central Henderson tenant,
+  // feeding the merged array here made GRACE report three "upcoming events"
+  // — Labor Day, Membership Class, Sunday Service — when the church had ZERO
+  // real events in the window. Same failure class as the inactivity
+  // fabrication (77760fb) and the memory-date fabrication (022a9ea): a
+  // confident answer assembled from something the church never entered.
+  //
+  // The real complaint that prompted the merge — "GRACE said the calendar was
+  // clear" — is answered below by widening the horizon truthfully instead:
+  // a day-start boundary so an event earlier TODAY still counts (the Dashboard
+  // uses `day >= todayStart`), and an explicit next-event lookahead when the
+  // 7-day window is empty, so GRACE can say what IS coming rather than "none".
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const futureEvents = events
+    .filter(e => !e.isPrivate && new Date(e.startDate) >= startOfToday)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  const upcomingEvents = futureEvents
+    .filter(e => new Date(e.startDate) <= sevenDaysFromNow)
     .slice(0, 10)
     .map(e => `${e.title} — ${new Date(e.startDate).toLocaleDateString()}`);
+  // Truthful empty state, in the same shape as the attendance line below:
+  // say what the system actually holds, never imply the church has no plans.
+  const nextBeyondWindow = futureEvents.find(e => new Date(e.startDate) > sevenDaysFromNow);
+  const eventsLine = upcomingEvents.length > 0
+    ? upcomingEvents.join(' | ')
+    : nextBeyondWindow
+      ? `none in the next 7 days — the next scheduled event is ${nextBeyondWindow.title} on ${new Date(nextBeyondWindow.startDate).toLocaleDateString()}`
+      : 'no events are scheduled in this church\'s calendar — say that plainly; do not describe recurring services or holidays as if they were scheduled entries';
 
   const upcomingBirthdays = people
     .filter(p => {
@@ -187,7 +219,7 @@ People: ${people.length} total (${people.filter(p => p.status === 'visitor').len
 Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
 Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
 Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${hasAttendanceData ? `${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}` : 'attendance not tracked in this system — do not claim anyone is inactive or has missed check-ins'}
-Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
+Upcoming events (7d): ${eventsLine}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
 Groups: ${groupActivityLines.join(', ') || 'none'}
@@ -251,6 +283,10 @@ function computeSalutation(data: GraceData, hour24: number): string {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+  // The Cmd+K palette filters its own workspace list through this same guard.
+  // Chat navigating where the palette refuses to offer would be the parity
+  // promise running backwards, so the resolver gets the guard too.
+  const { canAccess } = useRouteGuard();
   const tz = data.churchTimezone || TENANT_TIMEZONE;
   const { zoned } = useChurchClock(tz);
   const salutation = useMemo(
@@ -415,6 +451,43 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
+    // Navigation is an immediate, read-only UI transition.  Do it before the
+    // model call so "Open …" changes the route even if the AI service is
+    // unavailable, and so the reply never pretends a summary is navigation.
+    const navigation = resolveWorkspaceNavigation(query, canAccess);
+    if (navigation && data.onNavigate) {
+      data.onNavigate(navigation.view);
+      setMessages(m => m.map(msg =>
+        msg.id === assistantMsgId ? { ...msg, content: `Opened ${navigation.label}.` } : msg
+      ));
+      setLoading(false);
+      return;
+    }
+
+    const entityName = requestedEntityMemoryName(query);
+    if (entityName) {
+      // Pass the thread so the server writes this turn into the SAME
+      // conversation the model turns use — a deterministic answer that never
+      // reaches grace_messages leaves the next turn with no referent (E-5).
+      const result = await retrieveEntityMemory(entityName, { conversationId, question: query });
+      // E-7: the intent matcher is deliberately generous ("Brief me on…",
+      // "Tell me about…"), which it can only afford to be because a miss is
+      // NOT an answer. "Tell me about our giving this month" looks like a
+      // person request, finds nobody, and continues to the model rather than
+      // replacing a good answer with "I couldn't find a current record for
+      // our giving this month."
+      if (result.status !== 'not_found') {
+        if (result.conversationId && result.conversationId !== conversationId) {
+          setConversationId(result.conversationId);
+        }
+        setMessages(m => m.map(msg => msg.id === assistantMsgId
+          ? { ...msg, content: result.reply ?? "I couldn't retrieve that current record just now. Please try again." }
+          : msg));
+        setLoading(false);
+        return;
+      }
+    }
+
     // "remember that…" is now handled server-side (api/grace/_chat.ts) so
     // it's written with provenance to grace_memories instead of
     // localStorage — this client short-circuit list keeps only the
@@ -516,7 +589,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, conversationId, data.people, data.tasks, data.prayers]);
+  }, [dataContext, conversationId, data.people, data.tasks, data.prayers, data.onNavigate, canAccess]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>
