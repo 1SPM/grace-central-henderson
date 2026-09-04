@@ -18,6 +18,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { computeOnboardingSteps, currentOnboardingStep } from '../_lib/portalJourney.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
@@ -98,6 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
+    if (await enforcePortalWriteLimit(res, 'journey', member.personId)) return;
     const body = readBody(req, res, CREATE_SCHEMA);
     if (!body) return;
 
@@ -120,6 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'PATCH') {
+    if (await enforcePortalWriteLimit(res, 'journey', member.personId)) return;
     const id = typeof req.query.id === 'string' ? req.query.id : undefined;
     if (!id) return res.status(400).json({ error: 'missing_id' });
 

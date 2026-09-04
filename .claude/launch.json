@@ -6,6 +6,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "grace-mobile-demo",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["VITE_TENANT=faithful", "VITE_ENABLE_DEMO_MODE=true", "npm", "run", "dev", "--", "--port", "3010", "--strictPort"],
+      "port": 3010
+    },
+    {
+      "name": "grace-crm-vercel-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vercel", "dev", "--listen", "3050", "--yes"],
+      "port": 3050
     }
   ]
 }

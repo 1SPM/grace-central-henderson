@@ -210,6 +210,17 @@ export function parseLocalDate(dateStr: string): Date {
 }
 
 /**
+ * Parse a date value that may be either a bare YYYY-MM-DD (interpreted in
+ * the local timezone, like parseLocalDate) or a full ISO datetime (which
+ * parseLocalDate would mangle). Use for fields whose format varies by
+ * source, e.g. due dates across tasks vs WorkOS rows.
+ */
+export function parseDateFlexible(dateStr: string): Date {
+  if (!dateStr) return new Date(NaN);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? parseLocalDate(dateStr) : new Date(dateStr);
+}
+
+/**
  * Format a YYYY-MM-DD date string for display using the local timezone.
  * Returns the formatted date string, or the fallback if the date is invalid.
  */

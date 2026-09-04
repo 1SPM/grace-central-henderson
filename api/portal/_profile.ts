@@ -16,6 +16,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -55,6 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'PATCH') {
+    if (await enforcePortalWriteLimit(res, 'profile', member.personId)) return;
     const body = readBody(req, res, UPDATE_SCHEMA);
     if (!body) return;
 

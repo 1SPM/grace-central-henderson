@@ -1,6 +1,6 @@
 import { Flag } from 'lucide-react';
 
-type BadgeVariant = 'urgent' | 'normal' | 'low' | 'success' | 'warning' | 'info' | 'default';
+export type BadgeVariant = 'urgent' | 'normal' | 'low' | 'success' | 'warning' | 'info' | 'default';
 
 interface StatusBadgeProps {
   variant?: BadgeVariant;

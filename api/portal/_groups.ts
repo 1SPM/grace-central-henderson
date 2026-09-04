@@ -14,6 +14,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { createPortalRequestTask } from '../_lib/portalRequestTask.js';
 import { readBody, uuid_ } from '../_lib/validation.js';
@@ -47,6 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
+    if (await enforcePortalWriteLimit(res, 'groups', member.personId)) return;
     const body = readBody(req, res, JOIN_SCHEMA);
     if (!body) return;
 

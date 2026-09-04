@@ -14,6 +14,8 @@ import { visiblePaletteActions, PALETTE_ACTION_UI } from '../lib/paletteActions'
 import { useWorkOsPermissions } from '../hooks/useWorkOsPermissions';
 import { useRouteGuard } from '../hooks/useRouteGuard';
 
+import { WORKSPACES } from '../lib/workspaceRegistry';
+
 interface GlobalSearchProps {
   people: Person[];
   tasks: Task[];
@@ -49,31 +51,43 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   add_note: <FileText size={16} />,
 };
 
-// Primary views exposed to the command palette. Lean, not all 52.
-const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode; sundayTab?: SundayTab }[] = [
-  { view: 'dashboard', label: 'Home', subtitle: 'Today, KPIs & next actions', icon: <LayoutDashboard size={16} /> },
-  { view: 'leadership', label: 'Leadership', subtitle: 'Pastors, clergy & AI companions', icon: <Crown size={16} /> },
-  { view: 'feed', label: 'Action Center', subtitle: 'Tasks, follow-ups, mail & birthdays', icon: <ListTodo size={16} /> },
-  { view: 'people', label: 'Congregation', subtitle: 'Directory, groups, skills & families', icon: <Users size={16} /> },
-  { view: 'sunday-prep', label: 'Sunday Service Tools', subtitle: 'Prep, archive, attendance & announcements', icon: <Church size={16} /> },
-  { view: 'sunday-prep', label: 'Sermon Archive', subtitle: 'Sunday Service Tools · Past messages', icon: <BookOpen size={16} />, sundayTab: 'archive' },
-  { view: 'wallets', label: 'Impact Card Accounts', subtitle: 'GRACE Banking card program & member usage', icon: <Wallet size={16} /> },
-  { view: 'workos', label: 'GRACE WorkOS', subtitle: 'Work orders, approvals, agents & audit trail', icon: <Workflow size={16} /> },
-  { view: 'giving', label: 'Impact Campaigns', subtitle: 'Giving, pledges & campaigns', icon: <DollarSign size={16} /> },
-  { view: 'pastoral-care', label: 'Pastoral Care', subtitle: 'Crisis dispatch, weddings, funerals & legacy planning', icon: <Heart size={16} /> },
-  { view: 'discipleship-engagement', label: 'Growth & Engagement', subtitle: 'Pathways, portal signals & spiritual growth', icon: <TrendingUp size={16} /> },
-  { view: 'analytics', label: 'Analytics', subtitle: 'Settings · Trends, health score & growth', icon: <BarChart3 size={16} /> },
-  { view: 'reports', label: 'Reports', subtitle: 'Settings · Printable church reports', icon: <FileText size={16} /> },
-  { view: 'prayer', label: 'Prayer', subtitle: 'Prayer requests & answered prayers', icon: <Heart size={16} /> },
-  { view: 'tasks', label: 'Task List', subtitle: 'Advanced task management', icon: <CheckSquare size={16} /> },
-  { view: 'families', label: 'Families', subtitle: 'Congregation · Households', icon: <Home size={16} /> },
-  { view: 'attendance', label: 'Attendance', subtitle: 'Sunday Service Tools · Check-in & counts', icon: <UserCheck size={16} /> },
-  { view: 'announcements', label: 'Announcements', subtitle: 'Sunday Service Tools · Announcement board', icon: <Megaphone size={16} /> },
-  { view: 'grace-mobile', label: 'GRACE Mobile', subtitle: 'Mobile CRM for staff · Home, Actions, People, Sunday & Giving', icon: <Smartphone size={16} /> },
-  { view: 'email-templates', label: 'Email Templates', subtitle: 'Settings · Reusable outreach messages', icon: <Mail size={16} /> },
-  { view: 'tags', label: 'Tags', subtitle: 'Settings · Segments and member labels', icon: <Tag size={16} /> },
-  { view: 'settings', label: 'Settings', subtitle: 'Church profile, tools, integrations & billing', icon: <Settings size={16} /> },
-];
+// Palette rows come from the shared workspace registry
+// (src/lib/workspaceRegistry.ts), which the chat navigation resolver also
+// reads. Only the icons live here — they are React nodes, and that module is
+// imported by the chat path, which must not pull in React.
+const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
+  'home': <LayoutDashboard size={16} />,
+  'leadership': <Crown size={16} />,
+  'action-center': <ListTodo size={16} />,
+  'congregation': <Users size={16} />,
+  'sunday-tools': <Church size={16} />,
+  'sermon-archive': <BookOpen size={16} />,
+  'impact-card': <Wallet size={16} />,
+  'workos': <Workflow size={16} />,
+  'campaigns': <DollarSign size={16} />,
+  'pastoral-care': <Heart size={16} />,
+  'growth': <TrendingUp size={16} />,
+  'analytics': <BarChart3 size={16} />,
+  'reports': <FileText size={16} />,
+  'prayer': <Heart size={16} />,
+  'tasks': <CheckSquare size={16} />,
+  'families': <Home size={16} />,
+  'attendance': <UserCheck size={16} />,
+  'announcements': <Megaphone size={16} />,
+  'grace-mobile': <Smartphone size={16} />,
+  'email-templates': <Mail size={16} />,
+  'tags': <Tag size={16} />,
+  'settings': <Settings size={16} />,
+};
+
+const NAV_ITEMS: { view: View; label: string; subtitle: string; icon: React.ReactNode; sundayTab?: SundayTab }[] =
+  WORKSPACES.map(w => ({
+    view: w.view,
+    label: w.label,
+    subtitle: w.subtitle,
+    icon: WORKSPACE_ICONS[w.id] ?? <LayoutDashboard size={16} />,
+    ...(w.sundayTab ? { sundayTab: w.sundayTab } : {}),
+  }));
 
 type Mode = 'search' | 'ai';
 

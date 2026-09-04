@@ -32,6 +32,10 @@ export const RATES: Record<string, ModelRate> = {
   'gemini:gemini-1.5-pro':     { promptPerMillionMicroUsd: 1_250_000, completionPerMillionMicroUsd: 5_000_000 },
 
   // Anthropic Claude
+  // claude-haiku-4-5: rate carried over from the claude-3-5-haiku entry
+  // below as a placeholder (same tier) — verify against Anthropic's
+  // current pricing page before this model sees real production volume.
+  'claude:claude-haiku-4-5-20251001': { promptPerMillionMicroUsd: 800_000, completionPerMillionMicroUsd: 4_000_000 },
   'claude:claude-3-5-sonnet':  { promptPerMillionMicroUsd: 3_000_000, completionPerMillionMicroUsd: 15_000_000 },
   'claude:claude-3-5-haiku':   { promptPerMillionMicroUsd:   800_000, completionPerMillionMicroUsd:  4_000_000 },
   'claude:claude-3-haiku':     { promptPerMillionMicroUsd:   250_000, completionPerMillionMicroUsd:  1_250_000 },

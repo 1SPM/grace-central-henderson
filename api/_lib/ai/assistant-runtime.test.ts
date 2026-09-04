@@ -183,3 +183,84 @@ describe('financial safety — AI spend budget', () => {
     if (!result.allowed) expect(result.reason).toBe('hard_cut');
   });
 });
+
+
+describe('member assistant moderation — fails closed (members-portal audit, Phase 1)', () => {
+  const BUDGET_OK = {
+    church_ai_budgets: { data: null, error: null },   // no row yet → default $50/mo cap
+    token_usage: { data: [], error: null },           // zero spend this month
+  };
+
+  function fetchSpyModerationOnly(response: { ok: boolean; status?: number; body?: unknown }) {
+    return vi.fn((url: unknown) => {
+      if (typeof url === 'string' && url.includes('api.openai.com/v1/moderations')) {
+        return Promise.resolve({
+          ok: response.ok,
+          status: response.status ?? 200,
+          json: async () => response.body ?? {},
+        });
+      }
+      throw new Error('fetch must never reach the model once moderation has blocked the turn');
+    });
+  }
+
+  afterEach(() => {
+    delete process.env.OPENAI_API_KEY;
+  });
+
+  it('blocks the turn and logs a security event when there is no OPENAI_API_KEY to moderate with', async () => {
+    delete process.env.OPENAI_API_KEY;
+    const { supabase, writes } = fakeSupabase({
+      ...BUDGET_OK,
+      security_events: { data: { id: 'sec-1' }, error: null },
+    });
+    // moderate() never calls fetch when no key is configured — reaching
+    // fetch at all here would mean the turn was NOT blocked before Gemini.
+    const fetchSpy = vi.fn(() => { throw new Error('fetch must never be called when moderation cannot run at all'); });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const result = await runAssistantTurn({ supabase, member: MEMBER, message: 'what time is the service on Sunday?', apiKey: 'x' });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) expect(result.reason).toBe('moderation_unavailable');
+    const secEvent = writes.find(w => w.table === 'security_events');
+    expect(secEvent).toBeTruthy();
+    expect((secEvent!.row as { event_type: string }).event_type).toBe('ai.member_moderation_skipped');
+  });
+
+  it('blocks the turn when the moderation endpoint itself errors, rather than proceeding to the model', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    const { supabase, writes } = fakeSupabase({
+      ...BUDGET_OK,
+      security_events: { data: { id: 'sec-1' }, error: null },
+    });
+    vi.stubGlobal('fetch', fetchSpyModerationOnly({ ok: false, status: 500 }));
+
+    const result = await runAssistantTurn({ supabase, member: MEMBER, message: 'what time is the service on Sunday?', apiKey: 'x' });
+
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) expect(result.reason).toBe('moderation_unavailable');
+    expect(writes.some(w => w.table === 'security_events')).toBe(true);
+  });
+
+  it('still blocks genuinely flagged input as moderation_input, not as a skip', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    const { supabase, writes } = fakeSupabase({
+      ...BUDGET_OK,
+      security_events: { data: { id: 'sec-1' }, error: null },
+    });
+    vi.stubGlobal('fetch', fetchSpyModerationOnly({
+      ok: true,
+      body: { results: [{ flagged: true, categories: { harassment: true } }] },
+    }));
+
+    const result = await runAssistantTurn({ supabase, member: MEMBER, message: 'something the model should never see', apiKey: 'x' });
+
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) expect(result.reason).toBe('moderation_input');
+    // A genuinely flagged message is a different signal from an unavailable
+    // moderation check — it must not also raise the "skipped" security event.
+    expect(writes.some(w => w.table === 'security_events')).toBe(false);
+  });
+});

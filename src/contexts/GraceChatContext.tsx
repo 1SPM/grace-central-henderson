@@ -1,14 +1,14 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import type { Person } from '../types';
-import { generateAIText, generateAIStreamed } from '../lib/services/ai';
-import { buildChatActionPrompt } from '../../api/_lib/actionCatalog';
+import { sendGraceTurn, hydrateGraceConversation, importBrainEntries, retrieveEntityMemory } from '../lib/services/graceChat';
+import { buildChatActionPrompt } from '../lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
 import { buildGreeting, loadStoredMessages, persistMessages, pickReturnGreeting, GRACE_PANEL_SESSION_KEY } from '../lib/grace-chat/persistence';
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
-import { addBrainEntry, buildBrainContext, deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY, parseBrainDirective, serializeBrainEntries, type GraceBrainEntry } from '../lib/grace-brain';
+import { deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY } from '../lib/grace-brain';
 import { getChurchHour, resolveGraceSalutation } from '../lib/greeting';
 import { useChurchClock } from '../hooks/useChurchClock';
 import { useAISettings } from '../hooks/useAISettings';
@@ -16,6 +16,9 @@ import { TENANT_DEFAULT_SETTINGS, TENANT_TIMEZONE } from '../config/tenant';
 import { buildAdminPersonaHeader } from '../lib/grace-chat/adminPersona';
 import { GRACE_ADMIN_QUICK_TAGS, mergeQuickTags, MONDAY_BRIEF_PROMPT, type GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { computeGroupCommunityStats, getDemoCommunityDataForCRM } from '../lib/services/community';
+import { resolveWorkspaceNavigation } from '../lib/grace-chat/navigation';
+import { useRouteGuard } from '../hooks/useRouteGuard';
+import { requestedEntityMemoryName } from '../lib/grace-chat/entityMemory';
 
 /**
  * Map any backend/transport failure to a graceful assistant reply.
@@ -60,7 +63,7 @@ interface GraceChatContextValue {
 
 const GraceChatContext = createContext<GraceChatContextValue | null>(null);
 
-function buildDataContext(data: GraceData, voiceMode?: boolean): string {
+export function buildDataContext(data: GraceData, voiceMode?: boolean): string {
   const { people, tasks, giving, events, groups, prayers, attendance, churchName, churchProfile, graceFacts, userFirstName, userRole } = data;
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -87,19 +90,58 @@ function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     })
     .filter(Boolean);
 
+  // With zero attendance rows at all, "not in attendedRecently" is true for
+  // every member/regular — that's an absence of data, not evidence of
+  // inactivity, and must not be presented to the model as if it were (found
+  // via the live-judgment tier: GRACE confidently narrated "gone quiet on
+  // check-ins" for people with no attendance tracking whatsoever).
+  const hasAttendanceData = attendance.length > 0;
   const attendedRecently = new Set(
     attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId)
   );
-  const inactivePeople = people
-    .filter(p => p.status === 'member' || p.status === 'regular')
-    .filter(p => !attendedRecently.has(p.id))
-    .slice(0, 15)
-    .map(p => `${p.firstName} ${p.lastName}`);
+  const inactivePeople = hasAttendanceData
+    ? people
+        .filter(p => p.status === 'member' || p.status === 'regular')
+        .filter(p => !attendedRecently.has(p.id))
+        .slice(0, 15)
+        .map(p => `${p.firstName} ${p.lastName}`)
+    : [];
 
-  const upcomingEvents = events
-    .filter(e => new Date(e.startDate) >= now && new Date(e.startDate) <= sevenDaysFromNow)
+  // Private events (weddings/funerals/sensitive planning) never reach the
+  // model — same category of gap as the prayer-content fix (TD-066).
+  //
+  // ONLY REAL CALENDAR ROWS REACH THE MODEL. The Dashboard and Sunday tools
+  // render mergeCalendarWithRhythm(), which injects generated holidays and a
+  // synthetic "Sunday Service" for every Sunday of the year. That is defensible
+  // as a visual backdrop the user can see is a pattern; it is NOT defensible as
+  // conversational fact. Measured against the live Central Henderson tenant,
+  // feeding the merged array here made GRACE report three "upcoming events"
+  // — Labor Day, Membership Class, Sunday Service — when the church had ZERO
+  // real events in the window. Same failure class as the inactivity
+  // fabrication (77760fb) and the memory-date fabrication (022a9ea): a
+  // confident answer assembled from something the church never entered.
+  //
+  // The real complaint that prompted the merge — "GRACE said the calendar was
+  // clear" — is answered below by widening the horizon truthfully instead:
+  // a day-start boundary so an event earlier TODAY still counts (the Dashboard
+  // uses `day >= todayStart`), and an explicit next-event lookahead when the
+  // 7-day window is empty, so GRACE can say what IS coming rather than "none".
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const futureEvents = events
+    .filter(e => !e.isPrivate && new Date(e.startDate) >= startOfToday)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  const upcomingEvents = futureEvents
+    .filter(e => new Date(e.startDate) <= sevenDaysFromNow)
     .slice(0, 10)
     .map(e => `${e.title} — ${new Date(e.startDate).toLocaleDateString()}`);
+  // Truthful empty state, in the same shape as the attendance line below:
+  // say what the system actually holds, never imply the church has no plans.
+  const nextBeyondWindow = futureEvents.find(e => new Date(e.startDate) > sevenDaysFromNow);
+  const eventsLine = upcomingEvents.length > 0
+    ? upcomingEvents.join(' | ')
+    : nextBeyondWindow
+      ? `none in the next 7 days — the next scheduled event is ${nextBeyondWindow.title} on ${new Date(nextBeyondWindow.startDate).toLocaleDateString()}`
+      : 'no events are scheduled in this church\'s calendar — say that plainly; do not describe recurring services or holidays as if they were scheduled entries';
 
   const upcomingBirthdays = people
     .filter(p => {
@@ -111,7 +153,9 @@ function buildDataContext(data: GraceData, voiceMode?: boolean): string {
     .map(p => `${p.firstName} ${p.lastName} (${new Date(p.birthDate!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
 
   const openTasks = tasks.filter(t => !t.completed).slice(0, 15);
-  const activePrayers = prayers.filter(p => !p.isAnswered).slice(0, 10);
+  // Private prayer requests never reach the model — same category of data
+  // as giving/care/spiritual-conversation content elsewhere in this app.
+  const activePrayers = prayers.filter(p => !p.isAnswered && !p.isPrivate).slice(0, 10);
 
   const { posts: communityPosts, connections: communityConnections } = getDemoCommunityDataForCRM();
   const groupActivityLines = groups.slice(0, 8).map(g => {
@@ -170,16 +214,16 @@ ${buildChatActionPrompt()}
 
 If user says "do tasks" / "do them" / "handle these" after seeing a task list, emit mark_task_done blocks for the listed tasks (cap at 10). Don't claim done until they Execute. Never invent names — for prayer/note/update actions, personName must match the People list below.
 
-Church: ${resolvedChurch} · Today: ${now.toLocaleDateString()}
+Church: ${resolvedChurch} · Today: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 People: ${people.length} total (${people.filter(p => p.status === 'visitor').length} visitor, ${people.filter(p => p.status === 'regular').length} regular, ${people.filter(p => p.status === 'member').length} member)
 Giving this month (MTD, matches the Dashboard Impact MTD tile): $${mtdTotal.toLocaleString()} from ${mtdGiving.length} gifts
 Giving last 30d (rolling window, NOT the same as "this month" — use MTD above for month-scoped questions): $${totalGiving.toLocaleString()} from ${recentGiving.length} gifts. Top: ${topDonors.length ? topDonors.slice(0, 5).join('; ') : 'none'}
-Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}
-Upcoming events (7d): ${upcomingEvents.join(' | ') || 'none'}
+Check-ins last 30d: ${recentCheckIns}. Inactive members/regulars: ${hasAttendanceData ? `${inactivePeople.slice(0, 8).join(', ') || 'none'}${inactivePeople.length > 8 ? ` +${inactivePeople.length - 8}` : ''}` : 'attendance not tracked in this system — do not claim anyone is inactive or has missed check-ins'}
+Upcoming events (7d): ${eventsLine}
 Upcoming birthdays (7d): ${upcomingBirthdays.join(', ') || 'none'}
 Open tasks (${tasks.filter(t => !t.completed).length}): ${openTasks.map(t => t.title).join('; ') || 'none'}
 Groups: ${groupActivityLines.join(', ') || 'none'}
-Active prayers (${prayers.filter(p => !p.isAnswered).length}): ${activePrayers.slice(0, 6).map(p => p.content.slice(0, 50)).join(' | ') || 'none'}`;
+Active prayers (${prayers.filter(p => !p.isAnswered && !p.isPrivate).length}): ${activePrayers.slice(0, 6).map(p => p.content).join(' | ') || 'none'}`;
 }
 
 function buildSuggestions(data: GraceData): string[] {
@@ -204,7 +248,12 @@ function buildSuggestions(data: GraceData): string[] {
   const attendedRecently = new Set(
     attendance.filter(a => new Date(a.date) >= thirtyDaysAgo).map(a => a.personId),
   );
-  const inactive = people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length;
+  // Same fix as buildDataContext: no attendance rows means no evidence of
+  // inactivity, not zero inactive people — don't surface the "who hasn't
+  // attended" suggestion when we have no attendance data to answer it from.
+  const inactive = attendance.length > 0
+    ? people.filter(p => (p.status === 'member' || p.status === 'regular') && !attendedRecently.has(p.id)).length
+    : 0;
 
   const candidates: Array<{ score: number; text: string }> = [];
   if (overdue > 0) candidates.push({ score: 100, text: `What tasks are overdue?` });
@@ -234,6 +283,10 @@ function computeSalutation(data: GraceData, hour24: number): string {
 }
 
 export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInteraction, onAddPerson, onAddEvent, onToggleTask, onUpdateTask, onDeleteTask, onDeletePerson, onDeletePrayer, onUpdatePersonStatus, onMarkPrayerAnswered, ...data }: GraceChatProviderProps) {
+  // The Cmd+K palette filters its own workspace list through this same guard.
+  // Chat navigating where the palette refuses to offer would be the parity
+  // promise running backwards, so the resolver gets the guard too.
+  const { canAccess } = useRouteGuard();
   const tz = data.churchTimezone || TENANT_TIMEZONE;
   const { zoned } = useChurchClock(tz);
   const salutation = useMemo(
@@ -242,26 +295,75 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   );
 
   const [messages, setMessages] = useState<GraceMessage[]>(() => {
-    const stored = loadStoredMessages();
+    const stored = loadStoredMessages(data.userId);
     if (stored) return stored;
     return [buildGreeting(data, computeSalutation(data, getChurchHour(data.churchTimezone || TENANT_TIMEZONE)))];
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
-  const [brainEntries, setBrainEntries] = useState<GraceBrainEntry[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
-  });
+  // Server conversation id (ADR-014) — undefined until the first turn or
+  // the hydration effect below resolves; cleared by clearMessages to
+  // start a fresh server conversation.
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  // Keyed by the userId it hydrated/imported for (not a bare boolean) so a
+  // genuine identity change without a full remount — e.g. sign-out then
+  // sign-in as a different staff member in the same tab — re-runs both
+  // effects instead of silently skipping them for the new user.
+  const hydratedForUserRef = useRef<string | null>(null);
+  const importedBrainForUserRef = useRef<string | null>(null);
+  // Set the instant a real send starts. Guards the hydration effect below:
+  // hydration is an async GET fired on mount, and if the user sends a
+  // message (e.g. clicking a starter chip, which auto-sends) before that
+  // GET resolves, applying the hydrated snapshot afterward would silently
+  // wipe the message they just sent back out of view.
+  const hasSentRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, serializeBrainEntries(brainEntries));
-  }, [brainEntries]);
+    persistMessages(messages, data.userId);
+  }, [messages, data.userId]);
 
+  // Cross-session recall (ADR-014): on mount, load the caller's most
+  // recent server conversation and use it as the transcript instead of
+  // the localStorage fallback — this is the actual "close the browser,
+  // come back tomorrow" proof. Runs once per userId.
   useEffect(() => {
-    persistMessages(messages);
-  }, [messages]);
+    if (!data.userId || hydratedForUserRef.current === data.userId) return;
+    hydratedForUserRef.current = data.userId;
+    let cancelled = false;
+    void hydrateGraceConversation().then(result => {
+      if (cancelled || result.messages.length === 0 || hasSentRef.current) return;
+      setConversationId(result.conversationId ?? undefined);
+      setMessages(result.messages.map(m => {
+        // Historical assistant replies may contain raw <action> blocks —
+        // parseActions strips them to plain text. Deliberately NOT
+        // re-attaching the parsed action cards: whether the user already
+        // executed them before closing the browser isn't persisted, and
+        // offering a stale, possibly-already-run action back up would risk
+        // a duplicate CRM write, not just a display glitch.
+        const { cleanText } = parseActions(m.content);
+        return { id: m.id, role: m.role, content: cleanText };
+      }));
+    });
+    return () => { cancelled = true; };
+  }, [data.userId]);
+
+  // One-time migration: the pre-server-memory "remember that…" entries
+  // lived only in localStorage (src/lib/grace-brain.ts). Carry them into
+  // server memory once so demo continuity isn't lost — the API only
+  // accepts this when the user has zero server memories, so it's safe to
+  // call unconditionally here.
+  useEffect(() => {
+    if (!data.userId || importedBrainForUserRef.current === data.userId || typeof window === 'undefined') return;
+    const stored = deserializeBrainEntries(window.localStorage.getItem(GRACE_BRAIN_STORAGE_KEY));
+    if (stored.length === 0) return;
+    importedBrainForUserRef.current = data.userId;
+    void importBrainEntries(stored.map(e => e.text)).then(result => {
+      if (result && result.imported > 0) {
+        window.localStorage.setItem(GRACE_BRAIN_STORAGE_KEY, '[]');
+      }
+    });
+  }, [data.userId]);
 
   // If the only message is the auto-greeting and live data shifts (e.g., a task is added),
   // refresh it so opening the panel still feels current.
@@ -305,8 +407,6 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     [suggestions],
   );
 
-  const brainContext = useMemo(() => buildBrainContext(brainEntries), [brainEntries]);
-
   const openPanel = useCallback((seed?: string) => {
     setPanelOpen(true);
     if (seed && seed.trim()) {
@@ -333,10 +433,14 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const clearMessages = useCallback(() => {
     setMessages([buildGreeting(data, salutation)]);
     setReplyContext(null);
+    // Starting a fresh transcript starts a fresh server conversation too —
+    // otherwise the next turn would silently append to the old thread.
+    setConversationId(undefined);
   }, [data, salutation]);
 
   const sendMessage = useCallback(async (query: string) => {
     if (!query.trim()) return;
+    hasSentRef.current = true;
     const userMsgId = `u-${Date.now()}`;
     const assistantMsgId = `a-${Date.now() + 1}`;
     const isBrief = query.trim() === MONDAY_BRIEF_PROMPT.trim();
@@ -347,18 +451,47 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     ]);
     setLoading(true);
 
-    const memoryToSave = parseBrainDirective(query);
-    if (memoryToSave) {
-      setBrainEntries(entries => addBrainEntry(entries, memoryToSave));
+    // Navigation is an immediate, read-only UI transition.  Do it before the
+    // model call so "Open …" changes the route even if the AI service is
+    // unavailable, and so the reply never pretends a summary is navigation.
+    const navigation = resolveWorkspaceNavigation(query, canAccess);
+    if (navigation && data.onNavigate) {
+      data.onNavigate(navigation.view);
       setMessages(m => m.map(msg =>
-        msg.id === assistantMsgId
-          ? { ...msg, content: `Remembered: ${memoryToSave}` }
-          : msg
+        msg.id === assistantMsgId ? { ...msg, content: `Opened ${navigation.label}.` } : msg
       ));
       setLoading(false);
       return;
     }
 
+    const entityName = requestedEntityMemoryName(query);
+    if (entityName) {
+      // Pass the thread so the server writes this turn into the SAME
+      // conversation the model turns use — a deterministic answer that never
+      // reaches grace_messages leaves the next turn with no referent (E-5).
+      const result = await retrieveEntityMemory(entityName, { conversationId, question: query });
+      // E-7: the intent matcher is deliberately generous ("Brief me on…",
+      // "Tell me about…"), which it can only afford to be because a miss is
+      // NOT an answer. "Tell me about our giving this month" looks like a
+      // person request, finds nobody, and continues to the model rather than
+      // replacing a good answer with "I couldn't find a current record for
+      // our giving this month."
+      if (result.status !== 'not_found') {
+        if (result.conversationId && result.conversationId !== conversationId) {
+          setConversationId(result.conversationId);
+        }
+        setMessages(m => m.map(msg => msg.id === assistantMsgId
+          ? { ...msg, content: result.reply ?? "I couldn't retrieve that current record just now. Please try again." }
+          : msg));
+        setLoading(false);
+        return;
+      }
+    }
+
+    // "remember that…" is now handled server-side (api/grace/_chat.ts) so
+    // it's written with provenance to grace_memories instead of
+    // localStorage — this client short-circuit list keeps only the
+    // detections that stay purely local (no persistence involved).
     if (isOverdueTasksQuery(query)) {
       setMessages(m => m.map(msg =>
         msg.id === assistantMsgId
@@ -405,47 +538,34 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
       return;
     }
 
-    const recentHistory = messages
-      .filter(m => m.id !== 'greet' && m.content.trim())
-      .slice(-6)
-      .map(m => `${m.role === 'user' ? 'User' : 'Grace'}: ${m.content}`)
-      .join('\n');
-
-    const basePrompt = brainContext
-      ? `${dataContext}\n\n${brainContext}`
-      : dataContext;
-
-    const prompt = recentHistory
-      ? `${basePrompt}\n\nRecent conversation (use to resolve pronouns like "him" / "her" / "that task"):\n${recentHistory}\n\nUser question: ${query}`
-      : `${basePrompt}\n\nUser question: ${query}`;
-
     try {
-      let streamed = false;
-      const streamResult = await generateAIStreamed({
-        prompt,
-        maxTokens: 1200,
+      // Server composes memory + conversation history and persists both
+      // sides of the turn (ADR-014) — the client sends only the church-data
+      // context it already had assembled plus the current conversation id.
+      const turnResult = await sendGraceTurn({
+        message: query,
+        conversationId,
+        dataContext,
         onChunk: (chunk) => {
-          streamed = true;
           setMessages(m => m.map(msg =>
             msg.id === assistantMsgId ? { ...msg, content: msg.content + chunk } : msg
           ));
         },
       });
 
-      if (streamResult.error) {
+      if (turnResult.conversationId && turnResult.conversationId !== conversationId) {
+        setConversationId(turnResult.conversationId);
+      }
+
+      if (turnResult.error) {
         // Never surface raw API/transport errors (e.g. "Not found", "401") as
         // if Grace said them — always reply with a graceful, actionable line.
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(streamResult.error) } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure(turnResult.error) } : msg
         ));
-      } else if (!streamed) {
-        // Fallback to non-streaming when the server didn't honor stream mode
-        const result = await generateAIText({ prompt, maxTokens: 1200 });
-        const text = result.success && result.text
-          ? result.text
-          : friendlyAIFailure(result.error);
+      } else if (!turnResult.streamed) {
         setMessages(m => m.map(msg =>
-          msg.id === assistantMsgId ? { ...msg, content: text } : msg
+          msg.id === assistantMsgId ? { ...msg, content: friendlyAIFailure() } : msg
         ));
       }
 
@@ -469,7 +589,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     } finally {
       setLoading(false);
     }
-  }, [dataContext, brainContext, data.people, data.tasks, data.prayers, messages]);
+  }, [dataContext, conversationId, data.people, data.tasks, data.prayers, data.onNavigate, canAccess]);
 
   const updateAction = useCallback((messageId: string, actionId: string, patch: Partial<PendingAction>) => {
     setMessages(m => m.map(msg =>
@@ -577,4 +697,13 @@ export function useGraceChat() {
   const ctx = useContext(GraceChatContext);
   if (!ctx) throw new Error('useGraceChat must be used inside GraceChatProvider');
   return ctx;
+}
+
+/**
+ * Null when no GraceChatProvider is mounted — lets surfaces that may render
+ * outside the provider (GRACE Mobile's Ask screen in previews/tests)
+ * degrade to a static fallback instead of crashing.
+ */
+export function useGraceChatOptional() {
+  return useContext(GraceChatContext);
 }

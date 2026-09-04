@@ -88,6 +88,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (result.reason === 'moderation_output') {
       return res.status(422).json({ error: 'output_moderation_block' });
     }
+    if (result.reason === 'moderation_unavailable') {
+      return res.status(503).json({
+        error: 'assistant_temporarily_unavailable',
+        detail: 'The safety check for this conversation is temporarily unavailable. Please try again shortly, or contact the church office directly.',
+      });
+    }
     if (result.reason === 'over_cap' || result.reason === 'hard_cut') {
       return res.status(402).json({
         error: 'ai_budget_exceeded',

@@ -22,9 +22,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { requireClerkAuth, type AuthOk } from '../_lib/auth-helper.js';
+import { resolveMemberActor } from '../_lib/authz.js';
 import { requirePlanGate } from '../_lib/billing/gates.js';
 import { readBody, str, int_ } from '../_lib/validation.js';
-import { getI2cAdapter } from '../_lib/i2c/index.js';
+import { getI2cAdapter, type I2cAdapter } from '../_lib/i2c/index.js';
 import {
   resolveDemoChurchId,
   isDemoModeActive,
@@ -116,6 +117,91 @@ async function resolvePerson(supabase: Db, auth: AuthOk) {
     .eq('church_id', auth.churchId)
     .maybeSingle();
   return data as { id: string; first_name: string; last_name: string; email: string | null } | null;
+}
+
+/**
+ * The full member-self payload for GET ?resource=me. Pulled out of the
+ * main handler so it has exactly one implementation for exactly one
+ * meaning of "me" — reused by both a real Clerk session and the
+ * demo/preview fallback below it (TD-053: this route used to be the
+ * only api/portal/* -adjacent surface not going through the portal's
+ * demo-bootstrap actor resolution, so a preview or demo member session
+ * got a dead wallet while every other tab worked).
+ */
+async function buildMePayload(
+  supabase: Db,
+  adapter: I2cAdapter,
+  identity: { clerkUserId: string; churchId: string },
+) {
+  const person = await resolvePerson(supabase, identity as AuthOk);
+  if (!person) return { person_id: null, kyc: null, cards: [], transactions: [] };
+
+  const [{ data: kyc }, { data: cards }] = await Promise.all([
+    supabase
+      .from('kyc_verifications')
+      .select('*')
+      .eq('church_id', identity.churchId)
+      .eq('person_id', person.id)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('cards')
+      .select('*')
+      .eq('church_id', identity.churchId)
+      .eq('cardholder_person_id', person.id)
+      .order('issued_at', { ascending: false }),
+  ]);
+
+  const cardIds = (cards ?? []).map(c => c.id);
+  let transactions: unknown[] = [];
+  if (cardIds.length > 0) {
+    const { data: txns } = await supabase
+      .from('interchange_events')
+      .select('*')
+      .in('card_id', cardIds)
+      .order('occurred_at', { ascending: false })
+      .limit(50);
+    transactions = txns ?? [];
+  }
+
+  // Member-facing 'me' resource: never return account_number_last4 or
+  // routing_number to the cardholder themselves (financial-safety brief
+  // explicitly prohibits exposing account numbers / routing details to
+  // members). Staff-facing resources ('account', 'admin' below) select
+  // the full row since staff legitimately need it for support.
+  const { data: account } = await supabase
+    .from('card_accounts')
+    .select('id, church_id, person_id, i2c_account_id, account_name, available_balance_micro_usd, status, last_synced_at, created_at')
+    .eq('church_id', identity.churchId)
+    .eq('person_id', person.id)
+    .maybeSingle();
+
+  const { data: route } = await supabase
+    .from('impact_routes')
+    .select('*')
+    .eq('church_id', identity.churchId)
+    .eq('person_id', person.id)
+    .maybeSingle();
+
+  const { data: transfers } = await supabase
+    .from('card_transfers')
+    .select('*')
+    .eq('church_id', identity.churchId)
+    .eq('person_id', person.id)
+    .order('initiated_at', { ascending: false })
+    .limit(25);
+
+  return {
+    person_id: person.id,
+    kyc: kyc ?? null,
+    cards: cards ?? [],
+    transactions,
+    account: account ?? null,
+    impact_route: route ?? null,
+    transfers: transfers ?? [],
+    adapter_mode: adapter.mode,
+  };
 }
 
 function logActivity(supabase: Db, churchId: string, personId: string | null, eventType: string, entityId: string, metadata: Record<string, unknown>) {
@@ -250,6 +336,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const payload = await buildAdminCardProgramPayload(supabase, demoChurchId, adapter);
       return res.status(200).json(payload);
     }
+
+    // Member self-service (?resource=me) on a demo/preview session — the
+    // one gap TD-053 flags. Every other api/portal/* route resolves a
+    // demo/preview actor via resolveMemberActor; this route only had the
+    // admin fallback above, so a demo member or a staff "preview as
+    // member" session saw a dead wallet even though the rest of the
+    // portal worked normally for them.
+    if (req.method === 'GET' && resource === 'me') {
+      const member = await resolveMemberActor(req, res, supabase);
+      if (!member) return; // resolveMemberActor already wrote the error response
+      const memberGate = await requirePlanGate(member.churchId, 'cardProgram', supabase);
+      if (!memberGate.ok) {
+        return res.status(memberGate.status).json({
+          error: memberGate.error,
+          detail: memberGate.detail,
+          required_plan: memberGate.required_plan,
+        });
+      }
+      return res.status(200).json(await buildMePayload(supabase, adapter, member));
+    }
+
     return res.status(auth.status).json({
       error: auth.error,
       detail: auth.error === 'jwt missing church_id claim'
@@ -274,75 +381,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const resource = String(req.query.resource ?? 'me');
 
     if (resource === 'me') {
-      const person = await resolvePerson(supabase, auth);
-      if (!person) return res.status(200).json({ person_id: null, kyc: null, cards: [], transactions: [] });
-
-      const [{ data: kyc }, { data: cards }] = await Promise.all([
-        supabase
-          .from('kyc_verifications')
-          .select('*')
-          .eq('church_id', auth.churchId)
-          .eq('person_id', person.id)
-          .order('submitted_at', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from('cards')
-          .select('*')
-          .eq('church_id', auth.churchId)
-          .eq('cardholder_person_id', person.id)
-          .order('issued_at', { ascending: false }),
-      ]);
-
-      const cardIds = (cards ?? []).map(c => c.id);
-      let transactions: unknown[] = [];
-      if (cardIds.length > 0) {
-        const { data: txns } = await supabase
-          .from('interchange_events')
-          .select('*')
-          .in('card_id', cardIds)
-          .order('occurred_at', { ascending: false })
-          .limit(50);
-        transactions = txns ?? [];
-      }
-
-      // Member-facing 'me' resource: never return account_number_last4 or
-      // routing_number to the cardholder themselves (financial-safety brief
-      // explicitly prohibits exposing account numbers / routing details to
-      // members). Staff-facing resources ('account', 'admin' below) select
-      // the full row since staff legitimately need it for support.
-      const { data: account } = await supabase
-        .from('card_accounts')
-        .select('id, church_id, person_id, i2c_account_id, account_name, available_balance_micro_usd, status, last_synced_at, created_at')
-        .eq('church_id', auth.churchId)
-        .eq('person_id', person.id)
-        .maybeSingle();
-
-      const { data: route } = await supabase
-        .from('impact_routes')
-        .select('*')
-        .eq('church_id', auth.churchId)
-        .eq('person_id', person.id)
-        .maybeSingle();
-
-      const { data: transfers } = await supabase
-        .from('card_transfers')
-        .select('*')
-        .eq('church_id', auth.churchId)
-        .eq('person_id', person.id)
-        .order('initiated_at', { ascending: false })
-        .limit(25);
-
-      return res.status(200).json({
-        person_id: person.id,
-        kyc: kyc ?? null,
-        cards: cards ?? [],
-        transactions,
-        account: account ?? null,
-        impact_route: route ?? null,
-        transfers: transfers ?? [],
-        adapter_mode: adapter.mode,
-      });
+      return res.status(200).json(await buildMePayload(supabase, adapter, auth));
     }
 
     if (resource === 'account') {

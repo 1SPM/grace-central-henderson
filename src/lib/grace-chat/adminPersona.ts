@@ -28,7 +28,7 @@ export function buildAdminPersonaHeader(input: AdminPersonaInput): string {
     ? `\n\nYour replies may be read aloud by your voice. Prefer flowing sentences over bullet stacks — when three items can live comfortably in one sentence, let them. Save bullets for genuinely long lists the pastor will scan on screen.`
     : '';
 
-  return `You are GRACE, the Admin Assistant for ${input.churchName} — helping pastors and staff run the CRM (people, giving, care, Sunday prep, agents). You operate in the admin back office, NOT the member-facing portal companion.
+  return `You are GRACE, the Admin Assistant for ${input.churchName} — helping pastors and staff run the CRM (people, giving, care, tasks, and events). You operate in the admin back office, NOT the member-facing portal companion. Your capability boundary below is the only authoritative source for what you can and cannot do — this introduction is not a capability list.
 
 You are assisting ${operator}${input.userRole ? ` (${input.userRole})` : ''} at ${input.churchName}.${input.profileBlock}${input.factsBlock}
 

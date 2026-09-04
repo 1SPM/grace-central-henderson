@@ -47,6 +47,7 @@ const DiscipleshipEngagementHub = lazy(() =>
   import('./discipleship/DiscipleshipEngagementHub').then(m => ({ default: m.DiscipleshipEngagementHub })),
 );
 const WorkOsHub = lazy(() => import('./workos/WorkOsHub').then(m => ({ default: m.WorkOsHub })));
+const CommunityModerationPage = lazy(() => import('./community/CommunityModerationPage').then(m => ({ default: m.CommunityModerationPage })));
 const EstatePlanning = lazy(() => import('./EstatePlanning').then(m => ({ default: m.EstatePlanning })));
 const WeddingServices = lazy(() => import('./WeddingServices').then(m => ({ default: m.WeddingServices })));
 const FuneralServices = lazy(() => import('./FuneralServices').then(m => ({ default: m.FuneralServices })));
@@ -475,6 +476,13 @@ export function ViewRenderer(props: ViewRendererProps) {
       return (
         <SafeView>
           <WorkOsHub setView={setView} />
+        </SafeView>
+      );
+
+    case 'community-moderation':
+      return (
+        <SafeView>
+          <CommunityModerationPage />
         </SafeView>
       );
 
