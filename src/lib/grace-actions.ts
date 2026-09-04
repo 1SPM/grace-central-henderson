@@ -1,5 +1,6 @@
 import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
 import { actionTypesForSurface } from './actionCatalog';
+import { countPersonMatches } from './personMatching';
 
 export type ActionType =
   | 'add_task'
@@ -232,15 +233,10 @@ export function resolvePrayer(
 // not a new or different judgment about who matches.
 // ---------------------------------------------------------------------
 
-export function countPersonMatches(name: string | undefined, people: Person[]): Person[] {
-  if (!name) return [];
-  const lower = name.toLowerCase().trim();
-  const exact = people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase() === lower);
-  if (exact.length > 0) return exact;
-  const firstNameOnly = people.filter(p => p.firstName.toLowerCase() === lower);
-  if (firstNameOnly.length > 0) return firstNameOnly;
-  return people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
-}
+// countPersonMatches lives in personMatching.ts (a dependency-free leaf) so
+// the server person-lookup route can share it without dragging this module's
+// imports into a Node ESM function. Re-exported here so callers are unchanged.
+export { countPersonMatches };
 
 export function countTaskMatches(
   title: string | undefined,
