@@ -33,6 +33,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { resolveMemberActor } from '../_lib/authz.js';
+import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -96,6 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
+    if (await enforcePortalWriteLimit(res, 'giving', member.personId)) return;
     if (!STRIPE_SECRET_KEY) return res.status(503).json({ error: 'service_not_configured' });
     const body = readBody(req, res, CANCEL_SCHEMA);
     if (!body) return;
