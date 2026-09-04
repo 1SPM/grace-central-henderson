@@ -38,6 +38,7 @@ import type { MemberActor } from '../authz.js';
 import { checkBudget } from './budget.js';
 import { moderate } from './moderation.js';
 import { recordUsage } from './usage.js';
+import { logSecurityEvent } from '../securityLog.js';
 import { callGeminiWithTools, type GeminiContent } from './adapters/gemini.js';
 import { detectCrisisLanguage, CRISIS_RESOURCE_MESSAGE } from '../careSafety.js';
 import { emitPlatformEvent } from '../platformEvents.js';
@@ -67,8 +68,51 @@ export interface AssistantTurnInput {
 export type AssistantTurnResult =
   | { allowed: false; reason: 'over_cap' | 'hard_cut'; detail: Record<string, unknown> }
   | { allowed: false; reason: 'moderation_input' | 'moderation_output' }
+  | { allowed: false; reason: 'moderation_unavailable' }
   | { allowed: false; reason: 'provider_error'; detail: string }
   | { allowed: true; reply: string; toolCalls: { name: string; success: boolean }[]; crisisDetected: boolean };
+
+/**
+ * moderation.ts fails OPEN by design for deployments running without
+ * OpenAI configured (see its own header) — the right default for the
+ * staff assistant, which sits behind an authenticated session bounded by
+ * RLS. The member assistant has no such backstop: it is the surface
+ * AI_BOUNDARIES.md and TECH_DEBT.md TD-008 mean by "before any AI message
+ * is sent to a real congregant without staff review." So here, and only
+ * here, a skipped moderation check (no API key, or the request failing)
+ * blocks the turn rather than silently proceeding — logged as an
+ * `elevated` security_events row so a spike is visible to an operator,
+ * per moderation.ts's own suggestion. A genuinely empty string being
+ * "skipped" is not a safety gap (nothing to check) and does not trip
+ * this — see the empty_input skipReason below.
+ */
+async function moderateOrFailClosed(
+  supabase: SupabaseClient,
+  member: MemberActor,
+  text: string,
+  direction: 'input' | 'output',
+  requestId?: string | null,
+): Promise<{ blocked: false } | { blocked: true; reason: 'moderation_input' | 'moderation_output' | 'moderation_unavailable' }> {
+  const result = await moderate(text);
+
+  if (result.flagged) {
+    return { blocked: true, reason: direction === 'input' ? 'moderation_input' : 'moderation_output' };
+  }
+
+  if (result.skipped && result.skipReason !== 'empty_input') {
+    await logSecurityEvent(supabase, {
+      eventType: 'ai.member_moderation_skipped',
+      severity: 'elevated',
+      churchId: member.churchId,
+      actorClerkId: member.clerkUserId,
+      route: '/api/portal/assistant',
+      detail: { direction, skipReason: result.skipReason, requestId: requestId ?? null },
+    });
+    return { blocked: true, reason: 'moderation_unavailable' };
+  }
+
+  return { blocked: false };
+}
 
 // Server-composed only — never accepts or merges any client-supplied
 // "system prompt" / persona / rules text. This is the entire policy
@@ -165,15 +209,15 @@ export async function runAssistantTurn(input: AssistantTurnInput): Promise<Assis
     };
   }
 
-  // 3. Input moderation.
-  const inputMod = await moderate(message);
-  if (inputMod.flagged) {
+  // 3. Input moderation — fails closed for this surface (see moderateOrFailClosed).
+  const inputMod = await moderateOrFailClosed(supabase, member, message, 'input', input.requestId);
+  if (inputMod.blocked) {
     void recordUsage(supabase, {
       churchId: member.churchId, provider: PROVIDER, model: MODEL, feature: FEATURE,
-      promptTokens: 0, completionTokens: 0, success: false, errorCode: 'moderation_input',
+      promptTokens: 0, completionTokens: 0, success: false, errorCode: inputMod.reason,
       requestId: input.requestId, actorClerkId: member.clerkUserId,
     });
-    return { allowed: false, reason: 'moderation_input' };
+    return { allowed: false, reason: inputMod.reason };
   }
 
   const ctx: AssistantToolContext = { supabase, member };
@@ -254,15 +298,15 @@ export async function runAssistantTurn(input: AssistantTurnInput): Promise<Assis
     return { allowed: false, reason: 'provider_error', detail: 'assistant could not complete the request' };
   }
 
-  // 6. Output moderation.
-  const outputMod = await moderate(finalText);
-  if (outputMod.flagged) {
+  // 6. Output moderation — fails closed for this surface (see moderateOrFailClosed).
+  const outputMod = await moderateOrFailClosed(supabase, member, finalText, 'output', input.requestId);
+  if (outputMod.blocked) {
     void recordUsage(supabase, {
       churchId: member.churchId, provider: PROVIDER, model: MODEL, feature: FEATURE,
       promptTokens: totalPromptTokens, completionTokens: totalCompletionTokens, success: false,
-      errorCode: 'moderation_output', requestId: input.requestId, actorClerkId: member.clerkUserId,
+      errorCode: outputMod.reason, requestId: input.requestId, actorClerkId: member.clerkUserId,
     });
-    return { allowed: false, reason: 'moderation_output' };
+    return { allowed: false, reason: outputMod.reason };
   }
 
   void recordUsage(supabase, {
