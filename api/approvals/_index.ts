@@ -15,7 +15,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
-import { executeAgentAction } from '../_lib/agentActionExecutors.js';
+import { executeAgentAction, auditActionFor } from '../_lib/agentActionExecutors.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, bool_ } from '../_lib/validation.js';
@@ -336,7 +336,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         churchId: actor.churchId,
         actorUserId: actor.userId,
         actorClerkId: actor.clerkUserId,
-        action: 'update',
+        action: auditActionFor(agentMutation),
         entityType: agentMutation.entityType,
         entityId: agentMutation.entityId,
         before: agentMutation.before,

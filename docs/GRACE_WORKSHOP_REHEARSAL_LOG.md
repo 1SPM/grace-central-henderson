@@ -168,13 +168,14 @@ Central Henderson roster was verified unchanged afterwards.**
 | `POST /api/actions/propose` | `agent_actions` row (`delete_person`, `proposed`, linked `approval_id`) + `audit_logs` `propose/agent_action` — *"Proposed via Ask GRACE"* ✅ |
 | Decision Queue | approval `pending`, `risk_level: medium`, proposed action rendered as *"Delete ZZREHEARSAL DeleteMe and their history"* ✅ |
 | `PATCH /api/approvals` approve | 200; executor ran; person deleted; `audit_logs` `decide/approval` written ✅ |
-| Audit of the change itself | written, attributed, correlated — **but `action='update'` for a deletion** ⚠️ (**R-18**) |
+| Audit of the change itself | written, attributed, correlated — `action='update'` for a deletion at the time (**R-18**, closed 2026-09-04: now `delete`) |
 
 **Two findings:**
 
-- **R-18** — `api/approvals/_index.ts:331` hardcodes `action: 'update'` on the
-  mutation audit row. An approved deletion is filed as an update, so
-  `where action='delete'` misses it. `/api/actions/execute` gets this right.
+- **R-18** — `api/approvals/_index.ts:331` hardcoded `action: 'update'` on the
+  mutation audit row, so an approved deletion was filed as an update and
+  `where action='delete'` missed it. *Closed 2026-09-04: the verb now comes
+  from the mutation (`auditActionFor`), on both routes.*
 - **C-13 confirmed live** — `requested_by_user_id` and `approver_user_id` were
   **the same user**. There is no separation-of-duty control; the proposer
   approved their own deletion seconds later. Audited and attributed, but not a

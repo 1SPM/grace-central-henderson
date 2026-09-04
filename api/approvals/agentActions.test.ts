@@ -34,6 +34,7 @@ const APPROVAL_ID = '00000000-0000-4000-8000-0000000000a1';
 const ACTION_ID = '00000000-0000-4000-8000-0000000000a2';
 const WORK_ORDER_ID = '00000000-0000-4000-8000-0000000000a3';
 const OWNER_ID = '00000000-0000-4000-8000-0000000000a4';
+const PERSON_ID = '00000000-0000-4000-8000-0000000000d1';
 
 function makeReq(decision: string) {
   return {
@@ -86,6 +87,8 @@ function supabaseFor(opts: {
   actionStatus?: string;
   /** A human requester on the approval (agent proposals have none). */
   requestedByUserId?: string;
+  /** Route a delete_person proposal through the NON-atomic executor path. */
+  deletePerson?: boolean;
   /** Stand in for whatever the function decided — refusal or breakage. */
   rpcResult?: { data?: unknown; error?: { message: string; code?: string } };
 } = {}) {
@@ -103,9 +106,15 @@ function supabaseFor(opts: {
         }
         return { data: { ...PENDING_APPROVAL, status: 'decided', decision: 'approve' } };
       },
+      people: (op: string) => (op === 'select'
+        ? { data: { id: PERSON_ID, first_name: 'Dana', last_name: 'Reyes', email: null, phone: null, status: 'member' } }
+        : { data: { id: PERSON_ID } }),
       agent_actions: (op: string) => {
         if (op === 'select') {
-          return { data: { ...PROPOSED_ACTION, status: opts.actionStatus ?? 'proposed', approval_id: APPROVAL_ID, requires_approval: true } };
+          const action = opts.deletePerson
+            ? { ...PROPOSED_ACTION, action_type: 'delete_person', target_entity_type: 'person', target_entity_id: PERSON_ID, payload: {} }
+            : PROPOSED_ACTION;
+          return { data: { ...action, status: opts.actionStatus ?? 'proposed', approval_id: APPROVAL_ID, requires_approval: true } };
         }
         // The non-atomic status write-back is conditional + re-read, so it
         // must resolve a row for a successful write.
@@ -191,6 +200,26 @@ describe('PATCH /api/approvals — separation of duty (C-13)', () => {
     const res = await decide(supabase, 'approve');
     expect(res.status).not.toHaveBeenCalledWith(403);
     expect(rpcCalls(supabase)).toHaveLength(1);
+  });
+});
+
+describe('PATCH /api/approvals — the mutation audit verb (R-18)', () => {
+  it('files an approved delete_person as a delete, against the person', async () => {
+    // The row an auditor finds with `where action='delete'`. This path used
+    // to hardcode 'update' — right for the first executor, wrong for this one.
+    const supabase = supabaseFor({ deletePerson: true });
+    const res = await decide(supabase, 'approve');
+
+    const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string } };
+    expect(body.agent_action?.status).toBe('executed');
+    const personAudit = auditInserts(supabase)
+      .map(a => a.payload as Record<string, unknown>)
+      .filter(a => a.entity_type === 'person');
+    expect(personAudit).toHaveLength(1);
+    expect(personAudit[0].action).toBe('delete');
+    expect(personAudit[0].entity_id).toBe(PERSON_ID);
+    expect(personAudit[0].before).toMatchObject({ first_name: 'Dana' });
+    expect(personAudit[0].after).toBeNull();
   });
 });
 

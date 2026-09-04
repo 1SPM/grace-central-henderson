@@ -368,11 +368,10 @@ describe('LEG 4b — AUTHORITY: propose → approve → execute → audit (TEST 
       .eq('church_id', CHURCH_ID).eq('entity_id', testPersonId);
     log(`  4b-4 audit_logs: ${JSON.stringify(audit)}`);
     expect(audit?.length).toBeGreaterThan(0);
-    // FINDING (live, 2026-08-31): approvals/_index.ts:331 hardcodes action:'update'
-    // for the mutation audit row, so an APPROVED DELETION is filed as an
-    // 'update'. /api/actions/execute correctly writes 'delete'. Asserted as
-    // observed, not as intended, so this runner reports the real behaviour.
-    expect(audit![0].action, 'observed: approvals path files a delete as an update').toBe('update');
+    // R-18 (found live 2026-08-31, closed 2026-09-04): the approvals path used
+    // to hardcode action:'update', so an APPROVED DELETION was filed as an
+    // update. The verb now comes from the mutation itself (after === null).
+    expect(audit![0].action, 'an approved deletion is filed as a delete').toBe('delete');
     expect(audit![0].actor_user_id).toBe(APPROVER_USER_ID);
   });
 

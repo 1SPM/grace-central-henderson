@@ -36,7 +36,7 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
 import { findAction } from '../_lib/actionCatalog.js';
-import { executeAgentAction, isExecutableActionType } from '../_lib/agentActionExecutors.js';
+import { executeAgentAction, isExecutableActionType, auditActionFor } from '../_lib/agentActionExecutors.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, uuid_ } from '../_lib/validation.js';
@@ -136,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       churchId: actor.churchId,
       actorUserId: actor.userId,
       actorClerkId: actor.clerkUserId,
-      action: 'delete',
+      action: auditActionFor(outcome.mutation),
       entityType: outcome.mutation.entityType,
       entityId: outcome.mutation.entityId,
       before: outcome.mutation.before,

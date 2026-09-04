@@ -310,10 +310,15 @@ repository or live-database evidence.
   deletions** — and that query is the whole point of the trail. Workshop: LOW.
   Pilot: **MEDIUM.** Production: MEDIUM. Security/privacy: MEDIUM (SOC 2
   evidence-gathering, "who deleted this record?").
-- **Timing:** before pilot. **To close:** derive the verb from the mutation
-  (`agentMutation.after === null ? 'delete' : 'update'`) — a one-line change with
-  an obvious test. Deliberately **not** applied here: it edits a live approval
-  path and this turn's scope was rehearsal.
+- **Status: CLOSED 2026-09-04.** `auditActionFor(mutation)` in
+  `api/_lib/agentActionExecutors.ts` derives the verb from the mutation's own
+  snapshots (`after === null` → delete, `before === null` → create, else
+  update) and BOTH routes use it — the approvals path had hardcoded `'update'`
+  and `/api/actions/execute` had hardcoded `'delete'`, each right for the one
+  executor it was written around. Unit-tested on the helper, route-tested on
+  an approved `delete_person` (`action='delete'`, `entity_type='person'`,
+  `after: null`), and re-rehearsed live: the approved deletion now files as a
+  `delete` under the approver's id.
 
 ## R-19 · Extraction duplicates a fact the deterministic path already stored — **still open, no longer carries a wrong date**
 - **Layer:** memory · **Severity: LOW** · **Likelihood: HIGH (observed live)**

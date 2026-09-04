@@ -283,11 +283,11 @@ This maps directly onto the brief's §E preview→confirm→execute→audit
 requirement, and is the most mature machinery in the product. Two caveats
 already recorded in the risk register:
 
-- **R-18** — `api/approvals/_index.ts:331` hardcodes `action: 'update'`, so an
-  approved *deletion* is filed as an update.
-- **C-13** — no separation of duty: `requested_by_user_id` is recorded and never
-  compared to the approver. "Stops at a named human" is true; "a *different*
-  human" is not.
+- **R-18** — `api/approvals/_index.ts:331` hardcoded `action: 'update'`, so an
+  approved *deletion* was filed as an update. *Closed 2026-09-04.*
+- **C-13** — no separation of duty: `requested_by_user_id` was recorded and never
+  compared to the approver. "Stops at a named human" was true; "a *different*
+  human" was not. *Closed 2026-09-04.*
 
 Also relevant to §E: **9 of the 14 catalog actions never reach a server
 permission check or audit row** — they run through React callbacks against the
@@ -339,7 +339,7 @@ Current state: **1590 tests pass, 0 fail.**
 | 1 — navigation | `setView` has no `?tab=` parameter. Three assistant surfaces (§0.2) — pick one. |
 | 2 — canonical calendar | **§0.1.** The dashboard composition is not canonical. Resolve the synthetic-rhythm question before reusing anything. |
 | 3 — profile memory | No profile retrieval exists at all. `households` empty. Ministry scope and `sensitivity` are not enforcement dimensions (§5). |
-| 4 — approval/audit | Machinery is sound; R-18 and C-13 should be closed first if the demo narrative is dual control. |
+| 4 — approval/audit | Machinery is sound; R-18 and C-13 both closed 2026-09-04, so the dual-control narrative is now true. |
 | 5 — expansion | Depends on 1–4. |
 
 ## 10. What this audit did not verify
