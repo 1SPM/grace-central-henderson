@@ -38,8 +38,12 @@ const CHURCH_ID = '11111111-1111-1111-1111-111111111111';
 /** The account that has actually driven Ask GRACE on this tenant — memories
  *  are scoped to church_id + user_id, so the pre-seeded workshop memory MUST
  *  belong to this user or the demo recalls nothing. */
-const DEMO_CLERK_ID = 'user_3GaW8TXN3YM7XfjPjDbnHsgJNT5';
-const DEMO_USER_ID = '0d93eed1-df64-4eae-a273-2a28439120ed';
+const DEMO_CLERK_ID = 'user_3Ge90H8NjoV8nIfP2DJB2qnIYI4';
+const DEMO_USER_ID = '6a5838df-63ca-46c1-843f-3d1436186946';
+/** A SECOND System Administrator on the tenant. Since the C-13 fix the proposer
+ *  cannot approve their own request, so leg 4 needs two people — as it should. */
+const APPROVER_CLERK_ID = 'user_3GaW8TXN3YM7XfjPjDbnHsgJNT5';
+const APPROVER_USER_ID = '0d93eed1-df64-4eae-a273-2a28439120ed';
 
 /** Everything this run creates is prefixed so it is trivially findable and removable. */
 const TAG = 'ZZREHEARSAL';
@@ -89,12 +93,12 @@ function makeRes(): Res {
 }
 
 /** Loads the REAL handler with ONLY Clerk stubbed and the REAL Supabase client injected. */
-async function loadHandler(path: string) {
+async function loadHandler(path: string, asClerkId = DEMO_CLERK_ID) {
   vi.resetModules();
   globalThis.fetch = realFetch;
   process.env.CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || 'unused-because-verifyToken-is-stubbed';
   vi.doMock('@clerk/backend', () => ({
-    verifyToken: vi.fn().mockResolvedValue({ sub: DEMO_CLERK_ID, app_metadata: { church_id: CHURCH_ID } }),
+    verifyToken: vi.fn().mockResolvedValue({ sub: asClerkId, app_metadata: { church_id: CHURCH_ID } }),
   }));
   const mod = await import(path);
   return mod.default as (req: Req, res: Res) => Promise<unknown>;
@@ -320,17 +324,35 @@ describe('LEG 4b — AUTHORITY: propose → approve → execute → audit (TEST 
     log(`  4b-3 pending approvals (newest 3): ${JSON.stringify(data)}`);
     const mine = ((data ?? []) as ApprovalRow[]).find(a => a.entity_type === 'agent_action');
     expect(mine).toBeTruthy();
-    // C-13: recorded here on purpose — the proposer and the approver are the
-    // same user id, and nothing in the decide path compares them.
-    log(`  4b-3 requested_by_user_id = ${mine!.requested_by_user_id} · approver will be ${DEMO_USER_ID}`);
+    log(`  4b-3 requested_by_user_id = ${mine!.requested_by_user_id} · approver will be ${APPROVER_USER_ID}`);
   });
 
-  it('4b-4 · approving it executes the delete and writes an audit row', async () => {
+  it('4b-4a · the proposer CANNOT approve their own request (C-13 closed)', async () => {
     const { data: acts } = await live().from('agent_actions')
       .select('id, approval_id').eq('church_id', CHURCH_ID).eq('target_entity_id', testPersonId);
     const approvalId = ((acts ?? []) as AgentActionRow[])[0].approval_id!;
 
-    const handler = await loadHandler('../../../api/approvals/_index.js');
+    const handler = await loadHandler('../../../api/approvals/_index.js', DEMO_CLERK_ID);
+    const req = makeReq({ decision: 'approve', decision_notes: `${TAG} self-approval attempt` }, 'PATCH');
+    req.query = { id: approvalId };
+    const res = makeRes();
+    await handler(req, res);
+    log(`  4b-4a self-approve status=${JSON.stringify(res.statuses)} body=${JSON.stringify(res.jsonBodies)}`);
+    expect(res.statuses[0]).toBe(403);
+    expect((res.jsonBodies[0] as { error: string }).error).toBe('self_approval');
+
+    const { data: person } = await live().from('people').select('id').eq('id', testPersonId).maybeSingle();
+    expect(person, 'the refusal must not have executed the delete').not.toBeNull();
+    const { data: approval } = await live().from('approvals').select('status').eq('id', approvalId).maybeSingle();
+    expect(approval?.status).toBe('pending');
+  });
+
+  it('4b-4 · a DIFFERENT person approving it executes the delete and writes an audit row', async () => {
+    const { data: acts } = await live().from('agent_actions')
+      .select('id, approval_id').eq('church_id', CHURCH_ID).eq('target_entity_id', testPersonId);
+    const approvalId = ((acts ?? []) as AgentActionRow[])[0].approval_id!;
+
+    const handler = await loadHandler('../../../api/approvals/_index.js', APPROVER_CLERK_ID);
     const req = makeReq({ decision: 'approve', decision_notes: `${TAG} workshop rehearsal` }, 'PATCH');
     req.query = { id: approvalId };
     const res = makeRes();
@@ -351,7 +373,7 @@ describe('LEG 4b — AUTHORITY: propose → approve → execute → audit (TEST 
     // 'update'. /api/actions/execute correctly writes 'delete'. Asserted as
     // observed, not as intended, so this runner reports the real behaviour.
     expect(audit![0].action, 'observed: approvals path files a delete as an update').toBe('update');
-    expect(audit![0].actor_user_id).toBe(DEMO_USER_ID);
+    expect(audit![0].actor_user_id).toBe(APPROVER_USER_ID);
   });
 
   it('4b-5 · REPORT', () => {

@@ -78,7 +78,7 @@ The best-engineered part of the system. `hydrateAction` deliberately leaves
 the explicit check still fails closed; `blockOnAmbiguity` runs **first** in
 every entity-resolving handler, before approval routing; `/api/actions/execute`
 and `/propose` refuse each other's action classes by construction; approvals
-require `approvals.decide`. Held back by: there is NO separation of duty — `requested_by_user_id` is recorded and never compared to the approver (C-13); the ambiguity gate runs in the browser over
+require `approvals.decide`. Held back by: separation of duty only landed 2026-09-04 (C-13 closed — requester cannot approve their own request) and has one live rehearsal behind it; the ambiguity gate runs in the browser over
 the client's roster (**C-05**); a parallel surface has no gate at all
 (**R-01**); and no chat action has **ever executed against live data** —
 `agent_actions` and `audit_logs` contain no chat-originated row of any type.

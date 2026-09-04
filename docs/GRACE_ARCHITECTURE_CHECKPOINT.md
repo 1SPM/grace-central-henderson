@@ -315,7 +315,7 @@ showing them would be showing paper.
 | Missing action parameters | **Partially open.** Handlers re-check a subset (title, personId, body…). `add_task` still defaults a missing `dueDate` to +7 days. `REQUIRED_ACTION_PARAMETERS` is never enforced at runtime. |
 | Direct execute bypass of an approval-gated action | **Blocked.** `/api/actions/execute` refuses `requiresApproval` before touching the actor. `execute.test.ts`. |
 | Approval bypass | **Blocked.** `approvals.decide` required; church-scoped; conditional on `status='pending'` so a concurrent decision cannot double-execute. |
-| Self-approval (proposer decides own request) | **OPEN.** `_propose.ts:124` records `requested_by_user_id`; the PATCH decide path never compares it to `actor.userId`. A System Administrator can propose `delete_person` in chat and approve it seconds later. Audited, but not a second pair of eyes. (C-13) |
+| Self-approval (proposer decides own request) | **Blocked (2026-09-04).** The PATCH decide path refuses `approve`/`approve_with_changes` when `requested_by_user_id === actor.userId` (403 `self_approval`). Withdrawing one's own request is still allowed; agent proposals are unaffected. Route-tested; live rehearsal asserts the refusal, then approves as a second System Administrator. (C-13, closed) |
 | Source-scope laundering (consolidated figure as Henderson's) | **Prompt-guarded only** — but live-observed holding once. |
 | Cross-tenant retrieval | **Blocked.** Every query filters `church_id`; RLS SELECT-only verified live in `pg_policy`. |
 | Unauthorized sensitive-data access | **Blocked for private prayers/events** (TD-066/067, regression-tested). **Open in one direction:** the epistemic block publishes colliding roster names to the model on every turn (R-11). |
