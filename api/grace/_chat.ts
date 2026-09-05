@@ -56,7 +56,7 @@ const SCHEMA = {
   // The caller's IANA zone, so a note's weekday is read on the church's
   // calendar rather than the server's (UTC). Optional; shape-checked here,
   // validity-checked where it is used (an unknown zone falls back).
-  timeZone: str({ required: false, max: 64, pattern: /^(?:UTC|Etc\/[A-Za-z0-9_+\-]+|[A-Za-z_]+(?:\/[A-Za-z0-9_+\-]+)+)$/ }),
+  timeZone: str({ required: false, max: 64, pattern: /^(?:UTC|Etc\/[A-Za-z0-9_+-]+|[A-Za-z_]+(?:\/[A-Za-z0-9_+-]+)+)$/ }),
 };
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
