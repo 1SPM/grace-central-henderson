@@ -53,6 +53,10 @@ const SCHEMA = {
   message: str({ required: true, min: 1, max: 4000 }),
   conversationId: str({ required: false }),
   dataContext: str({ required: false, max: DATA_CONTEXT_MAX_CHARS }),
+  // The caller's IANA zone, so a note's weekday is read on the church's
+  // calendar rather than the server's (UTC). Optional; shape-checked here,
+  // validity-checked where it is used (an unknown zone falls back).
+  timeZone: str({ required: false, max: 64, pattern: /^(?:UTC|Etc\/[A-Za-z0-9_+\-]+|[A-Za-z_]+(?:\/[A-Za-z0-9_+\-]+)+)$/ }),
 };
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
@@ -148,7 +152,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const knowledgeBlock = buildKnowledgeBlock(knowledgeRows);
 
   const memories = await retrieveMemories(supabase, { churchId: actor.churchId, userId: actor.userId, query: message });
-  const memoryBlock = buildMemoryBlock(memories);
+  const memoryBlock = buildMemoryBlock(memories, body.timeZone || undefined);
 
   const { data: historyRows } = await supabase
     .from('grace_messages')

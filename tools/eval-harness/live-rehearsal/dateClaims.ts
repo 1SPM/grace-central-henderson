@@ -46,10 +46,16 @@ export function findDateClaims(text: string, defaultYear: number): DateClaim[] {
   return claims;
 }
 
-/** True when the reply asserts the event is today (not merely that the note was taken today). */
+/**
+ * True when the reply asserts the EVENT is today — not merely that the note
+ * was taken today. "You told me that on Friday (today)" is provenance: a
+ * telling-verb earlier in the same sentence, with no sentence break between
+ * it and "today", marks the whole clause as being about when the note was
+ * taken.
+ */
 export function claimsToday(text: string): boolean {
   const hits = [...text.matchAll(/\btoday\b/gi)];
-  return hits.some(h => !/\b(?:told|noted|mentioned|said|asked|wrote)\s+(?:me\s+)?(?:that\s+)?(?:earlier\s+)?$/i.test(text.slice(Math.max(0, h.index! - 40), h.index!)));
+  return hits.some(h => !/\b(?:told|noted|mentioned|said|asked|wrote)\b[^.!?\n]*$/i.test(text.slice(Math.max(0, h.index! - 60), h.index!)));
 }
 
 export function weekdayOf(date: Date): Weekday {
