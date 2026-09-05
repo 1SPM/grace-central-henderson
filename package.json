@@ -34,7 +34,7 @@
     "express": "^5.2.1",
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.0",
-    "lucide-react": "^0.263.1",
+    "lucide-react": "^1.39.0",
     "posthog-js": "^1.424.0",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
