@@ -6,6 +6,7 @@ import { useGraceSpeech } from '../hooks/useGraceSpeech';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
+import { ChatMarkdown } from './grace/ChatMarkdown';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
 import { FloatingWindow } from './ui/FloatingWindow';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -37,25 +38,6 @@ function executedSummary(a: PendingAction): string {
   if (a.type === 'send_email') return `Emailed ${a.personName ?? 'recipient'}: ${a.subject ?? ''}`;
   if (a.type === 'send_sms') return `Texted ${a.personName ?? 'recipient'}`;
   return 'Done';
-}
-
-function renderWithLinks(text: string) {
-  const parts = text.split(/(https?:\/\/[^\s)]+)/g);
-  return parts.map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="underline text-blue-700 dark:text-blue-400 hover:text-blue-800 break-all"
-      >
-        {part}
-      </a>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
-  );
 }
 
 /** Skip TTS for configuration / error strings — not useful read aloud. */
@@ -253,7 +235,7 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
                 }`}
               >
                 {m.content
-                  ? renderWithLinks(m.content)
+                  ? <ChatMarkdown text={m.content} />
                   : m.role === 'assistant' && chat.loading
                     ? <Loader2 size={16} className="animate-spin text-gray-500" />
                     : ''}
