@@ -33,6 +33,7 @@ import { buildDataContext } from '../../../src/contexts/GraceChatContext.js';
 import { parseActions, hydrateAction } from '../../../src/lib/grace-actions.js';
 import type { GraceData } from '../../../src/lib/grace-chat/types.js';
 import type { Person } from '../../../src/types.js';
+import { findDateClaims, claimsToday, weekdayOf } from './dateClaims.js';
 
 const CHURCH_ID = '11111111-1111-1111-1111-111111111111';
 /** The account that has actually driven Ask GRACE on this tenant — memories
@@ -236,6 +237,18 @@ describe('LEG 3 — MEMORY (live tenant)', () => {
     log(`  3b status/json: ${JSON.stringify(res.statuses)} ${JSON.stringify(res.jsonBodies)}`);
     expect(reply.length).toBeGreaterThan(0);
     expect(reply.toLowerCase()).toContain('thursday');
+    // The memory names a weekday and no date. Recalling the weekday is the
+    // floor; pinning a WRONG date to it is a fabrication (2026-09-05: "that's
+    // today, September 4th" — a Friday). Every date the reply pins must be a
+    // Thursday, and "today" may only be claimed on a Thursday. Provenance
+    // dates ("you told me on Friday, September 4th") are excluded by design.
+    const today = new Date();
+    for (const claim of findDateClaims(reply, today.getFullYear())) {
+      expect(claim.weekday, `reply pinned "${claim.raw}", which is a ${claim.weekday}, to a Thursday memory`).toBe('Thursday');
+    }
+    if (claimsToday(reply)) {
+      expect(weekdayOf(today), `reply says the Thursday check-in is "today", but today is ${weekdayOf(today)}`).toBe('Thursday');
+    }
   });
 });
 

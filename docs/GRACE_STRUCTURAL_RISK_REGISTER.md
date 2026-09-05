@@ -371,3 +371,31 @@ repository or live-database evidence.
   what four other fixtures already do.
 - **Not fixed here:** it belongs to whoever owns the in-flight mobile refactor,
   and the right fix is a proof-boundary decision, not a regex tweak.
+## R-21 · A weekday-only memory gets a wrong calendar date pinned to it — **OPEN, now caught by the harness**
+- **Layer:** memory → model · **Severity: MEDIUM** · **Likelihood: HIGH for
+  weekday-only notes (observed 2/2 on 2026-09-05)**
+- **Description.** R-17 fixed the note-date confusion (the bracketed date is
+  named as provenance now). What remains: a memory that names only a weekday —
+  *"check-in with Bill is Thursday at 2pm"* — is recalled with a calendar date
+  the model invents. Recorded on Friday 2026-09-04 (local), asked in a fresh
+  conversation: *"Thursday at 2pm — that's today, September 4th."* The prompt
+  said `Today: Friday, September 4, 2026`; September 4 is a Friday. Reproduced
+  on the next run.
+- **Evidence (live).** `tools/eval-harness/.output/live-rehearsal.json`, leg
+  3b, 2026-09-05 02:xx UTC, both runs.
+- **Why the harness had not caught it.** The 3b assertion checked for the word
+  "thursday" and nothing else. It now checks every calendar date the reply
+  pins against the memory's weekday and refuses "today" on a non-Thursday
+  (`live-rehearsal/dateClaims.ts`, provenance dates excluded by design), so
+  **leg 3b is red until this is fixed** — correctly.
+- **Impact.** Workshop: **LOW** — the seeded workshop memory carries an
+  explicit date ("Thursday, September 10th") and recalls exactly; the rule for
+  the day is that any "remember that…" said live must include the date.
+  Pilot: MEDIUM — staff say "Thursday" far more often than "September 10th".
+- **To close.** Either resolve a bare weekday to a concrete date at save time
+  (next occurrence, church timezone) and store both, or add one line to the
+  memory block header telling the model not to assert a date a note does not
+  contain. Both are narrow; both need the same live sample discipline R-17
+  had (≥7 fresh-conversation recalls, 0 wrong dates) before being called
+  fixed. Not for demo week.
+
