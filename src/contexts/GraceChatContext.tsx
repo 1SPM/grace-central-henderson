@@ -5,7 +5,7 @@ import { buildChatActionPrompt } from '../lib/actionCatalog';
 import { parseActions, hydrateAction, isTaskBatchFollowUp, buildTaskCompletionActions, isPastedTaskList, buildAddTaskActionsFromInput, isOverdueTasksQuery, formatOverdueTasksResponse, type PendingAction } from '../lib/grace-actions';
 import { useGraceInbox, type InboxMessageInjection } from '../lib/grace-chat/useGraceInbox';
 import { useGraceOpsAggregates } from '../lib/grace-chat/useGraceOpsAggregates';
-import { buildGreeting, loadStoredMessages, persistMessages, pickReturnGreeting, GRACE_PANEL_SESSION_KEY } from '../lib/grace-chat/persistence';
+import { buildGreeting, loadStoredMessages, persistMessages, GRACE_PANEL_SESSION_KEY } from '../lib/grace-chat/persistence';
 import { runActionHandler, type ChatHandlers, type ReplyContext as HandlerReplyContext } from '../lib/grace-chat/handlers';
 import type { GraceMessage as ChatMessage, GraceData as ChatData, ActionInstance as ChatActionInstance } from '../lib/grace-chat/types';
 import { deserializeBrainEntries, GRACE_BRAIN_STORAGE_KEY } from '../lib/grace-brain';
@@ -46,6 +46,9 @@ interface GraceChatContextValue {
   messages: GraceMessage[];
   loading: boolean;
   panelOpen: boolean;
+  /** Increments on each same-session re-open of the panel, so the voice layer
+   *  can say a short "I'm here" without a bubble landing in the transcript. */
+  reopenTick: number;
   openPanel: (seed?: string) => void;
   closePanel: () => void;
   sendMessage: (query: string) => Promise<void>;
@@ -301,6 +304,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   });
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [reopenTick, setReopenTick] = useState(0);
   const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
   // Server conversation id (ADR-014) — undefined until the first turn or
   // the hydration effect below resolves; cleared by clearMessages to
@@ -417,11 +421,13 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     // Bare launch (no starter prompt) — the full greeting already covers
     // "first time"; a live assistant doesn't repeat the whole spiel every
     // time you glance back over, so re-opens this session get a short
-    // acknowledgment instead. Session-scoped (sessionStorage), not
-    // forever (chat history itself persists in localStorage across days).
+    // spoken acknowledgment instead. Spoken only: it used to be appended
+    // as an assistant bubble too, which left a stray "I'm here." between
+    // real turns in the transcript (2026-09-05 rehearsal). Session-scoped
+    // (sessionStorage), not forever (chat history persists across days).
     if (typeof window !== 'undefined') {
       if (window.sessionStorage.getItem(GRACE_PANEL_SESSION_KEY)) {
-        setMessages(m => [...m, pickReturnGreeting()]);
+        setReopenTick(t => t + 1);
       } else {
         window.sessionStorage.setItem(GRACE_PANEL_SESSION_KEY, '1');
       }
@@ -675,6 +681,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     messages,
     loading,
     panelOpen,
+    reopenTick,
     openPanel,
     closePanel,
     sendMessage,
@@ -688,7 +695,7 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
     suggestions,
     quickTags,
     salutation,
-  }), [messages, loading, panelOpen, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, replyContext, data.people, suggestions, quickTags, salutation]);
+  }), [messages, loading, panelOpen, reopenTick, openPanel, closePanel, sendMessage, clearMessages, updateAction, executeAction, dismissAction, replyContext, data.people, suggestions, quickTags, salutation]);
 
   return <GraceChatContext.Provider value={value}>{children}</GraceChatContext.Provider>;
 }

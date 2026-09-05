@@ -99,7 +99,11 @@ export function parseActions(text: string): ParseResult {
       // malformed JSON — skip silently
     }
   }
-  cleanText = cleanText.trim();
+  // An action block usually sits on its own paragraph, so removing it
+  // leaves two blank paragraphs back to back — which whitespace-pre-wrap
+  // renders as a hole in the bubble. Collapse any run of blank lines
+  // (including whitespace-only ones) to a single paragraph break.
+  cleanText = cleanText.replace(/[ \t]*\n(?:[ \t]*\n)+/g, '\n\n').trim();
   if (!cleanText) {
     cleanText = actions.length === 1
       ? 'Ready to add this? Review and edit, then click Execute.'

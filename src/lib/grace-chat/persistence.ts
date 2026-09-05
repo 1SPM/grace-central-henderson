@@ -25,8 +25,10 @@ const RETURN_GREETINGS = [
 ];
 
 /**
- * Short acknowledgment for the 2nd+ panel open in the same session — a
- * live assistant doesn't re-introduce itself every time you glance over.
+ * Short spoken acknowledgment for the 2nd+ panel open in the same session —
+ * a live assistant doesn't re-introduce itself every time you glance over.
+ * Voice only (AskGrace speaks it off reopenTick); it is not a transcript
+ * message any more.
  */
 export function pickReturnGreeting(): GraceMessage {
   const content = RETURN_GREETINGS[Math.floor(Math.random() * RETURN_GREETINGS.length)];
@@ -109,7 +111,10 @@ export function loadStoredMessages(userId?: string): GraceMessage[] | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
-    return parsed as GraceMessage[];
+    // Re-greetings are spoken now, never transcribed; drop any a previous
+    // build left in the stored transcript.
+    const messages = (parsed as GraceMessage[]).filter(m => m.source !== 'regreet');
+    return messages.length > 0 ? messages : null;
   } catch {
     return null;
   }
