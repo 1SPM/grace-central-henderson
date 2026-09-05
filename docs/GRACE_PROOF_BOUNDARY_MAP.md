@@ -122,7 +122,7 @@ No baseline was changed.
 
 | Behaviour | Strongest proof |
 |---|---|
-| Anything at all in the Ask GRACE panel | **NOT PROVEN as LIVE UI.** No automated browser coverage exists for the chat panel, action cards, Execute button, or the ambiguity message. The nine persisted `grace_messages` are the only trace of a human driving the real surface, and none of them exercised memory or an action. |
+| Anything at all in the Ask GRACE panel | **LIVE UI — manual, 2026-09-04/05** (`GRACE_WORKSHOP_REHEARSAL_LOG.md`, *"Browser dress rehearsal"*). Memory recall, the honest calendar answer, the ambiguity refusal, the person-record card, propose → Decision Queue, the self-approval refusal, and the second-person approval were each driven through the real panel in Chrome with a real Clerk session on production, and read back from the tenant. **Still no automated browser coverage.** The exercise is what found #200: the harness stubs Clerk and sends its own header, so it had been proving the route while the browser sent none — *the harness proved the routes; only the browser proved the door.* Treat every INTEGRATION claim about the chat door as "route only" until a browser has sent the request. |
 
 ---
 
@@ -132,7 +132,7 @@ No baseline was changed.
 |---|---|
 | LIVE DB | 5 |
 | LIVE MODEL | 2 (mission answer, boundary decline) |
-| LIVE UI | **0** |
+| LIVE UI | **0 automated** · 7 manual (2026-09-04/05 browser rehearsal) |
 | INTEGRATION | 16 |
 | UNIT | 11 |
 | ARCH ONLY | 5 (whole epistemic decision layer) |

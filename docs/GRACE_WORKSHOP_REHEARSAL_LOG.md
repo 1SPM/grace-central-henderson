@@ -15,6 +15,14 @@ further live samples.**
 > writes its transcript to `tools/eval-harness/.output/live-rehearsal.json`,
 > so it can be re-run before the workshop as a go/no-go check.
 
+> **Update — 2026-09-04/05, browser dress rehearsal on production.** Both legs
+> were then driven through the real Ask GRACE panel in Chrome, signed in with a
+> real Clerk session against `gracecrm-centralhenderson.org`. **The harness had
+> proved the routes; only the browser proved the door.** Seven defects the
+> harness could not see were found and fixed (#200–#206), one of them
+> workshop-blocking. See *"Browser dress rehearsal"* below. Legs 3 and 4 are
+> now proven **LIVE UI**, end to end, including the second-person approval.
+
 ---
 
 > **On the names quoted below.** Every person named here — Sarah Mitchell,
@@ -210,16 +218,110 @@ residue behind), and writes its transcript to
 
 ---
 
+## Browser dress rehearsal — 2026-09-04/05 · production, real Clerk session
+
+**Surface:** `https://gracecrm-centralhenderson.org` (Vercel production, `main`),
+Chrome, signed in as the demo account `user_3Ge90H8…` (info@divinityagi.com,
+shown as "Pastor James"). Every step below is what a person in the room
+would do: the docked "Ask Grace" input, the panel, the action cards, the
+**Approvals (1)** chip, the Approval Centre buttons, the sidebar. Every server
+outcome was read back from the tenant afterwards. Names quoted are fixture
+data, as noted at the top of this log.
+
+### Why this was different from the harness
+
+`tools/eval-harness/live-rehearsal/` stubs Clerk's `verifyToken` and sends
+its own `Authorization` header. That proves the **route**. It says nothing
+about whether the **browser** sends the header — and it did not (#200 below).
+Every green CI run since the chat-door actions shipped had been proving the
+wrong half. This is the single most important finding of the checkpoint so
+far, and it is now recorded in `GRACE_PROOF_BOUNDARY_MAP.md`.
+
+### Results
+
+| leg | ask | on screen | server |
+|---|---|---|---|
+| 3 MEMORY | *"When is our GRACE workshop demo?"* | *"Thursday, September 10th — you told me that earlier this week."* | recall from `grace_memories`, no fabricated date (R-17 holding) |
+| calendar | *"What's on the church calendar this week?"* | *"No events are scheduled… service times aren't logged as calendar entries"* | `calendar_events` has 0 future rows — the answer is true |
+| 4a AUTHORITY | *"Delete Sarah"* | *"You have two Sarahs… Sarah Mitchell, Sarah Chen. Which one?"* — after #204, rendered as bullets, no `**` | no action parsed; refusal is model + `hydrateAction` backstop |
+| lookup | *"Tell me about ZZREHEARSAL DeleteMe"* | deterministic record card | `/api/grace/entity-memory` (fixed by #197) |
+| 4b propose | *"Delete ZZREHEARSAL DeleteMe"* → Confirm | **before #200:** *"I couldn't send that for approval: missing bearer token"*. **After:** *"needs approval. I've sent it to the Decision Queue."* | `approvals` row pending, `requested_by_user_id` = demo account |
+| 4b self-approve | Approvals chip → Approve | **before #201:** raw `self_approval`. **After:** *"You requested this change, so someone else has to approve it. You can still reject or escalate it yourself."* | `PATCH 403`, approval still pending, person still present (C-13 holding) |
+| 4b second person | sidebar **View as a team member → Pastor James Wilson** → Approve | approved | approval `decided/approve`, approver `b30fa9d3…` (James Wilson); `agent_actions` executed; person deleted; `audit_logs` **`delete/person`** (R-18 holding); `security_events.authz.view_as` naming both admin and target |
+
+Both legs end to end, in the browser, on production. Tenant reset afterwards
+(pending approval, agent action, TEST person, rehearsal conversations,
+extraction residue removed; seed exchange, the user's own threads and all
+audit rows kept).
+
+### What the browser found that the harness could not
+
+| PR | finding | how it was found |
+|---|---|---|
+| **#200** | `handlers.ts` sent `/api/actions/propose`, `/execute` and both agentmail calls with only `Content-Type` — **every gated chat action was a 401 in a real browser**. `graceChat.ts` already had `buildHeaders()`; the action calls never used it. | Confirm delete → *"missing bearer token"*; no `approvals` row written |
+| **#201** | the C-13 refusal rendered as raw `self_approval`; the dashboard's **Approvals (1)** chip was a dead `<a href="#/workos…">` (nothing routes on a bare hash change); the Approval Centre's "Pending" dropdown listed everything on first load — 16 decided rehearsal rows above the one live request | clicking through the exact path the client will watch |
+| **#202** | dashboard header read *"Next: Membership Class — Sat, Sep 5 · 9:00 AM"* — a synthetic rhythm entry (`churchCalendarRhythm.ts`, "Room 105") — while GRACE said nothing was scheduled. Page and assistant contradicted each other on one screen. | reading the header next to the calendar answer |
+| **#203** | approving the one pending card re-listed unfiltered — the 16 decided rows came straight back under "Pending" | pressing Approve |
+| **#204** | chat bubbles showed `**Sarah Mitchell**` literally | the 4a reply |
+| **#205** | the first chunk of the first spoken answer returned **503**. Vercel's runtime logs for that minute show every function invocation returned 200 — the 503 came from the edge, in the minute a new deployment (#199) took the production alias. The client treated any non-429 chunk failure as "neural TTS is gone" and read the whole reply in the browser voice. Now: one retry on 5xx/network; a persisting 503 is "busy", neural voice kept. | the network panel, then the logs |
+| **#206** | *"I'm here."* appeared as an assistant bubble between two real turns (the panel's re-open acknowledgment was a message, not just speech); action-card bubbles had a hole where the `<action>` block was stripped | the transcript screenshot |
+
+Also found, not a defect in the product: the **Approvals (1)** chip does not
+appear the instant GRACE says "sent to the Decision Queue" — the decision
+queue refetch is debounced. Reload, or pause a beat, before pointing at it.
+
+### The second-person step
+
+`info@theinnerface.com` (`user_3GaW8TXN…`, the account the Aug 31 run used)
+could not be signed into: password reset and magic link both failed, and the
+`CLERK_SECRET_KEY` in `.env.local` is rejected by Clerk's API, so the account
+could not be inspected from here. Fix in the Clerk dashboard when convenient.
+
+For the workshop the second person is **"View as a team member → Pastor
+James Wilson"**. That is the WorkOS leader-login feature, not a workaround:
+`resolveStaffActor` resolves the acting user to James Wilson's `users` row
+(a System Administrator holding `approvals.decide`), the approval and the
+audit row carry *his* id, and `security_events` records `authz.view_as` with
+both the real admin and the target on every request. Proposer ≠ approver, so
+C-13 passes. Say so honestly if asked: an admin previewing another leader's
+seat, and the security log says exactly that.
+
+### One self-inflicted outcome, recorded so it is not mistaken for a defect
+
+After the rehearsal I removed the rehearsal conversation from the tenant
+**while the panel was still open on it**. The next message ("Sarah Chen",
+answering *"Which one should I remove?"*) carried a conversation id that no
+longer existed; `getOrCreateConversation` silently started a fresh thread
+with no history, and GRACE answered as if it had never asked. That is a
+cleanup error, not a disambiguation defect — but it exposes two real things:
+a clarification lives only in history (there is no structured "pending
+action awaiting a name"), and an unknown conversation id should be a 404 the
+client can recover from, not a silent new thread. Neither is for this week.
+**On the day: start with + New, and stop leg 4a at "Which Sarah?" — never
+follow it with a real member's name.**
+
+---
+
 ## Pre-workshop checklist
 
 1. ~~Fix R-17 before demonstrating leg 3.~~ **Done and re-verified (7 samples).**
-2. **Seed the real workshop memory** through the real UI, signed in as
-   `user_3GaW8TXN3YM7XfjPjDbnHsgJNT5`, at least a day ahead — natural wording,
-   no `ZZREHEARSAL` tag — and verify the row exists.
+2. ~~Seed the real workshop memory.~~ **Done 2026-09-04** on the account that
+   actually drives the demo — `user_3Ge90H8…` (info@divinityagi.com), not
+   `user_3GaW8TXN…` — as *"our GRACE workshop demo is Thursday, September
+   10th"* through the real `/api/grace/chat` handler; the ambiguous
+   *"…is Thursday"* row is `superseded`. Recall verified in the browser.
 3. ~~Delete the empty conversations.~~ **Done.**
-4. **Decide the leg 4 narrative** given C-13 (same person proposed and approved).
-5. **Drive both legs once through the real browser UI.** This rehearsal proved
-   the handlers; it did not touch the panel, the action cards, or the Execute
-   button.
+4. ~~Decide the leg 4 narrative given C-13.~~ **C-13 is closed (#198).** The
+   narrative is now the true one: the proposer is refused in plain words,
+   a different person approves — **View as → Pastor James Wilson**.
+5. ~~Drive both legs once through the real browser UI.~~ **Done 2026-09-04/05**
+   — see *"Browser dress rehearsal"* above. Seven fixes came out of it.
 6. Do **not** demonstrate `send_email` (**C-04**), group activity (**R-12**), or
    anything on `#/redesign` (**R-01**).
+7. **On the day:** open Ask GRACE with **+ New**; stop leg 4a at *"Which
+   Sarah?"*; reload (or pause) before pointing at the **Approvals (1)** chip;
+   sidebar → **Yourself** after the View-as approval.
+8. **Hold the Dependabot majors** (Clerk backend 2→3, `@vercel/node` 5→11,
+   Sentry 8→10, Tailwind 3→4, lucide) until after the workshop — Clerk and
+   `@vercel/node` touch exactly the auth and function-loading paths verified
+   here.
