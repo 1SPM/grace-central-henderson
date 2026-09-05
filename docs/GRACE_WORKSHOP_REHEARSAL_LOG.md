@@ -23,6 +23,14 @@ further live samples.**
 > workshop-blocking. See *"Browser dress rehearsal"* below. Legs 3 and 4 are
 > now proven **LIVE UI**, end to end, including the second-person approval.
 
+> **Update — 2026-09-05, go/no-go run and R-21.** The final harness run passed
+> 10/10 — and one of those passes was wrong. Leg 3b had recalled a weekday-only
+> memory with a fabricated date and the assertion only looked for the word
+> "thursday". The assertion was tightened (#208), went red on the real
+> defect, the defect was fixed on the server (#209) and re-verified with 15
+> live samples, and the harness is green again on the unchanged rule. See
+> *"R-21"* below. **Both legs: READY.**
+
 ---
 
 > **On the names quoted below.** Every person named here — Sarah Mitchell,
@@ -140,6 +148,65 @@ date — the extracted copy now reads *"…Thursday at 2pm this week"* rather th
 *"(Aug 31)"*.
 
 **Verdict: LEG 3 IS READY.**
+
+### R-21 — the residue of R-17, found by the go/no-go, fixed and re-verified (2026-09-05)
+
+R-17 closed the note-date confusion: the bracketed date is named as
+provenance and the model stopped reading it as the event's date. What it did
+not close was the case where the note names **only a weekday**. The final
+go/no-go run on 2026-09-05 recalled *"my check-in with Bill Hoffman is
+Thursday at 2pm"* (noted on Friday, September 4) as:
+
+> *"Thursday at 2pm — that's today, September 4th."*
+
+September 4 is a Friday, and the prompt said so. **The assertion passed**,
+because it checked for the word "thursday" and nothing else. Reproduced on
+the next run.
+
+**The judge first (#208).** `live-rehearsal/dateClaims.ts` extracts every
+calendar date a reply pins and its weekday, skipping dates named as
+provenance (*"you told me on Friday, September 4th"* is R-17 working), and
+tells whether the reply claims the event is *today*. Leg 3b now requires
+every pinned date to be a Thursday and refuses "today" on a non-Thursday.
+Run live under that rule, leg 3b failed with *reply pinned "September 4th",
+which is a Friday, to a Thursday memory* — which was the point. A go/no-go
+that cannot say no is decoration.
+
+**Then the fix (#209).** The memory-block header had already told the model
+not to attach a date a note does not contain; it did anyway. So the server
+computes it. `weekdayOnlyHint` (`api/_lib/grace-memory.ts`) appends to any
+weekday-only memory line the next occurrence of that weekday after the note
+was taken —
+
+> `[you said on Fri, Sep 4] my check-in with Bill is Thursday at 2pm (weekday only — the next Thursday after this note is Thu, Sep 10; if you give a date, give exactly that one)`
+
+— or, when the note was written on that very weekday, both candidates and an
+instruction to say it is unclear rather than choose. Stored content is
+untouched; the anchor lives only in the prompt. The weekday is read on the
+**church's** calendar, not the server's: the client now sends its IANA zone
+with each turn (`timeZone`). A note taken at 6pm Pacific on a Thursday is
+already Friday in UTC and would otherwise have been pushed a week out.
+
+**Re-verified with R-17's discipline.** Local handler with the fix, live
+tenant, real Claude, demo account, every artefact removed afterwards —
+**15 fresh-conversation recalls, 0 wrong dates:**
+
+| replies | wording |
+|---|---|
+| 14 | *"…is Thursday at 2pm — that's September 10th."* (a Thursday) |
+| 1 | *"…is Thursday at 2pm. You told me that on Friday (today)."* (weekday plus provenance; no date pinned) |
+
+Harness leg 3b is green again **on the unchanged rule**. The only change to
+the judge: a provenance "today" inside a telling-clause is not an event
+claim — while *"It is today at 2pm"* after a sentence break is still caught,
+and tested. Post-merge, the full harness runs 10/10 against production code
+with the recall reading *"that's September 10th."*
+
+**What this means for the workshop.** The seeded memory already carries an
+explicit date, so leg 3 was never exposed. The rule for the day — say the
+date, not just the weekday, in any live *"remember that…"* — is now
+belt-and-braces rather than necessary. For the pilot it matters more: staff
+say "Thursday" far more often than "September 10th".
 
 ---
 
@@ -320,7 +387,9 @@ follow it with a real member's name.**
    anything on `#/redesign` (**R-01**).
 7. **On the day:** open Ask GRACE with **+ New**; stop leg 4a at *"Which
    Sarah?"*; reload (or pause) before pointing at the **Approvals (1)** chip;
-   sidebar → **Yourself** after the View-as approval.
+   sidebar → **Yourself** after the View-as approval. Any live *"remember
+   that…"* should name the date as well as the weekday — no longer necessary
+   since R-21, still good habit.
 8. **Hold the Dependabot majors** (Clerk backend 2→3, `@vercel/node` 5→11,
    Sentry 8→10, Tailwind 3→4, lucide) until after the workshop — Clerk and
    `@vercel/node` touch exactly the auth and function-loading paths verified
