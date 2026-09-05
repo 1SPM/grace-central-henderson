@@ -66,6 +66,16 @@ describe('parseActions', () => {
     expect(r.actions).toHaveLength(0);
   });
 
+  it('leaves one paragraph break where an action block was stripped, not a hole', () => {
+    // The model puts the action on its own paragraph; removing it left two
+    // blank paragraphs back to back, which whitespace-pre-wrap rendered as a
+    // gap in the bubble (2026-09-05 rehearsal).
+    const text = "I'll remove ZZREHEARSAL DeleteMe from the system.\n\n<action>{\"type\":\"delete_person\",\"personName\":\"ZZREHEARSAL DeleteMe\"}</action>\n\nReview and confirm when you're ready, and I'll save it.";
+    const r = parseActions(text);
+    expect(r.actions).toHaveLength(1);
+    expect(r.cleanText).toBe("I'll remove ZZREHEARSAL DeleteMe from the system.\n\nReview and confirm when you're ready, and I'll save it.");
+  });
+
   it('returns text unchanged when no action blocks', () => {
     const r = parseActions('Just answering a question.');
     expect(r.actions).toHaveLength(0);

@@ -8,6 +8,7 @@ import { useGraceChat, PendingAction } from '../contexts/GraceChatContext';
 import { GraceOrb } from './grace/GraceOrb';
 import { ChatMarkdown } from './grace/ChatMarkdown';
 import type { GraceQuickTag } from '../lib/grace-chat/adminQuickTags';
+import { pickReturnGreeting } from '../lib/grace-chat/persistence';
 import { FloatingWindow } from './ui/FloatingWindow';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { CampusView } from './workos/CampusView';
@@ -97,20 +98,20 @@ export function AskGraceChat({ variant = 'panel', onClose, fullscreen = false }:
     return () => window.clearTimeout(timer);
   }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
 
-  // Speak the short "I'm here" re-greeting GraceChatContext appends on a
-  // same-session re-open (see openPanel) — the full-greeting effect above
-  // only fires once per session, so this is what voices every reopen after.
-  const lastSpokenRegreetIdRef = useRef<string | null>(null);
+  // Speak a short "I'm here" on a same-session re-open (GraceChatContext
+  // bumps reopenTick in openPanel) — the full-greeting effect above only
+  // fires once per session, so this is what voices every reopen after.
+  // Voice only: nothing is added to the transcript.
+  const lastSpokenReopenRef = useRef(0);
   useEffect(() => {
     if (variant !== 'panel' || !aiSettings.voiceReadback || !speechSupported) return;
-    const last = chat.messages[chat.messages.length - 1];
-    if (!last || last.role !== 'assistant' || last.source !== 'regreet') return;
-    if (lastSpokenRegreetIdRef.current === last.id) return;
-    lastSpokenRegreetIdRef.current = last.id;
+    if (chat.reopenTick === 0 || lastSpokenReopenRef.current === chat.reopenTick) return;
+    lastSpokenReopenRef.current = chat.reopenTick;
 
-    const timer = window.setTimeout(() => speak(last.content, last.id), 300);
+    const ack = pickReturnGreeting();
+    const timer = window.setTimeout(() => speak(ack.content, ack.id), 300);
     return () => window.clearTimeout(timer);
-  }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.messages]);
+  }, [variant, aiSettings.voiceReadback, speechSupported, speak, chat.reopenTick]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
