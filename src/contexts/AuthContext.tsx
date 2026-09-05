@@ -200,9 +200,21 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
             };
             setUser(mappedUser);
             authService.setCurrentUser(mappedUser);
+          } else if (error && error.code !== 'PGRST116') {
+            // A real error (network/RLS/outage), not "genuinely zero rows"
+            // (PGRST116). Treating this the same as "brand new user" was
+            // the bug: a transient failure here bounced an existing staff
+            // member to /signup's new-church wizard. Prefer the same
+            // Clerk-metadata fallback the outer catch already uses over
+            // guessing this is a signup.
+            const fallbackUser = clerkMetadataFallbackUser(clerkUser);
+            if (fallbackUser) {
+              setUser(fallbackUser);
+              authService.setCurrentUser(fallbackUser);
+            }
           } else {
-            // User has no `users` row yet. The church_id comes from
-            // publicMetadata set by POST /api/billing/create-church —
+            // Genuinely zero rows for this clerk_id. The church_id comes
+            // from publicMetadata set by POST /api/billing/create-church —
             // it must already exist before we write a users row.
             // If it's missing, the user hasn't finished onboarding;
             // redirect to /signup rather than inserting a row with a
