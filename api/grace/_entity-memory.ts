@@ -18,7 +18,11 @@ import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 // full names, so a bare first name returned "not found" — and Central
 // Henderson has two Sarahs. countPersonMatches tiers exact-full-name →
 // exact-first-name → substring, returning EVERY match at whichever tier hit.
-import { countPersonMatches } from '../../src/lib/grace-actions.js';
+// personMatching.ts is a dependency-free leaf on purpose: this route runs
+// under Node ESM, where the client module's extensionless imports do not
+// resolve (ERR_MODULE_NOT_FOUND on actionCatalog took the route down in
+// production on 2026-09-04).
+import { countPersonMatches } from '../../src/lib/personMatching.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -98,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const byId = new Map(rows.map(r => [r.id, r]));
   const candidates = countPersonMatches(
     body.name!,
-    rows.map(r => ({ id: r.id, firstName: r.first_name ?? '', lastName: r.last_name ?? '' })) as never,
+    rows.map(r => ({ id: r.id, firstName: r.first_name ?? '', lastName: r.last_name ?? '' })),
   );
   if (candidates.length === 0) return respond('not_found', `I couldn't find a current record for ${body.name}.`);
   if (candidates.length > 1) {

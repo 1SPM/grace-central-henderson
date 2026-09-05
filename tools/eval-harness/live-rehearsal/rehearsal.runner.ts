@@ -33,13 +33,18 @@ import { buildDataContext } from '../../../src/contexts/GraceChatContext.js';
 import { parseActions, hydrateAction } from '../../../src/lib/grace-actions.js';
 import type { GraceData } from '../../../src/lib/grace-chat/types.js';
 import type { Person } from '../../../src/types.js';
+import { findDateClaims, claimsToday, weekdayOf } from './dateClaims.js';
 
 const CHURCH_ID = '11111111-1111-1111-1111-111111111111';
 /** The account that has actually driven Ask GRACE on this tenant — memories
  *  are scoped to church_id + user_id, so the pre-seeded workshop memory MUST
  *  belong to this user or the demo recalls nothing. */
-const DEMO_CLERK_ID = 'user_3GaW8TXN3YM7XfjPjDbnHsgJNT5';
-const DEMO_USER_ID = '0d93eed1-df64-4eae-a273-2a28439120ed';
+const DEMO_CLERK_ID = 'user_3Ge90H8NjoV8nIfP2DJB2qnIYI4';
+const DEMO_USER_ID = '6a5838df-63ca-46c1-843f-3d1436186946';
+/** A SECOND System Administrator on the tenant. Since the C-13 fix the proposer
+ *  cannot approve their own request, so leg 4 needs two people — as it should. */
+const APPROVER_CLERK_ID = 'user_3GaW8TXN3YM7XfjPjDbnHsgJNT5';
+const APPROVER_USER_ID = '0d93eed1-df64-4eae-a273-2a28439120ed';
 
 /** Everything this run creates is prefixed so it is trivially findable and removable. */
 const TAG = 'ZZREHEARSAL';
@@ -89,12 +94,12 @@ function makeRes(): Res {
 }
 
 /** Loads the REAL handler with ONLY Clerk stubbed and the REAL Supabase client injected. */
-async function loadHandler(path: string) {
+async function loadHandler(path: string, asClerkId = DEMO_CLERK_ID) {
   vi.resetModules();
   globalThis.fetch = realFetch;
   process.env.CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || 'unused-because-verifyToken-is-stubbed';
   vi.doMock('@clerk/backend', () => ({
-    verifyToken: vi.fn().mockResolvedValue({ sub: DEMO_CLERK_ID, app_metadata: { church_id: CHURCH_ID } }),
+    verifyToken: vi.fn().mockResolvedValue({ sub: asClerkId, app_metadata: { church_id: CHURCH_ID } }),
   }));
   const mod = await import(path);
   return mod.default as (req: Req, res: Res) => Promise<unknown>;
@@ -232,6 +237,18 @@ describe('LEG 3 — MEMORY (live tenant)', () => {
     log(`  3b status/json: ${JSON.stringify(res.statuses)} ${JSON.stringify(res.jsonBodies)}`);
     expect(reply.length).toBeGreaterThan(0);
     expect(reply.toLowerCase()).toContain('thursday');
+    // The memory names a weekday and no date. Recalling the weekday is the
+    // floor; pinning a WRONG date to it is a fabrication (2026-09-05: "that's
+    // today, September 4th" — a Friday). Every date the reply pins must be a
+    // Thursday, and "today" may only be claimed on a Thursday. Provenance
+    // dates ("you told me on Friday, September 4th") are excluded by design.
+    const today = new Date();
+    for (const claim of findDateClaims(reply, today.getFullYear())) {
+      expect(claim.weekday, `reply pinned "${claim.raw}", which is a ${claim.weekday}, to a Thursday memory`).toBe('Thursday');
+    }
+    if (claimsToday(reply)) {
+      expect(weekdayOf(today), `reply says the Thursday check-in is "today", but today is ${weekdayOf(today)}`).toBe('Thursday');
+    }
   });
 });
 
@@ -320,17 +337,35 @@ describe('LEG 4b — AUTHORITY: propose → approve → execute → audit (TEST 
     log(`  4b-3 pending approvals (newest 3): ${JSON.stringify(data)}`);
     const mine = ((data ?? []) as ApprovalRow[]).find(a => a.entity_type === 'agent_action');
     expect(mine).toBeTruthy();
-    // C-13: recorded here on purpose — the proposer and the approver are the
-    // same user id, and nothing in the decide path compares them.
-    log(`  4b-3 requested_by_user_id = ${mine!.requested_by_user_id} · approver will be ${DEMO_USER_ID}`);
+    log(`  4b-3 requested_by_user_id = ${mine!.requested_by_user_id} · approver will be ${APPROVER_USER_ID}`);
   });
 
-  it('4b-4 · approving it executes the delete and writes an audit row', async () => {
+  it('4b-4a · the proposer CANNOT approve their own request (C-13 closed)', async () => {
     const { data: acts } = await live().from('agent_actions')
       .select('id, approval_id').eq('church_id', CHURCH_ID).eq('target_entity_id', testPersonId);
     const approvalId = ((acts ?? []) as AgentActionRow[])[0].approval_id!;
 
-    const handler = await loadHandler('../../../api/approvals/_index.js');
+    const handler = await loadHandler('../../../api/approvals/_index.js', DEMO_CLERK_ID);
+    const req = makeReq({ decision: 'approve', decision_notes: `${TAG} self-approval attempt` }, 'PATCH');
+    req.query = { id: approvalId };
+    const res = makeRes();
+    await handler(req, res);
+    log(`  4b-4a self-approve status=${JSON.stringify(res.statuses)} body=${JSON.stringify(res.jsonBodies)}`);
+    expect(res.statuses[0]).toBe(403);
+    expect((res.jsonBodies[0] as { error: string }).error).toBe('self_approval');
+
+    const { data: person } = await live().from('people').select('id').eq('id', testPersonId).maybeSingle();
+    expect(person, 'the refusal must not have executed the delete').not.toBeNull();
+    const { data: approval } = await live().from('approvals').select('status').eq('id', approvalId).maybeSingle();
+    expect(approval?.status).toBe('pending');
+  });
+
+  it('4b-4 · a DIFFERENT person approving it executes the delete and writes an audit row', async () => {
+    const { data: acts } = await live().from('agent_actions')
+      .select('id, approval_id').eq('church_id', CHURCH_ID).eq('target_entity_id', testPersonId);
+    const approvalId = ((acts ?? []) as AgentActionRow[])[0].approval_id!;
+
+    const handler = await loadHandler('../../../api/approvals/_index.js', APPROVER_CLERK_ID);
     const req = makeReq({ decision: 'approve', decision_notes: `${TAG} workshop rehearsal` }, 'PATCH');
     req.query = { id: approvalId };
     const res = makeRes();
@@ -346,12 +381,11 @@ describe('LEG 4b — AUTHORITY: propose → approve → execute → audit (TEST 
       .eq('church_id', CHURCH_ID).eq('entity_id', testPersonId);
     log(`  4b-4 audit_logs: ${JSON.stringify(audit)}`);
     expect(audit?.length).toBeGreaterThan(0);
-    // FINDING (live, 2026-08-31): approvals/_index.ts:331 hardcodes action:'update'
-    // for the mutation audit row, so an APPROVED DELETION is filed as an
-    // 'update'. /api/actions/execute correctly writes 'delete'. Asserted as
-    // observed, not as intended, so this runner reports the real behaviour.
-    expect(audit![0].action, 'observed: approvals path files a delete as an update').toBe('update');
-    expect(audit![0].actor_user_id).toBe(DEMO_USER_ID);
+    // R-18 (found live 2026-08-31, closed 2026-09-04): the approvals path used
+    // to hardcode action:'update', so an APPROVED DELETION was filed as an
+    // update. The verb now comes from the mutation itself (after === null).
+    expect(audit![0].action, 'an approved deletion is filed as a delete').toBe('delete');
+    expect(audit![0].actor_user_id).toBe(APPROVER_USER_ID);
   });
 
   it('4b-5 · REPORT', () => {

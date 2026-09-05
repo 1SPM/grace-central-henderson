@@ -28,6 +28,7 @@ import {
   executeAgentAction,
   isExecutableActionType,
   listExecutableActionTypes,
+  auditActionFor,
   ASSIGN_OWNER_RPC,
   type AgentActionRow,
   type ExecutorContext,
@@ -240,5 +241,20 @@ describe('delete_person — the gated, irreversible one', () => {
     const supabase = db();
     const result = await executeAgentAction(supabase as never, personAction({ target_entity_id: null }), context());
     expect(result).toEqual({ ok: false, reason: 'no_target_person' });
+  });
+});
+
+describe('auditActionFor — the verb comes from the mutation, not the route (R-18)', () => {
+  const m = (before: Record<string, unknown> | null, after: Record<string, unknown> | null) =>
+    ({ entityType: 'person', entityId: 'p1', before, after });
+
+  it('a snapshot with nothing after it is a delete', () => {
+    expect(auditActionFor(m({ id: 'p1' }, null))).toBe('delete');
+  });
+  it('nothing before and something after is a create', () => {
+    expect(auditActionFor(m(null, { id: 'p1' }))).toBe('create');
+  });
+  it('before and after both present is an update', () => {
+    expect(auditActionFor(m({ owner: null }, { owner: 'u1' }))).toBe('update');
   });
 });

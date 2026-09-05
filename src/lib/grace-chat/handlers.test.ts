@@ -9,6 +9,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { runActionHandler, type HandlerContext, type ChatHandlers } from './handlers';
+import { setClerkTokenProvider } from '../supabase';
 import type { PendingAction } from '../grace-actions';
 import type { Person, Task, PrayerRequest } from '../../types';
 
@@ -46,6 +47,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.restoreAllMocks();
+  setClerkTokenProvider(null);
 });
 
 const AMBIGUOUS_PERSON = { personAmbiguous: true as const, personName: 'Sarah', personCandidates: ['Sarah Kim', 'Sarah Lopez'] };
@@ -138,6 +140,43 @@ describe('approval status is irrelevant until target ambiguity has been resolved
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(String(fetchSpy.mock.calls[0][0])).toContain('/api/actions/propose');
     expect(pushed.join(' ')).toMatch(/needs approval/i);
+  });
+});
+
+describe('the chat door authenticates its server calls', () => {
+  // Found in the browser on the live tenant (2026-09-04): /api/actions/propose
+  // was sent with only a Content-Type header, so every gated chat action
+  // came back "I couldn't send that for approval: missing bearer token".
+  // The harness never saw it because it stubs Clerk's verifyToken. What the
+  // route sees is the header, so that is what this asserts.
+  const headersOf = (call: unknown[]) => (call[1] as { headers: Record<string, string> }).headers;
+
+  it('sends the Clerk bearer token with a proposal', async () => {
+    setClerkTokenProvider(async () => 'clerk-session-token');
+    fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ status: 'pending' }) });
+    const { ctx } = makeCtx({ type: 'delete_person', personId: 'p1', personName: 'Sarah Kim' });
+    await runActionHandler(ctx);
+    expect(headersOf(fetchSpy.mock.calls[0])).toMatchObject({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer clerk-session-token',
+    });
+  });
+
+  it('sends the Clerk bearer token with a direct execution', async () => {
+    setClerkTokenProvider(async () => 'clerk-session-token');
+    fetchSpy.mockResolvedValue({ ok: true, json: async () => ({}) });
+    const { ctx } = makeCtx({ type: 'delete_task', taskId: 't1', taskTitle: 'Follow up' } as PendingAction);
+    ctx.tasks = [{ id: 't1', title: 'Follow up', completed: false } as Task];
+    await runActionHandler(ctx);
+    expect(String(fetchSpy.mock.calls[0][0])).toContain('/api/actions/execute');
+    expect(headersOf(fetchSpy.mock.calls[0]).Authorization).toBe('Bearer clerk-session-token');
+  });
+
+  it('still sends the request, without a token, when no provider is registered', async () => {
+    fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ status: 'pending' }) });
+    const { ctx } = makeCtx({ type: 'delete_person', personId: 'p1', personName: 'Sarah Kim' });
+    await runActionHandler(ctx);
+    expect(headersOf(fetchSpy.mock.calls[0])).toEqual({ 'Content-Type': 'application/json' });
   });
 });
 

@@ -77,6 +77,65 @@ describe('ApprovalCentre (approval test)', () => {
     });
   });
 
+  it('asks the server for pending approvals on first load, matching the filter it shows', async () => {
+    // The dropdown opens on "Pending"; the first request has to say so, or
+    // every decided row is listed under a filter that claims otherwise.
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/approvals')) return Promise.resolve(jsonResponse({ approvals: [PENDING_APPROVAL] }));
+      return Promise.resolve(jsonResponse({ permissions: ['approvals.decide'] }));
+    });
+
+    render(<ApprovalCentre />);
+
+    await waitFor(() => expect(screen.getByTestId('approval-card')).toBeInTheDocument());
+    const firstList = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/approvals'));
+    expect(String(firstList![0])).toContain('status=pending');
+  });
+
+  it('re-lists with the same filter after a decision, so Pending stays Pending', async () => {
+    // Seen live 2026-09-05: approving the one pending card refreshed the
+    // list unfiltered, and 16 decided rehearsal rows appeared under a
+    // dropdown still reading "Pending".
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/approvals') && opts?.method === 'PATCH') {
+        return Promise.resolve(jsonResponse({ approval: { ...PENDING_APPROVAL, status: 'decided', decision: 'approve' } }));
+      }
+      if (url.includes('/api/approvals')) return Promise.resolve(jsonResponse({ approvals: [PENDING_APPROVAL] }));
+      return Promise.resolve(jsonResponse({ permissions: ['approvals.decide'] }));
+    });
+
+    render(<ApprovalCentre />);
+    await waitFor(() => expect(screen.getByTestId('approval-card')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Approve'));
+
+    await waitFor(() => expect(fetchMock.mock.calls.some(([, o]) => o?.method === 'PATCH')).toBe(true));
+    await waitFor(() => {
+      const lists = fetchMock.mock.calls.filter(([url, o]) => String(url).includes('/api/approvals') && !o?.method);
+      expect(lists.length).toBeGreaterThanOrEqual(2);
+      expect(String(lists[lists.length - 1][0])).toContain('status=pending');
+    });
+  });
+
+  it('explains a self-approval refusal in plain words instead of the error code', async () => {
+    // C-13: the requester may not approve their own request. The server says
+    // 403 { error: 'self_approval' }; the decider must not see "self_approval".
+    fetchMock.mockImplementation((url: string, opts?: RequestInit) => {
+      if (url.includes('/api/approvals') && opts?.method === 'PATCH') {
+        return Promise.resolve(jsonResponse({ error: 'self_approval' }, 403));
+      }
+      if (url.includes('/api/approvals')) return Promise.resolve(jsonResponse({ approvals: [PENDING_APPROVAL] }));
+      return Promise.resolve(jsonResponse({ permissions: ['approvals.decide'] }));
+    });
+
+    render(<ApprovalCentre />);
+
+    await waitFor(() => expect(screen.getByTestId('approval-card')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Approve'));
+
+    await waitFor(() => expect(screen.getByText(/someone else has to approve it/i)).toBeInTheDocument());
+    expect(screen.queryByText('self_approval')).not.toBeInTheDocument();
+  });
+
   it('does not show decision buttons when the caller only has approvals.view', async () => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('/api/approvals')) return Promise.resolve(jsonResponse({ approvals: [PENDING_APPROVAL] }));

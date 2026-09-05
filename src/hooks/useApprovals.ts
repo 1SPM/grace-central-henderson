@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { workosFetch, WorkOsApiError } from '../lib/services/workos';
 import type { Approval, ApprovalDecision, ApprovalStatus } from '../types/shared-platform';
@@ -14,14 +14,28 @@ interface ListResponse { approvals: Approval[] }
 export interface AgentActionOutcome { action_id: string; status: string; reason?: string }
 interface DecideResponse { approval: Approval; agent_action?: AgentActionOutcome | null; audit_incomplete?: boolean }
 
-export function useApprovals() {
+/**
+ * @param initialStatus what the first load asks for. The Approval Centre
+ * opens on "Pending", so its first fetch must say so — mounting with an
+ * unfiltered list() showed every decided row under a dropdown that read
+ * Pending (2026-09-04 browser rehearsal: 16 decided rehearsal deletions
+ * above the one live request).
+ */
+export function useApprovals(initialStatus?: ApprovalStatus) {
   const { getAuthToken } = useAuthContext();
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [forbidden, setForbidden] = useState(false);
+  // What the list currently shows, so a decision refreshes the SAME view.
+  // decide() used to re-list unfiltered, which put every decided row back
+  // under a dropdown still reading "Pending" the moment one was approved.
+  const lastFilters = useRef<{ status?: ApprovalStatus; workOrderId?: string } | undefined>(
+    initialStatus ? { status: initialStatus } : undefined,
+  );
 
   const list = useCallback(async (filters?: { status?: ApprovalStatus; workOrderId?: string }) => {
+    lastFilters.current = filters;
     setIsLoading(true);
     setError(null);
     setForbidden(false);
@@ -40,14 +54,14 @@ export function useApprovals() {
     }
   }, [getAuthToken]);
 
-  useEffect(() => { void list(); }, [list]);
+  useEffect(() => { void list(initialStatus ? { status: initialStatus } : undefined); }, [list, initialStatus]);
 
   const decide = useCallback(async (id: string, decision: ApprovalDecision, decisionNotes?: string) => {
     const data = await workosFetch<DecideResponse>(`/api/approvals?id=${encodeURIComponent(id)}`, getAuthToken, {
       method: 'PATCH',
       body: JSON.stringify({ decision, decision_notes: decisionNotes }),
     });
-    await list();
+    await list(lastFilters.current);
     return {
       approval: data.approval,
       agentAction: data.agent_action ?? null,
@@ -60,7 +74,7 @@ export function useApprovals() {
       method: 'PATCH',
       body: JSON.stringify({ mark_related_party_reviewed: true }),
     });
-    await list();
+    await list(lastFilters.current);
     return data.approval;
   }, [getAuthToken, list]);
 

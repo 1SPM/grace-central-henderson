@@ -1,5 +1,6 @@
 import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
 import { actionTypesForSurface } from './actionCatalog';
+import { countPersonMatches } from './personMatching';
 
 export type ActionType =
   | 'add_task'
@@ -98,7 +99,11 @@ export function parseActions(text: string): ParseResult {
       // malformed JSON — skip silently
     }
   }
-  cleanText = cleanText.trim();
+  // An action block usually sits on its own paragraph, so removing it
+  // leaves two blank paragraphs back to back — which whitespace-pre-wrap
+  // renders as a hole in the bubble. Collapse any run of blank lines
+  // (including whitespace-only ones) to a single paragraph break.
+  cleanText = cleanText.replace(/[ \t]*\n(?:[ \t]*\n)+/g, '\n\n').trim();
   if (!cleanText) {
     cleanText = actions.length === 1
       ? 'Ready to add this? Review and edit, then click Execute.'
@@ -232,15 +237,10 @@ export function resolvePrayer(
 // not a new or different judgment about who matches.
 // ---------------------------------------------------------------------
 
-export function countPersonMatches(name: string | undefined, people: Person[]): Person[] {
-  if (!name) return [];
-  const lower = name.toLowerCase().trim();
-  const exact = people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase() === lower);
-  if (exact.length > 0) return exact;
-  const firstNameOnly = people.filter(p => p.firstName.toLowerCase() === lower);
-  if (firstNameOnly.length > 0) return firstNameOnly;
-  return people.filter(p => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lower));
-}
+// countPersonMatches lives in personMatching.ts (a dependency-free leaf) so
+// the server person-lookup route can share it without dragging this module's
+// imports into a Node ESM function. Re-exported here so callers are unchanged.
+export { countPersonMatches };
 
 export function countTaskMatches(
   title: string | undefined,

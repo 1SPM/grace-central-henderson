@@ -11,7 +11,9 @@ import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { StatusBadge } from './ui/StatusBadge';
 import { buildActionBarSignals } from '../lib/actionBarSignals';
+import { openHashRoute } from '../lib/workosNav';
 import type { DecisionQueueItem } from '../hooks/useDecisionQueue';
+import type { View } from '../types';
 
 const COLLAPSE_KEY = 'graceActionBar.collapsed';
 const MAX_VISIBLE = 5;
@@ -20,9 +22,10 @@ interface ActionBarProps {
   items: DecisionQueueItem[];
   isLoading: boolean;
   currentView: string;
+  setView: (view: View) => void;
 }
 
-export function ActionBar({ items, isLoading, currentView }: ActionBarProps) {
+export function ActionBar({ items, isLoading, currentView, setView }: ActionBarProps) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
 
   // Fail closed while loading, matching WorkOsHub's gate — never flash
@@ -67,6 +70,10 @@ export function ActionBar({ items, isLoading, currentView }: ActionBarProps) {
           <a
             key={signal.kind}
             href={signal.href}
+            // The href is the canonical route, kept for semantics and
+            // middle-click; the click itself has to drive the app's view
+            // state, because nothing routes on a bare hash change.
+            onClick={e => { if (openHashRoute(signal.href, setView)) e.preventDefault(); }}
             className="flex-shrink-0"
           >
             <StatusBadge variant={signal.badgeVariant} size="sm">

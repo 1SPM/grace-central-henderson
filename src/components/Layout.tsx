@@ -687,7 +687,7 @@ export function Layout({ currentView, setView, children, onOpenSearch, isDemo = 
 
         <DemoEnvironmentBanner />
         <TrialBanner />
-        <ActionBar items={decisionQueueItems} isLoading={decisionQueueLoading} currentView={currentView} />
+        <ActionBar items={decisionQueueItems} isLoading={decisionQueueLoading} currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-auto">
           {children}
         </main>

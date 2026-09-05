@@ -131,11 +131,16 @@ all 49 permissions including `approvals.decide` — can ask GRACE to
 `delete_person`, then approve their own request seconds later in the Decision
 Queue. The change is fully audited and attributed; it simply is not a second
 pair of eyes.
-**Status: OPEN — WORKSHOP SAFE**, and in fact it is what makes a solo
-rehearsal/demo of leg 4 possible at all. **Reclassify to PILOT BLOCKER** if the
-pilot contract promises dual control. *Found while rehearsing demo leg 4 on the
-live tenant (2026-08-31); it corrects an incorrect "self-approval blocked"
-claim made earlier in this same checkpoint.*
+**Status: CLOSED 2026-09-04.** The decide path now refuses `approve` /
+`approve_with_changes` when `requested_by_user_id === actor.userId` (403
+`self_approval`); `reject` / `return_for_revision` / `escalate` on one's own
+request stay allowed (withdrawing is not approving), and agent proposals carry
+no human requester so are unaffected. Route tests in
+`api/approvals/agentActions.test.ts`; the live rehearsal runner now proposes as
+one System Administrator and approves as another, and asserts the self-approval
+refusal first. Leg 4 therefore needs two people — as it should. *Found while
+rehearsing demo leg 4 on the live tenant (2026-08-31); it corrected an incorrect
+"self-approval blocked" claim made earlier in this same checkpoint.*
 
 ---
 

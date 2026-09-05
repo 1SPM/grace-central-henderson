@@ -15,7 +15,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { requirePermission } from '../_lib/authz.js';
-import { executeAgentAction } from '../_lib/agentActionExecutors.js';
+import { executeAgentAction, auditActionFor } from '../_lib/agentActionExecutors.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, bool_ } from '../_lib/validation.js';
@@ -159,6 +159,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!existing) return res.status(404).json({ error: 'not_found' });
     if (existing.status !== 'pending') {
       return res.status(409).json({ error: 'already_decided', status: existing.status });
+    }
+    // C-13: the approval gate is a second pair of eyes, so the person who
+    // asked for the change cannot be the one who approves it. Only favourable
+    // decisions are held back — withdrawing or escalating your own request is
+    // fine — and agent proposals carry no human requester, so are unaffected.
+    if (existing.requested_by_user_id && existing.requested_by_user_id === actor.userId
+        && ['approve', 'approve_with_changes'].includes(body.decision)) {
+      return res.status(403).json({ error: 'self_approval' });
     }
 
     const decidedAt = new Date().toISOString();
@@ -328,7 +336,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         churchId: actor.churchId,
         actorUserId: actor.userId,
         actorClerkId: actor.clerkUserId,
-        action: 'update',
+        action: auditActionFor(agentMutation),
         entityType: agentMutation.entityType,
         entityId: agentMutation.entityId,
         before: agentMutation.before,

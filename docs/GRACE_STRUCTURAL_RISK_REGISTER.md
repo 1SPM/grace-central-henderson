@@ -310,10 +310,15 @@ repository or live-database evidence.
   deletions** — and that query is the whole point of the trail. Workshop: LOW.
   Pilot: **MEDIUM.** Production: MEDIUM. Security/privacy: MEDIUM (SOC 2
   evidence-gathering, "who deleted this record?").
-- **Timing:** before pilot. **To close:** derive the verb from the mutation
-  (`agentMutation.after === null ? 'delete' : 'update'`) — a one-line change with
-  an obvious test. Deliberately **not** applied here: it edits a live approval
-  path and this turn's scope was rehearsal.
+- **Status: CLOSED 2026-09-04.** `auditActionFor(mutation)` in
+  `api/_lib/agentActionExecutors.ts` derives the verb from the mutation's own
+  snapshots (`after === null` → delete, `before === null` → create, else
+  update) and BOTH routes use it — the approvals path had hardcoded `'update'`
+  and `/api/actions/execute` had hardcoded `'delete'`, each right for the one
+  executor it was written around. Unit-tested on the helper, route-tested on
+  an approved `delete_person` (`action='delete'`, `entity_type='person'`,
+  `after: null`), and re-rehearsed live: the approved deletion now files as a
+  `delete` under the approver's id.
 
 ## R-19 · Extraction duplicates a fact the deterministic path already stored — **still open, no longer carries a wrong date**
 - **Layer:** memory · **Severity: LOW** · **Likelihood: HIGH (observed live)**
@@ -366,3 +371,48 @@ repository or live-database evidence.
   what four other fixtures already do.
 - **Not fixed here:** it belongs to whoever owns the in-flight mobile refactor,
   and the right fix is a proof-boundary decision, not a regex tweak.
+## R-21 · A weekday-only memory gets a wrong calendar date pinned to it — **FIXED & RE-VERIFIED 2026-09-05 (15 live samples, 0 wrong dates)**
+- **Layer:** memory → model · **Severity: MEDIUM** · **Likelihood: HIGH for
+  weekday-only notes (observed 2/2 on 2026-09-05)**
+- **Description.** R-17 fixed the note-date confusion (the bracketed date is
+  named as provenance now). What remains: a memory that names only a weekday —
+  *"check-in with Bill is Thursday at 2pm"* — is recalled with a calendar date
+  the model invents. Recorded on Friday 2026-09-04 (local), asked in a fresh
+  conversation: *"Thursday at 2pm — that's today, September 4th."* The prompt
+  said `Today: Friday, September 4, 2026`; September 4 is a Friday. Reproduced
+  on the next run.
+- **Evidence (live).** `tools/eval-harness/.output/live-rehearsal.json`, leg
+  3b, 2026-09-05 02:xx UTC, both runs.
+- **Why the harness had not caught it.** The 3b assertion checked for the word
+  "thursday" and nothing else. It now checks every calendar date the reply
+  pins against the memory's weekday and refuses "today" on a non-Thursday
+  (`live-rehearsal/dateClaims.ts`, provenance dates excluded by design), so
+  **leg 3b is red until this is fixed** — correctly.
+- **Impact.** Workshop: **LOW** — the seeded workshop memory carries an
+  explicit date ("Thursday, September 10th") and recalls exactly; the rule for
+  the day is that any "remember that…" said live must include the date.
+  Pilot: MEDIUM — staff say "Thursday" far more often than "September 10th".
+- **Fix (same day).** Telling the model not to compute a date was already in
+  the header and was not enough, so the server computes it.
+  `weekdayOnlyHint` (`api/_lib/grace-memory.ts`) appends to any weekday-only
+  memory line the next occurrence of that weekday after the note was taken —
+  *"(weekday only — the next Thursday after this note is Thu, Sep 10; if you
+  give a date, give exactly that one)"* — or, when the note was written on
+  that very weekday, both candidates with an instruction to say it is
+  unclear. The header now says to use exactly that date and never call it
+  "today" unless today's date is literally that date. The client sends its
+  IANA zone with each turn (`timeZone`, shape-checked in the route) so the
+  weekday is read on the church's calendar, not UTC's — a note taken at 6pm
+  Pacific on a Thursday is already Friday in UTC and would otherwise be
+  pushed a week out. Stored content is untouched; the anchor lives only in
+  the prompt.
+- **Verification (live, local handler with the fix, real Claude, demo
+  account, all artefacts removed afterwards).** 15 fresh-conversation recalls
+  of *"…check-in with Bill Hoffman is Thursday at 2pm"* noted on Friday
+  2026-09-04: 14 × *"Thursday at 2pm — that's September 10th"* (a Thursday),
+  1 × *"Thursday at 2pm. You told me that on Friday (today)"* (weekday plus
+  provenance, no date pinned). **0 wrong dates.** Harness leg 3b, red since
+  #208, is green again on the same rule — nothing in the assertion was
+  loosened; the judge learned only that a provenance "today" inside a
+  telling-clause is not an event claim.
+

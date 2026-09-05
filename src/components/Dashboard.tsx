@@ -22,7 +22,7 @@ import { useMailInboxStats } from '../hooks/useMailInboxStats';
 import { usePortalActivity } from '../hooks/usePortalActivity';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useChurchClock } from '../hooks/useChurchClock';
-import { buildDashboardCalendarIndex } from '../lib/calendarEvents';
+import { buildCalendarIndex, buildDashboardCalendarIndex } from '../lib/calendarEvents';
 import { greetingWord, resolveAddressee } from '../lib/greeting';
 import {
   buildDashboardMetricsFromInputs,
@@ -135,10 +135,17 @@ export function Dashboard({
     [people, tasks, giving, careConversations, prayers, mailStats, mailBacklog],
   );
 
+  // The hero's "Next:" names what is actually on the church's calendar.
+  // The widget below deliberately blends in seasonal rhythm — holidays,
+  // milestones, weekly services, a synthetic "Membership Class" — which is
+  // fine as texture under a legend, and wrong as a headline: it told the
+  // pastor "Next: Membership Class — Sat, Sep 5 · 9:00 AM" while GRACE,
+  // reading the same data, said nothing was scheduled (2026-09-04
+  // rehearsal). Staged events only here; with none, the line is omitted.
   const heroSubline = useMemo(() => {
-    const nextEvent = findNextEventLabel(calendarIndex.eventsByDay, churchTodayKey);
+    const nextEvent = findNextEventLabel(buildCalendarIndex(events).eventsByDay, churchTodayKey);
     return buildHeroSubline(metrics.attentionCount, nextEvent);
-  }, [calendarIndex.eventsByDay, churchTodayKey, metrics.attentionCount]);
+  }, [events, churchTodayKey, metrics.attentionCount]);
 
   const detailSectionCount = countDetailSections(
     metrics.fundTotalsMtd,

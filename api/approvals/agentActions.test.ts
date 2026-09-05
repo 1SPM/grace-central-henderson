@@ -34,6 +34,7 @@ const APPROVAL_ID = '00000000-0000-4000-8000-0000000000a1';
 const ACTION_ID = '00000000-0000-4000-8000-0000000000a2';
 const WORK_ORDER_ID = '00000000-0000-4000-8000-0000000000a3';
 const OWNER_ID = '00000000-0000-4000-8000-0000000000a4';
+const PERSON_ID = '00000000-0000-4000-8000-0000000000d1';
 
 function makeReq(decision: string) {
   return {
@@ -84,6 +85,10 @@ const RPC_EXECUTED = {
 function supabaseFor(opts: {
   approvalStatus?: string;
   actionStatus?: string;
+  /** A human requester on the approval (agent proposals have none). */
+  requestedByUserId?: string;
+  /** Route a delete_person proposal through the NON-atomic executor path. */
+  deletePerson?: boolean;
   /** Stand in for whatever the function decided — refusal or breakage. */
   rpcResult?: { data?: unknown; error?: { message: string; code?: string } };
 } = {}) {
@@ -97,13 +102,19 @@ function supabaseFor(opts: {
       role_permissions: () => ({ data: [{ permissions: { key: 'approvals.decide' } }] }),
       approvals: (op: string) => {
         if (op === 'select') {
-          return { data: { ...PENDING_APPROVAL, status: opts.approvalStatus ?? 'pending' } };
+          return { data: { ...PENDING_APPROVAL, status: opts.approvalStatus ?? 'pending', requested_by_user_id: opts.requestedByUserId ?? null } };
         }
         return { data: { ...PENDING_APPROVAL, status: 'decided', decision: 'approve' } };
       },
+      people: (op: string) => (op === 'select'
+        ? { data: { id: PERSON_ID, first_name: 'Dana', last_name: 'Reyes', email: null, phone: null, status: 'member' } }
+        : { data: { id: PERSON_ID } }),
       agent_actions: (op: string) => {
         if (op === 'select') {
-          return { data: { ...PROPOSED_ACTION, status: opts.actionStatus ?? 'proposed', approval_id: APPROVAL_ID, requires_approval: true } };
+          const action = opts.deletePerson
+            ? { ...PROPOSED_ACTION, action_type: 'delete_person', target_entity_type: 'person', target_entity_id: PERSON_ID, payload: {} }
+            : PROPOSED_ACTION;
+          return { data: { ...action, status: opts.actionStatus ?? 'proposed', approval_id: APPROVAL_ID, requires_approval: true } };
         }
         // The non-atomic status write-back is conditional + re-read, so it
         // must resolve a row for a successful write.
@@ -143,6 +154,74 @@ const auditInserts = (supabase: ReturnType<typeof supabaseFor>) =>
   supabase.__calls.filter(c => c.table === 'audit_logs' && c.op === 'insert');
 const actionUpdates = (supabase: ReturnType<typeof supabaseFor>) =>
   supabase.__calls.filter(c => c.table === 'agent_actions' && c.op === 'update');
+
+describe('PATCH /api/approvals — separation of duty (C-13)', () => {
+  // The gate is a second pair of eyes. requested_by_user_id was recorded by
+  // /api/actions/propose from the start and never read here — so a System
+  // Administrator could propose delete_person in chat and approve it
+  // seconds later. Audited, but not a second person.
+  const approvalUpdates = (supabase: ReturnType<typeof supabaseFor>) =>
+    supabase.__calls.filter(c => c.table === 'approvals' && c.op === 'update');
+
+  it('refuses to let the requester approve their own request, and changes nothing', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'approve');
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ error: 'self_approval' });
+    expect(approvalUpdates(supabase)).toHaveLength(0);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('holds approve_with_changes to the same rule', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'approve_with_changes');
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('lets the requester withdraw their own request (reject is not an approval)', async () => {
+    const supabase = supabaseFor({ requestedByUserId: FIXTURE_STAFF_USER.id });
+    const res = await decide(supabase, 'reject');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(approvalUpdates(supabase)).toHaveLength(1);
+    expect(rpcCalls(supabase)).toHaveLength(0);
+  });
+
+  it('a different person approving proceeds exactly as before', async () => {
+    const supabase = supabaseFor({ requestedByUserId: '00000000-0000-4000-8000-00000000beef' });
+    const res = await decide(supabase, 'approve');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(1);
+  });
+
+  it('an agent proposal has no human requester and is unaffected', async () => {
+    const supabase = supabaseFor();
+    const res = await decide(supabase, 'approve');
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(rpcCalls(supabase)).toHaveLength(1);
+  });
+});
+
+describe('PATCH /api/approvals — the mutation audit verb (R-18)', () => {
+  it('files an approved delete_person as a delete, against the person', async () => {
+    // The row an auditor finds with `where action='delete'`. This path used
+    // to hardcode 'update' — right for the first executor, wrong for this one.
+    const supabase = supabaseFor({ deletePerson: true });
+    const res = await decide(supabase, 'approve');
+
+    const body = res.json.mock.calls.at(-1)?.[0] as { agent_action?: { status: string } };
+    expect(body.agent_action?.status).toBe('executed');
+    const personAudit = auditInserts(supabase)
+      .map(a => a.payload as Record<string, unknown>)
+      .filter(a => a.entity_type === 'person');
+    expect(personAudit).toHaveLength(1);
+    expect(personAudit[0].action).toBe('delete');
+    expect(personAudit[0].entity_id).toBe(PERSON_ID);
+    expect(personAudit[0].before).toMatchObject({ first_name: 'Dana' });
+    expect(personAudit[0].after).toBeNull();
+  });
+});
 
 describe('PATCH /api/approvals — agent action execution', () => {
   it('a favourable decision executes the action exactly once and reports it executed', async () => {
