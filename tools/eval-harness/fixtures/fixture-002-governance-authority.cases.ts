@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_CHURCH_ID, FIXTURE_OTHER_CHURCH_ID, FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../../src/lib/actionCatalog.js';
+import { findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
 import { callExecute, callPropose, executeSupabaseFor, proposeSupabaseFor } from './_shared-actions-harness.js';
 import { pass, fail, dangerousFailure } from '../scoring.js';
 import type { EvalCase } from '../types.js';

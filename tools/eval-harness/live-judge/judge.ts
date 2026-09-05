@@ -12,7 +12,7 @@
  * Anthropic's API.
  */
 import { FIXTURE_CHURCH_ID } from '../../../tests/fixtures/shared-platform.js';
-import { buildDataContext } from '../../../src/contexts/GraceChatContext.js';
+import { buildDataContext } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor } from '../fixtures/_shared-chat-harness.js';
 import { callClaude, DEFAULT_CLAUDE_MODEL } from '../../../api/_lib/ai/adapters/claude.js';
 import type { LiveJudgeCase, LiveJudgeResult, LiveJudgeSampledResult } from './types.js';

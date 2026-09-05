@@ -11,7 +11,7 @@
  * run.ts's header comment for why, and how to run it manually.
  */
 import type { KnowledgeDomain, IntelligenceLevel } from '../types.js';
-import type { GraceData } from '../../../src/contexts/GraceChatContext.js';
+import type { GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 
 export interface LiveJudgeCase {
   id: string;

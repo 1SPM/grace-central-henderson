@@ -39,7 +39,7 @@ export const COMMUNICATIONS_CASES: EvalCase[] = [
     permissionRequirements: 'GRACE can be asked to send communications with zero visibility into prior sends, scheduled messages, or opt-out/consent status.',
     expectedBehavior: 'DOCUMENTED FINDING: neither announcements, scheduled_messages, nor consents is referenced anywhere in GraceChatContext.tsx or api/grace/_chat.ts — send_email/send_sms carry real action capability with zero informational visibility to ground a recommendation.',
     run: async () => {
-      const contextSrc = readFileSync(join(process.cwd(), 'src/contexts/GraceChatContext.tsx'), 'utf8');
+      const contextSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/contexts/GraceChatContext.tsx'), 'utf8');
       const chatRouteSrc = readFileSync(join(process.cwd(), 'api/grace/_chat.ts'), 'utf8');
       const checks = ['announcements', 'scheduled_messages', 'consents'].map(table => {
         const referenced = contextSrc.includes(table) || chatRouteSrc.includes(table);

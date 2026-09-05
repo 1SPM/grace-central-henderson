@@ -1,14 +1,14 @@
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 
+// Backend + tooling tests only. Frontend tests live with their own app now
+// (apps/admin-web/vitest.config.ts, apps/member-web/vitest.config.ts) —
+// api/ and tools/ stay shared at the repo root (Phase 1 plan: one api/,
+// shared by both Vercel projects), so they keep their own root-level config.
 export default defineConfig({
-  plugins: [react()],
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
     include: [
-      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'tools/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}',
       'api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}',
     ],
@@ -17,10 +17,8 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'src/test/',
         '**/*.d.ts',
         '**/*.config.*',
-        '**/types.ts',
       ],
     },
   },

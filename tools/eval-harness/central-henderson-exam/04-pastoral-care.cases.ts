@@ -11,7 +11,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { pass, fail } from '../scoring.js';
 import type { EvalCase } from '../types.js';
 import { HENDERSON_CHURCH_ID } from './_henderson-knowledge-seed.js';

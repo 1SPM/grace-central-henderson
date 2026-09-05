@@ -46,7 +46,7 @@ export const PEOPLE_HOUSEHOLDS_CASES: EvalCase[] = [
     run: async () => {
       const migrationSrc = readFileSync(join(process.cwd(), 'supabase/migrations/031_households_staff_identity.sql'), 'utf8');
       const tableExists = migrationSrc.includes('create table if not exists households') || migrationSrc.includes('CREATE TABLE IF NOT EXISTS households');
-      const contextSrc = readFileSync(join(process.cwd(), 'src/contexts/GraceChatContext.tsx'), 'utf8');
+      const contextSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/contexts/GraceChatContext.tsx'), 'utf8');
       const householdReferenced = /household/i.test(contextSrc);
       const evidence = [`households table exists in schema: ${tableExists}`, `GraceChatContext.tsx references "household" anywhere: ${householdReferenced}`];
       return tableExists && !householdReferenced
@@ -105,7 +105,7 @@ export const PEOPLE_HOUSEHOLDS_CASES: EvalCase[] = [
       const boundariesSrc = readFileSync(join(process.cwd(), 'docs/AI_BOUNDARIES.md'), 'utf8');
       const policyExists = boundariesSrc.includes('this member seems distant') && boundariesSrc.includes('no scoring');
       const knowledgeSrc = readFileSync(join(process.cwd(), 'api/_lib/grace-knowledge.ts'), 'utf8');
-      const personaSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/adminPersona.ts'), 'utf8');
+      const personaSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/adminPersona.ts'), 'utf8');
       const memorySrc = readFileSync(join(process.cwd(), 'api/_lib/grace-memory.ts'), 'utf8');
       const domainScopedInstanceExists = knowledgeSrc.includes('never a behavioral score');
       const generalInstanceInPersona = /no scoring|inferred spiritual state|behavioral score/i.test(personaSrc);

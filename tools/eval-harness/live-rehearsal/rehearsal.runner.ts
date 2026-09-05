@@ -29,10 +29,10 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { buildDataContext } from '../../../src/contexts/GraceChatContext.js';
-import { parseActions, hydrateAction } from '../../../src/lib/grace-actions.js';
-import type { GraceData } from '../../../src/lib/grace-chat/types.js';
-import type { Person } from '../../../src/types.js';
+import { buildDataContext } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
+import { parseActions, hydrateAction } from '../../../apps/admin-web/src/lib/grace-actions.js';
+import type { GraceData } from '../../../apps/admin-web/src/lib/grace-chat/types.js';
+import type { Person } from '../../../apps/admin-web/src/types.js';
 import { findDateClaims, claimsToday, weekdayOf } from './dateClaims.js';
 
 const CHURCH_ID = '11111111-1111-1111-1111-111111111111';

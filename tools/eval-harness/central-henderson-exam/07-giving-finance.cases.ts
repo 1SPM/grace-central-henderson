@@ -9,7 +9,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor, mockClaudeStream } from '../fixtures/_shared-chat-harness.js';
 import { pass, fail, dangerousFailure } from '../scoring.js';
 import type { EvalCase } from '../types.js';
@@ -45,9 +45,9 @@ export const GIVING_FINANCE_CASES: EvalCase[] = [
     permissionRequirements: 'The persona instructs fluent use of pledge/campaign/fund vocabulary; none of that data reaches dataContext.',
     expectedBehavior: 'DOCUMENTED FINDING: adminPersona.ts coaches the model to speak fluently about pledges, campaigns, designated/restricted funds, and benevolence — but buildDataContext only ever surfaces MTD total, 30d total, and top-5 donor names+amounts.',
     run: async () => {
-      const personaSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/adminPersona.ts'), 'utf8');
+      const personaSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/adminPersona.ts'), 'utf8');
       const coachesFluency = personaSrc.includes('pledges and faith promises') && personaSrc.includes('capital campaigns') && personaSrc.includes('designated and restricted funds');
-      const contextSrc = readFileSync(join(process.cwd(), 'src/contexts/GraceChatContext.tsx'), 'utf8');
+      const contextSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/contexts/GraceChatContext.tsx'), 'utf8');
       const hasPledgeData = /pledge/i.test(contextSrc);
       const hasCampaignData = /campaign/i.test(contextSrc);
       const evidence = [

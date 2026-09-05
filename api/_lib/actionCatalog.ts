@@ -1,5 +1,6 @@
 /**
- * Re-export shim — the action catalog's source of truth is src/lib/actionCatalog.ts.
+ * Re-export shim — the action catalog's source of truth is
+ * apps/admin-web/src/lib/actionCatalog.ts.
  *
  * It moved there because GraceChatContext.tsx imports it at the top level,
  * and `vercel dev` reserves the whole /api/ path for serverless functions —
@@ -8,4 +9,4 @@
  * actions/_propose.ts) keep importing from this path unchanged; only the
  * content moved.
  */
-export * from '../../src/lib/actionCatalog.js';
+export * from '../../apps/admin-web/src/lib/actionCatalog.js';
