@@ -4,6 +4,44 @@ import { createLogger } from '../utils/logger';
 const log = createLogger('grace-speech');
 
 const TTS_URL = '/api/grace/tts';
+
+/**
+ * A spoken answer is several chunked POSTs fired back to back. One of them
+ * can meet a transient the function never sees — Vercel's edge returned a
+ * 503 on the first chunk of the first answer in the 2026-09-04 browser
+ * rehearsal, in the minute a new deployment took the production alias, while
+ * every invocation that ran logged 200. Without this, that single chunk sent
+ * the WHOLE reply to the robotic browser voice with an "unavailable" notice.
+ * Retry once on a 5xx or a network error; never on a 4xx (401/429 mean
+ * something, and a retry would just repeat it).
+ */
+export const TTS_RETRY = { attempts: 2, delayMs: 500 } as const;
+
+export function isRetriableTtsFailure(err: unknown): boolean {
+  const status = (err as { status?: number } | null)?.status;
+  if (typeof status === 'number') return status >= 500;
+  return err instanceof TypeError; // fetch's "Failed to fetch"
+}
+
+export async function withTtsRetry<T>(
+  attempt: () => Promise<T>,
+  opts: { attempts?: number; delayMs?: number; sleep?: (ms: number) => Promise<void> } = {},
+): Promise<T> {
+  const attempts = opts.attempts ?? TTS_RETRY.attempts;
+  const sleep = opts.sleep ?? ((ms: number) => new Promise<void>(r => setTimeout(r, ms)));
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await attempt();
+    } catch (err) {
+      lastErr = err;
+      if (err instanceof DOMException && err.name === 'AbortError') throw err;
+      if (!isRetriableTtsFailure(err) || i === attempts - 1) throw err;
+      await sleep(opts.delayMs ?? TTS_RETRY.delayMs);
+    }
+  }
+  throw lastErr;
+}
 const TTS_HEALTH_URL = '/api/grace/tts/health';
 
 export type GraceVoiceProvider = 'elevenlabs' | 'browser' | 'none';
@@ -321,20 +359,22 @@ export function useGraceSpeech() {
         if (token) headers.Authorization = `Bearer ${token}`;
       } catch { /* no session (demo/anonymous) — proceed without a token */ }
 
-      const res = await fetch(TTS_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ text: chunk }),
-        signal: controller.signal,
+      return withTtsRetry(async () => {
+        const res = await fetch(TTS_URL, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text: chunk }),
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          const e = new Error(`TTS ${res.status}`) as Error & { status?: number };
+          e.status = res.status;
+          throw e;
+        }
+        const buffer = await res.arrayBuffer();
+        if (buffer.byteLength === 0) throw new Error('TTS empty response');
+        return buffer;
       });
-      if (!res.ok) {
-        const e = new Error(`TTS ${res.status}`) as Error & { status?: number };
-        e.status = res.status;
-        throw e;
-      }
-      const buffer = await res.arrayBuffer();
-      if (buffer.byteLength === 0) throw new Error('TTS empty response');
-      return buffer;
     };
 
     try {
@@ -395,6 +435,14 @@ export function useGraceSpeech() {
       // a "busy" notice and keep the neural voice — don't drop to the robotic
       // browser voice mid-conversation for a momentary throttle.
       if ((err as { status?: number })?.status === 429) {
+        flagNotice('busy');
+        return;
+      }
+      // A 503 that survived the retry is still transient by construction:
+      // the mount-time health probe already put us on the browser voice if
+      // neural TTS were truly unconfigured. Say "busy", keep the neural
+      // voice for the next answer, don't read this one in the robotic voice.
+      if ((err as { status?: number })?.status === 503) {
         flagNotice('busy');
         return;
       }

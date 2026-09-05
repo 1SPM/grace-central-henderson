@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { composeSpeechText, splitSpeechChunks, stripForSpeech } from './useGraceSpeech';
+import { withTtsRetry, isRetriableTtsFailure, composeSpeechText, splitSpeechChunks, stripForSpeech } from './useGraceSpeech';
 
 describe('composeSpeechText — the Anti-List Rule', () => {
   it('weaves short bullet items into a single comma-joined sentence', () => {
@@ -115,5 +115,51 @@ describe('stripForSpeech + composeSpeechText together', () => {
     expect(out).not.toContain('[');
     expect(out).not.toContain('https://');
     expect(out).not.toMatch(/^- /m);
+  });
+});
+
+describe('withTtsRetry — one transient chunk must not cost the whole answer', () => {
+  const failWith = (status: number) => Object.assign(new Error(`TTS ${status}`), { status });
+  const noSleep = { sleep: async () => {} };
+
+  it('retries once on a 5xx and returns the second attempt', async () => {
+    // The 2026-09-04 rehearsal: edge 503 on the first chunk, 200 a moment later.
+    let calls = 0;
+    const out = await withTtsRetry(async () => { calls++; if (calls === 1) throw failWith(503); return 'audio'; }, noSleep);
+    expect(out).toBe('audio');
+    expect(calls).toBe(2);
+  });
+
+  it('retries a network failure the same way', async () => {
+    let calls = 0;
+    const out = await withTtsRetry(async () => { calls++; if (calls === 1) throw new TypeError('Failed to fetch'); return 'audio'; }, noSleep);
+    expect(out).toBe('audio');
+    expect(calls).toBe(2);
+  });
+
+  it('does not retry a 4xx — 401 and 429 mean something', async () => {
+    let calls = 0;
+    await expect(withTtsRetry(async () => { calls++; throw failWith(429); }, noSleep)).rejects.toMatchObject({ status: 429 });
+    expect(calls).toBe(1);
+  });
+
+  it('gives up after the configured attempts and rethrows the last error', async () => {
+    let calls = 0;
+    await expect(withTtsRetry(async () => { calls++; throw failWith(502); }, { ...noSleep, attempts: 2 })).rejects.toMatchObject({ status: 502 });
+    expect(calls).toBe(2);
+  });
+
+  it('never retries an abort — the user pressed stop', async () => {
+    let calls = 0;
+    await expect(withTtsRetry(async () => { calls++; throw new DOMException('aborted', 'AbortError'); }, noSleep)).rejects.toThrow('aborted');
+    expect(calls).toBe(1);
+  });
+
+  it('classifies failures', () => {
+    expect(isRetriableTtsFailure(failWith(503))).toBe(true);
+    expect(isRetriableTtsFailure(failWith(502))).toBe(true);
+    expect(isRetriableTtsFailure(failWith(401))).toBe(false);
+    expect(isRetriableTtsFailure(new TypeError('Failed to fetch'))).toBe(true);
+    expect(isRetriableTtsFailure(new Error('TTS empty response'))).toBe(false);
   });
 });
