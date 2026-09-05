@@ -223,13 +223,71 @@ export async function retrieveMemories(
  * user-told context, not church data — if it conflicts with live church
  * data elsewhere in the prompt, the church data wins (ADR-014).
  */
-export function buildMemoryBlock(memories: GraceMemoryRow[]): string {
+const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+const WEEKDAY_RE = /\b(sun|mon|tue|wed|thu|fri|sat)(?:day|nesday|rsday|urday|s|es|r|rs)?\b/i;
+const WEEKDAY_INDEX: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+// A note that already carries a calendar date needs no anchor.
+const EXPLICIT_DATE_RE = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?\b|\b\d{1,2}\/\d{1,2}\b|\b\d{4}-\d{2}-\d{2}\b/i;
+
+/**
+ * The calendar day a timestamp falls on IN THE CHURCH'S ZONE, as a local
+ * date-only value safe for day arithmetic. The server runs in UTC; a note
+ * taken at 6pm Pacific on a Thursday is already Friday in UTC, which would
+ * push "Thursday" a whole week out. The client sends its zone with each
+ * turn; an unknown or missing zone falls back to the server's.
+ */
+function calendarDay(at: Date, timeZone?: string): Date {
+  if (timeZone) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(at);
+      const get = (t: string) => Number(parts.find(x => x.type === t)?.value);
+      const d = new Date(get('year'), get('month') - 1, get('day'));
+      if (!Number.isNaN(d.getTime())) return d;
+    } catch { /* invalid zone — fall through */ }
+  }
+  return new Date(at.getFullYear(), at.getMonth(), at.getDate());
+}
+
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+/**
+ * R-21: a note that names only a weekday ("check-in with Bill is Thursday at
+ * 2pm") was recalled with a calendar date the model invented — live, twice,
+ * "that's today, September 4th" on a Friday, with the header above already
+ * telling it not to. Telling the model not to compute a date was not enough;
+ * so the server computes it. Returns a parenthetical to append to the memory
+ * line: the next occurrence of that weekday after the note was taken, or —
+ * when the note was written on that very weekday — both candidates, because
+ * "Thursday" said on a Thursday genuinely is ambiguous and the honest reply
+ * is to say so rather than pick.
+ */
+export function weekdayOnlyHint(content: string, createdAt: string | Date, timeZone?: string): string | null {
+  if (EXPLICIT_DATE_RE.test(content)) return null;
+  const m = WEEKDAY_RE.exec(content);
+  if (!m) return null;
+  const target = WEEKDAY_INDEX[m[1].toLowerCase()];
+  const noted = new Date(createdAt);
+  if (Number.isNaN(noted.getTime())) return null;
+  const name = WEEKDAY_NAMES[target];
+  const notedDay = calendarDay(noted, timeZone);
+  const delta = (target - notedDay.getDay() + 7) % 7;
+  if (delta === 0) {
+    const following = new Date(notedDay); following.setDate(notedDay.getDate() + 7);
+    return `(weekday only — this note was written on a ${name}, so "${name}" may mean that same day, ${fmt(notedDay)}, or the following ${name}, ${fmt(following)}; say that it is unclear rather than choosing)`;
+  }
+  const next = new Date(notedDay); next.setDate(notedDay.getDate() + delta);
+  return `(weekday only — the next ${name} after this note is ${fmt(next)}; if you give a date, give exactly that one)`;
+}
+
+export function buildMemoryBlock(memories: GraceMemoryRow[], timeZone?: string): string {
   if (memories.length === 0) return '';
   const lines = memories.map(m => {
     // Weekday included so a relative day word inside the note ("Thursday")
-    // can be reasoned about against the day the note was actually taken.
-    const date = new Date(m.created_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    // can be reasoned about against the day the note was actually taken —
+    // in the church's zone, not the server's.
+    const date = fmt(calendarDay(new Date(m.created_at), timeZone));
     const label = m.source === 'user_stated' ? 'you said' : 'noted from chat';
+    const hint = weekdayOnlyHint(m.content, m.created_at, timeZone);
     // R-17: this used to render as `[Aug 31, you said] …`, which the model
     // read as the date of the thing described rather than the date the note
     // was taken — live, twice, it turned "my check-in is Thursday" into
@@ -237,9 +295,9 @@ export function buildMemoryBlock(memories: GraceMemoryRow[]): string {
     // attribution phrase so it can only be read as provenance. The exact
     // substrings "you said" / "noted from chat" are load-bearing: the
     // qualification suite and the Pilot Capability Manifest assert them.
-    return `- [${label} on ${date}] ${m.content}`;
+    return `- [${label} on ${date}] ${m.content}${hint ? ` ${hint}` : ''}`;
   });
-  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded, oldest to newest) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. If two notes below conflict with each other (e.g. a corrected date), trust the one with the more recent date — it supersedes the earlier one. Attribute memories as "you told me…", never state them as database facts.\nTHE DATE IN EACH BRACKET IS WHEN THE NOTE WAS TAKEN — never the date of anything described inside it. If a note names a weekday or a relative day ("Thursday", "next week") and you cannot work out the exact calendar date from it and today's date above, give the weekday as the staff member said it and do not attach a specific date to it. Never say a commitment is "today" or "tomorrow" unless the dates actually establish that.\n${lines.join('\n')}`;
+  return `\n== PERSONAL MEMORY (things this staff member told you earlier — may be stale or superseded, oldest to newest) ==\nThese are conversation notes, NOT church records. If anything here conflicts with the live church data above, the church data wins. If two notes below conflict with each other (e.g. a corrected date), trust the one with the more recent date — it supersedes the earlier one. Attribute memories as "you told me…", never state them as database facts.\nTHE DATE IN EACH BRACKET IS WHEN THE NOTE WAS TAKEN — never the date of anything described inside it. If a note names only a weekday, a parenthetical after it gives the calendar date that weekday resolves to — use exactly that date if you give one, never compute a different one, and if the parenthetical says it is unclear, say so. Never say a commitment is "today" or "tomorrow" unless today's date above is literally that date. For any other relative wording ("next week") give it as the staff member said it and do not attach a date.\n${lines.join('\n')}`;
 }
 
 // ---------------------------------------------------------------------

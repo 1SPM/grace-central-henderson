@@ -12,6 +12,7 @@ import {
   saveMemory,
   retrieveMemories,
   buildMemoryBlock,
+  weekdayOnlyHint,
   runExtraction,
   resolvePersonIds,
 } from './grace-memory.js';
@@ -225,5 +226,70 @@ describe('runExtraction', () => {
 
     expect(saved).toEqual([]);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe('weekdayOnlyHint — R-21: the server resolves a bare weekday, the model does not', () => {
+  // Fri 2026-09-04: the live miss. "Thursday at 2pm" was recalled as "that's
+  // today, September 4th". The next Thursday after that note is Sep 10.
+  const FRIDAY = '2026-09-04T18:00:00.000Z';
+
+  it('names the next occurrence after the note', () => {
+    const hint = weekdayOnlyHint('my check-in with Bill Hoffman is Thursday at 2pm', FRIDAY);
+    expect(hint).toContain('next Thursday after this note is Thu, Sep 10');
+    expect(hint).toContain('give exactly that one');
+  });
+
+  it('says it is unclear when the note was written on that very weekday', () => {
+    const hint = weekdayOnlyHint('our GRACE workshop demo is Thursday', '2026-09-03T12:00:00.000Z');
+    expect(hint).toContain('written on a Thursday');
+    expect(hint).toContain('Thu, Sep 3');
+    expect(hint).toContain('Thu, Sep 10');
+    expect(hint).toContain('unclear');
+  });
+
+  it('leaves a note with an explicit date alone', () => {
+    expect(weekdayOnlyHint('our GRACE workshop demo is Thursday, September 10th', FRIDAY)).toBeNull();
+    expect(weekdayOnlyHint('call on 9/10', FRIDAY)).toBeNull();
+    expect(weekdayOnlyHint('prep Q1 materials', FRIDAY)).toBeNull();
+  });
+
+  it('reads abbreviations', () => {
+    expect(weekdayOnlyHint('elders meet Tues at 7', FRIDAY)).toContain('next Tuesday after this note is Tue, Sep 8');
+  });
+
+  it('appends the anchor to the memory line and keeps the load-bearing labels', () => {
+    const block = buildMemoryBlock([
+      { id: '1', content: 'my check-in with Bill is Thursday at 2pm', source: 'user_stated', person_ids: [], created_at: FRIDAY },
+    ] as never);
+    expect(block).toContain('[you said on Fri, Sep 4] my check-in with Bill is Thursday at 2pm (weekday only — the next Thursday after this note is Thu, Sep 10');
+    expect(block).toContain('use exactly that date');
+  });
+});
+
+describe('weekdayOnlyHint — reads the weekday on the church\'s calendar, not the server\'s', () => {
+  // 2026-09-04T02:00Z is Thursday Sep 3, 7pm in Las Vegas — and already Friday in UTC.
+  const THU_EVENING_PACIFIC = '2026-09-04T02:00:00.000Z';
+
+  it('a Thursday-evening note about "Thursday" is ambiguous in Pacific time', () => {
+    const hint = weekdayOnlyHint('check-in with Bill is Thursday at 2pm', THU_EVENING_PACIFIC, 'America/Los_Angeles');
+    expect(hint).toContain('written on a Thursday');
+    expect(hint).toContain('Thu, Sep 3');
+  });
+
+  it('the same note read in UTC would point a week out — which is why the zone is sent', () => {
+    const hint = weekdayOnlyHint('check-in with Bill is Thursday at 2pm', THU_EVENING_PACIFIC, 'UTC');
+    expect(hint).toContain('next Thursday after this note is Thu, Sep 10');
+  });
+
+  it('an unknown zone falls back instead of throwing', () => {
+    expect(() => weekdayOnlyHint('meet Thursday', THU_EVENING_PACIFIC, 'Not/AZone')).not.toThrow();
+  });
+
+  it('the provenance date in the bracket follows the zone too', () => {
+    const block = buildMemoryBlock([
+      { id: '1', content: 'call Bill', source: 'user_stated', person_ids: [], created_at: THU_EVENING_PACIFIC },
+    ] as never, 'America/Los_Angeles');
+    expect(block).toContain('[you said on Thu, Sep 3] call Bill');
   });
 });

@@ -69,6 +69,10 @@ export interface GraceTurnResult {
   conversationId?: string;
 }
 
+function browserTimeZone(): string | undefined {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined; } catch { return undefined; }
+}
+
 export async function sendGraceTurn(opts: GraceTurnOptions): Promise<GraceTurnResult> {
   try {
     const response = await fetch('/api/grace/chat', {
@@ -78,6 +82,9 @@ export async function sendGraceTurn(opts: GraceTurnOptions): Promise<GraceTurnRe
         message: opts.message,
         conversationId: opts.conversationId ?? undefined,
         dataContext: opts.dataContext,
+        // So the server reads a note's weekday on this church's calendar,
+        // not on UTC's (R-21).
+        timeZone: browserTimeZone(),
       }),
       signal: opts.signal,
     });

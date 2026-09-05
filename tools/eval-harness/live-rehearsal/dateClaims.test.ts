@@ -21,6 +21,14 @@ describe('date claims in a recall reply', () => {
     expect(claimsToday('You told me today that the check-in is Thursday.')).toBe(false);
   });
 
+  it('provenance "today" with a weekday in between is still provenance (sample 7, 2026-09-05)', () => {
+    const reply = 'Your ZZR21 check-in with Bill Hoffman is Thursday at 2pm. You told me that on Friday (today).';
+    expect(claimsToday(reply)).toBe(false);
+    expect(findDateClaims(reply, 2026)).toEqual([]);
+    // …but an event-claim "today" after a sentence break is still caught.
+    expect(claimsToday('You told me on Friday. It is today at 2pm.')).toBe(true);
+  });
+
   it('reads the other date shapes', () => {
     expect(findDateClaims('on 9/10 at 2pm', 2026).map(c => c.weekday)).toEqual(['Thursday']);
     expect(findDateClaims('on 2026-09-11', 2026).map(c => c.weekday)).toEqual(['Friday']);

@@ -371,7 +371,7 @@ repository or live-database evidence.
   what four other fixtures already do.
 - **Not fixed here:** it belongs to whoever owns the in-flight mobile refactor,
   and the right fix is a proof-boundary decision, not a regex tweak.
-## R-21 · A weekday-only memory gets a wrong calendar date pinned to it — **OPEN, now caught by the harness**
+## R-21 · A weekday-only memory gets a wrong calendar date pinned to it — **FIXED & RE-VERIFIED 2026-09-05 (15 live samples, 0 wrong dates)**
 - **Layer:** memory → model · **Severity: MEDIUM** · **Likelihood: HIGH for
   weekday-only notes (observed 2/2 on 2026-09-05)**
 - **Description.** R-17 fixed the note-date confusion (the bracketed date is
@@ -392,10 +392,27 @@ repository or live-database evidence.
   explicit date ("Thursday, September 10th") and recalls exactly; the rule for
   the day is that any "remember that…" said live must include the date.
   Pilot: MEDIUM — staff say "Thursday" far more often than "September 10th".
-- **To close.** Either resolve a bare weekday to a concrete date at save time
-  (next occurrence, church timezone) and store both, or add one line to the
-  memory block header telling the model not to assert a date a note does not
-  contain. Both are narrow; both need the same live sample discipline R-17
-  had (≥7 fresh-conversation recalls, 0 wrong dates) before being called
-  fixed. Not for demo week.
+- **Fix (same day).** Telling the model not to compute a date was already in
+  the header and was not enough, so the server computes it.
+  `weekdayOnlyHint` (`api/_lib/grace-memory.ts`) appends to any weekday-only
+  memory line the next occurrence of that weekday after the note was taken —
+  *"(weekday only — the next Thursday after this note is Thu, Sep 10; if you
+  give a date, give exactly that one)"* — or, when the note was written on
+  that very weekday, both candidates with an instruction to say it is
+  unclear. The header now says to use exactly that date and never call it
+  "today" unless today's date is literally that date. The client sends its
+  IANA zone with each turn (`timeZone`, shape-checked in the route) so the
+  weekday is read on the church's calendar, not UTC's — a note taken at 6pm
+  Pacific on a Thursday is already Friday in UTC and would otherwise be
+  pushed a week out. Stored content is untouched; the anchor lives only in
+  the prompt.
+- **Verification (live, local handler with the fix, real Claude, demo
+  account, all artefacts removed afterwards).** 15 fresh-conversation recalls
+  of *"…check-in with Bill Hoffman is Thursday at 2pm"* noted on Friday
+  2026-09-04: 14 × *"Thursday at 2pm — that's September 10th"* (a Thursday),
+  1 × *"Thursday at 2pm. You told me that on Friday (today)"* (weekday plus
+  provenance, no date pinned). **0 wrong dates.** Harness leg 3b, red since
+  #208, is green again on the same rule — nothing in the assertion was
+  loosened; the judge learned only that a provenance "today" inside a
+  telling-clause is not an event claim.
 
