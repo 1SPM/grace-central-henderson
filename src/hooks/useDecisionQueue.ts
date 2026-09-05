@@ -1,10 +1,61 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useAuthContext } from '../contexts/AuthContext';
 import { workosFetch, WorkOsApiError } from '../lib/services/workos';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const REALTIME_DEBOUNCE_MS = 3_000;
 const FALLBACK_POLL_MS = 60_000;
+
+// useDecisionQueue is a shared data hook called from many places at once
+// (Layout.tsx, DecisionQueuePanel, CampusView, AskGrace, BriefScreen) --
+// unlike a component-scoped hook, several instances routinely mount for
+// the SAME churchId simultaneously (e.g. Layout.tsx's own call plus
+// DecisionQueuePanel's, both live on the dashboard). Supabase's realtime
+// client keys channels by topic name, so two independent
+// `.channel('decision-queue-X').on(...).subscribe()` calls for the same
+// X don't create two channels -- the second `.channel()` call returns the
+// SAME already-subscribed object, and its `.on()` throws ("cannot add
+// postgres_changes callbacks ... after subscribe()"), taking down every
+// consumer with an ErrorBoundary. This module-level registry makes the
+// channel a singleton per churchId: the first mount creates and
+// subscribes it, later mounts just add their own listener to the shared
+// set, and the channel is only torn down once the last listener leaves.
+interface DecisionQueueChannelEntry {
+  channel: RealtimeChannel;
+  listeners: Set<() => void>;
+}
+const channelRegistry = new Map<string, DecisionQueueChannelEntry>();
+
+function subscribeToDecisionQueueChanges(churchId: string, onChange: () => void): () => void {
+  let entry = channelRegistry.get(churchId);
+  if (!entry) {
+    if (!supabase) throw new Error('subscribeToDecisionQueueChanges called without a configured Supabase client');
+    const sb = supabase;
+    const listeners = new Set<() => void>();
+    const channel = sb
+      .channel(`decision-queue-${churchId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'platform_events', filter: `church_id=eq.${churchId}` },
+        () => listeners.forEach((fn) => fn()),
+      )
+      .subscribe();
+    entry = { channel, listeners };
+    channelRegistry.set(churchId, entry);
+  }
+  entry.listeners.add(onChange);
+
+  return () => {
+    const current = channelRegistry.get(churchId);
+    if (!current) return;
+    current.listeners.delete(onChange);
+    if (current.listeners.size === 0) {
+      channelRegistry.delete(churchId);
+      void supabase?.removeChannel(current.channel);
+    }
+  };
+}
 
 // Mirrors DecisionQueueKind in api/_lib/decisionQueue.ts — kept as a
 // separate local type rather than a cross-import, matching how every
@@ -103,23 +154,15 @@ export function useDecisionQueue() {
     }
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const sb = supabase;
-    const channel = sb
-      .channel(`decision-queue-${churchId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'platform_events', filter: `church_id=eq.${churchId}` },
-        () => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => refreshRef.current(), REALTIME_DEBOUNCE_MS);
-        },
-      )
-      .subscribe();
+    const unsubscribe = subscribeToDecisionQueueChanges(churchId, () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => refreshRef.current(), REALTIME_DEBOUNCE_MS);
+    });
 
     return () => {
       clearInterval(pollId);
       if (debounceTimer) clearTimeout(debounceTimer);
-      void sb.removeChannel(channel);
+      unsubscribe();
     };
   }, [isLoaded, churchId]);
 
