@@ -117,33 +117,6 @@ export function PlanningCenterImport({
   const [importType, setImportType] = useState<'people' | 'groups'>('people');
   const [error, setError] = useState<string | null>(null);
 
-  // Parse CSV content
-  const parseCSV = useCallback((content: string): { headers: string[]; data: Record<string, string>[] } => {
-    const lines = content.trim().split(/\r?\n/);
-    if (lines.length < 2) {
-      throw new Error('CSV file must have headers and at least one data row');
-    }
-
-    // Parse header row
-    const headerLine = lines[0];
-    const csvHeaders = parseCSVLine(headerLine);
-
-    // Parse data rows
-    const data: Record<string, string>[] = [];
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseCSVLine(lines[i]);
-      if (values.length === csvHeaders.length) {
-        const row: Record<string, string> = {};
-        csvHeaders.forEach((header, index) => {
-          row[header] = values[index];
-        });
-        data.push(row);
-      }
-    }
-
-    return { headers: csvHeaders, data };
-  }, []);
-
   // Parse a single CSV line (handling quotes)
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
@@ -173,6 +146,42 @@ export function PlanningCenterImport({
     result.push(current.trim());
 
     return result;
+  };
+
+  // Parse CSV content
+  const parseCSV = useCallback((content: string): { headers: string[]; data: Record<string, string>[] } => {
+    const lines = content.trim().split(/\r?\n/);
+    if (lines.length < 2) {
+      throw new Error('CSV file must have headers and at least one data row');
+    }
+
+    // Parse header row
+    const headerLine = lines[0];
+    const csvHeaders = parseCSVLine(headerLine);
+
+    // Parse data rows
+    const data: Record<string, string>[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = parseCSVLine(lines[i]);
+      if (values.length === csvHeaders.length) {
+        const row: Record<string, string> = {};
+        csvHeaders.forEach((header, index) => {
+          row[header] = values[index];
+        });
+        data.push(row);
+      }
+    }
+
+    return { headers: csvHeaders, data };
+  }, []);
+
+  // Auto-map fields based on known Planning Center field names
+  const autoMapFields = (csvHeaders: string[]) => {
+    const mappings: ImportMapping[] = csvHeaders.map((header) => {
+      const targetField = planningCenterFieldMappings[header] || 'skip';
+      return { sourceField: header, targetField };
+    });
+    setFieldMappings(mappings);
   };
 
   // Handle file upload
@@ -226,15 +235,6 @@ export function PlanningCenterImport({
     }
   }, [parseCSV]);
 
-  // Auto-map fields based on known Planning Center field names
-  const autoMapFields = (csvHeaders: string[]) => {
-    const mappings: ImportMapping[] = csvHeaders.map((header) => {
-      const targetField = planningCenterFieldMappings[header] || 'skip';
-      return { sourceField: header, targetField };
-    });
-    setFieldMappings(mappings);
-  };
-
   // Update field mapping
   const updateMapping = (sourceField: string, targetField: keyof Person | 'skip') => {
     setFieldMappings((prev) =>
@@ -242,6 +242,44 @@ export function PlanningCenterImport({
         m.sourceField === sourceField ? { ...m, targetField } : m
       )
     );
+  };
+
+  // Parse various date formats
+  const parseDate = (value: string): string | null => {
+    if (!value) return null;
+
+    // Try various date formats
+    const formats = [
+      /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
+      /^(\d{2})\/(\d{2})\/(\d{4})$/, // MM/DD/YYYY
+      /^(\d{2})-(\d{2})-(\d{4})$/, // MM-DD-YYYY
+    ];
+
+    for (const format of formats) {
+      const match = value.match(format);
+      if (match) {
+        try {
+          const date = new Date(value);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString().split('T')[0];
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+
+    // Try native date parsing
+    try {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
   };
 
   // Generate preview
@@ -307,44 +345,6 @@ export function PlanningCenterImport({
     });
     setStep('preview');
   }, [rawData, fieldMappings, existingPeople]);
-
-  // Parse various date formats
-  const parseDate = (value: string): string | null => {
-    if (!value) return null;
-
-    // Try various date formats
-    const formats = [
-      /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
-      /^(\d{2})\/(\d{2})\/(\d{4})$/, // MM/DD/YYYY
-      /^(\d{2})-(\d{2})-(\d{4})$/, // MM-DD-YYYY
-    ];
-
-    for (const format of formats) {
-      const match = value.match(format);
-      if (match) {
-        try {
-          const date = new Date(value);
-          if (!isNaN(date.getTime())) {
-            return date.toISOString().split('T')[0];
-          }
-        } catch {
-          continue;
-        }
-      }
-    }
-
-    // Try native date parsing
-    try {
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) {
-        return date.toISOString().split('T')[0];
-      }
-    } catch {
-      return null;
-    }
-
-    return null;
-  };
 
   // Run import
   const runImport = async () => {
