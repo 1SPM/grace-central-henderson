@@ -18,7 +18,8 @@
 import { useMemo, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Gift, Repeat, History, CreditCard, ShieldCheck, Clock } from 'lucide-react';
+import { Gift, Repeat, History, CreditCard, ShieldCheck } from 'lucide-react';
+import { LockedFeature } from '../components/LockedFeature';
 import { usePortalGiving, type RecurringGiftEntry } from '../hooks/usePortalGiving';
 import { usePortalAuth } from '../PortalAuthContext';
 import { usePortalImpactCard } from '../hooks/usePortalImpactCard';
@@ -51,16 +52,18 @@ export function PortalGiving() {
         <p className="text-sm text-stone-500 mt-1">Make a gift, manage recurring giving, and check your Impact Card.</p>
       </div>
 
-      {giving.isPendingVerification && (
-        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex items-start gap-2">
-          <Clock size={16} className="mt-0.5 shrink-0" />
-          <span>Your account is still being reviewed by church staff. Giving and your Impact Card will be available here once that's done.</span>
-        </div>
+      {giving.isPendingVerification ? (
+        <section className="rounded-2xl border border-stone-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-stone-900 mb-3 flex items-center gap-1.5"><Gift size={16} /> Give</h2>
+          <LockedFeature message="Making a gift and your gift history unlock once church staff confirms your account." skeletonRows={2} />
+        </section>
+      ) : (
+        <>
+          <GiveSection giving={giving} />
+          <RecurringSection giving={giving} />
+          <HistorySection giving={giving} />
+        </>
       )}
-
-      <GiveSection giving={giving} />
-      <RecurringSection giving={giving} />
-      <HistorySection giving={giving} />
       <ImpactCardSection impactCard={impactCard} />
     </div>
   );
@@ -319,10 +322,10 @@ function ImpactCardSection({ impactCard }: { impactCard: ReturnType<typeof usePo
       )}
 
       {state === 'pending_verification' && (
-        <p className="text-sm text-stone-500 flex items-start gap-1.5">
-          <Clock size={13} className="mt-0.5 shrink-0" />
-          {errorMessage || "Your Impact Card status will show here once church staff confirms your account."}
-        </p>
+        <LockedFeature
+          message={errorMessage || "Your Impact Card status will show here once church staff confirms your account."}
+          skeletonRows={3}
+        />
       )}
 
       {state === 'unavailable' && (

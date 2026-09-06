@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { HeartHandshake, Heart, ShieldAlert, Clock } from 'lucide-react';
+import { HeartHandshake, Heart, ShieldAlert } from 'lucide-react';
 import { usePortalCare } from '../hooks/usePortalCare';
 import { usePortalPrayerWall, type PrayerVisibility } from '../hooks/usePortalPrayer';
+import { LockedFeature } from '../components/LockedFeature';
 
 const CATEGORIES = [
   { value: 'general', label: 'General' },
@@ -119,10 +120,8 @@ export function PortalCare() {
 
         {isPendingVerification ? (
           <div className="mt-4 pt-4 border-t border-stone-100">
-            <p className="text-xs text-stone-500 flex items-start gap-1.5">
-              <Clock size={13} className="mt-0.5 shrink-0" />
-              Your past request history will show here once church staff confirms your account. Submitting a new request above works right away.
-            </p>
+            <p className="text-xs font-medium text-stone-500 mb-2">Your requests</p>
+            <LockedFeature message="Your past request history unlocks once church staff confirms your account. Submitting a new request above works right away." skeletonRows={2} />
           </div>
         ) : requests.length > 0 && (
           <div className="mt-4 pt-4 border-t border-stone-100">

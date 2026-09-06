@@ -1,0 +1,33 @@
+/* GRACE brand typography — local files + CDN fallback */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('inter-400.ttf') format('truetype'),
+       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('inter-600.ttf') format('truetype'),
+       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('inter-700.ttf') format('truetype'),
+       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('playfair-700.ttf') format('truetype'),
+       url('https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@5.2.8/latin-700-normal.woff2') format('woff2');
+}
