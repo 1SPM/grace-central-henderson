@@ -36,6 +36,53 @@
   let isOpen = false;
   let thinking = false;
   let greeted = false;
+  let disclosureShown = false;
+
+  /* ══ REAL ASSISTANT BRIDGE — grace-member-session.js's Clerk session,
+   * when present, routes every message through the real, Claude-powered
+   * member assistant (api/portal/_assistant.ts) instead of the local
+   * regex engine below. That endpoint has its own, more capable and
+   * safer routing (real tool calls, server-side deterministic crisis
+   * detection, moderation, budget) — the local think()/askAi() engine
+   * stays only as the fallback for a session-less visitor (staff
+   * "Preview Portal", or Clerk failing to load). See the
+   * member-portal-audit plan: "reconnect real GRACE." */
+  const threadHistory = [];
+
+  function pushHistory(role, text) {
+    threadHistory.push({ role: role, text: String(text).slice(0, 4000) });
+    if (threadHistory.length > 10) threadHistory.splice(0, threadHistory.length - 10);
+  }
+
+  function askRealAssistant(text) {
+    return global.GRACE_SESSION.ready.then((session) => {
+      if (!session || !session.getToken) return null; // no real session — caller falls back
+      return session.getToken().then((token) => {
+        if (!token) return null;
+        return fetch('/api/portal/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ message: text, history: threadHistory.slice(0, -1) }),
+        })
+          .then((r) => r.json().then((body) => ({ status: r.status, body: body })))
+          .then((res) => {
+            if (res.status === 200) {
+              return { text: res.body.reply, disclosure: res.body.disclosure };
+            }
+            if (res.status === 402) {
+              return { text: 'We’ve reached this month’s conversation limit with GRACE. Please reach out to the church office directly, or try again next month.' };
+            }
+            if (res.status === 422) {
+              return { text: 'I’m not able to help with that particular message. Let’s try something else, or I can connect you with a real person.' };
+            }
+            if (res.status === 503) {
+              return { text: 'My safety check is temporarily unavailable, so I can’t respond right now — please try again shortly, or contact the church office directly.' };
+            }
+            return { text: 'Something went wrong on my end — please try again in a moment.' };
+          });
+      });
+    }).catch(() => null);
+  }
 
   /** Tenant slug for localStorage namespacing — both tenant pages share this
    *  marketing/shared/ origin, so every key must carry the church it belongs
@@ -1014,35 +1061,68 @@
       if (!root || thinking || !text) return;
       if (!isOpen) api.open();
       appendUser(text);
+      pushHistory('user', text);
       thinking = true;
       showTyping();
-      setTimeout(() => {
-        const resp = think(text);
-        Memory.record(resp.intent);
-        renderChips();
-        if (resp.intent === 'unknown') {
-          // AI bridge: let the shared GRACE endpoint answer; scripted reply is the fallback.
-          askAi(text)
-            .then((aiText) => {
-              removeTyping();
-              thinking = false;
-              appendGrace(aiText, resp.nav, resp.navLabel);
-            })
-            .catch(() => {
-              removeTyping();
-              thinking = false;
-              appendGrace(resp.text, resp.nav, resp.navLabel);
-            });
-          return;
-        }
-        removeTyping();
-        thinking = false;
-        appendGrace(resp.text, resp.nav, resp.navLabel);
-        if (resp.care && !resp.handoff) {
-          // Crisis: also notify live care, mirroring existing dispatch behavior
-          if (A.onCrisis) A.onCrisis();
-        }
-      }, 650 + Math.random() * 350);
+
+      const useLocalEngine = () => {
+        setTimeout(() => {
+          const resp = think(text);
+          Memory.record(resp.intent);
+          renderChips();
+          if (resp.intent === 'unknown') {
+            // AI bridge: let the shared GRACE endpoint answer; scripted reply is the fallback.
+            askAi(text)
+              .then((aiText) => {
+                removeTyping();
+                thinking = false;
+                pushHistory('model', aiText);
+                appendGrace(aiText, resp.nav, resp.navLabel);
+              })
+              .catch(() => {
+                removeTyping();
+                thinking = false;
+                pushHistory('model', resp.text);
+                appendGrace(resp.text, resp.nav, resp.navLabel);
+              });
+            return;
+          }
+          removeTyping();
+          thinking = false;
+          pushHistory('model', resp.text);
+          appendGrace(resp.text, resp.nav, resp.navLabel);
+          if (resp.care && !resp.handoff) {
+            // Crisis: also notify live care, mirroring existing dispatch behavior
+            if (A.onCrisis) A.onCrisis();
+          }
+        }, 650 + Math.random() * 350);
+      };
+
+      if (global.GRACE_SESSION) {
+        askRealAssistant(text).then((result) => {
+          if (!result) { useLocalEngine(); return; }
+          removeTyping();
+          thinking = false;
+          Memory.record('real_assistant');
+          renderChips();
+          pushHistory('model', result.text);
+          let text2 = result.text;
+          if (result.disclosure && !disclosureShown) {
+            disclosureShown = true;
+            text2 = text2 + '\n\n' + result.disclosure;
+          }
+          appendGrace(text2, null, null);
+        });
+        return;
+      }
+      useLocalEngine();
+    },
+    /** Called by grace-member-session.js once the real member's name is
+     *  known — A.memberName was only a mount-time snapshot (often the
+     *  static demo default), so this corrects it in place for name()
+     *  and any already-mounted UI that reads A.memberName live. */
+    setMemberName(memberName) {
+      if (A && memberName) A.memberName = memberName;
     }
   };
 

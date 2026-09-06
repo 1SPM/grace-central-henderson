@@ -180,6 +180,7 @@
   font-size: 12.5px;
   line-height: 1.55;
   word-wrap: break-word;
+  white-space: pre-line;
 }
 
 .gcp-msg--grace .gcp-bubble {

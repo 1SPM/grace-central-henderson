@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="../../shared/grace-orb.css">
 <link rel="stylesheet" href="../../shared/grace-companion.css">
+<link rel="stylesheet" href="../../shared/grace-member-session.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;font-size:13px;font-family:var(--font-web);color:var(--central-black)}
@@ -140,6 +141,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .lc-topic{font-size:11px;color:#EE2B37;margin-top:3px;font-weight:500}
 .lc-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
 .lc-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e8e0d5;background:#fff;color:#555}
+.lc-btn:hover,.lc-btn:focus-visible{border-color:#EE2B37;color:#EE2B37;outline:none}
 .lc-btn-ai{background:#000000;color:#fff;border-color:#000000}
 
 /* ── CARE REQUEST ── */
@@ -835,6 +837,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .pf-calc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .pf-calc-lbl{font-size:11px;color:#555;width:110px;flex-shrink:0}
 .pf-calc-input{flex:1;border:1px solid #86efac;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;outline:none;background:#fff;color:#1a1a1a}
+.pf-calc-input:focus{outline:2px solid #16a34a;outline-offset:1px}
 .pf-calc-result{background:#000000;color:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .pf-calc-result-lbl{font-size:10px;color:rgba(255,255,255,.55)}
 .pf-calc-result-val{font-size:17px;font-weight:800;color:#EE2B37}
@@ -1084,6 +1087,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .wlt-header-block .res-hero{margin-bottom:0;border-radius:16px;border:none}
 .wlt-tabs{display:flex;gap:4px;background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:4px;margin-bottom:14px}
 .wlt-tab{padding:9px 22px;border-radius:9px;font-size:13px;font-weight:600;color:#888;cursor:pointer;transition:all .15s;border:none;background:transparent;font-family:inherit}
+.wlt-tab:hover,.wlt-tab:focus-visible{color:#EE2B37;outline:none}
 .wlt-tab:hover{color:#1a1a1a;background:#f7f5f2}
 .wlt-tab.active{background:#000000;color:#fff}
 .wlt-panel{display:none}
@@ -1307,6 +1311,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .net-summary-sep{color:#e4dcce}
 .net-tabs{display:flex;gap:4px;background:#fff;border:1px solid #ece8e1;border-radius:12px;padding:4px;margin-bottom:18px;flex-wrap:wrap}
 .net-tab{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;color:#888;cursor:pointer;transition:all .15s;border:none;background:transparent;font-family:inherit}
+.net-tab:hover,.net-tab:focus-visible{color:#EE2B37;outline:none}
 .net-tab:hover{color:#1a1a1a;background:#f7f5f2}
 .net-tab.active{background:#000000;color:#fff}
 .net-tab-panel{display:none}
@@ -1400,6 +1405,7 @@ body{background:var(--central-white);display:flex;height:100vh;overflow:hidden;f
 .study-scripture-block{background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.88)),url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80') center/cover;border-radius:14px;padding:16px 18px;margin-bottom:14px}
 .study-scripture-block .bc-verse{font-size:15px}
 .study-reflect-input{width:100%;border:1px solid #e4dcce;border-radius:12px;padding:12px;font-size:13px;color:#374151;outline:none;resize:none;height:100px;font-family:inherit;line-height:1.55;background:#faf8f5;margin-top:10px}
+.study-reflect-input:focus,#jd-textarea:focus,#study-topic-input:focus{outline:2px solid #b45309;outline-offset:1px}
 .study-step-actions{display:flex;flex-direction:column;gap:8px}
 .study-step-btn{background:#000;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .study-step-btn.secondary{background:#f7f5f2;border:1px solid #e8e0d5;color:#555}
@@ -1626,6 +1632,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .grace-faq-block .faq-card{background:#fff;border:1px solid #e8e4dc;border-radius:16px;overflow:hidden}
 .grace-faq-block .faq-card.open{border-color:#EE2B37;box-shadow:0 2px 12px rgba(238,43,55,.08)}
 .grace-faq-block .faq-card-head{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer}
+.grace-faq-block .faq-card-head:hover,.grace-faq-block .faq-card-head:focus-visible{background:#faf8f5;outline:none}
 .grace-faq-block .faq-card-q{flex:1;font-size:14px;font-weight:700;color:#1a1a1a;line-height:1.35}
 .grace-faq-block .faq-toggle{width:28px;height:28px;border-radius:50%;background:#f7f5f2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .grace-faq-block .faq-card.open .faq-toggle{background:#000}
@@ -1751,6 +1758,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .mobile-share-hint{font-size:12px;color:#666;text-align:center;margin:12px 0 0;line-height:1.45}
 .mobile-share-url-row{display:flex;gap:8px;margin-bottom:10px}
 .mobile-share-url-row input{flex:1;min-width:0;font-size:11px;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;background:#f9f9f9;color:#555;outline:none;font-family:inherit}
+.mobile-share-url-row input:focus{outline:2px solid #9ca3af;outline-offset:1px}
 .mobile-share-copy{padding:10px 14px;background:#f2f2f2;border:1px solid #ddd;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
 .mobile-share-copy.copied{background:#ecfdf5;color:#059669;border-color:#a7f3d0}
 .mobile-share-open{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#c0392b;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box}
@@ -2816,8 +2824,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div id="ge-add-event-form" style="display:none;padding:12px 18px;border-bottom:1px solid #f3f0eb;background:#faf8f5">
               <div style="display:grid;grid-template-columns:1fr 110px 90px;gap:8px;margin-bottom:8px">
                 <input id="ge-ev-name" placeholder="Event name" style="border:1.5px solid #ece8e1;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit">
-                <input id="ge-ev-date" type="date" style="border:1.5px solid #ece8e1;border-radius:8px;padding:8px 8px;font-size:11.5px;font-family:inherit">
-                <input id="ge-ev-time" type="time" style="border:1.5px solid #ece8e1;border-radius:8px;padding:8px 8px;font-size:11.5px;font-family:inherit">
+                <input id="ge-ev-date" type="date" aria-label="Event date" style="border:1.5px solid #ece8e1;border-radius:8px;padding:8px 8px;font-size:11.5px;font-family:inherit">
+                <input id="ge-ev-time" type="time" aria-label="Event time" style="border:1.5px solid #ece8e1;border-radius:8px;padding:8px 8px;font-size:11.5px;font-family:inherit">
               </div>
               <div style="display:flex;gap:8px;justify-content:flex-end">
                 <button onclick="toggleAddEventForm()" style="background:none;border:none;font-size:11px;color:#888;cursor:pointer;font-weight:600">Cancel</button>
@@ -3094,7 +3102,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <h2>Give &amp; Impact</h2>
               <p>Give directly, or route impact from your GRACE Impact Card to a ministry. Qualified purchases can create impact for Central.</p>
             </div>
-            <div class="wlt-kpi-grid wlt-kpi-grid--3" role="group" aria-label="Wallet summary">
+            <div class="wlt-kpi-grid wlt-kpi-grid--3" role="group" aria-label="Wallet summary" data-gr-lock="impact">
               <div class="wlt-kpi">
                 <span class="wlt-kpi-val" id="wlt-kpi-available">$3,240</span>
                 <span class="wlt-kpi-key">Available balance</span>
@@ -3197,13 +3205,13 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div class="wlt-give-goal-bar">
           <div class="wlt-goal-head">
             <span class="res-section-label" style="margin:0">2026 giving goal</span>
-            <span class="wlt-goal-pct" id="wlt-goal-pct">53%</span>
+            <span class="wlt-goal-pct" id="wlt-goal-pct">52%</span>
           </div>
           <div class="wlt-goal-copy" id="wlt-goal-copy">$1,240 of $2,400</div>
-          <div class="prog-bar"><div class="prog-fill" id="wlt-goal-fill" style="width:53%"></div></div>
+          <div class="prog-bar"><div class="prog-fill" id="wlt-goal-fill" style="width:52%"></div></div>
         </div>
 
-        <div class="wlt-banking-grid" id="wallet-card-anchor">
+        <div class="wlt-banking-grid" id="wallet-card-anchor" data-gr-lock="impact">
           <div class="card">
             <div class="card-head">
               <span class="card-title">Your GRACE Impact Card</span>
@@ -3464,7 +3472,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       </div><!-- /wlt-give -->
 
       <!-- ── IMPACT & HISTORY ── -->
-      <div class="wlt-panel" id="wlt-impact">
+      <div class="wlt-panel" id="wlt-impact" data-gr-lock="impact">
 
       <div class="wlt-impact-flow">
 
@@ -3472,6 +3480,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <h3>Your Impact</h3>
           <button type="button" class="wlt-impact-link" onclick="document.getElementById('wlt-alloc-card').scrollIntoView({behavior:'smooth'});document.getElementById('pf-cause-edit').style.display='block'">Adjust routing →</button>
         </div>
+
+        <div id="gr-kyc-cta" hidden></div>
 
         <div class="pf-grid pf-grid--3">
           <div class="pf-scard pf-sc--green pf-sc1" onclick="showWalletStatDetail('impact')">
@@ -3524,11 +3534,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div id="pf-cause-edit" style="display:none;border-top:1px solid #f3f0eb">
               <div style="padding:14px 16px">
                 <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:10px">Adjust allocation — must total 100%</div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#EE2B37"></div><div class="pf-cs-name">Missions Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="40" oninput="pfUpdateAlloc(this,0)"><div class="pf-cs-pct" id="pf-cs-0">40%</div></div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#000000"></div><div class="pf-cs-name">Building Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="25" oninput="pfUpdateAlloc(this,1)"><div class="pf-cs-pct" id="pf-cs-1">25%</div></div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#7c3aed"></div><div class="pf-cs-name">Youth Ministry</div><input type="range" class="pf-cs-slider" min="0" max="100" value="20" oninput="pfUpdateAlloc(this,2)"><div class="pf-cs-pct" id="pf-cs-2">20%</div></div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#16a34a"></div><div class="pf-cs-name">Food Pantry</div><input type="range" class="pf-cs-slider" min="0" max="100" value="10" oninput="pfUpdateAlloc(this,3)"><div class="pf-cs-pct" id="pf-cs-3">10%</div></div>
-                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#0891b2"></div><div class="pf-cs-name">Care Fund</div><input type="range" class="pf-cs-slider" min="0" max="100" value="5" oninput="pfUpdateAlloc(this,4)"><div class="pf-cs-pct" id="pf-cs-4">5%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#EE2B37"></div><div class="pf-cs-name">Missions Fund</div><input type="range" class="pf-cs-slider" aria-label="Missions Fund allocation percent" min="0" max="100" value="40" oninput="pfUpdateAlloc(this,0)"><div class="pf-cs-pct" id="pf-cs-0">40%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#000000"></div><div class="pf-cs-name">Building Fund</div><input type="range" class="pf-cs-slider" aria-label="Building Fund allocation percent" min="0" max="100" value="25" oninput="pfUpdateAlloc(this,1)"><div class="pf-cs-pct" id="pf-cs-1">25%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#7c3aed"></div><div class="pf-cs-name">Youth Ministry</div><input type="range" class="pf-cs-slider" aria-label="Youth Ministry allocation percent" min="0" max="100" value="20" oninput="pfUpdateAlloc(this,2)"><div class="pf-cs-pct" id="pf-cs-2">20%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#16a34a"></div><div class="pf-cs-name">Food Pantry</div><input type="range" class="pf-cs-slider" aria-label="Food Pantry allocation percent" min="0" max="100" value="10" oninput="pfUpdateAlloc(this,3)"><div class="pf-cs-pct" id="pf-cs-3">10%</div></div>
+                <div class="pf-cs-row"><div class="pf-cs-dot" style="background:#0891b2"></div><div class="pf-cs-name">Care Fund</div><input type="range" class="pf-cs-slider" aria-label="Care Fund allocation percent" min="0" max="100" value="5" oninput="pfUpdateAlloc(this,4)"><div class="pf-cs-pct" id="pf-cs-4">5%</div></div>
                 <button class="pf-cs-save" onclick="pfSaveAlloc()">Save allocation</button>
               </div>
             </div>
@@ -3771,7 +3781,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
 
           <!-- Recent requests -->
-          <div class="card">
+          <div class="card" data-gr-lock="care">
             <div class="card-head"><div class="card-title">My recent requests</div></div>
             <div class="tx-row"><div class="tx-ico" style="background:#e8edf8"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" fill="#000000" opacity=".2"/><path d="M8 1.5c-.6.6-1.8 1.4-1.8 3.1 0 1.1.8 2 1.8 2s1.8-.9 1.8-2c0-1.7-1.2-2.5-1.8-3.1z" stroke="#000000" stroke-width="1"/><path d="M5.5 9.5h5M8 7v2.5" stroke="#EE2B37" stroke-width=".9" stroke-linecap="round"/></svg></div><div><div class="tx-name">Prayer — Anxiety &amp; faith</div><div class="tx-sub">May 26 · Resolved · human follow-up offered</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Resolved</div></div>
             <div class="tx-row"><div class="tx-ico" style="background:#e8f5ed"><svg viewBox="0 0 16 16" width="13" height="13" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="#16a34a" opacity=".12"/><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#16a34a" stroke-width="1.1"/><path d="M8 6v4M6 8h4" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/></svg></div><div><div class="tx-name">Hospital visit — Rm 214</div><div class="tx-sub">May 14 · Visit by Rev. Mitchell</div></div><div style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap">Complete</div></div>
@@ -4336,6 +4346,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <script src="../../shared/grace-messaging.js"></script>
 <script src="../../shared/grace-companion.js"></script>
 <script src="../../shared/grace-duotone-icons.js"></script>
+<script src="../../shared/grace-member-session.js"></script>
 <script>
 /* D-ID Studio — set agentId + clientKey from studio.d-id.com Agents share panel when ready */
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
