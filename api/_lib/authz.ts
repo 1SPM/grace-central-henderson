@@ -69,6 +69,13 @@ export const HOST_CHURCH_IDS: Record<string, string> = {
   'grace-crm.dev': '22222222-2222-2222-2222-222222222222',
   'www.grace-crm.dev': '22222222-2222-2222-2222-222222222222',
   'gracecrm-centralhenderson.org': '11111111-1111-1111-1111-111111111111',
+  // grace-members' own Vercel-assigned domain, same church as
+  // gracecrm-centralhenderson.org above — Central Henderson's Member
+  // Portal doesn't have its real custom domain wired up yet (Phase 1 M8
+  // cutover, still pending), so this is what api/portal/_self-signup.ts
+  // resolves against until then. Remove once the real domain is live and
+  // this Vercel-assigned host is no longer how members reach the portal.
+  'grace-members.vercel.app': '11111111-1111-1111-1111-111111111111',
 };
 
 /**
