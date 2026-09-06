@@ -20,6 +20,13 @@ export interface Person {
   smallGroups: string[];
   familyId?: string;
   portalEnabled?: boolean;
+  /** True when this person's portal login was self-registered (see
+   * migration 078) rather than staff-provisioned. */
+  selfRegistered?: boolean;
+  /** Set when staff confirms a self-registered identity — unlocks
+   * giving/care/Impact history. Undefined for staff-provisioned people
+   * (never needed review) and for anyone not yet reviewed. */
+  staffReviewedAt?: string;
 }
 
 export interface Interaction {

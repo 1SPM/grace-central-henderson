@@ -106,6 +106,25 @@ export function PersonProfile({
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [provisionError, setProvisionError] = useState('');
   const [provisionResult, setProvisionResult] = useState<{ mode: 'invite' | 'direct'; email: string } | null>(null);
+  const [isConfirmingIdentity, setIsConfirmingIdentity] = useState(false);
+  const [confirmIdentityError, setConfirmIdentityError] = useState('');
+  const [identityConfirmed, setIdentityConfirmed] = useState(false);
+
+  const handleConfirmIdentity = async () => {
+    setIsConfirmingIdentity(true);
+    setConfirmIdentityError('');
+    try {
+      await workosFetch('/api/people/confirm-portal-identity', getAuthToken, {
+        method: 'POST',
+        body: JSON.stringify({ person_id: person.id }),
+      });
+      setIdentityConfirmed(true);
+    } catch (err) {
+      setConfirmIdentityError(err instanceof WorkOsApiError ? err.message : 'Could not confirm this identity.');
+    } finally {
+      setIsConfirmingIdentity(false);
+    }
+  };
 
   const handleProvisionPortal = async (mode: 'invite' | 'direct') => {
     setIsProvisioning(true);
@@ -440,6 +459,26 @@ export function PersonProfile({
                         </div>
                       )}
                     </div>
+                  )}
+                  {person.selfRegistered && !person.staffReviewedAt && !identityConfirmed && hasWorkOsPermission('portal.provision_member') && (
+                    <button
+                      onClick={() => void handleConfirmIdentity()}
+                      disabled={isConfirmingIdentity}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 disabled:opacity-60"
+                      title="This person self-registered for the Members Portal. Confirm their identity to unlock their giving history, Impact Card, and care-request history."
+                    >
+                      {isConfirmingIdentity ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                      Confirm identity (self sign-up)
+                    </button>
+                  )}
+                  {(identityConfirmed || (person.selfRegistered && !!person.staffReviewedAt)) && (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                      <Check size={16} />
+                      Identity confirmed
+                    </span>
+                  )}
+                  {confirmIdentityError && (
+                    <span className="text-xs text-red-600 dark:text-red-400 self-center">{confirmIdentityError}</span>
                   )}
                   {person.email && onSendEmail && (
                     <button

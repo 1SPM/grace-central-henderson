@@ -84,6 +84,8 @@ export interface Person {
   portal_enabled: boolean;
   portal_last_seen_at: string | null;
   directory_opt_in: boolean;
+  self_registered: boolean;
+  staff_reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 }

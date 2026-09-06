@@ -61,6 +61,8 @@ describe('typeConverters', () => {
         smallGroups: [],
         familyId: 'family-1',
         portalEnabled: false,
+        selfRegistered: false,
+        staffReviewedAt: undefined,
       });
     });
 

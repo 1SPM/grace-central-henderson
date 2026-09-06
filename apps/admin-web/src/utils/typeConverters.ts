@@ -24,6 +24,8 @@ export interface DbPerson {
   tags: string[];
   family_id: string | null;
   portal_enabled?: boolean | null;
+  self_registered?: boolean | null;
+  staff_reviewed_at?: string | null;
 }
 
 // Database task type
@@ -121,6 +123,8 @@ export function toPersonLegacy(p: DbPerson): LegacyPerson {
     smallGroups: [], // Will be populated separately
     familyId: p.family_id || undefined,
     portalEnabled: p.portal_enabled ?? false,
+    selfRegistered: p.self_registered ?? false,
+    staffReviewedAt: p.staff_reviewed_at || undefined,
   };
 }
 

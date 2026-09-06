@@ -185,6 +185,12 @@ export interface MemberActor {
    * preview actors, but callers with additional side effects beyond a
    * simple write (e.g. sending an email) should still check this. */
   isPreview?: boolean;
+  /** False only for a self-registered person (people.self_registered)
+   * staff hasn't reviewed yet (people.staff_reviewed_at IS NULL) — see
+   * migration 078 and requireVerifiedIdentity below. Staff-provisioned,
+   * demo, and preview actors are always true: only the unattended
+   * self-signup path (api/portal/_self-signup.ts) can produce false. */
+  identityVerified: boolean;
 }
 
 /** True when the request carries an Authorization: Bearer header. Used to
@@ -548,7 +554,7 @@ export async function resolveMemberActor(
 
   const { data: personRow, error } = await supabase
     .from('people')
-    .select('id, portal_enabled')
+    .select('id, portal_enabled, self_registered, staff_reviewed_at')
     .eq('clerk_user_id', auth.clerkUserId)
     .eq('church_id', auth.churchId)
     .maybeSingle();
@@ -567,7 +573,47 @@ export async function resolveMemberActor(
     personId: personRow.id,
     clerkUserId: auth.clerkUserId,
     churchId: auth.churchId,
+    identityVerified: !personRow.self_registered || !!personRow.staff_reviewed_at,
   };
+}
+
+/**
+ * Gate for the sensitive-data surface (giving history, Impact Card,
+ * care-request history) a self-registered-but-unreviewed member
+ * shouldn't see yet — see migration 078 and MemberActor.identityVerified.
+ * Writes the 403 itself so call sites read the same one-liner every
+ * REST route already uses for resolveMemberActor/requirePermission.
+ */
+export function requireVerifiedIdentity(res: VercelResponse, actor: MemberActor): boolean {
+  if (actor.identityVerified) return true;
+  res.status(403).json({
+    error: 'pending_verification',
+    detail: 'Your account is still being reviewed by church staff. This information will be available once that review is complete.',
+  });
+  return false;
+}
+
+/**
+ * Same identityVerified computation as resolveMemberActor, for the rare
+ * call site (api/neobank/_index.ts's ?resource=me path) that resolves
+ * its actor via requireClerkAuth directly rather than resolveMemberActor
+ * and so never got a MemberActor to check. No matching people row (e.g.
+ * a staff member with no member record) is not a pending self-signup,
+ * so it reads as verified — there's nothing here to withhold.
+ */
+export async function isIdentityVerifiedForClerkUser(
+  supabase: SupabaseClient,
+  churchId: string,
+  clerkUserId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('people')
+    .select('self_registered, staff_reviewed_at')
+    .eq('church_id', churchId)
+    .eq('clerk_user_id', clerkUserId)
+    .maybeSingle();
+  if (!data) return true;
+  return !data.self_registered || !!data.staff_reviewed_at;
 }
 
 // Distinguishes staff-issued preview tokens (opaque random strings) from
@@ -635,6 +681,7 @@ async function resolvePreviewMemberActor(
     clerkUserId: (person.clerk_user_id as string) ?? '',
     churchId: row.church_id as string,
     isPreview: true,
+    identityVerified: true,
   };
 }
 
@@ -698,6 +745,7 @@ async function resolveDemoMemberActor(
     personId: personRow.id,
     clerkUserId: demoMemberClerkId,
     churchId,
+    identityVerified: true,
   };
 }
 

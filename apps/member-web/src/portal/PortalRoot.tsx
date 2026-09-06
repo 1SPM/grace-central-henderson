@@ -39,11 +39,24 @@ function PreviewBanner({ personName }: { personName: string | null }) {
   );
 }
 
+function PortalProvisioningError({ message }: { message: string }) {
+  return (
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm text-center">
+        <h1 className="text-xl font-semibold text-stone-900 mb-2">We hit a snag</h1>
+        <p className="text-sm text-stone-500">{message}</p>
+      </div>
+    </div>
+  );
+}
+
 function PortalGate() {
-  const { isLoaded, isSignedIn, isDemo, isPreview, previewPersonName } = usePortalAuth();
+  const { isLoaded, isSignedIn, isDemo, isPreview, previewPersonName, isProvisioning, provisioningError } = usePortalAuth();
 
   if (!isLoaded) return <PortalLoading />;
   if (!isSignedIn && !isDemo) return <PortalSignIn />;
+  if (isProvisioning) return <PortalLoading />;
+  if (provisioningError) return <PortalProvisioningError message={provisioningError} />;
 
   if (isPreview) {
     return (

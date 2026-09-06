@@ -67,6 +67,8 @@ function convertLegacyPerson(p: LegacyPerson): Person {
     portal_enabled: false,
     portal_last_seen_at: null,
     directory_opt_in: true,
+    self_registered: false,
+    staff_reviewed_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -318,6 +320,8 @@ export function useSupabaseData(authReady: boolean = true) {
         portal_enabled: false,
         portal_last_seen_at: null,
         directory_opt_in: true,
+        self_registered: false,
+        staff_reviewed_at: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

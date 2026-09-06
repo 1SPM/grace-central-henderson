@@ -12,7 +12,7 @@
  * Same three-mode shape as the staff AuthContext (real Clerk / demo /
  * blocked) for consistency, but resolving a *member* identity, not staff.
  */
-import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react';
 import { isDemoModeActive } from '@grace/platform-core/tenant';
 import { setClerkTokenProvider } from '@grace/platform-core/supabase';
@@ -31,6 +31,15 @@ export interface PortalAuthContextValue {
   previewPersonName: string | null;
   memberFirstName: string | null;
   getAuthToken: () => Promise<string | null>;
+  /** True while a freshly-signed-in member is being completed into a
+   * usable identity (api/portal/_self-signup.ts) — see
+   * PortalAuthProviderInner's provisioning effect. PortalGate shows a
+   * loading state rather than the sign-in wall or a broken shell while
+   * this is true. */
+  isProvisioning: boolean;
+  /** Set if provisioning failed (e.g. this host isn't a recognized
+   * church domain) — distinct from a normal loading state. */
+  provisioningError: string | null;
 }
 
 const PortalAuthContext = createContext<PortalAuthContextValue | null>(null);
@@ -76,9 +85,85 @@ const isDemoModeEnabled = isDemoModeActive();
 export const PORTAL_DEMO_HOSTS = new Set<string>([]);
 const isPortalDemoHost = typeof window !== 'undefined' && PORTAL_DEMO_HOSTS.has(window.location.hostname);
 
+/** Reads the church_id claim out of a Clerk session JWT client-side, no
+ * library needed — just enough to decide whether self-signup needs to
+ * run. Never trusted for anything security-relevant: every server route
+ * re-verifies the token and re-derives church_id itself
+ * (api/_lib/auth-helper.ts). A malformed/unexpected token shape reads as
+ * "no claim" rather than throwing, so it safely falls through to
+ * attempting self-signup. */
+function tokenHasChurchClaim(token: string): boolean {
+  try {
+    const payloadSegment = token.split('.')[1];
+    const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64)) as { app_metadata?: { church_id?: string }; church_id?: string };
+    return !!(payload.app_metadata?.church_id ?? payload.church_id);
+  } catch {
+    return false;
+  }
+}
+
 function PortalAuthProviderInner({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
+  const [isProvisioning, setIsProvisioning] = useState(false);
+  const [provisioningError, setProvisioningError] = useState<string | null>(null);
+  const [provisioningDone, setProvisioningDone] = useState(false);
+
+  // Completes a first-time (or church_id-claim-less) sign-in into a
+  // usable identity: a brand-new Clerk sign-up has no church association
+  // at all until api/portal/_self-signup.ts sets it. Runs once per
+  // sign-in; idempotent on the server, so re-running for an
+  // already-provisioned member is a cheap no-op rather than something
+  // that needs its own "already done" tracking here beyond
+  // provisioningDone (which just stops it from re-firing on every
+  // re-render while isSignedIn stays true).
+  useEffect(() => {
+    if (!isSignedIn || provisioningDone) return;
+    let cancelled = false;
+
+    (async () => {
+      setIsProvisioning(true);
+      setProvisioningError(null);
+      try {
+        // The DEFAULT session token (no template) carries app_metadata —
+        // the 'supabase' template is scoped for direct Supabase RLS calls
+        // only (see setClerkTokenProvider below) and isn't guaranteed to
+        // include it.
+        const token = await getToken({ skipCache: true });
+        if (!token) throw new Error('no_session_token');
+
+        if (!tokenHasChurchClaim(token)) {
+          const resp = await fetch('/api/portal/self-signup', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!resp.ok) {
+            const body = await resp.json().catch(() => ({}));
+            throw new Error(body.error || `self_signup_failed_${resp.status}`);
+          }
+          // Clerk's cached token won't reflect the metadata write just
+          // made until forced — every getToken() call after this in the
+          // session (getAuthToken below, setClerkTokenProvider) needs the
+          // refreshed claim.
+          await getToken({ skipCache: true });
+        }
+        if (!cancelled) setProvisioningDone(true);
+      } catch (err) {
+        if (!cancelled) {
+          setProvisioningError(
+            err instanceof Error && err.message === 'signup_not_available_on_this_domain'
+              ? "This isn't a recognized church address yet. Contact your church administrator."
+              : "We couldn't finish setting up your account. Please try again in a moment.",
+          );
+        }
+      } finally {
+        if (!cancelled) setIsProvisioning(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [isSignedIn, provisioningDone, getToken]);
 
   // Register the same global Clerk-token provider the staff AuthContext
   // uses (src/lib/supabase.ts) — the Portal and staff CRM are mutually
@@ -132,6 +217,8 @@ function PortalAuthProviderInner({ children }: { children: ReactNode }) {
     previewPersonName: null,
     memberFirstName: user?.firstName ?? null,
     getAuthToken,
+    isProvisioning: !!isSignedIn && isProvisioning,
+    provisioningError,
   };
 
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
@@ -150,6 +237,8 @@ function PortalAuthProviderDemo({ children }: { children: ReactNode }) {
     previewPersonName: null,
     memberFirstName: null, // resolved server-side from the demo person row instead
     getAuthToken: async () => null,
+    isProvisioning: false,
+    provisioningError: null,
   };
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
 }
@@ -163,6 +252,8 @@ function PortalAuthProviderBlocked({ children }: { children: ReactNode }) {
     previewPersonName: null,
     memberFirstName: null,
     getAuthToken: async () => null,
+    isProvisioning: false,
+    provisioningError: null,
   };
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
 }
@@ -187,6 +278,8 @@ function PortalAuthProviderPreview({
     previewPersonName: personName,
     memberFirstName: personName,
     getAuthToken: async () => token,
+    isProvisioning: false,
+    provisioningError: null,
   };
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
 }
