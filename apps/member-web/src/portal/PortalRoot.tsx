@@ -1,7 +1,6 @@
 import { Suspense, useEffect } from 'react';
 import { SignIn } from '@clerk/clerk-react';
 import { PortalAuthProvider, usePortalAuth } from './PortalAuthContext';
-import { PortalShell } from './PortalShell';
 
 // Central Henderson gets its own branded page; every other church (today
 // just Faithful, but any future one too — see marketing/tenants/faithful
@@ -76,14 +75,6 @@ function PortalSignIn() {
   );
 }
 
-function PreviewBanner({ personName }: { personName: string | null }) {
-  return (
-    <div className="bg-amber-500 text-amber-950 text-sm font-medium text-center py-2 px-4 sticky top-0 z-50">
-      Staff Preview — viewing as {personName ?? 'this member'} (read-only)
-    </div>
-  );
-}
-
 function PortalProvisioningError({ message }: { message: string }) {
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
@@ -96,24 +87,12 @@ function PortalProvisioningError({ message }: { message: string }) {
 }
 
 function PortalGate() {
-  const { isLoaded, isSignedIn, isDemo, isPreview, previewPersonName, isProvisioning, provisioningError } = usePortalAuth();
+  const { isLoaded, isSignedIn, isDemo, isProvisioning, provisioningError } = usePortalAuth();
 
   if (!isLoaded) return <PortalLoading />;
   if (!isSignedIn && !isDemo) return <PortalSignIn />;
   if (isProvisioning) return <PortalLoading />;
   if (provisioningError) return <PortalProvisioningError message={provisioningError} />;
-
-  // Staff "preview as member" has no equivalent in the static pages yet
-  // (no read-only mode, no banner) — keep it on the in-app shell. This is
-  // a staff tool, not something real members ever see.
-  if (isPreview) {
-    return (
-      <>
-        <PreviewBanner personName={previewPersonName} />
-        <PortalShell />
-      </>
-    );
-  }
 
   return <StaticPortalHandoff />;
 }
