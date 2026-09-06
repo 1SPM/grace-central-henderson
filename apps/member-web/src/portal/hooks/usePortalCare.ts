@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePortalAuth } from '../PortalAuthContext';
-import { workosFetch } from '@grace/platform-core/services/workos';
+import { workosFetch, WorkOsApiError } from '@grace/platform-core/services/workos';
 
 export interface CareRequestStatus {
   id: string;
@@ -23,16 +23,22 @@ export function usePortalCare() {
   const [requests, setRequests] = useState<CareRequestStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsPendingVerification(false);
     try {
       const result = await workosFetch<{ requests: CareRequestStatus[] }>('/api/portal/care', getAuthToken);
       setRequests(result.requests);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load your care requests');
+      if (err instanceof WorkOsApiError && err.message === 'pending_verification') {
+        setIsPendingVerification(true);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load your care requests');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,5 +64,5 @@ export function usePortalCare() {
     }
   }, [getAuthToken, refresh]);
 
-  return { requests, isLoading, error, isSubmitting, refresh, submit };
+  return { requests, isLoading, error, isPendingVerification, isSubmitting, refresh, submit };
 }

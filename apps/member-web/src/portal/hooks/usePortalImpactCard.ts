@@ -7,7 +7,7 @@ import {
 } from '@grace/platform-core/services/impactCard';
 import { usePortalAuth } from '../PortalAuthContext';
 
-export type PortalImpactCardState = 'loading' | 'ready' | 'unavailable' | 'signed_out' | 'preview';
+export type PortalImpactCardState = 'loading' | 'ready' | 'unavailable' | 'signed_out' | 'preview' | 'pending_verification';
 
 export function usePortalImpactCard() {
   const { isPreview } = usePortalAuth();
@@ -44,6 +44,12 @@ export function usePortalImpactCard() {
       setData(result);
       setState('ready');
     } catch (err) {
+      if (err instanceof NeobankFetchError && err.code === 'pending_verification') {
+        setErrorMessage(err.detail);
+        setData(null);
+        setState('pending_verification');
+        return;
+      }
       const message = err instanceof NeobankFetchError ? err.detail : 'Could not load your Impact Card.';
       setErrorMessage(message);
       setData(null);

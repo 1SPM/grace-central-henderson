@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePortalAuth } from '../PortalAuthContext';
-import { workosFetch } from '@grace/platform-core/services/workos';
+import { workosFetch, WorkOsApiError } from '@grace/platform-core/services/workos';
 
 export interface GiftHistoryEntry {
   id: string;
@@ -41,16 +41,22 @@ export function usePortalGiving() {
   const [data, setData] = useState<PortalGivingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsPendingVerification(false);
     try {
       const result = await workosFetch<PortalGivingData>('/api/portal/giving', getAuthToken);
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load your giving history');
+      if (err instanceof WorkOsApiError && err.message === 'pending_verification') {
+        setIsPendingVerification(true);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load your giving history');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -75,5 +81,5 @@ export function usePortalGiving() {
     }
   }, [getAuthToken, refresh]);
 
-  return { data, isLoading, error, isCancelling, refresh, cancelRecurring };
+  return { data, isLoading, error, isPendingVerification, isCancelling, refresh, cancelRecurring };
 }

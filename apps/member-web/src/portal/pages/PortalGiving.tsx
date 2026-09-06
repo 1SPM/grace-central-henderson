@@ -18,7 +18,7 @@
 import { useMemo, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Gift, Repeat, History, CreditCard, ShieldCheck } from 'lucide-react';
+import { Gift, Repeat, History, CreditCard, ShieldCheck, Clock } from 'lucide-react';
 import { usePortalGiving, type RecurringGiftEntry } from '../hooks/usePortalGiving';
 import { usePortalAuth } from '../PortalAuthContext';
 import { usePortalImpactCard } from '../hooks/usePortalImpactCard';
@@ -50,6 +50,13 @@ export function PortalGiving() {
         <h1 className="text-2xl font-semibold text-stone-900">Give &amp; Impact Card</h1>
         <p className="text-sm text-stone-500 mt-1">Make a gift, manage recurring giving, and check your Impact Card.</p>
       </div>
+
+      {giving.isPendingVerification && (
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex items-start gap-2">
+          <Clock size={16} className="mt-0.5 shrink-0" />
+          <span>Your account is still being reviewed by church staff. Giving and your Impact Card will be available here once that's done.</span>
+        </div>
+      )}
 
       <GiveSection giving={giving} />
       <RecurringSection giving={giving} />
@@ -309,6 +316,13 @@ function ImpactCardSection({ impactCard }: { impactCard: ReturnType<typeof usePo
 
       {state === 'signed_out' && (
         <p className="text-sm text-stone-500">Sign in to view your Impact Card status. (Not available in demo mode yet.)</p>
+      )}
+
+      {state === 'pending_verification' && (
+        <p className="text-sm text-stone-500 flex items-start gap-1.5">
+          <Clock size={13} className="mt-0.5 shrink-0" />
+          {errorMessage || "Your Impact Card status will show here once church staff confirms your account."}
+        </p>
       )}
 
       {state === 'unavailable' && (

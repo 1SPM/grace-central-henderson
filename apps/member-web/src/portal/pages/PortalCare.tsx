@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HeartHandshake, Heart, ShieldAlert } from 'lucide-react';
+import { HeartHandshake, Heart, ShieldAlert, Clock } from 'lucide-react';
 import { usePortalCare } from '../hooks/usePortalCare';
 import { usePortalPrayerWall, type PrayerVisibility } from '../hooks/usePortalPrayer';
 
@@ -25,7 +25,7 @@ const PRAYER_VISIBILITY: { value: PrayerVisibility; label: string; description: 
 const CRISIS_NOTICE = 'If you are in immediate danger, please call or text 988 (Suicide & Crisis Lifeline) or call 911.';
 
 export function PortalCare() {
-  const { requests, isSubmitting: careSubmitting, submit: submitCare } = usePortalCare();
+  const { requests, isSubmitting: careSubmitting, isPendingVerification, submit: submitCare } = usePortalCare();
   const { entries, isLoading: wallLoading, isSubmitting: prayerSubmitting, lastResult, submit: submitPrayer } = usePortalPrayerWall();
 
   const [category, setCategory] = useState('general');
@@ -117,7 +117,14 @@ export function PortalCare() {
           </form>
         )}
 
-        {requests.length > 0 && (
+        {isPendingVerification ? (
+          <div className="mt-4 pt-4 border-t border-stone-100">
+            <p className="text-xs text-stone-500 flex items-start gap-1.5">
+              <Clock size={13} className="mt-0.5 shrink-0" />
+              Your past request history will show here once church staff confirms your account. Submitting a new request above works right away.
+            </p>
+          </div>
+        ) : requests.length > 0 && (
           <div className="mt-4 pt-4 border-t border-stone-100">
             <p className="text-xs font-medium text-stone-500 mb-2">Your requests</p>
             <ul className="space-y-1.5" data-testid="care-request-status-list">
