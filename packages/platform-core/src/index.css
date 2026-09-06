@@ -1,7 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/**
+ * Shared design tokens only — NOT a Tailwind entry point. Tailwind's own
+ * `@import "tailwindcss"` + `@config` directives live in each app's own
+ * tiny tailwind.css (apps/admin-web/src/tailwind.css, same for member-web)
+ * because `@config`'s path is relative to the CSS file it's written in —
+ * this file is physically shared, but each app has its OWN
+ * tailwind.config.js, so the directive can't live here.
+ */
 :root {
   /* Brand — Monday purple */
   --color-primary: 97 97 255;      /* #6161FF — CTAs, active nav, focus */

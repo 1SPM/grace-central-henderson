@@ -52,14 +52,26 @@ export function SignUpFlow({ initialPlan = 'pro' }: SignUpFlowProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Once Clerk auth lands, advance past the auth step.
+  // Once Clerk auth lands, advance past the auth step — unless this Clerk
+  // account already has a church (set server-side by create-church once
+  // onboarding completes). That happens when someone with an existing
+  // account lands on /signup — e.g. a stale/mismatched clerk_id bounced
+  // them here from the main app's own sign-in sync (AuthContext.tsx) — and
+  // re-running church-details → plan-confirm against an already-active
+  // church is exactly what produced "Could not activate trial" in
+  // practice (a second Stripe checkout session for an already-subscribed
+  // church). Send them to the dashboard instead of back through the wizard.
   useEffect(() => {
-    if (isSignedIn && step === 'auth') {
-      setStep('church-details');
-      // Pre-fill admin name from Clerk if available
-      if (user?.fullName) setAdminName(user.fullName);
+    if (!isSignedIn || step !== 'auth') return;
+    const existingChurchId = user?.publicMetadata?.church_id as string | undefined;
+    if (existingChurchId) {
+      window.location.pathname = '/';
+      return;
     }
-  }, [isSignedIn, step, user?.fullName]);
+    setStep('church-details');
+    // Pre-fill admin name from Clerk if available
+    if (user?.fullName) setAdminName(user.fullName);
+  }, [isSignedIn, step, user?.fullName, user?.publicMetadata]);
 
   const handleCreateChurch = async (event: React.FormEvent) => {
     event.preventDefault();

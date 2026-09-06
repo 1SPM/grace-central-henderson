@@ -507,6 +507,14 @@
 - **Recommendation, not yet actioned:** delete the role in a future migration once the one live assignment is confirmed with its owner (it grants that account nothing today, so removing it changes no behavior) — do not attempt to wire it into `resolveMemberActor` without first designing how a `people` row would hold an RBAC grant, which is bigger than this role.
 - **Re-entry trigger:** before adding a second permission for "staff acting as a member" (redundant with `portal.preview_as_member`), or before any change that gives `people` rows their own permission grants (at which point this role's *purpose* becomes buildable, even if this exact row is retired).
 
+### TD-071 — `GraceChatContext.openPanel`'s seed-message closure can go stale
+- **Severity:** P3 (correctness risk, not a security issue; not confirmed to have ever manifested)
+- **Location:** `src/contexts/GraceChatContext.tsx` — `openPanel` (`useCallback` with an empty dependency array) calls `sendMessage` inside a deferred `setTimeout`; `sendMessage` is itself a `useCallback` whose own dependencies (`dataContext`, `conversationId`, `data.people`, etc.) change across renders.
+- **Problem:** because `openPanel` never re-creates after its first render, its closure over `sendMessage` is fixed to whatever `sendMessage` was on that first render. If `openPanel`'s seeded-launch path (`openPanel(seed)`) is ever invoked after the panel/provider has been alive long enough for `sendMessage`'s own dependencies to change, the seeded message could be sent through a stale `sendMessage` — stale `dataContext`/`conversationId` at minimum, not a crash.
+- **Surfaced by:** upgrading `eslint-plugin-react-hooks` 7.0.1→7.1.1 (dependency-maintenance PR, 2026-09-05), whose newer `react-hooks/immutability` rule now catches this pattern. Suppressed inline (`eslint-disable-next-line`) rather than restructured, since this is the live, rehearsed chat-launch path for the 2026-09-10 workshop demo — not something to change the runtime behavior of during demo week.
+- **Recommendation, not yet actioned:** either add `sendMessage` to `openPanel`'s dependency array (simplest, but re-creates `openPanel`'s identity on every `sendMessage` change — check whether anything memoizes on `openPanel`'s reference) or hold `sendMessage` in a ref updated via a `useEffect` and call `ref.current(seed)` from the timeout instead.
+- **Re-entry trigger:** after 2026-09-10, before the next time this file is touched for an unrelated reason, or immediately if `openPanel(seed)` is ever observed sending a message that doesn't match current conversation state.
+
 ---
 
 ## Resolved

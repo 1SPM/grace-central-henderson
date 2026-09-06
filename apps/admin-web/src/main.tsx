@@ -8,7 +8,7 @@ import { handleDemoEntryQuery } from '@grace/platform-core/demoEntry';
 import { checkEnvironment } from '@grace/platform-core/envCheck';
 import { initSentry, initPosthog, SentryErrorBoundary } from '@grace/platform-core/observability';
 import { getTenant } from '@grace/platform-core/tenant';
-import '@grace/platform-core/index.css';
+import './tailwind.css';
 import './styles/grace-orb.css';
 import './styles/grace-tokens.css';
 import './styles/central-tokens.css';

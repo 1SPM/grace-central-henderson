@@ -7,7 +7,7 @@ import { checkEnvironment } from '@grace/platform-core/envCheck';
 import { initSentry, initPosthog, SentryErrorBoundary } from '@grace/platform-core/observability';
 import { UpdatePrompt } from '@grace/platform-core/UpdatePrompt';
 import { PortalRoot } from './portal/PortalRoot';
-import '@grace/platform-core/index.css';
+import './tailwind.css';
 
 // Tenant theming — resolved at RUNTIME (hostname map / VITE_TENANT), same
 // as apps/admin-web/src/main.tsx. Kept in sync deliberately: both apps

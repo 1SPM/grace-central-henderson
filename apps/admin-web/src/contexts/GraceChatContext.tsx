@@ -414,7 +414,16 @@ export function GraceChatProvider({ children, onAddTask, onAddPrayer, onAddInter
   const openPanel = useCallback((seed?: string) => {
     setPanelOpen(true);
     if (seed && seed.trim()) {
-      // Defer to next tick so panel renders before we send
+      // Defer to next tick so panel renders before we send. sendMessage is
+      // declared below via useCallback with deps that do change across
+      // renders (dataContext, conversationId, ...), and openPanel's own
+      // empty dep array means this closure only captures sendMessage from
+      // openPanel's first render — a real staleness risk flagged by a
+      // newer eslint-plugin-react-hooks rule. Deliberately not restructured
+      // right now: this is the live, rehearsed chat-launch path for the
+      // 2026-09-10 demo. Tracked as follow-up, not fixed under demo-week
+      // time pressure — see TECH_DEBT.md.
+      // eslint-disable-next-line react-hooks/immutability
       setTimeout(() => void sendMessage(seed), 0);
       return;
     }

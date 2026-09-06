@@ -59,8 +59,11 @@ describe('runFrontendSafety (integration on the real repo)', () => {
   // Phase 1 split: there are now three frontend surfaces sharing a repo,
   // not one src/ — each must independently stay clean of exposed secrets.
   it('apps/admin-web is clean (0 findings)', () => {
+    // admin-web's src/ is the largest of the three surfaces (500+ files) —
+    // the walk routinely exceeds vitest's 5000ms default here even with no
+    // contention, unlike the other two surfaces below.
     expect(runFrontendSafety('apps/admin-web/src', ['.env.example'])).toEqual([]);
-  });
+  }, 20_000);
   it('apps/member-web is clean (0 findings)', () => {
     expect(runFrontendSafety('apps/member-web/src', ['.env.example'])).toEqual([]);
   });
