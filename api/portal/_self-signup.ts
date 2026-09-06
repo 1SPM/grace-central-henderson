@@ -110,13 +110,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq('id', personId);
     if (updateErr) return res.status(500).json({ error: 'person_link_failed' });
   } else {
+    // people.first_name/last_name are NOT NULL with no default, but this
+    // Clerk instance's sign-up form collects only email + password — so
+    // clerkUser.firstName/lastName are routinely empty, not an edge case.
+    // Falls back to a clearly-a-placeholder name the member can replace
+    // in My Profile, rather than failing the whole sign-up over it.
     const { data: created, error: createErr } = await supabase
       .from('people')
       .insert({
         church_id: churchId,
         clerk_user_id: auth.clerkUserId,
-        first_name: clerkUser.firstName || null,
-        last_name: clerkUser.lastName || null,
+        first_name: clerkUser.firstName || 'New',
+        last_name: clerkUser.lastName || 'Member',
         email,
         status: 'member',
         portal_enabled: true,
