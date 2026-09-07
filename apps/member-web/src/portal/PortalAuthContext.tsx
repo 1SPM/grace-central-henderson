@@ -180,16 +180,20 @@ function PortalAuthProviderInner({ children }: { children: ReactNode }) {
     }
   }, [isSignedIn, getToken]);
 
+  // The DEFAULT session token, deliberately — not the 'supabase' template
+  // (that one's registered separately below, only for direct-Supabase-
+  // client calls). This is now used for exactly one thing:
+  // StaticPortalHandoff decoding app_metadata.church_id to pick the right
+  // tenant page. Real bug found live: preferring the 'supabase' template
+  // here sent a correctly-provisioned Central Henderson member to the
+  // Faithful page, because that template doesn't carry app_metadata —
+  // only the default one does.
   const getAuthToken = useCallback(async (): Promise<string | null> => {
     if (!isSignedIn) return null;
     try {
-      return (await getToken({ template: 'supabase' })) ?? (await getToken());
+      return await getToken();
     } catch {
-      try {
-        return await getToken();
-      } catch {
-        return null;
-      }
+      return null;
     }
   }, [isSignedIn, getToken]);
 
