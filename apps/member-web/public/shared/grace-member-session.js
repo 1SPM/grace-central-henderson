@@ -77,12 +77,22 @@
     if (!name) return;
     var nameEls = document.querySelectorAll('.sb-name');
     for (var i = 0; i < nameEls.length; i++) nameEls[i].textContent = name;
-    if (typeof window.HOME_STATE === 'object' && window.HOME_STATE) {
-      window.HOME_STATE.memberName = name;
-      if (typeof window.hydrateHome === 'function') {
-        try { window.hydrateHome(); } catch (e) { /* best-effort re-render only */ }
+    // HOME_STATE is declared `const`/`let` in the page's own inline
+    // <script> — that does NOT attach it to window (only `var` and
+    // function declarations do), but it IS visible here as a bare
+    // identifier: classic (non-module) <script> tags share one global
+    // lexical scope, and this closure only runs long after that
+    // top-level declaration has already executed. `typeof` is the safe
+    // way to probe a bare identifier that might not exist at all
+    // (e.g. a page with no HOME_STATE) without throwing.
+    try {
+      if (typeof HOME_STATE !== 'undefined' && HOME_STATE) {
+        HOME_STATE.memberName = name;
+        if (typeof hydrateHome === 'function') {
+          try { hydrateHome(); } catch (e) { /* best-effort re-render only */ }
+        }
       }
-    }
+    } catch (e) { /* HOME_STATE/hydrateHome not present on this page */ }
     // GRACE_COMPANION.mount() ran synchronously at page load with whatever
     // HOME_STATE.memberName was at that moment (the static demo default) —
     // correct its already-captured copy too.
