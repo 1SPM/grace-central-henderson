@@ -1,6 +1,6 @@
 # Member-Portal GRACE Memory — Qualification Plan
 
-**Status:** qualification gate built; ADR-019 drafted (Proposed); implementation NOT started; policy NOT yet amended.
+**Status:** qualification gate built; **ADR-019 Accepted (2026-09-07)**; implementation NOT started (tasks 1-6 below).
 **Date:** 2026-09-07
 **Owner decisions (this pass):** tests and scenarios only; GRACE may remember explicit
 "remember that…" directives and AI-extracted **self-stated** facts — never an inference;
@@ -58,7 +58,7 @@ are the gaps the member gate closes.
 Each task names the harness cases it unlocks. Nothing below task 0 may start before task 0 lands.
 
 ### Task 0 — Policy gate (hard prerequisite)
-- **ADR-019 is drafted** (`DECISIONS.md`, status Proposed, 2026-09-07) amending ADR-014 (`DECISIONS.md:303`) and ADR-016 (`DECISIONS.md:345`). Owner acceptance is the gate; the two rewrites below are spelled out verbatim in its *Consequences* and happen on acceptance, not before.
+- **ADR-019 is Accepted** (`DECISIONS.md`, 2026-09-07), amending ADR-014 (`DECISIONS.md:303`) and ADR-016 (`DECISIONS.md:345`). `docs/AI_BOUNDARIES.md:98` and `docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md`'s Scope line have been rewritten per its Consequences; ADR-014/016's superseded sentences carry pointer annotations rather than edits.
 - Rewrite `docs/AI_BOUNDARIES.md:98` and `docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md:5-7`.
 - Add the member carve-out verbatim: **"only facts the member stated about themselves;
   never an inference; never a sensitive category even if self-stated."**

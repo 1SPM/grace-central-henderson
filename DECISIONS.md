@@ -300,7 +300,7 @@ The transport moves from the client-composed, gateway-bypassing `api/ai/_generat
 **Consequences.**
 - Cross-session recall works: a staff member's stated facts survive a closed browser and a new day, scoped to that individual and that church.
 - The staff chat route finally goes through the gateway (budget, moderation, usage-metered as `ask-grace`), closing the bypass noted in `ARCHITECTURE.md` §7 and `DEMO_BRIEF.md`.
-- Member portal assistant is explicitly out of scope — it stays non-persistent per its stated privacy posture (`api/portal/_assistant.ts`, `docs/AI_BOUNDARIES.md`).
+- Member portal assistant is explicitly out of scope — it stays non-persistent per its stated privacy posture (`api/portal/_assistant.ts`, `docs/AI_BOUNDARIES.md`). **Superseded by ADR-019 (2026-09-07):** the member assistant gained a narrower, member-only memory carve-out. This sentence is left as-is for the historical record; see ADR-019 for current scope.
 - Client-composed church-data context (`GraceChatContext.buildDataContext`) remains a client→server trust boundary for one more phase; logged in `TECH_DEBT.md` as the next thing to retire once server-side composition (`api/_lib/ai/assistant-runtime.ts`'s pattern) is worth the rebuild.
 - No embeddings/pgvector in V1 (not installed on the live project) — retrieval V1 is recency + Postgres full-text search + person-name entity matching, deliberately "nothing fancy" per the product brief. The schema is written so an `embedding vector(768)` column can be added additively later without a breaking migration.
 
@@ -342,7 +342,7 @@ RLS is SELECT-only, scoped `church_id = get_church_id()`, no write policy — sa
 
 **Decision.** Adopt the framework documented in [`docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md`](docs/GRACE_INTELLIGENCE_QUALIFICATION_FRAMEWORK.md) as the standing qualification standard for staff Ask GRACE (`api/grace/_chat.ts`) going forward: 10 knowledge domains × 7 knowledge-sophistication levels (KNOW → REMEMBER → CONNECT → INTERPRET → RECOMMEND → ACT → ANTICIPATE), 9 cross-cutting judgment axes, and a deterministic-vs-live-judgment scoring model. This is a **second, independent axis** from the existing GRACE operational/accountability loop (`docs/GRACE_INTELLIGENCE_LAYER.md`'s sees → understands → proposes → decide → acts) — knowledge sophistication is not the same question as who is allowed to act, and the two are not to be collapsed into one scale.
 
-This ADR explicitly does **not** redefine ADR-014 (Memory V1) or ADR-015 (Central Henderson church knowledge). Those remain the source of truth for what is actually built and how it works; this ADR only establishes how future capability claims about Ask GRACE get qualified and tested. Scope matches ADR-014/015: staff Ask GRACE only, not the member portal assistant, the demo companion, or the marketing visual.
+This ADR explicitly does **not** redefine ADR-014 (Memory V1) or ADR-015 (Central Henderson church knowledge). Those remain the source of truth for what is actually built and how it works; this ADR only establishes how future capability claims about Ask GRACE get qualified and tested. Scope matches ADR-014/015: staff Ask GRACE only, not the member portal assistant, the demo companion, or the marketing visual. **Superseded in part by ADR-019 (2026-09-07):** the member-portal assistant's memory family of cases is now qualified under this framework via the sibling suite `tools/eval-harness/central-henderson-exam/member-assistant/`, outside the 10-domain main exam. This sentence is left as-is for the historical record; see ADR-019 for current scope.
 
 **Consequences.**
 - New GRACE intelligence work on staff Ask GRACE should be classified against this framework's grid before being described as "done" — a capability is only as proven as its lowest untested level below the claimed ceiling (the "gaps below ceiling" rollup rule).
@@ -416,7 +416,7 @@ Prompt order: `dataContext → knowledgeBlock → memoryBlock → capabilityBloc
 ## ADR-019 — Member-portal GRACE memory (amends ADR-014 and ADR-016 scope)
 
 - **Date:** 2026-09-07
-- **Status:** Proposed (draft — owner decision pending; nothing below is built, and the two document rewrites in *Consequences* happen only on acceptance)
+- **Status:** Accepted (2026-09-07). Policy only — implementation (tasks 1–6, `docs/MEMBER_MEMORY_QUALIFICATION_PLAN.md`) has not started. The two document rewrites named in *Consequences* are applied by this same commit.
 
 **Context.** ADR-014 gave the staff Ask GRACE persistent memory and, in the same decision, ruled the member-portal assistant explicitly out of scope: "it stays non-persistent per its stated privacy posture." ADR-016 then scoped the qualification framework to staff Ask GRACE only, and `docs/AI_BOUNDARIES.md` ("Staff Ask GRACE memory") says the portal assistant "remains deliberately non-persistent." All three are consistent, current, and enforced: `api/portal/_assistant.ts` carries client-held history only, and `runAssistantTurn` (`api/_lib/ai/assistant-runtime.ts`) writes nothing but `token_usage` on a plain turn — verified as a checked fact, not an assertion, by the `ma-safety-baseline-non-persistence-today` case in the harness below.
 
