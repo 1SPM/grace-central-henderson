@@ -85,6 +85,17 @@
     // top-level declaration has already executed. `typeof` is the safe
     // way to probe a bare identifier that might not exist at all
     // (e.g. a page with no HOME_STATE) without throwing.
+    // hydrateHome() (called below) re-derives HOME_STATE.memberName from
+    // GRACE_METRICS.home.memberName on every call (`?? HOME_STATE.memberName`
+    // only falls back when that's nullish — it's always the hardcoded demo
+    // string 'Maya', so it always wins). Patch that source too, or the
+    // hydrateHome() call right after this immediately stomps the real name
+    // back to the demo default — the exact bug this function exists to fix.
+    try {
+      if (typeof GRACE_METRICS !== 'undefined' && GRACE_METRICS && GRACE_METRICS.home) {
+        GRACE_METRICS.home.memberName = name;
+      }
+    } catch (e) { /* GRACE_METRICS not present on this page */ }
     try {
       if (typeof HOME_STATE !== 'undefined' && HOME_STATE) {
         HOME_STATE.memberName = name;
