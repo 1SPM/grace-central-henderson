@@ -1,6 +1,7 @@
 # Pilot Critical Path — Task Breakdown
 
-**Status:** plan only; no code changed by this document. Track A is the blocker for everything else.
+**Status:** Track A resolved (2026-09-07, `grace-links.js` dead-link fix — see its correction
+note below); Tracks B and C still plan-only.
 **Date:** 2026-09-07
 
 ## Why this exists
@@ -17,37 +18,45 @@ intentional shared placeholder identity used in both tenants until further notic
 no TD entry, and no doc correction is created for it here. If this changes, it gets a fresh
 finding at that time, not a retroactive edit of this line.
 
-## Track A — Make `/portal` the real front door
+## Track A — The demo hub's portal link was dead; the real portal was already live
 
-**New: TD-073.** On 2026-09-03, during the member-portal audit, the decision was made that
-`/portal` (the real React app — Clerk auth, KYC, Stripe, the server-composed member
-assistant) is the pilot surface, and the static pages (`members-card.html`, the two
-`tenants/*/member-portal.html` forks) demote to design spec and sales demo. **That decision
-was never written into a tracked document, and the routing was never changed.** Verified
-today: `vercel.json`'s redirect from the live domain's root still points at
-`members-card.html`; nothing in `apps/member-web` links to `/portal`. Every feature built for
-`/portal` — including the entire member-memory gate — currently ships to a surface no member
-can reach.
+**⚠️ Correction to this track's original write-up (same day, 2026-09-07).** This track
+originally described a risky production redirect cutover — claiming `/portal` had no inbound
+link anywhere and that `apps/member-web/vercel.json` redirected the live domain's root to
+`members-card.html`. That was wrong on both counts, discovered while starting the work:
+there is no `apps/member-web/vercel.json` (the redirect belongs to the **admin-web** project,
+a different Vercel project, and `members-card.html` is its own legitimate hub page, not a
+competing fake portal). More importantly, **another session had already fixed the real "Two
+Front Doors" problem the day before** (commits `ed2e7bd`, `678f1ca`, 2026-09-06): the React
+member-portal pages were removed, and `PortalRoot.tsx` now authenticates via Clerk and hands
+off to the real static tenant page. `/portal` on the `grace-members` project was confirmed
+live and working (HTTP 200) before any change here today.
 
-1. Point the live-domain redirect at `/portal` instead of `members-card.html` in
-   `apps/member-web/vercel.json`. Stage behind a specific test account or a header-gated
-   flag first — this is a production cutover for the live Central Henderson tenant, not a
-   demo tenant, so it does not get a cold switch.
-2. Re-verify `/portal`'s auth, KYC, giving, and assistant flows under the traffic pattern a
-   real cutover implies, not just the isolated QA passes already run against it.
-3. Relabel `members-card.html` and both `tenants/*/member-portal.html` pages explicitly as
-   design previews wherever a link to them survives the cutover, so nobody — staff, a new
-   hire, a future audit — mistakes them for the live product once they're no longer the
-   front door.
-4. Update `docs/DEPLOY.md`, `docs/LINKS.md`, and `PILOT_READINESS.md` to point at `/portal`
-   as the member-facing surface; both currently describe the redirect-to-`members-card.html`
-   behavior as if it were permanent.
-5. Once live, retire the `ma-safety-baseline-non-persistence-today` framing implicitly tied
-   to "the assistant nobody reaches" — no code change, just an awareness check that the
-   member-memory gate's cases are now exercised by real traffic, not just the harness.
+**What was actually broken, and is now fixed:** `apps/admin-web/public/grace-links.js` — the
+shared config both hub pages read their "Open Member Portal" link from — still pointed at
+`/previews/grace_member_portal_central.html` and `/previews/grace_member_portal_generic.html`,
+neither of which exists in this monorepo. A member (or a salesperson demoing the product)
+clicking that button hit a dead link. Fixed: both entries now point at
+`https://grace-members.vercel.app/portal`, matching the server-side `MEMBER_PORTAL_URL`
+default already used by `api/people/_preview-portal-token.ts`. Tracked as TD-073, marked
+resolved.
 
-**Blocks:** every other track. A wallet, a memory feature, or an AI-access fix on `/portal`
-has no effect on what a member actually sees until this ships.
+**Remaining, smaller follow-ups — not blockers:**
+1. Verify the fix live once this deploys: click "Open Member Portal" from
+   `gracecrm-centralhenderson.org/members-card.html` and confirm it lands on a working Clerk
+   sign-in at `grace-members.vercel.app/portal`, not a 404.
+2. Consider a real custom domain for the `grace-members` project instead of the raw
+   `.vercel.app` URL — cosmetic and trust-building, not a functional blocker.
+3. Update `docs/DEPLOY.md` / `docs/LINKS.md` if either still describes the old previews-based
+   portal path as current.
+
+**No longer applicable:** the original tasks 1–3 (staged redirect cutover, re-verifying
+`/portal`'s flows "under a real cutover," relabeling the static pages as previews) assumed an
+architecture that isn't the current one. `/portal` already is the real, working front door;
+nothing here needed a production cutover.
+
+**Depends on nothing further; unblocks:** the member-memory gate and any other `/portal`
+work are now exercised by a surface members can actually reach, once this deploys.
 
 ## Track B — Wallet: stage for the real API, keep demo state on both platforms
 
