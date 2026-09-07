@@ -43,11 +43,12 @@
     }
   }
 
-  function loadScript(src) {
+  function loadScript(src, attrs) {
     return new Promise(function (resolve, reject) {
       var s = document.createElement('script');
       s.src = src;
       s.async = true;
+      for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) s.setAttribute(k, attrs[k]);
       s.onload = resolve;
       s.onerror = reject;
       document.head.appendChild(s);
@@ -224,10 +225,13 @@
       if (!pubKey) return null;
       var sdkUrl = clerkSdkUrlFromPublishableKey(pubKey);
       if (!sdkUrl) return null;
-      return loadScript(sdkUrl)
+      // Clerk's self-hosted <script> build isn't a constructor — it
+      // self-initializes as window.Clerk, reading the publishable key
+      // from this data attribute (Clerk's own documented non-npm
+      // integration pattern), then window.Clerk.load() readies it.
+      return loadScript(sdkUrl, { 'data-clerk-publishable-key': pubKey })
         .then(function () {
-          var clerk = new window.Clerk(pubKey);
-          return clerk.load().then(function () { return clerk; });
+          return window.Clerk.load().then(function () { return window.Clerk; });
         })
         .then(function (clerk) {
           if (!clerk.session) return null; // no signed-in member (e.g. staff preview)
