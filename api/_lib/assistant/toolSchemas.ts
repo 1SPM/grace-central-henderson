@@ -133,7 +133,7 @@ export const ASSISTANT_TOOL_DECLARATIONS: GeminiFunctionDeclaration[] = [
   },
   {
     name: 'request_human_followup',
-    description: 'Ask a real staff member to reach out to the member directly, for anything that is not a pastoral care matter (general questions, help with something in the portal, etc).',
+    description: 'Ask a real staff member to reach out to the member directly. Use ONLY when the member has explicitly said they want a person to contact them, or their need genuinely requires a person and no other tool applies. Never use this for factual questions about the church (service times, address, events, resources, ministries) — try search_approved_church_resources first. A prior turn offering to escalate does NOT mean the member has agreed to it; only use this tool once they say yes.',
     parameters: {
       type: 'OBJECT',
       properties: { message: { type: 'STRING', description: 'What the member would like help with.' } },
