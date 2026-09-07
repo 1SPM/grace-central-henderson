@@ -88,6 +88,7 @@ const navSections: NavSection[] = [
 const moreItems: { view: View; label: string; icon: ReactNode }[] = [
   { view: 'grace-mobile', label: 'GRACE Mobile', icon: <Smartphone size={18} /> },
   { view: 'community-moderation', label: 'Community Moderation', icon: <Flag size={18} /> },
+  { view: 'workshop-evidence', label: 'Workshop Evidence', icon: <Sparkles size={18} /> },
 ];
 
 const givingSubViews = ['online-giving', 'batch-entry', 'pledges', 'campaigns', 'statements', 'charity-baskets', 'donation-tracker', 'member-stats'];
@@ -158,6 +159,7 @@ const viewLabels: Record<View, string> = {
   'financial-hub': 'Home',
   wallets: 'Impact Card Accounts',
   workos: 'GRACE WorkOS',
+  'workshop-evidence': 'Workshop Evidence',
 };
 
 function adminRoleLabel(role?: string | null): string {

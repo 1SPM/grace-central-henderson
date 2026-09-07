@@ -67,6 +67,7 @@ const VIEW_TO_PATH: Record<View, string> = {
   wallets: 'wallets',
   workos: 'workos',
   'community-moderation': 'community-moderation',
+  'workshop-evidence': 'workshop-evidence',
 };
 
 // Reverse map: path -> view

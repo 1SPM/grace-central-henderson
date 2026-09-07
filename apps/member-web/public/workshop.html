@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meet Maya — The GRACE Experience</title>
+<!--
+  The "Me" + "Us" stages of the Maya -> Me -> Us -> Pastor -> Real Pilot
+  workshop experience (see the North Star doc). Deliberately public and
+  tenant-agnostic: no Clerk sign-in, no church name hardcoded anywhere in
+  this file (that was the exact leak class fixed earlier in shared/
+  grace-impact-metrics.js / grace-messaging.js — this page just says
+  "your church" rather than repeating the mistake). Church is resolved
+  server-side from the request Host header (api/_lib/resolveChurchByHost.ts),
+  same trust boundary as the public /connect card intake.
+
+  There is no real spend-to-impact formula in the product; the "impact"
+  figure this page shows is an explicit illustrative estimate, labeled as
+  such, computed server-side (api/workshop/_simulate.ts) — never invented
+  client-side.
+-->
+<style>
+  :root {
+    --red: #ee2b37;
+    --red-dark: #d5202b;
+    --ink: #1a1a1a;
+    --ink-soft: #666;
+    --paper: #faf8f5;
+    --card: #ffffff;
+    --line: #e8e4dc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  main { max-width: 480px; margin: 0 auto; padding: 28px 20px 64px; }
+  .orb {
+    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 16px;
+    background: radial-gradient(circle at 30% 30%, #f5cf6b, #ee2b37 60%, #7c3aed);
+  }
+  h1 { font-size: 1.6rem; text-align: center; margin: 0 0 6px; }
+  .lede { text-align: center; color: var(--ink-soft); font-size: 0.95rem; margin: 0 0 28px; }
+  .day {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .day .tag {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--red); flex-shrink: 0; width: 68px; padding-top: 2px;
+  }
+  .day p { margin: 0; font-size: 0.92rem; color: var(--ink); }
+  .cta {
+    display: block; width: 100%; border: none; border-radius: 12px;
+    background: var(--red); color: #fff; font-size: 1rem; font-weight: 700;
+    padding: 14px; margin-top: 24px; cursor: pointer; font-family: inherit;
+  }
+  .cta:hover { background: var(--red-dark); }
+  .cta:disabled { opacity: 0.6; cursor: default; }
+  #form-section, #result-section { display: none; }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="number"] {
+    width: 100%; font-size: 1rem; font-family: inherit; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+  }
+  .causes { display: grid; gap: 8px; }
+  .cause-option {
+    display: flex; align-items: center; gap: 10px; border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px; cursor: pointer;
+  }
+  .cause-option input { width: 18px; height: 18px; }
+  .cause-option span { font-size: 0.92rem; }
+  .hint { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
+  .error { color: var(--red); font-size: 0.85rem; margin-top: 8px; display: none; }
+  .result-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; text-align: center; margin-bottom: 14px;
+  }
+  .result-card .amount { font-size: 2.2rem; font-weight: 700; color: var(--red); margin: 4px 0; }
+  .result-card .caption { font-size: 0.85rem; color: var(--ink-soft); }
+  .us-card { background: #1a1a2e; color: #fff; border-radius: 14px; padding: 20px; text-align: center; }
+  .us-card .amount { font-size: 1.8rem; font-weight: 700; margin: 4px 0; }
+  .us-card .caption { font-size: 0.8rem; color: #b8b8d0; }
+  .disclaimer { font-size: 0.72rem; color: var(--ink-soft); text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="orb"></div>
+  <h1>Meet Maya</h1>
+  <p class="lede">Most of Maya's life happens between Sundays. Here's her week with GRACE.</p>
+
+  <div id="story-section">
+    <div class="day"><span class="tag">Sunday</span><p>Maya belongs. She's known at her church, not just another face in the room.</p></div>
+    <div class="day"><span class="tag">Monday</span><p>Maya asks GRACE a question about her church — and gets a real answer.</p></div>
+    <div class="day"><span class="tag">Tuesday</span><p>GRACE remembers her — her rhythm, her giving, what she cares about.</p></div>
+    <div class="day"><span class="tag">Wednesday</span><p>Her everyday spending, through her Impact Card, quietly creates real impact for causes she chose.</p></div>
+    <button class="cta" id="make-it-mine-btn">Make it mine →</button>
+  </div>
+
+  <div id="form-section">
+    <h1 style="font-size:1.3rem;">Your turn</h1>
+    <p class="lede">You've seen Maya's week. Now let's see what yours could look like.</p>
+
+    <div class="field">
+      <label for="display-name">Your name (optional)</label>
+      <input type="text" id="display-name" maxlength="100" placeholder="Just for the room, not required" />
+    </div>
+
+    <div class="field">
+      <label>Causes you care about</label>
+      <div class="causes" id="cause-options">
+        <label class="cause-option"><input type="checkbox" value="missions" checked /> <span>Missions</span></label>
+        <label class="cause-option"><input type="checkbox" value="building" /> <span>Building Fund</span></label>
+        <label class="cause-option"><input type="checkbox" value="youth" checked /> <span>Youth Ministry</span></label>
+        <label class="cause-option"><input type="checkbox" value="food_pantry" checked /> <span>Food Pantry</span></label>
+        <label class="cause-option"><input type="checkbox" value="care_fund" /> <span>Care Fund</span></label>
+      </div>
+      <p class="hint">Pick as many as you like — your impact splits evenly across them.</p>
+    </div>
+
+    <div class="field">
+      <label for="monthly-spend">Roughly how much do you spend in a typical month? ($)</label>
+      <input type="number" id="monthly-spend" min="0" max="100000" step="1" placeholder="e.g. 2000" />
+      <p class="hint">A rough estimate is fine — this is just for the simulation.</p>
+    </div>
+
+    <p class="error" id="form-error"></p>
+    <button class="cta" id="submit-btn">See my impact →</button>
+  </div>
+
+  <div id="result-section">
+    <div class="result-card">
+      <div class="caption">If you'd been using your Impact Card this month</div>
+      <div class="amount" id="personal-amount">$0</div>
+      <div class="caption" id="rate-caption"></div>
+    </div>
+    <div class="us-card">
+      <div class="caption">Together with everyone else here</div>
+      <div class="amount" id="us-amount">$0</div>
+      <div class="caption" id="us-count"></div>
+    </div>
+    <p class="disclaimer">This is an illustrative estimate for today's workshop, not a real transaction or a live Impact Card.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var storySection = document.getElementById('story-section');
+  var formSection = document.getElementById('form-section');
+  var resultSection = document.getElementById('result-section');
+  var makeItMineBtn = document.getElementById('make-it-mine-btn');
+  var submitBtn = document.getElementById('submit-btn');
+  var formError = document.getElementById('form-error');
+
+  makeItMineBtn.addEventListener('click', function () {
+    storySection.style.display = 'none';
+    formSection.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function selectedCauses() {
+    var boxes = document.querySelectorAll('#cause-options input[type="checkbox"]:checked');
+    return Array.prototype.map.call(boxes, function (b) { return b.value; });
+  }
+
+  function showError(msg) {
+    formError.textContent = msg;
+    formError.style.display = 'block';
+  }
+
+  submitBtn.addEventListener('click', function () {
+    formError.style.display = 'none';
+    var causes = selectedCauses();
+    if (causes.length === 0) {
+      showError('Pick at least one cause.');
+      return;
+    }
+    var spendInput = document.getElementById('monthly-spend');
+    var spend = parseFloat(spendInput.value);
+    if (!spendInput.value || isNaN(spend) || spend < 0) {
+      showError('Enter a rough monthly spend amount.');
+      return;
+    }
+    var evenPct = Math.floor((100 / causes.length) * 100) / 100;
+    var allocations = causes.map(function (cause, i) {
+      // Give the remainder to the last entry so the split always sums to exactly 100.
+      var pct = i === causes.length - 1 ? Math.round((100 - evenPct * (causes.length - 1)) * 100) / 100 : evenPct;
+      return { cause: cause, pct: pct };
+    });
+    var displayName = document.getElementById('display-name').value.trim();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Just a sec…';
+
+    fetch('/api/workshop/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName: displayName || undefined, monthlySpend: spend, allocations: allocations }),
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (result) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'See my impact →';
+        if (!result.ok) {
+          showError((result.body && result.body.detail) || 'Something went wrong — please try again.');
+          return;
+        }
+        renderResult(result.body);
+      })
+      .catch(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'See my impact →';
+        showError('Could not reach the server — check your connection and try again.');
+      });
+  });
+
+  function renderResult(body) {
+    formSection.style.display = 'none';
+    resultSection.style.display = 'block';
+    document.getElementById('personal-amount').textContent = '$' + body.projectedImpactUsd.toFixed(2);
+    document.getElementById('rate-caption').textContent = 'Illustrative rate: ' + body.illustrativeRatePct + '% of everyday spending';
+    updateUs(body.church);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    pollAggregate();
+  }
+
+  function updateUs(church) {
+    document.getElementById('us-amount').textContent = '$' + church.totalProjectedImpactUsd.toFixed(2);
+    document.getElementById('us-count').textContent = church.participantCount + (church.participantCount === 1 ? ' person' : ' people') + ' so far today';
+  }
+
+  var pollTimer = null;
+  function pollAggregate() {
+    if (pollTimer) return;
+    pollTimer = setInterval(function () {
+      fetch('/api/workshop/aggregate').then(function (r) { return r.ok ? r.json() : null; }).then(function (agg) {
+        if (agg) updateUs({ totalProjectedImpactUsd: agg.totalProjectedImpactUsd, participantCount: agg.participantCount });
+      }).catch(function () {});
+    }, 8000);
+  }
+})();
+</script>
+</body>
+</html>
