@@ -26,7 +26,22 @@
  * the same bootstrap instead of duplicating it.
  */
 (function () {
-  var CLERK_SDK_URL = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+  /** Clerk's own frontend-api domain (e.g. https://key-sculpin-9.clerk.
+   *  accounts.dev) already has to be CSP-whitelisted for Clerk itself to
+   *  work at all — loading the SDK from a generic CDN like jsdelivr.net
+   *  hits this deployment's script-src CSP, which doesn't list it (and
+   *  shouldn't need to). Clerk serves its own SDK from that same domain
+   *  for exactly this reason; derive it from the publishable key rather
+   *  than hardcoding one church's instance. */
+  function clerkSdkUrlFromPublishableKey(pubKey) {
+    try {
+      var b64 = pubKey.replace(/^pk_(test|live)_/, '');
+      var frontendApi = atob(b64).replace(/\$$/, '');
+      return 'https://' + frontendApi + '/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+    } catch (e) {
+      return null;
+    }
+  }
 
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
@@ -207,7 +222,9 @@
     return fetchTenantConfig().then(function (cfg) {
       var pubKey = cfg && cfg.clerk_publishable_key;
       if (!pubKey) return null;
-      return loadScript(CLERK_SDK_URL)
+      var sdkUrl = clerkSdkUrlFromPublishableKey(pubKey);
+      if (!sdkUrl) return null;
+      return loadScript(sdkUrl)
         .then(function () {
           var clerk = new window.Clerk(pubKey);
           return clerk.load().then(function () { return clerk; });
