@@ -67,6 +67,10 @@ export interface AssistantTurnInput {
    *  standard workspace/org-wide key (see adapters/claude.ts). */
   workspaceId?: string;
   requestId?: string | null;
+  /** Test seam only — lets a harness script the model without stubbing
+   *  global fetch (mirrors RunExtractionInput.fetchImpl in grace-memory.ts).
+   *  Moderation still goes through global fetch; see moderation.ts. */
+  fetchImpl?: typeof fetch;
 }
 
 export type AssistantTurnResult =
@@ -258,6 +262,7 @@ export async function runAssistantTurn(input: AssistantTurnInput): Promise<Assis
       systemInstruction: SYSTEM_INSTRUCTION,
       messages,
       tools: ASSISTANT_TOOL_DECLARATIONS_CLAUDE,
+      fetchImpl: input.fetchImpl,
     });
     totalPromptTokens += result.promptTokens ?? 0;
     totalCompletionTokens += result.completionTokens ?? 0;
