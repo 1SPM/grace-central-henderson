@@ -56,6 +56,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  // "Wallet" sub-stage aggregate — one extra query, shown on the same
+  // shared "Us" screen at the same 8-second poll cadence, not a second
+  // endpoint. Single headline cause per row, so no % split needed here
+  // (unlike byCauseUsd above).
+  const { data: walletRows, error: walletError, count: walletCount } = await supabase
+    .from('workshop_wallet_activations')
+    .select('headline_cause, projected_monthly_impact_micro_usd', { count: 'exact' })
+    .eq('church_id', churchId);
+
+  if (walletError) {
+    console.error('[workshop/aggregate] wallet read failed', walletError);
+  }
+
+  const walletRowsSafe = walletRows ?? [];
+  const totalWalletProjectedImpactMicroUsd = walletRowsSafe.reduce(
+    (sum, r) => sum + Number(r.projected_monthly_impact_micro_usd),
+    0,
+  );
+  const walletCauseTotals = new Map<string, number>();
+  for (const row of walletRowsSafe) {
+    if (typeof row.headline_cause === 'string') {
+      walletCauseTotals.set(
+        row.headline_cause,
+        (walletCauseTotals.get(row.headline_cause) ?? 0) + Number(row.projected_monthly_impact_micro_usd),
+      );
+    }
+  }
+
   return res.status(200).json({
     participantCount: count ?? 0,
     totalMonthlySpendUsd: totalMonthlySpendMicroUsd / 1_000_000,
@@ -63,5 +91,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     byCauseUsd: Object.fromEntries(
       [...causeTotals.entries()].map(([cause, micro]) => [cause, micro / 1_000_000]),
     ),
+    wallet: {
+      activationCount: walletCount ?? 0,
+      totalProjectedImpactUsd: totalWalletProjectedImpactMicroUsd / 1_000_000,
+      byCauseUsd: Object.fromEntries(
+        [...walletCauseTotals.entries()].map(([cause, micro]) => [cause, micro / 1_000_000]),
+      ),
+    },
   });
 }

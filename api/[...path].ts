@@ -139,6 +139,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workos/notification-prefs': () => import('./workos/_notification-prefs.js'),
   'workos/my-work': () => import('./workos/_my-work.js'),
   'workshop/simulate': () => import('./workshop/_simulate.js'),
+  'workshop/wallet-activate': () => import('./workshop/_wallet-activate.js'),
   'workshop/aggregate': () => import('./workshop/_aggregate.js'),
   'workshop/participants': () => import('./workshop/_participants.js'),
 };

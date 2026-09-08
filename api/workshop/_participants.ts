@@ -16,6 +16,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { resolveStaffActor } from '../_lib/authz.js';
+import { resolveWorkshopUrlForChurch } from './_shared.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -46,6 +47,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'read_failed' });
   }
 
+  const { data: walletData, error: walletError } = await supabase
+    .from('workshop_wallet_activations')
+    .select('simulation_id, headline_cause, projected_monthly_impact_micro_usd, created_at')
+    .eq('church_id', actor.churchId);
+
+  if (walletError) {
+    console.error('[workshop/participants] wallet read failed', walletError);
+  }
+
+  const walletBySimulationId = new Map(
+    (walletData ?? []).map(w => [
+      w.simulation_id,
+      {
+        headlineCause: w.headline_cause,
+        projectedMonthlyImpactUsd: Number(w.projected_monthly_impact_micro_usd) / 1_000_000,
+        createdAt: w.created_at,
+      },
+    ]),
+  );
+
   const participants = (data ?? []).map(row => ({
     id: row.id,
     displayName: row.display_name,
@@ -54,13 +75,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     illustrativeRatePct: Number(row.illustrative_rate_bps) / 100,
     projectedImpactUsd: Number(row.projected_impact_micro_usd) / 1_000_000,
     createdAt: row.created_at,
+    walletActivation: walletBySimulationId.get(row.id) ?? null,
   }));
 
   const totalProjectedImpactUsd = participants.reduce((sum, p) => sum + p.projectedImpactUsd, 0);
+  const walletActivationCount = walletBySimulationId.size;
+  const totalWalletProjectedImpactUsd = [...walletBySimulationId.values()].reduce(
+    (sum, w) => sum + w.projectedMonthlyImpactUsd,
+    0,
+  );
+  const workshopUrl = await resolveWorkshopUrlForChurch(actor.churchId, supabase);
 
   return res.status(200).json({
     participantCount: participants.length,
     totalProjectedImpactUsd,
+    walletActivationCount,
+    totalWalletProjectedImpactUsd,
+    workshopUrl,
     participants,
   });
 }

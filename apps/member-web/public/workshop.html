@@ -60,7 +60,7 @@
   }
   .cta:hover { background: var(--red-dark); }
   .cta:disabled { opacity: 0.6; cursor: default; }
-  #form-section, #result-section { display: none; }
+  #form-section, #result-section, #wallet-section { display: none; }
   .field { margin-bottom: 18px; }
   .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
   .field input[type="text"], .field input[type="number"] {
@@ -86,6 +86,21 @@
   .us-card .amount { font-size: 1.8rem; font-weight: 700; margin: 4px 0; }
   .us-card .caption { font-size: 0.8rem; color: #b8b8d0; }
   .disclaimer { font-size: 0.72rem; color: var(--ink-soft); text-align: center; margin-top: 20px; }
+  .impact-card {
+    background: linear-gradient(135deg, #1a1a2e, #3a2a4e);
+    color: #fff; border-radius: 16px; padding: 22px; margin-bottom: 14px;
+  }
+  .impact-card .label { font-size: 0.78rem; color: #b8b8d0; text-transform: uppercase; letter-spacing: 0.06em; }
+  .impact-card .number { font-size: 1.15rem; letter-spacing: 0.12em; margin: 14px 0 18px; font-variant-numeric: tabular-nums; }
+  .impact-card .cause-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+  .impact-card .cause-row select {
+    font-family: inherit; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 4px 8px;
+  }
+  .impact-card .cause-row select option { color: #1a1a1a; }
+  .impact-card .monthly { font-size: 1.6rem; font-weight: 700; margin-top: 14px; }
+  .wallet-success { text-align: center; font-size: 0.95rem; font-weight: 600; padding: 14px; }
+  .wallet-us-line { font-size: 0.8rem; color: var(--ink-soft); text-align: center; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -145,6 +160,32 @@
       <div class="caption" id="us-count"></div>
     </div>
     <p class="disclaimer">This is an illustrative estimate for today's workshop, not a real transaction or a live Impact Card.</p>
+    <button class="cta" id="see-card-btn">See my Impact Card →</button>
+  </div>
+
+  <div id="wallet-section">
+    <h1 style="font-size:1.3rem;">Your Impact Card</h1>
+    <p class="lede">A preview of what everyday spending could quietly do, if this were live.</p>
+
+    <div class="impact-card">
+      <div class="label">Your Impact Card</div>
+      <div class="number" id="wallet-card-number">•••• •••• •••• ••••</div>
+      <div class="cause-row">
+        <span>Featured cause</span>
+        <span id="wallet-cause-fixed" style="display:none;"></span>
+        <select id="wallet-cause-select" style="display:none;"></select>
+      </div>
+      <div class="monthly" id="wallet-monthly-amount">$0/mo</div>
+    </div>
+
+    <p class="disclaimer">This is an illustrative preview only — not a real card, no card number, no application, and nothing here is ever used for a real transaction.</p>
+    <p class="error" id="wallet-error"></p>
+    <button class="cta" id="activate-card-btn">Generate my Impact Card →</button>
+
+    <div id="wallet-success" style="display:none;">
+      <p class="wallet-success">✓ Added — thanks for trying GRACE</p>
+      <p class="wallet-us-line" id="wallet-us-line"></p>
+    </div>
   </div>
 </main>
 
@@ -153,9 +194,26 @@
   var storySection = document.getElementById('story-section');
   var formSection = document.getElementById('form-section');
   var resultSection = document.getElementById('result-section');
+  var walletSection = document.getElementById('wallet-section');
   var makeItMineBtn = document.getElementById('make-it-mine-btn');
   var submitBtn = document.getElementById('submit-btn');
   var formError = document.getElementById('form-error');
+  var seeCardBtn = document.getElementById('see-card-btn');
+  var activateCardBtn = document.getElementById('activate-card-btn');
+  var walletError = document.getElementById('wallet-error');
+  var walletSuccess = document.getElementById('wallet-success');
+
+  var CAUSE_LABELS = {
+    missions: 'Missions', building: 'Building Fund', youth: 'Youth Ministry',
+    food_pantry: 'Food Pantry', care_fund: 'Care Fund',
+  };
+
+  // Populated once the "Me" stage completes — the wallet stage is a
+  // continuation of that same submission, never a fresh form.
+  var lastSimulationId = null;
+  var lastCauses = [];
+  var lastTopCause = null;
+  var lastProjectedImpactUsd = 0;
 
   makeItMineBtn.addEventListener('click', function () {
     storySection.style.display = 'none';
@@ -186,6 +244,7 @@
       showError('Enter a rough monthly spend amount.');
       return;
     }
+    lastCauses = causes;
     var evenPct = Math.floor((100 / causes.length) * 100) / 100;
     var allocations = causes.map(function (cause, i) {
       // Give the remainder to the last entry so the split always sums to exactly 100.
@@ -225,8 +284,90 @@
     document.getElementById('personal-amount').textContent = '$' + body.projectedImpactUsd.toFixed(2);
     document.getElementById('rate-caption').textContent = 'Illustrative rate: ' + body.illustrativeRatePct + '% of everyday spending';
     updateUs(body.church);
+    lastSimulationId = body.simulationId;
+    lastTopCause = body.topCause;
+    lastProjectedImpactUsd = body.projectedImpactUsd;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     pollAggregate();
+  }
+
+  seeCardBtn.addEventListener('click', function () {
+    resultSection.style.display = 'none';
+    walletSection.style.display = 'block';
+    renderWalletCard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function renderWalletCard() {
+    // Purely cosmetic, client-side only — never sent to or stored by
+    // the server, never implies a real card number.
+    var seed = (Date.now() % 10000).toString().padStart(4, '0');
+    document.getElementById('wallet-card-number').textContent = '•••• •••• •••• ' + seed;
+    document.getElementById('wallet-monthly-amount').textContent = '$' + lastProjectedImpactUsd.toFixed(2) + '/mo';
+
+    var fixed = document.getElementById('wallet-cause-fixed');
+    var select = document.getElementById('wallet-cause-select');
+    if (lastCauses.length > 1) {
+      select.innerHTML = '';
+      lastCauses.forEach(function (cause) {
+        var opt = document.createElement('option');
+        opt.value = cause;
+        opt.textContent = CAUSE_LABELS[cause] || cause;
+        if (cause === lastTopCause) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.style.display = 'inline-block';
+      fixed.style.display = 'none';
+    } else {
+      fixed.textContent = CAUSE_LABELS[lastTopCause] || lastTopCause;
+      fixed.style.display = 'inline';
+      select.style.display = 'none';
+    }
+  }
+
+  function selectedHeadlineCause() {
+    var select = document.getElementById('wallet-cause-select');
+    if (select.style.display !== 'none' && select.value) return select.value;
+    return lastTopCause;
+  }
+
+  activateCardBtn.addEventListener('click', function () {
+    walletError.style.display = 'none';
+    activateCardBtn.disabled = true;
+    activateCardBtn.textContent = 'Just a sec…';
+
+    fetch('/api/workshop/wallet-activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ simulationId: lastSimulationId, headlineCause: selectedHeadlineCause() }),
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (result) {
+        if (!result.ok) {
+          activateCardBtn.disabled = false;
+          activateCardBtn.textContent = 'Generate my Impact Card →';
+          walletError.textContent = (result.body && result.body.detail) || 'Something went wrong — please try again.';
+          walletError.style.display = 'block';
+          return;
+        }
+        activateCardBtn.style.display = 'none';
+        walletSuccess.style.display = 'block';
+        updateWalletUs(result.body.church);
+      })
+      .catch(function () {
+        activateCardBtn.disabled = false;
+        activateCardBtn.textContent = 'Generate my Impact Card →';
+        walletError.textContent = 'Could not reach the server — check your connection and try again.';
+        walletError.style.display = 'block';
+      });
+  });
+
+  function updateWalletUs(walletChurch) {
+    var line = document.getElementById('wallet-us-line');
+    if (!walletChurch) return;
+    line.textContent = walletChurch.walletActivationCount +
+      (walletChurch.walletActivationCount === 1 ? ' person has' : ' people have') +
+      ' previewed their Impact Card so far today';
   }
 
   function updateUs(church) {
@@ -239,7 +380,11 @@
     if (pollTimer) return;
     pollTimer = setInterval(function () {
       fetch('/api/workshop/aggregate').then(function (r) { return r.ok ? r.json() : null; }).then(function (agg) {
-        if (agg) updateUs({ totalProjectedImpactUsd: agg.totalProjectedImpactUsd, participantCount: agg.participantCount });
+        if (!agg) return;
+        updateUs({ totalProjectedImpactUsd: agg.totalProjectedImpactUsd, participantCount: agg.participantCount });
+        if (agg.wallet && walletSuccess.style.display !== 'none') {
+          updateWalletUs({ walletActivationCount: agg.wallet.activationCount });
+        }
       }).catch(function () {});
     }, 8000);
   }

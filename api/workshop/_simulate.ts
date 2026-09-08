@@ -24,57 +24,10 @@ import { createClient } from '@supabase/supabase-js';
 import { readBody, str, num_ } from '../_lib/validation.js';
 import { resolveChurchIdForHost } from '../_lib/resolveChurchByHost.js';
 import { clientIp, enforceRateLimit } from '../_lib/rateLimit/limiter.js';
+import { ILLUSTRATIVE_RATE_BPS, validateAllocations } from './_shared.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-/** 2% — matches the higher of the two inconsistent hardcoded demo rates
- *  found in the tenant HTML (1% and 2% were both used for different line
- *  items); there was no single real rate to inherit, so this is a fresh,
- *  explicit choice for the workshop, not a value pulled from production. */
-const ILLUSTRATIVE_RATE_BPS = 200;
-
-const ALLOWED_CAUSES = ['missions', 'building', 'youth', 'food_pantry', 'care_fund'] as const;
-type Cause = (typeof ALLOWED_CAUSES)[number];
-
-interface AllocationInput {
-  cause: Cause;
-  pct: number;
-}
-
-function validateAllocations(input: unknown): { ok: true; value: AllocationInput[] } | { ok: false; error: string } {
-  if (!Array.isArray(input) || input.length === 0) {
-    return { ok: false, error: 'allocations must be a non-empty array' };
-  }
-  if (input.length > ALLOWED_CAUSES.length) {
-    return { ok: false, error: `allocations must have at most ${ALLOWED_CAUSES.length} entries` };
-  }
-  const out: AllocationInput[] = [];
-  let total = 0;
-  const seen = new Set<string>();
-  for (const item of input) {
-    if (typeof item !== 'object' || item === null) {
-      return { ok: false, error: 'each allocation must be an object' };
-    }
-    const { cause, pct } = item as Record<string, unknown>;
-    if (typeof cause !== 'string' || !ALLOWED_CAUSES.includes(cause as Cause)) {
-      return { ok: false, error: `allocation cause must be one of ${ALLOWED_CAUSES.join(', ')}` };
-    }
-    if (seen.has(cause)) {
-      return { ok: false, error: `duplicate allocation cause: ${cause}` };
-    }
-    seen.add(cause);
-    if (typeof pct !== 'number' || !Number.isFinite(pct) || pct < 0 || pct > 100) {
-      return { ok: false, error: 'allocation pct must be a number between 0 and 100' };
-    }
-    total += pct;
-    out.push({ cause: cause as Cause, pct });
-  }
-  if (Math.abs(total - 100) > 0.5) {
-    return { ok: false, error: `allocation percentages must sum to 100 (got ${total})` };
-  }
-  return { ok: true, value: out };
-}
 
 const SCHEMA = {
   displayName: str({ max: 100 }),
@@ -146,11 +99,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const totalProjectedImpactMicroUsd = (sumRows ?? []).reduce((sum, r) => sum + Number(r.projected_impact_micro_usd), 0);
 
+  // Highest-pct cause, ties broken by first-seen order — computed once
+  // here so the client (workshop.html's wallet stage) doesn't have to
+  // recompute it from the allocations it already sent.
+  const topCause = allocationsResult.value.reduce((top, a) => (a.pct > top.pct ? a : top)).cause;
+
   return res.status(200).json({
     success: true,
     simulationId: row.id,
     projectedImpactUsd: projectedImpactMicroUsd / 1_000_000,
     illustrativeRatePct: ILLUSTRATIVE_RATE_BPS / 100,
+    topCause,
     church: {
       participantCount: count ?? 0,
       totalProjectedImpactUsd: totalProjectedImpactMicroUsd / 1_000_000,

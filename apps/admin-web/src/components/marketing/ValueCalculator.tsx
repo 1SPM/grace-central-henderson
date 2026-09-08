@@ -14,6 +14,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { capture } from '@grace/platform-core/observability/posthog';
+import { useCountUp } from '../../hooks/useCountUp';
 
 // TODO(Phase 1 M8): grace-crm-two.vercel.app was this app's own white-label
 // demo domain — previews/marketing no longer live there (moved out, M7).
@@ -66,54 +67,6 @@ function fmtCompact(n: number): string {
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
-}
-
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  return reduced;
-}
-
-/** Rolls the displayed total toward `target` instead of snapping — the
- *  cause-and-effect between moving a slider and the number changing
- *  should feel visible, not instant. */
-function useCountUp(target: number): number {
-  const reduced = useReducedMotion();
-  const [shown, setShown] = useState(target);
-  const shownRef = useRef(target);
-  const fromRef = useRef(target);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (reduced) {
-      shownRef.current = target;
-      setShown(target);
-      return;
-    }
-    fromRef.current = shownRef.current;
-    const from = fromRef.current;
-    const t0 = performance.now();
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-
-    function step(now: number) {
-      const k = Math.min(1, (now - t0) / 350);
-      const eased = 1 - Math.pow(1 - k, 3);
-      const val = from + (target - from) * eased;
-      shownRef.current = val;
-      setShown(val);
-      if (k < 1) rafRef.current = requestAnimationFrame(step);
-    }
-    rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
-  }, [target, reduced]);
-
-  return shown;
 }
 
 function OutcomeCard({
