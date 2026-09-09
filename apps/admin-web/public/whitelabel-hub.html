@@ -244,7 +244,7 @@
           </div>
         </div>
         <div class="card-footer">
-          <a id="wl-portal-link" href="/previews/grace_member_portal_generic.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Generic Members Portal &rarr;</a>
+          <a id="wl-portal-link" href="https://grace-members.vercel.app/tenants/faithful/member-portal.html" class="btn-primary" target="_blank" rel="noopener noreferrer">Open Generic Members Portal &rarr;</a>
         </div>
       </div>
       <div class="card card-featured">
@@ -263,7 +263,7 @@
               <div class="phone-preview">
                 <img
                   class="phone-preview-img"
-                  src="/previews/assets/members-portal-phone-faithful.png"
+                  src="/mockups/members-portal-phone-faithful.png"
                   alt="Faithful Church Members Card Portal on iPhone"
                   width="270"
                   height="585"
@@ -353,8 +353,11 @@
         if (demoHub) demoHub.href = demo.hub;
       }
 
-      var IOS_APP_PATH = (wl && wl.mobileApp) || '/grace_faithful_church_members_card_ios_app.html';
-      var appUrl = window.location.origin + IOS_APP_PATH;
+      // mobileApp is a full absolute URL (the page lives on grace-members,
+      // not this domain — see grace-links.js) — use it directly, never
+      // prefix with this page's own origin.
+      var appUrl = (wl && wl.mobileApp) ||
+        'https://grace-members.vercel.app/tenants/faithful/grace_faithful_church_members_card_ios_app.html';
       var urlInput = document.getElementById('ios-app-url');
       var domainLabel = document.getElementById('ios-app-domain');
       var pathLabel = document.getElementById('ios-app-path');
@@ -365,8 +368,11 @@
 
       urlInput.value = appUrl;
       urlInput.title = appUrl;
-      domainLabel.textContent = window.location.host;
-      pathLabel.textContent = IOS_APP_PATH;
+      // Derive from the real resolved URL, not this page's own origin —
+      // appUrl is cross-origin (grace-members, not grace-crm-two).
+      var appUrlParsed = new URL(appUrl);
+      domainLabel.textContent = appUrlParsed.host;
+      pathLabel.textContent = appUrlParsed.pathname;
       openLink.href = appUrl;
       qrImg.src =
         'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +

@@ -202,7 +202,7 @@
               <div class="phone-preview">
                 <img
                   class="phone-preview-img"
-                  src="/previews/assets/members-portal-phone.png"
+                  src="/mockups/members-portal-phone.png"
                   alt="Central Church Members Card Portal on iPhone"
                   width="270"
                   height="585"
@@ -246,8 +246,8 @@
                 <div class="url-row">
                   <input id="ios-app-url" type="text" class="url-input" readonly aria-label="iOS Members Card app URL" />
                   <div class="app-link-preview" aria-hidden="true">
-                    <span class="app-link-domain">gracecrm-centralhenderson.org</span>
-                    <span class="app-link-path">/grace_central_henderson_members_card_ios_app.html</span>
+                    <span class="app-link-domain">grace-members.vercel.app</span>
+                    <span class="app-link-path">/tenants/central-henderson/grace_central_henderson_members_card_ios_app.html</span>
                   </div>
                   <button type="button" id="ios-app-copy" class="btn-copy" aria-label="Copy app URL">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -283,8 +283,11 @@
         if (portalLink) portalLink.href = links.desktopPortal;
       }
 
-      var IOS_APP_PATH = (links && links.mobileApp) || '/grace_central_henderson_members_card_ios_app.html';
-      var appUrl = window.location.origin + IOS_APP_PATH;
+      // mobileApp is a full absolute URL (the page lives on grace-members,
+      // not this domain — see grace-links.js) — use it directly, never
+      // prefix with this page's own origin.
+      var appUrl = (links && links.mobileApp) ||
+        'https://grace-members.vercel.app/tenants/central-henderson/grace_central_henderson_members_card_ios_app.html';
       var urlInput = document.getElementById('ios-app-url');
       var openLink = document.getElementById('ios-app-open');
       var qrImg = document.getElementById('ios-app-qr');

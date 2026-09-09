@@ -487,13 +487,13 @@
              journey, and a clearly labeled preview of the future GRACE Impact Card opportunity,
              designed for the phone your members already carry.</p>
           <div class="demo-phone-visual">
-            <img class="phone" src="previews/assets/members-portal-phone-faithful.png" alt="GRACE Members Card app on iPhone" width="178" height="366" loading="lazy" />
+            <img class="phone" src="mockups/members-portal-phone-faithful.png" alt="GRACE Members Card app on iPhone" width="178" height="366" loading="lazy" />
             <div>
               <div class="demo-qr"><img id="qr-app" alt="QR code to open the members app" width="108" height="108" loading="lazy" /></div>
               <p class="demo-qr-hint">Scan with your phone camera to open it right now</p>
             </div>
           </div>
-          <a class="demo-link" id="link-app" href="../grace_faithful_church_members_card_ios_app.html" target="_blank" rel="noopener noreferrer">Open the app demo in your browser <span class="arr">&rarr;</span></a>
+          <a class="demo-link" id="link-app" href="https://grace-members.vercel.app/tenants/faithful/grace_faithful_church_members_card_ios_app.html" target="_blank" rel="noopener noreferrer">Open the app demo in your browser <span class="arr">&rarr;</span></a>
         </div>
         <div class="demo-card rv rv-d1">
           <span class="demo-tag">Admin CRM</span>
@@ -507,7 +507,7 @@
           <h3>The congregation&rsquo;s front door</h3>
           <p>An interactive member portal demo covering giving, groups, events, care, and
              a personal journey in a sample white-label identity.</p>
-          <a class="demo-link" id="link-portal" href="../previews/grace_member_portal_generic.html" target="_blank" rel="noopener noreferrer">Open the members portal demo <span class="arr">&rarr;</span></a>
+          <a class="demo-link" id="link-portal" href="https://grace-members.vercel.app/tenants/faithful/member-portal.html" target="_blank" rel="noopener noreferrer">Open the members portal demo <span class="arr">&rarr;</span></a>
         </div>
       </div>
     </div>
@@ -656,7 +656,8 @@
       function resolvePagePath(path) {
         return window.location.protocol === 'file:' && path.charAt(0) === '/' ? '../' + path.slice(1) : path;
       }
-      var appPath = resolvePagePath((wl && wl.mobileApp) || '/grace_faithful_church_members_card_ios_app.html');
+      var appPath = resolvePagePath((wl && wl.mobileApp) ||
+        'https://grace-members.vercel.app/tenants/faithful/grace_faithful_church_members_card_ios_app.html');
       var appUrl = new URL(appPath, window.location.href).href;
       var linkApp = document.getElementById('link-app');
       var linkCrm = document.getElementById('link-crm');

@@ -14,20 +14,31 @@
  * real Clerk membership base, so the direct link lets anyone browse it
  * without an account. Owner decision, 2026-09-08.
  *
+ * `mobileApp` (both tenants) points at the iOS design-preview page,
+ * which lives ONLY on the grace-members project, at
+ * /tenants/<tenant>/grace_<tenant>_..._ios_app.html — same relative
+ * folder depth as that tenant's member-portal.html, so its ../../shared
+ * and ../../assets paths resolve against files already there. This file
+ * is admin-web's own domain, so these must be full absolute URLs, not
+ * same-origin paths. Source of truth for the page content is
+ * marketing/tenants/<tenant>/members-card.html (renamed from this exact
+ * filename during the Phase 1 monorepo split, commit 6b4a6dc) — copy
+ * from there again if the page is ever redesigned.
+ *
  * If a custom domain is ever attached to grace-members, update
- * desktopPortal here and MEMBER_PORTAL_URL together.
+ * desktopPortal/mobileApp here and MEMBER_PORTAL_URL together.
  */
 window.GRACE_LINKS = {
   demo: {
     hub: 'https://gracecrm-centralhenderson.org/members-card.html',
     crm: 'https://gracecrm-centralhenderson.org/app#/dashboard',
     desktopPortal: 'https://grace-members.vercel.app/portal',
-    mobileApp: '/grace_central_henderson_members_card_ios_app.html',
+    mobileApp: 'https://grace-members.vercel.app/tenants/central-henderson/grace_central_henderson_members_card_ios_app.html',
   },
   whitelabel: {
     hub: 'https://grace-crm-two.vercel.app/whitelabel-hub.html',
     crm: 'https://grace-crm-two.vercel.app/#/dashboard',
     memberPortal: 'https://grace-members.vercel.app/tenants/faithful/member-portal.html',
-    mobileApp: '/grace_faithful_church_members_card_ios_app.html',
+    mobileApp: 'https://grace-members.vercel.app/tenants/faithful/grace_faithful_church_members_card_ios_app.html',
   },
 };
