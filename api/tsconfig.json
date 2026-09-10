@@ -5,6 +5,11 @@
     "moduleResolution": "nodenext",
     "lib": ["ES2022"],
     "outDir": "./dist",
+    // api imports shared sources that live above this folder — platform-core,
+    // apps/admin-web/src/lib, tests/fixtures, tools/eval-harness — so the
+    // compilation unit spans the repo. Without this, tsc infers a rootDir of
+    // api/ from the include glob and reports TS6059 for all 11 of them.
+    "rootDir": "..",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
