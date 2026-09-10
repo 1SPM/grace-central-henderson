@@ -16,7 +16,7 @@
  * yourself own, which needs no broad permission grant at all.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient, type ServiceClient } from '../_lib/supabaseServiceClient.js';
 import { resolveStaffActor } from '../_lib/authz.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, uuid_ } from '../_lib/validation.js';
@@ -41,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+  const supabase = createServiceClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   if (req.method === 'GET') return getMyWork(req, res, supabase);
   if (req.method === 'POST') return postFlag(req, res, supabase);
@@ -67,7 +67,7 @@ function toAgentActivity(run: {
 async function getMyWork(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return;
@@ -136,7 +136,7 @@ async function getMyWork(
 async function postFlag(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return;

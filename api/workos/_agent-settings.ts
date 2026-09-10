@@ -13,7 +13,7 @@
  * Every write is audited.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient, type ServiceClient } from '../_lib/supabaseServiceClient.js';
 import { requirePermission } from '../_lib/authz.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str, arrayOfStr } from '../_lib/validation.js';
@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+  const supabase = createServiceClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   if (req.method === 'GET') return getAgentSettings(req, res, supabase);
   if (req.method === 'PUT') return putAgentSettings(req, res, supabase);
@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function getAgentSettings(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await requirePermission(req, res, supabase, 'agents.view');
   if (!actor) return;
@@ -68,7 +68,7 @@ async function getAgentSettings(
 async function putAgentSettings(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await requirePermission(req, res, supabase, 'agents.manage');
   if (!actor) return;

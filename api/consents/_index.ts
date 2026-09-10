@@ -20,7 +20,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient, type ServiceClient } from '../_lib/supabaseServiceClient.js';
 import { requirePermission, resolveMemberActor } from '../_lib/authz.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
@@ -41,7 +41,7 @@ const UPDATE_SCHEMA = {
   status: str({ required: true, pattern: /^(granted|denied|withdrawn)$/ }),
 };
 
-async function fetchConsentBundle(supabase: ReturnType<typeof createClient>, churchId: string, personId: string) {
+async function fetchConsentBundle(supabase: ServiceClient, churchId: string, personId: string) {
   const [{ data: consents }, { data: preferences }] = await Promise.all([
     supabase.from('consents').select('*').eq('church_id', churchId).eq('person_id', personId),
     supabase.from('communication_preferences').select('*').eq('church_id', churchId).eq('person_id', personId).maybeSingle(),
@@ -50,7 +50,7 @@ async function fetchConsentBundle(supabase: ReturnType<typeof createClient>, chu
 }
 
 async function syncCommunicationPreferences(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   churchId: string,
   personId: string,
 ) {
@@ -76,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+  const supabase = createServiceClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   const staffPersonId = typeof req.query.person_id === 'string' ? req.query.person_id : undefined;
 

@@ -22,7 +22,7 @@
  *      accountable is a settings-grade decision. Every write is audited.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient, type ServiceClient } from '../_lib/supabaseServiceClient.js';
 import { requirePermission, resolveStaffActor } from '../_lib/authz.js';
 import { recordAudit } from '../_lib/workosAudit.js';
 import { readBody, str } from '../_lib/validation.js';
@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+  const supabase = createServiceClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   if (req.method === 'GET') return getAreas(req, res, supabase);
   if (req.method === 'PUT') return putArea(req, res, supabase);
@@ -66,7 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function getAreas(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await resolveStaffActor(req, res, supabase);
   if (!actor) return; // 401/403 already sent
@@ -159,7 +159,7 @@ function readLink(
 async function putArea(
   req: VercelRequest,
   res: VercelResponse,
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
 ) {
   const actor = await requirePermission(req, res, supabase, 'admin.manage_settings');
   if (!actor) return; // 401/403 already sent
