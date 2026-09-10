@@ -16,7 +16,7 @@
  * pre-joined anywhere in the schema or prompt assembly.
  */
 import type { LiveJudgeCase } from '../types.js';
-import type { GraceData } from '../../../../src/contexts/GraceChatContext.js';
+import type { GraceData } from '../../../../apps/admin-web/src/contexts/GraceChatContext.js';
 
 const now = new Date();
 const soon = new Date(now.getTime() + 3 * 86400_000).toISOString();

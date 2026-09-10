@@ -1,0 +1,26 @@
+{
+  "name": "@grace/platform-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./theme": "./src/theme.tsx",
+    "./supabase": "./src/supabase.ts",
+    "./logger": "./src/logger.ts",
+    "./tenant": "./src/tenant.ts",
+    "./watchAssets": "./src/watchAssets.ts",
+    "./shared-platform": "./src/shared-platform.ts",
+    "./DemoEnvironmentBanner": "./src/DemoEnvironmentBanner.tsx",
+    "./services/workos": "./src/services/workos.ts",
+    "./services/impactCard": "./src/services/impactCard.ts",
+    "./observability/sentry": "./src/observability/sentry.ts",
+    "./observability/scrub": "./src/observability/scrub.ts",
+    "./observability": "./src/observability/index.ts",
+    "./observability/posthog": "./src/observability/posthog.ts",
+    "./envCheck": "./src/envCheck.ts",
+    "./demoEntry": "./src/demoEntry.ts",
+    "./index.css": "./src/index.css",
+    "./UpdatePrompt": "./src/UpdatePrompt.tsx",
+    "./tailwind-preset": "./tailwind-preset.js"
+  }
+}

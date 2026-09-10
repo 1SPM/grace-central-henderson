@@ -28,7 +28,10 @@ import { microUsdToUsd } from '../_lib/ai/pricing.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+// Only needed if ANTHROPIC_API_KEY is an identity-linked key — omit for a
+// standard workspace/org-wide key (same as api/grace/_chat.ts).
+const ANTHROPIC_WORKSPACE_ID = process.env.ANTHROPIC_WORKSPACE_ID;
 
 const SCHEMA = {
   message: str({ required: true, min: 1, max: 4000 }),
@@ -51,8 +54,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
   }
-  if (!GEMINI_API_KEY) {
-    return res.status(503).json({ error: 'assistant_not_configured', detail: 'GEMINI_API_KEY is not set on this deployment.' });
+  if (!ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'assistant_not_configured', detail: 'ANTHROPIC_API_KEY is not set on this deployment.' });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
 
@@ -77,7 +80,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     member,
     message: body.message!,
     history,
-    apiKey: GEMINI_API_KEY,
+    apiKey: ANTHROPIC_API_KEY,
+    workspaceId: ANTHROPIC_WORKSPACE_ID,
     requestId,
   });
 

@@ -103,6 +103,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'portal/notifications': () => import('./portal/_notifications.js'),
   'portal/care': () => import('./portal/_care.js'),
   'portal/assistant': () => import('./portal/_assistant.js'),
+  'portal/self-signup': () => import('./portal/_self-signup.js'),
   'portal/giving': () => import('./portal/_giving.js'),
   'portal/prayer': () => import('./portal/_prayer.js'),
   'prayer-requests': () => import('./prayer-requests/_index.js'),
@@ -114,6 +115,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'finance/expenses': () => import('./finance/_expenses.js'),
   'people/preview-portal-token': () => import('./people/_preview-portal-token.js'),
   'people/provision-portal': () => import('./people/_provision-portal.js'),
+  'people/confirm-portal-identity': () => import('./people/_confirm-portal-identity.js'),
   'people/seed-demo-persona': () => import('./people/_seed-demo-persona.js'),
   'team/invite': () => import('./team/_invite.js'),
   'team/accept-invitation': () => import('./team/_accept-invitation.js'),
@@ -136,6 +138,10 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workos/decision-queue': () => import('./workos/_decision-queue.js'),
   'workos/notification-prefs': () => import('./workos/_notification-prefs.js'),
   'workos/my-work': () => import('./workos/_my-work.js'),
+  'workshop/simulate': () => import('./workshop/_simulate.js'),
+  'workshop/wallet-activate': () => import('./workshop/_wallet-activate.js'),
+  'workshop/aggregate': () => import('./workshop/_aggregate.js'),
+  'workshop/participants': () => import('./workshop/_participants.js'),
 };
 
 // Generous, per-IP-per-route defaults — this is a defense-in-depth

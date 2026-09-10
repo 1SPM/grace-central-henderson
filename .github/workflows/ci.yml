@@ -18,7 +18,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # Fans out to each workspace's own tsconfig — the split left no root
+      # tsconfig.json, so a bare `tsc --noEmit` here printed usage and exited 1.
+      - run: npm run typecheck
 
   test:
     name: Test
@@ -42,7 +44,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Lives in the admin-web workspace since the monorepo split, and needs
+      # that app's jsdom config — not the root node-environment one.
       - run: npx vitest run src/security/smoke.test.ts
+        working-directory: apps/admin-web
 
   rls-lint:
     name: RLS Lint (migrations)

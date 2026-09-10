@@ -19,6 +19,7 @@ export default function handler(_req: VercelRequest, res: VercelResponse) {
     ),
     supabase: Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
     gemini: Boolean(process.env.GEMINI_API_KEY),
+    anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
     agents: true,
     // Only `configured` is public. demoMode is deliberately withheld: this
     // endpoint is unauthenticated, so echoing it back handed anyone a

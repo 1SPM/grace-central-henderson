@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="GRACE Members — your church home, events, groups, and giving." />
+    <title>GRACE Members</title>
+
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#e11d48" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GRACE Members" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Mirrors apps/admin-web/index.html's pre-paint dark/light class —
+         keep the two in sync with platform-core's ThemeContext.tsx default. -->
+    <script>
+      (function () {
+        try {
+          if (!localStorage.getItem('grace-theme-reset-v2')) {
+            localStorage.setItem('grace-theme-reset-v2', '1');
+            localStorage.setItem('grace-theme', 'dark');
+            document.documentElement.classList.add('dark');
+            return;
+          }
+          var saved = localStorage.getItem('grace-theme');
+          if (saved === 'dark' || saved === null) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <!-- Blank-page guard, mirrored from apps/admin-web/index.html — see that
+         file's comment for the full rationale (stale bundle after deploy). -->
+    <script>
+      (function () {
+        var FLAG = 'grace-blank-page-recovery';
+        function alreadyTried() {
+          try { return !!sessionStorage.getItem(FLAG); } catch (e) { return false; }
+        }
+        function markTried() {
+          try { sessionStorage.setItem(FLAG, String(Date.now())); } catch (e) {}
+        }
+        function showFallback() {
+          var root = document.getElementById('root');
+          if (!root || root.children.length) return;
+          root.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+            'font-family:Figtree,system-ui,sans-serif;background:#18181b;color:#e4e4e7;padding:24px">' +
+            '<div style="max-width:380px;text-align:center">' +
+            '<p style="font-size:16px;font-weight:600;margin:0 0 8px">This page didn\'t finish loading</p>' +
+            '<p style="font-size:13px;color:#a1a1aa;line-height:1.5;margin:0 0 16px">' +
+            'A new version was just released. Reloading should pick it up.</p>' +
+            '<button onclick="location.reload(true)" style="padding:9px 18px;border:0;border-radius:8px;' +
+            'background:#E02E47;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Reload</button>' +
+            '</div></div>';
+        }
+        function selfHeal() {
+          if (alreadyTried()) { showFallback(); return; }
+          markTried();
+          var reload = function () { window.location.reload(); };
+          try {
+            var jobs = [];
+            if ('serviceWorker' in navigator) {
+              jobs.push(
+                navigator.serviceWorker.getRegistrations()
+                  .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+                  .catch(function () {})
+              );
+            }
+            if (window.caches && window.caches.keys) {
+              jobs.push(
+                window.caches.keys()
+                  .then(function (ks) { return Promise.all(ks.map(function (k) { return window.caches.delete(k); })); })
+                  .catch(function () {})
+              );
+            }
+            Promise.all(jobs).then(reload, reload);
+          } catch (e) { reload(); }
+        }
+        window.addEventListener('error', function (e) {
+          var t = e && e.target;
+          if (t && t.tagName === 'SCRIPT' && typeof t.src === 'string' && t.src.indexOf('/assets/') !== -1) {
+            selfHeal();
+          }
+        }, true);
+        window.addEventListener('vite:preloadError', function () { selfHeal(); });
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var root = document.getElementById('root');
+            if (root && root.children.length === 0) showFallback();
+          }, 15000);
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

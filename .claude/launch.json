@@ -18,6 +18,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["vercel", "dev", "--listen", "3050", "--yes"],
       "port": 3050
+    },
+    {
+      "name": "grace-member-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=apps/member-web"],
+      "port": 3020
     }
   ]
 }

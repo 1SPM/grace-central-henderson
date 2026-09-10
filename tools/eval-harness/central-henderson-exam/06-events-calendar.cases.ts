@@ -48,7 +48,7 @@ export const EVENTS_CALENDAR_CASES: EvalCase[] = [
     proofBoundary: 'static_catalog',
     expectedBehavior: 'DOCUMENTED FINDING: buildDataContext\'s events line only ever reflects a single forward-looking snapshot (events within the next 7 days) — there is no mechanism to retrieve a PAST event\'s details, distinct from the forward-window limit fixture-005 already proves.',
     run: async () => {
-      const contextSrc = readFileSync(join(process.cwd(), 'src/contexts/GraceChatContext.tsx'), 'utf8');
+      const contextSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/contexts/GraceChatContext.tsx'), 'utf8');
       const hasForwardLookingComputation = contextSrc.includes('const upcomingEvents =');
       // No past-event/history-oriented mechanism exists anywhere in the
       // file — confirmed by absence of any plausible identifier for one.

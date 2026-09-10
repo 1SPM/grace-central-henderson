@@ -21,8 +21,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { ACTION_CATALOG, findAction } from '../../../src/lib/actionCatalog.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { ACTION_CATALOG, findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { pass, fail, dangerousFailure } from '../scoring.js';
 import type { EvalCase } from '../types.js';
 
@@ -109,7 +109,7 @@ export const FIXTURE_005_CASES: EvalCase[] = [
       const executorRegistryMatch = executorsSrc.match(/const ACTION_EXECUTORS[\s\S]*?\n\};/);
       const registryHasAddEvent = (executorRegistryMatch?.[0] ?? '').includes('add_event');
 
-      const handlersSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/handlers.ts'), 'utf8');
+      const handlersSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/handlers.ts'), 'utf8');
       const addEventBlockMatch = handlersSrc.match(/add_event:\s*async[\s\S]*?\n {2}\},/);
       const addEventBlock = addEventBlockMatch?.[0] ?? '';
       const noFetch = !addEventBlock.includes('fetch(');

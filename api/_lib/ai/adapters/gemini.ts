@@ -140,11 +140,14 @@ export async function callGeminiStream(
 
 // ---------------------------------------------------------------------
 // Tool-calling variant — additive, does not change callGemini() above.
-// Used by the member GRACE assistant (api/_lib/ai/assistant-runtime.ts)
-// for its multi-turn tool-execution loop. Takes a full `contents` array
-// (multi-turn conversation, including prior functionCall/functionResponse
-// parts) instead of a single prompt string, and a set of function
-// declarations the model may call.
+// Not currently wired to any route (the member GRACE assistant moved to
+// callClaudeWithTools in ./claude.ts — see assistant-runtime.ts) — kept
+// as the Gemini-side half of the shared tool-declaration shape contract
+// in case a feature needs Gemini's own multi-turn tool-execution loop
+// again. Takes a full `contents` array (multi-turn conversation,
+// including prior functionCall/functionResponse parts) instead of a
+// single prompt string, and a set of function declarations the model may
+// call.
 // ---------------------------------------------------------------------
 
 export interface GeminiContentPart {

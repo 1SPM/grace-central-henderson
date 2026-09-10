@@ -10,4 +10,4 @@
  * workos/_staff.ts, workos/_my-work.ts, workos/_areas.ts) keep importing
  * from this path unchanged; only the content moved.
  */
-export * from '../../src/lib/ministryAreas.js';
+export * from '../../apps/admin-web/src/lib/ministryAreas.js';

@@ -32,7 +32,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { resolveMemberActor } from '../_lib/authz.js';
+import { resolveMemberActor, requireVerifiedIdentity } from '../_lib/authz.js';
 import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
@@ -57,6 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!member) return;
 
   if (req.method === 'GET') {
+    if (!requireVerifiedIdentity(res, member)) return;
     const [{ data: church }, { data: gifts, error: giftsErr }, { data: recurring, error: recurringErr }] = await Promise.all([
       supabase.from('churches').select('slug, name, stripe_connect_charges_enabled, settings').eq('id', member.churchId).maybeSingle(),
       supabase.from('giving')

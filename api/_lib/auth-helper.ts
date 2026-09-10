@@ -89,3 +89,31 @@ export async function requireClerkAuth(
     sessionId: payload.sid ?? '',
   };
 }
+
+export type MinimalAuthResult =
+  | { ok: true; clerkUserId: string }
+  | { ok: false; status: 401 | 503; error: string };
+
+/**
+ * Verifies a Clerk session WITHOUT requiring the church_id claim —
+ * requireClerkAuth can't be reused here because the whole point of
+ * api/portal/_self-signup.ts is to run BEFORE that claim exists (it's
+ * what sets it, via Clerk publicMetadata). Only proves "this is a real,
+ * currently-valid Clerk session for this user" — every tenant/permission
+ * check for what that session may then do still happens separately.
+ */
+export async function verifyClerkSessionOnly(req: VercelRequest): Promise<MinimalAuthResult> {
+  if (!CLERK_SECRET_KEY) {
+    return { ok: false, status: 503, error: 'auth not configured' };
+  }
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) {
+    return { ok: false, status: 401, error: 'missing bearer token' };
+  }
+  try {
+    const payload = (await verifyToken(header.slice(7), { secretKey: CLERK_SECRET_KEY })) as unknown as ClerkPayload;
+    return { ok: true, clerkUserId: payload.sub };
+  } catch {
+    return { ok: false, status: 401, error: 'invalid token' };
+  }
+}

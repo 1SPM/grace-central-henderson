@@ -22,7 +22,7 @@ import { logSecurityEvent, securityContext } from '../_lib/securityLog.js';
 // under Node ESM, where the client module's extensionless imports do not
 // resolve (ERR_MODULE_NOT_FOUND on actionCatalog took the route down in
 // production on 2026-09-04).
-import { countPersonMatches } from '../../src/lib/personMatching.js';
+import { countPersonMatches } from '../../apps/admin-web/src/lib/personMatching.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

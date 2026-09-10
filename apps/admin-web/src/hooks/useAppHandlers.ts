@@ -1,0 +1,597 @@
+import { useState, useCallback, useEffect } from 'react';
+import { isValidEmail, sanitizePhone, sanitizeInput } from '../utils/security';
+import { createLogger } from '@grace/platform-core/logger';
+import { useToast } from '../components/Toast';
+import { supabase, isSupabaseConfigured } from '@grace/platform-core/supabase';
+import { logMemberActivity } from '../lib/services/memberActivity';
+import type { EventRsvp } from '../lib/database.types';
+
+const log = createLogger('app-handlers');
+import type { Person, Task, Interaction, Attendance, View, EventCategory } from '../types';
+import type {
+  Person as DbPerson,
+  PersonInsert,
+  TaskInsert,
+  InteractionInsert,
+  PrayerRequestInsert,
+} from '../lib/database.types';
+
+interface UseAppHandlersProps {
+  churchId: string;
+  dbPeople: DbPerson[];
+  addPerson: (data: PersonInsert) => Promise<unknown>;
+  updatePerson: (id: string, data: Partial<DbPerson>) => Promise<unknown>;
+  addTask: (data: TaskInsert) => Promise<unknown>;
+  toggleTask: (id: string) => Promise<unknown>;
+  addInteraction: (data: InteractionInsert) => Promise<unknown>;
+  addPrayer: (data: PrayerRequestInsert) => Promise<unknown>;
+  markPrayerAnswered: (id: string, testimony?: string) => Promise<unknown>;
+  addGiving: (data: {
+    church_id: string;
+    person_id: string | null;
+    amount: number;
+    fund: string;
+    date: string;
+    method: string;
+    is_recurring?: boolean;
+    note?: string | null;
+  }) => Promise<unknown>;
+  createGroup?: (data: {
+    church_id: string;
+    name: string;
+    description?: string;
+    leader_id?: string;
+    meeting_day?: string;
+    meeting_time?: string;
+    location?: string;
+  }) => Promise<unknown>;
+  addGroupMember?: (groupId: string, personId: string) => Promise<unknown>;
+  removeGroupMember?: (groupId: string, personId: string) => Promise<unknown>;
+  addEvent?: (data: {
+    church_id: string;
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date?: string;
+    all_day: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => Promise<unknown>;
+  updateEvent?: (id: string, data: Partial<{
+    title: string;
+    description: string | null;
+    start_date: string;
+    end_date: string | null;
+    all_day: boolean;
+    location: string | null;
+    category: EventCategory;
+  }>) => Promise<unknown>;
+  deleteEvent?: (id: string) => Promise<unknown>;
+  checkIn?: (churchId: string, personId: string, eventType: Attendance['eventType'], eventName?: string) => Promise<unknown>;
+  setView: (view: View) => void;
+  setSelectedPersonId: (id: string | null) => void;
+  openPersonForm: (person?: Person) => void;
+  closePersonForm: () => void;
+  /** Fired after a person's status changes (e.g. visitor → member) so agents can react. */
+  onPersonStatusChange?: (personId: string, previousStatus: string, newStatus: string) => void;
+  /** Fired after a donation is recorded so agents (thank-you flow) can react. */
+  onNewDonation?: (donation: {
+    id: string;
+    personId?: string;
+    amount: number;
+    fund: string;
+    date: string;
+    method: string;
+    isRecurring: boolean;
+  }) => void;
+}
+
+export function useAppHandlers({
+  churchId,
+  dbPeople,
+  addPerson,
+  updatePerson,
+  addTask,
+  toggleTask,
+  addInteraction,
+  addPrayer,
+  markPrayerAnswered,
+  addGiving,
+  createGroup,
+  addGroupMember,
+  removeGroupMember,
+  addEvent,
+  updateEvent,
+  deleteEvent,
+  checkIn: checkInToDb,
+  setView,
+  setSelectedPersonId,
+  openPersonForm,
+  closePersonForm,
+  onPersonStatusChange,
+  onNewDonation,
+}: UseAppHandlersProps) {
+  const toast = useToast();
+
+  // Attendance state (demo data)
+  const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
+
+  // RSVPs — persisted in event_rsvps, mirrored into local state for the UI.
+  const [rsvps, setRsvps] = useState<{ eventId: string; personId: string; status: 'yes' | 'no' | 'maybe'; guestCount: number; source?: 'portal' | 'admin' }[]>([]);
+
+  // Hydrate persisted RSVPs.
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !supabase) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase!
+        .from('event_rsvps')
+        .select('*')
+        .eq('church_id', churchId);
+      if (cancelled || error || !data) return;
+      setRsvps((data as EventRsvp[]).map(r => ({
+        eventId: r.event_id,
+        personId: r.person_id,
+        status: r.status,
+        guestCount: r.guest_count,
+        source: r.source,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, [churchId]);
+
+  // Volunteer assignments state (demo data)
+  const [volunteerAssignments, setVolunteerAssignments] = useState<{
+    id: string;
+    eventId: string;
+    roleId: string;
+    personId: string;
+    status: 'confirmed' | 'pending' | 'declined';
+  }[]>([]);
+
+  const handleViewPerson = useCallback((id: string) => {
+    setSelectedPersonId(id);
+    setView('person');
+  }, [setSelectedPersonId, setView]);
+
+  const handleBackToPeople = useCallback(() => {
+    setSelectedPersonId(null);
+    setView('people');
+  }, [setSelectedPersonId, setView]);
+
+  const handleAddInteraction = useCallback(async (interaction: Omit<Interaction, 'id' | 'createdAt'>) => {
+    try {
+      await addInteraction({
+        church_id: churchId,
+        person_id: interaction.personId,
+        type: interaction.type,
+        content: interaction.content,
+        created_by_name: interaction.createdBy,
+      });
+    } catch (error) {
+      log.error('Failed to add interaction', error);
+      toast.error('Failed to save interaction. Please try again.');
+    }
+  }, [addInteraction, churchId, toast]);
+
+  const handleAddTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt'>) => {
+    try {
+      await addTask({
+        church_id: churchId,
+        person_id: task.personId || null,
+        title: task.title,
+        description: task.description || null,
+        due_date: task.dueDate,
+        completed: task.completed,
+        priority: task.priority,
+        category: task.category,
+        assigned_to: task.assignedTo || null,
+      });
+    } catch (error) {
+      log.error('Failed to add task', error);
+      toast.error('Failed to create task. Please try again.');
+    }
+  }, [addTask, churchId, toast]);
+
+  const handleToggleTask = useCallback(async (taskId: string) => {
+    await toggleTask(taskId);
+  }, [toggleTask]);
+
+  const handleMarkPrayerAnswered = useCallback(async (id: string, testimony?: string) => {
+    await markPrayerAnswered(id, testimony);
+  }, [markPrayerAnswered]);
+
+  const handleCheckIn = useCallback(async (personId: string, eventType: Attendance['eventType'], eventName?: string) => {
+    if (checkInToDb) {
+      await checkInToDb(churchId, personId, eventType, eventName);
+    } else {
+      const newRecord: Attendance = {
+        id: `attendance-${Date.now()}`,
+        personId,
+        eventType,
+        eventName,
+        date: new Date().toISOString().split('T')[0],
+        checkedInAt: new Date().toISOString(),
+      };
+      setAttendanceRecords((prev) => [...prev, newRecord]);
+    }
+    logMemberActivity({
+      churchId,
+      personId,
+      eventType: 'checkin',
+      metadata: { event_type: eventType, event_name: eventName ?? null },
+    });
+  }, [checkInToDb, churchId]);
+
+  const handleRSVP = useCallback((eventId: string, personId: string, status: 'yes' | 'no' | 'maybe', guestCount: number = 0, source: 'portal' | 'admin' = 'portal') => {
+    setRsvps((prev) => {
+      const existingIndex = prev.findIndex((r) => r.eventId === eventId && r.personId === personId);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = { eventId, personId, status, guestCount, source };
+        return updated;
+      }
+      return [...prev, { eventId, personId, status, guestCount, source }];
+    });
+
+    // Persist (upsert on event+person) — fire-and-forget so the UI stays snappy.
+    if (isSupabaseConfigured() && supabase) {
+      void supabase
+        .from('event_rsvps')
+        .upsert(
+          {
+            church_id: churchId,
+            event_id: eventId,
+            person_id: personId,
+            status,
+            guest_count: guestCount,
+            source,
+          },
+          { onConflict: 'event_id,person_id' },
+        )
+        .then(({ error }) => {
+          if (error) log.warn('RSVP persist failed', error.message);
+        });
+    }
+
+    logMemberActivity({
+      churchId,
+      personId,
+      eventType: 'rsvp',
+      entityType: 'calendar_event',
+      entityId: eventId,
+      metadata: { status, guest_count: guestCount, source },
+    });
+  }, [churchId]);
+
+  const handleAssignVolunteer = useCallback((eventId: string, roleId: string, personId: string) => {
+    const newAssignment = {
+      id: `vol-${Date.now()}`,
+      eventId,
+      roleId,
+      personId,
+      status: 'pending' as const,
+    };
+    setVolunteerAssignments((prev) => [...prev, newAssignment]);
+  }, []);
+
+  const handleUpdateVolunteerStatus = useCallback((assignmentId: string, status: 'confirmed' | 'pending' | 'declined') => {
+    setVolunteerAssignments((prev) =>
+      prev.map((a) => (a.id === assignmentId ? { ...a, status } : a))
+    );
+  }, []);
+
+  const handleRemoveVolunteer = useCallback((assignmentId: string) => {
+    setVolunteerAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+  }, []);
+
+  const handleAddPrayer = useCallback(async (prayer: { personId: string; content: string; isPrivate: boolean }) => {
+    try {
+      await addPrayer({
+        church_id: churchId,
+        person_id: prayer.personId,
+        content: prayer.content,
+        is_private: prayer.isPrivate,
+      });
+    } catch (error) {
+      log.error('Failed to add prayer request', error);
+      toast.error('Failed to save prayer request. Please try again.');
+    }
+  }, [addPrayer, churchId, toast]);
+
+  const handleAddGiving = useCallback(async (donation: {
+    personId?: string;
+    amount: number;
+    fund: string;
+    method: string;
+    date: string;
+    isRecurring: boolean;
+    note?: string;
+  }) => {
+    try {
+      await addGiving({
+        church_id: churchId,
+        person_id: donation.personId || null,
+        amount: donation.amount,
+        fund: donation.fund,
+        method: donation.method,
+        date: donation.date,
+        is_recurring: donation.isRecurring,
+        note: donation.note || null,
+      });
+      onNewDonation?.({
+        id: `giving-${Date.now()}`,
+        personId: donation.personId,
+        amount: donation.amount,
+        fund: donation.fund,
+        date: donation.date,
+        method: donation.method,
+        isRecurring: donation.isRecurring,
+      });
+    } catch (error) {
+      log.error('Failed to record donation', error);
+      toast.error('Failed to record donation. Please try again.');
+    }
+  }, [addGiving, churchId, toast, onNewDonation]);
+
+  const handleAddPerson = useCallback(() => {
+    openPersonForm();
+  }, [openPersonForm]);
+
+  const handleEditPerson = useCallback((person: Person) => {
+    openPersonForm(person);
+  }, [openPersonForm]);
+
+  const handleSavePerson = useCallback(async (personData: Omit<Person, 'id'> | Person) => {
+    try {
+      if ('id' in personData) {
+        const previousStatus = dbPeople.find(p => p.id === personData.id)?.status;
+        await updatePerson(personData.id, {
+          first_name: personData.firstName,
+          last_name: personData.lastName,
+          email: personData.email || null,
+          phone: personData.phone || null,
+          status: personData.status,
+          photo_url: personData.photo || null,
+          address: personData.address || null,
+          city: personData.city || null,
+          state: personData.state || null,
+          zip: personData.zip || null,
+          birth_date: personData.birthDate || null,
+          join_date: personData.joinDate || null,
+          first_visit: personData.firstVisit || null,
+          notes: personData.notes || null,
+          tags: personData.tags,
+          family_id: personData.familyId || null,
+        });
+        if (previousStatus && previousStatus !== personData.status) {
+          onPersonStatusChange?.(personData.id, previousStatus, personData.status);
+        }
+      } else {
+        await addPerson({
+          church_id: churchId,
+          first_name: personData.firstName,
+          last_name: personData.lastName,
+          email: personData.email || null,
+          phone: personData.phone || null,
+          status: personData.status,
+          photo_url: personData.photo || null,
+          address: personData.address || null,
+          city: personData.city || null,
+          state: personData.state || null,
+          zip: personData.zip || null,
+          birth_date: personData.birthDate || null,
+          join_date: personData.joinDate || null,
+          first_visit: personData.firstVisit || null,
+          notes: personData.notes || null,
+          tags: personData.tags,
+          family_id: personData.familyId || null,
+        });
+      }
+      closePersonForm();
+    } catch (error) {
+      log.error('Failed to save person', error);
+      toast.error('Failed to save person. Please try again.');
+    }
+  }, [addPerson, updatePerson, churchId, closePersonForm, toast, dbPeople, onPersonStatusChange]);
+
+  const handleBulkUpdateStatus = useCallback(async (ids: string[], status: Person['status']) => {
+    let failures = 0;
+    for (const id of ids) {
+      try {
+        const previousStatus = dbPeople.find(p => p.id === id)?.status;
+        await updatePerson(id, { status });
+        if (previousStatus && previousStatus !== status) {
+          onPersonStatusChange?.(id, previousStatus, status);
+        }
+      } catch (error) {
+        log.error(`Failed to update status for person ${id}`, error);
+        failures++;
+      }
+    }
+    if (failures > 0) {
+      toast.error(`Failed to update ${failures} of ${ids.length} people.`);
+    }
+  }, [updatePerson, toast, dbPeople, onPersonStatusChange]);
+
+  const handleBulkAddTag = useCallback(async (ids: string[], tag: string) => {
+    let failures = 0;
+    for (const id of ids) {
+      try {
+        const person = dbPeople.find(p => p.id === id);
+        if (person && !person.tags.includes(tag)) {
+          await updatePerson(id, { tags: [...person.tags, tag] });
+        }
+      } catch (error) {
+        log.error(`Failed to add tag for person ${id}`, error);
+        failures++;
+      }
+    }
+    if (failures > 0) {
+      toast.error(`Failed to tag ${failures} of ${ids.length} people.`);
+    }
+  }, [dbPeople, updatePerson, toast]);
+
+  const handleImportCSV = useCallback(async (importedPeople: Partial<Person>[]) => {
+    for (const person of importedPeople) {
+      const firstName = sanitizeInput(person.firstName || '', { maxLength: 100 });
+      const lastName = sanitizeInput(person.lastName || '', { maxLength: 100 });
+      if (!firstName || !lastName) continue;
+
+      const email = person.email && isValidEmail(person.email) ? person.email : null;
+      const phone = person.phone ? sanitizePhone(person.phone) : null;
+      const validStatuses = ['visitor', 'regular', 'member', 'leader', 'inactive'];
+      const status = validStatuses.includes(person.status || '') ? person.status as Person['status'] : 'visitor';
+
+      try {
+        await addPerson({
+          church_id: churchId,
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          phone,
+          status,
+          photo_url: null,
+          address: person.address ? sanitizeInput(person.address, { maxLength: 200 }) : null,
+          city: person.city ? sanitizeInput(person.city, { maxLength: 100 }) : null,
+          state: person.state ? sanitizeInput(person.state, { maxLength: 50 }) : null,
+          zip: person.zip ? sanitizeInput(person.zip, { maxLength: 20 }) : null,
+          birth_date: person.birthDate || null,
+          join_date: person.joinDate || null,
+          first_visit: person.firstVisit || null,
+          notes: person.notes ? sanitizeInput(person.notes, { maxLength: 2000 }) : null,
+          tags: person.tags || [],
+          family_id: null,
+        });
+      } catch (error) {
+        log.error(`Failed to import ${firstName} ${lastName}`, error);
+      }
+    }
+  }, [addPerson, churchId]);
+
+  const handleUpdatePersonTags = useCallback(async (personId: string, tags: string[]) => {
+    await updatePerson(personId, { tags });
+  }, [updatePerson]);
+
+  // Group handlers
+  const handleCreateGroup = useCallback(async (groupData: {
+    name: string;
+    description?: string;
+    leaderId?: string;
+    members?: string[];
+    meetingDay?: string;
+    meetingTime?: string;
+    location?: string;
+  }) => {
+    if (!createGroup) return;
+    await createGroup({
+      church_id: churchId,
+      name: groupData.name,
+      description: groupData.description,
+      leader_id: groupData.leaderId,
+      meeting_day: groupData.meetingDay,
+      meeting_time: groupData.meetingTime,
+      location: groupData.location,
+    });
+  }, [createGroup, churchId]);
+
+  const handleAddGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!addGroupMember) return;
+    await addGroupMember(groupId, personId);
+  }, [addGroupMember]);
+
+  const handleRemoveGroupMember = useCallback(async (groupId: string, personId: string) => {
+    if (!removeGroupMember) return;
+    await removeGroupMember(groupId, personId);
+  }, [removeGroupMember]);
+
+  // Event handlers
+  const handleAddEvent = useCallback(async (eventData: {
+    title: string;
+    description?: string;
+    startDate: string;
+    endDate?: string;
+    allDay: boolean;
+    location?: string;
+    category: EventCategory;
+  }) => {
+    if (!addEvent) return;
+    try {
+      await addEvent({
+        church_id: churchId,
+        title: eventData.title,
+        description: eventData.description,
+        start_date: eventData.startDate,
+        end_date: eventData.endDate,
+        all_day: eventData.allDay,
+        location: eventData.location,
+        category: eventData.category,
+      });
+    } catch (error) {
+      log.error('Failed to create event', error);
+      toast.error('Failed to create event. Please try again.');
+    }
+  }, [addEvent, churchId, toast]);
+
+  const handleUpdateEvent = useCallback(async (eventId: string, updates: {
+    title?: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    allDay?: boolean;
+    location?: string;
+    category?: EventCategory;
+  }) => {
+    if (!updateEvent) return;
+    await updateEvent(eventId, {
+      title: updates.title,
+      description: updates.description,
+      start_date: updates.startDate,
+      end_date: updates.endDate,
+      all_day: updates.allDay,
+      location: updates.location,
+      category: updates.category,
+    });
+  }, [updateEvent]);
+
+  const handleDeleteEvent = useCallback(async (eventId: string) => {
+    if (!deleteEvent) return;
+    await deleteEvent(eventId);
+  }, [deleteEvent]);
+
+  return {
+    // State
+    attendanceRecords,
+    rsvps,
+    volunteerAssignments,
+    // Handlers
+    handlers: {
+      viewPerson: handleViewPerson,
+      backToPeople: handleBackToPeople,
+      addPerson: handleAddPerson,
+      editPerson: handleEditPerson,
+      savePerson: handleSavePerson,
+      addInteraction: handleAddInteraction,
+      addTask: handleAddTask,
+      toggleTask: handleToggleTask,
+      markPrayerAnswered: handleMarkPrayerAnswered,
+      checkIn: handleCheckIn,
+      rsvp: handleRSVP,
+      assignVolunteer: handleAssignVolunteer,
+      updateVolunteerStatus: handleUpdateVolunteerStatus,
+      removeVolunteer: handleRemoveVolunteer,
+      addPrayer: handleAddPrayer,
+      addGiving: handleAddGiving,
+      bulkUpdateStatus: handleBulkUpdateStatus,
+      bulkAddTag: handleBulkAddTag,
+      importCSV: handleImportCSV,
+      updatePersonTags: handleUpdatePersonTags,
+      createGroup: handleCreateGroup,
+      addGroupMember: handleAddGroupMember,
+      removeGroupMember: handleRemoveGroupMember,
+      addEvent: handleAddEvent,
+      updateEvent: handleUpdateEvent,
+      deleteEvent: handleDeleteEvent,
+    },
+  };
+}

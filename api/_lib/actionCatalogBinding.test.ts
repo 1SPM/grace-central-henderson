@@ -24,7 +24,7 @@ import {
   type ActionDefinition,
 } from './actionCatalog.js';
 import { listExecutableActionTypes } from './agentActionExecutors.js';
-import type { ActionType } from '../../src/lib/grace-actions.js';
+import type { ActionType } from '../../apps/admin-web/src/lib/grace-actions.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(HERE, '..', '..', 'supabase', 'migrations');
