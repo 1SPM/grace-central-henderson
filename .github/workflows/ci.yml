@@ -35,7 +35,7 @@ jobs:
       - run: npm run test:run
 
   api-install:
-    name: API Install
+    name: API Install & Typecheck Ratchet
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +43,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: api/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+      # Root deps supply tsx and vitest for the ratchet below.
+      - run: npm ci
       # api/ is not a root workspace and does not appear in the root lockfile,
       # so no other job installs it. Its lockfile drifted out of sync with
       # api/package.json undetected (stripe pinned at 14.25.0 while
@@ -52,6 +56,11 @@ jobs:
       # api/ actually gets installed.
       - run: npm ci
         working-directory: api
+      # The count-based gate, not a clean gate: 17 Stripe errors remain by
+      # decision, and the ratchet keeps that number a floor. See the tool's
+      # header for why.
+      - run: npx vitest run tools/api-typecheck-ratchet.test.ts
+      - run: npx tsx tools/api-typecheck-ratchet.ts
 
   security-smoke:
     name: Security Smoke Checks
