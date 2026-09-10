@@ -43,7 +43,12 @@ const DEMO_CLERK_ID = 'user_3Ge90H8NjoV8nIfP2DJB2qnIYI4';
 const DEMO_USER_ID = '6a5838df-63ca-46c1-843f-3d1436186946';
 /** A SECOND System Administrator on the tenant. Since the C-13 fix the proposer
  *  cannot approve their own request, so leg 4 needs two people — as it should. */
-const APPROVER_CLERK_ID = 'user_3GaW8TXN3YM7XfjPjDbnHsgJNT5';
+// Repointed 2026-09-05: the original id belonged to the Clerk DEVELOPMENT
+// instance, which Production had never heard of — the cause of the
+// "can't sign in as info@theinnerface.com" report. A fresh Production
+// Clerk user was created and users.clerk_id updated to match; stubbing
+// the old id here made the approval 403 `no_user_record_for_church`.
+const APPROVER_CLERK_ID = 'user_3ItNfI5pLiTkyQIOAnFk2SHPslg';
 const APPROVER_USER_ID = '0d93eed1-df64-4eae-a273-2a28439120ed';
 
 /** Everything this run creates is prefixed so it is trivially findable and removable. */
