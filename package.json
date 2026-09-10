@@ -14,8 +14,9 @@
     "lint": "eslint . --max-warnings 0",
     "lint:rls": "tsx tools/lint-rls.ts",
     "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:run": "vitest run && npm run test:run --workspaces --if-present",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",

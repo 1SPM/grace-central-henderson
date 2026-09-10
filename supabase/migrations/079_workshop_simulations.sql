@@ -40,3 +40,12 @@ create policy workshop_simulations_staff_select on workshop_simulations
     church_id = get_church_id()
     and user_has_permission(get_app_user_id(), get_church_id(), 'analytics.view')
   );
+
+-- ═══ ROLLBACK ═══
+-- Migration 080's workshop_wallet_activations.simulation_id references this
+-- table ON DELETE CASCADE, so 080 must be rolled back FIRST — otherwise the
+-- drop below either fails or silently takes 080's rows with it.
+--
+-- drop policy if exists workshop_simulations_staff_select on workshop_simulations;
+-- drop index if exists workshop_simulations_church_id_idx;
+-- drop table if exists workshop_simulations;

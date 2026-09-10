@@ -34,3 +34,15 @@ COMMENT ON COLUMN people.self_registered IS
   'True when clerk_user_id was bound via member self-signup (api/portal/_self-signup.ts), not staff provisioning.';
 COMMENT ON COLUMN people.staff_reviewed_at IS
   'Set when staff confirms a self-registered identity. NULL = pending review; gates the sensitive-data tools/routes via actor.identityVerified.';
+
+-- ═══ ROLLBACK ═══
+-- Drops the index first, then the columns (their COMMENTs go with them).
+-- NOT loss-free: `self_registered` and `staff_reviewed_at` are the only
+-- record of which members bound their own account and which of those a
+-- staff member has since confirmed. Rolling back re-opens the sensitive
+-- surface for those people, because actor.identityVerified reads these
+-- columns — export them first if the data still matters.
+--
+-- drop index if exists idx_people_pending_self_signup_review;
+-- alter table people drop column if exists staff_reviewed_at;
+-- alter table people drop column if exists self_registered;

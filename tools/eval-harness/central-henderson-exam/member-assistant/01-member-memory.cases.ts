@@ -29,7 +29,6 @@ import { FIXTURE_CHURCH_ID, FIXTURE_OTHER_CHURCH_ID } from '../../../../tests/fi
 import { CRISIS_RESOURCE_MESSAGE } from '../../../../api/_lib/careSafety.js';
 import { ASSISTANT_TOOL_NAMES } from '../../../../api/_lib/assistant/tools.js';
 import {
-  MEMBER_ACTOR,
   OTHER_CHURCH_MEMBER_ACTOR,
   memberSupabaseFor,
   mockClaudeToolLoop,

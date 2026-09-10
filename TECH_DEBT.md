@@ -534,6 +534,18 @@
 - **Not done:** attaching a real custom domain to the `grace-members` project instead of the raw `.vercel.app` URL — cosmetic/trust, not a blocker, and out of scope here.
 - **Re-entry trigger:** if a custom domain is ever attached to `grace-members`, update `grace-links.js` and `MEMBER_PORTAL_URL` together — they're required to match by the comment now in both files.
 
+### TD-074 — The monorepo split moved every path; four CI gates kept pointing at the old ones — **RESOLVED (gates), one debt recorded**
+- **Severity:** P1. Not a product bug: four of the repo's own quality gates had been failing or silently checking nothing since the Phase-1 split, and production shipped anyway because deployments were **promoted by hand** rather than gated on a green PR. Found on 2026-09-09 when `phase1-monorepo-split` was finally opened as a PR against `main` — the first time those checks had been required for it.
+- **What was broken, all the same root cause** — the split moved each app one level down (`src/` → `apps/<app>/src/`, `public/` → `apps/<app>/public/`, `dist/` → `apps/<app>/dist/`) and the root-relative globs were never updated:
+  - **App tests were not run at all.** The root `vitest.config.ts` includes only `tools/**` and `api/**`, and `npm run test:run` never fanned out to the workspaces — **68 test files / 580 tests** (every admin-web and member-web suite) were outside CI. They were not rotten: they pass 580/580 once run.
+  - **Security Smoke Checks** ran `vitest run src/security/smoke.test.ts`, a path that no longer exists → "No test files found", exit 1.
+  - **Lint** un-ignored the build output and the static browser scripts (`dist/**`, `public/grace-links.js` were root-relative), so `eslint .` reported **7045** errors locally, drowning the one real source error in build artifacts.
+  - **Typecheck** ran a bare `tsc --noEmit` with **no root `tsconfig.json`** (the split removed it), so it printed usage and exited 1.
+- **Fixed here:** root `test:run` and a new root `typecheck` fan out via `npm run … --workspaces --if-present`; the smoke step runs in `apps/admin-web` against that app's jsdom config; eslint ignores are monorepo-relative (`**/dist/**`, `**/public/**/*.js`, `marketing/**/*.js`); one genuinely unused import removed. Migrations 078 and 079 gained the rollback documentation the rollback lint requires (079's notes that 080 must be rolled back first — its FK cascades).
+- **Debt recorded, deliberately not fixed here:** `api/` has **141 typecheck errors**, mostly `never`-typed Supabase query results. This is **pre-existing and was never gated**: the pre-split root `tsconfig.json` included `['src']` only, so `api/` has never been typechecked in CI. The new root `typecheck` therefore covers the workspaces — exactly the pre-split coverage — rather than silently adopting 141 failures or silently dropping the gate. Closing it means typing the Supabase client (generated types) across `api/`.
+- **Lesson:** a large directory move needs its *tooling* config moved with it, and the proof that it was is a green PR — not a green deploy. Promotion-by-hand hid four dead gates for days.
+- **Re-entry trigger:** any future move of `apps/*`, `api/`, or `marketing/` — re-run `npm run lint`, `npm run typecheck`, `npm run test:run` and the CI workflow's own paths before assuming the gates still point at real files.
+
 ---
 
 ## Resolved
