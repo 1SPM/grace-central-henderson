@@ -2,9 +2,12 @@
 
 **Status:** Standing evaluation model for staff Ask GRACE (ADR-016). Design is
 complete; the fixture suite that proves each cell is built incrementally.
-**Scope:** Staff Ask GRACE only (`api/grace/_chat.ts`). The member portal
-assistant, the static demo companion, and the marketing visual are separate
-stacks with different guarantees and are not covered by this framework.
+**Scope:** Staff Ask GRACE (`api/grace/_chat.ts`) and, for the memory family of
+cases only, the member-portal assistant (`api/_lib/ai/assistant-runtime.ts`)
+under ADR-019 — qualified by the sibling suite in
+`tools/eval-harness/central-henderson-exam/member-assistant/`, which stays
+outside the 10-domain main exam. The static demo companion and the marketing
+visual remain uncovered.
 **Companion doc:** [`GRACE_INTELLIGENCE_LAYER.md`](GRACE_INTELLIGENCE_LAYER.md)
 — the operational/accountability loop this framework is reconciled against,
 not a duplicate of.

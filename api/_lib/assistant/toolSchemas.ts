@@ -1,13 +1,16 @@
 /**
- * Gemini function-calling declarations for the 14 assistant tools.
- * Shape matches Gemini's REST `tools[].functionDeclarations[]` —
- * see https://ai.google.dev/api/caching#FunctionDeclaration.
+ * Function-calling declarations for the 14 assistant tools, defined once
+ * in Gemini's REST `tools[].functionDeclarations[]` shape (see
+ * https://ai.google.dev/api/caching#FunctionDeclaration) and converted
+ * to Anthropic's `tools[].input_schema` shape by toClaudeToolDeclarations
+ * below — one source of truth for both providers' adapters.
  *
  * These are a SHAPE contract only (types, enums, required fields) — the
  * real business-rule validation happens again inside each tool in
  * api/_lib/assistant/tools.ts. Never trust the model's arguments as
  * pre-validated just because they matched this schema.
  */
+import type { ClaudeToolDeclaration } from '../ai/adapters/claude.js';
 
 export interface GeminiFunctionDeclaration {
   name: string;
@@ -130,7 +133,7 @@ export const ASSISTANT_TOOL_DECLARATIONS: GeminiFunctionDeclaration[] = [
   },
   {
     name: 'request_human_followup',
-    description: 'Ask a real staff member to reach out to the member directly, for anything that is not a pastoral care matter (general questions, help with something in the portal, etc).',
+    description: 'Ask a real staff member to reach out to the member directly. Use ONLY when the member has explicitly said they want a person to contact them, or their need genuinely requires a person and no other tool applies. Never use this for factual questions about the church (service times, address, events, resources, ministries) — try search_approved_church_resources first. A prior turn offering to escalate does NOT mean the member has agreed to it; only use this tool once they say yes.',
     parameters: {
       type: 'OBJECT',
       properties: { message: { type: 'STRING', description: 'What the member would like help with.' } },
@@ -138,3 +141,33 @@ export const ASSISTANT_TOOL_DECLARATIONS: GeminiFunctionDeclaration[] = [
     },
   },
 ];
+
+const GEMINI_TO_JSON_SCHEMA_TYPE: Record<string, string> = {
+  STRING: 'string',
+  NUMBER: 'number',
+  INTEGER: 'integer',
+  BOOLEAN: 'boolean',
+  OBJECT: 'object',
+  ARRAY: 'array',
+};
+
+export function toClaudeToolDeclarations(
+  declarations: GeminiFunctionDeclaration[] = ASSISTANT_TOOL_DECLARATIONS,
+): ClaudeToolDeclaration[] {
+  return declarations.map(d => ({
+    name: d.name,
+    description: d.description,
+    input_schema: {
+      type: 'object',
+      properties: Object.fromEntries(
+        Object.entries(d.parameters.properties).map(([key, prop]) => [
+          key,
+          { ...prop, type: GEMINI_TO_JSON_SCHEMA_TYPE[prop.type] ?? prop.type.toLowerCase() },
+        ]),
+      ),
+      ...(d.parameters.required ? { required: d.parameters.required } : {}),
+    },
+  }));
+}
+
+export const ASSISTANT_TOOL_DECLARATIONS_CLAUDE: ClaudeToolDeclaration[] = toClaudeToolDeclarations();

@@ -38,6 +38,7 @@ const MEMBER: MemberActor = {
   personId: 'person-1',
   clerkUserId: 'clerk-1',
   churchId: 'church-1',
+  identityVerified: true,
 };
 
 afterEach(() => {

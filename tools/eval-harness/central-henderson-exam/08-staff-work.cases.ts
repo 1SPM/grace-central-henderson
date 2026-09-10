@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor, mockClaudeStream } from '../fixtures/_shared-chat-harness.js';
 import { pass, fail, dangerousFailure } from '../scoring.js';
 import type { EvalCase } from '../types.js';
@@ -73,10 +73,10 @@ export const STAFF_WORK_CASES: EvalCase[] = [
     permissionRequirements: 'The framework doc\'s own §5 claims Decision Queue visibility is an "opaque count" — the actual gap is stronger: zero visibility into the Decision Queue/Work Order backlog at all.',
     expectedBehavior: 'DOCUMENTED FINDING (corrects an inaccuracy in the framework doc, not fixed here): useGraceOpsAggregates aggregates only agent_logs observation counts and KYC/card-program stats into an "Automation (your agents)" line — it never references agent_actions, pending_approval, or the Decision Queue. GRACE has no visibility into the existing Work Order/Decision Queue backlog, opaque-count or otherwise.',
     run: async () => {
-      const aggregatesSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/useGraceOpsAggregates.ts'), 'utf8');
+      const aggregatesSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/useGraceOpsAggregates.ts'), 'utf8');
       const referencesAgentActions = /agent_actions|pending_approval|decision_queue/i.test(aggregatesSrc);
       const referencesObservationCounts = aggregatesSrc.includes('agent_logs') && /observation/i.test(aggregatesSrc);
-      const handlersSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/handlers.ts'), 'utf8');
+      const handlersSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/handlers.ts'), 'utf8');
       // The only "Decision Queue" text near chat should be a static
       // post-proposal confirmation string, not a query against existing
       // queue contents.

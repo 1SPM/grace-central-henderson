@@ -24,6 +24,7 @@ beforeEach(() => {
   vi.resetModules();
   process.env.VITE_SUPABASE_URL = 'https://example.invalid';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
+  process.env.VITE_CLERK_PUBLISHABLE_KEY = 'pk_test_fixture';
 });
 
 describe('GET /api/tenant/config', () => {
@@ -52,9 +53,10 @@ describe('GET /api/tenant/config', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     const body = res.json.mock.calls[0][0];
-    expect(Object.keys(body).sort()).toEqual(['branding', 'church_name']);
+    expect(Object.keys(body).sort()).toEqual(['branding', 'church_name', 'clerk_publishable_key']);
     expect(body.church_name).toBe('Real Church');
     expect(body.branding).toEqual({ primaryColor: '#123456', logoUrl: 'https://example.com/logo.png' });
+    expect(body.clerk_publishable_key).toBe('pk_test_fixture');
     expect(JSON.stringify(body)).not.toContain('sk_live_should_never_leak');
     expect(JSON.stringify(body)).not.toContain('super-secret');
   });
@@ -75,6 +77,6 @@ describe('GET /api/tenant/config', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     const body = res.json.mock.calls[0][0];
-    expect(body).toEqual({ church_name: null, branding: null });
+    expect(body).toEqual({ church_name: null, branding: null, clerk_publishable_key: 'pk_test_fixture' });
   });
 });

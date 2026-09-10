@@ -18,11 +18,27 @@ import { recordAudit } from '../_lib/workosAudit.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const APP_URL = process.env.FRONTEND_URL || process.env.VERCEL_URL
-  ? (process.env.FRONTEND_URL || `https://${process.env.VERCEL_URL}`)
-  : 'http://localhost:3000';
+// Deliberately NOT process.env.VERCEL_URL — this route runs on the admin
+// app's deployment (staff click "Preview Portal" from a person's CRM
+// profile), but the portal_url it builds points at the separate
+// grace-members deployment. VERCEL_URL here would resolve to the admin
+// app's own domain, which doesn't serve /tenants/*/member-portal.html.
+const MEMBER_PORTAL_URL = process.env.MEMBER_PORTAL_URL || 'https://grace-members.vercel.app';
 
 const PREVIEW_TTL_MS = 10 * 60 * 1000; // 10 minutes — long enough to click through several portal pages
+
+// The Member Portal is now the static page at apps/member-web/public/tenants/
+// (copied from marketing/tenants/), not a React shell — "preview as member"
+// just opens that same page directly. It shows identical generic content to
+// every visitor today (no live per-member data wired in yet), so there is
+// nothing left for a token-gated, read-only React view to protect; the
+// minted token/audit trail below is kept for the record of who previewed
+// what and when, not because anything validates it server-side anymore.
+// Mirrors apps/member-web/src/portal/PortalRoot.tsx's CENTRAL_HENDERSON_CHURCH_ID.
+const CENTRAL_HENDERSON_CHURCH_ID = '11111111-1111-1111-1111-111111111111';
+function portalTenantSlug(churchId: string): string {
+  return churchId === CENTRAL_HENDERSON_CHURCH_ID ? 'central-henderson' : 'faithful';
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
@@ -89,6 +105,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     token,
     expires_at: expiresAt,
     person_name: personName,
-    portal_url: `${APP_URL}/portal?preview_token=${encodeURIComponent(token)}&preview_name=${encodeURIComponent(personName)}`,
+    portal_url: `${MEMBER_PORTAL_URL}/tenants/${portalTenantSlug(actor.churchId)}/member-portal.html`,
   });
 }

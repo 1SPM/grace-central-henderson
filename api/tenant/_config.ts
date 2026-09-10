@@ -11,7 +11,14 @@
  * HOST_TENANTS) are deliberately separate and stay hardcoded — enabling
  * an auth bypass for a host is a code change, not a database edit.
  *
- * Response: { church_name: string, branding: { primaryColor?, logoUrl? } } | { church_name: null, branding: null }
+ * Response: { church_name: string, branding: { primaryColor?, logoUrl? }, clerk_publishable_key: string | null } | { church_name: null, branding: null, clerk_publishable_key: string | null }
+ *
+ * clerk_publishable_key is included so the static Member Portal pages
+ * (apps/member-web/public/tenants/*, no build step of their own) can
+ * initialize Clerk's browser SDK without the key being hand-copied into
+ * static HTML — it's already a public, non-secret value (that's what
+ * "publishable" means), same as what apps/member-web's own React build
+ * already inlines via VITE_CLERK_PUBLISHABLE_KEY.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -19,6 +26,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const CLERK_PUBLISHABLE_KEY = process.env.VITE_CLERK_PUBLISHABLE_KEY || null;
 
 const CACHE_CONTROL = 'public, max-age=300, s-maxage=300';
 
@@ -31,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const host = typeof req.query.host === 'string' ? req.query.host.trim().toLowerCase() : '';
   res.setHeader('Cache-Control', CACHE_CONTROL);
   if (!host || host.length > 255) {
-    return res.status(200).json({ church_name: null, branding: null });
+    return res.status(200).json({ church_name: null, branding: null, clerk_publishable_key: CLERK_PUBLISHABLE_KEY });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -42,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .limit(1)
     .maybeSingle();
   if (error || !church) {
-    return res.status(200).json({ church_name: null, branding: null });
+    return res.status(200).json({ church_name: null, branding: null, clerk_publishable_key: CLERK_PUBLISHABLE_KEY });
   }
 
   const settings = (church.settings as Record<string, unknown> | null) ?? {};
@@ -55,5 +63,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       primaryColor: typeof branding?.primaryColor === 'string' ? branding.primaryColor : undefined,
       logoUrl: typeof branding?.logoUrl === 'string' ? branding.logoUrl : undefined,
     },
+    clerk_publishable_key: CLERK_PUBLISHABLE_KEY,
   });
 }

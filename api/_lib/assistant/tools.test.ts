@@ -41,6 +41,7 @@ const MEMBER: MemberActor = {
   personId: 'person-real-owner',
   clerkUserId: 'clerk-real-owner',
   churchId: 'church-real-tenant',
+  identityVerified: true,
 };
 
 describe('cross-member access attempts', () => {

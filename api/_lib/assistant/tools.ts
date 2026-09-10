@@ -588,6 +588,17 @@ export function isAssistantToolName(name: string): name is AssistantToolName {
  * log itself. Args are summarized (keys only, no values) in the audit
  * payload to avoid writing free-text member content into platform_events.
  */
+// These three tools surface the same sensitive history the Give/Care/
+// Impact portal pages gate behind actor.identityVerified (see migration
+// 078, api/_lib/authz.ts's requireVerifiedIdentity) — a self-registered,
+// not-yet-staff-reviewed member gets the same "pending" answer here
+// instead of the model silently reading real financial/pastoral data.
+const IDENTITY_GATED_TOOLS = new Set<AssistantToolName>([
+  'get_my_giving_summary',
+  'get_my_impact_summary',
+  'get_my_care_request_status',
+]);
+
 export async function executeAssistantTool(
   name: AssistantToolName,
   ctx: AssistantToolContext,
@@ -595,7 +606,11 @@ export async function executeAssistantTool(
 ): Promise<ToolResult> {
   let result: ToolResult;
   try {
-    result = await TOOL_IMPLEMENTATIONS[name](ctx, args);
+    if (IDENTITY_GATED_TOOLS.has(name) && !ctx.member.identityVerified) {
+      result = fail('pending_verification');
+    } else {
+      result = await TOOL_IMPLEMENTATIONS[name](ctx, args);
+    }
   } catch (err) {
     console.error('[assistant/tools] tool threw', { name, error: err });
     result = fail('tool_execution_failed');

@@ -8,19 +8,19 @@
  * silently worked around:
  *
  * 1. KNOW-level "dataContext" (church profile / status counts / inactivity
- *    / birthdays) is CLIENT-composed (src/contexts/GraceChatContext.tsx's
+ *    / birthdays) is CLIENT-composed (apps/admin-web/src/contexts/GraceChatContext.tsx's
  *    buildDataContext) and not exported — unlike Fixture #001/#002's
  *    server-composed prompt blocks, this harness cannot render the full
  *    React provider tree to verify buildDataContext's exact string output
  *    without new, disproportionate test infrastructure. What IS
  *    deterministically provable without touching production code is that
- *    the data actually reaches the provider (src/App.tsx's wiring) — this
+ *    the data actually reaches the provider (apps/admin-web/src/App.tsx's wiring) — this
  *    fixture proves that narrower claim honestly, and does not claim more.
  * 2. ACT-level: of the four people-domain catalog actions, only
  *    delete_person is reachable via the server execute/propose pipeline
  *    (already exercised by Fixture #002). add_person, add_note, and
  *    update_person_status run entirely through a CLIENT-side "chat door"
- *    (src/lib/grace-chat/handlers.ts's runActionHandler) that calls an
+ *    (apps/admin-web/src/lib/grace-chat/handlers.ts's runActionHandler) that calls an
  *    injected UI callback directly — no fetch, no server-side permission
  *    check against the catalog's stated people.manage key, no approval,
  *    no audit_logs row at the point of dispatch. This matches
@@ -33,7 +33,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { vi } from 'vitest';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../../src/lib/actionCatalog.js';
+import { findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
 import { mockClaudeStream, postToChat, supabaseFor } from './_shared-chat-harness.js';
 import { pass, fail } from '../scoring.js';
 import type { EvalCase } from '../types.js';
@@ -60,10 +60,10 @@ export const FIXTURE_003_CASES: EvalCase[] = [
     level: 'KNOW',
     classification: 'testable',
     proofBoundary: 'static_catalog',
-    sourceScope: 'Confirms the data pipeline that KNOW-level people/household facts depend on — does NOT independently verify buildDataContext\'s exact output string, since that function (src/contexts/GraceChatContext.tsx) is not exported.',
-    expectedBehavior: 'src/App.tsx wires people/tasks/prayers/attendance into GraceChatProvider (via the shared graceChatProps object spread into both the desktop and GRACE Mobile mounts), so KNOW-level facts about them have a real data path into the chat prompt.',
+    sourceScope: 'Confirms the data pipeline that KNOW-level people/household facts depend on — does NOT independently verify buildDataContext\'s exact output string, since that function (apps/admin-web/src/contexts/GraceChatContext.tsx) is not exported.',
+    expectedBehavior: 'apps/admin-web/src/App.tsx wires people/tasks/prayers/attendance into GraceChatProvider (via the shared graceChatProps object spread into both the desktop and GRACE Mobile mounts), so KNOW-level facts about them have a real data path into the chat prompt.',
     run: async () => {
-      const appSource = readFileSync(join(process.cwd(), 'src/App.tsx'), 'utf8');
+      const appSource = readFileSync(join(process.cwd(), 'apps/admin-web/src/App.tsx'), 'utf8');
       // Both provider mounts spread one shared props object; the wiring
       // proof is that object's literal plus the spread reaching the provider.
       const propsBlockMatch = appSource.match(/const graceChatProps = \{[\s\S]*?\n {2}\};/);
@@ -142,9 +142,9 @@ export const FIXTURE_003_CASES: EvalCase[] = [
     isArchitecturalFinding: true,
     permissionRequirements: 'None enforced at this layer — no catalog permission check, no approval, no audit_logs row.',
     prohibitedBehavior: 'N/A — this case documents a known, pre-existing gap (actionCatalog.ts\'s own TD-061 framing), not a live exploit.',
-    expectedBehavior: 'DOCUMENTED FINDING: add_person, add_note, and update_person_status run via src/lib/grace-chat/handlers.ts\'s client-side runActionHandler, calling an injected UI callback directly with no server request — unlike delete_person (gated, already proven server-routed by Fixture #002). Grading this PASS means "the documented gap is still accurately documented," never "domain 2 ACT is more proven."',
+    expectedBehavior: 'DOCUMENTED FINDING: add_person, add_note, and update_person_status run via apps/admin-web/src/lib/grace-chat/handlers.ts\'s client-side runActionHandler, calling an injected UI callback directly with no server request — unlike delete_person (gated, already proven server-routed by Fixture #002). Grading this PASS means "the documented gap is still accurately documented," never "domain 2 ACT is more proven."',
     run: async () => {
-      const { runActionHandler } = await import('../../../src/lib/grace-chat/handlers.js');
+      const { runActionHandler } = await import('../../../apps/admin-web/src/lib/grace-chat/handlers.js');
       const fetchSpy = vi.fn();
       const originalFetch = global.fetch;
       global.fetch = fetchSpy as unknown as typeof fetch;

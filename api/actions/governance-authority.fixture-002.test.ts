@@ -46,7 +46,7 @@ import {
   FIXTURE_CHURCH_ID,
   FIXTURE_STAFF_USER,
 } from '../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../src/lib/actionCatalog.js';
+import { findAction } from '../../apps/admin-web/src/lib/actionCatalog.js';
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
