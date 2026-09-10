@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveAreas, attachNextEvents, staffDisplayName, MINISTRY_AREAS, EVENT_CATEGORY_AREA } from './ministryAreas';
+import { resolveAreas, attachNextEvents, staffDisplayName, MINISTRY_AREAS, EVENT_CATEGORY_AREA } from './ministryAreas.js';
 
 const STAFF = [
   { id: 'u-naomi', first_name: 'Naomi', last_name: 'Ito', title: 'Director of Finance' },
