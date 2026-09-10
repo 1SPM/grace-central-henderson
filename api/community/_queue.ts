@@ -31,6 +31,19 @@ import { requirePermission } from '../_lib/authz.js';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+type Author = { first_name: string; last_name: string };
+
+/**
+ * PostgREST returns a single object for a many-to-one embed like
+ * `people:author_person_id(...)`, but the generated client types widen it to an
+ * array. Accepting both here, and normalising in toQueueItem, lets the pending
+ * and reported queries share one mapper without casting at each call site.
+ */
+type PostRow = {
+  id: string; author_person_id: string; post_type: string; body: string; created_at: string;
+  people: Author | Author[] | null;
+};
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(503).json({ error: 'service_not_configured' });
@@ -63,10 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // (covered there) or has already been decided (rejected/removed, not
   // worth re-surfacing). Only an APPROVED-and-reported post belongs here.
   const reportedPostIds = [...new Set((openReports ?? []).map(r => r.post_id))].filter(id => !pendingIds.has(id));
-  let reportedPosts: {
-    id: string; author_person_id: string; post_type: string; body: string; created_at: string;
-    people: { first_name: string; last_name: string } | null;
-  }[] = [];
+  let reportedPosts: PostRow[] = [];
   if (reportedPostIds.length > 0) {
     const { data, error } = await supabase
       .from('community_posts')
@@ -75,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .is('deleted_at', null)
       .eq('moderation_status', 'approved');
     if (error) return res.status(500).json({ error: 'read_failed' });
-    reportedPosts = (data ?? []) as typeof reportedPosts;
+    reportedPosts = (data ?? []) as unknown as PostRow[];
   }
 
   const reportsByPost = new Map<string, { reasons: string[]; count: number }>();
@@ -86,8 +96,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     reportsByPost.set(r.post_id, entry);
   }
 
-  function toQueueItem(p: (typeof reportedPosts)[number]) {
-    const author = p.people;
+  function toQueueItem(p: PostRow) {
+    const author = Array.isArray(p.people) ? p.people[0] ?? null : p.people;
     return {
       id: p.id,
       post_type: p.post_type,

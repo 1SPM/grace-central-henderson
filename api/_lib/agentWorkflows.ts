@@ -110,8 +110,13 @@ async function runVerityQualityReview(supabase: SupabaseClient, churchId: string
     (assignments ?? []).map(a => [a.area_key, a.owner_user_id as string]),
   );
   const proposals = (unownedWorkOrders ?? []).flatMap(w => {
+    // Narrowing `area` before the owner lookup rather than after keeps it
+    // non-optional in the emitted proposal. The old shape only produced an
+    // ownerUserId when area existed, but the compiler cannot see that
+    // correlation, so proposal.area stayed possibly-undefined downstream.
     const area = areaForMinistry(w.ministry);
-    const ownerUserId = area ? ownerByAreaKey.get(area.key) : undefined;
+    if (!area) return [];
+    const ownerUserId = ownerByAreaKey.get(area.key);
     return ownerUserId ? [{ workOrder: w, area, ownerUserId }] : [];
   });
 
