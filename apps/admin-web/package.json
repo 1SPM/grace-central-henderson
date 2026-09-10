@@ -1,7 +1,7 @@
 {
   "name": "@grace/admin-web",
   "version": "1.0.0",
-  "description": "GRACE CRM \u2014 the staff/admin surface (desktop + /mobile).",
+  "description": "GRACE CRM — the staff/admin surface (desktop + /mobile).",
   "private": true,
   "type": "module",
   "scripts": {
