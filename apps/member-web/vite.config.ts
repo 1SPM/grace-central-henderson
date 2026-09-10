@@ -103,8 +103,13 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
+          // Vite 8 (rolldown) only accepts the function form. scheduler is
+          // react-dom's runtime dependency and rode along in the old object
+          // form, so it stays with vendor-react.
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) return
+            const pkg = id.split('node_modules/').pop() ?? ''
+            if (/^(react|react-dom|scheduler)\//.test(pkg)) return 'vendor-react'
           },
         },
       },

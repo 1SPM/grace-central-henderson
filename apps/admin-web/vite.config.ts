@@ -145,10 +145,16 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-icons': ['lucide-react'],
-            'vendor-supabase': ['@supabase/supabase-js'],
+          // Vite 8 (rolldown) only accepts the function form. Matching on the
+          // path segment after node_modules/ keeps 'react' from also catching
+          // 'lucide-react'. scheduler is react-dom's runtime dependency and
+          // rode along in the old object form, so it stays with vendor-react.
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) return
+            const pkg = id.split('node_modules/').pop() ?? ''
+            if (/^(react|react-dom|scheduler)\//.test(pkg)) return 'vendor-react'
+            if (/^lucide-react\//.test(pkg)) return 'vendor-icons'
+            if (/^@supabase\/supabase-js\//.test(pkg)) return 'vendor-supabase'
           },
         },
       },
