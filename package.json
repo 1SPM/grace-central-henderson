@@ -13,6 +13,7 @@
     "dev:full": "npm run dev:api & npm run dev --workspace=apps/admin-web",
     "lint": "eslint . --max-warnings 0",
     "lint:rls": "tsx tools/lint-rls.ts",
+    "build": "npm run build --workspaces --if-present",
     "test": "vitest",
     "test:run": "vitest run && npm run test:run --workspaces --if-present",
     "test:coverage": "vitest run --coverage",
