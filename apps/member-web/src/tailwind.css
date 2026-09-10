@@ -1,0 +1,3 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+@import "@grace/platform-core/index.css";

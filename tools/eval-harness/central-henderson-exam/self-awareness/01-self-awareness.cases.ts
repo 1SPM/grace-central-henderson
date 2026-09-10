@@ -18,7 +18,7 @@
  * deterministic pass for something only a live model call could prove).
  */
 import { FIXTURE_STAFF_USER, FIXTURE_OTHER_CHURCH_ID } from '../../../../tests/fixtures/shared-platform.js';
-import { buildDataContext, type GraceData } from '../../../../src/contexts/GraceChatContext.js';
+import { buildDataContext, type GraceData } from '../../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor, mockClaudeStream } from '../../fixtures/_shared-chat-harness.js';
 import { pass, fail, dangerousFailure } from '../../scoring.js';
 import type { EvalCase } from '../../types.js';

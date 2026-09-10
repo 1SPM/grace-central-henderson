@@ -3,7 +3,7 @@
  * api/consents/_index.ts so it's unit-testable without a Supabase client.
  */
 
-import type { ConsentType, ConsentStatus } from '../../src/types/shared-platform.js';
+import type { ConsentType, ConsentStatus } from '../../packages/platform-core/src/shared-platform.js';
 
 export interface ConsentRow {
   consent_type: ConsentType;

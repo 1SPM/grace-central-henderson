@@ -31,7 +31,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { resolveMemberActor } from '../_lib/authz.js';
+import { resolveMemberActor, requireVerifiedIdentity } from '../_lib/authz.js';
 import { enforcePortalWriteLimit } from '../_lib/portalWriteRateLimit.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
@@ -66,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!member) return;
 
   if (req.method === 'GET') {
+    if (!requireVerifiedIdentity(res, member)) return;
     const { data: requests, error } = await supabase
       .from('care_requests')
       .select('id, category, status, crisis_flagged, created_at, resolved_at, care_assignments(id)')

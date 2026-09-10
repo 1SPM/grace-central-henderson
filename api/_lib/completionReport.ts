@@ -9,7 +9,7 @@
  * `include`) — see that file's "Work Order completion report" section.
  */
 
-import type { CompletionReport } from '../../src/types/shared-platform.js';
+import type { CompletionReport } from '../../packages/platform-core/src/shared-platform.js';
 
 export type { CompletionReport };
 

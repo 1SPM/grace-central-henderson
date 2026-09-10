@@ -226,7 +226,8 @@ From `SECURITY_AUDIT_REPORT.md` and `SECURITY_FINDINGS_STATUS.md`:
 - `api/ai/generate.ts`, `api/grace/draft-reply.ts` — HTTP entry points
 
 **Providers configured**
-- **Gemini** (`GEMINI_API_KEY`) — primary. `thinkingBudget: 0` enforced (commit `c28992f`) to prevent reply truncation.
+- **Claude/Anthropic** (`ANTHROPIC_API_KEY`) — powers both "Ask GRACE" surfaces: the staff assistant (`api/grace/_chat.ts`, ADR-014) and, as of the Phase 1 monorepo split, the Member Portal assistant (`api/portal/_assistant.ts` → `api/_lib/ai/assistant-runtime.ts`, via `callClaudeWithTools` in `api/_lib/ai/adapters/claude.ts`).
+- **Gemini** (`GEMINI_API_KEY`) — still used for other AI features: draft-reply, inbound-email classification, and AI video generation. `thinkingBudget: 0` enforced (commit `c28992f`) to prevent reply truncation. No longer used by either "Ask GRACE" surface.
 - **Hermes** (`HERMES_API_URL`, `HERMES_API_KEY`) — generic OpenAI-compatible adapter for self-hosted models. Off unless URL is set.
 
 **Patterns already proven in this codebase**

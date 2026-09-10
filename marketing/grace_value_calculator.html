@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRACE Value Calculator</title>
+<meta name="description" content="Explore GRACE's estimated operational value and the future potential of the GRACE Impact Card, with every assumption visible.">
+<meta property="og:title" content="GRACE Value Calculator">
+<meta property="og:description" content="A transparent model for GRACE operational value and future Impact Card potential. Every assumption is visible and editable.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://grace-value-calculator-eta.vercel.app/">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<!-- ARTIFACT-BODY-START -->
+<style>
+  :root {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-wash: #EFF6FF;
+    --revenue: #7C3AED; --revenue-wash: #F5F3FF;
+    --savings: #047857; --savings-wash: #ECFDF5;
+    --growth: #B45309; --growth-wash: #FFFBEB;
+    --focus: #2563EB;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+      --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+      --accent: #60A5FA; --accent-wash: rgba(96,165,250,.14);
+      --revenue: #C4B5FD; --revenue-wash: rgba(196,181,253,.12);
+      --savings: #34D399; --savings-wash: rgba(52,211,153,.10);
+      --growth: #FBBF24; --growth-wash: rgba(251,191,36,.10);
+      --focus: #60A5FA;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0B1220; --card: #16213A; --card-inset: #101A2E;
+    --ink: #F8FAFC; --ink-soft: #CBD5E1; --muted: #94A3B8; --line: #2C3A55;
+    --accent: #60A5FA; --accent-wash: rgba(96,165,250,.14);
+    --revenue: #C4B5FD; --revenue-wash: rgba(196,181,253,.12);
+    --savings: #34D399; --savings-wash: rgba(52,211,153,.10);
+    --growth: #FBBF24; --growth-wash: rgba(251,191,36,.10);
+    --focus: #60A5FA;
+  }
+  :root[data-theme="light"] {
+    --ground: #F6F8FB; --card: #FFFFFF; --card-inset: #F1F5F9;
+    --ink: #0F172A; --ink-soft: #334155; --muted: #64748B; --line: #E2E8F0;
+    --accent: #1E3A8A; --accent-wash: #EFF6FF;
+    --revenue: #7C3AED; --revenue-wash: #F5F3FF;
+    --savings: #047857; --savings-wash: #ECFDF5;
+    --growth: #B45309; --growth-wash: #FFFBEB;
+    --focus: #2563EB;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 60px 22px 80px; }
+
+  /* ---------- hero ---------- */
+  h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 300;
+    font-size: clamp(32px, 5.4vw, 48px); line-height: 1.1; margin: 0 0 12px; text-wrap: balance;
+    text-align: center;
+  }
+  .sub { color: var(--ink-soft); margin: 0 auto 34px; font-size: 17px; max-width: 46ch; text-align: center; }
+
+  /* one input that matters */
+  .people { max-width: 560px; margin: 0 auto 8px; text-align: center; }
+  .people label { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .people .pv {
+    font-family: "Fraunces", Georgia, serif; font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.1; margin: 2px 0 6px; color: var(--ink);
+  }
+  .people .pv small { font-size: .45em; color: var(--muted); font-family: inherit; }
+  input[type="range"].big {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 30px;
+    background: transparent; cursor: pointer; display: block;
+  }
+  input[type="range"].big::-webkit-slider-runnable-track {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, var(--accent) var(--fill, 50%), var(--line) var(--fill, 50%));
+  }
+  input[type="range"].big::-moz-range-track { height: 8px; border-radius: 4px; background: var(--line); }
+  input[type="range"].big::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--accent); }
+  input[type="range"].big::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 26px; height: 26px; margin-top: -9px;
+    border-radius: 50%; background: var(--card); border: 3px solid var(--accent);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  input[type="range"].big::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--card);
+    border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  input[type="range"].big:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+
+  /* the answer */
+  .total { text-align: center; padding: 26px 0 10px; }
+  .total .tl { font-size: 12.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .total .tv {
+    font-family: "Fraunces", Georgia, serif; font-weight: 400; color: var(--savings);
+    font-size: clamp(52px, 10vw, 88px); line-height: 1.05; margin: 4px 0 6px;
+  }
+  .total .ts { color: var(--ink-soft); font-size: 16px; max-width: 44ch; margin: 0 auto; }
+  .total .tc { color: var(--muted); font-size: 12.5px; max-width: 44ch; margin: 8px auto 0; }
+
+  /* ---------- ecosystem loop ---------- */
+  .loop { position: relative; margin: 40px auto 8px; max-width: 620px; }
+  .loop svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .loop .n { font-size: 13px; font-weight: 700; fill: var(--ink); }
+  .loop .d { font-size: 10.5px; fill: var(--muted); }
+  .loop .ring { stroke: var(--line); }
+  .loop .arrow {
+    fill: var(--accent);
+    offset-path: path('M112,158 A238,86 0 1,1 588,158 A238,86 0 1,1 112,158');
+  }
+  .loop .arrow.a1 { offset-distance: 0%; }
+  .loop .arrow.a2 { offset-distance: 25%; }
+  .loop .arrow.a3 { offset-distance: 50%; }
+  .loop .arrow.a4 { offset-distance: 75%; }
+  .loop .icon { color: var(--accent); transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  .loop .icon:hover { transform: scale(1.22); }
+  .loop .icon circle, .loop .icon path, .loop .icon rect, .loop .icon line {
+    fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .loop .hub { fill: var(--card-inset); stroke: var(--line); stroke-width: 1.2; }
+  .loop .church { color: var(--ink); }
+  .loop .church circle, .loop .church path, .loop .church line {
+    fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .loop .ring { animation: loop-dash-flow 12s linear infinite; }
+    .loop .arrow { offset-rotate: auto; animation: loop-orbit 12s linear infinite; }
+    .loop .arrow.a2 { animation-delay: -3s; }
+    .loop .arrow.a3 { animation-delay: -6s; }
+    .loop .arrow.a4 { animation-delay: -9s; }
+  }
+  @keyframes loop-dash-flow { to { stroke-dashoffset: -24; } }
+  @keyframes loop-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  .loop-notice {
+    position: absolute; left: 50%; top: 50%; max-width: 200px; z-index: 2;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 9px 13px; box-shadow: 0 8px 20px -8px rgba(0,0,0,.3);
+    opacity: 0; transform: translate(-50%, -50%) translateY(8px);
+    transition: opacity .4s ease, transform .4s ease, left .5s ease, top .5s ease;
+    pointer-events: none;
+  }
+  .loop-notice.show { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  .loop-notice .lnt { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--revenue); margin-bottom: 2px; }
+  .loop-notice .lnb { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { .loop-notice { transition: none; } }
+  @media (max-width: 560px) {
+    .loop-notice { position: static; max-width: none; left: auto; top: auto; margin: 14px auto 0; transform: none; }
+    .loop-notice.show { transform: none; }
+  }
+  .loop-cap {
+    text-align: center; color: var(--ink-soft); font-size: 16.5px; font-weight: 500;
+    line-height: 1.5; margin: 16px auto 40px; max-width: 54ch;
+  }
+  .loop-cap b { color: var(--accent); font-weight: 700; }
+
+  /* ---------- three outcomes ---------- */
+  .outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .oc {
+    border-radius: 16px; padding: 22px 20px 18px; background: var(--card);
+    border: 1px solid var(--line); border-top: 4px solid var(--line);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .oc.revenue { border-top-color: var(--revenue); }
+  .oc.savings { border-top-color: var(--savings); }
+  .oc.growth  { border-top-color: var(--growth); }
+  .oc .k { font-size: 11.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+  .oc.revenue .k { color: var(--revenue); }
+  .oc .badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--card-inset); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; }
+  .oc.savings .k { color: var(--savings); }
+  .oc.growth  .k { color: var(--growth); }
+  .oc .v { font-family: "Fraunces", Georgia, serif; font-size: clamp(30px, 4.5vw, 40px); line-height: 1.1; }
+  .oc.revenue .v { color: var(--revenue); }
+  .oc.savings .v { color: var(--savings); }
+  .oc.growth  .v { color: var(--growth); }
+  .oc .story { font-size: 14px; color: var(--ink-soft); margin: 2px 0 10px; flex: 1; }
+  .oc .how { font-size: 12.5px; color: var(--muted); border-top: 1px dotted var(--line); padding-top: 10px; }
+  .oc .how b { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  /* one dial per card */
+  .dial { margin-top: 10px; }
+  .dial .dl { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 2px; }
+  .dial .dl b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="range"].sm {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer; display: block;
+  }
+  input[type="range"].sm::-webkit-slider-runnable-track {
+    height: 5px; border-radius: 3px;
+    background: linear-gradient(to right, var(--dc, var(--accent)) var(--fill, 50%), var(--line) var(--fill, 50%));
+  }
+  input[type="range"].sm::-moz-range-track { height: 5px; border-radius: 3px; background: var(--line); }
+  input[type="range"].sm::-moz-range-progress { height: 5px; border-radius: 3px; background: var(--dc, var(--accent)); }
+  input[type="range"].sm::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 17px; height: 17px; margin-top: -6px;
+    border-radius: 50%; background: var(--card); border: 2.5px solid var(--dc, var(--accent));
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  input[type="range"].sm::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%; background: var(--card);
+    border: 2.5px solid var(--dc, var(--accent)); box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  input[type="range"].sm:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .oc.revenue .dial input { --dc: var(--revenue); }
+  .oc.savings .dial input { --dc: var(--savings); }
+  .oc.growth  .dial input { --dc: var(--growth); }
+
+  /* ---------- cta ---------- */
+  .ctaband { text-align: center; margin-top: 44px; }
+  .ctaband p { color: var(--ink-soft); font-size: 16px; max-width: 46ch; margin: 0 auto 16px; }
+  .cta {
+    display: inline-block; font: inherit; font-size: 15px; font-weight: 700; padding: 13px 28px;
+    border-radius: 12px; cursor: pointer; background: var(--ink); color: var(--ground);
+    border: 1px solid var(--ink); text-decoration: none;
+  }
+  .cta:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .ctaband .share {
+    display: block; margin: 12px auto 0; font: inherit; font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); background: none; border: none; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .ctaband .share:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* ---------- check the math ---------- */
+  details.mathcheck { margin: 40px auto 0; max-width: 620px; border-top: 1px solid var(--line); padding-top: 18px; }
+  details.mathcheck > summary {
+    cursor: pointer; font-weight: 700; font-size: 14.5px; list-style: none;
+    display: flex; align-items: center; justify-content: center; gap: 7px; padding: 4px 0; color: var(--ink-soft);
+  }
+  details.mathcheck > summary::-webkit-details-marker { display: none; }
+  details.mathcheck > summary::before { content: "▸"; color: var(--accent); font-size: 12px; }
+  details.mathcheck[open] > summary::before { content: "▾"; }
+  details.mathcheck > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .mathcheck-note { font-size: 13px; color: var(--muted); text-align: center; max-width: 50ch; margin: 10px auto 20px; }
+
+  .mgrp { margin-bottom: 14px; padding: 16px 18px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--line); }
+  .mgrp.revenue { border-left-color: var(--revenue); }
+  .mgrp.savings { border-left-color: var(--savings); }
+  .mgrp.growth  { border-left-color: var(--growth); }
+  .mgrp h4 { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 3px; }
+  .mgrp.revenue h4 { color: var(--revenue); }
+  .mgrp.savings h4 { color: var(--savings); }
+  .mgrp.growth  h4 { color: var(--growth); }
+  .mgrp .formula { font-size: 12.5px; color: var(--muted); margin: 0 0 10px; }
+  .mrow { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+          padding: 8px 0; border-top: 1px dotted var(--line); }
+  .mrow:first-of-type { border-top: none; }
+  .mrow label { font-size: 13.5px; color: var(--ink-soft); }
+  .mrow .mfield { position: relative; width: 108px; flex: none; }
+  .mrow .mfield input {
+    width: 100%; padding: 6px 26px 6px 8px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--card-inset); color: var(--ink); font: inherit; font-size: 13.5px;
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .mrow .mfield.pfx input { padding: 6px 30px 6px 20px; }
+  .mrow .mfield .u { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--muted); pointer-events: none; }
+  .mrow .mfield.pfx .u:first-child { left: 8px; right: auto; }
+  .mrow .mfield input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  footer.fine { margin-top: 52px; padding-top: 16px; border-top: 1px solid var(--line);
+                font-size: 12px; color: var(--muted); line-height: 1.55; text-align: center; }
+</style>
+
+<div class="wrap">
+
+  <h1>See the operating value. Inspect the assumptions.</h1>
+  <p class="sub">A planning model for church leaders who need to understand what drives the estimate before making a decision.</p>
+
+  <div class="people">
+    <label for="members">Your congregation</label>
+    <div class="pv num"><span id="membersOut">2,500</span> <small>people</small></div>
+    <input type="range" class="big" id="members" min="200" max="20000" step="100" value="2500" aria-label="Congregation size">
+  </div>
+
+  <div class="total">
+    <div class="tl">Illustrative operating value for your church</div>
+    <div class="tv num" id="totalOut">$0</div>
+    <p class="ts">per year in estimated staff capacity and giving engagement. The Impact Card is shown separately and excluded from this total.</p>
+    <p class="tc">This is a planning model, not a guarantee. Every assumption is visible below.</p>
+  </div>
+
+  <!-- ecosystem loop -->
+  <div class="loop" aria-hidden="true">
+    <svg viewBox="0 0 700 316">
+      <ellipse cx="350" cy="158" rx="238" ry="86" fill="none" class="ring" stroke-width="1.6" stroke-dasharray="6 6"/>
+      <!-- arrows travel the ring path, clockwise -->
+      <polygon class="arrow a1" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a2" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a3" points="-6,-5 8,0 -6,5"/>
+      <polygon class="arrow a4" points="-6,-5 8,0 -6,5"/>
+      <!-- the church, anchoring the ecosystem -->
+      <circle class="hub" cx="350" cy="158" r="27"/>
+      <svg class="church" x="333" y="141" width="34" height="34" viewBox="0 0 24 24">
+        <path d="M12 2v3"/><path d="M10.3 3.5h3.4"/>
+        <path d="M4 21V11l8-6 8 6v10"/><path d="M9 21v-6h6v6"/>
+      </svg>
+      <!-- node icons -->
+      <svg class="icon i1" x="339" y="15" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+      </svg>
+      <svg class="icon i2" x="586" y="106" width="22" height="22" viewBox="0 0 24 24">
+        <rect x="2" y="6" width="20" height="14" rx="2.5"/><line x1="2" y1="11" x2="22" y2="11"/>
+      </svg>
+      <svg class="icon i3" x="339" y="245" width="22" height="22" viewBox="0 0 24 24">
+        <path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2.3 5 6 5c2 0 3.5 1 4.5 2.3 1-1.3 2.5-2.3 4.5-2.3 3.7 0 5.5 3.5 4 6.7C19.5 16.4 12 21 12 21z"/>
+      </svg>
+      <svg class="icon i4" x="92" y="106" width="22" height="22" viewBox="0 0 24 24">
+        <path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M5.5 9A8 8 0 0 1 20 12"/><path d="M18.5 15A8 8 0 0 1 4 12"/>
+      </svg>
+      <!-- nodes -->
+      <g text-anchor="middle">
+        <text x="350" y="58" class="n">Your members</text>
+        <text x="597" y="156" class="n">Future card program</text>
+        <text x="597" y="172" class="d">subject to banking agreements</text>
+        <text x="350" y="296" class="n">Ministry funding</text>
+        <text x="103" y="156" class="n">Engagement &amp; agency</text>
+        <text x="103" y="172" class="d">members choose the impact</text>
+      </g>
+    </svg>
+    <div class="loop-notice" id="loopNotice" aria-hidden="true">
+      <div class="lnt">Example activity &middot; GRACE Impact Card</div>
+      <div class="lnb" id="loopNoticeText"></div>
+    </div>
+  </div>
+  <p class="loop-cap">If launched, the GRACE Impact Card would let members direct a share of eligible card economics toward <b>missions, youth, and benevolence</b>. It is a future program concept, not a live card product.</p>
+
+  <!-- three outcomes -->
+  <div class="outcomes">
+
+    <section class="oc revenue" aria-labelledby="ocR">
+      <span class="k" id="ocR">Impact Card potential</span><span class="badge">Projected · excluded from total · requires agreements</span>
+      <span class="v num" id="revOut">$0</span>
+      <p class="story">A potential future program for directing a share of eligible everyday card economics toward member-selected ministry initiatives. No bank, sponsorship, or program-management agreement is executed today.</p>
+      <div class="dial">
+        <div class="dl"><span>Potential active-card adoption</span><b><span id="adoptOut">15</span>%</b></div>
+        <input type="range" class="sm" id="adopt" min="0" max="60" step="1" value="15" aria-label="Potential share of members carrying the card">
+      </div>
+      <div class="how" id="revHow"></div>
+    </section>
+
+    <section class="oc savings" aria-labelledby="ocS">
+      <span class="k" id="ocS">Efficiency savings</span>
+      <span class="v num" id="savOut">$0</span>
+      <p class="story">GRACE automates data entry, scheduling, and follow-ups, and replaces the stack of software subscriptions your operating budget pays for today.</p>
+      <div class="dial">
+        <div class="dl"><span>Office &amp; admin staff</span><b><span id="fteOut">6</span> FTE</b></div>
+        <input type="range" class="sm" id="fte" min="1" max="40" step="1" value="6" aria-label="Office and admin staff">
+      </div>
+      <div class="how" id="savHow"></div>
+    </section>
+
+    <section class="oc growth" aria-labelledby="ocG">
+      <span class="k" id="ocG">Giving growth</span>
+      <span class="v num" id="groOut">$0</span>
+      <p class="story">Members with agency stay engaged. Seeing their generosity fund real, designated initiatives keeps your congregation engaged, giving, and growing.</p>
+      <div class="dial">
+        <div class="dl"><span>Annual giving today</span><b>$<span id="givingOut">5.0M</span></b></div>
+        <input type="range" class="sm" id="giving" min="100000" max="40000000" step="100000" value="5000000" aria-label="Annual giving">
+      </div>
+      <div class="how" id="groHow"></div>
+    </section>
+
+  </div>
+
+  <div class="ctaband">
+    <p>Explore the operational model and the future card concept. Every financial assumption remains visible and editable.</p>
+    <button type="button" class="cta" id="btnCta">See GRACE in action</button>
+    <button type="button" class="share" id="btnShare">Copy a link to this scenario</button>
+  </div>
+
+  <!-- check the math -->
+  <details class="mathcheck" id="mathDetails">
+    <summary>Check the math</summary>
+    <p class="mathcheck-note">Financial stewardship means showing our work, not just the results. Every number above comes from the assumptions below, and changing any of them moves the totals.</p>
+
+    <div class="mgrp revenue">
+      <h4>Impact Card potential <span class="badge">Excluded from headline</span></h4>
+      <p class="formula">Potential active cards &times; eligible everyday spend &times; estimated net share to the church &times; 12 months</p>
+      <div class="mrow">
+        <label for="mSpend">Everyday spend per account</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mSpend" type="number" min="0" step="25" value="500"><span class="u" style="left:auto;right:9px">/mo</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mCommission">Estimated net share to the church</label>
+        <div class="mfield"><input id="mCommission" type="number" min="0" max="5" step="0.05" value="0.5"><span class="u">%</span></div>
+      </div>
+    </div>
+
+    <div class="mgrp savings">
+      <h4>Efficiency savings</h4>
+      <p class="formula">(Admin staff &times; loaded cost &times; share automated) + (members &times; software replaced)</p>
+      <div class="mrow">
+        <label for="mLoaded">Loaded cost per staff member</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mLoaded" type="number" min="0" step="1000" value="65000"><span class="u" style="left:auto;right:9px">/yr</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mAutomated">Share of their work automated</label>
+        <div class="mfield"><input id="mAutomated" type="number" min="0" max="100" step="1" value="15"><span class="u">%</span></div>
+      </div>
+      <div class="mrow">
+        <label for="mSoftware">Software replaced, per member</label>
+        <div class="mfield pfx"><span class="u">$</span><input id="mSoftware" type="number" min="0" step="1" value="6"><span class="u" style="left:auto;right:9px">/yr</span></div>
+      </div>
+    </div>
+
+    <div class="mgrp growth">
+      <h4>Giving growth</h4>
+      <p class="formula">Annual giving today &times; the lift from an engaged, retained congregation</p>
+      <div class="mrow">
+        <label for="mLift">Engagement lift on giving</label>
+        <div class="mfield"><input id="mLift" type="number" min="0" max="20" step="0.5" value="2"><span class="u">%</span></div>
+      </div>
+    </div>
+  </details>
+
+  <footer class="fine">
+    Illustrative estimates based on your inputs and GRACE planning assumptions. Staff capacity and giving engagement are estimates, not guarantees. Impact Card potential is excluded from the headline and requires executed banking, sponsorship, and program-management agreements before it can become a live program. Actual results vary by congregation.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // The model, kept deliberately simple:
+  //   Card potential = members × card adoption × everyday spend × estimated net share
+  //   Savings       = admin staff × loaded cost × share automated + software replaced
+  //   Giving growth = annual giving × engagement lift
+  // Card potential is intentionally excluded from the headline until the program is contracted.
+  // Every assumption is editable under "Check the math."
+  var DEFAULTS = {
+    mSpend: 500, mCommission: 0.5, mLoaded: 65000, mAutomated: 15, mSoftware: 6, mLift: 2
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function assumption(id) {
+    var el = $(id);
+    var n = el ? parseFloat(el.value) : NaN;
+    return isFinite(n) && n >= 0 ? n : DEFAULTS[id];
+  }
+  function fmt(n) {
+    if (n >= 1e6) return '$' + (Math.round(n / 1e5) / 10).toLocaleString('en-US') + 'M';
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+  function fmtM(n) { return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : Math.round(n / 1000) + 'k'; }
+  function track(name, field) {
+    var p = { event: name }; if (field) p.field = field;
+    (window.dataLayer = window.dataLayer || []).push(p);
+  }
+
+  function paintFill(r) {
+    var min = parseFloat(r.min), max = parseFloat(r.max), v = parseFloat(r.value);
+    var f = max > min ? (v - min) / (max - min) * 100 : 0;
+    r.style.setProperty('--fill', Math.max(0, Math.min(100, f)) + '%');
+  }
+
+  // members drives sensible defaults for the other two dials until touched
+  var touched = { fte: false, giving: false };
+
+  // --- personalization + shareable scenario state --------------------------
+  var qs = new URLSearchParams(window.location.search);
+  var churchName = (qs.get('church') || '').trim().slice(0, 40);
+  // headline stays generic — only the tab title personalizes
+  if (churchName) {
+    document.title = churchName + ' · GRACE Value Calculator';
+  }
+
+  function scenarioUrl() {
+    var p = new URLSearchParams();
+    if (churchName) p.set('church', churchName);
+    p.set('m', $('members').value);
+    p.set('a', $('adopt').value);
+    p.set('f', $('fte').value);
+    p.set('g', $('giving').value);
+    return window.location.origin + window.location.pathname + '?' + p.toString();
+  }
+  var urlTimer;
+  function syncUrl() {
+    clearTimeout(urlTimer);
+    urlTimer = setTimeout(function () {
+      try { history.replaceState(null, '', scenarioUrl()); } catch (e) { /* file:// contexts can refuse */ }
+    }, 250);
+  }
+
+  // --- count-up on the headline total --------------------------------------
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var shownTotal = null;
+  function setTotal(target) {
+    var el = $('totalOut');
+    if (shownTotal === null || REDUCED) { shownTotal = target; el.textContent = fmt(target); return; }
+    var from = shownTotal, t0 = performance.now();
+    shownTotal = target;
+    function step(now) {
+      if (shownTotal !== target) return;            // a newer animation took over
+      var k = Math.min(1, (now - t0) / 350);
+      k = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(from + (target - from) * k);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function render() {
+    var members = parseFloat($('members').value);
+    var adopt = parseFloat($('adopt').value) / 100;
+    var fte = parseFloat($('fte').value);
+    var giving = parseFloat($('giving').value);
+
+    var spendPerAccount = assumption('mSpend');
+    var netShare = assumption('mCommission') / 100;
+    var loaded = assumption('mLoaded');
+    var automated = assumption('mAutomated') / 100;
+    var softwarePerMember = assumption('mSoftware');
+    var lift = assumption('mLift') / 100;
+
+    var accounts = members * adopt;
+    var revenue = accounts * spendPerAccount * 12 * netShare;
+    var savings = fte * loaded * automated + members * softwarePerMember;
+    var growth = giving * lift;
+    var total = savings + growth;
+
+    $('membersOut').textContent = members.toLocaleString('en-US');
+    setTotal(total);
+    $('revOut').textContent = fmt(revenue);
+    $('savOut').textContent = fmt(savings);
+    $('groOut').textContent = fmt(growth);
+    $('adoptOut').textContent = Math.round(adopt * 100);
+    $('fteOut').textContent = fte;
+    $('givingOut').textContent = fmtM(giving);
+
+    $('revHow').innerHTML = '<b>' + Math.round(accounts).toLocaleString('en-US') + ' members</b> × <b>$' +
+      spendPerAccount + '/mo</b> eligible spend × <b>' + assumption('mCommission') + '%</b> estimated net share';
+    $('savHow').innerHTML = '<b>' + fte + ' staff</b> × ' + assumption('mAutomated') + '% of their week automated, plus <b>' +
+      fmt(members * softwarePerMember) + '/yr</b> of software replaced';
+    $('groHow').innerHTML = '<b>' + assumption('mLift') + '% lift</b> on <b>' + fmt(giving) + '</b> from engaged, retained members';
+
+    ['members', 'adopt', 'fte', 'giving'].forEach(function (id) { paintFill($(id)); });
+  }
+
+  $('members').addEventListener('input', function () {
+    var m = parseFloat(this.value);
+    // scale companion dials with congregation size until the user takes over
+    if (!touched.fte) $('fte').value = Math.max(1, Math.round(m / 400));
+    if (!touched.giving) $('giving').value = Math.round(m * 2000 / 100000) * 100000;
+    track('assumption_changed', 'members');
+    render();
+    syncUrl();
+  });
+  $('adopt').addEventListener('input', function () { track('assumption_changed', 'adoption'); render(); syncUrl(); });
+  $('fte').addEventListener('input', function () { touched.fte = true; track('assumption_changed', 'fte'); render(); syncUrl(); });
+  $('giving').addEventListener('input', function () { touched.giving = true; track('assumption_changed', 'giving'); render(); syncUrl(); });
+
+  Object.keys(DEFAULTS).forEach(function (id) {
+    var el = $(id);
+    if (el) el.addEventListener('input', function () { track('math_assumption_changed', id); render(); });
+  });
+  var mathDetails = $('mathDetails');
+  if (mathDetails) {
+    mathDetails.addEventListener('toggle', function () { if (this.open) track('math_opened'); });
+  }
+
+  // TODO(Phase 1 M8): grace-crm-two.vercel.app was admin's white-label demo
+  // domain — previews/marketing no longer live there at all (moved to their
+  // own destination, M7). Point this at marketing's real deployed domain
+  // once it exists; path below already reflects the new tenants/ layout.
+  var DEMO_URL = 'https://grace-crm-two.vercel.app/tenants/faithful/member-portal.html';
+  $('btnCta').addEventListener('click', function () {
+    track('demo_requested', 'ecosystem_calculator');
+    window.open(DEMO_URL, '_blank', 'noopener');
+  });
+
+  $('btnShare').addEventListener('click', function () {
+    var self = this;
+    function done() { self.textContent = 'Link copied ✓'; setTimeout(function () { self.textContent = 'Copy a link to this scenario'; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(scenarioUrl()).then(done, done); } else { done(); }
+    track('scenario_shared');
+  });
+
+  // restore a shared scenario from the URL, then let members-scaling fill the rest
+  function qnum(k) { var v = parseFloat(qs.get(k)); return isFinite(v) ? v : null; }
+  var q;
+  if ((q = qnum('m')) !== null) $('members').value = Math.max(200, Math.min(20000, q));
+  if ((q = qnum('a')) !== null) $('adopt').value = Math.max(0, Math.min(60, q));
+  if ((q = qnum('f')) !== null) { $('fte').value = Math.max(1, Math.min(40, q)); touched.fte = true; }
+  if ((q = qnum('g')) !== null) { $('giving').value = Math.max(100000, Math.min(40000000, q)); touched.giving = true; }
+  if (!touched.fte) $('fte').value = Math.max(1, Math.round(parseFloat($('members').value) / 400));
+  if (!touched.giving) $('giving').value = Math.round(parseFloat($('members').value) * 2000 / 100000) * 100000;
+
+  // --- periodic program-concept notice --------------------------------------
+  // These describe possible use cases only. They are not live transactions.
+  var ACTIVITY_EXAMPLES = [
+    { text: 'Potential member-selected support for Food Pantry', x: 78, y: 22 },
+    { text: 'Potential member-selected support for Youth Ministry', x: 78, y: 78 },
+    { text: 'Potential member-selected support for Missions', x: 22, y: 78 },
+    { text: 'Potential member-selected support for Benevolence', x: 22, y: 22 }
+  ];
+  (function () {
+    var el = $('loopNotice'), textEl = $('loopNoticeText');
+    if (!el || !textEl) return;
+    var i = 0;
+    function cycle() {
+      var item = ACTIVITY_EXAMPLES[i % ACTIVITY_EXAMPLES.length];
+      textEl.textContent = item.text;
+      el.style.left = item.x + '%';
+      el.style.top = item.y + '%';
+      i++;
+      el.classList.add('show');
+      setTimeout(function () { el.classList.remove('show'); }, 4200);
+    }
+    setTimeout(cycle, 1800);
+    setInterval(cycle, 6800);
+  })();
+
+  render();
+  track('calculator_started');
+})();
+</script>
+<!-- ARTIFACT-BODY-END -->
+</body>
+</html>

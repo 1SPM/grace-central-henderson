@@ -69,6 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     greeting_name: person?.first_name ?? 'friend',
+    identity_verified: member.identityVerified,
     upcoming_events: eventsWithRsvp,
     onboarding: { steps, current_step: nextStep },
     group_activity: { count: (myGroups ?? []).length, groups: (myGroups ?? []).map(g => ({ id: g.group_id, name: (g as unknown as { small_groups: { name: string } | null }).small_groups?.name ?? 'Group' })) },

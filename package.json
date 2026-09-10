@@ -1,21 +1,23 @@
 {
-  "name": "grace-crm",
+  "name": "grace-platform",
   "version": "1.0.0",
   "description": "GRACE - Growth, Relationships, Attendance, Community, Engagement. Church CRM that never loses a visitor.",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
     "dev:api": "tsx --env-file=.env.local api/_server.ts",
-    "dev:full": "npm run dev:api & npm run dev",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
-    "preview": "vite preview",
+    "dev:full": "npm run dev:api & npm run dev --workspace=apps/admin-web",
     "lint": "eslint . --max-warnings 0",
     "lint:rls": "tsx tools/lint-rls.ts",
+    "build": "npm run build --workspaces --if-present",
     "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:run": "vitest run && npm run test:run --workspaces --if-present",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",

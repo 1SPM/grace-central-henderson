@@ -317,6 +317,50 @@
   2. If recipient bounced, mark in `people.communication_status` so we don't keep trying.
 - **Root-cause fix:** wire bounce webhooks so we mark bad addresses automatically.
 
+### RB-017 — Vercel project configuration (Phase 1 monorepo split)
+
+- **Type:** planned procedure (not an incident). Reference for the `grace-admin` / `grace-members` Vercel project setup, and what to check if a deploy builds the wrong app or a cron fires twice.
+- **Why `vercel.json` has no `buildCommand`/`outputDirectory`/`crons`:** both Vercel projects set **Root Directory = repo root** (`.`) so they can both see the single shared `api/` folder — Vercel's `/api` Functions convention and any `functions` glob in `vercel.json` resolve relative to Root Directory, and cannot reach outside it (confirmed against Vercel's own docs; the "Include source files outside of the Root Directory" toggle only affects install/build file visibility, not where Functions are detected). Since both projects read the *same* `vercel.json`, anything in that file applies identically to both — so build/output config and crons, which must differ per project, cannot live there.
+- **Required per-project Dashboard settings** (Project Settings → General → Build & Development Settings, toggle "Override" on each):
+  | Setting | `grace-admin` | `grace-members` |
+  |---|---|---|
+  | Root Directory | `.` (repo root) | `.` (repo root) |
+  | Build Command | `npm run build --workspace=apps/admin-web` | `npm run build --workspace=apps/member-web` |
+  | Output Directory | `apps/admin-web/dist` | `apps/member-web/dist` |
+  | Include source files outside Root Directory | on (needed for `npm install` to resolve the npm workspace) | on |
+- **Cron jobs — `grace-admin` project ONLY** (Project Settings → Cron Jobs, added manually — do not add these to `vercel.json`, and do not add them to `grace-members`, or every cron double-fires against the same Supabase data):
+  | Path | Schedule |
+  |---|---|
+  | `/api/cron/ai-anomaly` | `0 5 * * *` |
+  | `/api/cron/reconcile-stripe` | `0 6 * * *` |
+  | `/api/cron/workos-agents` | `30 6 * * *` |
+  | `/api/cron/agents` | `0 7 * * *` |
+  | `/api/cron/send-pending-emails` | `0 8 * * *` |
+  | `/api/cron/notify` | `*/15 * * * *` |
+- **First check if a deploy looks wrong:** confirm which project's dashboard settings actually have "Override" toggled on — an untoggled override silently falls back to `vercel.json`/framework defaults (no build command, no output directory found), which looks like a build failure but is actually a missing override.
+- **First check if a cron double-fires:** Project Settings → Cron Jobs on *both* projects — the schedule should exist only under `grace-admin`.
+- **`grace-members`' CSP is not yet split off in `vercel.json`.** The shared `headers` block still carries `grace-admin`'s full CSP (Twilio, D-ID, LaunchDarkly, Resend origins `grace-members` never calls) — harmless today since Vercel headers apply per-request, but not minimal. Headers *can* be scoped per app within the one shared file the same way `redirects` already scopes by host (`"has": [{"type": "host", "value": "..."}]`) — but that requires `grace-members`' real production hostname, which doesn't exist until its domain is chosen at cutover. Audited trimmed CSP, ready to add as a host-conditional header block once that hostname is known (dev-mode equivalent already live in `apps/member-web/vite.config.ts`):
+  ```
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.i.posthog.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: https: blob:;
+  connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.clerk.accounts.dev wss://*.supabase.co https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://*.i.posthog.com;
+  frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev;
+  frame-ancestors 'none';
+  ```
+  Deliberately excluded vs. admin's CSP: Twilio, Resend, D-ID, LaunchDarkly, Cloudflare Turnstile (no evidence any portal code path calls these — Clerk's own bot protection doesn't need a CSP entry for it). If a Clerk custom/satellite domain gets configured for the member app (mirroring admin's `clerk.gracecrm-centralhenderson.org` pattern), add it explicitly rather than widening the wildcard.
+- **`grace-members`' Production Branch tracking does not reliably stay set to `phase1-monorepo-split`.** Its Production Deployment defaults to (and has silently reverted back to) `main` — visible as "To update your Production Deployment, push to the main branch" on the Overview page — even after explicitly changing it under Settings → Environments → Production → Branch Tracking. Since `main` doesn't have the monorepo split yet (merging it is a deliberate, still-pending step — see the M8 cutover notes), a push to `phase1-monorepo-split` only produces a **Preview** deployment; Production keeps serving whatever commit was last manually promoted.
+  - **First check after every push you expect to go live:** the Overview page's Production Deployment commit SHA/message. If it doesn't match your latest commit, it wasn't promoted.
+  - **Fix, every time this happens:** Deployments (or the Active Branches list on Overview) → find the `phase1-monorepo-split` deployment for your commit → "..." → **Promote to Production**. Don't rely on Branch Tracking alone until it's confirmed to hold across a full push-deploy cycle.
+  - **Cheap way to confirm a promote actually took**, without waiting on a full `/api/health` diff: hit an endpoint that only exists in the new commit and check you get that route's own auth/validation error (e.g. a 401 from a route requiring a bearer token) rather than the dispatcher's generic `{"error":"Not found"}` (`api/[...path].ts`) — a 404 there means Production is still on an older commit.
+- **The Member Portal's GRACE assistant now runs on Claude, not Gemini** — `api/portal/_assistant.ts` requires `ANTHROPIC_API_KEY` (same variable the staff Ask GRACE chat already used), not `GEMINI_API_KEY`. Both Vercel projects deploy the same `api/`, so both need `ANTHROPIC_API_KEY` set. `GEMINI_API_KEY` is still required for other, unrelated AI features (draft-reply, inbound-email classification, AI video generation) — don't remove it.
+- **A newly-created project's auto-imported "Sensitive" env vars can look present but be empty.** When Vercel auto-copies variables during cross-project linking (e.g. creating `grace-members` from an already-linked repo), a variable whose Type is "Sensitive" copies its *name* but not its *value* — Sensitive values are write-only and can't be read back out, even by the project owner. Symptom: `/api/health` shows `false` for a service whose env var visibly exists in the dashboard. Fix: don't add a new entry (it'll conflict as "already exists") — open the existing entry (check its "Added ⏱ ago" timestamp to find the original one if duplicates exist) and edit its value in place, then redeploy. Verify with `curl https://<project>.vercel.app/api/health`.
+- **`marketing/` (previews/demo collateral, Phase 1 M7) still needs its own deployment.** It was pulled out of both apps entirely — `apps/admin-web`'s build no longer copies or serves any of it — but it isn't deployed anywhere yet. Recommendation (per the Phase 1 plan): its own lightweight Vercel project, since it's sales/demo collateral, not product. Two things `vercel.json` used to carry for these files that will need to move with them wherever they land:
+  - Two per-file headers (`X-Frame-Options: SAMEORIGIN`, `Content-Security-Policy: frame-ancestors 'self'`) for the two members-card pages (now `marketing/tenants/{central-henderson,faithful}/members-card.html`) — they were built to be framed/embedded, so whatever serves them needs the same headers or they'll refuse to render in an iframe.
+  - The legacy redirect `/previews/grace_central_henderson_members_card_ios_app.html` → the card page — removed as dead (both sides of that redirect referenced files that no longer exist in this repo's Vercel-deployed apps); recreate only if something external still links to that old path.
+
 ---
 
 ### RB-057 — Applying the RLS role-gating migrations (056 P0, 057 P1a)

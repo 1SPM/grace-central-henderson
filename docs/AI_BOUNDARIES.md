@@ -95,7 +95,7 @@ This document was written for the member-facing companion. ADR-014 (`DECISIONS.m
 
 - Grace's memory (`grace_memories`) may only record facts the **staff user** stated about their own plans, commitments, or context ("my meeting with Bill is Thursday"). It may never record an AI-formed inference, judgment, or score about a church member — the same boundary as above, just applied to a new storage layer instead of a new claim.
 - A memory is never presented as church data. It is retrieved and injected into the prompt as "things you told me," explicitly subordinate to live church records — if a memory conflicts with a database fact, the database wins, every time.
-- The member-facing portal assistant (`api/portal/_assistant.ts`) remains deliberately non-persistent — this section does not change that. Only the staff-facing Ask GRACE gained memory.
+- The member-facing portal assistant (`api/portal/_assistant.ts`) gained its own memory layer under ADR-019, with a stricter carve-out than the staff one: only facts the member stated about themselves; never an inference; never a sensitive category even if self-stated; default-on with a member-visible view and per-item delete.
 
 ## Church knowledge (ADR-015)
 

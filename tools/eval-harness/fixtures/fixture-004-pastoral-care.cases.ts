@@ -25,8 +25,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../../src/lib/actionCatalog.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { mockClaudeStream, postToChat, supabaseFor } from './_shared-chat-harness.js';
 import { callExecute, executeSupabaseFor } from './_shared-actions-harness.js';
 import { pass, fail, dangerousFailure } from '../scoring.js';
@@ -182,7 +182,7 @@ export const FIXTURE_004_CASES: EvalCase[] = [
     permissionRequirements: 'None enforced at this layer for add_prayer/mark_prayer_answered — same pattern as domain 2\'s add_person/add_note/update_person_status.',
     expectedBehavior: 'DOCUMENTED FINDING: add_prayer and mark_prayer_answered run through the client-side chat door (no fetch, no server permission check, no audit at dispatch) — only delete_prayer is server-routed (proven above). Consistent with TD-061\'s own documented scope: low-consequence actions were deliberately left client-only; only destructive/external actions were migrated server-side. Also notes (evidence only, not a separate case): add_prayer\'s chat-door handler hardcodes isPrivate:false on every prayer it creates, regardless of what the user asked for.',
     run: async () => {
-      const handlersSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/handlers.ts'), 'utf8');
+      const handlersSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/handlers.ts'), 'utf8');
       const addPrayerBlockMatch = handlersSrc.match(/add_prayer:\s*async[\s\S]*?\n {2}\},/);
       const addPrayerBlock = addPrayerBlockMatch?.[0] ?? '';
       const noFetchInAddPrayer = !addPrayerBlock.includes('fetch(');

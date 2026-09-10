@@ -5,7 +5,7 @@
  * service times) — the research shows nothing else exists.
  */
 import { FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
 import { postToChat, supabaseFor, mockClaudeStream } from '../fixtures/_shared-chat-harness.js';
 import { pass, fail } from '../scoring.js';
 import type { EvalCase } from '../types.js';

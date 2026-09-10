@@ -54,12 +54,21 @@ export default tseslint.config(
     },
   },
   {
+    // Paths are matched from the repo root. The Phase-1 monorepo split moved
+    // every app one level down (apps/<app>/…), which silently un-ignored the
+    // build output and the static browser scripts — the same stale-path class
+    // that broke the security-smoke CI step and the app test globs.
     ignores: [
-      'dist/**',
+      '**/dist/**',
       'node_modules/**',
       '*.config.js',
       'previews/**',
-      'public/grace-links.js',
+      // Served verbatim to browsers via <script>, not part of the TS module
+      // graph: no bundler, no module scope, browser globals by design.
+      '**/public/**/*.js',
+      // marketing/ holds the same static browser scripts (the split's
+      // source-of-truth copies of what apps/*/public/shared serves).
+      'marketing/**/*.js',
       'grace-duotone-icons.js',
       'api/**/*.js',
     ],

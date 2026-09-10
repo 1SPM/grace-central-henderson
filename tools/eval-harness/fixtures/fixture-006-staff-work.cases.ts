@@ -23,12 +23,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../../src/lib/actionCatalog.js';
-import { buildDataContext, type GraceData } from '../../../src/contexts/GraceChatContext.js';
-import { isOverdueTasksQuery, getOverdueTasks, formatOverdueTasksResponse } from '../../../src/lib/grace-actions.js';
+import { findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
+import { buildDataContext, type GraceData } from '../../../apps/admin-web/src/contexts/GraceChatContext.js';
+import { isOverdueTasksQuery, getOverdueTasks, formatOverdueTasksResponse } from '../../../apps/admin-web/src/lib/grace-actions.js';
 import { pass, fail } from '../scoring.js';
 import type { EvalCase } from '../types.js';
-import type { Task } from '../../../src/types.js';
+import type { Task } from '../../../apps/admin-web/src/types.js';
 
 const FIXTURE = 'fixture-006-staff-work';
 const TENANT = { churchId: FIXTURE_CHURCH_ID, label: 'Central Henderson' };
@@ -133,7 +133,7 @@ export const FIXTURE_006_CASES: EvalCase[] = [
     permissionRequirements: 'None enforced at this layer for add_task/mark_task_done/update_task — same chat-door pattern as domains 2/4. delete_task IS server-routed (proven extensively by Fixture #002, cross-referenced not re-tested here: gov-remember-provenance, gov-act-execute-and-propose-happy-path).',
     expectedBehavior: 'DOCUMENTED FINDING: add_task, mark_task_done, and update_task run through the client-side chat door with no fetch/server permission check/audit at dispatch — only delete_task is server-routed.',
     run: async () => {
-      const handlersSrc = readFileSync(join(process.cwd(), 'src/lib/grace-chat/handlers.ts'), 'utf8');
+      const handlersSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/grace-chat/handlers.ts'), 'utf8');
       const checks = ['add_task', 'mark_task_done', 'update_task'].map(type => {
         const blockMatch = handlersSrc.match(new RegExp(`${type}:\\s*async[\\s\\S]*?\\n {2}\\},`));
         const block = blockMatch?.[0] ?? '';

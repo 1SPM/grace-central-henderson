@@ -22,7 +22,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { requireClerkAuth, type AuthOk } from '../_lib/auth-helper.js';
-import { resolveMemberActor } from '../_lib/authz.js';
+import { resolveMemberActor, requireVerifiedIdentity, isIdentityVerifiedForClerkUser } from '../_lib/authz.js';
 import { requirePlanGate } from '../_lib/billing/gates.js';
 import { readBody, str, int_ } from '../_lib/validation.js';
 import { getI2cAdapter, type I2cAdapter } from '../_lib/i2c/index.js';
@@ -346,6 +346,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET' && resource === 'me') {
       const member = await resolveMemberActor(req, res, supabase);
       if (!member) return; // resolveMemberActor already wrote the error response
+      if (!requireVerifiedIdentity(res, member)) return;
       const memberGate = await requirePlanGate(member.churchId, 'cardProgram', supabase);
       if (!memberGate.ok) {
         return res.status(memberGate.status).json({
@@ -381,6 +382,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const resource = String(req.query.resource ?? 'me');
 
     if (resource === 'me') {
+      if (!(await isIdentityVerifiedForClerkUser(supabase, auth.churchId, auth.clerkUserId))) {
+        return res.status(403).json({
+          error: 'pending_verification',
+          detail: 'Your account is still being reviewed by church staff. This information will be available once that review is complete.',
+        });
+      }
       return res.status(200).json(await buildMePayload(supabase, adapter, auth));
     }
 

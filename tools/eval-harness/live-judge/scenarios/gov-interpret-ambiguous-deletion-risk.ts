@@ -22,7 +22,7 @@
  * must target situational judgment, never personal judgment.
  */
 import type { LiveJudgeCase } from '../types.js';
-import type { GraceData } from '../../../../src/contexts/GraceChatContext.js';
+import type { GraceData } from '../../../../apps/admin-web/src/contexts/GraceChatContext.js';
 
 // buildDataContext never lists a person by name from a bare `people` array
 // — a name only reaches the prompt via one of the specific composed lines

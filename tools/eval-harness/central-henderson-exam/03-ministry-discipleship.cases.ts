@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FIXTURE_STAFF_USER } from '../../../tests/fixtures/shared-platform.js';
-import { findAction } from '../../../src/lib/actionCatalog.js';
+import { findAction } from '../../../apps/admin-web/src/lib/actionCatalog.js';
 import { pass, fail } from '../scoring.js';
 import type { EvalCase } from '../types.js';
 import { HENDERSON_CHURCH_ID } from './_henderson-knowledge-seed.js';
@@ -37,10 +37,10 @@ export const MINISTRY_DISCIPLESHIP_CASES: EvalCase[] = [
     permissionRequirements: 'Group-activity stats reaching the prompt come from a zero-argument demo-data function, not any per-church query — indistinguishable from real data in the prompt, but fabricated for every church including Central Henderson.',
     expectedBehavior: 'DOCUMENTED FINDING: buildDataContext calls getDemoCommunityDataForCRM() with zero arguments to compute group-activity stats — that function itself takes zero parameters, so it structurally cannot vary by church. A real per-church path (fetchCommunityPosts(churchId,...)) exists but is not used here.',
     run: async () => {
-      const contextSrc = readFileSync(join(process.cwd(), 'src/contexts/GraceChatContext.tsx'), 'utf8');
+      const contextSrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/contexts/GraceChatContext.tsx'), 'utf8');
       const callSiteMatch = contextSrc.match(/getDemoCommunityDataForCRM\([^)]*\)/);
       const callSiteHasNoArgs = callSiteMatch?.[0] === 'getDemoCommunityDataForCRM()';
-      const communitySrc = readFileSync(join(process.cwd(), 'src/lib/services/community.ts'), 'utf8');
+      const communitySrc = readFileSync(join(process.cwd(), 'apps/admin-web/src/lib/services/community.ts'), 'utf8');
       const fnSignatureMatch = communitySrc.match(/export function getDemoCommunityDataForCRM\([^)]*\)/);
       const fnTakesNoParams = fnSignatureMatch?.[0] === 'export function getDemoCommunityDataForCRM()';
       const realPathExists = communitySrc.includes('fetchCommunityPosts');
