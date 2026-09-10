@@ -46,6 +46,11 @@ Outer systems on the intelligence page are labeled live / partial / later. Do no
 
 Hub pages load [`public/grace-links.js`](../public/grace-links.js) so button targets stay in sync with this document.
 
-## GitHub Pages (static preview)
+## Retired: GitHub Pages static preview
 
-https://1spm.github.io/grace-central-henderson/ — legacy static preview; production uses Vercel URLs above.
+`https://1spm.github.io/grace-central-henderson/` was a legacy static preview,
+superseded by the Vercel URLs above. Its workflow (`.github/workflows/pages.yml`)
+was **removed on 2026-09-10**: it still required `previews/*` paths the Phase-1
+monorepo split deleted, so it could never pass again, and its deploy step
+published the whole repository root as a website. The already-published site may
+remain reachable until GitHub Pages is disabled for the repository.

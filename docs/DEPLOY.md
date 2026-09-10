@@ -87,6 +87,6 @@ Manual UX checks:
 
 1. **CRM** — `#/dashboard` → Ask Grace → speak icon → smooth Rachel voice; header shows **Neural voice**
 2. **Member portal** — open GRACE companion orb → panel header shows **Neural voice**
-3. **GitHub Pages** — browser voice only (no API); expected
+3. **Any host without the TTS API** — browser voice only; expected
 
 If health returns `"ok":false`, set or rotate `ELEVENLABS_API_KEY` in Vercel → Settings → Environment Variables, then redeploy.
