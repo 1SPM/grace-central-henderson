@@ -29,14 +29,22 @@ export type FieldValidator<T> = (input: unknown, field: string) => FieldResult<T
 
 // ---- Primitive validators ---------------------------------------------
 
-export function str(opts: {
+export type StrOpts = {
   min?: number;
   max?: number;
   required?: boolean;
   pattern?: RegExp;
   /** Trim before validation; the trimmed value is what's returned. */
   trim?: boolean;
-} = {}): FieldValidator<string | undefined> {
+};
+
+// `required: true` is enforced at runtime — the validator rejects undefined and
+// the empty string — but the single signature returned `string | undefined`
+// regardless, so every caller reading a required field was a type error.
+// These overloads let the flag reach the type.
+export function str(opts: StrOpts & { required: true }): FieldValidator<string>;
+export function str(opts?: StrOpts): FieldValidator<string | undefined>;
+export function str(opts: StrOpts = {}): FieldValidator<string | undefined> {
   const trim = opts.trim ?? true;
   return (input, field) => {
     if (input === undefined || input === null) {
@@ -69,6 +77,8 @@ export function str(opts: {
 /** RFC 5321 caps email at 320 chars; RFC 5322 has a permissive grammar. We do a pragmatic check. */
 const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
+export function email_(opts: { max?: number; required?: boolean } & { required: true }): FieldValidator<string>;
+export function email_(opts?: { max?: number; required?: boolean }): FieldValidator<string | undefined>;
 export function email_(opts: { max?: number; required?: boolean } = {}): FieldValidator<string | undefined> {
   const max = opts.max ?? 320;
   return (input, field) => {
@@ -83,6 +93,8 @@ export function email_(opts: { max?: number; required?: boolean } = {}): FieldVa
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export function uuid_(opts: { required?: boolean } & { required: true }): FieldValidator<string>;
+export function uuid_(opts?: { required?: boolean }): FieldValidator<string | undefined>;
 export function uuid_(opts: { required?: boolean } = {}): FieldValidator<string | undefined> {
   return (input, field) => {
     if (input === undefined || input === null) {
@@ -96,6 +108,8 @@ export function uuid_(opts: { required?: boolean } = {}): FieldValidator<string 
   };
 }
 
+export function bool_(opts: { required?: boolean } & { required: true }): FieldValidator<boolean>;
+export function bool_(opts?: { required?: boolean }): FieldValidator<boolean | undefined>;
 export function bool_(opts: { required?: boolean } = {}): FieldValidator<boolean | undefined> {
   return (input, field) => {
     if (input === undefined || input === null) {
@@ -109,6 +123,8 @@ export function bool_(opts: { required?: boolean } = {}): FieldValidator<boolean
   };
 }
 
+export function int_(opts: { min?: number; max?: number; required?: boolean } & { required: true }): FieldValidator<number>;
+export function int_(opts?: { min?: number; max?: number; required?: boolean }): FieldValidator<number | undefined>;
 export function int_(opts: { min?: number; max?: number; required?: boolean } = {}): FieldValidator<number | undefined> {
   return (input, field) => {
     if (input === undefined || input === null) {
@@ -128,6 +144,8 @@ export function int_(opts: { min?: number; max?: number; required?: boolean } = 
   };
 }
 
+export function num_(opts: { min?: number; max?: number; required?: boolean } & { required: true }): FieldValidator<number>;
+export function num_(opts?: { min?: number; max?: number; required?: boolean }): FieldValidator<number | undefined>;
 export function num_(opts: { min?: number; max?: number; required?: boolean } = {}): FieldValidator<number | undefined> {
   return (input, field) => {
     if (input === undefined || input === null) {

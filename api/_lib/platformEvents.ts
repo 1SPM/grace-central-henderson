@@ -58,6 +58,13 @@ export type PlatformEventType =
   | 'agent_finding.triaged'
   | 'agent_finding.dismissed'
   | 'agent_finding.resolved'
+  // Emitted in code but missing from this union until 2026-09-10, so every
+  // emit site was a type error. platform_events.event_type is plain TEXT with
+  // no CHECK constraint, so these have always been written successfully.
+  | 'agent.sweep.completed'
+  | 'action.executed'
+  | 'agent_action.proposed'
+  | 'community.post.submitted'
   | 'agent_finding.converted'
   | 'tenant.hosts_updated'
   | 'portal.member_provisioned'

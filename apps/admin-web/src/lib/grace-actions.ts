@@ -1,6 +1,6 @@
-import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types';
-import { actionTypesForSurface } from './actionCatalog';
-import { countPersonMatches } from './personMatching';
+import type { Person, Task, PrayerRequest, MemberStatus, EventCategory } from '../types.js';
+import { actionTypesForSurface } from './actionCatalog.js';
+import { countPersonMatches } from './personMatching.js';
 
 export type ActionType =
   | 'add_task'

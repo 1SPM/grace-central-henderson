@@ -3,7 +3,7 @@
  * instructions/tasks overlay on the static agent registry.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
+import { createMockSupabase, type TableHandler } from '../../tests/fixtures/mockSupabase.js';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../tests/fixtures/shared-platform.js';
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }));
@@ -32,7 +32,7 @@ beforeEach(async () => {
   });
 });
 
-function withPermissions(permissionKeys: string[], tables: Record<string, () => { data: unknown; error?: unknown }> = {}) {
+function withPermissions(permissionKeys: string[], tables: Record<string, TableHandler> = {}) {
   return createMockSupabase({
     tables: {
       users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),

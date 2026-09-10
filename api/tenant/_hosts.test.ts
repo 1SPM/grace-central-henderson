@@ -4,7 +4,7 @@
  * without leaking which church) and the hostname shape check.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createMockSupabase } from '../../tests/fixtures/mockSupabase.js';
+import { createMockSupabase, type TableHandler } from '../../tests/fixtures/mockSupabase.js';
 import { FIXTURE_CHURCH_ID, FIXTURE_STAFF_USER } from '../../tests/fixtures/shared-platform.js';
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }));
@@ -21,7 +21,7 @@ function makeRes() {
   return res as unknown as import('@vercel/node').VercelResponse & { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> };
 }
 
-function authorizedSupabase(overrides: Record<string, () => { data: unknown }> = {}) {
+function authorizedSupabase(overrides: Record<string, TableHandler> = {}) {
   return createMockSupabase({
     tables: {
       users: () => ({ data: { id: FIXTURE_STAFF_USER.id, account_status: 'active' } }),

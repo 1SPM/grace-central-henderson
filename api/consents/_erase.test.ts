@@ -3,7 +3,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const requirePermissionMock = vi.fn();
 vi.mock('../_lib/authz.js', () => ({ requirePermission: requirePermissionMock }));
-const recordAuditMock = vi.fn(async () => {});
+// Declared with recordAudit's real arity so mock.calls[0][1] is the audit
+// input rather than an out-of-range read on an empty tuple.
+const recordAuditMock = vi.fn(async (_supabase: unknown, _input: Record<string, unknown>) => {});
 vi.mock('../_lib/workosAudit.js', () => ({ recordAudit: recordAuditMock }));
 const deleteUserMock = vi.fn(async () => {});
 vi.mock('@clerk/backend', () => ({ createClerkClient: () => ({ users: { deleteUser: deleteUserMock } }) }));
@@ -100,7 +102,7 @@ describe('POST /api/consents/erase', () => {
     expect(recordAuditMock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       action: 'person.erased', entityType: 'person', entityId: PID, reason: 'right_to_be_forgotten',
     }));
-    const auditArg = recordAuditMock.mock.calls[0][1] as Record<string, unknown>;
+    const auditArg = recordAuditMock.mock.calls[0][1];
     const serialized = JSON.stringify(auditArg);
     expect(serialized).not.toMatch(/@/);          // no email
     expect(serialized).not.toContain('clerk_user_id'); // no auth identifier in the durable log

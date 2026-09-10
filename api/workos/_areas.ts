@@ -257,7 +257,6 @@ async function putArea(
     after: saved,
     route: '/api/workos/areas',
     method: 'PUT',
-    req,
   });
 
   return res.status(200).json({ assignment: saved });

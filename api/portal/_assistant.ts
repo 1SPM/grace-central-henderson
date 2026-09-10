@@ -106,7 +106,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         cap_usd: microUsdToUsd(Number(result.detail.cap_micro_usd ?? 0)),
       });
     }
-    return res.status(502).json({ error: 'assistant_error', detail: String(result.detail) });
+    // `in` rather than reading result.detail directly: two variants of
+    // AssistantTurnResult carry a two-literal discriminant, and excluding those
+    // literals above never removes the members from the union, so the compiler
+    // still sees the moderation variant here — which genuinely has no `detail`.
+    // Reading it unguarded put the literal text "undefined" in the body.
+    const detail = 'detail' in result ? result.detail : result.reason;
+    return res.status(502).json({ error: 'assistant_error', detail: String(detail) });
   }
 
   return res.status(200).json({
