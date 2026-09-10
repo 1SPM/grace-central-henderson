@@ -34,6 +34,25 @@ jobs:
       - run: npm ci
       - run: npm run test:run
 
+  api-install:
+    name: API Install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      # api/ is not a root workspace and does not appear in the root lockfile,
+      # so no other job installs it. Its lockfile drifted out of sync with
+      # api/package.json undetected (stripe pinned at 14.25.0 while
+      # package.json declared ^22.6.1) while every check on main stayed green.
+      # This job exists so that class of drift fails here instead of wherever
+      # api/ actually gets installed.
+      - run: npm ci
+        working-directory: api
+
   security-smoke:
     name: Security Smoke Checks
     runs-on: ubuntu-latest
