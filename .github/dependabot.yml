@@ -42,6 +42,25 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@stripe/react-stripe-js"
         update-types: ["version-update:semver-major"]
+
+      # React 19 has to move as one unit: react, react-dom and both type
+      # packages together. Dependabot groups react-dom with @types/react-dom
+      # but not with react itself, so it proposes react-dom 19 against react
+      # 18 (see #223) — a broken pairing, not just a peer-range complaint.
+      # Ignoring only half would let the same mismatch arrive from the other
+      # direction, so all four majors are held together.
+      #
+      # Scoped to MAJOR only, like the Stripe block above: minor, patch and
+      # SECURITY updates still come through. Remove this block when the React
+      # 19 migration is picked up and Dependabot will re-open the majors fresh.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore(deps)
       include: scope
