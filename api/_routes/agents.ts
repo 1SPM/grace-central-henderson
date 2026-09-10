@@ -6,6 +6,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { routeParam } from '../_lib/routeParams.js';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const router = Router();
@@ -219,7 +220,7 @@ router.post('/logs', async (req: Request, res: Response) => {
  * Update agent stats (called from frontend after agent execution)
  */
 router.post('/:agentId/stats', async (req: Request, res: Response) => {
-  const { agentId } = req.params;
+  const agentId = routeParam(req.params.agentId);
   const { actionsExecuted, actionsFailed, churchId } = req.body;
 
   if (!VALID_AGENTS.includes(agentId)) {
@@ -295,7 +296,7 @@ router.post('/:agentId/stats', async (req: Request, res: Response) => {
  * Trigger an agent to run (for scheduled/cron execution)
  */
 router.post('/:agentId/trigger', async (req: Request, res: Response) => {
-  const { agentId } = req.params;
+  const agentId = routeParam(req.params.agentId);
   const { churchId, dryRun } = req.body;
 
   if (!VALID_AGENTS.includes(agentId)) {

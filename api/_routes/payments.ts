@@ -5,6 +5,7 @@
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
+import { routeParam } from '../_lib/routeParams.js';
 import Stripe from 'stripe';
 
 // Initialize router
@@ -70,7 +71,7 @@ router.post('/customers', asyncHandler(async (req: Request, res: Response) => {
 
 // Get customer's payment methods
 router.get('/customers/:customerId/payment-methods', asyncHandler(async (req: Request, res: Response) => {
-  const { customerId } = req.params;
+  const customerId = routeParam(req.params.customerId);
 
   const paymentMethods = await stripe.paymentMethods.list({
     customer: customerId,
@@ -102,7 +103,7 @@ router.get('/customers/:customerId/payment-methods', asyncHandler(async (req: Re
 
 // Get customer's payment history
 router.get('/customers/:customerId/payments', asyncHandler(async (req: Request, res: Response) => {
-  const { customerId } = req.params;
+  const customerId = routeParam(req.params.customerId);
   const { limit = '50' } = req.query;
 
   const payments = await stripe.paymentIntents.list({
@@ -125,7 +126,7 @@ router.get('/customers/:customerId/payments', asyncHandler(async (req: Request, 
 
 // Get giving summary for a customer
 router.get('/customers/:customerId/summary', asyncHandler(async (req: Request, res: Response) => {
-  const { customerId } = req.params;
+  const customerId = routeParam(req.params.customerId);
   const { year } = req.query;
   const targetYear = year ? parseInt(year as string) : new Date().getFullYear();
 
@@ -162,7 +163,7 @@ router.get('/customers/:customerId/summary', asyncHandler(async (req: Request, r
 
 // Get customer subscriptions
 router.get('/customers/:customerId/subscriptions', asyncHandler(async (req: Request, res: Response) => {
-  const { customerId } = req.params;
+  const customerId = routeParam(req.params.customerId);
 
   const subscriptions = await stripe.subscriptions.list({
     customer: customerId,
@@ -220,7 +221,7 @@ router.post('/create-payment-intent', asyncHandler(async (req: Request, res: Res
 
 // Confirm a payment intent
 router.post('/confirm-payment/:paymentIntentId', asyncHandler(async (req: Request, res: Response) => {
-  const { paymentIntentId } = req.params;
+  const paymentIntentId = routeParam(req.params.paymentIntentId);
   const { payment_method } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
@@ -267,7 +268,7 @@ router.post('/subscriptions', asyncHandler(async (req: Request, res: Response) =
 
 // Cancel a subscription
 router.delete('/subscriptions/:subscriptionId', asyncHandler(async (req: Request, res: Response) => {
-  const { subscriptionId } = req.params;
+  const subscriptionId = routeParam(req.params.subscriptionId);
   const subscription = await stripe.subscriptions.cancel(subscriptionId);
 
   res.json({
@@ -278,7 +279,7 @@ router.delete('/subscriptions/:subscriptionId', asyncHandler(async (req: Request
 
 // Pause a subscription
 router.post('/subscriptions/:subscriptionId/pause', asyncHandler(async (req: Request, res: Response) => {
-  const { subscriptionId } = req.params;
+  const subscriptionId = routeParam(req.params.subscriptionId);
 
   const subscription = await stripe.subscriptions.update(subscriptionId, {
     pause_collection: { behavior: 'void' },
@@ -292,7 +293,7 @@ router.post('/subscriptions/:subscriptionId/pause', asyncHandler(async (req: Req
 
 // Resume a subscription
 router.post('/subscriptions/:subscriptionId/resume', asyncHandler(async (req: Request, res: Response) => {
-  const { subscriptionId } = req.params;
+  const subscriptionId = routeParam(req.params.subscriptionId);
 
   const subscription = await stripe.subscriptions.update(subscriptionId, {
     pause_collection: null as unknown as Stripe.SubscriptionUpdateParams.PauseCollection,
