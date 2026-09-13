@@ -1,0 +1,35 @@
+#screen-care .scroll{background:#f1f7fc;padding:16px 14px 30px}
+#screen-care .cr-hero{padding:24px 20px;border-radius:12px;background:linear-gradient(90deg,#0b294cdd,#0b294c85),url('../../assets/faithful-care.jpg') center/cover;box-shadow:none;margin-bottom:18px}
+#screen-care .cr-hero h2{font:500 29px/1.15 Georgia,serif;color:white;margin:8px 0 12px}
+#screen-care .cr-hero p{font-size:14px;line-height:1.55;color:#e3edf8}
+#screen-care .cr-hero-body{gap:16px;align-items:center}
+#screen-care .cr-hero-face img{width:74px;height:74px;object-fit:cover;object-position:center 28%;border-radius:50%;border:2px solid #d7e8f7}
+#screen-care .cr-hero-leader{font-size:12px;color:#d8e6f5;line-height:1.6;margin-top:16px}
+#screen-care .cr-hero-leader strong{color:white;font:500 18px Georgia,serif}
+#screen-care .cr-hero-live{font-size:11px;letter-spacing:0;color:#d6e6f7}
+#screen-care .cr-hero-live i,#screen-care .cr-hero-face-live,#screen-care #cr-hero-leader-status{display:none}
+#screen-care .card,#screen-care .cr-blessing{border:1px solid #d6e3f1;border-radius:12px;background:#ffffffee;box-shadow:0 3px 12px #183b6010;margin-bottom:18px!important}
+#screen-care h3{font:500 23px/1.25 Georgia,serif;color:#173353}
+#screen-care .section-head{padding:20px 18px 12px!important;gap:12px;flex-wrap:wrap}
+#screen-care .care-option{padding:17px 16px;gap:12px;min-height:78px;border-bottom:1px solid #e6edf5;box-sizing:border-box}
+#screen-care .co-ico{width:42px;height:42px;border-radius:12px;flex-shrink:0}
+#screen-care .co-name{font-size:15px;font-weight:600;color:#173353;line-height:1.4}
+#screen-care .co-sub{font-size:12px;color:#536b84;line-height:1.55;margin-top:4px}
+#screen-care .co-arrow{color:#4e7195;font-size:23px}
+#screen-care .care-option--crisis{background:#fff1ee;border-left:3px solid #b84636}
+#screen-care .cr-req-row{padding:16px;gap:12px}
+#screen-care .cr-req-row>div[style*="flex:1"]>div:first-child{font-size:14px!important;color:#173353}
+#screen-care .cr-req-row>div[style*="flex:1"]>div:last-child{font-size:12px!important;color:#536b84!important}
+#screen-care .cr-blessing{padding:20px}
+#screen-care .cr-blessing-av{width:52px;height:52px;border-radius:50%;object-fit:cover}
+#screen-care .cr-blessing-who{font:500 19px Georgia,serif;color:#173353}
+#screen-care .cr-blessing-role,#screen-care .cr-blessing-text{font-size:13px;line-height:1.6;color:#536b84}
+#screen-care .cr-blessing-actions{display:grid;grid-template-columns:1fr;gap:9px}
+#screen-care .cr-ba-btn{min-height:46px;font-size:14px;border:1px solid #cddfee;border-radius:9px;color:#173353}
+#screen-care .cr-ba-primary{background:#175fa5;color:white;border-color:#175fa5}
+#screen-care .cr-dispatch-grid{grid-template-columns:1fr}
+#screen-care .cr-dispatch-cell{padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:5px 10px;border-bottom:1px solid #e1ebf5}
+#screen-care .cr-dispatch-title{font-size:14px;color:#173353}
+#screen-care .cr-dispatch-sub{font-size:12px;line-height:1.5;color:#536b84;grid-column:1}
+#screen-care .cr-dispatch-badge{grid-column:2;grid-row:1/3;align-self:center;background:#eaf2fb;color:#3e607e}
+#screen-care :focus-visible{outline:3px solid #2c86bf;outline-offset:2px}

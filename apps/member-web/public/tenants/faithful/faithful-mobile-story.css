@@ -1,0 +1,56 @@
+.visitor-phone{display:block;width:100%;max-width:410px;height:760px;border:8px solid #173755;border-radius:32px;background:#fff;margin:auto}
+#sec-mobile .mobile-link-page{max-width:1200px;margin-left:0;margin-right:0;padding-left:0;padding-right:0}
+#sec-mobile .mobile-link-preview{flex:0 1 442px;box-sizing:border-box}
+#sec-mobile .mobile-share-panel{flex:1 1 420px;max-width:none;box-sizing:border-box}
+#sec-mobile .mobile-link-tag[aria-pressed="true"]{background:#173755;color:#fff}
+#sec-mobile button{cursor:pointer;min-height:44px}
+#sec-mobile [data-visitor-story] article{padding:16px 0;border-bottom:1px solid #cadde9}
+#sec-mobile [data-visitor-story] h3{margin:0 0 8px;color:#173755}
+#sec-mobile [data-visitor-story] p{white-space:pre-wrap;overflow-wrap:anywhere}
+#sec-mobile [data-visitor-story] textarea,#sec-mobile [data-name]{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cadde9;border-radius:8px;font:inherit}
+#sec-mobile [data-signup] label{display:block;margin:16px 0}
+#sec-mobile button:focus-visible{outline:3px solid #175fa5;outline-offset:3px}
+@media(max-width:600px){.visitor-phone{height:650px;box-sizing:border-box}#sec-mobile .mobile-link-split{display:block}}
+
+/* Faithful's navy and blue, with a quieter secondary action hierarchy. */
+#sec-mobile .mobile-link-tags{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid #cadde9;border-radius:18px;background:#edf4f8;width:fit-content;max-width:100%;box-sizing:border-box}
+#sec-mobile button{font:inherit;font-weight:600;border:1px solid #cadde9;border-radius:12px;padding:10px 18px;color:#173755;background:#fff;transition:background .16s ease,box-shadow .16s ease,border-color .16s ease}
+#sec-mobile button:hover{background:#edf4f8;border-color:#8bafc5}
+#sec-mobile .mobile-link-tag{border-color:transparent;background:transparent;border-radius:12px;padding:11px 20px}
+#sec-mobile .mobile-link-tag[aria-pressed="true"]{background:#173755;color:#fff;box-shadow:0 3px 8px #17375526}
+#sec-mobile .mobile-share-panel{padding:28px;border:1px solid #cadde9;border-radius:22px;background:linear-gradient(155deg,#fff,#f5f9fc);color:#173755;min-width:0}
+#sec-mobile .mobile-share-panel>h2{margin-top:0;font-size:clamp(20px,2.2vw,30px);line-height:1.2;white-space:nowrap}
+#sec-mobile .mobile-share-panel>p{color:#526b7d;line-height:1.6}
+#sec-mobile [data-visitor-story] article{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;align-items:center}
+#sec-mobile [data-visitor-story] article>h3{font-size:19px}
+#sec-mobile .visitor-story-subline{grid-column:1;display:block;color:#526b7d;font-size:13px;line-height:1.5;margin-bottom:10px}
+#sec-mobile [data-visitor-story] article>p{grid-column:1;color:#526b7d;margin:0;line-height:1.5}
+#sec-mobile [data-visitor-story] article>button{grid-column:2;grid-row:1 / span 2;background:transparent;border-color:transparent;color:#175fa5;padding:8px 12px}
+#sec-mobile [data-visitor-story] article>button:hover{background:#e6f0f7}
+#sec-mobile .mobile-share-panel [data-visitor-story] article>button{display:none}
+#sec-mobile .mobile-share-panel [data-visitor-story] article{grid-template-columns:minmax(0,1fr)}
+#sec-mobile [data-visitor-story] article>textarea{grid-column:1}
+#sec-mobile [data-refresh]{margin-top:16px;font-size:14px}
+#sec-mobile .mobile-share-panel hr{border:0;border-top:1px solid #cadde9;margin:28px 0}
+#sec-mobile [data-continue],#sec-mobile [data-create]{background:#175fa5;color:#fff;border-color:#175fa5;box-shadow:0 4px 12px #175fa522;width:100%;padding:14px 20px}
+#sec-mobile [data-continue]:hover,#sec-mobile [data-create]:hover{background:#173755;border-color:#173755}
+#sec-mobile [data-top-continue]{align-self:flex-start;background:#175fa5;border-color:#175fa5;color:#fff;margin-bottom:8px}
+#sec-mobile [data-top-continue]:hover{background:#173755;border-color:#173755}
+#sec-mobile .visitor-preview-caption{text-align:center;color:#526b7d;font-size:14px;margin:0 0 14px}
+#sec-mobile .visitor-phone{box-shadow:0 18px 46px #17375520;box-sizing:border-box}
+#sec-mobile .mobile-share-panel>small{display:block;color:#526b7d;line-height:1.5;margin-top:16px}
+@media(max-width:600px){#sec-mobile .mobile-share-panel{padding:20px;margin-top:24px}#sec-mobile .mobile-link-tags{width:100%}#sec-mobile .mobile-link-tag{flex:1 1 40%;padding:10px}#sec-mobile [data-visitor-story] article{column-gap:8px}}
+@media(prefers-reduced-motion:reduce){#sec-mobile button{transition:none}}
+#sec-mobile .visitor-signup{max-width:960px;margin:24px 0;padding:32px;border:1px solid #cadde9;border-radius:22px;background:#fff;color:#173755}
+#sec-mobile .visitor-signup[hidden],#sec-mobile .mobile-link-page[hidden]{display:none}
+#sec-mobile .visitor-signup h2{font-size:32px;line-height:1.2}
+#sec-mobile .visitor-signup label{display:block;margin:20px 0 10px}
+#sec-mobile .visitor-signup-note{font-size:13px;line-height:1.5;color:#526b7d;margin-top:24px}
+#sec-mobile .visitor-signup-story{margin:28px 0;padding-top:24px;border-top:1px solid #cadde9}
+#sec-mobile .visitor-signup-story>h3{font-size:26px;margin:0 0 8px}
+#sec-mobile .visitor-signup-story>p{color:#526b7d;line-height:1.5}
+#sec-mobile .visitor-signup [data-visitor-story]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px}
+#sec-mobile .visitor-signup [data-name]{max-width:440px}
+#sec-mobile .visitor-signup [data-create]{max-width:440px}
+@media(max-width:700px){#sec-mobile .visitor-signup [data-visitor-story]{grid-template-columns:1fr}}
+@media(max-width:600px){#sec-mobile .visitor-signup{padding:20px;margin:12px 0}}

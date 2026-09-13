@@ -263,6 +263,7 @@
               .then(function (home) {
                 if (!home) return null;
                 return {
+                  ...(window.GRACE_MEMBER_EXPERIENCE === 'faithful-v1' ? {memberIdentity: clerk.user && clerk.user.id} : {}),
                   getToken: function () { return clerk.session.getToken(); },
                   home: home,
                 };

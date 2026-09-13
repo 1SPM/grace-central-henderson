@@ -7,6 +7,8 @@
   // Tenant identity comes from the page (window.GRACE_PORTAL_CHURCH) or an
   // explicit getMessaging(churchName) arg. The fallback is deliberately
   // neutral — never a real tenant's name; this file is shared across previews.
+  // Explicit page opt-in; Central retains the previous shared behavior.
+  const faithfulExperience = global.GRACE_MEMBER_EXPERIENCE === 'faithful-v1';
   const DEFAULT_CHURCH = global.GRACE_PORTAL_CHURCH || 'your church';
   // Set explicitly by each tenant page alongside GRACE_PORTAL_CHURCH — do
   // NOT infer this from the church name (see the vendored-face check below;
@@ -71,19 +73,19 @@
           'Start here when you want to give, watch a service, join a group, or see what\'s coming up. When you\'d like someone to walk with you, your verified leader avatar is just a tap away.',
         homePlaceholder: 'Ask GRACE — give, watch, groups, events…',
         tutorial: {
-          badge: 'Getting started',
+          badge: (faithfulExperience ? 'Find your way' : 'Getting started'),
           status: 'New here? A quick orientation to your church home.',
           intro:
-            'I\'m GRACE — your companion for everyday church life at ' +
+            (faithfulExperience ? 'GRACE · AI assistant for ' : 'I\'m GRACE — your companion for everyday church life at ') +
             church +
-            ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; I can take you anywhere in the app.',
+            (faithfulExperience ? '. Find a service, group, event, or resource. Tap the GRACE orb to open chat.' : ' — give, watch, groups, events, and more. Tap any GRACE orb to open chat; I can take you anywhere in the app.'),
           steps: [
             { icon: 'home', label: 'Navigate', detail: 'Sidebar — My Church, GRACE Impact Card, Connect, and Journey.' },
-            { icon: 'chat', label: 'Ask GRACE', detail: 'Type below or tap an orb — I learn your rhythm on this device.' },
-            { icon: 'leadership', label: 'Go deeper', detail: 'Personal conversation stays with your verified leader avatar — siloed from GRACE.' },
+            { icon: 'chat', label: 'Ask GRACE', detail: (faithfulExperience ? 'Type below or tap an orb — Find services, groups, and resources.' : 'Type below or tap an orb — I learn your rhythm on this device.') },
+            { icon: 'leadership', label: (faithfulExperience ? 'Contact a leader' : 'Go deeper'), detail: (faithfulExperience ? 'Choose a leader avatar or request human follow-up. Avatars are AI, not live pastors.' : 'Personal conversation stays with your verified leader avatar — siloed from GRACE.') },
             { icon: 'people', label: 'Explore', detail: 'Scroll to GRACE at ' + church + ' for giving, care, groups, and watch.' },
           ],
-          tryLabel: 'Try it — ask GRACE anything',
+          tryLabel: (faithfulExperience ? 'What do you need today?' : 'Try it — ask GRACE anything'),
           dismissCta: 'Got it — I\'m settled',
           dismissNote: 'Dismiss anytime — I\'m always one orb-tap away in the sidebar.',
           reopenLabel: 'Show GRACE guide',
@@ -106,13 +108,13 @@
           return 'Share with ' + leaderFirstName(name) + '…';
         },
         disclaimer:
-          'This is an isolated avatar grounded in this leader\'s approved teachings. Your conversation is siloed to their profile and kept confidential if saved at all — not shared with GRACE.',
+          (faithfulExperience ? 'AI avatar based on this leader\'s teachings. Not a live conversation with the pastor. Review privacy information before sharing personal details.' : 'This is an isolated avatar grounded in this leader\'s approved teachings. Your conversation is siloed to their profile and kept confidential if saved at all — not shared with GRACE.'),
         profileDisclaimer:
           'Avatar reflects approved teachings — not a live person. Human follow-up available.',
-        homeStripLabel: 'Your leader',
-        homeStripSub: 'Verified avatar · not GRACE',
-        homeStripCta: 'Open avatar →',
-        reachableLive: 'Reachable now · real person available',
+        homeStripLabel: (faithfulExperience ? 'Your leadership' : 'Your leader'),
+        homeStripSub: (faithfulExperience ? 'Pastoral conversation · verified avatar · not GRACE' : 'Verified avatar · not GRACE'),
+        homeStripCta: (faithfulExperience ? 'Connect with your leader →' : 'Open avatar →'),
+        reachableLive: (faithfulExperience ? 'Human follow-up · response times vary' : 'Reachable now · real person available'),
         reachableAway: 'Avatar available · human follow-up by schedule',
         defaultResponse:
           'I hear you. I\'m here with you — we can pray, talk through what\'s on your heart, or I can request human follow-up when you need it.',
@@ -140,7 +142,7 @@
             icon: 'people',
             q: 'What is a leader avatar?',
             a:
-              'Each verified leader has an independent avatar — their pastoral essence captured in an isolated, grounded profile through our avatar program. It reflects their approved sermons and teachings, not a generic chatbot.',
+              (faithfulExperience ? 'Each verified leader has an independent avatar — an AI profile based on their teachings. It reflects their approved sermons and teachings, not a generic chatbot.' : 'Each verified leader has an independent avatar — their pastoral essence captured in an isolated, grounded profile through our avatar program. It reflects their approved sermons and teachings, not a generic chatbot.'),
           },
           {
             icon: 'chat',
@@ -152,7 +154,7 @@
             icon: 'shield',
             q: 'Are conversations private?',
             a:
-              'Avatar conversations are siloed per leader and kept confidential if saved at all — not shared with GRACE or other leaders. Crisis keywords (self-harm, abuse, suicidal thoughts) still route to live pastoral care immediately.',
+              (faithfulExperience ? 'Review the portal privacy information before sharing personal details. An avatar is not an emergency service. Use Help now for crisis resources or request human pastoral support; response times vary.' : 'Avatar conversations are siloed per leader and kept confidential if saved at all — not shared with GRACE or other leaders. Crisis keywords (self-harm, abuse, suicidal thoughts) still route to live pastoral care immediately.'),
           },
           {
             icon: 'people',
@@ -190,16 +192,16 @@
     const m = msg || getMessaging();
     if (leader && leader.role) {
       return leader.role.replace(/ · Grace AI with human follow-up/g, ' · Verified Avatar · Human follow-up available')
-        .replace(/ · AI Companion/g, ' · Verified Avatar · Human follow-up available');
+        .replace(faithfulExperience ? / · AI avatar/g : / · AI Companion/g, ' · Verified Avatar · Human follow-up available');
     }
     return m.churchName + ' ' + m.leaderAvatar.roleSuffix;
   }
 
   function avatarBio(name, churchName) {
     return (
-      'An isolated avatar grounded in ' +
+      (faithfulExperience ? 'An AI avatar based on ' : 'An isolated avatar grounded in ') +
       name +
-      '\'s approved sermons and teachings — a siloed duplicate of their pastoral essence, not GRACE. Human follow-up available when care is needed at ' +
+      (faithfulExperience ? '\'s approved sermons and teachings — an AI avatar, not a live conversation with the pastor. Request human support at ' : '\'s approved sermons and teachings — a siloed duplicate of their pastoral essence, not GRACE. Human follow-up available when care is needed at ') +
       (churchName || DEFAULT_CHURCH) +
       '.'
     );
@@ -212,7 +214,7 @@
       if (!l) return;
       l.role = (l.role || '')
         .replace(/ · Grace AI with human follow-up/g, ' · Verified Avatar · Human follow-up available')
-        .replace(/ · AI Companion/g, ' · Verified Avatar · Human follow-up available');
+        .replace(faithfulExperience ? / · AI avatar/g : / · AI Companion/g, ' · Verified Avatar · Human follow-up available');
       if (!l.role && l.title) {
         l.role = l.title + ' · ' + church + ' · Verified Avatar · Human follow-up available';
       }
@@ -225,7 +227,7 @@
         l.greeting =
           '"Good morning Maya — I\'m ' +
           leaderFirstName(l.name) +
-          '. What\'s on your heart today? This is a safe space to share."';
+          (faithfulExperience ? '. What\'s on your heart today? You can choose what to share."' : '. What\'s on your heart today? This is a safe space to share."');
       }
       l.bio = avatarBio(l.name, church);
       if (l.name === 'Deacon Robert Hayes' && IS_DEMO_TENANT) {
@@ -498,11 +500,15 @@
     setText('home-ai-status', m.system.homeStatus);
     setText('home-ai-greeting', m.system.homeGreeting);
     setText('home-ai-disclaimer', m.system.disclaimer);
-    const tut = m.system.tutorial;
+    const tut = faithfulExperience && m.system.tutorial ? Object.assign({}, m.system.tutorial, global.GRACE_HOME_GUIDE_COPY || {}) : m.system.tutorial;
     if (tut) {
+      if (faithfulExperience && global.GRACE_HOME_GUIDE_TITLE) setText('home-ai-name', global.GRACE_HOME_GUIDE_TITLE);
+      if (faithfulExperience && tut.tagline) setText('home-ai-role', tut.tagline);
+      if (faithfulExperience && tut.disclaimer) setText('home-ai-disclaimer', tut.disclaimer);
+      if (faithfulExperience && tut.placeholder) setPh('home-chat-input', tut.placeholder);
       setText('grace-tutorial-badge', tut.badge);
       setText('home-ai-status', tut.status);
-      setText('home-ai-greeting', tut.intro);
+      setText('home-ai-greeting', (faithfulExperience && global.GRACE_HOME_GUIDE_INTRO) || tut.intro);
       setText('grace-tutorial-try', tut.tryLabel);
       setText('grace-tutorial-dismiss-note', tut.dismissNote);
       const dismissBtn = document.getElementById('grace-tutorial-dismiss-btn');
@@ -560,7 +566,7 @@
     const mobChatDisclaimer = document.getElementById('mob-chat-disclaimer');
     if (mobChatDisclaimer) {
       mobChatDisclaimer.textContent =
-        'Isolated avatar — conversation siloed to this leader and kept confidential if saved at all, not shared with GRACE. Crisis requests route to a live leader immediately.';
+        (faithfulExperience ? 'AI avatar, not a live pastor. Review privacy information before sharing personal details. Use Help now for crisis resources; human follow-up times vary.' : 'Isolated avatar — conversation siloed to this leader and kept confidential if saved at all, not shared with GRACE. Crisis requests route to a live leader immediately.');
     }
     const ldDisclaimer = document.querySelector('.ld-disclaimer');
     if (ldDisclaimer) {

@@ -1378,7 +1378,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;background:rgba(68,158,202,.85);
   padding:4px 8px;border-radius:999px;margin-bottom:6px
 }
-/* Profile / My Journey */
+/* Profile / Reflect */
 .jy-hero{
   position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;min-height:220px;
   background:url('../../assets/dash-hero-audience.jpg') center/cover no-repeat;
@@ -1982,9 +1982,9 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   position:absolute;top:0;left:0;bottom:var(--ios-tab-chrome-h);width:min(300px,84%);
   z-index:45;background:linear-gradient(180deg,#0a1628 0%,#1e3a5f 55%,#0f2744 100%);border-right:1px solid rgba(255,255,255,.12);
   display:flex;flex-direction:column;color:#fff;
-  transform:translateX(-100%);transition:transform .28s cubic-bezier(.32,.72,0,1);box-shadow:8px 0 32px rgba(0,0,0,.28)
+  transform:translateX(-100%);transition:transform .28s cubic-bezier(.32,.72,0,1);box-shadow:none
 }
-.app.menu-open .app-drawer{transform:translateX(0)}
+.app.menu-open .app-drawer{transform:translateX(0);box-shadow:8px 0 32px rgba(0,0,0,.28)}
 .drawer-head{
   padding:14px 16px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
   border-bottom:1px solid rgba(255,255,255,.12);flex-shrink:0
@@ -2250,22 +2250,30 @@ html.embed-preview .dash-hero-toast,
 html.embed-preview .home-donate-toast,
 html.embed-preview .watch-donate-toast{display:none!important}
 </style>
+<link rel="stylesheet" href="faithful-mobile-refinement.css">
+<link rel="stylesheet" href="faithful-mobile-connect.css">
+<link rel="stylesheet" href="faithful-mobile-journey.css">
+<link rel="stylesheet" href="faithful-mobile-navigation.css">
+<link rel="stylesheet" href="faithful-mobile-cover.css">
+<link rel="stylesheet" href="faithful-mobile-care.css">
+<link rel="stylesheet" href="faithful-leader-profiles.css">
+<link rel="stylesheet" href="faithful-mobile-controls.css">
 </head>
 <body>
 <div class="device landing-active">
   <div id="landing-screen" class="landing-screen" aria-hidden="false">
     <div class="landing-inner">
-      <img class="landing-mark" src="../../assets/faithful-church-logo-wht.png" alt="">
+      <img class="landing-mark" src="../../assets/faithful-church-logo-wht.png" alt="Faithful Church">
       <div class="landing-copy">
-        <img class="landing-logo" src="../../assets/faithful-church-logo-wht.png" alt="Faithful Church">
-        <h1 class="landing-title">Members Card Portal</h1>
-        <p class="landing-sub">Your daily companion for giving, care, and connection at Faithful Church</p>
+        <h1 class="landing-title">You belong here.</h1>
+        <p class="landing-sub">Your church, your community, your next step.</p>
+        <p class="landing-caption">Faithful Church member portal</p>
       </div>
       <div class="landing-actions">
         <button type="button" class="landing-action" onclick="enterApp('login')">Log In</button>
-        <span class="landing-divider" aria-hidden="true">|</span>
-        <button type="button" class="landing-action" onclick="enterApp('signup')">Sign Up Now</button>
+        <button type="button" class="landing-action" onclick="enterApp('signup')">Create an account</button>
       </div>
+      <p class="landing-demo">Demo preview · both buttons open the sample portal</p>
     </div>
   </div>
   <div class="island"></div>
@@ -2320,7 +2328,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
         <div class="dash-mod">
           <div class="dash-mod-head">
-            <div class="dash-mod-title">GRACE at Faithful Church</div>
+            <div class="dash-mod-title">Grow with Faithful Church</div>
             <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
           </div>
           <div class="dash-pillars">
@@ -2598,7 +2606,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
       <div class="scroll">
         <div class="ld-hero-centered" id="ld-hero-centered">
           <div class="ld-hero-top">
-            <div class="ld-reachable ld-reachable--live" id="ld-reachable-badge">Reachable now · real person available</div>
+            <div class="ld-reachable ld-reachable--live" id="ld-reachable-badge">Human follow-up · response times vary</div>
           </div>
           <div class="ld-hero-body">
             <div class="ld-hero-profile">
@@ -2617,7 +2625,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 </div>
               </div>
             </div>
-            <p class="home-ai-greeting" id="ld-leader-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? This is a safe space to share.</p>
+            <p class="home-ai-greeting" id="ld-leader-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? You can choose what to share.</p>
             <div class="ld-hero-actions">
               <button type="button" class="ld-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
               <button type="button" class="ld-begin" onclick="openDivinityAvatar(currentLeader)">Begin a Conversation</button>
@@ -3724,7 +3732,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
         <div class="home-nav-brand">
           <button type="button" class="menu-btn" onclick="toggleAppMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="app-drawer"><span class="menu-btn-bars" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
-        <div class="home-nav-title">My Journey</div>
+        <div class="home-nav-title">Reflect</div>
         <div class="home-nav-actions">
           <div class="home-nav-bell nav-btn" onclick="openProfileGoalsSheet(true)" title="Goals &amp; settings"><span data-grace-icon="help" data-grace-size="16"></span></div>
         </div>
@@ -3738,7 +3746,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             <img class="jy-av" src="https://randomuser.me/api/portraits/women/42.jpg" alt="Maya Thompson">
             <div class="jy-hero-copy">
               <div class="jy-eyebrow">Faithful Church · Member since 2022</div>
-              <h1 class="jy-title">Maya's Journey</h1>
+              <h1 class="jy-title">Reflect</h1>
               <p class="jy-tagline">Reflect, set goals, and notice your daily rhythm.</p>
             </div>
           </div>
@@ -4185,7 +4193,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
           </button>
           <button type="button" class="drawer-item" data-drawer-tab="profile" onclick="navigateFromDrawer('profile')">
             <span class="drawer-item-icon" data-drawer-icon="profile"></span>
-            <span>My Journey</span>
+            <span>Reflect</span>
           </button>
         </nav>
         <div class="drawer-section-label">Get Connected</div>
@@ -4638,6 +4646,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
   /* Tenant declaration — shared preview assets read this instead of
      hardcoding any church name. */
   window.GRACE_PORTAL_CHURCH = 'Faithful Church';
+  window.GRACE_MEMBER_EXPERIENCE = 'faithful-v1';
   window.GRACE_PORTAL_IS_DEMO = true;
 </script>
 <script src="../../shared/grace-impact-metrics.js"></script>
@@ -4648,6 +4657,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 <script src="../../shared/grace-duotone-icons.js"></script>
 <script src="../../shared/grace-verified-leaders-faq.js"></script>
 <script src="../../shared/grace-messaging.js"></script>
+<script src="../../shared/grace-member-intents.js"></script>
 <script src="../../shared/grace-companion.js"></script>
 <script>
 var IS_EMBED_PREVIEW = (function () {
@@ -4660,24 +4670,24 @@ var IS_EMBED_PREVIEW = (function () {
 })();
 if (IS_EMBED_PREVIEW) document.documentElement.classList.add('embed-preview');
 const leaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Faithful Church · AI Companion',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',profileFrame:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'../../assets/watch/video/Maya-welcome-to-Central.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Faithful Church with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
-  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Faithful Church · AI Companion',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
-  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Faithful Church · AI Companion',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,humanLive:true,bio:'Pastor Derek serves middle school through college-age students and their parents.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Faithful Church · AI Companion",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,humanLive:false,bio:'Sis. Priya leads Women of Grace and mentorship circles.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
-  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Faithful Church · AI Companion',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,humanLive:false,bio:'Minister Okafor supports couples, parents, and blended families.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
-  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Faithful Church · AI Companion',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together."',online:true,humanLive:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
-  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Faithful Church · AI Companion',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations?"',online:true,humanLive:true,bio:'Elder Chen coordinates global partners and short-term teams.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
-  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Faithful Church · AI Companion",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,humanLive:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
-  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Faithful Church · AI Companion',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,humanLive:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
-  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Faithful Church · AI Companion',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding care."',online:true,humanLive:true,bio:'Licensed clinician bridging faith and mental health with pastoral support.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
-  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Faithful Church · AI Companion",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer?"',online:true,humanLive:true,bio:'Minister Torres runs Iron Men groups and workplace ministry.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
-  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Faithful Church · AI Companion',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community?"',online:true,humanLive:true,bio:'Sis. Angela builds community for single adults 22–40.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
-  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Faithful Church · AI Companion',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story?"',online:false,humanLive:false,bio:'Pastor Brooks organizes serve days and new believer follow-up.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
-  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Faithful Church · AI Companion',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or legacy giving, I\'m honored to walk with you."',online:true,humanLive:true,bio:'Rev. Doyle leads Golden Years fellowship and home communion visits.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
-  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Faithful Church · AI Companion',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or Sunday tech?"',online:true,humanLive:true,bio:'Bro. Kevin runs broadcast, social content, and the member app.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
-  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Faithful Church · AI Companion',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m glad you\'re here."',online:true,humanLive:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
-  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Faithful Church · AI Companion',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,humanLive:false,bio:'Pastor Grant officiates funerals and long-term bereavement care.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
-  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Faithful Church · AI Companion',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,humanLive:true,bio:'Minister Santos leads Domingo en Español and bilingual family resources.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'}
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Faithful Church · AI avatar',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',profileFrame:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'../../assets/watch/video/Maya-welcome-to-Central.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Faithful Church with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Faithful Church · AI avatar',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
+  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Faithful Church · AI avatar',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,humanLive:true,bio:'Pastor Derek serves middle school through college-age students and their parents.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Faithful Church · AI avatar",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. Share only what you choose — what\'s on your mind today, sis?"',online:false,humanLive:false,bio:'Sis. Priya leads Women of Grace and mentorship circles.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Faithful Church · AI avatar',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,humanLive:false,bio:'Minister Okafor supports couples, parents, and blended families.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
+  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Faithful Church · AI avatar',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together."',online:true,humanLive:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
+  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Faithful Church · AI avatar',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations?"',online:true,humanLive:true,bio:'Elder Chen coordinates global partners and short-term teams.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
+  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Faithful Church · AI avatar",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,humanLive:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
+  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Faithful Church · AI avatar',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,humanLive:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
+  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Faithful Church · AI avatar',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding care."',online:true,humanLive:true,bio:'Licensed clinician bridging faith and mental health with pastoral support.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
+  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Faithful Church · AI avatar",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer?"',online:true,humanLive:true,bio:'Minister Torres runs Iron Men groups and workplace ministry.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
+  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Faithful Church · AI avatar',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community?"',online:true,humanLive:true,bio:'Sis. Angela builds community for single adults 22–40.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
+  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Faithful Church · AI avatar',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story?"',online:false,humanLive:false,bio:'Pastor Brooks organizes serve days and new believer follow-up.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
+  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Faithful Church · AI avatar',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or legacy giving, I\'m honored to walk with you."',online:true,humanLive:true,bio:'Rev. Doyle leads Golden Years fellowship and home communion visits.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
+  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Faithful Church · AI avatar',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or Sunday tech?"',online:true,humanLive:true,bio:'Bro. Kevin runs broadcast, social content, and the member app.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
+  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Faithful Church · AI avatar',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m glad you\'re here."',online:true,humanLive:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
+  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Faithful Church · AI avatar',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,humanLive:false,bio:'Pastor Grant officiates funerals and long-term bereavement care.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
+  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Faithful Church · AI avatar',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,humanLive:true,bio:'Minister Santos leads Domingo en Español and bilingual family resources.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'}
 ];
 
 let currentLeader = 0;
@@ -4922,7 +4932,7 @@ function renderLeaderProfileLive(l) {
   syncHeroLiveDot('lpm-live-dot', l);
   if (liveEl) {
     if (getLeaderReachable(l)) {
-      liveEl.innerHTML = '<span class="ld-profile-human-live" aria-label="Leader is reachable"><i></i> Reachable now · real person available</span>';
+      liveEl.innerHTML = '<span class="ld-profile-human-live" aria-label="Leader is reachable"><i></i> Human follow-up · response times vary</span>';
     } else {
       liveEl.innerHTML = '<span class="ld-profile-human-away">Not live · avatar still available 24/7</span>';
     }
@@ -6313,7 +6323,7 @@ function renderHomeAi() {
   const firstName = leaderFirstName(leader.name);
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   set('home-ai-name', leader.name);
-  set('home-ai-role', leader.role.replace(/AI Companion/g, 'Verified Avatar'));
+  set('home-ai-role', leader.role.replace(/AI avatar/g, 'Verified Avatar'));
   var greet = (leader.greeting || '').replace(/^"|"$/g, '');
   if (greet.length > 72) greet = greet.slice(0, 69) + '…';
   set('home-ai-greeting', greet || 'What\'s on your heart?');
@@ -6352,7 +6362,7 @@ function openLeaderProfile(idx) {
   profileLeaderIdx = idx;
   document.getElementById('lpm-av').src = l.img;
   document.getElementById('lpm-name').textContent = l.name;
-  document.getElementById('lpm-title').textContent = (l.role || (l.title + ' · Faithful Church · AI Companion')).replace(/AI Companion/g, 'Verified Avatar');
+  document.getElementById('lpm-title').textContent = (l.role || (l.title + ' · Faithful Church · AI avatar')).replace(/AI avatar/g, 'Verified Avatar');
   const greetEl = document.getElementById('lpm-greeting');
   if (greetEl) greetEl.textContent = (l.greeting || '').replace(/^"|"$/g, '');
   document.getElementById('lpm-bio').textContent = l.bio || '';
@@ -6615,7 +6625,7 @@ function renderAllocation(allocation) {
   const colors = ALLOC_COLORS;
   root.innerHTML = allocation.map(function(item, index) {
     const c = colors[index % colors.length];
-    const barWidth = Math.min(100, item.pct * 2);
+    const barWidth = Math.min(100, item.pct);
     return '<div class="impact-row">' +
       '<div class="impact-dot" style="background:' + c + '"></div>' +
       '<div style="flex:1;min-width:0">' +
@@ -7225,6 +7235,8 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
   /* ── GRACE Companion — orb-launched chat sheet with agency over the app ── */
   if (typeof GRACE_COMPANION !== 'undefined') {
     GRACE_COMPANION.mount({
+      quietNavigator: true,
+      demoMemberId: 'maya',
       mode: 'sheet',
       container: document.querySelector('.device') || document.body,
       zIndex: 480,
@@ -7237,6 +7249,8 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       toast: (m) => showToast(m),
       openLeader: () => showScreen('leaders'),
       navigate: (key) => {
+        if (['settings','volunteer','first-step'].includes(key)) { openMemberDestination(key); return true; }
+        if (key === 'growth') { showScreen('profile'); scrollJourney('jy-growth'); return true; }
         if (key === 'watch') { openPush('watch'); return true; }
         const map = {
           give: 'give', wallet: 'give', impact: 'give', rewards: 'give',
@@ -7248,6 +7262,8 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
         const screen = map[key];
         if (!screen) return false;
         showScreen(screen);
+        if (['study','journal','goals'].includes(key)) scrollJourney('jy-' + key);
+        if (['groups','events','serve'].includes(key)) communityTab('groups-events');
         return true;
       },
       onCrisis: () => openCrisisSupport(),
@@ -7258,7 +7274,7 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       },
       onUnknown: (entry) => {
         console.info('GRACE admin inbox (members card):', entry);
-        showToast("Shared with your leaders — they'll follow up");
+        // No submission receipt exists in this preview; do not promise staff follow-up.
       },
       getState: () => ({
         goalPct: window.GRACE_METRICS?.givingGoal?.pct ?? 52,
@@ -7281,5 +7297,29 @@ function openGraceFromDrawer() {
   }
 }
 </script>
+<script src="faithful-mobile-refinement.js"></script>
+<script src="faithful-mobile-connect.js"></script>
+<script src="faithful-mobile-journey.js"></script>
+<script src="faithful-mobile-navigation.js"></script>
+<script src="faithful-mobile-care.js"></script>
+<link rel="stylesheet" href="faithful-destinations.css">
+<link rel="stylesheet" href="faithful-settings.css">
+<script src="faithful-destinations.js"></script>
+<link rel="stylesheet" href="faithful-impact-exercise.css">
+<script src="faithful-impact-exercise.js"></script>
+<link rel="stylesheet" href="faithful-preferences.css">
+<script src="faithful-preferences.js"></script>
+<script src="faithful-care-guide.js"></script>
+<script src="faithful-wallet-guide.js?v=card-introduction-2"></script>
+<link rel="stylesheet" href="faithful-weekly-journey.css">
+<link rel="stylesheet" href="faithful-weekly-editorial.css">
+<script src="faithful-weekly-scripture.js"></script>
+<script src="faithful-weekly-journey.js"></script>
+<link rel="stylesheet" href="faithful-guide-finish.css">
+<script src="faithful-guide-finish.js"></script>
+<script src="faithful-mobile-tour.js"></script>
+<script src="faithful-member-profile.js"></script>
+<script src="faithful-settings-tabs.js"></script>
+<link rel="stylesheet" href="faithful-member-profile.css">
 </body>
 </html>

@@ -1,0 +1,112 @@
+/* Faithful Journey: scoped presentation of the existing member journey. */
+#sec-mobile .mobile-link-title{font:700 40px/1.15 var(--font-display),Georgia,serif;color:#123457;margin:0 0 8px}
+#sec-mobile .mobile-link-desc{font-size:16px;line-height:1.6;color:#536d85}
+#sec-mobile .mobile-link-preview{background:#eaf2fa;border-color:#d8e5f1;padding:28px}
+.mobile-cover-preview{width:300px;max-width:100%;min-height:590px;box-sizing:border-box;border:7px solid #142536;border-radius:38px;background:linear-gradient(#09203a20 15%,#09203a88 48%,#09203a 78%),url('../../assets/faithful-worship-hero.jpg') 60% center/cover;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:32px 20px 24px;color:white;text-align:center;box-shadow:0 15px 35px #17395825}
+.mobile-cover-preview>img{width:100px;height:100px;object-fit:contain}
+.mobile-cover-preview h3{font:500 30px/1.15 Georgia,serif;color:white;margin:0 0 12px}
+.mobile-cover-preview p{font-size:13px;line-height:1.5;color:#e0ebf8;margin-bottom:22px}
+.mobile-cover-button{display:block;background:#d6e9ff;color:#16385c;border:1px solid #d6e9ff;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.mobile-cover-button.secondary{background:transparent;color:white}
+.mobile-cover-preview small{display:block;color:#c6d7e7;font-size:10px;margin-top:18px}
+#sec-mobile .mobile-share-block{border-color:#d8e5f1;box-shadow:none;background:#fff;border-radius:12px}
+#sec-mobile .mobile-share-head h4{font:700 23px var(--font-display),Georgia,serif;color:#173755}
+#sec-mobile .mobile-share-open{background:#175fa5;min-height:46px}
+#sec-mobile .mobile-share-hint,#sec-mobile .mobile-share-note{color:#536d85;line-height:1.6}
+#sec-mobile [hidden]{display:none!important}
+@media(max-width:720px){#sec-mobile .mobile-link-title{font-size:32px}}
+#sec-profile{--jy-ink:#142e52;--jy-muted:#536b89;--jy-line:#d9e5f2;--jy-blue:#165da5;color:var(--jy-ink)}
+#sec-profile .journey-hero{background:none;border:0;box-shadow:none;padding:12px 0 20px;min-height:0;color:var(--jy-ink)}
+#sec-profile .journey-hero::before,#sec-profile .journey-hero::after,#sec-profile .journey-av,#sec-profile .journey-eyebrow,#sec-profile .journey-hero-stats,#sec-profile .journey-partner-bar{display:none}
+#sec-profile .journey-title{font:700 40px/1.15 var(--font-display),Georgia,serif;color:#123457;margin:0 0 8px}
+#sec-profile .journey-sub{font-size:15px;color:var(--jy-muted)}
+#sec-profile .journey-nav{background:none;border:0;border-bottom:1px solid var(--jy-line);border-radius:0;padding:0;gap:24px;margin-bottom:22px;overflow-x:auto;flex-wrap:nowrap}
+#sec-profile .journey-nav-btn{background:none;border:0;border-bottom:3px solid transparent;border-radius:0;padding:14px 12px;white-space:nowrap;font:500 17px Georgia,serif;color:var(--jy-muted)}
+#sec-profile .journey-nav-btn.active{color:var(--jy-blue);border-bottom-color:var(--jy-blue);background:#eaf4fc}
+#sec-profile .journey-nav-btn svg{display:none}
+#sec-profile .journey-section-hdr{display:none}
+#sec-profile .jy-banner{position:relative;min-height:190px;display:flex;align-items:center;padding:32px;margin-bottom:24px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,rgba(5,26,48,.86),rgba(5,26,48,.1)),var(--jy-photo) center/cover;color:white}
+#sec-profile .jy-banner h2{font:500 clamp(26px,3vw,38px)/1.16 Georgia,serif;max-width:570px;margin:0 0 12px;color:white}
+#sec-profile .jy-banner p{font-size:15px;line-height:1.6;max-width:540px;margin:0;color:#f1f6fc}
+#sec-profile .jy-demo{display:block;color:var(--jy-muted);font-size:12px;margin:0 0 14px}
+#sec-profile .card{border:1px solid var(--jy-line);background:rgba(255,255,255,.88);border-radius:12px;box-shadow:0 3px 10px #234b7010;overflow:hidden}
+#sec-profile .card-head{padding:20px 22px;border-bottom:1px solid #eaf0f7}
+#sec-profile .card-title,#sec-profile .jy-heading{font:500 23px/1.25 Georgia,serif;color:var(--jy-ink)}
+#sec-profile .prof-journal-layout,#sec-profile .journey-goals-layout,#sec-profile .journey-two-col{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(270px,1fr);gap:22px;align-items:start}
+#sec-profile .journey-journal-tabs{margin-bottom:16px}
+#sec-profile .journey-jtab{padding:10px 20px;color:var(--jy-muted);border:1px solid var(--jy-line);background:white;border-radius:8px}
+#sec-profile .journey-jtab.active{background:var(--jy-blue);color:white}
+#sec-profile textarea,#sec-profile input,#sec-profile select{border-color:var(--jy-line)!important;background:#f8fbfe!important;color:var(--jy-ink)!important;font:14px/1.6 inherit;box-sizing:border-box;max-width:100%}
+#sec-profile #jd-textarea{height:220px!important;resize:vertical!important;font-size:15px!important}
+#sec-profile button{cursor:pointer}
+#sec-profile button:focus-visible,#sec-profile [tabindex]:focus-visible,#sec-profile textarea:focus-visible,#sec-profile input:focus-visible,#sec-profile select:focus-visible{outline:3px solid #3293cc!important;outline-offset:3px}
+#sec-profile button[style*="background:#000"],#sec-profile .study-step-btn,#sec-profile .jy-primary{background:var(--jy-blue)!important;color:white!important;border:0;border-radius:8px;padding:11px 20px;font:600 13px/1.4 inherit}
+#sec-profile .mood-chip{border:1px solid var(--jy-line);border-radius:10px;background:#f5f9fe;color:var(--jy-ink);padding:12px 4px}
+#sec-profile .mood-chip.selected{border-color:var(--jy-blue);background:#e2effc}
+#sec-profile .jy-inset{padding:22px;font-size:14px;line-height:1.65;color:var(--jy-muted)}
+#sec-profile .jy-inset p{margin:0 0 14px}
+#sec-profile .jy-photo-link{display:block;margin-top:20px;padding:0;width:100%;text-align:left;background:white;border:1px solid var(--jy-line);border-radius:12px;overflow:hidden;color:var(--jy-ink)}
+#sec-profile .jy-photo-link img{width:100%;height:130px;object-fit:cover}
+#sec-profile .jy-photo-link span{display:block;padding:18px;font:500 22px Georgia,serif}
+#sec-profile .prof-stat-grid{gap:16px;margin-bottom:22px}
+#sec-profile .prof-stat-box{background:white;border:1px solid var(--jy-line);padding:22px;border-radius:10px}
+#sec-profile .ps-val{font:500 32px Georgia,serif;color:var(--jy-ink)}
+#sec-profile .ps-key{color:var(--jy-muted);font-size:13px}
+#sec-profile .jy-rhythm{display:flex;justify-content:space-between;gap:16px;padding:22px;border-bottom:1px solid var(--jy-line);align-items:center}
+#sec-profile .jy-rhythm:last-child{border-bottom:0}
+#sec-profile .jy-rhythm strong{font:500 21px Georgia,serif;display:block;margin-bottom:5px}
+#sec-profile .jy-rhythm p{margin:0;font-size:13px;line-height:1.5;color:var(--jy-muted)}
+#sec-profile .jy-link{border:0;background:transparent;color:var(--jy-blue);font-size:13px;padding:10px 0;text-align:left}
+#sec-profile .jy-note{margin-top:24px;padding:26px 30px;border:1px solid var(--jy-line);border-radius:10px;background:linear-gradient(90deg,#e7f2fcf5,#e7f2fcba),url('../../assets/faithful-dawn.jpg') center/cover;font-size:14px;line-height:1.6;color:var(--jy-muted)}
+#sec-profile .jy-note strong{display:block;font:500 26px Georgia,serif;color:var(--jy-ink);margin-bottom:8px}
+#sec-profile .study-stepper{gap:12px;padding:18px 0}
+#sec-profile .study-step-dot{font:500 15px Georgia,serif;text-transform:none;letter-spacing:0;padding:15px 8px;background:#edf3fa;border-color:var(--jy-line);color:var(--jy-muted)}
+#sec-profile .study-step-dot.active{background:var(--jy-blue);color:white}
+#sec-profile .study-active-layout{grid-template-columns:minmax(0,1.6fr) minmax(250px,1fr);gap:22px}
+#sec-profile .study-ai-thread{font-size:15px;line-height:1.7}
+#sec-profile .study-scripture-block{padding:22px;background:#edf5fc;border-left:3px solid #5b92c2;margin:16px 0}
+#sec-profile .study-topic-chip{background:#edf5fc;color:var(--jy-ink);border-color:var(--jy-line);padding:10px 15px}
+#sec-profile .jy-goal-card{background:#f7fbfe;border:1px solid var(--jy-line);padding:24px;margin-bottom:16px}
+#sec-profile .jy-goal-card-title{font:500 23px Georgia,serif;color:var(--jy-ink)}
+#sec-profile .jy-goal-card-sub{font-size:14px;color:var(--jy-muted);margin:8px 0 16px}
+#sec-profile .jy-goal-progress{height:8px;background:#dce8f4}
+#sec-profile .jy-goal-progress-fill{background:var(--jy-blue)}
+#sec-profile .goal-idea{background:#f4f8fc;border:1px solid var(--jy-line);padding:16px;border-radius:9px;color:var(--jy-ink)}
+#sec-profile .badge-grid{display:flex;flex-direction:column;padding:10px 22px}
+#sec-profile .badge-item{display:grid;grid-template-columns:50px 1fr;column-gap:14px;text-align:left;padding:16px 0;border-bottom:1px solid var(--jy-line)}
+#sec-profile .badge-circle{grid-row:span 2;margin:0;background:#edf5fc;color:var(--jy-blue);border:1px solid var(--jy-line)}
+#sec-profile .badge-name{font:500 18px Georgia,serif}
+#sec-profile .badge-sub{color:var(--jy-muted);font-size:12px}
+#sec-profile .jy-timeline{padding:0 22px}
+#sec-profile .jy-event{padding:22px 0 22px 24px;border-left:2px solid var(--jy-line);border-bottom:1px solid #eaf0f7;position:relative}
+#sec-profile .jy-event::before{content:'';position:absolute;left:-6px;top:29px;width:10px;height:10px;background:var(--jy-blue);border-radius:50%}
+#sec-profile .jy-event strong{display:block;font:500 20px Georgia,serif}
+#sec-profile .jy-event small{display:block;color:var(--jy-muted);margin-top:8px}
+#sec-profile .jy-filter{display:flex;gap:8px;flex-wrap:wrap;padding:18px 22px}
+#sec-profile .jy-filter button{border:1px solid var(--jy-line);background:#f3f8fd;color:var(--jy-muted);border-radius:20px;padding:8px 12px}
+#sec-profile .jy-filter button[aria-pressed=true]{background:var(--jy-blue);color:white}
+#sec-profile .study-path-card{border:1px solid var(--jy-line);background:#f7fbfe;border-radius:10px;padding:22px;margin:12px 0;min-height:82px}
+#sec-profile .study-path-title{font:500 21px Georgia,serif;color:var(--jy-ink)}
+#sec-profile .study-path-meta{color:var(--jy-muted);font-size:13px;margin-top:8px}
+#sec-profile .study-path-badge{background:#e7f1fa;color:#245480}
+#sec-profile .jy-primary:disabled{opacity:.55;cursor:default}
+#sec-profile input,#sec-profile select,#sec-profile textarea,#sec-profile button{font-family:inherit}
+#sec-profile input,#sec-profile select,#sec-profile textarea{font-size:14px;line-height:1.6}
+#sec-profile .jy-primary{font-size:13px;line-height:1.4;font-weight:600}
+#sec-profile .prof-journal-layout>div:last-child{display:grid;gap:18px}
+#sec-profile .prof-journal-layout .jy-photo-link{margin-top:0}
+#sec-profile .jy-goal-card-top{flex-wrap:wrap}
+#sec-profile .jy-goal-card-title,#sec-profile .jy-event strong{overflow-wrap:anywhere}
+#sec-profile .study-reflect-input{width:100%;min-height:140px;padding:14px}
+#sec-profile .jy-goal-card-top .jy-link{padding:8px;margin-left:4px}
+#sec-profile #jy-goal-form{padding:18px!important}
+#sec-profile #jy-goal-form label{display:grid;gap:8px;padding:0}
+#sec-profile #jy-goal-form input,#sec-profile #jy-goal-form select{width:100%;min-height:42px;padding:10px}
+#sec-profile #jy-goals-empty{padding:50px 26px!important;background:linear-gradient(#ffffffd9,#ffffffed),url('../../assets/faithful-growth.jpg') center/cover}
+/* One page-title scale; photographic hero headings retain their own hierarchy. */
+#sec-profile .journey-hero,#sec-network .fc-heading,#sec-wallet .fw-heading,#sec-ai .faithful-leadership-heading,#sec-watch .faithful-watch-heading{margin:12px 0 24px;padding:0}
+#sec-profile .journey-title,#sec-network .fc-heading h1,#sec-wallet .fw-heading h1,#sec-ai .faithful-leadership-heading h1,#sec-watch .faithful-watch-heading h1{font-family:var(--font-display),Georgia,serif;font-size:40px;font-weight:700;line-height:1.15;letter-spacing:-.02em;color:#123457;margin:0 0 8px}
+#sec-profile .journey-sub,#sec-network .fc-heading p,#sec-wallet .fw-heading p,#sec-ai .faithful-leadership-heading p,#sec-watch .faithful-watch-heading p{font-size:16px;line-height:1.5;color:#536d85;margin:0}
+@media(max-width:720px){#sec-profile .journey-title,#sec-network .fc-heading h1,#sec-wallet .fw-heading h1,#sec-ai .faithful-leadership-heading h1,#sec-watch .faithful-watch-heading h1{font-size:32px}}
+@media(max-width:900px){#sec-profile .prof-journal-layout,#sec-profile .journey-goals-layout,#sec-profile .journey-two-col,#sec-profile .study-active-layout{grid-template-columns:1fr}#sec-profile .journey-nav{gap:4px}#sec-profile .jy-banner{padding:24px;min-height:180px}#sec-profile .prof-stat-grid{grid-template-columns:repeat(2,1fr)}#sec-profile .jy-rhythm{flex-wrap:wrap}}
+@media(max-width:480px){#sec-profile .journey-nav-btn{font-size:14px;padding:12px 8px}#sec-profile .mood-chip{min-width:0}#sec-profile #jd-write .card>div[style*="repeat(6"]{grid-template-columns:repeat(3,1fr)!important}#sec-profile #jy-goal-form>div{grid-template-columns:1fr!important}#sec-profile .jy-banner h2{font-size:29px}}

@@ -1,0 +1,33 @@
+/* Recompose canonical wallet nodes: no duplicate balances, editors or activity state. */
+(() => {
+ const wallet=document.getElementById('wlt-give'), impact=document.getElementById('wlt-impact');
+ const make=(tag,cls,html)=>{const e=document.createElement(tag);e.className=cls;e.innerHTML=html;return e;};
+ const header=make('header','fw-heading','<h1>Your everyday, with purpose.</h1><p>Your card, giving, and church connection in one place.</p><small>Demo preview — illustrative balances and activity</small>');
+ wallet.prepend(header);
+ const bank=document.getElementById('wallet-card-anchor');header.after(bank);
+ const bridge=make('section','fw-bridge','<img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative pantry volunteers"><div><h2>Your card impact this month</h2><strong></strong><p>See how your allocation supports church ministries.</p></div><button type="button">View impact →</button>');
+ bridge.querySelector('button').onclick=()=>walletTab('impact');bank.after(bridge);
+ const recent=wallet.querySelector('.wlt-recent-card');bridge.after(recent);
+ const activityRow=make('div','fw-wallet-activity','');recent.before(activityRow);activityRow.append(recent);
+ const controls=make('section','fw-controls','<h2>Card controls</h2><p>Demo card-management options.</p><button type="button">View card details</button><button type="button">Manage card & locking</button>');activityRow.append(controls);
+ controls.querySelectorAll('button')[0].onclick=()=>{bank.scrollIntoView({behavior:'smooth'});};
+ controls.querySelectorAll('button')[1].onclick=()=>{toggleWalletManage();document.getElementById('wallet-account-card').scrollIntoView({behavior:'smooth'});};
+ const give=document.getElementById('wallet-give-anchor');activityRow.after(give);
+ const givingHeading=make('header','fw-giving-heading','<h2>Give directly</h2><p>Choose a ministry close to your heart.</p>');give.prepend(givingHeading);
+ const tiles=make('div','fw-giving-photos','');[['General giving','worship-hero'],['Missions','community'],['Youth','community'],['Food Pantry','food-pantry']].forEach(([name,img])=>{const tile=make('div','','<img src="../../assets/faithful-'+img+'.jpg" alt=""><strong>'+name+'</strong>');tiles.append(tile);});givingHeading.after(tiles);
+ const goal=wallet.querySelector('.wlt-give-goal-bar');
+ const feature=impact.querySelector('.faithful-impact-feature');
+ const intro=make('section','fw-impact-intro','<img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative food pantry volunteers"><div><h2>Small acts.<br>Meaningful support.</h2><p>Everyday generosity supporting your church community.</p><small>Demo preview — illustrative data</small></div>');
+ feature.replaceChildren(intro);
+ const alloc=document.getElementById('wlt-alloc-card');feature.append(alloc);
+ const allocationNote=make('p','fw-note','Allocation shares describe how card impact is distributed—not fundraising progress.');alloc.append(allocationNote);
+ const progress=make('section','fw-progress','<h2>Your giving goal</h2><p>A goal you choose, at your own pace.</p>');progress.append(goal);feature.append(progress);
+ const activity=document.getElementById('wlt-activity');feature.append(activity);
+ const direct=make('section','fw-direct','<h2>Give directly</h2><p>Choose a ministry close to your heart.</p><button type="button">Make a gift</button>');direct.querySelector('button').onclick=openWalletGive;feature.append(direct);
+ const footer=()=>make('footer','fw-footer','<h2>A brighter tomorrow, together.</h2><p>Faithful Church</p>');feature.append(footer());wallet.append(footer());
+ const images=['faithful-community','faithful-worship-hero','faithful-community','faithful-food-pantry','faithful-care'];
+ const rows=[...alloc.querySelectorAll('.pf-cause-item')];
+ rows.forEach((row,i)=>{const img=document.createElement('img');img.src='../../assets/'+images[i]+'.jpg';img.alt='';row.prepend(img);const amount=make('span','fw-allocation-amount','');row.append(amount);row.tabIndex=0;row.setAttribute('role','button');row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}};});
+ const sync=()=>{const total=Number(document.getElementById('pf-donut-val').textContent.replace(/[^\d.]/g,''))||0;bridge.querySelector('strong').textContent=total.toLocaleString('en-US',{style:'currency',currency:'USD'});const cents=Math.round(total*100);const shares=rows.map(r=>parseFloat(r.querySelector('.pf-cl-pct').textContent)||0);const amounts=shares.map(p=>Math.floor(cents*p/100));let remainder=cents-amounts.reduce((a,b)=>a+b,0);if(shares.reduce((a,b)=>a+b,0)===100){const order=shares.map((p,i)=>({i,f:cents*p/100-amounts[i]})).sort((a,b)=>b.f-a.f);for(let i=0;i<remainder;i++)amounts[order[i%order.length].i]++;}rows.forEach((r,i)=>{r.querySelector('.pf-cl-fill').style.width=shares[i]+'%';r.querySelector('.fw-allocation-amount').textContent=(amounts[i]/100).toLocaleString('en-US',{style:'currency',currency:'USD'});});};
+ const observer=new MutationObserver(sync);rows.forEach(r=>observer.observe(r.querySelector('.pf-cl-pct'),{childList:true,subtree:true,characterData:true}));observer.observe(document.getElementById('pf-donut-val'),{childList:true,characterData:true,subtree:true});sync();
+})();
