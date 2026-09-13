@@ -1,0 +1,77 @@
+/* Image-led weekly Journey. Scoped to the shared Faithful weekly component. */
+#sec-profile,#jy-scroll{container-name:weekly-journey;container-type:inline-size}
+/* Desktop already receives its gutters from .co; do not add another inset. */
+#sec-profile>.wj{max-width:none;margin:0;padding:0 0 28px}
+.wj .wj-heading{padding:10px 0 8px}
+.wj .wj-heading h1{font-size:clamp(32px,3vw,44px);margin:8px 0}
+.wj .wj-notice{font-size:13px;padding:8px 12px;margin:8px 0 20px}
+.wj .wj-week-picker{display:flex;align-items:center;gap:20px;margin-bottom:18px}
+.wj .wj-week-picker label{margin:0;white-space:nowrap}
+.wj .wj-week-picker select{max-width:580px;margin-left:auto}
+.wj .wj-lesson{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;background:white;padding:0;border:1px solid #d4e3f0;border-radius:18px;overflow:hidden}
+.wj .wj-sermon-image{position:relative;margin:0;min-height:310px;background:#173755}
+.wj .wj-sermon-image img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
+.wj .wj-sermon-image figcaption{position:absolute;bottom:0;left:0;right:0;padding:38px 20px 18px;color:white;background:linear-gradient(transparent,rgba(7,27,45,.9));font-weight:600}
+.wj .wj-lesson-copy{padding:20px 24px 20px 0}
+.wj .wj-lesson-copy h2{font-size:clamp(25px,2.5vw,34px);margin:12px 0}
+.wj .wj-speaker{color:#506b81;font-size:14px}
+.wj .wj-badge{margin-top:0}
+.wj .wj-source{font-size:13px;color:#506b81;margin-top:12px}
+.wj summary{cursor:pointer;padding:10px 0;min-height:24px}
+.wj .wj-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible;background:#e6eff7;padding:7px;border:1px solid #c4d8e8;border-radius:14px;margin:24px 0 18px}
+.wj .wj-tabs button{display:flex;align-items:center;justify-content:center;gap:9px;margin:0;min-height:60px;border:2px solid transparent;border-radius:9px;color:#294d6c;font-weight:600;white-space:normal;line-height:1.2;padding:10px 6px}
+.wj .wj-tabs button>span{font-size:25px;font-family:Georgia,serif;line-height:1}
+.wj .wj-tabs button[aria-pressed=true]{background:#173755;color:white;border:2px solid #173755;box-shadow:0 3px 9px #17375520}
+.wj .wj-tabs button:hover:not([aria-pressed=true]){background:#f8fbff}
+.wj .wj-tab-hero{position:relative;isolation:isolate;min-height:200px;display:flex;align-items:flex-end;overflow:hidden;border-radius:14px}
+.wj .wj-tab-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.wj .wj-tab-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,27,43,.82),rgba(9,27,43,.12));z-index:-1}
+.wj .wj-tab-hero>div{padding:26px 30px;max-width:650px}
+.wj .wj-tab-hero h2{color:white;font-size:clamp(28px,3vw,38px);margin:0 0 10px}
+.wj .wj-tab-hero p{color:#f4f7fa;margin:0}
+.wj #wj-panel{margin-top:20px;background:#fff;border:1px solid #d4e3f0;border-radius:14px;padding:26px 30px}
+.wj .wj-panel-journal{max-width:none;margin-left:0;margin-right:0}
+.wj .wj-panel-journal textarea{background:repeating-linear-gradient(#fff,#fff 31px,#edf2f6 32px);line-height:32px;padding:16px 20px;font-size:17px}
+.wj .wj-check{font-size:14px;font-weight:400}
+.wj .wj-entry{padding:20px 0}
+.wj .wj-entry h4{font:22px/1.3 var(--font-display,Georgia,serif);margin:0 0 8px}
+.wj .wj-book{position:relative;background:linear-gradient(90deg,#e5dfd2 0,#faf7ed 3%,#fffdf7 8%,#fffdf7 96%,#eee7d8 100%);margin:26px 6px 36px;padding:34px 42px 28px;border:1px solid #e2dbcd;border-radius:3px 14px 14px 3px;box-shadow:3px 4px 0 #f5f0e5,5px 7px 0 #dcd5c9,0 16px 25px #17375512}
+.wj .wj-book:before{content:'';position:absolute;left:20px;top:0;bottom:0;border-left:1px solid #d7cebe}
+.wj .wj-book blockquote{background:none;border:0;padding:0;margin:0;color:#263b49;font:clamp(24px,2.6vw,34px)/1.65 var(--font-display,Georgia,serif)}
+.wj .wj-book blockquote:first-letter{float:left;font-size:2.5em;line-height:1;padding:9px 8px 0 0;color:#365d77}
+.wj .wj-book cite{display:block;font:13px/1.6 var(--font-body,Arial,sans-serif);color:#586873;margin-top:22px;border-top:1px solid #ddd5c7;padding-top:14px}
+.wj .wj-panel-study>details{border-bottom:1px solid #d4e3f0;padding:4px 0}
+.wj .wj-panel-study>ul{padding-left:22px}
+.wj .wj-panel-study>ul li{padding:10px 0;font-size:18px}
+.wj .wj-panel-study details .wj-text{font:19px/1.85 var(--font-display,Georgia,serif);max-width:70ch}
+.wj .wj-evidence{margin:24px 0}
+.wj .wj-evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #d4e3f0;border-bottom:1px solid #d4e3f0;padding:20px 0;gap:18px}
+.wj .wj-evidence-grid>div{display:flex;flex-direction:column;align-items:flex-start}
+.wj .wj-evidence-grid strong{font:32px/1.2 var(--font-display,Georgia,serif)}
+.wj .wj-evidence-grid span{font-size:14px;color:#506b81;margin:8px 0}
+.wj .wj-evidence-grid button{font-size:13px;padding:6px 10px}
+.wj .wj-milestones{list-style:none;margin:18px 0;padding:0}
+.wj .wj-milestones li{display:flex;gap:16px;border-left:2px solid #ccdce7;margin-left:16px;padding:0 0 24px 22px}
+.wj .wj-milestones li>span{margin-left:-39px;display:grid;place-items:center;flex:0 0 30px;height:30px;border:2px solid #597b91;border-radius:50%;background:#f2f7fc;color:#173755}
+.wj .wj-evidence-note{font-size:13px;color:#506b81}
+.wj .wj-panel-activity>ul{list-style:none;padding:0;border-left:2px solid #c4d8e8;margin-left:12px}
+.wj .wj-panel-activity>ul li{padding:12px 20px;margin-left:0;border-bottom:1px solid #edf2f6}
+.wj .wj-panel-goals>p:has([data-adopt]){display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;background:#f2f7fc;border-radius:10px;max-width:none}
+.wj .wj-panel-goals [data-adopt]{flex-shrink:0}
+/* Follow the content width, including the phone frame inside a desktop window. */
+@container weekly-journey (max-width:700px){
+ .wj{padding:16px 12px 28px}
+ .wj .wj-week-picker{display:block}.wj .wj-week-picker label{margin:0 0 6px}
+ .wj .wj-lesson{grid-template-columns:1fr;gap:0}.wj .wj-sermon-image{min-height:185px}
+ .wj .wj-lesson-copy{padding:18px}.wj .wj-lesson-copy h2{font-size:26px}
+ .wj .wj-tabs{gap:2px;padding:4px;margin:20px 0 14px}
+ .wj .wj-tabs button{flex-direction:column;gap:6px;min-height:72px;font-size:12px;padding:7px 2px}
+ .wj .wj-tabs button>span{font-size:22px}
+ .wj .wj-tab-hero{min-height:180px}.wj .wj-tab-hero>div{padding:20px}.wj .wj-tab-hero h2{font-size:29px}
+ .wj .wj-tab-hero p{font-size:14px}
+ .wj #wj-panel{padding:18px 16px}
+ .wj .wj-book{padding:24px 22px 22px 30px;margin:22px 0 30px}.wj .wj-book:before{left:13px}
+ .wj .wj-book blockquote{font-size:25px}
+ .wj .wj-evidence-grid{grid-template-columns:1fr}.wj .wj-evidence-grid>div{display:grid;grid-template-columns:85px 1fr;align-items:center}.wj .wj-evidence-grid button{grid-column:2}
+ .wj .wj-panel-goals>p:has([data-adopt]){align-items:flex-start;flex-direction:column}
+}

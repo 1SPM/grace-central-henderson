@@ -1,0 +1,23 @@
+.fd-settings-cog{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:12px 16px;border:1px solid #ffffff38;border-radius:10px;background:#173755;color:#fff;font:600 15px/1.4 var(--font-body,Arial,sans-serif);cursor:pointer;text-align:left}
+.fd-settings-cog>span:first-child{font-size:25px;line-height:1}
+.fd-settings-cog:hover{background:#245173}
+.fd-settings-cog:focus-visible{outline:3px solid #77c5f0;outline-offset:-3px}
+.sb-foot .fd-settings-cog{margin-bottom:12px}
+#app-drawer>.fd-settings-cog{flex-shrink:0;border-radius:0;border-width:1px 0 0;padding-bottom:max(14px,env(safe-area-inset-bottom));position:relative;z-index:1}
+#sec-destination-settings select,#screen-destination-settings select{display:block;width:100%;min-height:46px;padding:10px;margin-top:8px;border:1px solid #c4d8e8;border-radius:8px;background:#fff;color:#173755;font:inherit}
+.fd-large-reading .fd-page p,.fd-large-reading .fd-page li,.fd-large-reading .wj p,.fd-large-reading .wj textarea{font-size:18px!important;line-height:1.7}
+
+/* Match the Faithful guides: navy headings, restrained surfaces, clear actions. */
+:is(#sec-destination-settings,#screen-destination-settings) .fd-card{border:1px solid #cadde9;border-radius:16px;background:linear-gradient(145deg,#fff,#f4f8fb);padding:24px;box-shadow:0 4px 14px #17375508}
+:is(#sec-destination-settings,#screen-destination-settings) :is(h1,h2,h3,label){color:#173755}
+:is(#sec-destination-settings,#screen-destination-settings) p{color:#526b7d;line-height:1.6}
+:is(#sec-destination-settings,#screen-destination-settings) .fd-button{min-height:44px;border-radius:10px;background:#175fa5;color:#fff;padding:12px 18px}
+:is(#sec-destination-settings,#screen-destination-settings) .fd-button:focus-visible{outline:3px solid #449eca;outline-offset:3px}
+@media(max-width:600px){:is(#sec-destination-settings,#screen-destination-settings) .fd-card{padding:18px}}
+.settings-tabs{display:flex;gap:6px;overflow-x:auto;padding:6px;margin:20px 0;background:#edf4f8;border:1px solid #cadde9;border-radius:14px}
+.settings-tabs button{flex:1 0 auto;min-height:46px;padding:12px 18px;border:0;border-radius:10px;background:transparent;color:#173755;font:600 15px/1.3 inherit;cursor:pointer}
+.settings-tabs button[aria-selected="true"]{background:#173755;color:white}
+.settings-tabs button:focus-visible{outline:3px solid #449eca;outline-offset:-3px}
+.fd-grid.settings-tab-content{display:block}
+.settings-tab-content>[hidden]{display:none}
+.settings-tab-content .fd-card{margin-bottom:18px}

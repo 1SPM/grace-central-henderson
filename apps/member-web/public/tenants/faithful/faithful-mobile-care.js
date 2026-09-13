@@ -1,0 +1,20 @@
+(() => {
+ const root=document.getElementById('screen-care');if(!root)return;
+ const q=s=>root.querySelector(s);
+ q('.home-nav-title').textContent='Pastoral Care';
+ q('.cr-hero-live').textContent='Care & connection';
+ q('.cr-hero-copy p').textContent='A place for prayer, practical support, and your next step.';
+ q('.cr-blessing-live').textContent='Demo';
+ q('.cr-blessing-role').textContent='AI leader avatar · not a live pastor';
+ q('.cr-blessing-text').textContent='Explore the leader avatar for reflection, or choose Direct Message to request human follow-up. Response times vary.';
+ q('.cr-ba-primary').textContent='Talk with the AI avatar';
+ q('.care-option--crisis .co-sub').textContent='Open crisis resources and urgent support options';
+ const dispatch=q('.cr-dispatch-grid').closest('.card');
+ dispatch.querySelector('h3').textContent='Your care team';
+ dispatch.querySelector('.section-head>div>span').textContent='Illustrative routing · demo portal';
+ dispatch.querySelector('.section-head>span').textContent='Demo';
+ root.querySelectorAll('.cr-dispatch-badge').forEach(n=>n.textContent='Demo');
+ dispatch.querySelector('.cr-dispatch-cell:last-child .cr-dispatch-sub').textContent='Use crisis resources for urgent support';
+ const recent=q('.cr-req-row').closest('.card');recent.querySelector('h3').textContent='Recent requests · sample';
+ root.querySelectorAll('.care-option,.home-nav-bell[onclick]').forEach(n=>{n.tabIndex=0;n.setAttribute('role','button');n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();n.click();}});});
+})();

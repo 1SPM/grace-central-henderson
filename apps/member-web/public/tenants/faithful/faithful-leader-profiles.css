@@ -1,0 +1,28 @@
+/* Shared profile presentation: desktop modal and mobile sheet. */
+body .leader-profile-modal,body .ld-profile-hero{background:linear-gradient(180deg,#e8f2faf2,#f7fbff 340px),url('../../assets/faithful-dawn.jpg') center top/cover!important;color:#173755}
+body .leader-profile-modal{max-width:480px;max-height:calc(100dvh - 40px)}
+body .leader-profile-modal::before{display:none}
+body .lpm-hero-top{display:flex;flex-direction:column;align-items:center;padding:28px 24px 16px}
+body .lpm-av-wrap{display:block;order:-1;width:112px;height:112px;margin:10px auto 18px;flex-shrink:0}
+body .lpm-av{display:block;width:112px!important;height:112px!important;max-width:none!important;object-fit:cover;object-position:center 28%;border-radius:50%;border:4px solid white;box-sizing:border-box;box-shadow:0 5px 18px #143a6020}
+body .ld-profile-hero .ld-av-lg{display:block!important;width:112px!important;height:112px!important;margin:16px auto 20px!important;padding:0!important;border:0!important;overflow:hidden;border-radius:50%;flex-shrink:0;box-shadow:0 5px 18px #143a6020}
+body .ld-profile-hero #lpm-av{width:112px!important;height:112px!important;max-width:none!important;display:block;object-fit:cover;object-position:center 28%;border:4px solid white;border-radius:50%;box-sizing:border-box}
+body .lpm-av-pulse,body .lpm-av-pulse2,body .ld-profile-hero .home-ai-pulse,body .ld-profile-hero .home-ai-pulse2{display:none}
+body .lpm-name,body .ld-profile-hero .ld-leader-name{font:700 29px/1.2 var(--font-display,Georgia),Georgia,serif!important;color:#173755!important;margin:8px 0;overflow-wrap:anywhere}
+body .lpm-title,body .ld-profile-hero .ld-leader-role{font-size:13px!important;line-height:1.6;color:#506a85!important}
+body .lpm-bio,body .lpm-greeting,body .ld-profile-hero .ld-profile-bio,body .ld-profile-hero .home-ai-greeting{font-size:14px!important;line-height:1.65!important;color:#3e5974!important}
+body .lpm-badge,body .ld-profile-hero .home-ai-mode{background:#dceafa!important;color:#214f80!important;border:1px solid #bdd4ed;padding:6px 10px;font-size:12px}
+body .lpm-dm-outline,body .ld-profile-hero .ld-dm-outline{background:white!important;border:1px solid #b9cfe4!important;color:#194775!important;min-height:46px;font-size:14px;width:100%;max-width:340px}
+body .lpm-begin,body .ld-profile-hero .ld-begin{background:#175fa5!important;color:white!important;border:1px solid #175fa5;box-shadow:none;min-height:46px;font-size:14px;width:100%;max-width:340px}
+body .lpm-stat--dark,body .ld-profile-hero .ld-profile-stat{background:white!important;border:1px solid #d5e2ef!important;border-radius:10px;padding:14px}
+body .lpm-stat-lbl,body .lpm-section-lbl,body .ld-profile-hero .ld-profile-stat>span{color:#536d87!important;font-size:11px!important;letter-spacing:0;text-transform:none}
+body .lpm-stat-val,body .ld-profile-hero .ld-profile-stat>strong{color:#173755!important;font-size:14px!important;line-height:1.5}
+body .lpm-tag,body .ld-profile-hero .ld-profile-tags>*{background:#e7f0f9!important;color:#365873!important;border:1px solid #ccdeed;font-size:12px;padding:7px 10px}
+body .lpm-foot{background:#f5f9fd;border-top:1px solid #d5e2ef;padding:16px;gap:12px}
+body .lpm-btn{min-height:44px}
+body .lpm-close,body .ld-profile-close{width:44px;height:44px;background:#e1edf8!important;color:#173755!important;z-index:10;top:10px;right:10px}
+body .ld-profile-hero{padding:22px 20px 28px!important}
+body .ld-profile-logo{filter:brightness(0) saturate(100%);opacity:.7}
+body .lpm-reachable--live,body #lpm-human-live>*{background:#dff0e5!important;color:#23613b!important;border:1px solid #bad9c5}
+body .ld-profile-verified-inline{color:#365873!important;font-size:12px}
+body .leader-profile-modal button:focus-visible,body .ld-profile-hero button:focus-visible{outline:3px solid #3c89c4;outline-offset:3px}

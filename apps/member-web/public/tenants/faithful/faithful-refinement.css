@@ -1,0 +1,348 @@
+/* Final Faithful composition, shared by desktop and compact layouts. */
+#sec-wallet .fw-wallet-activity{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-bottom:20px}
+#sec-wallet .fw-controls{padding:22px;border:1px solid #d7e5f1;border-radius:12px;background:#fff}#sec-wallet .fw-controls h2,#sec-wallet .fw-giving-heading h2{font:700 27px var(--font-display),Georgia,serif;color:#173755;margin:0 0 8px}
+#sec-wallet .fw-controls p,#sec-wallet .fw-giving-heading p{color:#536d85;margin-bottom:16px}#sec-wallet .fw-controls button{display:block;width:100%;min-height:44px;text-align:left;padding:12px;border:1px solid #d7e5f1;background:#f6faff;color:#17558b;border-radius:7px;margin-top:10px}
+#sec-wallet .fw-giving-heading{padding:20px 20px 0}#sec-wallet .fw-giving-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 20px 20px}#sec-wallet .fw-giving-photos>div{overflow:hidden;border:1px solid #d7e5f1;border-radius:8px}#sec-wallet .fw-giving-photos img{width:100%;height:115px;object-fit:cover}#sec-wallet .fw-giving-photos strong{display:block;padding:10px;color:#173755;font-size:14px}
+#sec-wallet #wallet-available-amt{font:700 46px var(--font-display),Georgia,serif}#sec-wallet .wallet-balance-block .pf-wallet-val{font:700 46px var(--font-display),Georgia,serif;color:#153454}
+@media(max-width:700px){#sec-wallet .fw-wallet-activity{grid-template-columns:1fr}#sec-wallet .fw-giving-photos{grid-template-columns:1fr 1fr}}
+#sec-wallet .fw-heading{margin:18px 0 24px}#sec-wallet .fw-heading h1{font:700 40px/1.15 var(--font-display),Georgia,serif;color:#123457;margin:0 0 10px}
+#sec-wallet .fw-heading p{font-size:17px;color:#536d85;margin-bottom:12px}#sec-wallet .fw-heading small,#sec-wallet .fw-impact-intro small{color:#22598a;background:#e9f4ff;border:1px solid #cde2f5;padding:6px 10px;border-radius:20px;display:inline-block}
+#wlt-give>.wlt-header-block,#wlt-give>.wlt-give-recent-grid:empty{display:none}
+#sec-wallet #wallet-card-anchor{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;margin:0 0 20px}
+#sec-wallet #wallet-card-anchor>.card{background:#fff;border:1px solid #d7e5f1;border-radius:12px;box-shadow:none;padding:12px}
+#sec-wallet .pf-card-flip{max-width:430px;margin:16px auto}#sec-wallet .wallet-acct-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#sec-wallet .wallet-act-btn{min-height:64px;border:1px solid #cddfed;background:#eff7fe;color:#154778;font-size:14px;border-radius:8px}
+#sec-wallet .card-title{font-family:var(--font-display),Georgia,serif;color:#173755;font-size:23px}
+#sec-wallet .fw-bridge{display:flex;align-items:center;gap:24px;background:white;border:1px solid #d7e5f1;border-radius:12px;padding:20px;margin-bottom:20px}
+#sec-wallet .fw-bridge img{width:200px;height:120px;object-fit:cover;border-radius:8px}#sec-wallet .fw-bridge strong{font:700 34px var(--font-display),Georgia,serif;color:#173755}#sec-wallet .fw-bridge button{margin-left:auto}
+#sec-wallet .fw-bridge h2,#sec-wallet .fw-progress h2,#sec-wallet .fw-direct h2{font:700 26px var(--font-display),Georgia,serif;color:#173755;margin:0 0 8px}
+#sec-wallet .fw-bridge p,#sec-wallet .fw-progress p,#sec-wallet .fw-direct p{color:#536d85;line-height:1.5}
+#sec-wallet .fw-bridge button,#sec-wallet .fw-direct button{border:1px solid #bfd6eb;border-radius:8px;padding:12px 18px;min-height:44px;background:#175b9b;color:white;cursor:pointer}
+#wlt-give>.wlt-recent-card,#wlt-give>#wallet-give-anchor{margin-bottom:20px;border:1px solid #d7e5f1;border-radius:12px;background:#fff}
+#sec-wallet .fw-impact-intro{display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:center;margin:24px 0}
+#sec-wallet .fw-impact-intro img{width:100%;height:240px;object-fit:cover;border-radius:10px}#sec-wallet .fw-impact-intro h2{font:700 36px/1.12 var(--font-display),Georgia,serif;color:#153454;margin:0 0 12px}
+#sec-wallet .fw-impact-intro p{font-size:16px;color:#536d85;line-height:1.5;margin-bottom:14px}
+#sec-wallet #wlt-alloc-card{background:white;border:1px solid #cbdff0;border-radius:12px;margin:0 0 20px;padding:12px}
+#sec-wallet #wlt-alloc-card .pf-donut-wrap{width:200px;height:200px;flex:0 0 200px}#sec-wallet #pf-donut-svg{width:200px;height:200px}
+#sec-wallet #wlt-alloc-card .pf-cause-item{display:grid;grid-template-columns:48px 10px minmax(110px,1fr) minmax(70px,1fr) 42px 65px;gap:10px;align-items:center;padding:10px 0;cursor:pointer}
+#sec-wallet .pf-cause-item>img{width:48px;height:44px;object-fit:cover;border-radius:6px}#sec-wallet .fw-allocation-amount{font-size:13px;color:#173755;text-align:right;font-variant-numeric:tabular-nums}
+#sec-wallet .pf-cl-bar{width:100%;height:8px;background:#e4ebf2}#sec-wallet .pf-cl-name{font-size:13px;color:#173755}#sec-wallet .pf-cl-pct{font-size:13px;color:#173755}
+#sec-wallet .fw-note{font-size:12px;color:#536d85;padding:12px 16px;margin:0;border-top:1px solid #e2eaf1}
+#sec-wallet .fw-progress,#sec-wallet .fw-direct,#sec-wallet #wlt-activity{background:#fff;border:1px solid #d7e5f1;border-radius:12px;padding:22px;margin:20px 0}
+#sec-wallet .fw-progress .wlt-give-goal-bar{margin:16px 0 0;background:#f3f8fd;border:0}#sec-wallet .fw-progress .prog-bar{height:12px}
+#sec-wallet .fw-footer{padding:36px 24px;text-align:center;background:linear-gradient(90deg,#eff7fcdf,#eff7fc88),url('../../assets/faithful-dawn.jpg') center/cover;border-radius:10px;margin-top:24px;color:#173755}#sec-wallet .fw-footer h2{font:700 30px var(--font-display),Georgia,serif}
+#wlt-impact>.faithful-impact-details{margin-top:20px}#wlt-impact .wlt-impact-head,#wlt-impact .wlt-impact-flow>.pf-grid,#wlt-impact .wlt-goal-cta{display:none}
+@media(max-width:1100px){#sec-wallet #wlt-alloc-card>div:nth-child(2){flex-direction:column;align-items:stretch!important}#sec-wallet #wlt-alloc-card .pf-donut-wrap{align-self:center}#sec-wallet .fw-bridge img{width:140px}}
+@media(max-width:700px){#sec-wallet #wallet-card-anchor,#sec-wallet .fw-impact-intro{grid-template-columns:1fr}#sec-wallet .fw-bridge{flex-wrap:wrap}#sec-wallet .fw-heading h1{font-size:30px}#sec-wallet #wlt-alloc-card .pf-cause-item{grid-template-columns:36px 8px 1fr 38px 60px;gap:6px}#sec-wallet .pf-cause-item>img{width:36px}#sec-wallet .pf-cl-bar{display:none}}
+#sec-ai .faithful-leadership-layout{align-items:start}
+#sec-ai .ai-main{align-self:start;height:auto}
+#sec-ai .ai-chat{flex:0 0 auto;min-height:0;height:auto}
+#sec-ai .ai-main>.grace-faq-block{margin:0;padding:20px;border:1px solid #dce6f1;border-radius:10px;background:#ffffffd9}
+#sec-ai .grace-faq-block .card-title{font:700 23px/1.3 var(--font-display),Georgia,serif;color:#173755}
+#sec-ai #desktop-faq-subtitle{display:block;color:#536b80!important;font-size:12px!important;line-height:1.5;margin-top:6px}
+#sec-ai .grace-faq-block .faq-card{border-radius:8px;border-color:#dce6f1}
+#sec-ai .grace-faq-block .faq-answer{color:#475f75;padding:0 16px 16px;line-height:1.6}
+#sec-ai .grace-faq-block .faq-card-q{color:#173755}
+#sec-ai .faithful-leadership-support>.faithful-urgent-help{margin:20px 0 0;background:#fff8f5;border-color:#e7ccc5;padding:24px}
+#sec-ai .faithful-emergency-heading{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+#sec-ai .faithful-emergency-heading>span{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:50%;background:#f4e0da;color:#983c31;font-size:28px}
+#sec-ai .faithful-emergency-heading h3{margin:0;line-height:1.2}
+#sec-ai .faithful-emergency-heading p{margin:7px 0 0}
+#sec-ai .faithful-emergency-path{padding:18px 0;border-top:1px solid #ead8d0}
+#sec-ai .faithful-emergency-path h4{font:700 18px/1.3 var(--font-display),Georgia,serif;color:#52352e;margin:0}
+#sec-ai .faithful-emergency-path p{font-size:14px;line-height:1.6;margin:8px 0 14px}
+#sec-ai .faithful-emergency-path button{width:100%;text-align:center;line-height:1.4}
+#sec-ai .faithful-emergency-path [data-support="pastoral"]{background:#fff;color:#77372d;border:1px solid #b97c6e}
+#sec-ai .faithful-urgent-help>small{display:block;border-top:1px solid #ead8d0;padding-top:14px;font-size:12px;line-height:1.6;color:#66483f}
+#sec-ai .faithful-urgent-help h3{color:#60382e;font-size:23px}
+#sec-ai .faithful-urgent-help p{color:#66483f;line-height:1.5}
+#sec-ai .faithful-urgent-help button{min-height:44px;background:#983c31;color:#fff;padding:10px 14px;border-radius:7px;font-weight:600}
+@media(min-width:1500px){#sec-ai .ai-shell.faithful-leadership-layout{grid-template-columns:minmax(0,1.5fr) minmax(440px,1fr)}#sec-ai .leader-pastoral-care .pcare-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#sec-ai .ai-hero--leader .ai-hero-leader-profile{flex-direction:row;flex-wrap:nowrap;text-align:left;justify-content:flex-start;gap:22px}
+#sec-ai .ai-hero--leader .av-ring-wrap--lg{flex:0 0 150px}
+#sec-ai .ai-hero--leader .av-ring--lg{width:150px;height:150px;border-radius:50%;overflow:hidden;background:#edf3f8;box-shadow:0 0 0 5px #ffffffb3,0 6px 22px #14355318}
+#sec-ai .ai-hero--leader #ai-leader-img{width:100%;height:100%;object-fit:cover;object-position:center 32%;border-radius:50%;transform:none}
+#sec-ai .ai-hero--leader .av-pulse,#sec-ai .ai-hero--leader .av-pulse2{display:none}
+#sec-ai .ai-hero--leader .ai-greeting{text-align:left;font-style:normal;line-height:1.6}
+#sec-ai .ai-hero-leader-disclaimer{color:#526b83;font-size:11px;line-height:1.5}
+#sec-ai .ai-mode-tag.ai{color:#245980;background:#e2edf8;border:1px solid #bdd1e4}
+#sec-ai .ai-hero-leader-actions{flex-wrap:wrap;gap:10px}
+#sec-ai .ai-hero-leader-actions button{padding:10px 14px;font-size:12px}
+#sec-ai .pcare-grid{display:grid;grid-template-columns:1fr;gap:10px;overflow:visible}
+#sec-ai .pcare-grid>*{width:auto;min-width:0;min-height:0;padding:14px;background:#f5f9fd;border:1px solid #dce7f0}
+#sec-ai .pcare-grid .pcare-card{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;padding:12px 12px 12px 90px;min-height:92px;text-align:left;overflow:hidden}
+#sec-ai .pcare-card::before{content:"";position:absolute;left:10px;top:12px;bottom:12px;width:68px;border-radius:7px;background:var(--care-image) center/cover no-repeat}
+#sec-ai .pcare-card .pcare-card-ico{display:none}
+#sec-ai .pcare-card .pcare-card-title{line-height:1.3}
+#sec-ai .pcare-card .pcare-card-sub{line-height:1.45;margin:0;color:#58708a}
+#sec-ai .pcare-card:focus-visible{outline:2px solid #175b9b;outline-offset:3px}
+#sec-ai [data-pcare-id="marriage"]{--care-image:url('../../assets/faithful-care.jpg')}
+#sec-ai [data-pcare-id="addiction"]{--care-image:url('../../assets/faithful-growth.jpg')}
+#sec-ai [data-pcare-id="grief"]{--care-image:url('../../assets/faithful-care.jpg')}
+#sec-ai [data-pcare-id="faith"]{--care-image:url('../../assets/faithful-reflection.jpg')}
+#sec-ai [data-pcare-id="crisis"]{--care-image:url('../../assets/faithful-community.jpg')}
+#sec-ai [data-pcare-id="financial"]{--care-image:url('../../assets/faithful-food-pantry.jpg')}
+#sec-ai [data-pcare-id="anxiety"]{--care-image:url('../../assets/faithful-dawn.jpg')}
+#sec-ai [data-pcare-id="parenting"]{--care-image:url('../../assets/faithful-parenting.jpg')}
+#sec-ai [data-pcare-id="other"]{--care-image:url('../../assets/faithful-community.jpg')}
+#sec-ai .pcare-head{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+#sec-ai .pcare-head-title{font-family:var(--font-display),Georgia,serif;font-size:22px;color:#173755}
+#sec-ai .pcare-intro{text-align:left}
+#sec-ai .quick-cmd{border:1px solid #d9e5f0;border-radius:18px;padding:8px 12px;color:#2b5377;background:#f5f9fd}
+#sec-ai .lg-item .lg-av{height:200px;object-fit:contain;object-position:center;background:#edf3f8;border-radius:8px}
+#sec-ai .lg-item .lg-topic{color:#58708a;font-size:12px;line-height:1.5;margin-top:5px}
+#sec-ai .lg-profile-btn,#sec-ai .lg-switch{padding:8px 12px;border-radius:6px;border:1px solid #cadce9;color:#21547e;background:#f6faff}
+#sec-ai .ai-chat-messages{min-height:240px;max-height:430px}
+@media(max-width:600px){#sec-ai .ai-hero--leader .ai-hero-leader-profile{flex-direction:column}#sec-ai .ai-hero--leader .av-ring-wrap--lg{flex-basis:auto}#sec-ai .lg-item .lg-av{height:165px}}
+.faithful-leadership-heading{margin:8px 0 24px}.faithful-leadership-heading h1{font-family:var(--font-display),Georgia,serif;font-size:38px;color:#123457}.faithful-leadership-heading p{color:#58718b;margin-top:7px}
+#sec-ai .faithful-leadership-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;height:auto;max-height:none;overflow:visible}
+#sec-ai .ai-hero--leader{background:linear-gradient(90deg,#f4fafff5,#e4f0f8cc),url('../../assets/faithful-dawn.jpg') center/cover;border:1px solid #dbe7f2;box-shadow:none;border-radius:12px;color:#173755}
+#sec-ai .ai-hero--leader .ai-leader-name{font-family:var(--font-display),Georgia,serif;font-size:29px;color:#143553}
+#sec-ai .ai-hero--leader .ai-leader-role,#sec-ai .ai-hero--leader .ai-greeting,#sec-ai .ai-hero--leader .ai-status{color:#526e87}
+#sec-ai .ai-hero-leader-kpis,#sec-ai .ai-hero-leader-top{display:none}
+#sec-ai .ai-hero-leader-actions button{background:#175b9b;color:#fff;border:1px solid #175b9b;border-radius:7px;min-height:42px}
+#sec-ai .ai-chat{background:#fff;border:1px solid #dce6f1;border-radius:10px;box-shadow:none}
+.faithful-leader-chat-heading{padding:16px;border-bottom:1px solid #e2eaf2}.faithful-leader-chat-heading h3{font-family:var(--font-display),Georgia,serif;font-size:19px;color:#173755}.faithful-leader-chat-heading span{font-size:11px;color:#657b92}
+.faithful-care-photo{width:100%;height:140px;object-fit:cover;display:block}
+#sec-ai .leader-pastoral-care{border:1px solid #dce6f1;border-radius:10px;overflow:hidden;background:#fff}
+.faithful-urgent-help{padding:22px;margin-top:16px;border:1px solid #dce6f1;border-radius:10px;background:#eef6fd;color:#173755}.faithful-urgent-help h3{font:700 22px var(--font-display),Georgia,serif}.faithful-urgent-help p{font-size:13px;margin:10px 0}.faithful-urgent-help button{border:0;background:none;color:#175b9b;padding:8px 0;cursor:pointer}
+#sec-ai #leader-gallery-wrap{width:100%;height:auto;margin:26px 0;max-height:none}
+#sec-ai .leader-gallery{height:auto;overflow:visible;border:1px solid #dce6f1;background:#ffffffb8}
+#sec-ai .leader-roster-scroll{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:18px;max-height:none;height:auto;overflow:visible}
+#sec-ai .lg-item{display:flex;flex-wrap:wrap;gap:8px;padding:14px;border:1px solid #dce6f1;border-radius:9px;background:#fff}
+#sec-ai .lg-item-main{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+#sec-ai .lg-av{width:100%;height:140px;object-fit:cover;border-radius:7px}#sec-ai .lg-av-wrap{width:100%}
+#sec-ai .lg-name,#sec-ai .lg-head{font-family:var(--font-display),Georgia,serif;color:#173755}#sec-ai .lg-head{font-size:24px;padding:20px}
+#sec-ai .leader-crisis-ad,#sec-ai .leader-crisis-outreach{display:none}
+@media(max-width:1000px){#sec-ai .leader-roster-scroll{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){#sec-ai .faithful-leadership-layout{grid-template-columns:1fr}#sec-ai .leader-roster-scroll{grid-template-columns:repeat(2,minmax(0,1fr))}.faithful-leadership-heading h1{font-size:30px}}
+#sec-watch #watch-study-banner{display:flex;position:relative;padding:16px 18px 16px 58px;margin:18px 0 24px;background:linear-gradient(110deg,#edf7ff,#e4f1ff);border:1px solid #c9dff5;border-radius:8px}
+#watch-study-banner::before{content:'▤';position:absolute;left:20px;top:50%;transform:translateY(-50%);font-size:28px;color:#176cb3}
+#sec-watch #watch-study-banner-title{font-family:var(--font-display),Georgia,serif;font-size:18px!important;color:#173b60!important}
+#watch-study-banner button:first-child{display:none}
+#sec-watch #watch-study-banner button:last-child{border:1px solid #5397cf!important;border-radius:22px!important;background:#ffffff70!important;color:#145c99!important;padding:10px 18px!important}
+#sec-watch .watch-live-stage .watch-live-top{position:absolute;top:16px;left:16px;right:16px}
+#sec-watch .watch-live-stage .watch-donate-stack{position:absolute;top:65px;right:76px;max-width:calc(100% - 96px)}
+#sec-watch .watch-live-stage .watch-live-rail{position:absolute;right:16px;top:50%;transform:translateY(-50%)}
+#sec-watch .watch-live-stage .watch-live-meta-block{position:absolute;left:22px;right:85px;bottom:22px}
+#sec-watch .watch-donate-toast{white-space:normal;max-width:100%;line-height:1.45;background:#102b46eb;box-shadow:0 4px 14px #0003;border-left-color:#86bbd9}
+#sec-watch .watch-live-stage{min-height:440px}
+#sec-watch .watch-live-series{background:#163a60d9}
+#sec-watch .watch-live-chat{padding:18px 16px;gap:16px}
+#sec-watch .watch-chat-msg{gap:10px}
+#sec-watch .watch-chat-av{width:32px;height:32px}
+#sec-watch .watch-chat-compose{padding:14px}
+#sec-watch .watch-chat-input,#sec-watch .watch-chat-send{min-height:42px}
+#sec-watch .watch-sermon-body{padding:14px 14px 16px}
+#sec-watch .watch-sermon-title{min-height:43px;line-height:1.35}
+#sec-watch .watch-sermon-meta{font-size:11px;line-height:1.4;color:#657b91}
+#sec-watch .watch-sermon-series{font-size:10px;letter-spacing:.3px;color:#567a9c}
+#sec-watch button:focus-visible,#sec-watch input:focus-visible{outline:3px solid #62a4d4;outline-offset:3px}
+@media(max-width:600px){#sec-watch .watch-live-stage{min-height:380px}#sec-watch .watch-live-title{font-size:24px}#sec-watch .watch-live-meta{font-size:11px}#sec-watch .watch-live-stage .watch-donate-stack{top:88px}}
+.faithful-watch-heading{margin:8px 0 24px}.faithful-watch-heading h1{font-family:var(--font-display),Georgia,serif;font-size:clamp(28px,3vw,42px);line-height:1.2;color:#123457}.faithful-watch-heading p{margin-top:6px;color:#55718b;font-size:16px}
+#sec-watch .watch-action-tile svg [stroke]{stroke:#175b9b}
+#sec-watch .watch-kpi-bar{display:none}
+#sec-watch .watch-immersive-layout{gap:16px;background:transparent;border-radius:0;overflow:visible;grid-template-columns:minmax(0,1fr) 300px}
+#sec-watch .watch-live-stage{border-radius:12px;overflow:hidden}
+#sec-watch .watch-chat-panel{background:#ffffffd9;border:1px solid #dce6f2;border-radius:12px;overflow:hidden}
+#sec-watch .watch-chat-head{font-family:var(--font-display),Georgia,serif;font-size:18px;color:#173755;padding:16px;border-color:#e1e9f2}
+#sec-watch .watch-chat-name{color:#214569;font-size:12px}
+#sec-watch .watch-chat-text{color:#4c627a;font-size:12px;line-height:1.55}
+#sec-watch .watch-chat-compose{border-color:#e1e9f2}
+#sec-watch .watch-chat-input{background:#f7faff;border-color:#dbe5f1;color:#183c5a;min-width:0}
+#sec-watch .watch-chat-input::placeholder{color:#71869c}
+#sec-watch .watch-chat-send{background:#175b9b}
+#sec-watch .watch-live-title{font-family:var(--font-display),Georgia,serif;font-size:30px;line-height:1.2}
+#sec-watch .watch-sermons-section{margin:28px 0}
+#sec-watch .watch-sermons-title{font-family:var(--font-display),Georgia,serif;font-size:29px;color:#143553}
+#sec-watch .watch-sermons-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;overflow:visible}
+#sec-watch .watch-sermon-card{min-width:0;border-color:#e1e8f0;border-radius:9px;box-shadow:none}
+#sec-watch .watch-sermon-title{font-family:var(--font-display),Georgia,serif;font-size:16px;color:#173755}
+#sec-watch .watch-sermon-card:nth-child(1) .watch-sermon-thumb{background-image:url('../../assets/faithful-care.jpg')!important}
+#sec-watch .watch-sermon-card:nth-child(2) .watch-sermon-thumb{background-image:url('../../assets/faithful-food-pantry.jpg')!important}
+#sec-watch .watch-sermon-card:nth-child(3) .watch-sermon-thumb{background-image:url('../../assets/faithful-growth.jpg')!important}
+#sec-watch .watch-sermon-card:nth-child(4) .watch-sermon-thumb{background-image:url('../../assets/faithful-reflection.jpg')!important}
+#sec-watch .watch-study-banner{background:#eaf4ff;border-color:#cddff2;border-radius:9px;padding:18px}
+#sec-watch .watch-schedule-hero{background-image:linear-gradient(90deg,#102e4dcc,#102e4d66),url('../../assets/faithful-dawn.jpg')!important;background-position:center;background-size:cover}
+#sec-watch .card{border-color:#e0e8f2;border-radius:10px;box-shadow:none}
+#sec-watch .card-title,#sec-watch .watch-action-tile h3{font-family:var(--font-display),Georgia,serif;color:#173755;font-size:21px}
+#sec-watch .watch-actions-grid{gap:14px;margin-top:24px}
+#sec-watch .watch-action-tile{background:#f2f7fc!important;color:#173755;border:1px solid #dce6f1;border-radius:10px;padding:20px;min-height:150px}
+#sec-watch .watch-action-tile::before{display:none}
+#sec-watch .watch-action-tile button{background:#175b9b!important;color:#fff!important;border:0!important;min-height:40px}
+@media(max-width:900px){#sec-watch .watch-immersive-layout{grid-template-columns:1fr}#sec-watch .watch-chat-panel{min-height:260px;max-height:340px}#sec-watch .watch-sermons-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){#sec-watch .watch-actions-grid{grid-template-columns:1fr}}
+#sec-home #home-next-step{display:none}
+#sec-home .dash-mod{padding-top:14px}
+#sec-home .dash-ai-companion,#sec-home .home-prayer-impact-grid{margin-top:16px}
+#sec-home>.faithful-invitation-row{margin-top:18px}
+html body .sb::before{background-image:linear-gradient(180deg,#142733 0%,#142733 44%,#142733f5 62%,#102837e0 82%,#102837d4 100%),url('../../assets/faithful-dawn.jpg')}
+html body .sb::after{opacity:.025}
+#sec-home .dash-pillar--growth::before{background-image:url('../../assets/faithful-growth.jpg');background-position:center}
+#sec-home .dash-pillar::before{clip-path:ellipse(100% 100% at 50% 0%)}
+#sec-home .dash-pillar-name{min-height:25px}
+#sec-home .dash-pillar-sub{line-height:1.55}
+.faithful-human-care{display:block;margin-top:8px;background:none;border:0;padding:0;color:#d3e7ff;text-decoration:underline;font-size:11px;cursor:pointer}
+.impact-float{max-width:300px;font-size:12px;box-shadow:0 4px 16px #18355320}
+#sec-home .dash-kpis{gap:14px}
+#sec-home .dash-kpis .dash-kpi{min-height:110px;padding:18px 28px 18px 78px;border:1px solid #dfe8f2;background:linear-gradient(145deg,#fff,#f9fbfe);border-radius:10px;box-shadow:0 3px 12px #15385b04;transition:border-color .18s,box-shadow .18s}
+#sec-home .dash-kpis .dash-kpi:hover{border-color:#9bb9d5;box-shadow:0 5px 16px #15385b0d}
+#sec-home .dash-kpis .dash-kpi:focus-visible{outline:3px solid #2d78b2;outline-offset:3px}
+#sec-home .dash-kpis .dash-kpi-val{font-size:22px;line-height:1.2;letter-spacing:-.3px;margin:0 0 5px;color:#123457}
+#sec-home .dash-kpis .dash-kpi-key{font-size:12px;line-height:1.45;color:#59718c;min-height:35px;display:flex;align-items:flex-start}
+#sec-home .dash-kpis .faithful-shortcut-icon{width:50px;height:50px;left:14px;background:#edf3fa;color:#14548b}
+#sec-home .dash-kpis .faithful-shortcut-icon svg [stroke]{stroke:currentColor}
+#sec-home .dash-kpis .dash-kpi:last-child .faithful-shortcut-icon{background:#edf5f1;color:#348d70}
+#sec-home .dash-kpis .dash-kpi::after{right:12px;font-size:23px;color:#607e9d}
+@media(max-width:640px){#sec-home .dash-kpis .dash-kpi{padding:16px 20px 14px 58px;min-height:114px}#sec-home .dash-kpis .faithful-shortcut-icon{left:9px;width:38px;height:38px}#sec-home .dash-kpis .dash-kpi-val{font-size:19px}#sec-home .dash-kpis .dash-kpi-key{font-size:11px}#sec-home .dash-kpis .dash-kpi::after{right:7px}}
+@media(prefers-reduced-motion:reduce){#sec-home .dash-kpis .dash-kpi{transition:none}}
+#sec-home>.faithful-invitation-row{order:99;margin-top:0}
+.faithful-invitation-row{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:14px;margin-top:18px;align-items:stretch}
+#sec-home .faithful-invitation-row .faithful-next-step-invitation{margin:0;padding:22px;min-height:200px;align-items:flex-start}
+.faithful-invitation-card{border:1px solid #e5e3df;border-radius:8px;overflow:hidden;background:#fff}
+.faithful-invitation-card>img{display:block;width:100%;height:85px;object-fit:cover}
+.faithful-invitation-card>div{padding:12px 16px}
+.faithful-invitation-card h3{font-family:var(--font-brand);font-size:18px;color:#142d49;margin-bottom:6px}
+.faithful-invitation-card p{font-size:13px;line-height:1.45;color:#425a71;margin-bottom:10px}
+.faithful-invitation-card button{border:0;padding:0;background:none;color:#0753ad;font:inherit;font-size:13px;cursor:pointer;text-align:left}
+@media(max-width:720px){.faithful-invitation-row{grid-template-columns:1fr}.faithful-invitation-card>img{height:125px}}
+#sec-home .faithful-next-step-invitation{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:18px;padding:24px 28px;border:1px solid #e5e3df;border-radius:8px;background:linear-gradient(90deg,#f8f7f3f5 0%,#f8f7f3ee 65%,#f8f7f370),url('../../assets/faithful-reflection.jpg') right center/cover;min-height:170px}
+.faithful-next-step-invitation .faithful-ask-copy{border:0;padding:0;max-width:440px;min-width:0}
+.faithful-next-step-invitation .faithful-ask-copy strong{font-size:23px;line-height:1.25}
+.faithful-next-step-invitation .faithful-ask-copy small{font-size:13px;line-height:1.5;margin-top:8px;color:#425a71}
+.faithful-explore-grace{align-self:flex-start;margin-top:16px;border:1px solid #9babae;border-radius:6px;padding:10px 18px;background:#ffffff60;color:#153047;font:inherit;cursor:pointer}
+@media(max-width:640px){#sec-home .faithful-next-step-invitation{align-items:flex-start;justify-content:flex-start;padding:20px;gap:12px;flex-wrap:wrap}}
+#sec-home .dash-pillar{--path-tint:#f4e5df;--path-ink:#663128;min-height:230px;padding:108px 18px 18px;background:linear-gradient(135deg,#fff,var(--path-tint));border:1px solid #ece7e1;overflow:hidden;box-shadow:0 5px 16px #28364a08}
+#sec-home .dash-pillar--resource{--path-tint:#eeeae5;--path-ink:#594c43}
+#sec-home .dash-pillar--assistance{--path-tint:#f5e9dc;--path-ink:#824632}
+#sec-home .dash-pillar--community{--path-tint:#f5ecdc;--path-ink:#855821}
+#sec-home .dash-pillar--engagement{--path-tint:#e6edf4;--path-ink:#41687b}
+#sec-home .dash-pillar::before{height:102px;border-radius:6px 6px 0 0;clip-path:polygon(0 0,100% 0,100% 100%,80% 96%,60% 88%,40% 79%,20% 72%,0 70%)}
+#sec-home .dash-pillar-top{left:18px;top:89px;bottom:auto}
+#sec-home .dash-pillar-step{font-size:52px;color:var(--path-ink);font-weight:400;line-height:1}
+#sec-home .dash-pillar-name{margin-left:48px;font-size:18px;margin-bottom:15px;color:#142436}
+#sec-home .dash-pillar-sub{margin:0 28px 0 0;font-size:13px;line-height:1.5;color:#35516a;min-height:48px}
+#sec-home .dash-pillar::after{content:'›';position:absolute;right:14px;bottom:24px;display:grid;place-items:center;width:30px;height:30px;border:1px solid #dededb;border-radius:50%;background:#ffffffb8;color:#102943;font-size:26px;line-height:1;transform:none;opacity:1}
+#sec-home .dash-pillar:focus-visible{outline:3px solid #3279b3;outline-offset:3px}
+@media(max-width:640px){#sec-home .dash-pillar{padding:108px 12px 16px;min-height:240px}#sec-home .dash-pillar-top{left:12px}#sec-home .dash-pillar-name{font-size:15px;margin-left:37px}#sec-home .dash-pillar-step{font-size:43px}#sec-home .dash-pillar::after{right:8px;bottom:15px}}
+#sec-home .dash-kpi{position:relative;padding:20px 25px 20px 82px;min-height:92px;display:flex;flex-direction:column;justify-content:center}
+.faithful-shortcut-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:56px;height:56px;display:grid;place-items:center;border-radius:50%;background:#eef3fb;color:#14558e}
+.dash-kpi:last-child .faithful-shortcut-icon{background:#edf5f3;color:#389476}
+.dash-kpi::after{content:'›';position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:24px;font-weight:300;color:#607c9b}
+@media(max-width:640px){#sec-home .dash-kpi{padding:14px 18px 14px 54px}.faithful-shortcut-icon{left:8px;width:38px;height:38px}.faithful-shortcut-icon svg{width:24px;height:24px}}
+#home-giving-impact[hidden]{display:none!important}
+.home-prayer-reel-stage{justify-content:center;align-items:center}
+.home-prayer-reel-video{max-width:300px;width:100%;flex:0 1 300px}
+.home-prayer-reel-hint,.home-prayer-reel-dots{text-align:center;justify-content:center}
+.faithful-community-wall{padding:18px;min-width:0}
+.faithful-community-wall h3{font-family:var(--font-brand);font-size:23px;color:#102c5b;margin-bottom:8px}
+.faithful-community-wall>button,.home-prayer-reel-dots+button{border:1px solid #cfdeed;border-radius:18px;padding:7px 14px;color:#14518a;background:#f5f9ff;cursor:pointer}
+.faithful-community-feed{max-height:460px;overflow:auto;margin-top:14px;display:grid;gap:14px}
+.faithful-community-feed .net-wall-card{cursor:pointer}
+.faithful-community-feed .net-wall-card:focus-visible{outline:3px solid #2866ab;outline-offset:2px}
+.faithful-community-post{display:flex;gap:14px;width:100%;padding:14px 0;border:0;border-bottom:1px solid #e4ecf5;background:transparent;text-align:left;cursor:pointer;color:#244263;font:inherit}
+.faithful-community-post>img{width:100px;height:85px;object-fit:cover;border-radius:8px}
+.faithful-community-post>span{display:flex;flex-direction:column;gap:7px;font-size:13px;line-height:1.45}
+.faithful-impact-footer,#sec-home #home-next-step{background:linear-gradient(90deg,#f4f8ffdc,#f4f8ff20),url('../../assets/faithful-dawn.jpg') center/cover!important}
+.faithful-impact-footer{min-height:130px}
+.dash-pillar--growth::before{background-image:url('../../assets/faithful-reflection.jpg');background-position:85% 50%}
+.dash-pillar--assistance::before{background-image:url('../../assets/faithful-care.jpg')}
+.dash-pillar--resource::before{background-image:url('../../assets/faithful-reflection.jpg');background-position:15% 75%;background-size:150%}
+body .faithful-impact-card-art{height:auto;padding:18px;background:#fff}
+body .faithful-impact-card-art>img{display:block;width:100%;height:auto;object-fit:contain;border-radius:16px;box-shadow:0 10px 22px #082b5020}
+body .faithful-impact-card-art .pf-card-flip:focus-visible{outline:3px solid #287fac;outline-offset:6px;border-radius:18px}
+@media(prefers-reduced-motion:reduce){body .faithful-impact-card-art .pf-card-inner{transition:none}}
+body .ma{background-color:#f7faff;background-image:radial-gradient(#adc5de25 .6px,transparent .8px);background-size:5px 5px}
+body .dash-kpi,body .dash-pillar{box-shadow:0 5px 20px #26518706;background-color:#ffffffdd}
+#sec-home:not(.active){display:none}
+#sec-home.active{display:flex;flex-direction:column;gap:16px}
+#sec-home .faithful-home-impact{order:4;margin:0 0 8px;min-width:0}
+.faithful-home-impact>.faithful-demo-label{margin:0 0 14px}
+.ma{background:#f7fbff;background-image:radial-gradient(ellipse at 30% 15%,#eaf4ff70,transparent 65%)}
+.sb{background:linear-gradient(150deg,#082b50,#041e3b);width:234px}
+.sb-member{display:flex;flex-direction:column;align-items:center;margin:20px 16px 0;padding:20px 0 14px;border-top:1px solid #ffffff26;color:#f4f8fc}
+.sb-member .sb-av{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid #e1edf5;margin-bottom:10px}
+.sb-member .sb-name{font:500 18px/1.3 Georgia,serif;color:#fff;text-align:center;margin-bottom:8px}
+.sb-member .sb-tier{background:#ffffff19;color:#e1edf7;padding:7px 12px;border-radius:18px;font-size:11px;line-height:1.4}
+.sb-member .sb-pulse-block{width:100%;border-top:1px solid #ffffff26;margin-top:14px;padding-top:12px}
+.sb-member .token-label{color:#b9cee0;font-size:12px}
+.sb-member .token-val{color:white;font:500 18px Georgia,serif}
+body .sb{background:#132936!important;isolation:isolate}
+body .sb::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:1;background:linear-gradient(180deg,#142733 0%,#142733f5 40%,#142733bd 60%,#10283780 100%),url('../../assets/faithful-dawn.jpg') 75% bottom/auto 62% no-repeat}
+body .sb::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.16;background-image:radial-gradient(#c4d4de55 .5px,transparent .8px);background-size:3px 3px}
+body .sb>*{position:relative;z-index:1}
+body .dash-live-pill{background:#075093!important}
+.faithful-demo-label{display:block;margin-top:10px;color:#607493;font-size:11px}
+.dash-pillar--engagement::before{background-image:url('../../assets/faithful-food-pantry.jpg')}
+.faithful-ask-prompt{cursor:pointer;font-family:inherit}
+.faithful-impact-card-art{height:267px;position:relative;padding:24px;color:white;background:radial-gradient(ellipse at 85% 80%,#12609a,transparent 65%),linear-gradient(140deg,#062447,#0b3562)}
+.faithful-impact-card-art h3{font-family:var(--font-brand);font-size:25px;color:white}
+.faithful-impact-card-art small{position:absolute;right:20px;top:65px;border:1px solid #82b7dd;border-radius:20px;padding:4px 12px}
+.faithful-impact-card-art p{white-space:pre-line;letter-spacing:4px;line-height:1.9;font-size:11px;color:#b8d8f3;margin-top:24px}
+.faithful-impact-card-art em{display:block;margin-top:20px;font-family:var(--font-brand);font-size:22px}
+.dash-hero{min-height:272px;padding:32px;border-radius:9px;margin:0;background-position:center}
+.dash-hero::before{background:linear-gradient(90deg,#031c36c9,transparent 80%)}
+.dash-hero-name{font-family:var(--font-brand);font-size:clamp(34px,3.5vw,54px);font-weight:700;line-height:1.14}
+.dash-hero-top{display:block;margin:0}
+.dash-hero-live-col{align-items:flex-start;max-width:none;margin-top:18px}
+.dash-live-pill{background:#075093;border:1px solid #b5d5f7;box-shadow:none;padding:12px 22px}
+.dash-hero-leader{position:absolute;right:0;bottom:0;max-width:380px;margin:0}
+.dash-kpis{order:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0}
+.dash-kpi{background:#ffffffb8;border:1px solid #e1eaf6;border-radius:8px;padding:20px;backdrop-filter:none;cursor:pointer}
+.dash-kpi-val{color:#102d59;font-family:var(--font-brand);font-size:22px}
+.dash-kpi-key{color:#5c7395;font-size:13px}
+#sec-home .dash-mod{order:3;margin:0;border:0;box-shadow:none;background:transparent;overflow:visible}
+.dash-mod-head{display:flex;flex-direction:column;align-items:stretch;border:0;background:none;padding:8px 0 16px}
+.faithful-ask-grace{padding:8px 0 20px;gap:16px;flex-wrap:wrap}
+.dash-mod-title{font-family:var(--font-brand);font-size:36px;color:#08264c}
+.dash-mod-sub{font-size:15px;color:#586f97;max-width:none}
+.dash-mod-body{padding:0}
+.dash-pillars{gap:16px}
+.dash-pillar{border-radius:7px;background:#fff;min-height:190px;padding:112px 12px 14px}
+.dash-pillar::before{height:100px;border-radius:7px 7px 0 0}
+.dash-pillar-top{top:116px;bottom:auto;left:12px}
+.dash-pillar-name{font-size:17px}.dash-pillar-sub{font-size:12px}
+#sec-home .dash-ai-companion{order:4;margin:0}
+.grace-home-tutorial .av-ring-wrap--grace{display:flex}
+.grace-home-tutorial{padding:20px;background:linear-gradient(125deg,#0b1c30,#203e62 65%,#0d2845);border:1px solid #244567;box-shadow:none;color:#fff}
+.grace-home-tutorial .ai-hero-row{padding-top:20px!important}
+.grace-home-tutorial .ai-hero-chatrow{display:flex;margin-top:14px}
+.grace-home-tutorial .grace-tutorial-steps{display:grid}
+.grace-home-tutorial #home-ai-disclaimer{color:#b9c9dc!important}
+.grace-home-tutorial .ai-leader-name,.grace-home-tutorial .ai-greeting,.grace-home-tutorial .grace-tutorial-step-label{color:#fff}
+.grace-home-tutorial .ai-leader-role,.grace-home-tutorial .ai-status,.grace-home-tutorial .grace-tutorial-step-detail,.grace-home-tutorial .grace-tutorial-try,.grace-home-tutorial .grace-tutorial-dismiss-note{color:#c4d2e4}
+.grace-home-tutorial .grace-tutorial-step,.grace-home-tutorial .ai-hero-chatwrap{background:#ffffff14;border-color:#ffffff30}
+.grace-home-tutorial .ai-hero-input{color:white}
+.grace-home-tutorial .ai-hero-input::placeholder{color:#c4d2e4}
+.grace-home-tutorial .grace-tutorial-badge,.grace-home-tutorial .ai-mode-tag{color:#e0ecff;background:#244b7a;border-color:#5c82b0}
+.grace-home-tutorial .grace-tutorial-dismiss-btn,.grace-home-tutorial .ai-hero-send{background:#285f9d;color:#fff}
+.grace-home-tutorial .grace-tutorial-dismiss{color:white;background:#ffffff20}
+#sec-home .dash-wallet{display:none}
+.faithful-impact-header{padding:12px 0 24px}.faithful-impact-header::before{display:none}
+.faithful-impact-primary{grid-template-columns:1.06fr 1fr .94fr}
+.faithful-impact-primary>section,.faithful-impact-secondary>section{border-radius:8px;box-shadow:none}
+.faithful-impact-feature{margin:0}
+.faithful-impact-balance strong span{font-size:inherit;color:inherit}
+.faithful-impact-secondary{gap:14px}
+.faithful-impact-footer{background:linear-gradient(110deg,#e1effb,#fff5e3);border-radius:8px}
+.faithful-impact-details{margin-top:20px;border-top:1px solid #dce6f2;padding-top:14px}
+.faithful-impact-details>summary{cursor:pointer;color:#16467e;font-size:15px;padding:10px}
+.faithful-impact-details .wlt-impact-head,.faithful-impact-details .pf-grid,.faithful-impact-details .wlt-goal-cta{display:none}
+@media(max-width:900px){
+ .sb{width:100%}.dash-hero-leader{position:static;margin-top:14px}
+ .dash-kpis{grid-template-columns:repeat(2,1fr)}
+ .faithful-impact-primary,.faithful-impact-secondary{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+ .sb{height:auto;min-height:0;display:block;position:static;padding:12px}
+ .sb-top{flex-direction:row;padding:0;justify-content:center}.sb-church{font-size:22px;margin:0}
+ .sb-scroll{display:flex;flex-direction:row;overflow:auto;max-height:none;padding:8px 0 0}
+ .nb{flex-shrink:0;padding:10px;margin:0;font-size:12px}.nb-label{font-size:12px}.nb-ico{display:none}
+ .co{padding:12px}.dash-hero{padding:24px 18px}.dash-hero-name{font-size:34px}
+ .dash-kpis{display:grid}.dash-kpi{padding:13px}.dash-kpi-val{font-size:20px}
+ .dash-mod-title{font-size:29px}.dash-mod-sub{font-size:13px}
+ .dash-pillars{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .dash-pillar{min-height:190px}.dash-pillar:nth-child(5){min-height:190px}
+ .dash-pillar-name,.dash-pillar-sub{margin-left:38px}
+ .faithful-impact-header h2{font-size:32px}
+}

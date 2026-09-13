@@ -36,6 +36,8 @@ paths = [
 #   gated server-side by the agent's Allowed Domains list in
 #   studio.d-id.com -> Manage Embed, same trust model as Supabase anon.
 regexes = [
+  # Browser storage namespace, not a credential (Memory.key).
+  '''^grace\.companion\.v2\.$''',
   '''sk_test_xxx''',
   '''pk_test_xxx''',
   '''whsec_xxx''',

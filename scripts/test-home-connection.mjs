@@ -1,0 +1,68 @@
+import {JSDOM} from 'jsdom';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const source=fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-preferences.js','utf8');
+for(const mobile of [false,true]){
+ const dom=new JSDOM(mobile?'<section id="screen-home"><div class="scroll"></div></section>':'<section id="sec-home"><div class="dash-mod"></div></section>',{url:'http://localhost/',runScripts:'outside-only'});
+ dom.window.eval(source);
+ const d=dom.window.document;const form=d.querySelector('.fp-connection form');assert(form);
+ assert(d.querySelector('summary').textContent.includes('Your church, at a glance'));
+ assert.equal(form.querySelectorAll('.fp-page-guide section').length,3);
+ assert(form.querySelector('.fp-connection-layout').hidden);
+ assert.equal(form.querySelector('.fp-begin'),null);
+ form.querySelector('[data-story-toggle]').click();
+ assert(!form.querySelector('.fp-connection-layout').hidden);
+ assert.equal(form.querySelectorAll('select').length,1);
+ assert.equal(form.querySelectorAll('fieldset').length,3);
+ assert.equal(form.querySelectorAll('fieldset:not([hidden])').length,3);
+ const choose=value=>{form.elements.connection.value=value;};
+ const selected=()=>form.elements.connection.value;
+ choose('My own note');const picker=form.querySelector('select');picker.value='1–3 years';picker.dispatchEvent(new dom.window.Event('change'));assert(selected().includes('My own note'));
+ const quick=form.querySelector('[data-quick-field="engagement"]');quick.click();assert(form.elements.engagement.value.includes(quick.value));quick.click();assert.equal(form.elements.engagement.value,'');
+ choose('1–3 years');
+ form.querySelector('[data-story-toggle]').click();assert(form.querySelector('.fp-connection-layout').hidden);assert.equal(selected(),'1–3 years');
+ form.querySelector('[data-story-toggle]').click();assert(!form.querySelector('.fp-connection-layout').hidden);assert.equal(selected(),'1–3 years');
+ const submit=()=>form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+ submit();assert.equal(dom.window.localStorage.length,0,'Requires storage choice');
+ form.elements.remember.checked=true;submit();
+ const key=dom.window.localStorage.key(0);assert.equal(JSON.parse(dom.window.localStorage.getItem(key)).homeConnection.connection,'1–3 years');
+ choose('More than 10 years');form.querySelector('[data-skip]').click();assert.equal(selected(),'1–3 years');
+ form.querySelector('[data-story-toggle]').click();choose('Temporary answer');form.querySelector('[data-story-skip]').click();assert.equal(selected(),'1–3 years');assert(form.querySelector('.fp-connection-layout').hidden);
+ form.querySelector('[data-clear]').click();assert(!JSON.parse(dom.window.localStorage.getItem(key)).homeConnection);
+ assert.equal(selected(),'');dom.window.close();
+}
+// Exercise the walkthrough independently of real audio services.
+{
+ const dom=new JSDOM('<section id="sec-home"><div class="dash-hero"></div><div id="home-leader-strip"></div><div class="dash-mod"></div></section>',{url:'http://localhost/',runScripts:'outside-only'});
+ let stops=0,spoken='';
+ dom.window.GRACE_COMPANION={stopNarration(){stops++;},narratePage(text,start,end){spoken=text;start();end();return true;}};
+ dom.window.eval(source);
+ const d=dom.window.document,click=selector=>d.querySelector(selector).click();
+ click('[data-tour-start]');
+ assert(!d.querySelector('[data-tour-panel]').hidden);
+ assert(d.querySelector('.dash-hero').classList.contains('fp-tour-highlight'));
+ click('[data-tour-listen]');assert(spoken.includes('service'));
+ assert.equal(d.querySelector('[data-tour-status]').textContent,'Audio finished.');
+ let delayedStart,delayedEnd;
+ dom.window.GRACE_COMPANION.narratePage=(text,start,end)=>{delayedStart=start;delayedEnd=end;return true;};
+ click('[data-tour-listen]');assert(d.querySelector('[data-tour-listen]').disabled);
+ click('[data-tour-stop]');assert.equal(d.querySelector('[data-tour-status]').textContent,'Audio stopped.');
+ delayedStart();delayedEnd();assert.equal(d.querySelector('[data-tour-status]').textContent,'Audio stopped.');
+ assert(!d.querySelector('.fp-tour').classList.contains('fp-speaking'));
+ assert(!d.querySelector('[data-tour-listen]').disabled);
+ click('[data-tour-next]');assert.equal(d.querySelectorAll('.fp-tour-highlight').length,1);
+ assert(d.querySelector('#home-leader-strip').classList.contains('fp-tour-highlight'));
+ dom.window.GRACE_COMPANION.narratePage=()=>false;
+ click('[data-tour-listen]');assert(d.querySelector('[data-tour-status]').textContent.includes('unavailable'));
+ click('[data-tour-next]');click('[data-tour-next]');
+ assert.equal(d.querySelectorAll('.fp-tour-highlight').length,0);
+ click('[data-tour-next]');assert(d.querySelector('[data-tour-panel]').hidden);
+ assert(!d.querySelector('.fp-connection-layout').hidden);
+ click('[data-tour-start]');click('[data-tour-exit]');
+ assert.equal(d.querySelectorAll('.fp-tour-highlight').length,0);
+ assert.equal(d.activeElement,d.querySelector('[data-tour-start]'));
+ assert(stops>=6);assert.equal(dom.window.localStorage.length,0);
+ dom.window.close();
+}
+console.log('PASS: walkthrough progression, highlight cleanup, narration callbacks, unavailable audio, exit focus and story handoff. Audio is stubbed, not microphone/playback verification.');
+console.log('PASS: desktop/mobile mounting, three optional story boxes, explicit storage choice, save, discard unsaved changes, clear. DOM verification, not visual review.');
