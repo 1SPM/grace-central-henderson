@@ -60,9 +60,12 @@ body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff3
 #sec-home .fh-care p{color:var(--fh-muted)}
 #sec-home .fh-care button{display:block;background:none;border:0;color:#0753ad;font:inherit;padding:12px 0;cursor:pointer}
 #sec-home .home-prayer-impact-grid,#sec-home .faithful-invitation-row{display:none}
-#sec-home .fh-prayer{order:6;display:flex;align-items:center;background:#f6f3ed;border:0;min-height:140px;margin:12px 0}
-#sec-home .fh-prayer>img{width:30%;height:140px;object-fit:cover}
-#sec-home .fh-prayer>div{padding:24px}
+#sec-home .fh-prayer{order:6;display:flex;align-items:center;position:relative;isolation:isolate;overflow:hidden;background-color:#f3f0e8;background-image:repeating-linear-gradient(0deg,#77674d08 0,#77674d08 1px,transparent 1px,transparent 4px),repeating-linear-gradient(90deg,#fff8 0,#fff8 1px,transparent 1px,transparent 5px);border:1px solid #d8d4c866;border-radius:12px;min-height:160px;margin:12px 0}
+#sec-home .fh-prayer::after{content:'';position:absolute;inset:0 0 0 55%;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#f3f0e8,transparent 70%),url('../../assets/faithful-dawn.jpg') right center/cover no-repeat;opacity:.18}
+#sec-home .fh-prayer>img{width:30%;height:160px;object-fit:cover;mask-image:linear-gradient(90deg,#000 88%,transparent);-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent)}
+#sec-home .fh-prayer>div{padding:24px 30px;position:relative;max-width:640px}
+#sec-home .fh-prayer h3{color:#173755;font-size:24px}
+#sec-home .fh-prayer p{color:#526985}
 #sec-home button:focus-visible,#sec-home [tabindex]:focus-visible{outline:3px solid #2a7ba6;outline-offset:4px}
 @media(max-width:1100px){#sec-home .fh-overview{grid-template-columns:1fr}#sec-home .fh-week .dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}#sec-home .fh-life{gap:24px}}
 @media(max-width:700px){#sec-home .faithful-impact-primary,#sec-home .fh-life{grid-template-columns:1fr}#sec-home .faithful-home-impact{padding:18px}#sec-home .fh-week .dash-kpis{display:flex}#sec-home .faithful-impact-card-art{max-width:390px}#sec-home .fh-prayer>img{width:32%}#sec-home .fh-prayer>div{padding:16px}#sec-home .fh-life-title{font-size:29px}}
