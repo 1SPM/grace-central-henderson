@@ -2,6 +2,7 @@
 body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff38}
 @media(max-width:640px){body .sb{position:relative;height:auto!important;min-height:0!important;width:100%;padding:10px 12px}body .sb-top{padding:0 0 8px;min-height:0}body .sb-scroll{display:flex;align-items:center;flex:none;height:auto;overflow-x:auto;padding:8px 0;gap:6px}body .sb-scroll .sb-member,body .sb-scroll .fd-destinations,body .sb-foot{display:none}body .sb-scroll .nb{height:44px;min-height:44px;flex:0 0 auto;padding:10px;margin:0;white-space:nowrap}body .sb .sb-top .sb-grace-orb{width:48px;height:48px}body .sb .sb-top .grace-orb{width:48px;height:48px}body .ma{margin-left:0;width:100%}}
 #sec-home[data-composed]{--fh-ink:#102c50;--fh-muted:#526985;--fh-line:#dce6ef;gap:24px}
+@media(max-width:640px){body .sb-scroll .fd-nav{display:none}body .sb-foot{display:block;padding:4px 0;background:none}body .sb-foot>*:not(.fd-settings-cog){display:none}body .sb-foot .fd-settings-cog{margin:0;padding:8px 12px;width:auto}body .sb-top{gap:14px}body .sb-top .sb-church{margin:0}}
 #sec-home .fh-overview{order:2;display:grid;grid-template-columns:minmax(0,2.5fr) minmax(230px,1fr);gap:28px}
 #sec-home .faithful-home-impact{order:0;margin:0;padding:22px;background:#eaf5fc;border-radius:12px;min-width:0;display:flex;flex-direction:column}
 #sec-home .faithful-home-impact>.faithful-demo-label{order:2;text-align:right;margin:8px 0 0}
