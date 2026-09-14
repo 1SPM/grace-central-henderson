@@ -80,30 +80,20 @@
   if (prayer) { prayer.classList.add('fh-prayer'); home.append(prayer); }
   const watch = document.getElementById('home-live-pill');
   watch.textContent = 'Watch the service'; watch.setAttribute('aria-label', 'Watch the service');
-  // One home-only activity surface; the older floating overlays remain hidden.
-  const activity = make('section', 'fh-activity');
-  activity.setAttribute('aria-label', 'Illustrative church activity');
-  const activityLabel = make('span', 'fh-activity-label', 'Demo activity');
-  const activityText = make('span', 'fh-activity-text');
-  const pause = make('button', 'fh-activity-pause', 'Pause');
-  pause.type = 'button'; pause.setAttribute('aria-pressed', 'false');
-  activity.append(activityLabel, activityText, pause);
-  home.querySelector('.dash-hero').before(activity);
-  let activityIndex = 0;
-  let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const updateActivity = () => {
-    const gift = HOME_STATE.heroToast;
-    const messages = [
-      `${gift.name} gave ${formatMoney(gift.amount)} to ${gift.fund}`,
-      ...demoPurchaseQueue.map(item => `IMPACT card · ${item.merchant} · ${formatMoney(item.impact)} for ${item.cause}`)
-    ];
-    activityText.textContent = messages[activityIndex % messages.length];
-    activityIndex++;
-  };
-  const updatePause = () => { pause.textContent = paused ? 'Resume' : 'Pause'; pause.setAttribute('aria-pressed', String(paused)); };
-  pause.onclick = () => { paused = !paused; updatePause(); };
-  updateActivity(); updatePause();
+  // Reuse the original transient badges; this only presents existing demo data.
+  let badgeIndex = 0;
   window.setInterval(() => {
-    if (!paused && !document.hidden && home.classList.contains('active') && !activity.matches(':hover, :focus-within')) updateActivity();
-  }, 8000);
+    if (document.hidden || !home.classList.contains('active')) return;
+    const donation = document.getElementById('dash-hero-toast');
+    if (badgeIndex % 2 === 0) {
+      dismissImpactFloat();
+      donation?.classList.add('show');
+      setTimeout(() => donation?.classList.remove('show'), 6000);
+    } else if (demoPurchaseQueue.length) {
+      donation?.classList.remove('show');
+      showImpactFloat(demoPurchaseQueue[Math.floor(badgeIndex / 2) % demoPurchaseQueue.length]);
+      setTimeout(dismissImpactFloat, 6000);
+    }
+    badgeIndex++;
+  }, 14000);
 })();

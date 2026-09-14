@@ -12,21 +12,6 @@
     card.tabIndex = 0;
     card.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); } };
   });
-  const activity = make('section', 'fm-activity');
-  activity.setAttribute('aria-label', 'Illustrative church activity');
-  const text = make('span', 'fm-activity-text');
-  const pause = make('button', '', 'Pause'); pause.type = 'button';
-  activity.append(make('small', '', 'Demo activity'), text, pause); home.prepend(activity);
-  let index = 0, paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const messages = () => [
-    ...watchDonationPool.slice(0, 2).map(g => `${g.name} gave $${g.amount} to ${g.fund}`),
-    'IMPACT card · McDonald’s · $0.26 for Youth',
-    'IMPACT card · Chevron Fuel · $0.63 for Missions'
-  ];
-  const update = () => { const items = messages(); text.textContent = items[index++ % items.length]; };
-  const buttonState = () => { pause.textContent = paused ? 'Resume' : 'Pause'; pause.setAttribute('aria-pressed', String(paused)); };
-  pause.onclick = () => { paused = !paused; buttonState(); }; update(); buttonState();
-  setInterval(() => { if (!paused && !document.hidden && document.getElementById('screen-home').classList.contains('active') && !activity.matches(':hover, :focus-within')) update(); }, 8000);
   const care = make('section', 'fm-care');
   care.append(make('h2', '', 'People to turn to'), make('p', '', 'Find support for the season you’re in.'));
   [ ['Marriage & relationships', 'Relationships & family'], ['Grief & loss', 'Grief & life changes'], ['Parenting', 'Relationships & family'], ['Faith questions', 'Help me decide'] ].forEach(([label, topic]) => {
