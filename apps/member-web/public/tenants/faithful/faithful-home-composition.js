@@ -39,7 +39,7 @@
   // Reuse the existing destination control regardless of its internal route name.
   const volunteerLink = [...document.querySelectorAll('.sb button')].find(button => button.textContent.trim() === 'Volunteer');
   if (volunteerLink) volunteer.onclick = () => volunteerLink.click();
-  else volunteer.onclick = () => openNetworkTab('community');
+  else volunteer.onclick = () => openMemberDestination('volunteer');
   pantry.append(volunteer);
   feed.querySelector('.faithful-community-feed').prepend(pantry);
   const posts = feed.querySelectorAll('.post');
