@@ -25,16 +25,20 @@ body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff3
 #sec-home .fh-week .dash-kpis{display:flex;flex-direction:column;gap:0}
 #sec-home .fh-week .dash-kpi{border:0;border-bottom:1px solid var(--fh-line);border-radius:0;background:none;padding:18px 22px 18px 72px;box-shadow:none}
 #sec-home .fh-week .dash-kpi[hidden]{display:none}
-#sec-home .dash-hero-leader,#sec-home .dash-hero-toast,.impact-float{display:none!important}
+#sec-home .dash-hero-toast,.impact-float{display:none!important}
+#sec-home .dash-hero-leader{display:flex;position:absolute;right:0;bottom:0;max-width:350px;margin:0;border-radius:14px;background:#10283feb;border:1px solid #ffffff38;box-shadow:0 8px 24px #03162726}
+#sec-home .dash-hero-top{min-height:208px;position:relative}
+#sec-home .dash-hero-leader .faithful-human-care{position:relative;z-index:1}
+#sec-home .fh-guide-subline{display:block;font:400 13px/1.5 var(--font-web);color:#526985;margin-top:4px}
+@media(max-width:900px){#sec-home .dash-hero-leader{position:relative;right:auto;bottom:auto;margin-top:22px;max-width:380px}#sec-home .dash-hero-top{min-height:0}}
 #sec-home .dash-live-pill{background:#0753ad;box-shadow:none}
 #sec-home .dash-pillars{gap:12px}
-#sec-home .dash-pillar{min-height:160px;padding-top:85px;border:0;box-shadow:none}
-#sec-home .dash-pillar::before{height:72px}
-#sec-home .dash-pillar-top{top:86px}
-#sec-home .dash-pillar-step{font-size:28px;line-height:1}
-#sec-home .dash-pillar-sub{padding-top:8px}
-#sec-home .dash-pillar::before{clip-path:none}
-#sec-home .dash-pillar-name{padding-left:25px}
+#sec-home .dash-pillar{min-height:208px;padding:110px 16px 40px;border:0;box-shadow:none;border-radius:10px}
+#sec-home .dash-pillar::before{height:96px;clip-path:ellipse(105% 100% at 45% 0%)}
+#sec-home .dash-pillar-top{top:109px;left:16px}
+#sec-home .dash-pillar-step{font-size:36px;line-height:1}
+#sec-home .dash-pillar-sub{padding:0;margin:10px 0 0;line-height:1.5}
+#sec-home .dash-pillar-name{padding:0;margin:0 0 0 38px;min-height:32px;font-size:17px;line-height:1.4}
 #sec-home .fh-pantry{padding:20px 0;border-bottom:1px solid var(--fh-line)}
 #sec-home .fh-pantry h3{font-family:var(--font-brand);font-size:24px;color:var(--fh-ink);margin-bottom:6px}
 #sec-home .fh-pantry p{color:var(--fh-muted);margin-bottom:16px}
