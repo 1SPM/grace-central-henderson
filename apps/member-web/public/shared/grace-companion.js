@@ -978,8 +978,8 @@
     q('#gcp-send').addEventListener('click', sendFromInput);
     if (A.publicDemoVoice) {
       const hint = document.createElement('p');
-      hint.className = 'gcp-disclosure';
-      hint.textContent = 'Try three guided exchanges with GRACE, then explore making it yours. Demo signup does not unlock a live account.';
+      hint.className = 'gcp-demo-intro';
+      hint.textContent = 'A little introduction to GRACE · 3 guided exchanges';
       q('#gcp-thread').before(hint);
     }
     q('#gcp-input').addEventListener('keydown', (e) => {
