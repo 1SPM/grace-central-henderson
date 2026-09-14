@@ -1,4 +1,5 @@
 /* One visual language for the Faithful discovery guides. */
+:is(.fp-connection,.fi-disclosure)>summary>.fh-guide-subline{display:block;margin-top:5px;color:#526b7d;font:400 13px/1.5 Arial,sans-serif;max-width:65ch}
 :is(.fp-connection,.fi-disclosure){--guide-ink:#173755;--guide-action:#175fa5;--guide-muted:#526b7d;--guide-line:#cadde9;border:1px solid var(--guide-line);border-radius:16px;background-color:#fbfdff;background-image:radial-gradient(rgba(23,55,85,.035) .65px,transparent .65px);background-size:5px 5px;box-shadow:0 3px 12px rgba(23,55,85,.035);color:var(--guide-ink)}
 :is(.fp-connection,.fi-disclosure)>summary{color:var(--guide-ink);font:600 16px/1.5 Arial,sans-serif;padding:18px 22px;min-height:64px;list-style:none;position:relative;padding-right:54px;background:linear-gradient(115deg,rgba(226,238,247,.65),rgba(255,255,255,.7));border-radius:15px}
 :is(.fp-connection,.fi-disclosure)>summary::-webkit-details-marker{display:none}
