@@ -56,9 +56,19 @@ body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff3
 #sec-home .faithful-impact-give>button:not(.faithful-impact-give-cta){border:0;border-radius:0;background:none;padding:12px 0}
 #sec-home .faithful-impact-give-cta{max-width:220px;background:#0753ad}
 #sec-home .fh-gift-note{font-size:12px;margin-top:16px}
-#sec-home .fh-care{border-top:1px solid var(--fh-line);margin-top:30px;padding-top:24px}
+#sec-home .fh-care{border:1px solid var(--fh-line);border-radius:18px 18px 28px 18px;margin-top:30px;padding:24px;background-color:#edf3f6;background-image:repeating-linear-gradient(0deg,#17375504 0,#17375504 1px,transparent 1px,transparent 4px)}
 #sec-home .fh-care p{color:var(--fh-muted)}
 #sec-home .fh-care button{display:block;background:none;border:0;color:#0753ad;font:inherit;padding:12px 0;cursor:pointer}
+#sec-home .fh-care h2{margin-bottom:8px}
+#sec-home .fh-care-services{margin:18px 0 10px}
+#sec-home .fh-care .fh-care-service{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;padding:15px 0;border-bottom:1px solid #17375518;color:#173755}
+#sec-home .fh-care-copy strong{display:block;font-size:15px;font-weight:600}
+#sec-home .fh-care-copy small{display:block;font-size:13px;line-height:1.5;color:#526985;margin-top:4px}
+#sec-home .fh-care-arrow{font-size:24px;color:#347890}
+#sec-home .fh-care button:hover{color:#185f79}
+#sec-home .fh-care button:focus-visible{outline:2px solid #347890;outline-offset:4px;border-radius:4px}
+#sec-home .fh-care .fh-care-more{font-size:14px;font-weight:600;padding:9px 0}
+#sec-home .fh-care .fh-care-note{font-size:12px;line-height:1.5;margin:14px 0 0}
 #sec-home .home-prayer-impact-grid,#sec-home .faithful-invitation-row{display:none}
 #sec-home .fh-prayer{order:6;display:flex;align-items:center;position:relative;isolation:isolate;overflow:hidden;background-color:#f3f0e8;background-image:repeating-linear-gradient(0deg,#77674d08 0,#77674d08 1px,transparent 1px,transparent 4px),repeating-linear-gradient(90deg,#fff8 0,#fff8 1px,transparent 1px,transparent 5px);border:1px solid #d8d4c866;border-radius:12px;min-height:160px;margin:12px 0}
 #sec-home .fh-prayer::after{content:'';position:absolute;inset:0 0 0 55%;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#f3f0e8,transparent 70%),url('../../assets/faithful-dawn.jpg') right center/cover no-repeat;opacity:.18}

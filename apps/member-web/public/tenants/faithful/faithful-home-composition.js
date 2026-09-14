@@ -50,10 +50,31 @@
   aside.append(give);
   give.append(make('p', 'fh-gift-note', 'Direct gifts are separate from card impact.'));
   const care = make('section', 'fh-care');
-  care.append(make('h2', '', 'People to turn to'), make('p', '', 'Questions, prayer, or a next step?'));
-  [['Find pastoral care', () => goSection('outreach')], ['Meet your leaders', () => goSection('ai')]].forEach(([label, action]) => {
-    const button = make('button', '', label); button.type = 'button'; button.onclick = action; care.append(button);
+  care.append(make('h2', '', 'People to turn to'), make('p', '', 'Find support for the season you’re in.'));
+  const services = make('div', 'fh-care-services');
+  const categories = getPastoralCareCategories();
+  const preferred = ['marriage', 'grief', 'parenting', 'faith'];
+  preferred.map(id => categories.find(category => category.id === id)).filter(Boolean).forEach(category => {
+    const button = make('button', 'fh-care-service');
+    button.type = 'button';
+    const copy = make('span', 'fh-care-copy');
+    copy.append(make('strong', '', category.title), make('small', '', category.subtitle));
+    const arrow = make('span', 'fh-care-arrow', '›'); arrow.setAttribute('aria-hidden', 'true');
+    button.append(copy, arrow);
+    button.onclick = () => {
+      goSection('ai');
+      const target = document.querySelector(`#pcare-grid [data-pcare-id="${category.id}"]`);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target?.focus({ preventScroll: true });
+    };
+    services.append(button);
   });
+  care.append(services);
+  const allCare = make('button', 'fh-care-more', 'View all support options');
+  allCare.type = 'button'; allCare.onclick = () => { goSection('ai'); document.getElementById('leader-pastoral-care')?.scrollIntoView({ block: 'start' }); };
+  const leaders = make('button', 'fh-care-more', 'Meet your leaders');
+  leaders.type = 'button'; leaders.onclick = () => goSection('ai');
+  care.append(allCare, leaders, make('p', 'fh-care-note', 'Browse first. Nothing is sent by choosing a topic here.'));
   aside.append(care); lower.append(community, aside); home.append(lower);
   const prayer = home.querySelector('.faithful-invitation-card');
   if (prayer) { prayer.classList.add('fh-prayer'); home.append(prayer); }
