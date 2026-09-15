@@ -73,6 +73,8 @@ export default defineConfig(({ mode }) => {
           // index.html as no-cache, so letting navigations hit the network
           // is correct and cheap.
           globPatterns: ['**/*.{js,css,svg,png,ico,woff,woff2}'],
+          // Preserve the full-resolution film artwork without precaching it.
+          globIgnores: ['assets/members-portal-video-thumbnail.png'],
           navigateFallback: null,
           cleanupOutdatedCaches: true,
           skipWaiting: true,
