@@ -3,13 +3,27 @@
   const mobile = !!document.getElementById('screen-home');
   const session = window.GRACE_SESSION ? await window.GRACE_SESSION.ready.catch(()=>null) : null;
   const memberId = session?.memberIdentity;
-  if (!memberId && window.Clerk?.user) return; // Do not load demo preferences for an unresolved signed-in account.
+  // Signed in, but this page could not resolve which member. This used to
+  // `return`, which removed the entire onboarding layer -- every dropdown and
+  // every "Let us know" -- from a signed-in member's portal. The workshop asks
+  // people to sign in, so the one path that most needed the tutorial was the one
+  // that lost it.
+  //
+  // What the guard was actually protecting is Maya's stored demo answers, not
+  // the tutorial. Every save, clear and read path is already refused by
+  // identityValid() below, so the only real leak was loading those answers into
+  // the form and labelling them as preferences. That is what is withheld now.
+  const unresolvedAccount = !memberId && !!window.Clerk?.user;
   const identity = memberId ? 'member.'+encodeURIComponent(memberId) : 'demo-maya';
   const key = 'grace.preferences.faithful.'+identity+'.v1';
   const identityValid = () => memberId ? window.Clerk?.user?.id === memberId : !window.Clerk?.user;
-  const context = memberId ? 'Personal preferences, saved only in this browser. These do not update church records.' : 'Demo preferences for Maya, saved only in this browser. These do not update church records.';
+  const context = unresolvedAccount
+    ? 'Signed in, but this preview could not confirm your account. You can read and try this section; nothing here will be saved.'
+    : memberId ? 'Personal preferences, saved only in this browser. These do not update church records.'
+    : 'Demo preferences for Maya, saved only in this browser. These do not update church records.';
   let answers = {};
-  try { answers = JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) {}
+  // Never read the demo persona's answers into a signed-in member's form.
+  if (!unresolvedAccount) { try { answers = JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) {} }
   if (!answers || typeof answers !== 'object' || Array.isArray(answers)) answers = {};
   const sections = [
     ['home',mobile?'#screen-home > .scroll':'#sec-home','How much guidance would you like?',['Explore on my own','Guide me','Help me decide']],
