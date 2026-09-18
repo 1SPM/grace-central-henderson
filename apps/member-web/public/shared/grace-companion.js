@@ -190,6 +190,14 @@
       if (this.browserSupported) this.pick();
     },
     detectProvider() {
+      if (A && A.publicDemoVoice) {
+        this.provider = 'demo';
+        this.demoReady = fetch('/shared/grace-demo-voice.json').then(r => {
+          if (!r.ok) throw new Error('Voice catalogue unavailable');
+          return r.json();
+        }).then(rows => { this.demoPhrases = rows; }).catch(() => { this.demoPhrases = []; });
+        return this.demoReady;
+      }
       if (!A || A.voiceProvider !== 'elevenlabs') {
         this.provider = 'browser';
         updateVoiceStatusLabel();
@@ -304,10 +312,27 @@
     },
     speak(text, onStart, onEnd) {
       if (!Memory.data.voiceOn) return;
+      if (A && A.publicDemoVoice) {
+        this.stop();
+        const request = this.demoRequest = (this.demoRequest || 0) + 1;
+        Promise.resolve(this.demoReady).then(() => {
+          if (request !== this.demoRequest || !Memory.data.voiceOn) return;
+          const normal = s => String(s).replace(/[’‘]/g, "'").replace(/\s+/g, ' ').trim();
+          const index = (this.demoPhrases || []).findIndex(s => normal(s) === normal(text));
+          if (index < 0) return; // Unlisted replies stay text-only; no paid request or fallback.
+          const audio = this._audio = new Audio('/assets/grace-clara-demo/' + index + '.mp3');
+          audio.onplay = () => { this.speaking = true; setSpeaking(true); if (onStart) onStart(); };
+          const done = () => { this._cleanupAudio(); this.speaking = false; setSpeaking(false); if (onEnd) onEnd(); };
+          audio.onended = done; audio.onerror = done;
+          audio.play().catch(done);
+        });
+        return;
+      }
       if (this.provider === 'elevenlabs') this.speakElevenLabs(text, onStart, onEnd);
       else if (this.browserSupported) this.speakBrowser(text, onStart, onEnd);
     },
     stop() {
+      this.demoRequest = (this.demoRequest || 0) + 1;
       this._cleanupAudio();
       if (this.browserSupported) { try { speechSynthesis.cancel(); } catch (e) {} }
       this.speaking = false;
@@ -951,6 +976,12 @@
     }
     q('#gcp-close-btn').addEventListener('click', () => api.close());
     q('#gcp-send').addEventListener('click', sendFromInput);
+    if (A.publicDemoVoice) {
+      const hint = document.createElement('p');
+      hint.className = 'gcp-demo-intro';
+      hint.textContent = 'A little introduction to GRACE · 3 guided exchanges';
+      q('#gcp-thread').before(hint);
+    }
     q('#gcp-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); sendFromInput(); }
     });
@@ -1201,6 +1232,30 @@
      *  return value exists to prevent. */
     ask(text) {
       if (!root || thinking || !text) return false;
+      if (A.publicDemoVoice) {
+        if (!isOpen) api.open();
+        appendUser(text);
+        if (RX.crisis.test(String(text).toLowerCase()) || /immediate danger/i.test(text)) {
+          appendGrace('If you are in immediate danger, call local emergency services. This demo cannot dispatch help. Please reach out to a trusted person or the church’s human care team.', 'outreach', 'Open care', true);
+          return true;
+        }
+        const used = A.demoExchanges || 0;
+        const finish = 'That’s a little taste of GRACE. Choose Make it yours to explore the next step. Account creation and full member conversations are still simulated in this demo.';
+        if (used >= 3) { appendGrace(finish, 'demo-signup', 'Make it yours'); return true; }
+        A.demoExchanges = used + 1;
+        const t = String(text).toLowerCase();
+        let reply = 'Would you like to explore the weekly message or connect with people?', nav = null, label = null;
+        if (/group|people/.test(t)) { reply = 'Let’s look at the groups listed in Connect. You can check meeting times and details before deciding.'; nav = 'groups'; label = 'Browse groups'; }
+        else if (/event/.test(t)) { reply = 'Check the event’s date, location, cost and registration details in Connect. Opening it does not register or cancel anything.'; nav = 'events'; label = 'Browse events'; }
+        else if (/bible|reflect|message|watch/.test(t)) { reply = 'The weekly lesson has optional reflection prompts. You can choose one or write freely.'; nav = 'journal'; label = 'Explore Reflect'; }
+        else if (/care|pastor|help|prayer/.test(t)) { reply = 'Would you like to explore the church’s human care options? This preview cannot promise a response time.'; nav = 'outreach'; label = 'Open care'; }
+        appendGrace(reply, nav, label);
+        if (used === 2) appendGrace(finish, 'demo-signup', 'Make it yours', true);
+        // Accepted and answered. ask() returns a boolean by contract: callers such
+        // as the Reflect share path say "your text has not been sent" on a falsy
+        // result, so a bare return here would deny a send that did happen.
+        return true; // Public demo never enters the unrestricted conversation service.
+      }
       if (A.quietNavigator && resolvedMemberId && global.Clerk?.user?.id !== resolvedMemberId) {
         memberDialogue?.reset();
         Voice.stop(); threadHistory.length = 0;

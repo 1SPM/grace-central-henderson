@@ -21,3 +21,12 @@
 .fd-grid.settings-tab-content{display:block}
 .settings-tab-content>[hidden]{display:none}
 .settings-tab-content .fd-card{margin-bottom:18px}
+.sb .nb { border: 1px solid transparent; }
+.sb .nb.active {
+  background: #173755;
+  border-color: #ffffff38;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.sb .nb.active:hover { background: #245173; }
+.sb .nb.active .nb-label { font-weight: 600; }

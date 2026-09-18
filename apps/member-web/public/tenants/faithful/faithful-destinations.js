@@ -88,14 +88,9 @@
   if (mobile) {
     document.querySelectorAll('[onclick^="drawerMenuAction("]').forEach(button => {
       const key = button.getAttribute('onclick').match(/'([^']+)'/)?.[1];
-      if (['mission','safety','privacy','terms'].includes(key)) { button.remove(); }
+      if (['mission','safety','privacy','terms','first-step','give-gift','volunteer','find-event','join-group'].includes(key)) { button.remove(); }
       else if (pages[key]) { button.removeAttribute('onclick'); button.dataset.fdAction = key; }
     });
-  } else {
-    const nav = document.createElement('nav');
-    nav.className = 'fd-nav'; nav.setAttribute('aria-label', 'Member destinations');
-    nav.innerHTML = '<p>Get connected</p>' + Object.entries(pages).slice(0,5).map(([key, [title]]) => `<button type="button" data-fd-action="${key}">${title}</button>`).join('');
-    document.querySelector('.sb-scroll').appendChild(nav);
   }
   const footerMarkup = '<span>Faithful Church</span><nav aria-label="Quick links">' + Object.entries({mission:'Our Mission',safety:'Safety',privacy:'Privacy',terms:'Terms'}).map(([key,label]) => `<button type="button" data-fd-action="${key}">${label}</button>`).join('') + '</nav>';
   const footerHosts = mobile ? parent.querySelectorAll('.screen:not(.push-screen) > .scroll') : [parent];
@@ -106,7 +101,7 @@
   });
   if (mobile) {
     document.querySelectorAll('.drawer-section-label').forEach(label => {
-      if (label.textContent.trim().toLowerCase() === 'quick links') label.remove();
+      if (['quick links','get connected'].includes(label.textContent.trim().toLowerCase())) label.remove();
     });
   }
   // Follow existing screen routing, including departures through primary navigation.

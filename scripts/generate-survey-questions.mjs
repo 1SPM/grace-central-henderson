@@ -36,6 +36,6 @@ ${groups}
 };
 /* Which group each tenant's portal shows. Faithful has its own so its form
  * never names another church and can ask about the "Let us know" onboarding. */
-window.GRACE_PILOT_SURVEY_TENANT_TRACKS = ${JSON.stringify(TENANT_SURVEY_TRACKS, null, 2).replace(/\n/g, '\n')};
+window.GRACE_PILOT_SURVEY_TENANT_TRACKS = ${JSON.stringify(TENANT_SURVEY_TRACKS, null, 2)};
 `);
 console.log(`wrote ${OUT} (` + Object.entries(SURVEY_TRACKS).map(([t, qs]) => `${t}: ${qs.length}`).join(', ') + ')');
