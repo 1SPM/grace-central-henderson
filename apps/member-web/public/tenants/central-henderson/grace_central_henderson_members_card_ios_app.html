@@ -2239,6 +2239,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer
 }
 .landing-action:active{opacity:.72}
+.landing-note{margin:14px 0 0;font-size:12px;line-height:1.5;opacity:.72;text-align:center}
 .landing-divider{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.18em}
 .device.landing-active .status-time,.device.landing-active .status-meta{color:#fff}
 .device.landing-active .status-battery{border-color:rgba(255,255,255,.45)}
@@ -2259,13 +2260,17 @@ html.embed-preview .watch-donate-toast{display:none!important}
       <div class="landing-copy">
         <img class="landing-logo" src="../../assets/CCC_Central_Church-invert.png" alt="Central Church">
         <h1 class="landing-title">Members Card Portal</h1>
-        <p class="landing-sub">Your daily companion for giving, care, and connection at Central</p>
+        <p class="landing-sub">Giving, care, and connection at Central</p>
       </div>
+      <!-- This page has no authentication: it is a visual preview with no network
+           calls at all. "Log In" and "Sign Up Now" were byte-identical no-ops that
+           both just dismissed this overlay, so they promised an account flow that
+           does not exist here. Real sign-up lives in the member-web app
+           (apps/member-web/src/portal), reached from the portal, not from this page. -->
       <div class="landing-actions">
-        <button type="button" class="landing-action" onclick="enterApp('login')">Log In</button>
-        <span class="landing-divider" aria-hidden="true">|</span>
-        <button type="button" class="landing-action" onclick="enterApp('signup')">Sign Up Now</button>
+        <button type="button" class="landing-action" onclick="enterApp()">Explore the preview</button>
       </div>
+      <p class="landing-note">A preview of the app. Account sign-in isn't connected here.</p>
     </div>
   </div>
   <div class="island"></div>
@@ -2490,7 +2495,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="home-gi-kpi"><div class="home-gi-kpi-val" id="home-gi-total">$18.42</div><div class="home-gi-kpi-key">Card impact · May</div></div>
               <div class="home-gi-kpi"><div class="home-gi-kpi-val" id="home-gi-lives">23</div><div class="home-gi-kpi-key">Lives impacted</div></div>
             </div>
-            <div class="home-gi-partner" id="home-gi-partner">Partner · 6% · Giving goal progress</div>
+            <div class="home-gi-partner" id="home-gi-partner">Partner · Giving goal progress</div>
             <div class="home-gi-alloc-head">Impact allocation</div>
             <div id="home-gi-alloc-list"></div>
             <button type="button" class="home-gi-cta" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review allocation →</button>
@@ -2598,7 +2603,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
       <div class="scroll">
         <div class="ld-hero-centered" id="ld-hero-centered">
           <div class="ld-hero-top">
-            <div class="ld-reachable ld-reachable--live" id="ld-reachable-badge">Reachable now · real person available</div>
+            <div class="ld-reachable ld-reachable--live" id="ld-reachable-badge">Human follow-up · response times vary</div>
           </div>
           <div class="ld-hero-body">
             <div class="ld-hero-profile">
@@ -2617,7 +2622,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 </div>
               </div>
             </div>
-            <p class="home-ai-greeting" id="ld-leader-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? This is a safe space to share.</p>
+            <p class="home-ai-greeting" id="ld-leader-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? You can choose what to share.</p>
             <div class="ld-hero-actions">
               <button type="button" class="ld-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
               <button type="button" class="ld-begin" onclick="openDivinityAvatar(currentLeader)">Begin a Conversation</button>
@@ -2951,7 +2956,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             </div>
             <div class="gv-stat-grid gv-stat-grid--3">
               <div class="gv-stat gv-stat-impact"><div class="gv-stat-lbl">Card impact</div><div class="gv-stat-val" id="gv-stat-impact">$18.42</div><div class="gv-stat-sub">↑ 12% · May</div></div>
-              <div class="gv-stat gv-stat-commit"><div class="gv-stat-lbl">Commitment™</div><div class="gv-stat-val" id="gv-stat-commit">Partner · 6%</div><div class="gv-stat-sub" id="gv-stat-commit-sub">Review your giving goal</div></div>
+              <div class="gv-stat gv-stat-commit"><div class="gv-stat-lbl">Commitment™</div><div class="gv-stat-val" id="gv-stat-commit">Partner</div><div class="gv-stat-sub" id="gv-stat-commit-sub">Review your giving goal</div></div>
               <div class="gv-stat gv-stat-lives"><div class="gv-stat-lbl">Lives Impacted</div><div class="gv-stat-val" id="gv-stat-lives">23</div><div class="gv-stat-sub">Meals · families · youth</div></div>
             </div>
           </div>
@@ -2984,7 +2989,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
           <div class="gv-commit-banner">
             <div class="gv-commit-banner-text">
-              <strong id="gv-commit-cta">Partner · 6%</strong>
+              <strong id="gv-commit-cta">Partner</strong>
               <p id="gv-commit-cta-sub">Giving goal progress</p>
             </div>
             <button type="button" class="gv-commit-banner-btn" onclick="walletTabGive('assets');scrollGiveAnchor('gv-give-form')">Give →</button>
@@ -3237,7 +3242,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-post-time">4 hr</div>
               </div>
               <div class="cn-post-badge cn-pb-milestone">🏅 Commitment milestone</div>
-              <div class="cn-post-body"><strong style="color:#15803d">👑 Giving goal updated</strong> — Giving 8%+ of income this month. So grateful for this community pushing me to give more generously. God is faithful! 🎉</div>
+              <div class="cn-post-body"><strong style="color:#15803d">👑 Giving goal updated</strong> — So grateful for this community encouraging generous giving. God is faithful! 🎉</div>
               <div class="cn-post-actions">
                 <button type="button" class="cn-pact" id="cn-pray-2" onclick="cnTogglePray('cn-pray-2','cn-count-2')">🙏 <span id="cn-count-2">42</span> Pray</button>
                 <button type="button" class="cn-pact" id="cn-amen-2" onclick="cnToggleAmen('cn-amen-2','cn-acount-2')">🙌 <span id="cn-acount-2">61</span> Amen</button>
@@ -3835,7 +3840,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="jy-section-ico"><span data-grace-icon="impact" data-grace-size="20"></span></div>
               <div>
                 <h2>Your growth</h2>
-                <p>Journey stage <strong style="color:#EE2B37">Beginning</strong> · Rhythm stable · Partner commitment at 6% of income.</p>
+                <p>Journey stage <strong style="color:#EE2B37">Beginning</strong> · Rhythm stable. Partner commitment.</p>
               </div>
             </div>
           </div>
@@ -4644,6 +4649,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 <script src="../../shared/grace-duotone-icons.js"></script>
 <script src="../../shared/grace-verified-leaders-faq.js"></script>
 <script src="../../shared/grace-messaging.js"></script>
+<script src="../../shared/grace-member-intents.js"></script>
 <script src="../../shared/grace-companion.js"></script>
 <script>
 var IS_EMBED_PREVIEW = (function () {
@@ -4656,24 +4662,24 @@ var IS_EMBED_PREVIEW = (function () {
 })();
 if (IS_EMBED_PREVIEW) document.documentElement.classList.add('embed-preview');
 const leaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI Companion',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',profileFrame:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'../../assets/watch/video/Maya-welcome-to-Central.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
-  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · AI Companion',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
-  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · AI Companion',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,humanLive:true,bio:'Pastor Derek serves middle school through college-age students and their parents.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · AI Companion",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,humanLive:false,bio:'Sis. Priya leads Women of Grace and mentorship circles.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
-  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · AI Companion',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,humanLive:false,bio:'Minister Okafor supports couples, parents, and blended families.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
-  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · AI Companion',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together."',online:true,humanLive:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
-  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · AI Companion',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations?"',online:true,humanLive:true,bio:'Elder Chen coordinates global partners and short-term teams.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
-  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · AI Companion",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,humanLive:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
-  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · AI Companion',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,humanLive:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
-  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · AI Companion',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding care."',online:true,humanLive:true,bio:'Licensed clinician bridging faith and mental health with pastoral support.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
-  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · AI Companion",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer?"',online:true,humanLive:true,bio:'Minister Torres runs Iron Men groups and workplace ministry.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
-  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · AI Companion',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community?"',online:true,humanLive:true,bio:'Sis. Angela builds community for single adults 22–40.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
-  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · AI Companion',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story?"',online:false,humanLive:false,bio:'Pastor Brooks organizes serve days and new believer follow-up.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
-  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · AI Companion',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or legacy giving, I\'m honored to walk with you."',online:true,humanLive:true,bio:'Rev. Doyle leads Golden Years fellowship and home communion visits.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
-  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · AI Companion',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or Sunday tech?"',online:true,humanLive:true,bio:'Bro. Kevin runs broadcast, social content, and the member app.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
-  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · AI Companion',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m glad you\'re here."',online:true,humanLive:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
-  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · AI Companion',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,humanLive:false,bio:'Pastor Grant officiates funerals and long-term bereavement care.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
-  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · AI Companion',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,humanLive:true,bio:'Minister Santos leads Domingo en Español and bilingual family resources.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'}
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Senior Pastor · Central Henderson · AI avatar',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',profileFrame:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',introVideoUrl:'../../assets/watch/video/Maya-welcome-to-Central.mp4',divinityRole:'SENIOR PASTOR',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can speak or type — I\'m listening."',online:true,humanLive:true,bio:'Pastor James leads Central Henderson with a heart for expository preaching and pastoral care.',exp:'22 yrs ministry',hours:'24/7 AI · Live Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Central Henderson · AI avatar',topic:'Care · Grief · Hospital',img:'https://randomuser.me/api/portraits/women/44.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,humanLive:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
+  {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Central Henderson · AI avatar',topic:'Youth · Identity · Faith',img:'https://randomuser.me/api/portraits/men/54.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,humanLive:true,bio:'Pastor Derek serves middle school through college-age students and their parents.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Central Henderson · AI avatar",topic:'Women · Mentorship · Calling',img:'https://randomuser.me/api/portraits/women/28.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. Share only what you choose — what\'s on your mind today, sis?"',online:false,humanLive:false,bio:'Sis. Priya leads Women of Grace and mentorship circles.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Central Henderson · AI avatar',topic:'Marriage · Family · Counselling',img:'https://randomuser.me/api/portraits/men/45.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,humanLive:false,bio:'Minister Okafor supports couples, parents, and blended families.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
+  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Central Henderson · AI avatar',topic:'Intercession · Prayer · Warfare',img:'https://randomuser.me/api/portraits/women/68.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together."',online:true,humanLive:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
+  {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Central Henderson · AI avatar',topic:'Missions · Global · Short-term trips',img:'https://randomuser.me/api/portraits/men/22.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations?"',online:true,humanLive:true,bio:'Elder Chen coordinates global partners and short-term teams.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
+  {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Central Henderson · AI avatar",topic:'Kids · Parents · Sunday School',img:'https://randomuser.me/api/portraits/women/65.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,humanLive:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
+  {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Central Henderson · AI avatar',topic:'Worship · Music · Creative arts',img:'https://randomuser.me/api/portraits/men/76.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,humanLive:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
+  {name:'Dr. Rachel Kim',title:'Counselling Director',role:'Counselling · Central Henderson · AI avatar',topic:'Mental health · Anxiety · Referrals',img:'https://randomuser.me/api/portraits/women/89.jpg',greeting:'"Hello Maya, Dr. Kim here. This is a confidential space to talk through stress, anxiety, or finding care."',online:true,humanLive:true,bio:'Licensed clinician bridging faith and mental health with pastoral support.',exp:'16 yrs · LCSW',hours:'24/7 AI · Clinic Tue–Thu',languages:['English','Korean'],specialties:['Anxiety','Depression','Referrals','Boundaries'],rating:'4.9★',sessions:'556'},
+  {name:'Min. David Torres',title:"Men's Ministry Director",role:"Men's Ministry · Central Henderson · AI avatar",topic:'Men · Accountability · Brotherhood',img:'https://randomuser.me/api/portraits/men/41.jpg',greeting:'"What\'s up Maya — David here. Men\'s breakfast, accountability, or just need a straight answer?"',online:true,humanLive:true,bio:'Minister Torres runs Iron Men groups and workplace ministry.',exp:'13 yrs ministry',hours:'24/7 AI · Sat men\'s breakfast',languages:['English','Spanish'],specialties:['Accountability','Work','Fatherhood','Recovery'],rating:'4.8★',sessions:'401'},
+  {name:'Sis. Angela Wright',title:'Singles Ministry Lead',role:'Singles Ministry · Central Henderson · AI avatar',topic:'Singles · Dating · Community',img:'https://randomuser.me/api/portraits/women/17.jpg',greeting:'"Hey Maya! Angela here — single season, dating questions, or just need community?"',online:true,humanLive:true,bio:'Sis. Angela builds community for single adults 22–40.',exp:'8 yrs ministry',hours:'24/7 AI · Events monthly',languages:['English'],specialties:['Singles','Dating','Community','Purpose'],rating:'4.8★',sessions:'334'},
+  {name:'Pastor Michael Brooks',title:'Outreach Pastor',role:'Outreach & Evangelism · Central Henderson · AI avatar',topic:'Evangelism · Local outreach · Serve days',img:'https://randomuser.me/api/portraits/men/61.jpg',greeting:'"Maya — Michael here. Ready to serve our city or share your faith story?"',online:false,humanLive:false,bio:'Pastor Brooks organizes serve days and new believer follow-up.',exp:'17 yrs ministry',hours:'AI 24/7 · Serve days monthly',languages:['English'],specialties:['Evangelism','Serve days','Follow-up','Local'],rating:'4.7★',sessions:'287'},
+  {name:'Rev. Patricia Doyle',title:'Seniors Ministry Pastor',role:'Seniors Ministry · Central Henderson · AI avatar',topic:'Seniors · Visits · Legacy',img:'https://randomuser.me/api/portraits/women/33.jpg',greeting:'"Good afternoon dear — Patricia here. Whether it\'s prayer, a visit, or legacy giving, I\'m honored to walk with you."',online:true,humanLive:true,bio:'Rev. Doyle leads Golden Years fellowship and home communion visits.',exp:'31 yrs ministry',hours:'24/7 AI · Visits Mon–Wed',languages:['English'],specialties:['Seniors','Visits','Legacy','Communion'],rating:'4.9★',sessions:'445'},
+  {name:'Bro. Kevin Nwosu',title:'Media Director',role:'Media & Communications · Central Henderson · AI avatar',topic:'Media · Tech · Livestream',img:'https://randomuser.me/api/portraits/men/86.jpg',greeting:'"Hey Maya — Kevin from media. Need help with the app, livestream, or Sunday tech?"',online:true,humanLive:true,bio:'Bro. Kevin runs broadcast, social content, and the member app.',exp:'7 yrs ministry',hours:'24/7 AI · Sun production',languages:['English'],specialties:['Livestream','App','Social','Volunteers'],rating:'4.7★',sessions:'198'},
+  {name:'Sis. Hannah Levy',title:'New Members Pastor',role:'New Members · Central Henderson · AI avatar',topic:'New here · Membership · Next steps',img:'https://randomuser.me/api/portraits/women/50.jpg',greeting:'"Welcome Maya! Hannah here — whether you\'re brand new or ready for membership class, I\'m glad you\'re here."',online:true,humanLive:true,bio:'Sis. Levy guides discovery class, baptism, and membership covenant.',exp:'6 yrs ministry',hours:'24/7 AI · Class Sun 11:30',languages:['English','Hebrew'],specialties:['Membership','Baptism','Orientation','Groups'],rating:'4.9★',sessions:'512'},
+  {name:'Pastor Thomas Grant',title:'Associate Pastor',role:'Funerals & Bereavement · Central Henderson · AI avatar',topic:'Funerals · Bereavement · End of life',img:'https://randomuser.me/api/portraits/men/67.jpg',greeting:'"Maya — Thomas here. If you\'re walking loss or preparing for a service, I\'m here with you in Christ\'s peace."',online:false,humanLive:false,bio:'Pastor Grant officiates funerals and long-term bereavement care.',exp:'31 yrs ministry',hours:'24/7 AI · On-call pastoral',languages:['English'],specialties:['Funerals','Grief','Liturgy','Families'],rating:'4.9★',sessions:'367'},
+  {name:'Min. Olivia Santos',title:'Spanish Ministry Lead',role:'Spanish Ministry · Central Henderson · AI avatar',topic:'Español · Familia · Comunidad',img:'https://randomuser.me/api/portraits/women/81.jpg',greeting:'"Hola Maya — soy Olivia. Puedes hablar conmigo en español o inglés. ¿En qué puedo acompañarte hoy?"',online:true,humanLive:true,bio:'Minister Santos leads Domingo en Español and bilingual family resources.',exp:'10 yrs ministry',hours:'24/7 AI · Domingo 2pm',languages:['Spanish','English'],specialties:['Familia','ESL','Comunidad','Oración'],rating:'4.8★',sessions:'423'}
 ];
 
 let currentLeader = 0;
@@ -4918,7 +4924,7 @@ function renderLeaderProfileLive(l) {
   syncHeroLiveDot('lpm-live-dot', l);
   if (liveEl) {
     if (getLeaderReachable(l)) {
-      liveEl.innerHTML = '<span class="ld-profile-human-live" aria-label="Leader is reachable"><i></i> Reachable now · real person available</span>';
+      liveEl.innerHTML = '<span class="ld-profile-human-live" aria-label="Leader is reachable"><i></i> Human follow-up · response times vary</span>';
     } else {
       liveEl.innerHTML = '<span class="ld-profile-human-away">Not live · avatar still available 24/7</span>';
     }
@@ -5410,7 +5416,9 @@ function navigateFromDrawer(name) {
   closeAppMenu();
 }
 
-function enterApp(mode) {
+/* Takes no argument by design: there is nothing here for a mode to select. It
+   previously accepted 'login' or 'signup' and read neither. */
+function enterApp() {
   var device = document.querySelector('.device');
   var landing = document.getElementById('landing-screen');
   if (!landing || landing.classList.contains('is-hidden')) return;
@@ -6111,7 +6119,10 @@ function routeGiveImpact(name, btn) {
 }
 
 function submitGiveGift() {
-  showToast('Gift submitted successfully');
+  // No API call behind this: docs/GIVING_SYSTEM_GUIDE.md promises a
+  // confirmation screen and an email receipt, and neither exists on this
+  // preview page. Do not tell the member a gift was taken.
+  showToast('Preview only — no gift was submitted');
 }
 
 var pulseRecentIcons = { 'Volunteer Event': '🤝', 'Live Service': '📺', 'Care Response': '🙏', 'Bible Study': '📖' };
@@ -6309,7 +6320,7 @@ function renderHomeAi() {
   const firstName = leaderFirstName(leader.name);
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   set('home-ai-name', leader.name);
-  set('home-ai-role', leader.role.replace(/AI Companion/g, 'Verified Avatar'));
+  set('home-ai-role', leader.role.replace(/AI avatar/g, 'Verified Avatar'));
   var greet = (leader.greeting || '').replace(/^"|"$/g, '');
   if (greet.length > 72) greet = greet.slice(0, 69) + '…';
   set('home-ai-greeting', greet || 'What\'s on your heart?');
@@ -6348,7 +6359,7 @@ function openLeaderProfile(idx) {
   profileLeaderIdx = idx;
   document.getElementById('lpm-av').src = l.img;
   document.getElementById('lpm-name').textContent = l.name;
-  document.getElementById('lpm-title').textContent = (l.role || (l.title + ' · Central Henderson · AI Companion')).replace(/AI Companion/g, 'Verified Avatar');
+  document.getElementById('lpm-title').textContent = (l.role || (l.title + ' · Central Henderson · AI avatar')).replace(/AI avatar/g, 'Verified Avatar');
   const greetEl = document.getElementById('lpm-greeting');
   if (greetEl) greetEl.textContent = (l.greeting || '').replace(/^"|"$/g, '');
   document.getElementById('lpm-bio').textContent = l.bio || '';

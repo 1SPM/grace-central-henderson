@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 const base = process.env.RELEASE_BASE || '190d4689d8bf9bca238f1cadd95bbfb4720177be';
 const shared='apps/member-web/public/shared/';
 const baseline = name=>execFileSync('git',['show',base+':'+shared+name],{encoding:'utf8'});
@@ -41,9 +42,34 @@ const enabled=setup(current,true);
 assert.notEqual(plain(enabled.c.GRACE_MESSAGING.getMessaging()).system.tutorial.badge,plain(before.c.GRACE_MESSAGING.getMessaging()).system.tutorial.badge);
 assert(enabled.c.testHooks.buildMemberPersonaPrompt('Hello').includes('DEMO LISTINGS'));
 for(const page of ['member-portal.html','grace_faithful_church_members_card_ios_app.html'])assert(fs.readFileSync('apps/member-web/public/tenants/faithful/'+page,'utf8').includes("GRACE_MEMBER_EXPERIENCE = 'faithful-v1'"));
-for(const page of ['member-portal.html','grace_central_henderson_members_card_ios_app.html']){
+// Central Henderson is the live client tenant. Two guards, and they protect
+// different things.
+//
+// 1. CONTENT PIN. Previously this compared Central's files to RELEASE_BASE via
+//    `git show`, which froze them at that commit forever: any deliberate
+//    Central change made this test unpassable, and the only way out was to
+//    delete the assertion. Pinning to a recorded hash keeps exactly the same
+//    protection — unreviewed drift still fails — while making an intentional
+//    change a visible one-line diff a reviewer must approve. Update these ONLY
+//    in a PR whose subject is changing Central.
+const CENTRAL_PAGE_SHA256={
+ 'member-portal.html':'67d04b22f87f60265d8546fdf34f8f964d27c2f56e82e6098581d34f56825662',
+ 'grace_central_henderson_members_card_ios_app.html':'652d1120c0a32d8ee8fbf8a80576ab8add1e5a717fb020a875cf0486f20dcb66',
+};
+for(const [page,expected] of Object.entries(CENTRAL_PAGE_SHA256)){
  const p='apps/member-web/public/tenants/central-henderson/'+page;
- assert.equal(fs.readFileSync(p,'utf8'),execFileSync('git',['show',base+':'+p],{encoding:'utf8'}));
+ const actual=createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+ assert.equal(actual,expected,`Central Henderson's ${page} changed. If that was deliberate, update CENTRAL_PAGE_SHA256 in this file as part of a PR that is about changing the live client tenant — not as a side effect of a Faithful release.`);
+}
+
+// 2. THE DURABLE INVARIANT, which the content pin never actually stated: the
+//    Faithful guided experience must not reach the live client tenant. A hash
+//    pin cannot express this on its own — bump the hash and it would pass even
+//    if the flag had been added. Assert the thing we actually care about.
+for(const page of Object.keys(CENTRAL_PAGE_SHA256)){
+ const html=fs.readFileSync('apps/member-web/public/tenants/central-henderson/'+page,'utf8');
+ assert(!html.includes("GRACE_MEMBER_EXPERIENCE = 'faithful-v1'"),`${page} must not opt into the Faithful experience`);
+ assert(!/src="faithful-[a-z-]+\.js"/.test(html),`${page} must not load Faithful-only modules`);
 }
 const config=JSON.parse(fs.readFileSync('vercel.json','utf8'));
 function headers(path){return Object.fromEntries(config.headers.filter(r=>new RegExp('^'+r.source+'$').test(path)).flatMap(r=>r.headers.map(h=>[h.key,h.value])));}
@@ -54,4 +80,4 @@ for(const path of ['/tenants/central-henderson/member-portal.html','/tenants/cen
  assert.equal(headers(path)['X-Frame-Options'],'DENY');
  assert(headers(path)['Content-Security-Policy'].includes("frame-ancestors 'none'"));
 }
-console.log('PASS: Central baseline copy, routing, greeting, prompt, speech fallback, unchanged pages; Faithful-only opt-in and exact mobile framing exception.');
+console.log('PASS: Central content pin + no-Faithful-leak invariant, routing, greeting, prompt, speech fallback, unchanged pages; Faithful-only opt-in and exact mobile framing exception.');
