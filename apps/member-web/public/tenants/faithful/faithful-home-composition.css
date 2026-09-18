@@ -33,13 +33,6 @@ body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff3
 #sec-home .fh-week .dash-kpis{display:flex;flex-direction:column;gap:0}
 #sec-home .fh-week .dash-kpi{border:0;border-bottom:1px solid var(--fh-line);border-radius:0;background:none;padding:18px 22px 18px 72px;box-shadow:none}
 #sec-home .fh-week .dash-kpi[hidden]{display:none}
-#sec-home .dash-hero-toast,.impact-float{display:none!important}
-#sec-home .fh-activity{order:-1;display:flex;align-items:center;gap:16px;min-height:44px;padding:10px 16px;border:1px solid #dce6ef;border-radius:10px;background:#edf5f9;color:#173755;font-size:13px}
-#sec-home .fh-activity-label{font-size:11px;color:#526985;flex-shrink:0}
-#sec-home .fh-activity-text{flex:1;min-width:0;line-height:1.5}
-#sec-home .fh-activity-pause{background:none;border:0;color:#175a77;font:inherit;font-size:12px;cursor:pointer;padding:7px}
-#sec-home .fh-activity-pause:focus-visible{outline:2px solid #347890;outline-offset:2px;border-radius:4px}
-@media(max-width:600px){#sec-home .fh-activity{gap:8px;padding:8px 10px;flex-wrap:wrap}#sec-home .fh-activity-label{width:100%}#sec-home .fh-activity-text{font-size:12px}}
 #sec-home .dash-hero-leader{display:flex;position:absolute;right:0;bottom:0;max-width:350px;margin:0;border-radius:14px;background:#10283feb;border:1px solid #ffffff38;box-shadow:0 8px 24px #03162726}
 #sec-home .dash-hero-top{min-height:208px;position:relative}
 #sec-home .dash-hero-leader .faithful-human-care{position:relative;z-index:1}
