@@ -15,6 +15,7 @@ import { randomBytes } from 'node:crypto';
 import { requirePermission, PREVIEW_TOKEN_PREFIX } from '../_lib/authz.js';
 import { emitPlatformEvent } from '../_lib/platformEvents.js';
 import { recordAudit } from '../_lib/workosAudit.js';
+import { portalTenantSlug } from '../_lib/portalTenants.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -34,11 +35,6 @@ const PREVIEW_TTL_MS = 10 * 60 * 1000; // 10 minutes — long enough to click th
 // nothing left for a token-gated, read-only React view to protect; the
 // minted token/audit trail below is kept for the record of who previewed
 // what and when, not because anything validates it server-side anymore.
-// Mirrors apps/member-web/src/portal/PortalRoot.tsx's CENTRAL_HENDERSON_CHURCH_ID.
-const CENTRAL_HENDERSON_CHURCH_ID = '11111111-1111-1111-1111-111111111111';
-function portalTenantSlug(churchId: string): string {
-  return churchId === CENTRAL_HENDERSON_CHURCH_ID ? 'central-henderson' : 'faithful';
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });

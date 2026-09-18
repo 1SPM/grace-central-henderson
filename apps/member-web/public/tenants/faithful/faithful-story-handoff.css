@@ -1,0 +1,34 @@
+/* Phone handoff panel. Sized for a code someone reads from a metre away, on a
+   screen that may be a laptop on a table between two people. */
+
+/* Consent block on the signup step: three separate choices, not one bundled
+   agreement, so a member can accept the handoff and still decline follow-up. */
+.visitor-signup [data-consents]{margin:1.25rem 0 1rem;padding:.9rem 1rem;border:1px solid #e2e8f0;border-radius:.6rem;text-align:left}
+.visitor-signup [data-consents] legend{padding:0 .35rem;font-size:.8rem;font-weight:700;color:#0f172a}
+.visitor-signup [data-consents] label{display:flex;gap:.6rem;align-items:flex-start;margin:.55rem 0;font-size:.87rem;line-height:1.45;color:#334155}
+.visitor-signup [data-consents] input{margin-top:.2rem;flex:none}
+.visitor-signup [data-decline]{display:block;width:100%;margin:.6rem 0 0;padding:.55rem 1rem;font-size:.85rem;font-weight:600;border-radius:.5rem;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer}
+.visitor-signup [data-decline]:hover{background:#f8fafc}
+
+@media (prefers-color-scheme:dark){
+  .visitor-signup [data-consents]{border-color:#334155}
+  .visitor-signup [data-consents] legend{color:#e2e8f0}
+  .visitor-signup [data-consents] label{color:#cbd5e1}
+  .visitor-signup [data-decline]{background:#1e293b;border-color:#334155;color:#e2e8f0}
+}
+
+/* The four pilot segmentation questions, inside the My Church "Let us know"
+   panel. Sits alongside .fp-questions, not inside it — see the note at the top
+   of faithful-story-segments.js. */
+/* Needs the .fp-connection prefix to beat `.fp-connection fieldset.fp-question
+   {border:0}`, which the class this panel shares would otherwise win with. */
+.fp-connection fieldset.fss-segments{margin-top:4px;padding-top:20px;border:0;border-top:1px solid #d4e3f0}
+.fss-segments>p{margin:0 0 16px;color:#526b7d;font-size:13px;max-width:60ch}
+.fss-segments .fss-row{margin:0 0 18px;max-width:30rem}
+.fss-segments label{display:block;margin:0 0 6px;font-size:15px;color:#173755}
+.fss-segments select{display:block;box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid #b4cce0;border-radius:10px;background:#fff;color:#173755;font:16px/1.4 Arial,sans-serif}
+.fss-segments select:focus-visible{outline:2px solid #3285bf;outline-offset:2px}
+.fss-segments .fss-why{margin:6px 0 0;color:#526b7d;font-size:13px;line-height:1.5}
+.fss-segments .fss-minor-note{margin:0 0 16px;padding:12px 14px;background:#edf4f8;border-left:3px solid #597b91;font-size:13px;color:#173755;max-width:60ch}
+@container (max-width:650px){.fss-segments .fss-row{max-width:none}}
+

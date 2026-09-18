@@ -89,6 +89,7 @@ jobs:
       - run: npm ci
       - run: npx vitest run tools/lint-rls.test.ts
       - run: npx tsx tools/lint-rls.ts
+      - run: npx tsx tools/lint-demo-anon-read.ts
 
   rollback-lint:
     name: Rollback Lint (migrations)

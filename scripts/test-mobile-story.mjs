@@ -1,0 +1,31 @@
+import {JSDOM} from 'jsdom';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const dom=new JSDOM('<section id="sec-home"><div class="fp-questions"><textarea>Maya saved history</textarea><textarea></textarea></div></section><section id="sec-mobile"><div class="mobile-link-page"><div class="mobile-link-intro"><p class="mobile-link-desc"></p><div class="mobile-link-tags"></div></div><div class="mobile-link-preview"></div><div class="mobile-share-panel"></div></div></section>',{url:'http://localhost',runScripts:'outside-only'});
+const w=dom.window,d=w.document;w.eval(fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-story.js','utf8'));
+assert(!d.querySelector('[data-visitor-story]').textContent.includes('Maya saved history'));
+const note=d.querySelectorAll('textarea')[1];note.value='My own connection';note.dispatchEvent(new w.Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,10));
+assert(d.querySelector('[data-visitor-story]').textContent.includes('My own connection'));assert(!d.querySelector('[data-visitor-story]').textContent.includes('Maya saved history'));
+const select=d.createElement('select');select.innerHTML='<option value=""></option><option>Returning to church</option>';d.querySelector('.fp-questions').append(select);select.onchange=()=>{select.value='';};select.value='Returning to church';select.dispatchEvent(new w.Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,10));assert(d.querySelector('[data-visitor-story]').textContent.includes('Returning to church'));
+d.querySelector('[data-continue]').click();d.querySelector('[data-name]').value='John';
+// Consent is no longer one bundled, un-declinable tickbox. The handoff button
+// is gated on the carry choice; declining is a separate, working path.
+assert(!d.querySelector('[data-consent-carry]').required,'carry consent must be declinable');
+assert(!d.querySelector('[data-name]').required,'name is validated in JS, not by the browser');
+d.querySelector('[data-create]').click();
+assert(/Carry my story/.test(d.querySelector('[data-signup] [role=status]').textContent),'refuses the handoff without the carry consent');
+assert.equal(w.FAITHFUL_VISITOR_STORY.getProfile(),null,'no profile is created by a refused handoff');
+d.querySelector('[data-decline]').click();
+assert.equal(w.FAITHFUL_VISITOR_STORY.getProfile().preferredName,'John');assert.equal(w.localStorage.length,0);
+assert.equal(JSON.stringify(w.FAITHFUL_VISITOR_STORY.getConsents()),JSON.stringify({carry:false,money:false,followup:false}));
+assert(w.FAITHFUL_VISITOR_STORY.getDraft(),'the draft is readable by the handoff module');
+assert(d.querySelector('.mobile-link-page').hidden);assert(!d.querySelector('[data-signup]').hidden);
+assert(d.querySelector('[data-signup]').contains(d.querySelector('[data-visitor-story]')));
+assert.equal(d.querySelector('[data-back]').textContent,'Back to Mobile');
+d.querySelector('[data-back]').click();assert(!d.querySelector('.mobile-link-page').hidden);assert(d.querySelector('[data-visitor-story]').textContent.includes('My own connection'));
+assert(d.querySelector('.mobile-share-panel').contains(d.querySelector('[data-visitor-story]')));
+assert(d.querySelector('.mobile-share-panel').textContent.includes('You can add or change your answers in the next step.'));
+d.querySelector('[data-continue]').click();assert.equal(d.querySelector('[data-name]').value,'John');
+const routes=[];w.enterApp=()=>{};w.showScreen=route=>routes.push(route);w.history.replaceState({},'','?tour=1#profile');w.eval(fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-tour.js','utf8'));assert.deepEqual(routes,['profile']);
+const care=d.createElement('section');care.id='fcg-story';care.innerHTML='<div class="fp-questions"><textarea></textarea><button type="button">Prayer</button></div><button type="button" data-story-skip>Skip</button>';d.body.append(care);care.querySelector('button').onclick=()=>care.querySelector('textarea').value='Prayer';care.querySelector('button').click();await new Promise(r=>setTimeout(r,10));assert(d.querySelector('[data-visitor-story]').textContent.includes('Prayer'));care.querySelector('[data-story-skip]').click();assert(!d.querySelector('[data-visitor-story]').textContent.includes('Prayer'));
+dom.window.close();console.log('PASS: visitor isolation, declinable consent, decline path, demo profile, no persistence, and allowlisted mobile routing. Visual and phone transfer not verified.');

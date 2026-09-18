@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="../../shared/grace-typography.css">
 <link rel="stylesheet" href="../../shared/grace-orb.css">
 <link rel="stylesheet" href="../../shared/grace-companion.css">
+<link rel="stylesheet" href="../../shared/grace-care-request.css">
 <link rel="stylesheet" href="../../shared/grace-member-session.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1758,6 +1759,74 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   transition:opacity .45s ease,transform .45s ease;pointer-events:none;text-align:right
 }
 .dash-hero-toast.show{opacity:1;transform:translateY(0);pointer-events:auto}
+/* Church-first home: stewardship stays visible as ministry impact, while
+   worship, belonging, care, and spiritual rhythm establish the front door. */
+.dash-hero-toast{background:rgba(13,37,62,.90);border-color:rgba(186,230,253,.24);text-align:left}
+.impact-float{background:#10283f;border-left-color:#7dd3fc}
+.dash-hero{background-image:url('../../assets/faithful-worship-hero.jpg');min-height:296px;border-radius:22px;padding:30px 32px 24px}
+.dash-hero::before{background:linear-gradient(90deg,rgba(5,24,47,.93) 0%,rgba(5,24,47,.58) 56%,rgba(5,24,47,.82) 100%)}
+.dash-hero-greeting{letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.68)}
+.dash-hero-name{font-family:var(--font-brand);font-size:clamp(38px,4vw,57px);font-weight:700;letter-spacing:-1.1px;margin-top:5px}
+.dash-live-pill{padding:12px 16px;background:#36b8f2;font-size:12px;box-shadow:0 8px 24px rgba(13,157,216,.25)}
+.dash-live-pill:hover{background:#63c9f4}
+.dash-hero-leader{border-radius:16px;padding:9px 14px 9px 9px;background:rgba(15,41,72,.72)}
+.dash-mod{border-radius:20px;border-color:#e8edf4;box-shadow:0 8px 26px rgba(17,44,79,.045)}
+.dash-mod-head{padding:18px 20px;background:linear-gradient(100deg,#fff 0%,#f7fbff 100%)}
+.dash-mod-title{font-size:19px;letter-spacing:-.3px}.dash-mod-sub{font-size:12px;max-width:560px}
+.dash-mod-body{padding:12px 14px 14px}
+.dash-pillar{min-height:134px;border-radius:16px;padding:15px 13px 13px;border-color:rgba(20,52,92,.08)}
+.dash-pillar::before{height:0}.dash-pillar-step{font-size:27px}.dash-pillar-name{font-size:13px}.dash-pillar-sub{font-size:10px}
+.grace-home-tutorial{background:linear-gradient(120deg,#f2efff 0%,#f8f9ff 58%,#edf8ff 100%);border:1px solid #ded9ff;box-shadow:0 8px 24px rgba(78,64,173,.08)}
+.grace-home-tutorial::before,.grace-home-tutorial::after{opacity:.42}
+.grace-home-tutorial .ai-leader-name{color:#1f2756;font-size:22px}
+.grace-home-tutorial .ai-leader-role,.grace-home-tutorial .ai-greeting{color:#55617f}
+.grace-home-tutorial .ai-status{color:#5265ad}
+.grace-home-tutorial .grace-tutorial-badge{background:#fff;color:#5c4bb4;border-color:#d8d0ff}
+.grace-home-tutorial .grace-tutorial-dismiss{background:rgba(92,75,180,.1);color:#5c4bb4}
+.grace-home-tutorial .grace-tutorial-step{background:rgba(255,255,255,.72);border-color:#ddd8fb}
+.grace-home-tutorial .grace-tutorial-step-label{color:#2d3766}.grace-home-tutorial .grace-tutorial-step-detail{color:#66708e}
+.grace-home-tutorial .grace-tutorial-step-ico{background:#ddd8fb}
+.grace-home-tutorial .grace-tutorial-try{color:#5c4bb4}
+.grace-home-tutorial .ai-hero-chatwrap{background:#fff;border-color:#d8d0ff}.grace-home-tutorial .ai-hero-input{color:#1f2756}.grace-home-tutorial .ai-hero-input::placeholder{color:#8791ab}
+.grace-home-tutorial .ai-hero-send{background:#6354c8}.grace-home-tutorial .grace-tutorial-dismiss-btn{background:#6354c8}
+.grace-home-tutorial .grace-tutorial-dismiss-note{color:#697495}
+.home-giving-impact{border-top:3px solid #77c7ed}.home-giving-impact-title{font-size:18px;letter-spacing:-.25px}
+.faithful-hero-belong{position:relative;z-index:1;margin-top:6px;font-family:var(--font-brand);font-size:24px;color:#fff}
+.sb{width:234px;background:linear-gradient(180deg,#082b54 0%,#0b315e 54%,#09294f 100%)}
+.sb{position:relative;overflow:hidden}.sb::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.22;background-image:radial-gradient(rgba(255,255,255,.16) .55px,transparent .7px),radial-gradient(rgba(91,191,244,.12) .55px,transparent .7px);background-position:0 0,5px 7px;background-size:13px 13px,17px 17px}.sb>*{position:relative;z-index:1}
+.ma{background-color:#fbfdff;background-image:radial-gradient(circle at 14% 8%,rgba(180,221,249,.25),transparent 27%),radial-gradient(circle at 89% 35%,rgba(223,232,255,.3),transparent 25%),linear-gradient(rgba(16,63,113,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(16,63,113,.018) 1px,transparent 1px);background-size:auto,auto,26px 26px,26px 26px}
+.card,.dash-mod{background-image:linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,251,255,.95))}
+.sb-top{padding:30px 16px 28px}.sb-top .sb-grace-orb{margin-bottom:16px;transform:scale(1.14);transform-origin:center}
+.sb-church{font-size:27px;font-weight:700;letter-spacing:-.45px;margin-bottom:8px}.sb-top>div:last-child{letter-spacing:1.8px}
+.nb{margin:2px 10px;padding:13px 16px;border-radius:8px}.nb.active{box-shadow:inset 4px 0 0 #80d3ff}.sb-foot{padding-bottom:22px}
+.faithful-ask-grace{display:flex;align-items:center;gap:12px;width:100%;padding:8px 0 16px;cursor:pointer}
+.faithful-ask-orb{display:none}
+.faithful-ask-copy{display:flex;flex-direction:column;min-width:190px;padding-left:14px;border-left:2px solid #5973a3}.faithful-ask-copy strong{font-family:var(--font-brand);font-size:18px;color:#122d5b}.faithful-ask-copy small{font-size:12px;color:#687ba0;margin-top:3px}
+.faithful-ask-prompt{font-size:11px;font-weight:700;color:#0750a2;padding:10px 14px;border-radius:22px;background:#f1f6fc;border:1px solid #e4eef9;white-space:nowrap;cursor:pointer}
+.dash-pillar{padding:102px 14px 13px;min-height:188px;background:#fff}.dash-pillar::before{height:88px;z-index:0;opacity:1;background:center/cover no-repeat;border-radius:15px 15px 0 0}.dash-pillar>*{position:relative;z-index:1}.dash-pillar-top{position:absolute;left:14px;bottom:12px;margin:0}.dash-pillar-step{font-family:var(--font-brand);font-size:52px;line-height:.8;color:#2155b5;text-shadow:0 1px 0 #fff}.dash-pillar-name{font-family:var(--font-brand);font-size:16px;margin-left:52px}.dash-pillar-sub{font-size:11px;line-height:1.35;margin-left:52px;min-height:32px}.dash-pillar-badge{display:none}
+.dash-pillar--growth::before{background-image:url('../../assets/watch/ondemand-rooted.jpg')}.dash-pillar--resource::before{background-image:url('../../assets/watch/ondemand-gift.jpg')}.dash-pillar--assistance::before{background-image:url('../../assets/causes/benevolence.jpg')}.dash-pillar--community::before{background-image:url('../../assets/faithful-community.jpg')}.dash-pillar--engagement::before{background-image:url('../../assets/watch/ondemand-serving.jpg')}
+#home-next-step{border:none;background:linear-gradient(112deg,#e5f2ff 0%,#f9f0df 54%,#fff 100%);overflow:hidden}.home-prayer-impact-grid .card{border-color:#e5edf6}
+.faithful-impact-feature{margin:6px 0 24px}.faithful-impact-header{padding:18px 20px 22px 148px;position:relative}.faithful-impact-header::before{content:'';position:absolute;left:120px;top:22px;bottom:25px;width:2px;background:#3259a6}.faithful-impact-header h2,.faithful-impact-footer h2{font-family:var(--font-brand);font-size:39px;letter-spacing:-.7px;color:#102c5b}.faithful-impact-header p{font-size:16px;color:#5d75a8;margin-top:4px}.faithful-impact-primary{display:grid;grid-template-columns:1.06fr 1fr .92fr;gap:14px}.faithful-impact-primary>section,.faithful-impact-secondary>section{border:1px solid #e3ebf5;border-radius:14px;background:rgba(255,255,255,.92);overflow:hidden}.faithful-impact-card-art{background:#082c59}.faithful-impact-card-art img{display:block;width:100%;height:267px;object-fit:cover}.faithful-impact-balance{display:grid;grid-template-columns:1fr auto;gap:4px;padding:18px 20px;border-bottom:1px solid #dce6f2}.faithful-impact-balance span{font-size:13px;color:#5d75a8}.faithful-impact-balance strong{font-family:var(--font-brand);font-size:30px;color:#102c5b}.faithful-impact-balance button{grid-row:1/3;grid-column:2;border:none;background:none;color:#0750a2;font-weight:700;cursor:pointer}.faithful-impact-card>p{padding:14px 20px 18px;color:#657daa;line-height:1.45;font-size:12px}.faithful-impact-cause{padding:18px}.faithful-impact-cause>p{color:#6078ab;font-size:14px}.faithful-impact-cause h3,.faithful-impact-give h3,.faithful-impact-secondary h3{font-family:var(--font-brand);font-size:27px;color:#102c5b;margin:2px 0 12px}.faithful-impact-cause img{display:block;width:100%;height:215px;object-fit:cover;border-radius:8px}.faithful-impact-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 0}.faithful-impact-stats span{display:flex;flex-direction:column;font-size:10px;color:#6b7fa9}.faithful-impact-stats b{font-family:var(--font-brand);font-size:14px;color:#102c5b}.faithful-impact-cause>button{width:100%;background:#fff;border:1px solid #1a5dbb;border-radius:22px;padding:10px;color:#0750a2;font-weight:700;cursor:pointer}.faithful-impact-give{padding:18px}.faithful-impact-give>p,.faithful-impact-secondary p{color:#6078ab;line-height:1.35;margin-bottom:12px}.faithful-impact-give>button{width:100%;display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto;text-align:left;gap:0 10px;background:#fff;border:1px solid #e3ebf5;border-radius:9px;padding:9px;margin-bottom:8px;cursor:pointer;color:#18386c}.faithful-impact-give>button>span{grid-row:1/3;font-size:22px;color:#0d5bb4}.faithful-impact-give small{color:#667da8}.faithful-impact-give .faithful-impact-give-cta{display:block;text-align:center;background:#0753ad;color:#fff;border:none;border-radius:24px;margin-top:12px;padding:12px}.faithful-impact-secondary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}.faithful-impact-secondary>section{padding:18px;min-height:215px}.faithful-impact-secondary h3{font-size:21px;margin:0}.faithful-impact-secondary section>div{color:#5e75a4;line-height:1.45}.faithful-impact-secondary blockquote{margin-top:16px;padding:16px;background:#edf6ff;color:#153a79;text-align:center;font-family:var(--font-brand);font-size:17px}.faithful-impact-secondary cite{display:block;font-family:var(--font-web);font-size:10px;margin-top:9px}.faithful-impact-secondary button{display:flex;justify-content:space-between;width:100%;padding:11px 0;border:none;border-bottom:1px solid #e6edf6;background:transparent;color:#153a79;text-align:left;cursor:pointer}.faithful-impact-secondary button span{color:#5872a0;font-size:11px}.faithful-impact-secondary a{display:block;color:#0750a2;margin-top:14px;cursor:pointer}.faithful-impact-footer{margin-top:14px;border-radius:12px;padding:20px 38px;background:linear-gradient(104deg,#d7ecff 0%,#fff5df 58%,#0f376e 100%)}.faithful-impact-footer h2{font-size:31px}.faithful-impact-footer p{color:#5270a2}
+@media (max-width:900px){.faithful-impact-primary,.faithful-impact-secondary{grid-template-columns:1fr}.faithful-impact-header{padding-left:24px}.faithful-impact-header::before{left:0}.faithful-impact-header h2{font-size:32px}}
+@media (max-width:900px){.faithful-ask-grace{flex-wrap:wrap}.faithful-ask-prompt{padding:8px 10px}.dash-pillar{padding-top:94px;min-height:174px}}
+.dash-kpis{grid-template-columns:repeat(4,1fr)}
+.dash-kpi{background:rgba(13,20,36,.76)}
+.dash-kpi:first-child{border-color:rgba(255,255,255,.30)}
+.dash-pillar--community{background:#f4faf7}.dash-pillar--growth{background:#f7f7ff}.dash-pillar--assistance{background:#fff8fa}
+.home-giving-impact-sub{color:#666;line-height:1.4}
+.home-giving-impact .home-gi-partner,.home-giving-impact .home-gi-alloc-head,.home-giving-impact #home-gi-alloc-list{display:none}
+.home-gi-kpi{background:#fbfaf7}
+.home-gi-cta{margin-top:auto}
+@media (max-width:720px){.dash-kpis{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:721px){
+  #sec-home{display:flex;flex-direction:column}
+  #sec-home .dash-hero{order:1}
+  #sec-home .dash-mod{order:2}
+  #sec-home .dash-ai-companion{order:3}
+  #sec-home #home-next-step{order:4}
+  #sec-home .home-prayer-impact-grid{order:5}
+  #sec-home .dash-wallet{order:6}
+}
 .mobile-link-page{max-width:920px;margin:0 auto;padding:24px 20px}
 .mobile-link-intro{margin-bottom:28px}
 .mobile-link-badge{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#449eca;margin-bottom:8px}
@@ -1901,6 +1970,61 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
   .sb-member,.sb-foot{padding-left:14px;padding-right:14px}
 }
 
+/* Faithful mobile home — an intentional church front door, rather than a
+   shrunken desktop dashboard.  The five GRACE paths, pastoral route, and
+   shared impact remain visible, but each earns one calm, touch-friendly beat. */
+@media (max-width:640px){
+  .sb{position:sticky;top:0;z-index:120;display:flex;align-items:center;height:66px;min-height:66px;padding:0 16px;background:#09213c}
+  .sb-top{display:flex;align-items:center;gap:9px;padding:0}
+  .sb-top .sb-grace-orb{transform:scale(.68);transform-origin:left center;margin-right:-13px}
+  .sb-church{font-size:17px;letter-spacing:-.2px}
+  .sb-top>div:last-child,.sb-scroll,.sb-foot{display:none}
+  .ma{width:100%;min-width:0}
+  .topbar{display:none}
+  .co{padding:0 0 30px}
+
+  #sec-home{display:flex;flex-direction:column}
+  #sec-home .dash-hero{order:1}
+  #sec-home .dash-mod{order:2}
+  #sec-home .dash-ai-companion{order:3}
+  #sec-home #home-next-step{order:4}
+  #sec-home .home-prayer-impact-grid{order:5}
+  #sec-home .dash-wallet{order:6}
+
+  .dash-hero{border-radius:0 0 24px 24px;min-height:0;padding:20px 16px 18px;margin-bottom:12px}
+  .dash-hero-top{flex-direction:column;align-items:stretch;gap:14px;margin-bottom:0}
+  .dash-hero-name{font-size:30px}
+  .dash-hero-leader{width:100%;margin-top:10px;padding:9px 10px 9px 9px}
+  .dash-hero-live-col{width:100%;max-width:none;align-items:stretch;gap:8px}
+  .dash-live-pill{justify-content:center;width:100%;padding:14px 16px;font-size:14px}
+  .dash-hero-toast{max-width:none;padding:9px 12px;font-size:11px}
+  .dash-kpis{display:none}
+
+  .dash-mod{margin:0 12px 12px;border-radius:18px}
+  .dash-mod-head{padding:17px 16px}
+  .dash-mod-title{font-size:18px}
+  .dash-mod-sub{font-size:12px;line-height:1.45;max-width:290px}
+  .dash-mod-body{padding:12px}
+  .dash-pillars{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .dash-pillar{min-height:166px;padding:96px 11px 11px}
+  .dash-pillar:nth-child(5){grid-column:1 / -1;min-height:150px}
+  .dash-pillar-top{left:11px;bottom:11px;margin:0}
+  .dash-pillar-step{font-size:39px}
+  .dash-pillar-name{font-size:13px;margin-left:40px}
+  .dash-pillar-sub{font-size:10px;margin-left:40px;min-height:28px}
+  .dash-pillar-badge{display:none}
+
+  .dash-ai-companion{margin:0 12px 12px}
+  .grace-home-tutorial{border-radius:18px}
+  .grace-tutorial-steps{gap:7px}
+  #home-next-step{margin:0 12px 12px!important}
+  .home-prayer-impact-grid{display:flex;flex-direction:column;gap:12px;margin:0 12px 12px}
+  .home-prayer-impact-grid .home-giving-impact{order:-1}
+  .dash-wallet{display:flex;flex-direction:column;gap:12px;margin:0 12px 12px}
+  .impact-float{left:12px;right:12px;bottom:16px;max-width:none;transform:translateY(120%)}
+  .impact-float.show{transform:translateY(0)}
+}
+
 /* ══ TYPOGRAPHY SCALE-UP ══
    Titles carry more weight and size. clamp() keeps them from swamping
    narrow viewports, where this portal spends most of its life. */
@@ -1914,8 +2038,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .journey-section-hdr .journey-section-ico{transform:scale(1.05)}
 
 /* The hero KPI strip was locked to repeat(4,1fr), so on a narrow viewport
-   each tile fell to ~95px and "Partner · 6%" wrapped to three lines and
-   spilled out of its tile. auto-fit lets it drop to 2-up before that. */
+   each tile fell to ~95px and the longest rhythm label wrapped to three
+   lines and spilled out of its tile. auto-fit lets it drop to 2-up before
+   that. (The label that triggered this originally carried a giving
+   percentage; that has since been removed, but keep auto-fit — the
+   constraint returns with any long label.) */
 .dash-kpis{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
 .dash-kpi-val{font-size:clamp(16px,1.7vw,21px);line-height:1.15;letter-spacing:-.3px}
 
@@ -1927,6 +2054,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 #tb-subtitle{display:none}
 .journey-section-hdr p{display:none}
 </style>
+<link rel="stylesheet" href="faithful-refinement.css">
+<link rel="stylesheet" href="faithful-connect-design.css">
+<link rel="stylesheet" href="faithful-journey-design.css">
+<link rel="stylesheet" href="faithful-leader-profiles.css">
 </head>
 <body>
 
@@ -1949,6 +2080,17 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div style="font-size:10px;font-weight:600;color:var(--sb-on-faint);text-transform:uppercase;letter-spacing:.7px">Members Portal</div>
   </div>
   <div class="sb-scroll">
+    <div class="sb-member">
+      <img class="sb-av" src="../../demo-faces/f030.jpg" alt="Maya Thompson">
+      <div class="sb-name">Maya Thompson</div>
+      <div class="sb-tier sb-commitment"><span class="sb-tier-dot"></span>Current rhythm · Partner</div>
+      <div class="sb-pulse-block">
+        <div class="token-row" style="margin-bottom:4px">
+          <span class="token-label" style="display:flex;align-items:center;gap:5px">Card impact · May</span>
+          <span class="token-val pulse-score">$18.42</span>
+        </div>
+      </div>
+    </div>
     <div class="nb active" id="nav-home" onclick="goSection('home')" role="button" tabindex="0" aria-current="page">
       <span class="nb-ico" data-grace-icon="home" data-grace-size="20" data-grace-variant="inverse"></span><span class="nb-label">My Church</span>
     </div>
@@ -1963,21 +2105,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <span class="nb-badge nb-badge-orange">5</span>
     </div>
     <div class="nb" id="nav-profile" onclick="openProfileTab('overview')" role="button" tabindex="0">
-      <span class="nb-ico" data-grace-icon="profile" data-grace-size="20" data-grace-variant="inverse"></span><span class="nb-label">My Journey</span>
+      <span class="nb-ico" data-grace-icon="profile" data-grace-size="20" data-grace-variant="inverse"></span><span class="nb-label">Reflect</span>
     </div>
     <div class="nb" id="nav-mobile" onclick="goSection('mobile')" role="button" tabindex="0">
-      <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="nb-label">Link to Mobile</span>
-    </div>
-    <div class="sb-member">
-      <img class="sb-av" src="/demo-faces/f030.jpg" alt="Maya Thompson">
-      <div class="sb-name">Maya Thompson</div>
-      <div class="sb-tier sb-commitment"><span class="sb-tier-dot"></span>Current rhythm · Partner</div>
-      <div class="sb-pulse-block">
-        <div class="token-row" style="margin-bottom:4px">
-          <span class="token-label" style="display:flex;align-items:center;gap:5px">Card impact · May</span>
-          <span class="token-val pulse-score">$18.42</span>
-        </div>
-      </div>
+      <span class="nb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="nb-label">Mobile</span>
     </div>
   </div>
   <div class="sb-foot">
@@ -2020,14 +2151,15 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <div>
             <div class="dash-hero-greeting" id="home-hero-date">Sat, May 30 · Faithful Church</div>
             <div class="dash-hero-name" id="home-hero-greeting-name">Good morning, Maya</div>
-            <div class="dash-hero-leader" id="home-leader-strip" onclick="goSection('ai')" role="button" tabindex="0" aria-label="Open your leader avatar">
+            <div class="faithful-hero-belong">You belong here.</div>
+            <div class="dash-hero-leader" id="home-leader-strip" onclick="goSection('ai')" role="button" tabindex="0" aria-label="Connect with your leadership">
               <img id="home-leader-strip-av" src="/demo-faces/f111.jpg" alt="">
               <div class="home-leader-strip-copy">
-                <div class="home-leader-strip-label" id="home-leader-strip-label">Your leader</div>
+                <div class="home-leader-strip-label" id="home-leader-strip-label">Your leadership</div>
                 <div class="home-leader-strip-name" id="home-leader-strip-name">Pastor James Wilson</div>
-                <div class="home-leader-strip-sub" id="home-leader-strip-sub">Verified avatar · not GRACE</div>
+                <div class="home-leader-strip-sub" id="home-leader-strip-sub">Pastoral conversation · verified avatar · not GRACE</div>
               </div>
-              <div class="home-leader-strip-cta" id="home-leader-strip-cta">Open avatar →</div>
+              <div class="home-leader-strip-cta" id="home-leader-strip-cta">Connect with Pastor James →</div>
             </div>
           </div>
           <div class="dash-hero-live-col">
@@ -2038,49 +2170,56 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
         </div>
         <div class="dash-kpis">
-          <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-impact">$18.42</div><div class="dash-kpi-key">Card impact · routed this month</div></div>
-          <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-given">$230</div><div class="dash-kpi-key">Direct gifts · May</div></div>
-          <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-rhythm">Partner</div><div class="dash-kpi-key">Giving rhythm · 6%</div></div>
-          <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-lives">23</div><div class="dash-kpi-key">Lives impacted · May</div></div>
+          <div class="dash-kpi"><div class="dash-kpi-val">Sunday</div><div class="dash-kpi-key">Service · 9:45 AM</div></div>
+          <div class="dash-kpi"><div class="dash-kpi-val">2 groups</div><div class="dash-kpi-key">A place to belong</div></div>
+          <div class="dash-kpi"><div class="dash-kpi-val">Care</div><div class="dash-kpi-key">Pastoral support is here</div></div>
+          <div class="dash-kpi"><div class="dash-kpi-val" id="home-kpi-impact">$18.42</div><div class="dash-kpi-key">Your shared impact this month</div></div>
         </div>
       </div>
 
       <div class="dash-mod">
         <div class="dash-mod-head">
+          <div class="faithful-ask-grace" role="button" tabindex="0" onclick="sendHomeCmd('Help me find my next step')">
+            <span class="faithful-ask-orb" aria-hidden="true"></span>
+            <span class="faithful-ask-copy"><strong>Ask GRACE</strong><small>What do you need today?</small></span>
+            <span class="faithful-ask-prompt" onclick="event.stopPropagation();sendHomeCmd('Help me find a group')">Find a group</span>
+            <span class="faithful-ask-prompt" onclick="event.stopPropagation();sendHomeCmd('I would like prayer')">Ask for prayer</span>
+            <span class="faithful-ask-prompt" onclick="event.stopPropagation();sendHomeCmd('Help me plan my week')">Plan my week</span>
+          </div>
           <div>
-            <div class="dash-mod-title">GRACE at Faithful Church</div>
-            <div class="dash-mod-sub">Growth · Resource · Assistance · Community · Engagement — tap where you want to go</div>
+            <div class="dash-mod-title">Grow with Faithful Church</div>
+            <div class="dash-mod-sub">Your pathways into growth, resources, care, community, and engagement.</div>
           </div>
         </div>
         <div class="dash-mod-body">
           <div class="dash-pillars">
             <div class="dash-pillar dash-pillar--growth" onclick="openProfileTab('growth')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">G</span></div>
-              <div class="dash-pillar-name">Journey</div>
+              <div class="dash-pillar-name">Growth</div>
               <div class="dash-pillar-sub">Reflect, journal &amp; build daily rhythm</div>
               <span class="dash-pillar-badge" id="dash-journey-badge">7 reflection days</span>
             </div>
             <div class="dash-pillar dash-pillar--resource" onclick="openWalletTab('impact')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">R</span></div>
-              <div class="dash-pillar-name">Impact</div>
-              <div class="dash-pillar-sub">See card routing &amp; ministry reach</div>
+              <div class="dash-pillar-name">Resource</div>
+              <div class="dash-pillar-sub">See ministry impact &amp; helpful resources</div>
               <span class="dash-pillar-badge" id="dash-pillar-impact-badge">$18.42 · May</span>
             </div>
             <div class="dash-pillar dash-pillar--assistance" onclick="goSection('outreach')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">A</span></div>
-              <div class="dash-pillar-name">Care</div>
+              <div class="dash-pillar-name">Assistance</div>
               <div class="dash-pillar-sub">Prayer, visits &amp; pastoral support</div>
               <span class="dash-pillar-badge" id="dash-pillar-care-badge">24/7 available</span>
             </div>
             <div class="dash-pillar dash-pillar--community" onclick="openNetworkTab('community')" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">C</span></div>
-              <div class="dash-pillar-name">Connect</div>
+              <div class="dash-pillar-name">Community</div>
               <div class="dash-pillar-sub">Groups, events &amp; watch live</div>
               <span class="dash-pillar-badge" id="dash-pillar-connect-badge">5 updates</span>
             </div>
             <div class="dash-pillar dash-pillar--engagement" onclick="openWalletGive()" role="button" tabindex="0">
               <div class="dash-pillar-top"><span class="dash-pillar-step" aria-hidden="true">E</span></div>
-              <div class="dash-pillar-name">Giving</div>
+              <div class="dash-pillar-name">Engagement</div>
               <div class="dash-pillar-sub">Tithes, offerings &amp; direct gifts</div>
               <span class="dash-pillar-badge" id="dash-pillar-giving-badge">$230 · May</span>
             </div>
@@ -2089,17 +2228,17 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       </div>
 
       <!-- Today's next step -->
-      <div class="card" style="margin-bottom:14px">
+      <div class="card" id="home-next-step" style="margin-bottom:14px">
         <div class="card-head">
           <div class="card-title">Today&apos;s next step</div>
-          <span class="card-link" onclick="openWalletTab('impact')">Review →</span>
+          <span class="card-link" onclick="openNetworkTab('community')">See what&apos;s happening →</span>
         </div>
         <div style="padding:14px 18px">
-          <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:6px" id="home-next-title">Review this month&apos;s impact for Food Pantry</div>
-          <div style="font-size:12px;color:#666;line-height:1.55;margin-bottom:12px" id="home-next-body">See your card-generated impact, then choose where Faithful Church should route it.</div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:6px" id="home-next-title">Make space for Sunday</div>
+          <div style="font-size:12px;color:#666;line-height:1.55;margin-bottom:12px" id="home-next-body">Join the service, find your people, or take one small step toward a more connected week.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button type="button" style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="openWalletTab('impact')">Review</button>
-            <button type="button" style="background:#f7f5f2;border:1px solid #e4dcce;color:#555;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="openWalletGive()">Give directly</button>
+            <button type="button" style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="openWatchLive()">Watch service</button>
+            <button type="button" style="background:#f7f5f2;border:1px solid #e4dcce;color:#555;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="openNetworkTab('community')">Find your people</button>
           </div>
         </div>
       </div>
@@ -2107,7 +2246,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <!-- GRACE onboarding tutorial — dismiss when settled; orb stays in sidebar -->
       <div class="dash-ai-companion" id="grace-home-tutorial-wrap">
         <div class="ai-hero ai-hero--home grace-home-tutorial" id="grace-home-tutorial-panel" role="region" aria-label="GRACE getting started guide">
-          <span class="grace-tutorial-badge" id="grace-tutorial-badge">Getting started</span>
+          <span class="grace-tutorial-badge" id="grace-tutorial-badge">Find your way</span>
           <button type="button" class="grace-tutorial-dismiss" onclick="dismissGraceHomeTutorial()" aria-label="Dismiss GRACE guide">×</button>
           <div class="ai-hero-row" style="padding-top:22px">
             <div class="av-ring-wrap av-ring-wrap--grace">
@@ -2123,7 +2262,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
             </div>
             <div class="ai-hero-text">
-              <div class="ai-leader-name" id="home-ai-name">GRACE</div>
+              <div class="ai-leader-name" id="home-ai-name">Navigate with GRACE</div>
               <div class="ai-leader-role" id="home-ai-role"></div>
               <div class="ai-status">
                 <span id="home-ai-status"></span>
@@ -2134,22 +2273,22 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
           <div class="grace-tutorial-steps" id="grace-tutorial-steps"></div>
           <div class="ai-hero-chatrow">
-            <div class="grace-tutorial-try" id="grace-tutorial-try">Try it — ask GRACE anything</div>
+            <div class="grace-tutorial-try" id="grace-tutorial-try">What do you need today?</div>
             <div class="ai-hero-chatwrap">
-              <input type="text" class="ai-hero-input" id="home-chat-input" placeholder="Ask GRACE — give, watch, groups, events…" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
+              <input type="text" class="ai-hero-input" id="home-chat-input" placeholder="Ask about giving, services, groups, or events" aria-label="Message to GRACE" onkeydown="if(event.key==='Enter'){event.preventDefault();sendHomeChat()}">
               <button type="button" class="ai-hero-send" onclick="sendHomeChat()" aria-label="Send message">→</button>
             </div>
           </div>
           <div class="grace-tutorial-foot">
-            <button type="button" class="grace-tutorial-dismiss-btn" id="grace-tutorial-dismiss-btn" onclick="dismissGraceHomeTutorial()">Got it — I'm settled</button>
-            <span class="grace-tutorial-dismiss-note" id="grace-tutorial-dismiss-note">Dismiss anytime — GRACE stays one orb-tap away in the sidebar.</span>
+            <button type="button" class="grace-tutorial-dismiss-btn" id="grace-tutorial-dismiss-btn" onclick="dismissGraceHomeTutorial()">Got it</button>
+            <span class="grace-tutorial-dismiss-note" id="grace-tutorial-dismiss-note">You can reopen this guide anytime.</span>
           </div>
         </div>
         <button type="button" class="grace-tutorial-reopen" id="grace-tutorial-reopen" onclick="showGraceHomeTutorial()" aria-label="Show GRACE guide again">
           <span class="grace-tutorial-reopen-orb" id="grace-tutorial-reopen-orb" aria-hidden="true"></span>
           <span class="grace-tutorial-reopen-copy">
             <span class="grace-tutorial-reopen-title" id="grace-tutorial-reopen-title">Show GRACE guide</span>
-            <span class="grace-tutorial-reopen-sub">New here or need a refresher? Reopen the orientation — I'm always in the sidebar orb.</span>
+            <span class="grace-tutorial-reopen-sub">Review navigation and available help.</span>
           </span>
         </button>
       </div>
@@ -2195,10 +2334,9 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div style="margin-top:8px"><span class="pf-wallet-delta" id="home-wallet-delta">↑ $18.42 Card impact · May</span></div>
           </div>
           <div class="wallet-acct-actions" style="padding-bottom:14px">
-            <button type="button" class="wallet-act-btn wallet-act-primary" onclick="openWalletTransferFromHome('send')">Send</button>
-            <button type="button" class="wallet-act-btn wallet-act-primary" onclick="openWalletTransferFromHome('receive')">Receive</button>
-            <button type="button" class="wallet-act-btn" onclick="openWalletGive()">Give</button>
-            <button type="button" class="wallet-act-btn" onclick="openWalletTab('wallet')">Open card</button>
+            <button type="button" class="wallet-act-btn wallet-act-primary" onclick="openWalletTab('wallet')">Manage card</button>
+            <button type="button" class="wallet-act-btn wallet-act-primary" onclick="openWalletTab('impact')">See impact</button>
+            <button type="button" class="wallet-act-btn" onclick="openWalletGive()">Give directly</button>
           </div>
         </div>
       </div>
@@ -2209,8 +2347,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div style="padding:14px 18px 0">
           <div class="home-prayer-reel-head">
             <div>
-              <div class="home-prayer-reel-title">Prayer Wall</div>
-              <div class="home-prayer-reel-sub">Prayer videos &amp; sermon clips</div>
+              <div class="home-prayer-reel-title">Pray with your church</div>
+              <div class="home-prayer-reel-sub">A moment from your church family</div>
             </div>
             <span class="home-prayer-reel-link" onclick="openNetworkPeople()">See all</span>
           </div>
@@ -2253,10 +2391,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         <div style="padding:14px 18px 0">
           <div class="home-giving-impact-head">
             <div>
-              <div class="home-giving-impact-title">Giving Impact Summary</div>
-              <div class="home-giving-impact-sub">Card impact &amp; giving routing</div>
+              <div class="home-giving-impact-title">Your shared impact</div>
+              <div class="home-giving-impact-sub">Everyday generosity strengthening ministry at Faithful Church.</div>
             </div>
-            <button type="button" class="home-giving-impact-link" onclick="openWalletTab('impact')">View impact →</button>
+            <button type="button" class="home-giving-impact-link" onclick="openWalletTab('impact')">See the story →</button>
           </div>
         </div>
         <div style="padding:12px 18px 16px;flex:1;display:flex;flex-direction:column">
@@ -2270,10 +2408,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="home-gi-kpi-key">Lives impacted</div>
             </div>
           </div>
-          <div class="home-gi-partner" id="home-gi-partner">Partner · 6% · Giving goal progress</div>
+          <div class="home-gi-partner" id="home-gi-partner">Partner · Giving goal progress</div>
           <div class="home-gi-alloc-head">Impact allocation</div>
           <div id="home-gi-alloc-list"></div>
-          <button type="button" class="home-gi-cta" onclick="openWalletTab('impact')">Review allocation →</button>
+          <button type="button" class="home-gi-cta" onclick="openWalletTab('impact')">See ministry impact</button>
         </div>
       </div>
       </div>
@@ -2296,7 +2434,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <!-- Avatar hero -->
           <div class="ai-hero ai-hero--leader">
             <div class="ai-hero-leader-top">
-              <div class="ai-reachable ai-reachable--live" id="ai-reachable-badge">Reachable now · real person available</div>
+              <div class="ai-reachable ai-reachable--live" id="ai-reachable-badge">Human follow-up · response times vary</div>
             </div>
             <div class="ai-hero-leader-body">
               <div class="ai-hero-leader-row ai-hero-leader-row--profile">
@@ -2320,7 +2458,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 </div>
               </div>
               <div class="ai-hero-leader-row ai-hero-leader-row--message">
-                <div class="ai-greeting" id="ai-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? This is a safe space to share.</div>
+                <div class="ai-greeting" id="ai-greeting">Good morning Maya — I'm Pastor James. What's on your heart today? You can choose what to share.</div>
               </div>
               <div class="ai-hero-leader-row ai-hero-leader-row--actions ai-hero-leader-actions">
                 <button type="button" class="ai-hero-dm" onclick="startLeaderDirectMessage(currentLeader)">Send a DM</button>
@@ -2446,7 +2584,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <button type="button" class="lpm-close" onclick="closeLeaderProfile()" aria-label="Close">✕</button>
           <div class="lpm-modal-scroll">
             <div class="lpm-hero-top">
-              <div class="lpm-reachable lpm-reachable--live" id="lpm-reachable">Reachable now · real person available</div>
+              <div class="lpm-reachable lpm-reachable--live" id="lpm-reachable">Human follow-up · response times vary</div>
               <div class="lpm-av-wrap">
                 <span class="lpm-av-pulse"></span>
                 <span class="lpm-av-pulse2"></span>
@@ -2623,15 +2761,18 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
               <div class="post-body">
                 <div class="post-type-badge ptb-milestone">🏅 Giving milestone</div>
+                <!-- Celebrates that a goal was set, never the amount or the
+                     share of income. One member's giving rate must not appear
+                     on another member's feed. -->
                 <div class="post-ring-card">
-                  <svg class="prc-ring" viewBox="0 0 44 44" width="44" height="44">
+                  <svg class="prc-ring" viewBox="0 0 44 44" width="44" height="44" aria-hidden="true">
                     <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(0,0,0,.1)" stroke-width="5"/>
-                    <circle cx="22" cy="22" r="18" fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="81 113" stroke-dashoffset="28" transform="rotate(-90 22 22)" stroke-linecap="round"/>
-                    <text x="22" y="27" text-anchor="middle" font-size="9" font-weight="bold" fill="#15803d">8%</text>
+                    <circle cx="22" cy="22" r="18" fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="113 0" transform="rotate(-90 22 22)" stroke-linecap="round"/>
+                    <text x="22" y="27" text-anchor="middle" font-size="14" fill="#15803d">♡</text>
                   </svg>
                   <div>
                     <div style="font-size:13px;font-weight:700;color:#15803d">👑 Giving goal updated</div>
-                    <div style="font-size:11px;color:#16a34a;margin-top:2px">Giving 8%+ of income · This month</div>
+                    <div style="font-size:11px;color:#16a34a;margin-top:2px">This month</div>
                   </div>
                 </div>
                 <div style="font-size:13px;color:#374151">Just updated my giving goal! So grateful for this community encouraging generous giving. God is faithful! 🎉</div>
@@ -2992,7 +3133,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="prayerpraise">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Prayer praise</span><img src="../../assets/dash-hero-audience.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="/demo-faces/f030.jpg" alt=""><div><div class="net-wall-name">Maya T.</div><div class="net-wall-role">Partner · 6%</div></div></div>
+              <div class="net-wall-user"><img src="/demo-faces/f030.jpg" alt=""><div><div class="net-wall-name">Maya T.</div><div class="net-wall-role">Partner</div></div></div>
               <div class="net-wall-caption">Job offer came through — praise God with me!</div>
               <div class="net-wall-stats"><span>🙏 67</span><span>💬 19</span><span>↗ 8</span></div>
             </div>
@@ -3030,11 +3171,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
     <div class="sec" id="sec-mobile">
       <div class="mobile-link-page">
         <div class="mobile-link-intro">
-          <div class="mobile-link-badge">New iOS App</div>
-          <h2 class="mobile-link-title">New iOS Members Card App</h2>
-          <p class="mobile-link-desc">Redesigned Faithful Church mobile experience &mdash; full iOS-native feel with Members Card Portal, giving, care, community, and journey screens.</p>
+          <div class="mobile-link-badge">Faithful Church</div>
+          <h2 class="mobile-link-title">Your church, wherever you are.</h2>
+          <p class="mobile-link-desc">Explore the mobile member portal for worship, care, community, giving, and your personal journey.</p>
           <div class="mobile-link-tags">
-            <span class="mobile-link-tag">iOS Native</span>
+            <span class="mobile-link-tag">Mobile web preview</span>
             <span class="mobile-link-tag">Members Card</span>
             <span class="mobile-link-tag">Giving</span>
             <span class="mobile-link-tag">Faithful Church</span>
@@ -3045,14 +3186,10 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <!-- No Faithful-branded phone mockup exists yet; the Central one
                  must not appear on this tenant, so hide the preview if the
                  asset is missing rather than render a broken image. -->
-            <img
-              class="mobile-preview-img"
-              src="../../assets/members-portal-phone-faithful.png"
-              onerror="this.style.display='none'"
-              alt="Faithful Church Members Card Portal on iPhone"
-              width="270"
-              height="585"
-            />
+            <div class="mobile-cover-preview" aria-label="Mobile welcome cover preview">
+              <img src="../../assets/faithful-church-logo-wht.png" alt="Faithful Church">
+              <div><h3>You belong here.</h3><p>Your church, your community, your next step.</p><span class="mobile-cover-button">Log In</span><span class="mobile-cover-button secondary">Create an account</span><small>Cover preview · open the portal to explore</small></div>
+            </div>
           </div>
           <div class="mobile-share-panel">
             <div class="mobile-share-block">
@@ -3068,7 +3205,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="mobile-share-qr">
                 <img id="mobile-ios-qr" alt="QR code for iOS Members Card app" width="140" height="140" loading="lazy" />
               </div>
-              <p class="mobile-share-hint">Scan with your phone camera, then log in or sign up for your member account.</p>
+              <p class="mobile-share-hint">Scan to open the mobile web preview. Account entry currently uses demo behavior.</p>
             </div>
             <div class="mobile-share-block">
               <div class="mobile-share-head">
@@ -3077,7 +3214,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 </div>
                 <div>
                   <h4>App URL</h4>
-                  <p>Share with members</p>
+                  <p>Preview link</p>
                 </div>
               </div>
               <div class="mobile-share-url-row">
@@ -3088,7 +3225,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Open in New Tab
               </a>
-              <p class="mobile-share-note">Open on your phone to log in or sign up for the Members Card Portal.</p>
+              <p class="mobile-share-note">Open the current mobile preview in a new tab.</p>
             </div>
           </div>
         </div>
@@ -3507,6 +3644,42 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       <!-- ── IMPACT & HISTORY ── -->
       <div class="wlt-panel" id="wlt-impact" data-gr-lock="impact">
 
+      <div class="faithful-impact-feature">
+        <header class="faithful-impact-header">
+          <div>
+            <h2>Your impact, in motion</h2>
+            <p>The everyday choices and gifts you make can strengthen ministry at Faithful Church.</p>
+          </div>
+        </header>
+        <div class="faithful-impact-primary">
+          <section class="faithful-impact-card">
+            <div class="faithful-impact-card-art"><img src="../../assets/faithful-church-card.png" alt="Faithful Church GRACE Impact Card"></div>
+            <div class="faithful-impact-balance"><span>Available balance</span><strong>$<span id="faithful-impact-balance">3,240</span>.00</strong><button type="button" onclick="walletTab('give')">Manage card <span>›</span></button></div>
+            <p>Your card turns everyday purchases into ministry impact, helping create a brighter tomorrow together.</p>
+          </section>
+          <section class="faithful-impact-cause">
+            <p>This month, your impact is supporting</p><h3>Food Pantry</h3>
+            <img src="../../assets/faithful-food-pantry.jpg" alt="Volunteers serving at the Faithful Church food pantry">
+            <div class="faithful-impact-stats"><span><b>$18.42</b>card impact</span><span><b>23</b>lives impacted</span><span><b>Food Pantry</b>route</span></div>
+            <button type="button" onclick="document.getElementById('wlt-alloc-card')?.scrollIntoView({behavior:'smooth'})">Choose a different cause <span>›</span></button>
+          </section>
+          <section class="faithful-impact-give">
+            <h3>Give directly</h3><p>Support the areas of ministry that matter most to you.</p>
+            <button type="button" onclick="openWalletGive()"><span>♡</span><b>General giving</b><small>Support our church and its mission</small></button>
+            <button type="button" onclick="openWalletGive()"><span>◎</span><b>Missions</b><small>Help bring hope near and far</small></button>
+            <button type="button" onclick="openWalletGive()"><span>♧</span><b>Youth</b><small>Invest in the next generation</small></button>
+            <button type="button" onclick="openWalletGive()"><span>◒</span><b>Food Pantry</b><small>Provide food and care for neighbors</small></button>
+            <button class="faithful-impact-give-cta" type="button" onclick="openWalletGive()">Make a gift <span>›</span></button>
+          </section>
+        </div>
+        <div class="faithful-impact-secondary">
+          <section><h3>Your giving rhythm</h3><p>A reflection of your faithful heart.</p><div>You’ve made 6 impact moments this month — thank you for showing up and making a difference.</div><blockquote>“Small, faithful steps change lives.”<cite>— Faithful Church</cite></blockquote></section>
+          <section><h3>Recent generosity</h3><p>Every act of generosity has a ripple effect.</p><button type="button" onclick="openWalletActivity()"><b>Food Pantry</b><span>$18.42 ›</span></button><button type="button" onclick="openWalletActivity()"><b>General giving</b><span>$50.00 ›</span></button><a onclick="openWalletActivity()">View all giving activity ›</a></section>
+          <section><h3>Where your impact goes</h3><p>Real people. Real change.</p><button type="button" onclick="openWalletTab('impact')"><b>Food Pantry</b><span>Meals, dignity, and hope for families ›</span></button><button type="button" onclick="openWalletTab('impact')"><b>Youth Ministry</b><span>Helping young people discover purpose ›</span></button><button type="button" onclick="openWalletTab('impact')"><b>Missions</b><span>Sharing hope, serving communities ›</span></button></section>
+        </div>
+        <div class="faithful-impact-footer"><h2>A brighter tomorrow, together.</h2><p>Thank you for being part of what God is doing through Faithful Church.</p></div>
+      </div>
+
       <div class="wlt-impact-flow">
 
         <div class="wlt-impact-head">
@@ -3524,7 +3697,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
           <div class="pf-scard pf-sc--purple pf-sc3" onclick="showWalletStatDetail('rhythm')">
             <div class="pf-sc-lbl">Giving rhythm</div>
-            <div class="pf-sc-val" id="pf-stat-commit">Partner · 6%</div>
+            <div class="pf-sc-val" id="pf-stat-commit">Partner</div>
             <div class="pf-sc-sub">Review your giving goal</div>
           </div>
           <div class="pf-scard pf-sc--red pf-sc4" onclick="showWalletStatDetail('lives')">
@@ -3535,7 +3708,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
 
         <div class="wlt-goal-cta">
-          <strong id="wlt-goal-cta-label">Partner · 6% · Giving goal progress</strong>
+          <strong id="wlt-goal-cta-label">Partner · Giving goal progress</strong>
           <button type="button" onclick="openWalletGive()">Give +</button>
         </div>
 
@@ -3642,6 +3815,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
     <!-- ══ WATCH ══ -->
     <div class="sec" id="sec-watch">
+      <header class="faithful-watch-heading"><h1>Worship with your church</h1><p>Gather wherever you are.</p></header>
 
       <div class="journey-hero-stats watch-kpi-bar" role="group" aria-label="Live service summary">
         <div class="journey-hero-stat"><span class="journey-hero-stat-val" id="watch-kpi-viewers">342</span><span class="journey-hero-stat-key">Watching now</span></div>
@@ -3693,7 +3867,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
       <div class="watch-study-banner" id="watch-study-banner" role="region" aria-label="Study this sermon">
         <div>
-          <div style="font-size:13px;font-weight:700;color:#1a1a1a" id="watch-study-banner-title">Study this message</div>
+          <div style="font-size:13px;font-weight:700;color:#1a1a1a" id="watch-study-banner-title">Take the message into your week</div>
           <div style="font-size:11px;color:#888;margin-top:2px">Continue in Bible Study — guided by Faithful Church&apos;s core beliefs</div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0">
@@ -3776,31 +3950,31 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="card-head">
               <div class="card-title">Submit a care request</div>
               <div style="font-size:10px;font-weight:700;background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:10px;display:flex;align-items:center;gap:4px">
-                <div style="width:5px;height:5px;border-radius:50%;background:#16a34a;animation:ldot 1.4s infinite"></div>Human follow-up available
+                Human follow-up · response times vary
               </div>
             </div>
             <div style="padding:4px 0">
-              <div class="care-option" onclick="showPortalToast('Prayer request submitted — your leader\'s avatar is ready, human follow-up available','🙏')">
+              <div class="care-option" onclick="openCareRequest('other')">
                 <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" fill="#000000" opacity=".2"/><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" stroke="#000000" stroke-width="1.2"/><path d="M6.5 11h5M9 8.7V11" stroke="var(--grace-sky-500)" stroke-width="1" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Prayer &amp; Guidance</div><div class="co-sub">Personal prayer, scripture, spiritual guidance</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Hospital visit request submitted','🏥')">
+              <div class="care-option" onclick="openCareRequest('other')">
                 <div class="co-ico" style="background:#e8f5ed"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><rect x="3" y="4" width="12" height="12" rx="2" fill="#16a34a" opacity=".12"/><rect x="3" y="4" width="12" height="12" rx="2" stroke="#16a34a" stroke-width="1.2"/><path d="M9 7v4M7 9h4" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Hospital Visitation</div><div class="co-sub">Request a pastoral visit — in hospital or at home</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Grief support request received','🕯️')">
+              <div class="care-option" onclick="openCareRequest('grief')">
                 <div class="co-ico" style="background:#f5ece8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 3c-.7 1-1 2-.6 3S10 8 10 9.5c0 .9-.6 1.5-1 1.5" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M6 16h6" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity=".4"/><rect x="7" y="13" width="4" height="3" rx="1" fill="#000000" opacity=".15"/></svg></div>
                 <div><div class="co-name">Grief &amp; Bereavement</div><div class="co-sub">Support through loss, grief counselling</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Food pantry pickup scheduled','🍽️')">
+              <div class="care-option" onclick="openCareRequest('financial')">
                 <div class="co-ico" style="background:#f5f0e8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M3 14h12M5 14V8M13 14V8" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M3 8h12l-1.5-5h-9L3 8z" fill="var(--grace-sky-500)" opacity=".2"/><path d="M3 8h12l-1.5-5h-9L3 8z" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
                 <div><div class="co-name">Food Pantry</div><div class="co-sub">Schedule a pickup — pantry open weekly</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Counselling session request submitted','💍')">
+              <div class="care-option" onclick="openCareRequest('marriage')">
                 <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><circle cx="6" cy="8" r="3" fill="#000000" opacity=".12"/><circle cx="6" cy="8" r="3" stroke="#000000" stroke-width="1.2"/><circle cx="12" cy="8" r="2.5" fill="var(--grace-sky-500)" opacity=".2"/><circle cx="12" cy="8" r="2.5" stroke="var(--grace-sky-500)" stroke-width="1.1"/><path d="M2 16c0-2.5 2-4 4-4s4 1.5 4 4" stroke="#000000" stroke-width="1.2" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Pre-Marital / Counselling</div><div class="co-sub">Book a session with Minister Grace Okafor</div></div>
                 <div class="co-arrow">›</div>
@@ -3939,7 +4113,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       </div>
 
       <div class="journey-partner-bar">
-        <span id="journey-partner-label"><strong>Partner · 6%</strong> · Review your giving goal</span>
+        <span id="journey-partner-label"><strong>Partner</strong> · Review your giving goal</span>
         <div class="journey-partner-links">
           <button type="button" onclick="journeyTab('growth')">View growth →</button>
           <button type="button" onclick="openWalletGive()">Review giving →</button>
@@ -4080,7 +4254,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="journey-section-ico"><span data-grace-icon="impact" data-grace-size="22"></span></div>
             <div>
               <h2>Your growth</h2>
-              <p id="journey-growth-sub">Journey stage: Growing · Rhythm stable · Partner · 6% of income.</p>
+              <p id="journey-growth-sub">Journey stage: Growing · Rhythm stable · Partner.</p>
             </div>
           </div>
         </div>
@@ -4370,12 +4544,30 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 
 <script>
   window.GRACE_PORTAL_CHURCH = 'Faithful Church';
+  window.GRACE_HOME_GUIDE_TITLE = 'Navigate with GRACE';
+  window.GRACE_HOME_GUIDE_INTRO = 'Find a service, group, event, or resource. Tap the GRACE orb to open chat.';
+  window.GRACE_HOME_GUIDE_COPY = {
+    tagline: 'Find what you need at Faithful Church.',
+    status: 'A quick guide to your member portal.',
+    placeholder: 'Ask about giving, services, groups, or events',
+    disclaimer: 'Leader avatars are AI, not live pastors. For human support, request pastoral care.',
+    dismissCta: 'Got it',
+    dismissNote: 'You can reopen this guide anytime.',
+    steps: [
+      { icon: 'home', label: 'Navigate', detail: 'Use the sidebar to open My Church, your Impact Card, Connect, or Reflect.' },
+      { icon: 'chat', label: 'Ask GRACE', detail: 'Type a question below or tap the orb for help finding something.' },
+      { icon: 'leadership', label: 'Request care', detail: 'Open My Leadership to find pastoral support. Response times vary.' },
+      { icon: 'people', label: 'Explore', detail: 'Use Grow with Faithful Church to explore the five pathways.' }
+    ]
+  };
   window.GRACE_PORTAL_IS_DEMO = true;
   window.GRACE_ICON_ACCENT = '#449eca';
   window.GRACE_ICON_LIGHT = '#e8f4fa';
 </script>
 <script src="../../shared/grace-messaging.js"></script>
+<script src="../../shared/grace-member-intents.js"></script>
 <script src="../../shared/grace-companion.js"></script>
+<script src="../../shared/grace-care-request.js"></script>
 <script src="../../shared/grace-duotone-icons.js"></script>
 <script src="../../shared/grace-member-session.js"></script>
 <script>
@@ -4383,9 +4575,9 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 const DID_STUDIO_CONFIG={agentId:'',clientKey:''};
 /* Divinity avatar sessions — per-leader didAvatarUrl overrides this fallback */
 const DIVINITY_AVATAR_URL='https://link.divinityagi.com/Individual';
-const titles={home:'My Church',ai:'My Leadership',network:'Connect at Faithful Church',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Maya's Journey",growth:"Maya's Journey",journal:"Maya's Journey",goals:"Maya's Journey",mobile:'Link to Mobile'};
+const titles={home:'My Church',ai:'My Leadership',network:'Connect at Faithful Church',wallet:'My GRACE Members Card',watch:'Watch',give:'My GRACE Members Card',outreach:'Connect · Care',groups:'Connect · Groups & Events',events:'Connect · Groups & Events',profile:"Reflect",growth:"Reflect",journal:"Reflect",goals:"Reflect",mobile:'Mobile'};
 const IOS_APP_PATH='/tenants/faithful/grace_faithful_church_members_card_ios_app.html';
-function iosAppUrl(){return window.location.origin+IOS_APP_PATH;}
+function iosAppUrl(){return new URL('grace_faithful_church_members_card_ios_app.html',window.location.href).href;}
 function initMobileSharePanel(){
   const appUrl=iosAppUrl();
   const urlInput=document.getElementById('mobile-ios-url');
@@ -4394,7 +4586,22 @@ function initMobileSharePanel(){
   const copyBtn=document.getElementById('mobile-ios-copy');
   if(urlInput){urlInput.value=appUrl;urlInput.title=appUrl;}
   if(openLink)openLink.href=appUrl;
-  if(qrImg)qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=449eca';
+  const localPreview=location.protocol==='file:'||['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname);
+  if(qrImg){
+    qrImg.hidden=localPreview;
+    if(localPreview){
+      qrImg.removeAttribute('src');
+      document.querySelector('#sec-mobile .mobile-share-hint').textContent='This preview is local to this computer. Phone scanning requires a hosted preview URL; nothing has been published from here.';
+      document.querySelector('#sec-mobile .mobile-share-qr').hidden=true;
+    }else{
+      // Third-party renderer, deliberately, and ONLY here: this encodes the
+      // public iOS-preview page URL, which is not a secret. Never reuse this
+      // for the story handoff code -- api.qrserver.com receives and logs
+      // whatever it encodes, and that QR carries a single-use token. The
+      // handoff renders server-side instead (api/story/_handoff.ts).
+      qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(appUrl)+'&bgcolor=ffffff&color=175fa5';
+    }
+  }
   if(copyBtn&&!copyBtn.dataset.wired){
     copyBtn.dataset.wired='1';
     copyBtn.addEventListener('click',()=>{
@@ -4569,7 +4776,11 @@ function dismissWatchStudyBanner(){
 }
 function startStudyFromPendingSermon(){
   const idx=WATCH_STATE.pendingStudyIdx;
-  if(idx==null)return;
+  if(idx==null){
+    startStudyPath(createStudyPath({source:'sermon',title:WATCH_STATE.title,series:WATCH_STATE.series,beliefId:'honor'}));
+    openProfileStudy();
+    return;
+  }
   dismissWatchStudyBanner();
   startStudyFromSermon(idx);
 }
@@ -4591,7 +4802,10 @@ function renderWatchSchedule(){
   </div>`;
 }
 function watchActionFollowJesus(){
-  pfToast('We are so glad — a team will reach out soon','✝','success');
+  // Nothing is submitted from here — there is no intake behind this button, so
+  // it must not say a team will reach out. Send the member to the page where a
+  // real next step exists instead.
+  pfToast('Opening ways to take a next step — nothing has been sent yet','✝');
   goSection('outreach');
 }
 function hydrateWatch(){
@@ -4689,7 +4903,7 @@ function toggleGraceFaq(i){
   });
   graceFaqOpen=isOpen?-1:i;
 }
-const GRACE_HOME_TUTORIAL_KEY='grace.home.tutorial.dismissed.central-henderson';
+const GRACE_HOME_TUTORIAL_KEY='grace.home.tutorial.dismissed.faithful';
 function dismissGraceHomeTutorial(){
   const wrap=document.getElementById('grace-home-tutorial-wrap');
   if(wrap)wrap.classList.add('is-dismissed');
@@ -5096,11 +5310,12 @@ function renderHomeImpactSummary(){
   const total=m?.graceImpact?.month??monthImpactTotal;
   const lives=m?.livesImpacted?.month??23;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   set('home-gi-total',formatMoney(total));
   set('home-gi-lives',String(lives));
-  set('home-gi-partner',`${level} · ${commitPct}% · Giving goal progress`);
+  // Participation level only. A giving rate as a share of income is a private
+  // figure and must not be rendered as a status label.
+  set('home-gi-partner',`${level} · Giving goal progress`);
   root.innerHTML=IMPACT_ALLOC_DEF.map((def,i)=>{
     const pct=allocPct(def.cause,[40,25,20,10,5][i]);
     const amt=total*pct/100;
@@ -5256,7 +5471,6 @@ function syncHomeKpis(){
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const givenMonth=m?.givenMonth??230;
   const impactMoney=formatMoney(WALLET_STATE.cardImpactMonth);
   set('home-hero-date',formatHomeDate());
@@ -5265,10 +5479,8 @@ function syncHomeKpis(){
   if(livePill)livePill.innerHTML=`<span class="dash-live-dot"></span> Sunday Service Live · ${watchViewerCount} watching`;
   set('home-kpi-impact',impactMoney);
   set('home-kpi-given','$'+Number(givenMonth).toLocaleString());
-  set('home-kpi-rhythm',`${level} · ${commitPct}%`);
+  set('home-kpi-rhythm',level);
   set('home-kpi-lives',String(WALLET_STATE.livesImpacted));
-  set('home-next-title',HOME_STATE.nextStep.title);
-  set('home-next-body',HOME_STATE.nextStep.body);
   const heroToast=document.getElementById('dash-hero-toast');
   if(heroToast){
     const ht=HOME_STATE.heroToast;
@@ -5336,7 +5548,6 @@ function initHomeHero(){
   initHomeImpactDemo();
   syncLeaderKpis();
   if(!homeHeroWelcomed){
-    pfToast('Welcome back, '+HOME_STATE.memberName+' — your church dashboard is live','🏛','success');
     homeHeroWelcomed=true;
   }
 }
@@ -5451,7 +5662,6 @@ function syncWalletKpis(){
   const impactText='↑ '+impactMoney+' Card impact · May';
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const ytdFmt='$'+Number(WALLET_STATE.givenYtd).toLocaleString();
   set('wallet-available-amt',availFmt);
   set('home-wallet-available',availFmt);
@@ -5464,14 +5674,14 @@ function syncWalletKpis(){
   set('pf-donut-val',WALLET_STATE.cardImpactMonth.toFixed(2));
   set('wlt-act-impact-total','+'+impactMoney);
   set('wlt-live-month-total',formatMoney(WALLET_STATE.cardImpactMonth));
-  set('pf-stat-commit',`${level} · ${commitPct}%`);
+  set('pf-stat-commit',level);
   set('pf-stat-lives',String(WALLET_STATE.livesImpacted));
   set('wlt-goal-pct',WALLET_STATE.givingGoalPct+'%');
   set('wlt-goal-copy',`$${WALLET_STATE.givingGoalRaised.toLocaleString()} of $${WALLET_STATE.givingGoalTarget.toLocaleString()}`);
   const fill=document.getElementById('wlt-goal-fill');
   if(fill)fill.style.width=Math.min(100,WALLET_STATE.givingGoalPct)+'%';
   const cta=document.getElementById('wlt-goal-cta-label');
-  if(cta)cta.textContent=`${level} · ${commitPct}% · Giving goal progress`;
+  if(cta)cta.textContent=`${level} · Giving goal progress`;
   syncWalletRouteLabel(WALLET_STATE.impactRoute);
   if(document.getElementById('sec-home')?.classList.contains('active'))syncHomeKpis();
 }
@@ -5513,10 +5723,9 @@ function renderRecentGifts(){
 function showWalletStatDetail(type){
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const msgs={
     impact:`Card impact — ${formatMoney(WALLET_STATE.cardImpactMonth)} generated this month from card spending`,
-    rhythm:`Giving rhythm ${level} at ${commitPct}% — review your giving goal`,
+    rhythm:`Giving rhythm ${level} — review your giving goal`,
     lives:`${WALLET_STATE.livesImpacted} lives impacted this month through your causes`
   };
   const icons={impact:'◈',rhythm:'🌿',lives:'💛'};
@@ -6071,12 +6280,12 @@ setInterval(()=>{
 
 /* ── AI HUB LOGIC ── */
 const aiLeaders = [
-  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Faithful Church · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? This is a safe space to share."',online:true,bio:'Pastor James leads Faithful Church with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
-  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Faithful Church · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'/demo-faces/f136.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her companion reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
+  {name:'Pastor James Wilson',title:'Senior Pastor',role:'Faithful Church · Verified Avatar · Human follow-up available',topic:'Prayer · Scripture · Guidance',img:'../../assets/Pastor-James-Wilson-profile.jpg',didAvatarUrl:'https://link.divinityagi.com/james-wilson',greeting:'"Good morning Maya — I\'m Pastor James. What\'s on your heart today? You can choose what to share."',online:true,bio:'Pastor James leads Faithful Church with a heart for expository preaching and pastoral care. His avatar is grounded in approved pastoral resources; human leaders follow up when care is needed.',exp:'22 yrs ministry',hours:'24/7 Avatar · Human follow-up Mon–Fri 9am–6pm',languages:['English','Spanish'],specialties:['Prayer','Scripture','Guidance','Leadership'],rating:'4.9★',sessions:'1,284'},
+  {name:'Rev. Sandra Mitchell',title:'Pastoral Care Director',role:'Pastoral Care · Faithful Church · Verified Avatar · Human follow-up available',topic:'Care · Grief · Hospital',img:'/demo-faces/f136.jpg',greeting:'"Hello Maya. I\'m Sandra — here for care, comfort, and support. What are you walking through today?"',online:true,bio:'Rev. Mitchell oversees bereavement, hospital visits, and crisis care dispatch. Her avatar reflects her gentle, trauma-informed approach to pastoral support.',exp:'18 yrs ministry',hours:'24/7 AI · On-call care',languages:['English'],specialties:['Grief','Hospital','Crisis care','Counselling'],rating:'4.9★',sessions:'892'},
   {name:'Pastor Derek Osei',title:'Youth & Family Pastor',role:'Youth & Family · Faithful Church · Verified Avatar · Human follow-up available',topic:'Youth · Identity · Faith',img:'/demo-faces/f117.jpg',greeting:'"What\'s good Maya! It\'s Pastor Derek. Talk to me — what\'s going on? Faith, life, whatever you\'ve got."',online:true,bio:'Pastor Derek serves middle school through college-age students and their parents. His avatar voice is energetic, scripture-grounded, and real about everyday struggles.',exp:'12 yrs ministry',hours:'24/7 AI · Evenings & weekends',languages:['English','Twi'],specialties:['Youth','Identity','Family','Campus'],rating:'4.8★',sessions:'654'},
-  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'/demo-faces/f108.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. This is a safe space — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her companion specializes in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
+  {name:'Sis. Priya Nair',title:"Women's Ministry Lead",role:"Women's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Women · Mentorship · Calling',img:'/demo-faces/f108.jpg',greeting:'"Hi Maya 🌸 I\'m Sis. Priya. Share only what you choose — what\'s on your mind today, sis?"',online:false,bio:'Sis. Priya leads Women of Grace and mentorship circles. Her avatar offers resources in calling, boundaries, and spiritual formation for women at every life stage.',exp:'9 yrs ministry',hours:'AI 24/7 · Groups Tue evenings',languages:['English','Tamil'],specialties:['Mentorship','Calling','Women','Prayer'],rating:'4.9★',sessions:'521'},
   {name:'Min. Grace Okafor',title:'Family Counselling Minister',role:'Family & Counselling · Faithful Church · Verified Avatar · Human follow-up available',topic:'Marriage · Family · Counselling',img:'/demo-faces/f144.jpg',greeting:'"Hey Maya. I\'m Minister Grace. Whether it\'s family, relationships, or just questions — I\'m here."',online:false,bio:'Minister Okafor supports couples, parents, and blended families with biblically grounded counsel. Community posts complement — never replace — live pastoral meetings.',exp:'15 yrs ministry',hours:'By appointment · AI 24/7',languages:['English','Igbo'],specialties:['Marriage','Parenting','Conflict','Restoration'],rating:'4.8★',sessions:'438'},
-  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Faithful Church · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'/demo-faces/f133.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His companion helps members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
+  {name:'Deacon Robert Hayes',title:'Prayer & Intercession',role:'Prayer & Intercession · Faithful Church · Verified Avatar · Human follow-up available',topic:'Intercession · Prayer · Warfare',img:'/demo-faces/f133.jpg',greeting:'"Good morning Maya. Deacon Hayes here — let\'s pray, intercede, and seek the Lord together. What do you need today?"',online:true,bio:'Deacon Hayes leads the intercession team and early-morning prayer watches. His avatar offers resources to help members build consistent prayer rhythms and spiritual warfare foundations.',exp:'25 yrs ministry',hours:'24/7 AI · Prayer room daily 5am',languages:['English'],specialties:['Intercession','Fasting','Warfare','Healing'],rating:'4.9★',sessions:'712'},
   {name:'Elder Marcus Chen',title:'Missions Elder',role:'Missions & Outreach · Faithful Church · Verified Avatar · Human follow-up available',topic:'Missions · Global · Short-term trips',img:'/demo-faces/f110.jpg',greeting:'"Peace, Maya — Elder Marcus here. Curious about missions or how your gifts can reach the nations? Let\'s talk."',online:true,bio:'Elder Chen coordinates global partners, short-term teams, and the Missions Fund. His avatar answers giving-route and trip questions with field-tested wisdom.',exp:'28 yrs ministry',hours:'24/7 AI · Office Wed–Fri',languages:['English','Mandarin'],specialties:['Missions','Global partners','Trips','Giving'],rating:'4.8★',sessions:'389'},
   {name:'Pastor Lisa Alvarez',title:"Children's Pastor",role:"Children's Ministry · Faithful Church · Verified Avatar · Human follow-up available",topic:'Kids · Parents · Sunday School',img:'/demo-faces/f143.jpg',greeting:'"Hi Maya! Pastor Lisa here — whether it\'s your kids, your classroom, or your heart as a parent, I\'m glad you came."',online:true,bio:'Pastor Lisa oversees nursery through 5th grade and parent equipping nights. Her companion helps families with scripture memory, baptism questions, and serving in kids ministry.',exp:'14 yrs ministry',hours:'24/7 AI · Sun & Wed programs',languages:['English','Spanish'],specialties:['Children','Parents','Safety','Volunteers'],rating:'4.9★',sessions:'467'},
   {name:'Bro. Samuel Okonkwo',title:'Worship Pastor',role:'Worship & Arts · Faithful Church · Verified Avatar · Human follow-up available',topic:'Worship · Music · Creative arts',img:'/demo-faces/f148.jpg',greeting:'"Hey Maya — Samuel here. Want to talk worship, serving on the team, or what we\'re singing this Sunday?"',online:false,bio:'Bro. Samuel leads the worship band, choir, and creative arts collective. His avatar shares set lists, chord charts info, and theology of worship resources.',exp:'11 yrs ministry',hours:'AI 24/7 · Rehearsals Thu',languages:['English'],specialties:['Worship','Music','Arts','Production'],rating:'4.7★',sessions:'298'},
@@ -6150,7 +6359,7 @@ function hydratePastoralCare() {
   const demo = m?.pastoralCare?.recentRequests;
   if (Array.isArray(demo) && demo.length) {
     LEADER_STATE.care.requests = demo.map(r => ({ ...r }));
-    LEADER_STATE.care.openCount = demo.filter(r => r.status === 'Submitted').length;
+    LEADER_STATE.care.openCount = demo.filter(r => r.status === 'Submitted' || r.status === 'Started').length;
     return;
   }
   LEADER_STATE.care.requests = [
@@ -6199,6 +6408,17 @@ function openPastoralCarePicker() {
   }
   showPortalToast('Choose a category below to start a confidential care request', '🙏');
 }
+/* The five "Submit a care request" options. Prefers the real intake
+   (POST /api/portal/care via shared/grace-care-request.js); falls back to the
+   leader conversation if that script did not load, so the button never dies
+   silently -- but it must never claim a request was sent. */
+function openCareRequest(categoryId) {
+  if (window.GRACE_CARE_REQUEST && window.GRACE_CARE_REQUEST.open) {
+    window.GRACE_CARE_REQUEST.open(categoryId);
+    return;
+  }
+  startPastoralCareRequest(categoryId);
+}
 function startPastoralCareRequest(categoryId) {
   const cat = getPastoralCareCategories().find(c => c.id === categoryId);
   if (!cat) return;
@@ -6216,7 +6436,9 @@ function startPastoralCareRequest(categoryId) {
     categoryId,
     label: cat.title,
     leader: leader.name,
-    status: 'Submitted',
+    // Client-side only: nothing is posted to the church from this page, so this
+    // list must not say "Submitted". It records what the member started.
+    status: 'Started',
     time: 'Just now'
   };
   LEADER_STATE.care.requests.unshift(req);
@@ -6332,7 +6554,6 @@ function initLeaderHero() {
   renderPastoralCare();
   renderLeaderChatSeed();
   if (!leaderHeroWelcomed) {
-    showPortalToast('Your verified leadership team is ready', '◈');
     leaderHeroWelcomed = true;
   }
 }
@@ -6553,7 +6774,7 @@ function openLeaderProfile(idx){
   document.getElementById('lpm-langs').innerHTML=l.languages.map(s=>`<span class="lpm-tag lpm-tag--lang">${s}</span>`).join('');
   const reachEl=document.getElementById('lpm-reachable');
   if(reachEl){
-    reachEl.textContent=reachable?'Reachable now · real person available':'AI available · human follow-up by schedule';
+    reachEl.textContent=reachable?'Human follow-up · response times vary':'AI available · human follow-up by schedule';
     reachEl.className='lpm-reachable '+(reachable?'lpm-reachable--live':'lpm-reachable--away');
   }
   const liveDot=document.getElementById('lpm-live-dot');
@@ -6628,7 +6849,7 @@ function showImpactFloat(item){
   const float=document.getElementById('impact-float');
   const text=document.getElementById('impact-float-text');
   if(!float||!text||!document.getElementById('sec-home')?.classList.contains('active'))return;
-  text.textContent=item.merchant+': +'+formatMoney(item.impact)+' to '+item.cause;
+  text.textContent='Your Impact Card added '+formatMoney(item.impact)+' to '+item.cause;
   float.classList.add('show');
 }
 function dismissImpactFloat(){
@@ -7010,7 +7231,7 @@ function startStudyFromLastJournal(){
 function openProfileStudy(topicOrPathId){
   _origGoSection('profile');
   setActiveNav('nav-profile');
-  document.getElementById('tb-title').textContent="Maya's Journey";
+  document.getElementById('tb-title').textContent="Reflect";
   initJourneyHero();
   setTimeout(()=>{
     journeyTab('study');
@@ -7232,9 +7453,9 @@ function syncJourneyKpis(){
     const level=m.commitment?.level||'Partner';
     const ytd=m.graceImpact?.ytd||WALLET_STATE.givenYtd;
     const partnerLbl=document.getElementById('journey-partner-label');
-    if(partnerLbl)partnerLbl.innerHTML=`<strong>${level} · ${pct}%</strong> · Review your giving goal`;
+    if(partnerLbl)partnerLbl.innerHTML=`<strong>${level}</strong> · Review your giving goal`;
     const growthSub=document.getElementById('journey-growth-sub');
-    if(growthSub)growthSub.textContent=`Journey stage: ${JOURNEY_STATE.stage} · Rhythm stable · ${level} · ${pct}% of income.`;
+    if(growthSub)growthSub.textContent=`Journey stage: ${JOURNEY_STATE.stage} · Rhythm stable · ${level}.`;
     const pctLbl=document.getElementById('jy-growth-pct-label');
     if(pctLbl)pctLbl.textContent=pct+'% complete';
     const fill=document.getElementById('jy-growth-fill');
@@ -7336,7 +7557,7 @@ function profileTab(tab){
 function openProfileTab(tab){
   _origGoSection('profile');
   setActiveNav('nav-profile');
-  document.getElementById('tb-title').textContent="Maya's Journey";
+  document.getElementById('tb-title').textContent="Reflect";
   initJourneyHero();
   setTimeout(()=>{
     journeyTab(tab||'journal');
@@ -7444,7 +7665,7 @@ goSection = function(s) {
     if(!document.querySelector('.net-tab-panel.active')) networkTab('community');
   }
   if(s==='profile'){
-    document.getElementById('tb-title').textContent="Maya's Journey";
+    document.getElementById('tb-title').textContent="Reflect";
     initJourneyHero();
     if(!document.querySelector('#sec-profile .journey-panel.active')) journeyTab('journal');
     if(typeof hydrateGraceIcons==='function') hydrateGraceIcons(document.getElementById('sec-profile'));
@@ -7583,6 +7804,8 @@ syncHomeLeaderStrip();
 
 /* ── GRACE Companion — orb-launched floating chat with agency over the portal ── */
 GRACE_COMPANION.mount({
+  quietNavigator: true,
+  demoMemberId: 'maya',
   mode: 'float',
   container: document.body,
   zIndex: 8800,
@@ -7595,6 +7818,13 @@ GRACE_COMPANION.mount({
   toast: (m) => showPortalToast(m, '◈'),
   openLeader: () => goSection('ai'),
   navigate: (key) => {
+    if (['settings','volunteer','first-step'].includes(key)) { openMemberDestination(key); return true; }
+    if (key === 'growth') { openProfileGrowth(); return true; }
+    if (key === 'outreach' || key === 'care') {
+      _origGoSection('outreach');
+      document.getElementById('tb-title').textContent = 'Pastoral Care';
+      return true;
+    }
     const map = {
       give: 'give', wallet: 'wallet', impact: 'impact', rewards: 'impact',
       watch: 'watch', groups: 'groups', events: 'events',
@@ -7608,10 +7838,6 @@ GRACE_COMPANION.mount({
     return true;
   },
   onCrisis: () => {
-    LEADER_STATE.pendingFollowUps++;
-    prependLeaderActivity({ icon: 'prayer', title: 'Care dispatch', detail: 'urgent request routed live', time: 'Just now' });
-    showPortalToast('Care dispatch notified — a leader will follow up', '🙏');
-    syncLeaderKpis();
     openCrisisSupport();
   },
   currentPage: () => {
@@ -7649,5 +7875,34 @@ if(typeof GRACE_METRICS!=='undefined'){
 }
 </script>
 <script>if(typeof hydrateImpactAllocation==='function')hydrateImpactAllocation();if(typeof hydrateLeader==='function')hydrateLeader();if(typeof hydrateHome==='function')hydrateHome();if(typeof hydrateWatch==='function')hydrateWatch();if(typeof hydrateJourney==='function')hydrateJourney();</script>
+<script src="faithful-refinement.js"></script>
+<script src="faithful-wallet-design.js"></script>
+<script src="faithful-connect-design.js"></script>
+<script src="faithful-journey-design.js"></script>
+<link rel="stylesheet" href="faithful-destinations.css">
+<link rel="stylesheet" href="faithful-settings.css">
+<script src="faithful-destinations.js"></script>
+<link rel="stylesheet" href="faithful-impact-exercise.css">
+<script src="faithful-impact-exercise.js"></script>
+<link rel="stylesheet" href="faithful-preferences.css">
+<script src="faithful-preferences.js"></script>
+<script src="faithful-care-guide.js"></script>
+<script src="faithful-wallet-guide.js?v=card-introduction-2"></script>
+<link rel="stylesheet" href="faithful-weekly-journey.css">
+<link rel="stylesheet" href="faithful-weekly-editorial.css">
+<script src="faithful-weekly-scripture.js"></script>
+<script src="faithful-weekly-journey.js"></script>
+<link rel="stylesheet" href="faithful-guide-finish.css">
+<script src="faithful-guide-finish.js"></script>
+<script src="faithful-mobile-story.js"></script>
+<script src="faithful-story-segments.js"></script>
+<script src="../../shared/grace-story-handoff.js"></script>
+<script src="faithful-story-handoff.js"></script>
+<script src="faithful-member-profile.js"></script>
+<script src="faithful-settings-tabs.js"></script>
+<link rel="stylesheet" href="faithful-member-profile.css">
+<link rel="stylesheet" href="faithful-mobile-story.css">
+<link rel="stylesheet" href="../../shared/grace-story-handoff.css">
+<link rel="stylesheet" href="faithful-story-handoff.css">
 </body>
 </html>
