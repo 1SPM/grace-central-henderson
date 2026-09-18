@@ -7,8 +7,18 @@ assert(!d.querySelector('[data-visitor-story]').textContent.includes('Maya saved
 const note=d.querySelectorAll('textarea')[1];note.value='My own connection';note.dispatchEvent(new w.Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,10));
 assert(d.querySelector('[data-visitor-story]').textContent.includes('My own connection'));assert(!d.querySelector('[data-visitor-story]').textContent.includes('Maya saved history'));
 const select=d.createElement('select');select.innerHTML='<option value=""></option><option>Returning to church</option>';d.querySelector('.fp-questions').append(select);select.onchange=()=>{select.value='';};select.value='Returning to church';select.dispatchEvent(new w.Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,10));assert(d.querySelector('[data-visitor-story]').textContent.includes('Returning to church'));
-d.querySelector('[data-continue]').click();d.querySelector('[data-name]').value='John';d.querySelector('[data-confirm]').checked=true;d.querySelector('[data-create]').click();
+d.querySelector('[data-continue]').click();d.querySelector('[data-name]').value='John';
+// Consent is no longer one bundled, un-declinable tickbox. The handoff button
+// is gated on the carry choice; declining is a separate, working path.
+assert(!d.querySelector('[data-consent-carry]').required,'carry consent must be declinable');
+assert(!d.querySelector('[data-name]').required,'name is validated in JS, not by the browser');
+d.querySelector('[data-create]').click();
+assert(/Carry my story/.test(d.querySelector('[data-signup] [role=status]').textContent),'refuses the handoff without the carry consent');
+assert.equal(w.FAITHFUL_VISITOR_STORY.getProfile(),null,'no profile is created by a refused handoff');
+d.querySelector('[data-decline]').click();
 assert.equal(w.FAITHFUL_VISITOR_STORY.getProfile().preferredName,'John');assert.equal(w.localStorage.length,0);
+assert.equal(JSON.stringify(w.FAITHFUL_VISITOR_STORY.getConsents()),JSON.stringify({carry:false,money:false,followup:false}));
+assert(w.FAITHFUL_VISITOR_STORY.getDraft(),'the draft is readable by the handoff module');
 assert(d.querySelector('.mobile-link-page').hidden);assert(!d.querySelector('[data-signup]').hidden);
 assert(d.querySelector('[data-signup]').contains(d.querySelector('[data-visitor-story]')));
 assert.equal(d.querySelector('[data-back]').textContent,'Back to Mobile');

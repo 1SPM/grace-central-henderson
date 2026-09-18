@@ -72,7 +72,16 @@ export type PlatformEventType =
   | 'portal.demo_persona_seeded'
   | 'portal.self_signup_completed'
   | 'portal.self_signup_reviewed'
-  | 'workos.notification_prefs_updated';
+  | 'workos.notification_prefs_updated'
+  // Story handoff (migration 082). Payloads carry ids, counts and expiry only
+  // -- never story content: these rows are read by staff tooling that has no
+  // pilot_research.view check of its own.
+  | 'story.handoff_issued'
+  | 'story.handoff_redeemed'
+  | 'story.handoff_refused'
+  | 'story.draft_claimed'
+  | 'story.attach_failed'
+  | 'story.followup_approved';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 

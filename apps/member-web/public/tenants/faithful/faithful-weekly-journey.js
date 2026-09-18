@@ -130,7 +130,10 @@
     if(a==='export'){const blob=new Blob([JSON.stringify({notice:'Session demo export. This downloaded file is not encrypted. Keep it somewhere appropriate.',entries:state.entries},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='faithful-session-reflections.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Export requested. The downloaded file is not encrypted.');}
     if(a==='share'){const t=q('#wj-text');shareText=t.value.slice(t.selectionStart,t.selectionEnd).trim();if(!shareText)return status('Select the specific words in your reflection that you want to share.');q('#wj-share-text').textContent=shareText;q('#wj-share').hidden=false;}
     if(a==='share-cancel'){shareText='';q('#wj-share').hidden=true;}
-    if(a==='share-confirm'){if(!shareText)return;if(!window.GRACE_COMPANION?.ask)return status('GRACE is unavailable. Your text has not been sent.');const text=shareText;shareText='';q('#wj-share').hidden=true;window.GRACE_COMPANION.open();window.GRACE_COMPANION.ask('Please help me reflect on this text I chose to share:\n'+text);status('Selected text sent to GRACE.');}
+    // ask() returns false when GRACE is unmounted or still answering. Keep the
+    // draft and the panel until it confirms acceptance: never report a send
+    // that did not happen.
+    if(a==='share-confirm'){if(!shareText)return;if(!window.GRACE_COMPANION?.ask)return status('GRACE is unavailable. Your text has not been sent.');const text=shareText;window.GRACE_COMPANION.open();if(!window.GRACE_COMPANION.ask('Please help me reflect on this text I chose to share:\n'+text))return status('GRACE is still answering. Your text has not been sent — try again in a moment.');shareText='';q('#wj-share').hidden=true;status('Selected text sent to GRACE.');}
     if(a==='dictate'){
       q('#wj-voice').hidden=false;
       const supported=window.SpeechRecognition||window.webkitSpeechRecognition;

@@ -7,6 +7,7 @@ import { checkEnvironment } from '@grace/platform-core/envCheck';
 import { initSentry, initPosthog, SentryErrorBoundary } from '@grace/platform-core/observability';
 import { UpdatePrompt } from '@grace/platform-core/UpdatePrompt';
 import { PortalRoot } from './portal/PortalRoot';
+import { captureOriginTenant } from './portal/originTenant';
 import './tailwind.css';
 
 // Tenant theming — resolved at RUNTIME (hostname map / VITE_TENANT), same
@@ -59,6 +60,11 @@ if (buildMeta && storedBuild && buildMeta !== storedBuild) {
 } else if (buildMeta) {
   localStorage.setItem('grace-build', buildMeta);
 }
+
+// Before render, and before Clerk can redirect away: ?tenant= tells
+// self-signup which portal the member came from. One host serves both
+// tenants, so nothing else can.
+captureOriginTenant();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

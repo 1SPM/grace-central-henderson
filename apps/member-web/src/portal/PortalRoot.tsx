@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from 'react';
 import { SignIn } from '@clerk/clerk-react';
 import { PortalAuthProvider, usePortalAuth } from './PortalAuthContext';
+import { StoryClaim } from './StoryClaim';
 
 // Central Henderson gets its own branded page; every other church (today
 // just Faithful, but any future one too — see marketing/tenants/faithful
@@ -97,11 +98,26 @@ function PortalGate() {
   return <StaticPortalHandoff />;
 }
 
+/**
+ * /claim is reached by scanning a QR on the desktop portal, by someone who
+ * usually has no account yet — so it renders BEFORE the auth gate, which would
+ * otherwise show a sign-IN form to a person who needs to sign UP. It stays
+ * inside PortalAuthProvider so that once they do create an account, the normal
+ * provisioning effect runs and attaches their story.
+ */
+function isClaimRoute(): boolean {
+  try {
+    return window.location.pathname.replace(/\/+$/, '') === '/claim';
+  } catch {
+    return false;
+  }
+}
+
 export function PortalRoot() {
   return (
     <PortalAuthProvider>
       <Suspense fallback={<PortalLoading />}>
-        <PortalGate />
+        {isClaimRoute() ? <StoryClaim /> : <PortalGate />}
       </Suspense>
     </PortalAuthProvider>
   );

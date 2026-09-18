@@ -49,11 +49,16 @@
   const leisureRow=document.createElement('div');leisureRow.innerHTML='<span>Leisure</span><i><b data-fi-bar="3"></b></i><output data-fi-value="3"></output>';panel.querySelector('.fi-chart').append(leisureRow);
   const categoryGroup=document.createElement('div');choices.closest('fieldset').after(categoryGroup);
   choices.className='fi-shopping-groups';
+  // Store names are recognition prompts, so they must be chains a member in
+  // southern Nevada actually shops at. Seven entries here were Canada-only
+  // (Sobeys, Save-On-Foods, Superstore, Petro-Canada, Esso, London Drugs,
+  // Shoppers Drug Mart) plus Tim Hortons, which has no Nevada presence — they
+  // read as someone else's demo. The US chains already in the list stay.
   const shoppingGroups=[
-    {title:'Groceries & household essentials',hint:'Walmart, Safeway, Sobeys and more',stores:['Walmart','Safeway','Sobeys','Costco','Save-On-Foods','Superstore'],max:2500},
-    {title:'Fuel & transport',hint:'Shell, Chevron, Petro-Canada and more',stores:['Shell','Chevron','Petro-Canada','Esso','Mobil','Uber','Lyft'],max:1500},
-    {title:'Other everyday spending',hint:'Online shopping, pharmacy and more',stores:['Amazon','Target','Shoppers Drug Mart','London Drugs'],max:3000},
-    {title:'Leisure & dining',hint:'Restaurants, coffee and entertainment',stores:['McDonald’s','Tim Hortons','Starbucks','DoorDash'],max:1500}
+    {title:'Groceries & household essentials',hint:'Walmart, Safeway, Smith’s and more',stores:['Walmart','Safeway','Smith’s','Costco','Albertsons','Sprouts'],max:2500},
+    {title:'Fuel & transport',hint:'Shell, Chevron, Terrible Herbst and more',stores:['Shell','Chevron','Terrible Herbst','76','Mobil','Uber','Lyft'],max:1500},
+    {title:'Other everyday spending',hint:'Online shopping, pharmacy and more',stores:['Amazon','Target','CVS','Walgreens'],max:3000},
+    {title:'Leisure & dining',hint:'Restaurants, coffee and entertainment',stores:['McDonald’s','In-N-Out Burger','Starbucks','DoorDash'],max:1500}
   ];
   const sliderPairs=[];
   shoppingGroups.forEach((group,index)=>{

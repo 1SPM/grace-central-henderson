@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="../../shared/grace-typography.css">
 <link rel="stylesheet" href="../../shared/grace-orb.css">
 <link rel="stylesheet" href="../../shared/grace-companion.css">
+<link rel="stylesheet" href="../../shared/grace-care-request.css">
 <link rel="stylesheet" href="../../shared/grace-member-session.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2037,8 +2038,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 .journey-section-hdr .journey-section-ico{transform:scale(1.05)}
 
 /* The hero KPI strip was locked to repeat(4,1fr), so on a narrow viewport
-   each tile fell to ~95px and "Partner · 6%" wrapped to three lines and
-   spilled out of its tile. auto-fit lets it drop to 2-up before that. */
+   each tile fell to ~95px and the longest rhythm label wrapped to three
+   lines and spilled out of its tile. auto-fit lets it drop to 2-up before
+   that. (The label that triggered this originally carried a giving
+   percentage; that has since been removed, but keep auto-fit — the
+   constraint returns with any long label.) */
 .dash-kpis{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
 .dash-kpi-val{font-size:clamp(16px,1.7vw,21px);line-height:1.15;letter-spacing:-.3px}
 
@@ -2404,7 +2408,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               <div class="home-gi-kpi-key">Lives impacted</div>
             </div>
           </div>
-          <div class="home-gi-partner" id="home-gi-partner">Partner · 6% · Giving goal progress</div>
+          <div class="home-gi-partner" id="home-gi-partner">Partner · Giving goal progress</div>
           <div class="home-gi-alloc-head">Impact allocation</div>
           <div id="home-gi-alloc-list"></div>
           <button type="button" class="home-gi-cta" onclick="openWalletTab('impact')">See ministry impact</button>
@@ -2760,12 +2764,12 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
                 <div class="post-ring-card">
                   <svg class="prc-ring" viewBox="0 0 44 44" width="44" height="44">
                     <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(0,0,0,.1)" stroke-width="5"/>
-                    <circle cx="22" cy="22" r="18" fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="81 113" stroke-dashoffset="28" transform="rotate(-90 22 22)" stroke-linecap="round"/>
-                    <text x="22" y="27" text-anchor="middle" font-size="9" font-weight="bold" fill="#15803d">8%</text>
+                    <circle cx="22" cy="22" r="18" fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="113 0" transform="rotate(-90 22 22)" stroke-linecap="round"/>
+                    <text x="22" y="27" text-anchor="middle" font-size="14" fill="#15803d">♡</text>
                   </svg>
                   <div>
                     <div style="font-size:13px;font-weight:700;color:#15803d">👑 Giving goal updated</div>
-                    <div style="font-size:11px;color:#16a34a;margin-top:2px">Giving 8%+ of income · This month</div>
+                    <div style="font-size:11px;color:#16a34a;margin-top:2px">This month</div>
                   </div>
                 </div>
                 <div style="font-size:13px;color:#374151">Just updated my giving goal! So grateful for this community encouraging generous giving. God is faithful! 🎉</div>
@@ -3126,7 +3130,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           <article class="net-wall-card" data-wall-cat="prayerpraise">
             <div class="net-wall-img-wrap"><span class="net-wall-tag">Prayer praise</span><img src="../../assets/dash-hero-audience.jpg" alt=""></div>
             <div class="net-wall-body">
-              <div class="net-wall-user"><img src="/demo-faces/f030.jpg" alt=""><div><div class="net-wall-name">Maya T.</div><div class="net-wall-role">Partner · 6%</div></div></div>
+              <div class="net-wall-user"><img src="/demo-faces/f030.jpg" alt=""><div><div class="net-wall-name">Maya T.</div><div class="net-wall-role">Partner</div></div></div>
               <div class="net-wall-caption">Job offer came through — praise God with me!</div>
               <div class="net-wall-stats"><span>🙏 67</span><span>💬 19</span><span>↗ 8</span></div>
             </div>
@@ -3690,7 +3694,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
           <div class="pf-scard pf-sc--purple pf-sc3" onclick="showWalletStatDetail('rhythm')">
             <div class="pf-sc-lbl">Giving rhythm</div>
-            <div class="pf-sc-val" id="pf-stat-commit">Partner · 6%</div>
+            <div class="pf-sc-val" id="pf-stat-commit">Partner</div>
             <div class="pf-sc-sub">Review your giving goal</div>
           </div>
           <div class="pf-scard pf-sc--red pf-sc4" onclick="showWalletStatDetail('lives')">
@@ -3701,7 +3705,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
         </div>
 
         <div class="wlt-goal-cta">
-          <strong id="wlt-goal-cta-label">Partner · 6% · Giving goal progress</strong>
+          <strong id="wlt-goal-cta-label">Partner · Giving goal progress</strong>
           <button type="button" onclick="openWalletGive()">Give +</button>
         </div>
 
@@ -3947,27 +3951,27 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
               </div>
             </div>
             <div style="padding:4px 0">
-              <div class="care-option" onclick="showPortalToast('Prayer request submitted — your leader\'s avatar is ready, human follow-up available','🙏')">
+              <div class="care-option" onclick="openCareRequest('other')">
                 <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" fill="#000000" opacity=".2"/><path d="M9 2c-.8.8-2.5 1.8-2.5 4.2 0 1.5 1.1 2.7 2.5 2.7s2.5-1.2 2.5-2.7C11.5 3.8 9.8 2.7 9 2z" stroke="#000000" stroke-width="1.2"/><path d="M6.5 11h5M9 8.7V11" stroke="var(--grace-sky-500)" stroke-width="1" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Prayer &amp; Guidance</div><div class="co-sub">Personal prayer, scripture, spiritual guidance</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Hospital visit request submitted','🏥')">
+              <div class="care-option" onclick="openCareRequest('other')">
                 <div class="co-ico" style="background:#e8f5ed"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><rect x="3" y="4" width="12" height="12" rx="2" fill="#16a34a" opacity=".12"/><rect x="3" y="4" width="12" height="12" rx="2" stroke="#16a34a" stroke-width="1.2"/><path d="M9 7v4M7 9h4" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Hospital Visitation</div><div class="co-sub">Request a pastoral visit — in hospital or at home</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Grief support request received','🕯️')">
+              <div class="care-option" onclick="openCareRequest('grief')">
                 <div class="co-ico" style="background:#f5ece8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M9 3c-.7 1-1 2-.6 3S10 8 10 9.5c0 .9-.6 1.5-1 1.5" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M6 16h6" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity=".4"/><rect x="7" y="13" width="4" height="3" rx="1" fill="#000000" opacity=".15"/></svg></div>
                 <div><div class="co-name">Grief &amp; Bereavement</div><div class="co-sub">Support through loss, grief counselling</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Food pantry pickup scheduled','🍽️')">
+              <div class="care-option" onclick="openCareRequest('financial')">
                 <div class="co-ico" style="background:#f5f0e8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><path d="M3 14h12M5 14V8M13 14V8" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linecap="round"/><path d="M3 8h12l-1.5-5h-9L3 8z" fill="var(--grace-sky-500)" opacity=".2"/><path d="M3 8h12l-1.5-5h-9L3 8z" stroke="var(--grace-sky-500)" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
                 <div><div class="co-name">Food Pantry</div><div class="co-sub">Schedule a pickup — pantry open weekly</div></div>
                 <div class="co-arrow">›</div>
               </div>
-              <div class="care-option" onclick="showPortalToast('Counselling session request submitted','💍')">
+              <div class="care-option" onclick="openCareRequest('marriage')">
                 <div class="co-ico" style="background:#e8edf8"><svg viewBox="0 0 18 18" width="15" height="15" fill="none"><circle cx="6" cy="8" r="3" fill="#000000" opacity=".12"/><circle cx="6" cy="8" r="3" stroke="#000000" stroke-width="1.2"/><circle cx="12" cy="8" r="2.5" fill="var(--grace-sky-500)" opacity=".2"/><circle cx="12" cy="8" r="2.5" stroke="var(--grace-sky-500)" stroke-width="1.1"/><path d="M2 16c0-2.5 2-4 4-4s4 1.5 4 4" stroke="#000000" stroke-width="1.2" stroke-linecap="round"/></svg></div>
                 <div><div class="co-name">Pre-Marital / Counselling</div><div class="co-sub">Book a session with Minister Grace Okafor</div></div>
                 <div class="co-arrow">›</div>
@@ -4106,7 +4110,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
       </div>
 
       <div class="journey-partner-bar">
-        <span id="journey-partner-label"><strong>Partner · 6%</strong> · Review your giving goal</span>
+        <span id="journey-partner-label"><strong>Partner</strong> · Review your giving goal</span>
         <div class="journey-partner-links">
           <button type="button" onclick="journeyTab('growth')">View growth →</button>
           <button type="button" onclick="openWalletGive()">Review giving →</button>
@@ -4247,7 +4251,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
             <div class="journey-section-ico"><span data-grace-icon="impact" data-grace-size="22"></span></div>
             <div>
               <h2>Your growth</h2>
-              <p id="journey-growth-sub">Journey stage: Growing · Rhythm stable · Partner · 6% of income.</p>
+              <p id="journey-growth-sub">Journey stage: Growing · Rhythm stable. Partner.</p>
             </div>
           </div>
         </div>
@@ -4561,6 +4565,7 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <script src="../../shared/grace-messaging.js"></script>
 <script src="../../shared/grace-member-intents.js"></script>
 <script src="../../shared/grace-companion.js"></script>
+<script src="../../shared/grace-care-request.js"></script>
 <script src="../../shared/grace-duotone-icons.js"></script>
 <script src="../../shared/grace-member-session.js"></script>
 <script>
@@ -4788,7 +4793,8 @@ function renderWatchSchedule(){
   </div>`;
 }
 function watchActionFollowJesus(){
-  pfToast('We are so glad — a team will reach out soon','✝','success');
+  // No intake behind this button.
+  pfToast('Opening ways to take a next step — nothing has been sent yet','✝');
   goSection('outreach');
 }
 function hydrateWatch(){
@@ -5293,11 +5299,10 @@ function renderHomeImpactSummary(){
   const total=m?.graceImpact?.month??monthImpactTotal;
   const lives=m?.livesImpacted?.month??23;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   set('home-gi-total',formatMoney(total));
   set('home-gi-lives',String(lives));
-  set('home-gi-partner',`${level} · ${commitPct}% · Giving goal progress`);
+  set('home-gi-partner',`${level} · Giving goal progress`);
   root.innerHTML=IMPACT_ALLOC_DEF.map((def,i)=>{
     const pct=allocPct(def.cause,[40,25,20,10,5][i]);
     const amt=total*pct/100;
@@ -5453,7 +5458,6 @@ function syncHomeKpis(){
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const givenMonth=m?.givenMonth??230;
   const impactMoney=formatMoney(WALLET_STATE.cardImpactMonth);
   set('home-hero-date',formatHomeDate());
@@ -5462,7 +5466,7 @@ function syncHomeKpis(){
   if(livePill)livePill.innerHTML=`<span class="dash-live-dot"></span> Sunday Service Live · ${watchViewerCount} watching`;
   set('home-kpi-impact',impactMoney);
   set('home-kpi-given','$'+Number(givenMonth).toLocaleString());
-  set('home-kpi-rhythm',`${level} · ${commitPct}%`);
+  set('home-kpi-rhythm',level);
   set('home-kpi-lives',String(WALLET_STATE.livesImpacted));
   const heroToast=document.getElementById('dash-hero-toast');
   if(heroToast){
@@ -5645,7 +5649,6 @@ function syncWalletKpis(){
   const impactText='↑ '+impactMoney+' Card impact · May';
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const ytdFmt='$'+Number(WALLET_STATE.givenYtd).toLocaleString();
   set('wallet-available-amt',availFmt);
   set('home-wallet-available',availFmt);
@@ -5658,14 +5661,14 @@ function syncWalletKpis(){
   set('pf-donut-val',WALLET_STATE.cardImpactMonth.toFixed(2));
   set('wlt-act-impact-total','+'+impactMoney);
   set('wlt-live-month-total',formatMoney(WALLET_STATE.cardImpactMonth));
-  set('pf-stat-commit',`${level} · ${commitPct}%`);
+  set('pf-stat-commit',level);
   set('pf-stat-lives',String(WALLET_STATE.livesImpacted));
   set('wlt-goal-pct',WALLET_STATE.givingGoalPct+'%');
   set('wlt-goal-copy',`$${WALLET_STATE.givingGoalRaised.toLocaleString()} of $${WALLET_STATE.givingGoalTarget.toLocaleString()}`);
   const fill=document.getElementById('wlt-goal-fill');
   if(fill)fill.style.width=Math.min(100,WALLET_STATE.givingGoalPct)+'%';
   const cta=document.getElementById('wlt-goal-cta-label');
-  if(cta)cta.textContent=`${level} · ${commitPct}% · Giving goal progress`;
+  if(cta)cta.textContent=`${level} · Giving goal progress`;
   syncWalletRouteLabel(WALLET_STATE.impactRoute);
   if(document.getElementById('sec-home')?.classList.contains('active'))syncHomeKpis();
 }
@@ -5707,10 +5710,9 @@ function renderRecentGifts(){
 function showWalletStatDetail(type){
   const m=typeof GRACE_METRICS!=='undefined'?GRACE_METRICS:null;
   const level=m?.commitment?.level??'Partner';
-  const commitPct=m?.commitment?.pct??6;
   const msgs={
     impact:`Card impact — ${formatMoney(WALLET_STATE.cardImpactMonth)} generated this month from card spending`,
-    rhythm:`Giving rhythm ${level} at ${commitPct}% — review your giving goal`,
+    rhythm:`Giving rhythm ${level} — review your giving goal`,
     lives:`${WALLET_STATE.livesImpacted} lives impacted this month through your causes`
   };
   const icons={impact:'◈',rhythm:'🌿',lives:'💛'};
@@ -6344,7 +6346,7 @@ function hydratePastoralCare() {
   const demo = m?.pastoralCare?.recentRequests;
   if (Array.isArray(demo) && demo.length) {
     LEADER_STATE.care.requests = demo.map(r => ({ ...r }));
-    LEADER_STATE.care.openCount = demo.filter(r => r.status === 'Submitted').length;
+    LEADER_STATE.care.openCount = demo.filter(r => r.status === 'Submitted' || r.status === 'Started').length;
     return;
   }
   LEADER_STATE.care.requests = [
@@ -6393,6 +6395,17 @@ function openPastoralCarePicker() {
   }
   showPortalToast('Choose a category below to start a confidential care request', '🙏');
 }
+/* The five "Submit a care request" options. Prefers the real intake
+   (POST /api/portal/care via shared/grace-care-request.js); falls back to the
+   leader conversation if that script did not load, so the button never dies
+   silently -- but it must never claim a request was sent. */
+function openCareRequest(categoryId) {
+  if (window.GRACE_CARE_REQUEST && window.GRACE_CARE_REQUEST.open) {
+    window.GRACE_CARE_REQUEST.open(categoryId);
+    return;
+  }
+  startPastoralCareRequest(categoryId);
+}
 function startPastoralCareRequest(categoryId) {
   const cat = getPastoralCareCategories().find(c => c.id === categoryId);
   if (!cat) return;
@@ -6410,7 +6423,9 @@ function startPastoralCareRequest(categoryId) {
     categoryId,
     label: cat.title,
     leader: leader.name,
-    status: 'Submitted',
+    // Client-side only: nothing is posted to the church from this page, so this
+    // list must not say "Submitted". It records what the member started.
+    status: 'Started',
     time: 'Just now'
   };
   LEADER_STATE.care.requests.unshift(req);
@@ -7425,9 +7440,9 @@ function syncJourneyKpis(){
     const level=m.commitment?.level||'Partner';
     const ytd=m.graceImpact?.ytd||WALLET_STATE.givenYtd;
     const partnerLbl=document.getElementById('journey-partner-label');
-    if(partnerLbl)partnerLbl.innerHTML=`<strong>${level} · ${pct}%</strong> · Review your giving goal`;
+    if(partnerLbl)partnerLbl.innerHTML=`<strong>${level}</strong> · Review your giving goal`;
     const growthSub=document.getElementById('journey-growth-sub');
-    if(growthSub)growthSub.textContent=`Journey stage: ${JOURNEY_STATE.stage} · Rhythm stable · ${level} · ${pct}% of income.`;
+    if(growthSub)growthSub.textContent=`Journey stage: ${JOURNEY_STATE.stage} · Rhythm stable · ${level}.`;
     const pctLbl=document.getElementById('jy-growth-pct-label');
     if(pctLbl)pctLbl.textContent=pct+'% complete';
     const fill=document.getElementById('jy-growth-fill');
@@ -7857,6 +7872,8 @@ if(typeof GRACE_METRICS!=='undefined'){
 <link rel="stylesheet" href="faithful-impact-exercise.css">
 <script src="faithful-impact-exercise.js"></script>
 <link rel="stylesheet" href="faithful-preferences.css">
+<link rel="stylesheet" href="../../shared/grace-story-handoff.css">
+<link rel="stylesheet" href="faithful-story-handoff.css">
 <script src="faithful-preferences.js"></script>
 <script src="faithful-care-guide.js"></script>
 <script src="faithful-wallet-guide.js?v=card-introduction-2"></script>
@@ -7867,6 +7884,9 @@ if(typeof GRACE_METRICS!=='undefined'){
 <link rel="stylesheet" href="faithful-guide-finish.css">
 <script src="faithful-guide-finish.js"></script>
 <script src="faithful-mobile-story.js"></script>
+<script src="../../shared/grace-story-handoff.js"></script>
+<script src="faithful-story-segments.js"></script>
+<script src="faithful-story-handoff.js"></script>
 <script src="faithful-member-profile.js"></script>
 <script src="faithful-settings-tabs.js"></script>
 <link rel="stylesheet" href="faithful-member-profile.css">
