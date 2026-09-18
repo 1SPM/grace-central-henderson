@@ -142,6 +142,9 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'workshop/wallet-activate': () => import('./workshop/_wallet-activate.js'),
   'workshop/aggregate': () => import('./workshop/_aggregate.js'),
   'workshop/participants': () => import('./workshop/_participants.js'),
+  'story/handoff': () => import('./story/_handoff.js'),
+  'story/claim': () => import('./story/_claim.js'),
+  'story/cancel': () => import('./story/_cancel.js'),
 };
 
 // Generous, per-IP-per-route defaults — this is a defense-in-depth

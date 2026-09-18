@@ -1,0 +1,26 @@
+/* Phone handoff panel — shared by every tenant, paired with
+   shared/grace-story-handoff.js. */
+.story-handoff{max-width:32rem;margin:0 auto;padding:1.5rem 1rem 2rem;text-align:center}
+.story-handoff h2{margin:0 0 .5rem;font-size:1.25rem;font-weight:700;color:#0f172a}
+.story-handoff h2:focus{outline:2px solid #175fa5;outline-offset:4px;border-radius:.25rem}
+.story-handoff .sh-lede{margin:0 auto 1.25rem;max-width:26rem;font-size:.9rem;line-height:1.5;color:#475569}
+.story-handoff .sh-qr{display:flex;justify-content:center;padding:1rem;background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;width:max-content;margin:0 auto}
+.story-handoff .sh-qr img{display:block;width:220px;height:220px;image-rendering:pixelated}
+.story-handoff .sh-countdown{margin:.75rem 0 0;font-size:.85rem;font-variant-numeric:tabular-nums;color:#0f172a}
+.story-handoff .sh-link{margin:.5rem 0 0;font-size:.8rem;color:#64748b;word-break:break-all}
+.story-handoff .sh-actions{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:1.25rem 0 0}
+.story-handoff .sh-actions button{padding:.55rem 1rem;font-size:.85rem;font-weight:600;border-radius:.5rem;border:1px solid #cbd5e1;background:#fff;color:#0f172a;cursor:pointer}
+.story-handoff .sh-actions button:hover{background:#f8fafc}
+.story-handoff [data-cancel]{border-color:#fecaca;color:#b91c1c}
+.story-handoff .sh-note{margin:1rem 0 0;font-size:.78rem;color:#64748b}
+.story-handoff [data-status]{margin:.75rem 0 0;min-height:1.25rem;font-size:.85rem;color:#b45309}
+
+
+  .story-handoff h2{color:#e2e8f0}
+  .story-handoff .sh-lede,.story-handoff .sh-link,.story-handoff .sh-note{color:#94a3b8}
+  .story-handoff .sh-countdown{color:#e2e8f0}
+  .story-handoff .sh-qr{background:#fff;border-color:#334155}
+  .story-handoff .sh-actions button{background:#1e293b;border-color:#334155;color:#e2e8f0}
+  .story-handoff .sh-actions button:hover{background:#273449}
+
+

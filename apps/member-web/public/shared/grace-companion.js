@@ -1193,16 +1193,21 @@
     },
     toggle() { isOpen ? api.close() : api.open(); },
     isOpen() { return isOpen; },
-    /** Send a message to GRACE (appends user bubble, thinks, replies). */
+    /** Send a message to GRACE (appends user bubble, thinks, replies).
+     *  Returns true when the message was accepted for delivery, false when it
+     *  was refused (not mounted, still thinking, empty, or the account
+     *  changed). Callers that tell the member their text was sent MUST check
+     *  this — reporting a send that did not happen is the failure mode this
+     *  return value exists to prevent. */
     ask(text) {
-      if (!root || thinking || !text) return;
+      if (!root || thinking || !text) return false;
       if (A.quietNavigator && resolvedMemberId && global.Clerk?.user?.id !== resolvedMemberId) {
         memberDialogue?.reset();
         Voice.stop(); threadHistory.length = 0;
         Memory.persistent = false; Memory.load();
         const messages = q('#gcp-thread'); if(messages) messages.replaceChildren();
         appendGrace('Your account changed. Reload this page before continuing.');
-        return;
+        return false;
       }
       if (!isOpen) api.open();
       appendUser(text);
@@ -1258,7 +1263,7 @@
       };
 
       // Same bounded guidance for authenticated and demo entry paths; crisis remains first in think().
-      if (guidedReply || (A.quietNavigator && crisis)) { useLocalEngine(); return; }
+      if (guidedReply || (A.quietNavigator && crisis)) { useLocalEngine(); return true; }
       if (global.GRACE_SESSION) {
         askRealAssistant(text).then((result) => {
           // A response belongs only to the member who started this turn.
@@ -1278,9 +1283,10 @@
           }
           appendGrace(text2, null, null);
         });
-        return;
+        return true;
       }
       useLocalEngine();
+      return true;
     },
     /** Called by grace-member-session.js once the real member's name is
      *  known — A.memberName was only a mount-time snapshot (often the

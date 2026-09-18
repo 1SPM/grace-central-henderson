@@ -31,14 +31,14 @@
   side.querySelector('[data-refresh]').onclick=()=>{for(const [key,,selector]of sections)if(key!=='impact'&&Object.hasOwn(draft,key))draft[key]=read(selector);const impact=window.FAITHFUL_IMPACT_DRAFT?.getReviewed();if(impact){draft.impact=['Demo impact estimate',impact.cause||'No cause selected',...(impact.merchants||[]).map(x=>typeof x==='string'?x:JSON.stringify(x)),...Object.entries(impact.monthlySpendingCents||{}).filter(([,v])=>v!==null).map(([k,v])=>`${k}: $${(v/100).toFixed(2)} per month`)];}else delete draft.impact;profile=null;renderStory();status.textContent='Updated from the sections you used this visit and any reviewed impact estimate.';};
   const signup=side.querySelector('[data-signup]');
   signup.className='visitor-signup';signup.setAttribute('aria-label','Create your account');
-  signup.innerHTML='<button type="button" data-back>Back to your story</button><p class="visitor-signup-note">Demo walkthrough · no account is registered or transferred. Your answers stay in this page until reload.</p><h2 tabindex="-1">Create your account</h2><p>Take the next step with the story you’ve started.</p><form><label for="visitor-preferred-name">Your preferred name</label><input id="visitor-preferred-name" maxlength="80" data-name autocomplete="given-name" required><p>You can add a photo later.</p><label><input type="checkbox" data-confirm required> Carry my reviewed story into my profile.</label><button type="submit" data-create>Continue</button></form><p role="status" aria-live="polite"></p>';
+  signup.innerHTML='<button type="button" data-back>Back to your story</button><p class="visitor-signup-note">Demo walkthrough · no account is registered or transferred. Your answers stay in this page until reload.</p><h2 tabindex="-1">Create your account</h2><p>Take the next step with the story you’ve started.</p><form><label for="visitor-preferred-name">Your preferred name</label><input id="visitor-preferred-name" maxlength="80" data-name autocomplete="given-name" aria-describedby="visitor-name-help"><p id="visitor-name-help">You can add a photo later.</p><fieldset data-consents><legend>What would you like to share?</legend><label><input type="checkbox" data-consent-carry> Carry my story to my phone.</label><label><input type="checkbox" data-consent-money> Include what I explored about the Impact Card and Wallet.</label><label><input type="checkbox" data-consent-followup> Let the Faithful Church team follow up with me about this pilot.</label></fieldset><button type="submit" data-create>Create my handoff</button><button type="button" data-decline>Continue without sharing my story</button></form><p role="status" aria-live="polite"></p>';
   host.after(signup);
   const storyAnchor=document.createComment('Story position on Mobile');list.before(storyAnchor);
   const signupStory=document.createElement('section');signupStory.setAttribute('aria-label','Your story so far');
   const storyHeading=document.createElement('h3');storyHeading.textContent='Your story so far';
   const storyIntro=document.createElement('p');storyIntro.textContent='Here’s what you’ve shared. Add a little more or adjust anything before continuing.';
   signupStory.className='visitor-signup-story';signupStory.append(storyHeading,storyIntro);
-  signup.querySelector('[data-confirm]').closest('label').before(signupStory);
+  signup.querySelector('[data-consents]').before(signupStory);
   const signupStatus=signup.querySelector('[role=status]');
   signup.querySelector('[data-back]').textContent='Back to Mobile';
   side.querySelector('[data-continue]').textContent='Make it yours';
@@ -48,6 +48,30 @@
   const repeatHeading=side.querySelector(':scope > h3');
   if(repeatHeading){for(let i=0;i<2;i++){const paragraph=repeatHeading.nextElementSibling;if(paragraph?.tagName==='P')paragraph.remove();}repeatHeading.remove();}
   signup.querySelector('[data-back]').onclick=()=>{storyAnchor.after(list);signup.hidden=true;host.hidden=false;if(pageTitle)pageTitle.textContent='Mobile';side.querySelector('[data-continue]').focus();};
-  signup.querySelector('form').onsubmit=event=>{event.preventDefault();const name=signup.querySelector('[data-name]').value.trim();if(!name||!signup.querySelector('[data-confirm]').checked){signupStatus.textContent='Add your preferred name and confirm your story to continue.';return;}profile={kind:'visitor-demo',preferredName:name,story:JSON.parse(JSON.stringify(draft))};if(window.openFaithfulMemberProfile)window.openFaithfulMemberProfile(profile);else signupStatus.textContent='Your story is prepared. The profile view is unavailable; your answers remain here.';};
-  window.FAITHFUL_VISITOR_STORY={getProfile:()=>profile?JSON.parse(JSON.stringify(profile)):null};renderStory();
+  const consent=key=>!!signup.querySelector('[data-consent-'+key+']')?.checked;
+  // Opens the local demo profile with nothing sent anywhere. This is the
+  // decline path, and it is a real outcome rather than a dead end: a member
+  // who does not want their answers carried still gets to finish.
+  const openLocalProfile=name=>{profile={kind:'visitor-demo',preferredName:name,story:JSON.parse(JSON.stringify(draft))};if(window.openFaithfulMemberProfile)window.openFaithfulMemberProfile(profile);else signupStatus.textContent='Your story is prepared. The profile view is unavailable; your answers remain here.';};
+  signup.querySelector('[data-decline]').onclick=()=>{const name=signup.querySelector('[data-name]').value.trim();if(!name){signupStatus.textContent='Add your preferred name to continue.';return;}signupStatus.textContent='Nothing was sent. Your answers stay on this page.';openLocalProfile(name);};
+  signup.querySelector('form').onsubmit=event=>{
+    event.preventDefault();
+    const name=signup.querySelector('[data-name]').value.trim();
+    if(!name){signupStatus.textContent='Add your preferred name to continue.';return;}
+    // Carrying the story is what the handoff IS, so it gates this button only
+    // -- never the whole screen. A consent you cannot decline is not consent,
+    // which is why the decline button above sits beside this one.
+    if(!consent('carry')){signupStatus.textContent='Tick \u201cCarry my story to my phone\u201d, or use \u201cContinue without sharing my story\u201d.';return;}
+    const payload={preferredName:name,sections:JSON.parse(JSON.stringify(draft)),consents:{carry:true,money:consent('money'),followup:consent('followup')}};
+    if(window.FAITHFUL_STORY_HANDOFF?.start){window.FAITHFUL_STORY_HANDOFF.start(payload);return;}
+    signupStatus.textContent='The phone handoff is unavailable right now. Your answers stay on this page.';
+    openLocalProfile(name);
+  };
+  window.FAITHFUL_VISITOR_STORY={
+    getProfile:()=>profile?JSON.parse(JSON.stringify(profile)):null,
+    // Read by faithful-story-handoff.js. Returns the visitor's own answers
+    // only -- never the demo persona's saved profile or journal.
+    getDraft:()=>JSON.parse(JSON.stringify(draft)),
+    getConsents:()=>({carry:consent('carry'),money:consent('money'),followup:consent('followup')}),
+  };renderStory();
 })();

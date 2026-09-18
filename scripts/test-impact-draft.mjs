@@ -20,7 +20,12 @@ for(const mobile of [false,true]){
  assert.equal(d.querySelectorAll('.fi-spending-row').length,4);
  assert.equal(d.querySelectorAll('.fi-store-family input[type="range"]').length,0);
  assert(Array.from(checkboxes).some(input=>input.value==='Safeway'));
- assert(Array.from(checkboxes).some(input=>input.value==='Sobeys'));
+ assert(Array.from(checkboxes).some(input=>input.value==='Smith\u2019s'));
+ // Store names are recognition prompts for a Henderson, NV congregation.
+ // Canada-only chains read as someone else's demo; keep them out.
+ const offMarket=['Sobeys','Save-On-Foods','Superstore','Petro-Canada','Esso','London Drugs','Shoppers Drug Mart','Tim Hortons'];
+ const stores=Array.from(checkboxes).map(input=>input.value);
+ for(const name of offMarket)assert(!stores.includes(name),`off-market store in catalog: ${name}`);
  assert.equal(d.querySelectorAll('.fi-merchant-choices input:checked').length,0,'Demo on state never becomes consent');
  assert.equal(get(),null);review();assert.equal(get(),null);
  change(checkboxes[0],true);change(d.querySelector('#fi-groceries'),'100');review();

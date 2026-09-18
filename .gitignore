@@ -52,3 +52,9 @@ previews/grace_member_portal.html
 previews/grace_mobile_ios.html
 .vercel
 .env*
+
+# A symlink named node_modules is a blob, not a directory, so the
+# `node_modules/` pattern above does not match it. Local dev worktrees
+# sometimes symlink these to share an install; they must never be committed.
+node_modules
+apps/*/node_modules

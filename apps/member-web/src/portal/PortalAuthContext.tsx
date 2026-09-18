@@ -16,6 +16,8 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react';
 import { isDemoModeActive } from '@grace/platform-core/tenant';
 import { setClerkTokenProvider } from '@grace/platform-core/supabase';
+import { readOriginTenant } from './originTenant.js';
+import { readPendingStoryClaim, clearPendingStoryClaim } from './pendingStoryClaim.js';
 
 export interface PortalAuthContextValue {
   isLoaded: boolean;
@@ -126,10 +128,36 @@ function PortalAuthProviderInner({ children }: { children: ReactNode }) {
         if (!token) throw new Error('no_session_token');
 
         if (!tokenHasChurchClaim(token)) {
+          // Tells the server which tenant portal this member came from —
+          // one host serves both, so it cannot infer this. A hint only: the
+          // server refuses a slug that would move the signup into a real
+          // tenant the Host does not own.
+          const originTenant = readOriginTenant();
+          // A story redeemed on this phone at /claim. The nonce is single-use
+          // and church-scoped server-side, so a tampered value attaches
+          // nothing; the preferred name is what stops this member being
+          // created as the literal placeholder "New Member".
+          const pendingStory = readPendingStoryClaim();
           const resp = await fetch('/api/portal/self-signup', {
             method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...(originTenant ? { tenant: originTenant } : {}),
+              ...(pendingStory
+                ? {
+                    story_draft_id: pendingStory.draftId,
+                    story_attach_nonce: pendingStory.attachNonce,
+                    ...(pendingStory.preferredName ? { preferred_name: pendingStory.preferredName } : {}),
+                  }
+                : {}),
+            }),
           });
+          // Clear on any settled outcome, success or not: the nonce is spent
+          // either way, and retrying with a dead one just fails again.
+          if (pendingStory) clearPendingStoryClaim();
           if (!resp.ok) {
             const body = await resp.json().catch(() => ({}));
             throw new Error(body.error || `self_signup_failed_${resp.status}`);

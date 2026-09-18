@@ -2234,6 +2234,7 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   color:rgba(255,255,255,.85);max-width:280px;margin:0
 }
 .landing-actions{display:flex;align-items:center;justify-content:center;gap:14px}
+.landing-note{margin:14px 0 0;font-size:12px;line-height:1.5;opacity:.72;text-align:center}
 .landing-action{
   background:none;border:none;padding:0;color:#fff;font-family:var(--font-body),Arial,sans-serif;
   font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer
@@ -2270,8 +2271,12 @@ html.embed-preview .watch-donate-toast{display:none!important}
         <p class="landing-caption">Faithful Church member portal</p>
       </div>
       <div class="landing-actions">
-        <button type="button" class="landing-action" onclick="enterApp('login')">Log In</button>
-        <button type="button" class="landing-action" onclick="enterApp('signup')">Create an account</button>
+      <!-- No authentication on this page: it is a visual preview with no network
+           calls. "Log In" and "Create an account" were byte-identical no-ops that
+           both dismissed this overlay. Real sign-up lives in the member-web app
+           (apps/member-web/src/portal), reached from the portal. -->
+      <button type="button" class="landing-action" onclick="enterApp()">Explore the preview</button>
+      <p class="landing-note">A preview of the app. Account sign-in isn't connected here.</p>
       </div>
       <p class="landing-demo">Demo preview · both buttons open the sample portal</p>
     </div>
@@ -2498,7 +2503,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="home-gi-kpi"><div class="home-gi-kpi-val" id="home-gi-total">$18.42</div><div class="home-gi-kpi-key">Card impact · May</div></div>
               <div class="home-gi-kpi"><div class="home-gi-kpi-val" id="home-gi-lives">23</div><div class="home-gi-kpi-key">Lives impacted</div></div>
             </div>
-            <div class="home-gi-partner" id="home-gi-partner">Partner · 6% · Giving goal progress</div>
+            <div class="home-gi-partner" id="home-gi-partner">Partner · Giving goal progress</div>
             <div class="home-gi-alloc-head">Impact allocation</div>
             <div id="home-gi-alloc-list"></div>
             <button type="button" class="home-gi-cta" onclick="showScreen('give');walletTabGive('impact');scrollGiveAnchor('gv-alloc-card')">Review allocation →</button>
@@ -2959,7 +2964,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
             </div>
             <div class="gv-stat-grid gv-stat-grid--3">
               <div class="gv-stat gv-stat-impact"><div class="gv-stat-lbl">Card impact</div><div class="gv-stat-val" id="gv-stat-impact">$18.42</div><div class="gv-stat-sub">↑ 12% · May</div></div>
-              <div class="gv-stat gv-stat-commit"><div class="gv-stat-lbl">Commitment™</div><div class="gv-stat-val" id="gv-stat-commit">Partner · 6%</div><div class="gv-stat-sub" id="gv-stat-commit-sub">Review your giving goal</div></div>
+              <div class="gv-stat gv-stat-commit"><div class="gv-stat-lbl">Commitment™</div><div class="gv-stat-val" id="gv-stat-commit">Partner</div><div class="gv-stat-sub" id="gv-stat-commit-sub">Review your giving goal</div></div>
               <div class="gv-stat gv-stat-lives"><div class="gv-stat-lbl">Lives Impacted</div><div class="gv-stat-val" id="gv-stat-lives">23</div><div class="gv-stat-sub">Meals · families · youth</div></div>
             </div>
           </div>
@@ -2992,7 +2997,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
           <div class="gv-commit-banner">
             <div class="gv-commit-banner-text">
-              <strong id="gv-commit-cta">Partner · 6%</strong>
+              <strong id="gv-commit-cta">Partner</strong>
               <p id="gv-commit-cta-sub">Giving goal progress</p>
             </div>
             <button type="button" class="gv-commit-banner-btn" onclick="walletTabGive('assets');scrollGiveAnchor('gv-give-form')">Give →</button>
@@ -3245,7 +3250,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
                 <div class="cn-post-time">4 hr</div>
               </div>
               <div class="cn-post-badge cn-pb-milestone">🏅 Commitment milestone</div>
-              <div class="cn-post-body"><strong style="color:#15803d">👑 Giving goal updated</strong> — Giving 8%+ of income this month. So grateful for this community pushing me to give more generously. God is faithful! 🎉</div>
+              <div class="cn-post-body"><strong style="color:#15803d">👑 Giving goal updated</strong> — So grateful for this community pushing me to give more generously. God is faithful! 🎉</div>
               <div class="cn-post-actions">
                 <button type="button" class="cn-pact" id="cn-pray-2" onclick="cnTogglePray('cn-pray-2','cn-count-2')">🙏 <span id="cn-count-2">42</span> Pray</button>
                 <button type="button" class="cn-pact" id="cn-amen-2" onclick="cnToggleAmen('cn-amen-2','cn-acount-2')">🙌 <span id="cn-acount-2">61</span> Amen</button>
@@ -3843,7 +3848,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
               <div class="jy-section-ico"><span data-grace-icon="impact" data-grace-size="20"></span></div>
               <div>
                 <h2>Your growth</h2>
-                <p>Journey stage <strong style="color:#449eca">Beginning</strong> · Rhythm stable · Partner commitment at 6% of income.</p>
+                <p>Journey stage <strong style="color:#449eca">Beginning</strong> · Rhythm stable. Partner commitment.</p>
               </div>
             </div>
           </div>
@@ -5424,7 +5429,9 @@ function navigateFromDrawer(name) {
   closeAppMenu();
 }
 
-function enterApp(mode) {
+/* Takes no argument by design: it previously accepted 'login' or 'signup'
+   and read neither. */
+function enterApp() {
   var device = document.querySelector('.device');
   var landing = document.getElementById('landing-screen');
   if (!landing || landing.classList.contains('is-hidden')) return;
@@ -6125,7 +6132,10 @@ function routeGiveImpact(name, btn) {
 }
 
 function submitGiveGift() {
-  showToast('Gift submitted successfully');
+  // No API call behind this: docs/GIVING_SYSTEM_GUIDE.md promises a
+  // confirmation screen and an email receipt, and neither exists on this
+  // preview page. Do not tell the member a gift was taken.
+  showToast('Preview only — no gift was submitted');
 }
 
 var pulseRecentIcons = { 'Volunteer Event': '🤝', 'Live Service': '📺', 'Care Response': '🙏', 'Bible Study': '📖' };

@@ -1,0 +1,23 @@
+/* Story capture. Tenant-neutral and deliberately quiet: it inherits the page's
+   type but sets its own spacing so it reads the same on any tenant's markup. */
+.gsc{max-width:34rem;margin:0 auto;padding:24px 16px 32px}
+.gsc h2{margin:0 0 6px;font-size:1.3rem;font-weight:700}
+.gsc h2:focus{outline:2px solid currentColor;outline-offset:4px;border-radius:4px}
+.gsc .gsc-lede{margin:0 0 20px;font-size:.9rem;line-height:1.55;opacity:.8}
+.gsc .gsc-row{margin:0 0 18px}
+.gsc label{display:block;margin:0 0 6px;font-size:.9rem;font-weight:600}
+.gsc textarea,.gsc select,.gsc input[type=text]{display:block;box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid rgba(100,116,139,.45);border-radius:9px;background:#fff;color:#0f172a;font:16px/1.5 inherit}
+.gsc textarea{resize:vertical}
+.gsc textarea:focus-visible,.gsc select:focus-visible,.gsc input:focus-visible{outline:2px solid #175fa5;outline-offset:2px}
+.gsc .gsc-help{margin:6px 0 0;font-size:.79rem;line-height:1.5;opacity:.72}
+.gsc fieldset{margin:24px 0;padding:16px;border:1px solid rgba(100,116,139,.3);border-radius:10px}
+.gsc legend{padding:0 6px;font-size:.85rem;font-weight:700}
+.gsc .gsc-consents label{display:flex;gap:10px;align-items:flex-start;margin:10px 0;font-weight:400;font-size:.88rem;line-height:1.5}
+.gsc .gsc-consents input{width:18px;height:18px;margin-top:2px;flex:none}
+.gsc .gsc-minor-note{margin:12px 0 0;padding:12px 14px;border-left:3px solid #597b91;background:rgba(100,116,139,.12);font-size:.82rem;line-height:1.5}
+.gsc [data-create]{width:100%;margin:8px 0;padding:.72rem 1rem;border:0;border-radius:9px;background:#175fa5;color:#fff;font-size:.92rem;font-weight:600;cursor:pointer}
+.gsc [data-decline]{width:100%;padding:.62rem 1rem;border:1px solid rgba(100,116,139,.45);border-radius:9px;background:transparent;color:inherit;font-size:.87rem;font-weight:600;cursor:pointer}
+.gsc .gsc-status{margin:14px 0 0;min-height:1.2rem;font-size:.87rem;line-height:1.5;opacity:.9}
+@media (prefers-color-scheme:dark){
+  .gsc textarea,.gsc select,.gsc input[type=text]{background:#1e293b;border-color:#334155;color:#e2e8f0}
+}
