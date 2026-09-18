@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../../shared/grace-orb.css">
 <link rel="stylesheet" href="../../shared/grace-companion.css">
 <link rel="stylesheet" href="../../shared/grace-care-request.css">
+<link rel="stylesheet" href="../../shared/grace-pilot-survey.css">
 <link rel="stylesheet" href="../../shared/grace-member-session.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -3227,7 +3228,11 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
           </div>
         </div>
       </div>
-    </div><!-- /sec-mobile -->
+          <!-- Pilot survey (shared/grace-pilot-survey.js). Track C stage 9 of the
+           pilot document: the member answers after the walkthrough, not before.
+           Anonymous — see the module header. -->
+      <div data-grace-pilot-survey></div>
+</div><!-- /sec-mobile -->
 
     <div class="pf-toast-container" id="pf-toast-container"></div>
 
@@ -4566,6 +4571,8 @@ button.dash-live-pill{-webkit-appearance:none;appearance:none;margin:0}
 <script src="../../shared/grace-member-intents.js"></script>
 <script src="../../shared/grace-companion.js"></script>
 <script src="../../shared/grace-care-request.js"></script>
+<script src="../../shared/grace-pilot-survey-questions.js"></script>
+<script src="../../shared/grace-pilot-survey.js"></script>
 <script src="../../shared/grace-duotone-icons.js"></script>
 <script src="../../shared/grace-member-session.js"></script>
 <script>

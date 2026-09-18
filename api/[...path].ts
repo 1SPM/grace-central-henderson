@@ -145,6 +145,7 @@ const routes: Record<string, () => Promise<RouteModule>> = {
   'story/handoff': () => import('./story/_handoff.js'),
   'story/claim': () => import('./story/_claim.js'),
   'story/cancel': () => import('./story/_cancel.js'),
+  'survey/respond': () => import('./survey/_respond.js'),
 };
 
 // Generous, per-IP-per-route defaults — this is a defense-in-depth

@@ -1,0 +1,152 @@
+/**
+ * The Discovery + Validation pilot's member survey (Track C).
+ *
+ * Twelve questions, transcribed from
+ * OPERATIONS/GRACE_Central_Discovery_Validation_Pilot_Deliverables.docx.pdf.
+ * The wording is the church's, not ours — do not "improve" it. Each question
+ * carries the dimension it measures, because the pilot scorecard reads results
+ * by dimension (usability / trust+control / practical value / adoption) rather
+ * than question by question, and a renamed dimension silently detaches a
+ * question from its scoring bucket.
+ *
+ * WHY THE DEFINITIONS LIVE HERE. The same list has to drive the form, the
+ * validation and the analysis. Keeping it server-side means a client that
+ * drifts is rejected rather than quietly storing answers to questions nobody
+ * asked — the same posture as storySegments.ts.
+ *
+ * Tracks A (Admin), B (Team) and the IMPACT concept set are deliberately not
+ * here yet. The storage and endpoint are track-agnostic, so adding them is a
+ * question-bank change, not a rebuild.
+ */
+
+export type QuestionType = 'likert5' | 'text' | 'choice';
+
+export interface SurveyQuestion {
+  key: string;
+  /** Verbatim from the pilot document. */
+  text: string;
+  type: QuestionType;
+  /** likert5 only: the 1 and 5 anchors, as written. */
+  low?: string;
+  high?: string;
+  /** choice only. */
+  options?: readonly string[];
+  /** The scorecard dimension this feeds. */
+  measures: string;
+  /** Open-text answers are never required; a member may skip any question. */
+  maxLength?: number;
+}
+
+const LIKELIHOOD = ['Very unlikely', 'Unlikely', 'Neutral', 'Likely', 'Very likely'] as const;
+
+export const MEMBER_SURVEY: readonly SurveyQuestion[] = [
+  { key: 'baseline_current_channels',
+    // Asked retrospectively here. The document intends it as a pre-walkthrough
+    // baseline; a facilitator running it live should capture it first.
+    text: 'Before the walkthrough, how easy is it to do the task we discussed using Central’s current channels?',
+    type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Current baseline' },
+  { key: 'comprehension',
+    text: 'After the walkthrough, how clearly do you understand what GRACE is?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'Comprehension' },
+  { key: 'usability_navigate',
+    text: 'How easy was the GRACE Members experience to navigate?',
+    type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Usability' },
+  { key: 'practical_value',
+    text: 'Did GRACE give you useful information or a useful next step?',
+    type: 'likert5', low: 'Not useful', high: 'Extremely useful', measures: 'Practical value' },
+  { key: 'privacy_comfort',
+    text: 'How comfortable were you with what GRACE appeared to know about you?',
+    type: 'likert5', low: 'Very uncomfortable', high: 'Very comfortable', measures: 'Privacy' },
+  { key: 'ai_disclosure',
+    text: 'How clear was it that you were interacting with AI rather than a pastor or staff member?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'AI disclosure' },
+  { key: 'human_escalation',
+    text: 'How clear was it when a human would become involved?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'Human escalation' },
+  { key: 'control_never_use',
+    text: 'What information should GRACE never use without asking you first?',
+    type: 'text', maxLength: 1000, measures: 'Control' },
+  { key: 'most_valuable_reason',
+    text: 'What is the most valuable reason you would use GRACE?',
+    type: 'choice', measures: 'Value',
+    options: ['Information', 'Groups and events', 'Communication', 'Next steps',
+              'Pastoral support', 'Giving', 'IMPACT', 'Other'] },
+  { key: 'barrier',
+    text: 'What would make you not use GRACE?',
+    type: 'text', maxLength: 1000, measures: 'Barrier' },
+  { key: 'channel_duplication',
+    text: 'Compared with the Central tools you already use, would GRACE feel easier, about the same, or like another place to check?',
+    type: 'choice', measures: 'Channel duplication',
+    options: ['Easier', 'About the same', 'Another place to check', 'Not sure'] },
+  { key: 'adoption_signal',
+    text: 'How likely would you be to use GRACE at least monthly if Central continued with it?',
+    type: 'choice', measures: 'Adoption signal', options: LIKELIHOOD },
+] as const;
+
+export const SURVEY_TRACKS = { members: MEMBER_SURVEY } as const;
+export type SurveyTrack = keyof typeof SURVEY_TRACKS;
+
+export type ValidationOutcome<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: string; path: string };
+
+/** Total characters across all open-text answers, to bound a submission. */
+export const MAX_TOTAL_TEXT = 4000;
+
+/**
+ * Every question is skippable. The pilot's own participant script says "You may
+ * stop at any time or skip any question", so a missing answer is valid data —
+ * a partial response is recorded rather than refused.
+ */
+export function validateAnswers(
+  track: string,
+  input: unknown,
+): ValidationOutcome<Record<string, string | number>> {
+  const questions = SURVEY_TRACKS[track as SurveyTrack];
+  if (!questions) return { ok: false, error: `unknown track '${track}'`, path: 'track' };
+  if (input === undefined || input === null) return { ok: true, value: Object.create(null) };
+  if (typeof input !== 'object' || Array.isArray(input)) {
+    return { ok: false, error: 'answers must be an object', path: 'answers' };
+  }
+
+  const out: Record<string, string | number> = Object.create(null);
+  let totalText = 0;
+
+  for (const [key, raw] of Object.entries(input as Record<string, unknown>)) {
+    // Resolve to our own question object rather than reusing the caller's key,
+    // so what gets written is never an attacker-influenced property name.
+    const question = questions.find(q => q.key === key);
+    if (!question) return { ok: false, error: `unknown question '${key}'`, path: `answers.${key}` };
+    if (raw === null || raw === undefined || raw === '') continue;   // skipped
+
+    if (question.type === 'likert5') {
+      const n = typeof raw === 'number' ? raw : Number(raw);
+      if (!Number.isInteger(n) || n < 1 || n > 5) {
+        return { ok: false, error: `${key} must be a whole number from 1 to 5`, path: `answers.${key}` };
+      }
+      out[question.key] = n;
+    } else if (question.type === 'choice') {
+      if (typeof raw !== 'string' || !question.options?.includes(raw)) {
+        return { ok: false, error: `${key} must be one of: ${question.options?.join(', ')}`, path: `answers.${key}` };
+      }
+      out[question.key] = raw;
+    } else {
+      if (typeof raw !== 'string') {
+        return { ok: false, error: `${key} must be text`, path: `answers.${key}` };
+      }
+      const trimmed = raw.trim();
+      if (trimmed === '') continue;
+      const max = question.maxLength ?? 1000;
+      if (trimmed.length > max) {
+        return { ok: false, error: `${key} exceeds ${max} characters`, path: `answers.${key}` };
+      }
+      totalText += trimmed.length;
+      out[question.key] = trimmed;
+    }
+  }
+
+  if (totalText > MAX_TOTAL_TEXT) {
+    return { ok: false, error: `answers exceed ${MAX_TOTAL_TEXT} characters`, path: 'answers' };
+  }
+  return { ok: true, value: out };
+}

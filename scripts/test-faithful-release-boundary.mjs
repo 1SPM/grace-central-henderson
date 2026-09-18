@@ -53,7 +53,7 @@ for(const page of ['member-portal.html','grace_faithful_church_members_card_ios_
 //    change a visible one-line diff a reviewer must approve. Update these ONLY
 //    in a PR whose subject is changing Central.
 const CENTRAL_PAGE_SHA256={
- 'member-portal.html':'67d04b22f87f60265d8546fdf34f8f964d27c2f56e82e6098581d34f56825662',
+ 'member-portal.html':'1a0a373736ea588b1993c3ac087e1f980c039b49b8baeada100fe993a91c8bb9',
  'grace_central_henderson_members_card_ios_app.html':'652d1120c0a32d8ee8fbf8a80576ab8add1e5a717fb020a875cf0486f20dcb66',
 };
 for(const [page,expected] of Object.entries(CENTRAL_PAGE_SHA256)){
