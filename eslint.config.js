@@ -54,6 +54,19 @@ export default tseslint.config(
     },
   },
   {
+    // CommonJS Node tooling. Same trust boundary as the .mjs block above; these
+    // are run by hand or by CI, never served to a browser. require() is the
+    // point of the extension, so the ESM-only rule does not apply here.
+    files: ['tools/**/*.cjs', 'scripts/**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: globals.node,
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
     // Paths are matched from the repo root. The Phase-1 monorepo split moved
     // every app one level down (apps/<app>/…), which silently un-ignored the
     // build output and the static browser scripts — the same stale-path class

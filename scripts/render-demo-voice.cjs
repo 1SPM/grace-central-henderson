@@ -8,7 +8,10 @@ async function main(){
  await fs.mkdir(path.join(root,'assets/grace-clara-demo'),{recursive:true});
  for(let i=0;i<phrases.length;i++){
   const destination=path.join(root,`assets/grace-clara-demo/${i}.mp3`);
-  try{if((await fs.stat(destination)).size>0)continue;}catch{}
+  // Already rendered? Skip it -- each clip costs an API call. A missing file
+  // is the normal case on a first run, not an error worth swallowing blind.
+  const existing=await fs.stat(destination).catch(()=>null);
+  if(existing&&existing.size>0)continue;
   const response=await fetch('https://api.elevenlabs.io/v1/text-to-speech/Qggl4b0xRMiqOwhPtVWT/stream',{method:'POST',headers:{'xi-api-key':process.env.ELEVENLABS_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({text:phrases[i],model_id:'eleven_multilingual_v2'}),signal:AbortSignal.timeout(30000)});
   if(!response.ok)throw Error(`Clip ${i}: HTTP ${response.status}`);
   if(!response.headers.get('content-type')?.includes('audio'))throw Error('Not audio');
