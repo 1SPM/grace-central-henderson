@@ -1,0 +1,95 @@
+/* Home-only tokens: retain Faithful's navy, blue, serif, and real card artwork. */
+body .sb .nb.active{background:#173755;box-shadow:none;border:1px solid #ffffff38}
+@media(max-width:640px){body .sb{position:relative;height:auto!important;min-height:0!important;width:100%;padding:10px 12px}body .sb-top{padding:0 0 8px;min-height:0}body .sb-scroll{display:flex;align-items:center;flex:none;height:auto;overflow-x:auto;padding:8px 0;gap:6px}body .sb-scroll .sb-member,body .sb-scroll .fd-destinations,body .sb-foot{display:none}body .sb-scroll .nb{height:44px;min-height:44px;flex:0 0 auto;padding:10px;margin:0;white-space:nowrap}body .sb .sb-top .sb-grace-orb{width:48px;height:48px}body .sb .sb-top .grace-orb{width:48px;height:48px}body .ma{margin-left:0;width:100%}}
+#sec-home[data-composed]{--fh-ink:#102c50;--fh-muted:#526985;--fh-line:#dce6ef;gap:24px}
+@media(max-width:640px){body .sb-scroll .fd-nav{display:none}body .sb-foot{display:block;padding:4px 0;background:none}body .sb-foot>*:not(.fd-settings-cog){display:none}body .sb-foot .fd-settings-cog{margin:0;padding:8px 12px;width:auto}body .sb-top{gap:14px}body .sb-top .sb-church{margin:0}}
+#sec-home .fh-overview{order:2;display:grid;grid-template-columns:minmax(0,2.5fr) minmax(230px,1fr);gap:28px}
+#sec-home .faithful-home-impact{order:0;margin:0;padding:22px;background:#eaf5fc;border-radius:12px;min-width:0;display:flex;flex-direction:column}
+#sec-home .faithful-home-impact>.faithful-demo-label{order:2;text-align:right;margin:8px 0 0}
+#sec-home .faithful-impact-primary{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+#sec-home .faithful-impact-primary>section{background:none;border:0;padding:0;overflow:visible;min-width:0}
+#sec-home .fh-card-title,#sec-home .fh-impact-title,#sec-home .fh-week h2,#sec-home .fh-care h2{font-family:var(--font-brand);font-size:clamp(23px,1.7vw,30px);color:var(--fh-ink);margin:0 0 18px;line-height:1.2}
+#sec-home .faithful-impact-card-art{height:auto;background:none;padding:0}
+#sec-home .faithful-impact-card-art .pf-card-flip{width:100%;max-width:none;margin:0}
+#sec-home .faithful-impact-card-art .pf-card-front img{width:100%;height:100%;object-fit:contain}
+#sec-home .faithful-impact-card-art .pf-card-inner{aspect-ratio:433/283}
+#sec-home .faithful-impact-card-art .pf-card-face{box-sizing:border-box;border-radius:18px}
+#sec-home .faithful-impact-card-art .pf-card-front{padding:0;background:transparent}
+#sec-home .faithful-impact-card-art .pf-card-front img{border-radius:inherit;object-fit:contain;display:block}
+#sec-home .faithful-impact-card-art .pf-gc-back{box-sizing:border-box;min-height:0;width:100%;height:100%;padding:16px 18px 12px}
+#sec-home .faithful-impact-card-art .pf-gc-wordmark-back{width:auto;height:28px;max-width:160px;object-fit:contain;object-position:left top;align-self:flex-start;flex-shrink:0;border-radius:0}
+#sec-home .faithful-impact-card-art .pf-card-back-stripe{flex-shrink:0}
+#sec-home .faithful-impact-card-art .pf-card-back-sig{flex-shrink:0}
+#sec-home .faithful-impact-card>p,#sec-home .faithful-impact-balance>span,#sec-home .faithful-impact-balance>strong{display:none}
+#sec-home .faithful-impact-balance{display:block;padding:12px 0 0;border:0}
+#sec-home .faithful-impact-balance button{padding:4px 0}
+#sec-home .faithful-impact-stats{display:block;padding:0 0 16px}
+#sec-home .faithful-impact-stats>span:not(:first-child){display:none}
+#sec-home .faithful-impact-stats>span{font-size:13px;color:var(--fh-muted)}
+#sec-home .faithful-impact-stats b{font-size:38px;line-height:1.2}
+#sec-home .faithful-impact-cause h3{font-size:22px;margin:4px 0 8px}
+#sec-home .faithful-impact-cause img{height:95px;max-width:190px;object-fit:cover}
+#sec-home .faithful-impact-cause>button{width:auto;border:0;background:none;padding:12px 0 0;border-radius:0}
+#sec-home .fh-week .dash-kpis{display:flex;flex-direction:column;gap:0}
+#sec-home .fh-week .dash-kpi{border:0;border-bottom:1px solid var(--fh-line);border-radius:0;background:none;padding:18px 22px 18px 72px;box-shadow:none}
+#sec-home .fh-week .dash-kpi[hidden]{display:none}
+#sec-home .dash-hero-toast,.impact-float{display:none!important}
+#sec-home .fh-activity{order:-1;display:flex;align-items:center;gap:16px;min-height:44px;padding:10px 16px;border:1px solid #dce6ef;border-radius:10px;background:#edf5f9;color:#173755;font-size:13px}
+#sec-home .fh-activity-label{font-size:11px;color:#526985;flex-shrink:0}
+#sec-home .fh-activity-text{flex:1;min-width:0;line-height:1.5}
+#sec-home .fh-activity-pause{background:none;border:0;color:#175a77;font:inherit;font-size:12px;cursor:pointer;padding:7px}
+#sec-home .fh-activity-pause:focus-visible{outline:2px solid #347890;outline-offset:2px;border-radius:4px}
+@media(max-width:600px){#sec-home .fh-activity{gap:8px;padding:8px 10px;flex-wrap:wrap}#sec-home .fh-activity-label{width:100%}#sec-home .fh-activity-text{font-size:12px}}
+#sec-home .dash-hero-leader{display:flex;position:absolute;right:0;bottom:0;max-width:350px;margin:0;border-radius:14px;background:#10283feb;border:1px solid #ffffff38;box-shadow:0 8px 24px #03162726}
+#sec-home .dash-hero-top{min-height:208px;position:relative}
+#sec-home .dash-hero-leader .faithful-human-care{position:relative;z-index:1}
+#sec-home .fh-guide-subline{display:block;font:400 13px/1.5 var(--font-web);color:#526985;margin-top:4px}
+@media(max-width:900px){#sec-home .dash-hero-leader{position:relative;right:auto;bottom:auto;margin-top:22px;max-width:380px}#sec-home .dash-hero-top{min-height:0}}
+#sec-home .dash-live-pill{background:#0753ad;box-shadow:none}
+#sec-home .dash-pillars{gap:12px}
+#sec-home .dash-pillar{min-height:208px;padding:110px 16px 40px;border:0;box-shadow:none;border-radius:10px}
+#sec-home .dash-pillar::before{height:96px;clip-path:ellipse(105% 100% at 45% 0%)}
+#sec-home .dash-pillar-top{top:109px;left:16px}
+#sec-home .dash-pillar-step{font-size:36px;line-height:1}
+#sec-home .dash-pillar-sub{padding:0;margin:10px 0 0;line-height:1.5}
+#sec-home .dash-pillar-name{padding:0;margin:0 0 0 38px;min-height:32px;font-size:17px;line-height:1.4}
+#sec-home .fh-pantry{padding:20px 0;border-bottom:1px solid var(--fh-line)}
+#sec-home .fh-pantry h3{font-family:var(--font-brand);font-size:24px;color:var(--fh-ink);margin-bottom:6px}
+#sec-home .fh-pantry p{color:var(--fh-muted);margin-bottom:16px}
+#sec-home .fh-pantry img{display:block;width:100%;height:260px;object-fit:cover;border-radius:8px}
+#sec-home .fh-pantry button{border:1px solid #adc3d9;border-radius:6px;padding:10px 16px;background:none;color:#0753ad;margin:14px 0;cursor:pointer}
+#sec-home .faithful-community-feed .post[hidden]{display:none}
+#sec-home #grace-home-tutorial-wrap{display:none}
+#sec-home .fh-life{order:5;display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:40px;padding-top:20px}
+#sec-home .fh-life-title{font-family:var(--font-brand);font-size:36px;color:var(--fh-ink);margin:0}
+#sec-home .fh-life-sub{color:var(--fh-muted);margin:6px 0 24px}
+#sec-home .faithful-community-wall{border:0;background:none;padding:0;box-shadow:none}
+#sec-home .faithful-community-feed{max-height:none;overflow:visible}
+#sec-home .faithful-community-feed .post{border:0;border-bottom:1px solid var(--fh-line);border-radius:0;box-shadow:none;background:none}
+#sec-home .faithful-impact-give{padding:0;background:none;border:0}
+#sec-home .faithful-impact-give>button:not(.faithful-impact-give-cta){border:0;border-radius:0;background:none;padding:12px 0}
+#sec-home .faithful-impact-give-cta{max-width:220px;background:#0753ad}
+#sec-home .fh-gift-note{font-size:12px;margin-top:16px}
+#sec-home .fh-care{border:1px solid var(--fh-line);border-radius:18px 18px 28px 18px;margin-top:30px;padding:24px;background-color:#edf3f6;background-image:repeating-linear-gradient(0deg,#17375504 0,#17375504 1px,transparent 1px,transparent 4px)}
+#sec-home .fh-care p{color:var(--fh-muted)}
+#sec-home .fh-care button{display:block;background:none;border:0;color:#0753ad;font:inherit;padding:12px 0;cursor:pointer}
+#sec-home .fh-care h2{margin-bottom:8px}
+#sec-home .fh-care-services{margin:18px 0 10px}
+#sec-home .fh-care .fh-care-service{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;padding:15px 0;border-bottom:1px solid #17375518;color:#173755}
+#sec-home .fh-care-copy strong{display:block;font-size:15px;font-weight:600}
+#sec-home .fh-care-copy small{display:block;font-size:13px;line-height:1.5;color:#526985;margin-top:4px}
+#sec-home .fh-care-arrow{font-size:24px;color:#347890}
+#sec-home .fh-care button:hover{color:#185f79}
+#sec-home .fh-care button:focus-visible{outline:2px solid #347890;outline-offset:4px;border-radius:4px}
+#sec-home .fh-care .fh-care-more{font-size:14px;font-weight:600;padding:9px 0}
+#sec-home .fh-care .fh-care-note{font-size:12px;line-height:1.5;margin:14px 0 0}
+#sec-home .home-prayer-impact-grid,#sec-home .faithful-invitation-row{display:none}
+#sec-home .fh-prayer{order:6;display:flex;align-items:center;position:relative;isolation:isolate;overflow:hidden;background-color:#f3f0e8;background-image:repeating-linear-gradient(0deg,#77674d08 0,#77674d08 1px,transparent 1px,transparent 4px),repeating-linear-gradient(90deg,#fff8 0,#fff8 1px,transparent 1px,transparent 5px);border:1px solid #d8d4c866;border-radius:12px;min-height:160px;margin:12px 0}
+#sec-home .fh-prayer::after{content:'';position:absolute;inset:0 0 0 55%;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#f3f0e8,transparent 70%),url('../../assets/faithful-dawn.jpg') right center/cover no-repeat;opacity:.18}
+#sec-home .fh-prayer>img{width:30%;height:160px;object-fit:cover;mask-image:linear-gradient(90deg,#000 88%,transparent);-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent)}
+#sec-home .fh-prayer>div{padding:24px 30px;position:relative;max-width:640px}
+#sec-home .fh-prayer h3{color:#173755;font-size:24px}
+#sec-home .fh-prayer p{color:#526985}
+#sec-home button:focus-visible,#sec-home [tabindex]:focus-visible{outline:3px solid #2a7ba6;outline-offset:4px}
+@media(max-width:1100px){#sec-home .fh-overview{grid-template-columns:1fr}#sec-home .fh-week .dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}#sec-home .fh-life{gap:24px}}
+@media(max-width:700px){#sec-home .faithful-impact-primary,#sec-home .fh-life{grid-template-columns:1fr}#sec-home .faithful-home-impact{padding:18px}#sec-home .fh-week .dash-kpis{display:flex}#sec-home .faithful-impact-card-art{max-width:390px}#sec-home .fh-prayer>img{width:32%}#sec-home .fh-prayer>div{padding:16px}#sec-home .fh-life-title{font-size:29px}}
