@@ -14,7 +14,12 @@ import {JSDOM} from 'jsdom';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {MEMBER_SURVEY, validateAnswers, MAX_TOTAL_TEXT} from '../api/_lib/pilotSurvey.ts';
+import {MEMBER_SURVEY, FAITHFUL_MEMBER_SURVEY, SURVEY_TRACKS, TENANT_SURVEY_TRACKS,
+        validateAnswers, MAX_TOTAL_TEXT} from '../api/_lib/pilotSurvey.ts';
+
+// The JSDOM run below loads the Faithful portal's URL, so that is the group it
+// must render. Central's is checked separately at the end.
+const EXPECTED = FAITHFUL_MEMBER_SURVEY;
 
 const GENERATED = 'apps/member-web/public/shared/grace-pilot-survey-questions.js';
 
@@ -47,9 +52,11 @@ w.eval(fs.readFileSync('apps/member-web/public/shared/grace-pilot-survey.js', 'u
 
 const form = d.querySelector('.gps-form');
 assert(form, 'the survey mounts into [data-grace-pilot-survey]');
-assert.equal(d.querySelectorAll('[data-answer]').length >= MEMBER_SURVEY.length, true);
+assert.equal(d.querySelectorAll('[data-answer]').length >= EXPECTED.length, true);
 assert.equal(new Set([...d.querySelectorAll('[data-answer]')].map(n => n.getAttribute('data-answer'))).size,
-  MEMBER_SURVEY.length, `all ${MEMBER_SURVEY.length} questions render, once each`);
+  EXPECTED.length, `all ${EXPECTED.length} questions render, once each`);
+assert.equal(w.GRACE_PILOT_SURVEY.getTrack(), 'members_faithful',
+  'the Faithful portal answers its own question group');
 
 // ── 4. every question is skippable ──────────────────────────────────────────
 for (const node of d.querySelectorAll('[data-answer]')) {
@@ -59,7 +66,7 @@ assert.equal(d.querySelector('[data-submit]').disabled, false,
   'a member who answers nothing can still submit — a refusal would discard their "I would not use this"');
 
 // likert questions offer all five points, labelled at both ends
-for (const q of MEMBER_SURVEY.filter(x => x.type === 'likert5')) {
+for (const q of EXPECTED.filter(x => x.type === 'likert5')) {
   const radios = d.querySelectorAll(`[data-answer="${q.key}"]`);
   assert.equal(radios.length, 5, `${q.key} offers 5 points`);
   const row = radios[0].closest('.gps-q');
@@ -67,14 +74,14 @@ for (const q of MEMBER_SURVEY.filter(x => x.type === 'likert5')) {
     `${q.key} labels both ends (${q.low} / ${q.high})`);
 }
 // choice questions offer exactly the server's options and nothing else
-for (const q of MEMBER_SURVEY.filter(x => x.type === 'choice')) {
+for (const q of EXPECTED.filter(x => x.type === 'choice')) {
   const values = [...d.querySelectorAll(`[data-answer="${q.key}"]`)].map(n => n.value);
   assert.deepEqual(values, [...q.options], `${q.key} options match the server allowlist`);
 }
 
 // ── answering, and the autosave ─────────────────────────────────────────────
-const likert = MEMBER_SURVEY.find(q => q.type === 'likert5');
-const text = MEMBER_SURVEY.find(q => q.type === 'text');
+const likert = EXPECTED.find(q => q.type === 'likert5');
+const text = EXPECTED.find(q => q.type === 'text');
 d.querySelector(`[data-answer="${likert.key}"][value="4"]`).checked = true;
 d.querySelector(`[data-answer="${text.key}"]`).value = '  it showed me my giving  ';
 form.dispatchEvent(new w.Event('input', {bubbles: true}));
@@ -83,7 +90,7 @@ await new Promise(r => setTimeout(r, 1400));
 assert.equal(posted.length, 1, 'a partial answer autosaves');
 const draft = posted[0].body;
 assert.equal(draft.completed, false, 'the autosave is not reported as a finished response');
-assert.equal(draft.track, 'members');
+assert.equal(draft.track, 'members_faithful', 'the payload carries the tenant\'s own track');
 assert.equal(draft.tenant, 'faithful', 'the tenant comes from the path, not from a guess');
 assert.equal(draft.answers[likert.key], '4');
 assert.equal(draft.answers[text.key], 'it showed me my giving', 'text is trimmed');
@@ -168,26 +175,81 @@ assert.equal(w.sessionStorage.getItem('grace.pilot-survey.draft-id'), '11111111-
 dom.window.close();
 
 // ── server validation ───────────────────────────────────────────────────────
-assert.equal(validateAnswers('members', {}).ok, true, 'an empty submission is valid data');
-assert.equal(validateAnswers('members', null).ok, true);
-assert.equal(validateAnswers('members', {[likert.key]: ''}).ok, true, 'a skipped question is not an error');
-assert.equal(validateAnswers('members', {}).value[likert.key], undefined);
-assert.equal(validateAnswers('members', {[likert.key]: '4'}).value[likert.key], 4, 'likert arrives as a number');
-assert.equal(validateAnswers('members', {[likert.key]: 6}).ok, false, 'out-of-range likert is refused');
-assert.equal(validateAnswers('members', {[likert.key]: 2.5}).ok, false);
-assert.equal(validateAnswers('members', {nope: 'x'}).ok, false, 'an unknown question is refused');
-assert.equal(validateAnswers('members', [1, 2]).ok, false, 'an array is not an answer set');
+const TRACK = 'members_faithful';
+assert.equal(validateAnswers(TRACK, {}).ok, true, 'an empty submission is valid data');
+assert.equal(validateAnswers(TRACK, null).ok, true);
+assert.equal(validateAnswers(TRACK, {[likert.key]: ''}).ok, true, 'a skipped question is not an error');
+assert.equal(validateAnswers(TRACK, {}).value[likert.key], undefined);
+assert.equal(validateAnswers(TRACK, {[likert.key]: '4'}).value[likert.key], 4, 'likert arrives as a number');
+assert.equal(validateAnswers(TRACK, {[likert.key]: 6}).ok, false, 'out-of-range likert is refused');
+assert.equal(validateAnswers(TRACK, {[likert.key]: 2.5}).ok, false);
+assert.equal(validateAnswers(TRACK, {nope: 'x'}).ok, false, 'an unknown question is refused');
+assert.equal(validateAnswers(TRACK, [1, 2]).ok, false, 'an array is not an answer set');
 assert.equal(validateAnswers('nope', {}).ok, false, 'an unknown track is refused');
-assert.equal(validateAnswers('members', {[text.key]: 'x'.repeat(MAX_TOTAL_TEXT + 1)}).ok, false, 'oversize text is refused');
+assert.equal(validateAnswers(TRACK, {[text.key]: 'x'.repeat(MAX_TOTAL_TEXT + 1)}).ok, false, 'oversize text is refused');
 
 // prototype pollution: these are property names, not questions
 for (const key of ['__proto__', 'constructor', 'prototype', 'toString']) {
-  const outcome = validateAnswers('members', {[key]: 'x'});
+  const outcome = validateAnswers(TRACK, {[key]: 'x'});
   assert.equal(outcome.ok, false, `${key} is refused as a question key`);
 }
 assert.equal(Object.prototype.polluted, undefined);
-const clean = validateAnswers('members', {[text.key]: 'ok'});
+const clean = validateAnswers(TRACK, {[text.key]: 'ok'});
 assert.equal(Object.getPrototypeOf(clean.value), null, 'the validated object has no prototype to pollute');
+
+// ── the two churches' evidence stays apart ─────────────────────────────────
+//
+// Faithful's form must never name another church: a participant asked to rate
+// "Central's current channels" is being asked about something that is not
+// theirs, and the answer would be noise in both churches' results.
+for (const q of FAITHFUL_MEMBER_SURVEY) {
+  assert(!/central/i.test(q.text), `Faithful question '${q.key}' must not name Central: ${q.text}`);
+  for (const opt of q.options || []) assert(!/central/i.test(opt), `Faithful option names Central: ${opt}`);
+}
+assert(MEMBER_SURVEY.some(q => /central/i.test(q.text)),
+  "Central's own set stays verbatim to the pilot document, which does name the church");
+
+// A question key shared by both groups must mean the same thing, or the two
+// sets cannot be read side by side.
+for (const f of FAITHFUL_MEMBER_SURVEY) {
+  const c = MEMBER_SURVEY.find(q => q.key === f.key);
+  if (!c) continue;
+  assert.equal(f.type, c.type, `${f.key}: same type across groups`);
+  assert.equal(f.measures, c.measures, `${f.key}: same measure across groups`);
+  assert.deepEqual(f.options ?? null, c.options ?? null, `${f.key}: same options across groups`);
+}
+
+// The onboarding is what Faithful actually walks people through, so it is
+// covered directly and named in the comprehension and usability questions.
+const fKeys = FAITHFUL_MEMBER_SURVEY.map(q => q.key);
+for (const k of ['onboarding_ease', 'onboarding_purpose_clear']) {
+  assert(fKeys.includes(k), `Faithful asks '${k}' directly`);
+  assert(!MEMBER_SURVEY.some(q => q.key === k), `${k} is Faithful-only`);
+}
+for (const k of ['comprehension', 'usability_navigate']) {
+  const q = FAITHFUL_MEMBER_SURVEY.find(x => x.key === k);
+  assert(/Let us know|onboarding/i.test(q.text),
+    `Faithful's '${k}' must include the onboarding, since that is what was walked through`);
+}
+
+// Separation is enforced twice: by church_id and by track.
+assert.notEqual(TENANT_SURVEY_TRACKS.faithful, TENANT_SURVEY_TRACKS['central-henderson'],
+  'the two tenants must not share a track');
+assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
+
+// Central's portal renders Central's group.
+{
+  const cdom = new JSDOM('<div data-grace-pilot-survey></div>',
+    {url: 'https://grace-members.vercel.app/tenants/central-henderson/member-portal.html', runScripts: 'outside-only'});
+  cdom.window.fetch = () => Promise.resolve({ok: true, json: async () => ({})});
+  cdom.window.eval(fs.readFileSync(GENERATED, 'utf8'));
+  cdom.window.eval(fs.readFileSync('apps/member-web/public/shared/grace-pilot-survey.js', 'utf8'));
+  assert.equal(cdom.window.GRACE_PILOT_SURVEY.getTrack(), 'members');
+  assert.equal(new Set([...cdom.window.document.querySelectorAll('[data-answer]')]
+    .map(n => n.getAttribute('data-answer'))).size, MEMBER_SURVEY.length,
+    `Central renders its own ${MEMBER_SURVEY.length} questions`);
+  cdom.window.close();
+}
 
 // ── both tenants are wired identically ──────────────────────────────────────
 for (const tenant of ['faithful', 'central-henderson']) {
@@ -228,4 +290,13 @@ assert(/unique \(church_id, track, respondent_key\)/.test(sql), 'one row per res
 assert(/enable row level security/.test(sql));
 assert(!/\banon\b/.test(sql), 'no anon policy: responses are read by staff, not the public');
 
-console.log(`PASS: no drift (${MEMBER_SURVEY.length} questions), skippable, truthful failure states, anonymous payload, server validation, both tenants wired. Visual layout and a real phone submission not verified.`);
+// 084 widens the track constraint so Faithful's group can be stored at all.
+{
+  const m84 = fs.readFileSync('supabase/migrations/084_pilot_survey_faithful_track.sql', 'utf8')
+    .replace(/--.*$/gm, '');
+  assert(/check \(track in \([^)]*'members_faithful'/.test(m84),
+    '084 must allow the members_faithful track, or every Faithful answer 500s');
+  assert(!/drop table|delete from/i.test(m84), '084 is a widening only');
+}
+
+console.log(`PASS: no drift (Central ${MEMBER_SURVEY.length}, Faithful ${FAITHFUL_MEMBER_SURVEY.length}), separate tracks, skippable, truthful failure states, anonymous payload, server validation, both tenants wired. Visual layout and a real phone submission not verified.`);
