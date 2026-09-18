@@ -19,8 +19,7 @@ async function main(){
    // The phrases come from grace-demo-voice.json, which is committed to this
    // repo, and the response is written to a path built from the loop index --
    // never from anything the response says.
-   // codeql[js/file-access-to-http]
-   const response=await fetch('https://api.elevenlabs.io/v1/text-to-speech/Qggl4b0xRMiqOwhPtVWT/stream',{method:'POST',headers:{'xi-api-key':process.env.ELEVENLABS_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({text:phrases[i],model_id:'eleven_multilingual_v2'}),signal:AbortSignal.timeout(30000)});
+   const response=await fetch('https://api.elevenlabs.io/v1/text-to-speech/Qggl4b0xRMiqOwhPtVWT/stream',{method:'POST',headers:{'xi-api-key':process.env.ELEVENLABS_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({text:phrases[i],model_id:'eleven_multilingual_v2'}),signal:AbortSignal.timeout(30000)});  // codeql[js/file-access-to-http]
    if(!response.ok)throw Error(`Clip ${i}: HTTP ${response.status}`);
    if(!response.headers.get('content-type')?.includes('audio'))throw Error('Not audio');
    // codeql[js/http-to-file-access]
