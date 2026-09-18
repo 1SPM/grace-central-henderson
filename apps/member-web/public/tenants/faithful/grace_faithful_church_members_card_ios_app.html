@@ -7251,6 +7251,7 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       container: document.querySelector('.device') || document.body,
       zIndex: 480,
       voiceProvider: 'elevenlabs',
+      publicDemoVoice: true,
       autoDetectVoice: true,
       ttsUrl: '/api/grace/tts',
       messaging: graceMsg,
@@ -7259,6 +7260,7 @@ if (typeof GRACE_MESSAGING !== 'undefined') {
       toast: (m) => showToast(m),
       openLeader: () => showScreen('leaders'),
       navigate: (key) => {
+        if (key === 'demo-signup') { window.location.href = 'member-portal.html?demo-signup=1'; return true; }
         if (['settings','volunteer','first-step'].includes(key)) { openMemberDestination(key); return true; }
         if (key === 'growth') { showScreen('profile'); scrollJourney('jy-growth'); return true; }
         if (key === 'watch') { openPush('watch'); return true; }

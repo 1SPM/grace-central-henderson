@@ -7804,6 +7804,7 @@ GRACE_COMPANION.mount({
   container: document.body,
   zIndex: 8800,
   voiceProvider: 'elevenlabs',
+  publicDemoVoice: true,
   autoDetectVoice: true,
   ttsUrl: '/api/grace/tts',
   messaging: GRACE_MSG,
@@ -7812,6 +7813,7 @@ GRACE_COMPANION.mount({
   toast: (m) => showPortalToast(m, '◈'),
   openLeader: () => goSection('ai'),
   navigate: (key) => {
+    if (key === 'demo-signup') { goSection('mobile'); document.querySelector('[data-continue]')?.click(); return true; }
     if (['settings','volunteer','first-step'].includes(key)) { openMemberDestination(key); return true; }
     if (key === 'growth') { openProfileGrowth(); return true; }
     if (key === 'outreach' || key === 'care') {
@@ -7898,6 +7900,14 @@ if(typeof GRACE_METRICS!=='undefined'){
 <script src="faithful-settings-tabs.js"></script>
 <link rel="stylesheet" href="faithful-member-profile.css">
 <link rel="stylesheet" href="faithful-mobile-story.css">
+<script>
+window.addEventListener('load', function () {
+  if (new URLSearchParams(location.search).has('demo-signup')) {
+    goSection('mobile');
+    document.querySelector('[data-continue]')?.click();
+  }
+});
+</script>
 <link rel="stylesheet" href="faithful-home-composition.css">
 <script src="faithful-home-composition.js"></script>
 </body>

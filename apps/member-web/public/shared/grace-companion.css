@@ -378,3 +378,15 @@
   .gcp-tag { display: none; }
   .gcp-root--sheet .gcp-panel { height: 84%; }
 }
+.gcp-demo-intro {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 16px 11px;
+  color: #596581;
+  background: #f7f8fc;
+  border-bottom: 1px solid #e8eaf3;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: .01em;
+}
