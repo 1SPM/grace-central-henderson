@@ -1,33 +1,38 @@
-/* GRACE brand typography — local files + CDN fallback */
+/* GRACE brand typography — self-hosted only.
+   The CDN fallback that used to follow each local file could never load: every
+   page serving these fonts sends font-src 'self' https://fonts.gstatic.com, so
+   the browser picked the woff2, was refused, and fell back to the .ttf anyway.
+   The typography was always correct; what it cost was four blocked requests and
+   four console errors on every page load -- noise that hides real errors.
+   Worth doing later: ship woff2 instead of .ttf. These four files are 1.1MB and
+   woff2 would be roughly a third of that, which matters on a phone. It needs a
+   converter that is not available here, so it is deliberately left undone
+   rather than pulled from a CDN. */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('inter-400.ttf') format('truetype'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-400-normal.woff2') format('woff2');
+  src: url('inter-400.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('inter-600.ttf') format('truetype'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-600-normal.woff2') format('woff2');
+  src: url('inter-600.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('inter-700.ttf') format('truetype'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.8/latin-700-normal.woff2') format('woff2');
+  src: url('inter-700.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Playfair Display';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('playfair-700.ttf') format('truetype'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@5.2.8/latin-700-normal.woff2') format('woff2');
+  src: url('playfair-700.ttf') format('truetype');
 }
