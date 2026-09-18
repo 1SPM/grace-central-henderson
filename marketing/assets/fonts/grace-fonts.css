@@ -1,38 +1,48 @@
-/* GRACE brand typography — self-hosted only.
-   The CDN fallback that used to follow each local file could never load: every
-   page serving these fonts sends font-src 'self' https://fonts.gstatic.com, so
-   the browser picked the woff2, was refused, and fell back to the .ttf anyway.
-   The typography was always correct; what it cost was four blocked requests and
-   four console errors on every page load -- noise that hides real errors.
-   Worth doing later: ship woff2 instead of .ttf. These four files are 1.1MB and
-   woff2 would be roughly a third of that, which matters on a phone. It needs a
-   converter that is not available here, so it is deliberately left undone
-   rather than pulled from a CDN. */
+/* GRACE brand typography — self-hosted woff2.
+
+   woff2 is a container around the same sfnt data, not a subset: every glyph and
+   every metric is identical to the .ttf these were built from, so no character
+   can go missing. It is also reversible -- fontTools can write the .ttf back out
+   -- which is why the .ttf files are not kept alongside as a source copy.
+
+   No .ttf fallback. woff2 has been supported since Chrome 36 and Safari 10
+   (2016); this portal already requires :has() and optional chaining, which are
+   years newer, so a browser that could use a .ttf fallback could not render the
+   page it would be reading.
+
+   No CDN fallback either. Every page serving these sends
+   font-src 'self' https://fonts.gstatic.com, so a third-party URL here is
+   refused at load time -- it only ever produced console errors.
+   scripts/test-css-origins.mjs enforces that.
+
+   Regenerate from a .ttf with fontTools:
+     python -c "from fontTools.ttLib import TTFont; f=TTFont('x.ttf'); f.flavor='woff2'; f.save('x.woff2')"
+*/
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('inter-400.ttf') format('truetype');
+  src: url('inter-400.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('inter-600.ttf') format('truetype');
+  src: url('inter-600.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('inter-700.ttf') format('truetype');
+  src: url('inter-700.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Playfair Display';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('playfair-700.ttf') format('truetype');
+  src: url('playfair-700.woff2') format('woff2');
 }

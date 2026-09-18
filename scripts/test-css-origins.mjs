@@ -65,7 +65,28 @@ for (const file of sheets) {
   }
 }
 
+// ── local url() targets must exist ─────────────────────────────────────────
+//
+// A @font-face pointing at a file that is not there does not error visibly: the
+// face just fails and the text renders in the next family down the stack. That
+// is how a rename slips through -- the page still looks plausible. Checked here
+// because this suite already has every stylesheet open.
+const missing = [];
+for (const file of sheets) {
+  const css = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/url\(\s*['"]?([^'")\s]+)/g)) {
+    const ref = m[1];
+    if (/^(https?:|data:|#|\/\/)/.test(ref)) continue;
+    const target = ref.startsWith('/')
+      ? path.join(file.startsWith('marketing') ? 'marketing' : 'apps/member-web/public', ref)
+      : path.join(path.dirname(file), ref);
+    if (!fs.existsSync(target.split('?')[0].split('#')[0])) missing.push(`${file}\n    -> ${ref} (resolved: ${target})`);
+  }
+}
+assert.deepEqual(missing, [],
+  `stylesheets reference files that do not exist:\n  ${missing.join('\n  ')}`);
+
 assert.deepEqual(problems, [],
   `stylesheets reach origins the CSP refuses:\n  ${problems.join('\n  ')}`);
 
-console.log(`PASS: ${sheets.length} stylesheets, every remote origin allowed by the shipped CSP. Runtime font rendering not verified.`);
+console.log(`PASS: ${sheets.length} stylesheets — every remote origin allowed by the shipped CSP, every local url() present on disk. Runtime font rendering not verified.`);
