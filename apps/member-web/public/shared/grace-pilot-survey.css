@@ -1,0 +1,37 @@
+/* Pilot survey. Plain and unhurried: this is research, and a form that looks
+   like a marketing questionnaire gets marketing-quality answers. */
+.gps{max-width:38rem;margin:0 auto;padding:24px 16px 40px}
+.gps h2{margin:0 0 8px;font-size:1.3rem;font-weight:700}
+.gps h2:focus{outline:2px solid currentColor;outline-offset:4px;border-radius:4px}
+.gps .gps-lede{margin:0 0 24px;font-size:.9rem;line-height:1.6;opacity:.8}
+.gps .gps-q{margin:0 0 26px;padding:16px;border:1px solid rgba(100,116,139,.28);border-radius:10px}
+.gps legend{padding:0 6px;font-size:.93rem;font-weight:600;line-height:1.5}
+.gps .gps-num{opacity:.55;font-variant-numeric:tabular-nums}
+/* Narrow first. A wrapping flex row put "Very easy" beside the 5 on a second
+   line, so the anchors stopped bracketing the scale and the question read as
+   broken — on the phone, which is where the pilot actually sends people. The
+   grid keeps all five points on one row and drops the anchors beneath them. */
+.gps .gps-scale{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:8px 6px;margin:12px 0 0}
+.gps .gps-anchor{grid-row:2;font-size:.76rem;line-height:1.4;opacity:.7}
+.gps .gps-anchor:first-of-type{grid-column:1/3}
+.gps .gps-anchor:last-of-type{grid-column:4/6;text-align:right}
+@media (min-width:30rem){
+  .gps .gps-scale{display:flex;align-items:center;gap:10px}
+  .gps .gps-anchor{flex:1 1 6rem}
+}
+.gps .gps-dot{grid-row:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:44px;min-height:44px;justify-content:center;cursor:pointer;border-radius:8px;font-size:.85rem}
+.gps .gps-dot:has(input:checked){background:rgba(23,95,165,.12);font-weight:700}
+.gps .gps-dot input{width:20px;height:20px;accent-color:#175fa5;cursor:pointer}
+.gps .gps-choices{display:grid;gap:8px;margin:12px 0 0}
+.gps .gps-choice{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:1px solid rgba(100,116,139,.3);border-radius:9px;font-size:.88rem;cursor:pointer}
+.gps .gps-choice:has(input:checked){background:rgba(23,95,165,.1);border-color:#175fa5}
+.gps .gps-choice input{width:18px;height:18px;flex:none;accent-color:#175fa5}
+.gps textarea{display:block;box-sizing:border-box;width:100%;margin:12px 0 0;padding:10px 12px;border:1px solid rgba(100,116,139,.4);border-radius:9px;background:#fff;color:#0f172a;font:16px/1.5 inherit;resize:vertical}
+.gps textarea:focus-visible,.gps input:focus-visible{outline:2px solid #175fa5;outline-offset:2px}
+.gps .gps-skip{margin:10px 0 0;font-size:.75rem;opacity:.6}
+.gps [data-submit]{width:100%;padding:.78rem 1rem;border:0;border-radius:9px;background:#175fa5;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer}
+.gps .gps-status{margin:12px 0 0;min-height:1.2rem;font-size:.87rem;opacity:.85}
+.gps .gps-done{padding:20px;border-radius:10px;background:rgba(23,95,165,.08)}
+.gps .gps-done h3{margin:0 0 8px;font-size:1.05rem}
+.gps .gps-done p{margin:0;font-size:.88rem;line-height:1.6;opacity:.85}
+@media (prefers-color-scheme:dark){.gps textarea{background:#1e293b;border-color:#334155;color:#e2e8f0}}

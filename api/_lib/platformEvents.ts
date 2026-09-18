@@ -81,7 +81,10 @@ export type PlatformEventType =
   | 'story.handoff_refused'
   | 'story.draft_claimed'
   | 'story.attach_failed'
-  | 'story.followup_approved';
+  | 'story.followup_approved'
+  // Pilot survey (migration 083). Payloads carry counts only, never answers.
+  | 'pilot_survey.saved'
+  | 'pilot_survey.completed';
 
 export type SourceApp = 'admin_dashboard' | 'member_portal' | 'workos' | 'system' | 'webhook';
 
