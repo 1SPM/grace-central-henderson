@@ -182,6 +182,12 @@
     if(id==='connect')enhanceConnect(details);
     if(id==='journey')enhanceReflect(details);
     details.querySelector('summary').textContent={home:'Your church, at a glance',connect:'Find your people',journey:'Bring the message into your week'}[id];
+    if(id==='home'){
+      const subline=document.createElement('small');
+      subline.className='fh-guide-subline';
+      subline.textContent='Services, people, and ways to take part.';
+      details.querySelector('summary').append(subline);
+    }
   });
   // Read-only snapshot for the later dialogue connection. No automatic AI transmission.
   window.FAITHFUL_PREVIEW_PREFERENCES={get:()=>identityValid()?({...answers}):{},identity,sections:mounted.length};

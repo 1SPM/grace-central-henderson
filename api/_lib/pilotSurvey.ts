@@ -83,7 +83,82 @@ export const MEMBER_SURVEY: readonly SurveyQuestion[] = [
     type: 'choice', measures: 'Adoption signal', options: LIKELIHOOD },
 ] as const;
 
-export const SURVEY_TRACKS = { members: MEMBER_SURVEY } as const;
+/**
+ * Faithful's own group. Three reasons it is a separate track rather than the
+ * same questions on a different tenant:
+ *
+ *  1. Faithful's form must not say "Central". Three of the Central questions
+ *     name the church, and a Faithful participant reading them would be asked
+ *     to rate channels that are not theirs.
+ *  2. The answers must not pool. A separate track means a separate row even
+ *     if a respondent key somehow repeated, on top of the church_id split —
+ *     two independent reasons the two churches' evidence stays apart.
+ *  3. Faithful is where the "Let us know" onboarding is actually walked
+ *     through, so the ease-of-use and comprehension questions here ask about
+ *     the onboarding as part of the platform, and two questions below cover
+ *     it directly. Central's track stays verbatim to the pilot document.
+ *
+ * Shared keys keep their Central meaning and measure, so the two sets can
+ * still be read side by side on everything they have in common.
+ */
+export const FAITHFUL_MEMBER_SURVEY: readonly SurveyQuestion[] = [
+  { key: 'baseline_current_channels',
+    text: 'Before the walkthrough, how easy is it to do the task we discussed using your church’s current channels?',
+    type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Current baseline' },
+  { key: 'onboarding_ease',
+    text: 'How easy were the “Let us know” steps to work through as you went?',
+    type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Onboarding usability' },
+  { key: 'onboarding_purpose_clear',
+    text: 'How clear was it why each “Let us know” step was asking for that information?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'Onboarding transparency' },
+  { key: 'comprehension',
+    text: 'After the walkthrough and the “Let us know” steps, how clearly do you understand what GRACE is?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'Comprehension' },
+  { key: 'usability_navigate',
+    text: 'How easy was the GRACE Members experience, including the onboarding steps, to navigate?',
+    type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Usability' },
+  { key: 'practical_value',
+    text: 'Did GRACE give you useful information or a useful next step?',
+    type: 'likert5', low: 'Not useful', high: 'Extremely useful', measures: 'Practical value' },
+  { key: 'privacy_comfort',
+    text: 'How comfortable were you with what GRACE appeared to know about you?',
+    type: 'likert5', low: 'Very uncomfortable', high: 'Very comfortable', measures: 'Privacy' },
+  { key: 'ai_disclosure',
+    text: 'How clear was it that you were interacting with AI rather than a pastor or staff member?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'AI disclosure' },
+  { key: 'human_escalation',
+    text: 'How clear was it when a human would become involved?',
+    type: 'likert5', low: 'Not clear', high: 'Very clear', measures: 'Human escalation' },
+  { key: 'control_never_use',
+    text: 'What information should GRACE never use without asking you first?',
+    type: 'text', maxLength: 1000, measures: 'Control' },
+  { key: 'most_valuable_reason',
+    text: 'What is the most valuable reason you would use GRACE?',
+    type: 'choice', measures: 'Value',
+    options: ['Information', 'Groups and events', 'Communication', 'Next steps',
+              'Pastoral support', 'Giving', 'IMPACT', 'Other'] },
+  { key: 'barrier',
+    text: 'What would make you not use GRACE?',
+    type: 'text', maxLength: 1000, measures: 'Barrier' },
+  { key: 'channel_duplication',
+    text: 'Compared with the tools your church already uses, would GRACE feel easier, about the same, or like another place to check?',
+    type: 'choice', measures: 'Channel duplication',
+    options: ['Easier', 'About the same', 'Another place to check', 'Not sure'] },
+  { key: 'adoption_signal',
+    text: 'How likely would you be to use GRACE at least monthly if your church continued with it?',
+    type: 'choice', measures: 'Adoption signal', options: LIKELIHOOD },
+] as const;
+
+export const SURVEY_TRACKS = {
+  members: MEMBER_SURVEY,
+  members_faithful: FAITHFUL_MEMBER_SURVEY,
+} as const;
+
+/** Which question group a tenant's portal shows. Anything else uses Central's. */
+export const TENANT_SURVEY_TRACKS: Readonly<Record<string, SurveyTrack>> = {
+  faithful: 'members_faithful',
+  'central-henderson': 'members',
+};
 export type SurveyTrack = keyof typeof SURVEY_TRACKS;
 
 export type ValidationOutcome<T> =

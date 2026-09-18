@@ -26,11 +26,20 @@
   var STORAGE_KEY = 'grace.pilot-survey.respondent';
   var mounted = null;
   var questions = [];
+  var track = 'members';
   var saveTimer = null;
 
   function tenantSlug() {
     var m = /\/tenants\/([a-z0-9-]+)\//.exec(location.pathname);
     return m ? m[1] : null;
+  }
+
+  /* Faithful answers its own question group, so its form never names another
+   * church and can ask about the "Let us know" onboarding. The server keeps the
+   * same map, and rejects a track it does not know. */
+  function trackForTenant(slug) {
+    var map = global.GRACE_PILOT_SURVEY_TENANT_TRACKS || {};
+    return (slug && map[slug]) || 'members';
   }
 
   /** Random, per-sitting, identifies no one. */
@@ -137,7 +146,7 @@
       body: JSON.stringify(Object.assign(
         tenantSlug() ? { tenant: tenantSlug() } : {},
         draftId ? { storyDraftId: draftId } : {},
-        { track: 'members', respondentKey: respondentKey(), answers: answers, completed: !!completed },
+        { track: track, respondentKey: respondentKey(), answers: answers, completed: !!completed },
       )),
     }).then(function (resp) {
       return resp.json().catch(function () { return {}; }).then(function (body) {
@@ -214,7 +223,8 @@
   function mount() {
     var container = document.querySelector('[data-grace-pilot-survey]');
     if (!container || mounted) return false;
-    questions = global.GRACE_PILOT_SURVEY_QUESTIONS || [];
+    track = trackForTenant(tenantSlug());
+    questions = (global.GRACE_PILOT_SURVEY_TRACKS || {})[track] || [];
     if (!questions.length) return false;
     mounted = build(container);
     return true;
@@ -227,6 +237,8 @@
       try { sessionStorage.setItem('grace.pilot-survey.draft-id', id); } catch (_) {}
     },
     getAnswers: function () { return mounted ? collect() : {}; },
+    /** Which question group this page is showing. */
+    getTrack: function () { return track; },
   };
 
   if (!mount()) document.addEventListener('DOMContentLoaded', mount);
