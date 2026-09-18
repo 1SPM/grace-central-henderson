@@ -32,6 +32,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireClerkAuth } from './auth-helper.js';
 import { logSecurityEvent, securityContext } from './securityLog.js';
+import { resolvePortalChurchId } from './portalTenants.js';
 
 // Same convention as the legacy demo bypass in api/_middleware/auth.ts —
 // same env var, same "explicit opt-in only" posture (see
@@ -537,6 +538,43 @@ export async function requirePermission(
  * does NOT require a users row or any role/permission grant — every
  * portal member gets baseline self-access to their own data by design.
  */
+/**
+ * Which portal tenant a member-scoped request is coming from.
+ *
+ * api/portal/_self-signup.ts already honours this slug, so a member who signs
+ * up while looking at the Faithful portal is CREATED in Faithful. Reading them
+ * back used the Host alone, and grace-members.vercel.app maps to Central
+ * Henderson -- so that member was written to one tenant and looked up in
+ * another, and could never be found again. resolveMemberActor now resolves the
+ * same way the sign-up that created them did.
+ *
+ * The slug is read from the query or body where a caller sends one, and
+ * otherwise from the Referer path, because the static portal pages make many
+ * fetches that carry no parameters of their own. Referer is not trusted here in
+ * any meaningful sense: resolvePortalChurchId honours a slug only for a demo
+ * tenant, or when the Host already resolves to that same church. A forged value
+ * can reach fabricated demo data and nothing else, and even there the lookup
+ * below still requires the caller's own Clerk user id -- it can never surface
+ * another person.
+ */
+const TENANT_SLUG = /^[a-z0-9-]{1,64}$/;
+
+function portalTenantHint(req: VercelRequest): string | undefined {
+  const fromQuery = req.query?.tenant;
+  const q = Array.isArray(fromQuery) ? fromQuery[0] : fromQuery;
+  if (typeof q === 'string' && TENANT_SLUG.test(q)) return q;
+
+  const b = (req.body as { tenant?: unknown } | undefined)?.tenant;
+  if (typeof b === 'string' && TENANT_SLUG.test(b)) return b;
+
+  const referer = req.headers.referer;
+  if (typeof referer === 'string') {
+    const m = /\/tenants\/([a-z0-9-]{1,64})\//.exec(referer);
+    if (m) return m[1];
+  }
+  return undefined;
+}
+
 export async function resolveMemberActor(
   req: VercelRequest,
   res: VercelResponse,
@@ -559,11 +597,16 @@ export async function resolveMemberActor(
     return null;
   }
 
+  // Same rule the sign-up used to create them; falls back to the Host result
+  // whenever no slug is offered, so every existing caller is unchanged.
+  const churchId =
+    (await resolvePortalChurchId(req.headers.host, portalTenantHint(req), supabase)) ?? auth.churchId;
+
   const { data: personRow, error } = await supabase
     .from('people')
     .select('id, portal_enabled, self_registered, staff_reviewed_at')
     .eq('clerk_user_id', auth.clerkUserId)
-    .eq('church_id', auth.churchId)
+    .eq('church_id', churchId)
     .maybeSingle();
 
   if (error) {
@@ -579,7 +622,7 @@ export async function resolveMemberActor(
     kind: 'member',
     personId: personRow.id,
     clerkUserId: auth.clerkUserId,
-    churchId: auth.churchId,
+    churchId,
     identityVerified: !personRow.self_registered || !!personRow.staff_reviewed_at,
   };
 }

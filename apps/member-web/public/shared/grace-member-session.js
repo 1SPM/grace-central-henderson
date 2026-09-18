@@ -43,6 +43,21 @@
     }
   }
 
+  /** Which tenant's portal this page is. The server honours it only for a demo
+   *  tenant or when the Host already owns the church, so it selects a tenant --
+   *  it never grants access to one. Sent explicitly rather than left to the
+   *  Referer, which a referrer policy or a privacy extension may strip. */
+  function portalTenantSlug() {
+    var m = /\/tenants\/([a-z0-9-]+)\//.exec(location.pathname);
+    return m ? m[1] : null;
+  }
+
+  function withTenant(url) {
+    var slug = portalTenantSlug();
+    if (!slug) return url;
+    return url + (url.indexOf('?') === -1 ? '?' : '&') + 'tenant=' + encodeURIComponent(slug);
+  }
+
   function loadScript(src, attrs) {
     return new Promise(function (resolve, reject) {
       var s = document.createElement('script');
@@ -174,7 +189,7 @@
     btn.disabled = true;
     window.GRACE_SESSION.ready.then(function (session) {
       return session.getToken().then(function (token) {
-        return fetch('/api/neobank', {
+        return fetch(withTenant('/api/neobank'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
           body: JSON.stringify(payload),
@@ -219,7 +234,7 @@
     var container = document.getElementById('gr-kyc-cta');
     if (!container || !session.home.identity_verified) return;
     session.getToken().then(function (token) {
-      return fetch('/api/neobank?resource=me', { headers: { Authorization: 'Bearer ' + token } });
+      return fetch(withTenant('/api/neobank?resource=me'), { headers: { Authorization: 'Bearer ' + token } });
     }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         if (!data) return;
@@ -258,7 +273,7 @@
           if (!clerk.session) return null; // no signed-in member (e.g. staff preview)
           return clerk.session.getToken().then(function (token) {
             if (!token) return null;
-            return fetch('/api/portal/home', { headers: { Authorization: 'Bearer ' + token } })
+            return fetch(withTenant('/api/portal/home'), { headers: { Authorization: 'Bearer ' + token } })
               .then(function (r) { return r.ok ? r.json() : null; })
               .then(function (home) {
                 if (!home) return null;
