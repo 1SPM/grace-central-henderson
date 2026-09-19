@@ -1,0 +1,270 @@
+/* Faithful mobile · My Church, one system.
+ *
+ * Home was assembled by a dozen modules, each with its own gutter (0, 12 or
+ * 16px), radius (9 to 28px), border colour and type size (9 to 32px). Nothing
+ * was wrong with any one piece; together they read as a stack of different
+ * apps. This layer makes the pieces share one gutter, one card, one type scale
+ * and one minimum tap size.
+ *
+ * THE TYPE SCALE IS SIX SIZES: 28 · 22 · 17 · 15 · 13 · 12, in two families
+ * (the display serif for titles, figures and scripture; the UI sans for
+ * everything else) and three weights (400 · 600 · 700). If something on Home
+ * needs a size that is not in that list, it needs a different role, not a
+ * seventh size. Shared chrome is exempt: the screen title, the numeric badges.
+ *
+ * Kept on purpose, because they are what people like about this page: the
+ * worship-photo hero with its "You belong here." line and replay pill, and the
+ * real IMPACT card art.
+ *
+ * Faithful only. Every selector is under .app #screen-home (or names a
+ * Faithful-mobile class), and the file lives in tenants/faithful, so nothing
+ * here can reach another tenant's portal.
+ */
+.app #screen-home{
+  --fh-gutter:16px;
+  --fh-radius:20px;
+  --fh-ink:#173755;
+  --fh-title:#123457;
+  --fh-muted:#536d85;
+  --fh-line:#dfe8f1;
+  --fh-soft:#eaf3fc;
+  --fh-control:#175fa5;
+  --fh-shadow:0 1px 2px #12345708,0 8px 24px #1234570d;
+  --fh-display:var(--font-display,Georgia),Georgia,serif;
+}
+
+/* ── one gutter, one rhythm ─────────────────────────────────────────────── */
+.app #screen-home > .scroll{padding-top:4px;padding-left:0;padding-right:0}
+.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.mobile-impact-summary,.mobile-shortcuts,.mobile-community-summary,.fm-survey-invite){
+  margin:16px var(--fh-gutter) 0;width:auto;box-sizing:border-box
+}
+.app #screen-home > .scroll > :is(.mobile-impact-summary,.mobile-community-summary){margin-top:32px}
+.app #screen-home > .scroll > .fm-survey-invite{margin-top:32px}
+
+/* ── one card ───────────────────────────────────────────────────────────── */
+/* Written out rather than grouped in :is(). :is() takes the specificity of its
+   MOST specific argument and lends it to every selector in the list, so one
+   "#id" or ".a .b" in there outranks the per-module rules below -- the card
+   and its story could not be joined until this was a plain list. */
+.app #screen-home .home-hero-leader,
+.app #screen-home .mobile-shortcuts button,
+.app #screen-home .mobile-impact-card,
+.app #screen-home .mobile-impact-story,
+.app #screen-home .cn-post{
+  background:#fff;border:1px solid var(--fh-line);border-radius:var(--fh-radius);box-shadow:var(--fh-shadow)
+}
+
+/* ── one type scale: 28 · 22 · 17 · 15 · 13 · 12 ────────────────────────── */
+.app #screen-home :is(.mobile-impact-summary h2,.mobile-community-summary h2){
+  font:700 22px/1.2 var(--fh-display);letter-spacing:-.3px;color:var(--fh-title);margin:0
+}
+.app #screen-home .mobile-impact-summary > p{font-size:13px;line-height:1.5;color:var(--fh-muted);margin:4px 0 0}
+
+/* ── hero: same photograph and words, a third shorter. The date line carries
+      the next service (faithful-mobile-finish.js), so there is one action ── */
+.app #screen-home .home-hero{min-height:176px;padding:20px 18px;border-radius:24px;display:flex;flex-direction:column;justify-content:flex-end}
+.app #screen-home .home-hero-date{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#e1eaf6}
+.app #screen-home .home-hero-name{font-size:28px;line-height:1.12;margin-top:4px}
+.app #screen-home .home-hero-tagline{font-size:15px;font-weight:400;margin-top:4px}
+.app #screen-home .home-hero-top-right{margin-top:14px}
+/* The one real action, so it reads as the primary button. */
+.app #screen-home .home-live-pill{min-height:44px;padding:0 18px;border-radius:22px;font-size:13px;font-weight:600;background:#fff!important;color:var(--fh-title);border-color:#fff}
+.app #screen-home .home-live-pill i{background:var(--fh-control)}
+
+/* The "Someone just gave" toasts were in the hero's flow, so each one made the
+   hero ~34px taller for a few seconds and everything under it jumped -- on a
+   timer, for as long as Home was open. The compact hero has no free corner,
+   so the newest one sits as a badge across the hero's bottom edge, in the gap
+   above the tiles: it covers nothing, and the page holds still. */
+.app #screen-home .home-hero{position:relative;overflow:visible}
+/* The badge is positioned against the hero, not the button row it sits in. */
+.app #screen-home :is(.home-hero-top,.home-hero-left,.home-hero-top-right){position:static}
+.app #screen-home .home-donate-stack{position:absolute;right:16px;bottom:-14px;max-width:72%;margin:0;pointer-events:none;z-index:2}
+.app #screen-home .home-donate-stack > :not(:last-child){display:none}
+.app #screen-home .home-donate-stack .watch-donate-toast{margin:0;padding:6px 10px;border-radius:14px;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(180deg,#2a3163,#1a2048);border:1px solid #b8a35a;color:#fff;box-shadow:0 6px 14px #12143459}
+
+/* ── leader: one row. Who, what it is, one way in ───────────────────────── */
+.app #screen-home #home-leader-chip{grid-template-columns:48px minmax(0,1fr) auto;column-gap:12px;padding:12px 12px 12px 14px}
+.app #screen-home #home-leader-chip-av{width:48px;height:48px}
+.app #screen-home #home-leader-chip .home-leader-chip-label{font-size:12px;font-weight:600;letter-spacing:.06em;color:#8a6420}
+.app #screen-home #home-leader-chip .home-leader-chip-name{white-space:normal;overflow:visible;text-overflow:clip;font-size:15px;font-weight:600;line-height:1.3}
+.app #screen-home #home-leader-chip .home-leader-chip-sub{font-size:13px}
+.app #screen-home #home-leader-chip .home-leader-chip-cta{min-height:44px;padding:0 16px;display:flex;align-items:center;border-radius:22px;background:var(--fh-soft);font-size:13px;font-weight:600;color:var(--fh-control);white-space:nowrap}
+/* "Request pastoral care" opens the Care screen -- exactly what the Care tile
+   two rows down does. One of them on Home is enough; the tile is the bigger
+   target. The link is hidden here, not removed: it is still in the DOM. */
+.app #screen-home #home-leader-chip > .mobile-human-care{display:none}
+
+/* ── IMPACT: one module. The card art stays; the cause becomes its footer ── */
+.app #screen-home .mobile-impact-summary > header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.app #screen-home .mobile-impact-summary > header > small{flex-shrink:0;font-size:12px;font-weight:600;color:#7a5a1e;background:#fbf3e1;padding:3px 9px;border-radius:10px}
+.app #screen-home .mobile-impact-card{margin-top:14px;border-radius:var(--fh-radius) var(--fh-radius) 0 0;border-bottom:0;box-shadow:none;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center}
+.app #screen-home .mobile-impact-card > img{min-height:0;height:auto;padding:16px 4px 16px 16px;background:transparent;box-sizing:border-box;filter:drop-shadow(0 6px 12px #12345726)}
+.app #screen-home .mobile-impact-card > div{padding:14px 14px 10px}
+.app #screen-home .mobile-impact-card span{font-size:13px;color:var(--fh-muted)}
+.app #screen-home .mobile-impact-card strong{font-size:22px;margin:4px 0 0;color:var(--fh-title)}
+.app #screen-home .mobile-impact-card small{font-size:12px}
+.app #screen-home .mobile-impact-story{margin-top:0;border-top:1px solid var(--fh-line);border-radius:0 0 var(--fh-radius) var(--fh-radius);grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:14px;background:#f8fbfe}
+.app #screen-home .mobile-impact-story > img{width:64px;height:64px;min-height:0;border-radius:14px}
+.app #screen-home .mobile-impact-story > div{padding:0}
+.app #screen-home .mobile-impact-story h3{font-size:17px;margin:0;color:var(--fh-title)}
+.app #screen-home .mobile-impact-story p{font-size:13px;margin:2px 0 0}
+.app #screen-home .mobile-impact-summary button{min-height:44px;padding:0;font-size:13px;font-weight:600;color:var(--fh-control)}
+.app #screen-home .mobile-impact-story{padding-bottom:4px}
+
+/* ── this week: four across, so it costs one row instead of two ─────────── */
+.app #screen-home .mobile-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.app #screen-home .mobile-shortcuts button{flex-direction:column;justify-content:flex-start;gap:6px;min-height:92px;padding:12px 4px 10px;text-align:center;border-radius:18px;transition:transform .12s ease}
+.app #screen-home .mobile-shortcuts button:active{transform:scale(.96)}
+.app #screen-home .mobile-shortcuts button > span:last-child{display:none}
+/* Tinted wells instead of solid discs: four dark circles in a row out-shouted
+   the hero above them. */
+.app #screen-home .mobile-shortcut-icon{width:40px;height:40px;background:var(--fh-soft);color:#13477a}
+.app #screen-home .mobile-shortcuts button:last-child .mobile-shortcut-icon{background:#e2f3ea;color:#35765a}
+.app #screen-home .mobile-shortcuts strong{font-size:13px;font-weight:600;line-height:1.2}
+.app #screen-home .mobile-shortcuts small{font-size:12px;line-height:1.25;margin-top:2px;color:var(--fh-muted)}
+
+/* ── pathways: not on the phone's Home ───────────────────────────────────
+   Growth, Resource, Assistance, Community and Engagement each open a screen
+   that is already a tab or a tile here, so on a phone the grid was 470px of
+   second navigation. Hidden, not removed: updateDashboard() sets the tiles'
+   badges by ID. Delete this one rule to bring the section back -- and add
+   '.dash-mod' to the order list in faithful-mobile-finish.js. */
+.app #screen-home > .scroll > .dash-mod{display:none}
+
+/* ── community: title, two ways in, one post ────────────────────────────── */
+.app #screen-home .mobile-community-summary{display:flex;flex-wrap:wrap;align-items:center;column-gap:20px}
+.app #screen-home .mobile-community-summary h2{flex:1 0 100%}
+.app #screen-home .mobile-community-summary > button{min-height:44px;padding:0;font-size:13px;font-weight:600;color:var(--fh-control);border:0;background:none;cursor:pointer;font-family:inherit}
+.app #screen-home .mobile-community-summary .cn-post{flex:1 0 100%;margin:6px 0 0;padding:16px;box-sizing:border-box}
+.app #screen-home .mobile-community-summary .cn-post-name{font-size:15px}
+.app #screen-home .mobile-community-summary .cn-post-role,
+.app #screen-home .mobile-community-summary .cn-post-time{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-badge{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-quote{font:700 15px/1.5 var(--fh-display);border-radius:4px 14px 14px 4px}
+.app #screen-home .mobile-community-summary .cn-post-verse{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-body{font-size:15px;line-height:1.5}
+.app #screen-home .mobile-community-summary .cn-post-actions{gap:8px}
+.app #screen-home .mobile-community-summary .cn-pact{min-height:44px;border-radius:14px;font-size:13px;white-space:nowrap;padding:0 2px}
+/* Home shows the post, not the thread; the thread is one tap away on Connect. */
+.app #screen-home .mobile-community-summary .cn-comment-area{display:none}
+
+/* ── the closing invitation ─────────────────────────────────────────────── */
+.app #screen-home .fm-survey-invite{border-radius:var(--fh-radius)}
+.app #screen-home .fm-survey-invite h2{font:700 17px/1.25 var(--fh-display);color:var(--fh-title)}
+.app #screen-home .fm-survey-invite p{font-size:13px}
+
+/* ── the scale, enforced where modules brought their own sizes ──────────── */
+.app #screen-home .mobile-impact-card strong{font-size:22px}
+.app #screen-home .mobile-community-summary .cn-post-quote{font-size:15px;line-height:1.5}
+.app #screen-home .fm-survey-invite button{font-size:15px;font-weight:600}
+
+/* ── one look: indigo, gold, and depth ────────────────────────────────────
+   Home briefly gave each function its own colour (blue, violet, rose, green,
+   gold). Five colours on one screen separated the cards and also made the page
+   busy. This is the uniform look Divinity uses instead, and it separates cards
+   by SURFACE rather than hue:
+
+     light card   white-to-lavender gradient, a thin gold rule round it, a soft
+                  two-layer shadow -- for things you read or browse
+     dark card    a deep indigo gradient with a sheen at the top and a gold
+                  rule -- for the people and the invitations: your leader, the
+                  scripture, the closing invitation, GRACE
+     gold         the one primary action on the screen
+     navy pill    every other action
+     icon well    a rounded square, lavender, navy glyph -- always the same
+
+   Texture comes from gradients, never from a flat fill: the page itself runs
+   lavender to grey-violet under a fine dot grain. Two colours, so nothing on
+   the page competes with the photograph in the hero. */
+.app #screen-home{
+  /* the tokens the rest of this file already uses, re-pointed */
+  --fh-ink:var(--dv-ink);--fh-title:var(--dv-navy);--fh-muted:var(--dv-muted);
+  --fh-line:var(--dv-gold-line);--fh-soft:#ecebf5;--fh-control:var(--dv-navy);
+  --fh-shadow:var(--dv-lift);
+  background:#efeef6;
+}
+.app #screen-home > .scroll{
+  background:
+    radial-gradient(#23255c14 .6px,transparent .9px) 0 0/6px 6px,
+    radial-gradient(90% 40% at 50% 0%,#ffffff 0%,#ffffff00 70%),
+    linear-gradient(180deg,#f6f5fb 0%,#ebe9f4 55%,#e6e4f0 100%);
+}
+
+/* light cards */
+.app #screen-home .mobile-shortcuts button,
+.app #screen-home .mobile-impact-card,
+.app #screen-home .cn-post,
+.app #screen-home > .scroll > .fw-story-nudge{background:var(--dv-light);border:1px solid var(--dv-gold-line);box-shadow:var(--dv-lift)}
+.app #screen-home .mobile-impact-card{box-shadow:none}
+.app #screen-home .mobile-impact-summary > header + p + .mobile-impact-card,
+.app #screen-home .mobile-impact-card{border-bottom:0}
+
+/* hero: the photograph under indigo, a gold hairline, one gold action */
+.app #screen-home .home-hero{
+  background:
+    linear-gradient(180deg,#1a1c4d59 0%,#1a1c4d8c 45%,#151740f0 100%),
+    linear-gradient(90deg,#151740d9 0%,#15174033 70%),
+    url('../../assets/faithful-worship-hero.jpg') 65% center/cover;
+  border:1px solid #d6bc7c8c;box-shadow:0 1px 0 #ffffff33 inset,0 18px 40px #15174059;
+}
+.app #screen-home .home-hero-date{color:#e3cf97}
+.app #screen-home .home-live-pill{background:var(--dv-gold-fill)!important;color:#1b1d3f;border:0;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}
+.app #screen-home .home-live-pill i{background:#1b1d3f}
+
+/* this week: four identical tiles; the glyph says which is which */
+.app #screen-home .mobile-shortcuts button .mobile-shortcut-icon,
+.app #screen-home .mobile-shortcuts button:last-child .mobile-shortcut-icon{width:44px;height:44px;border-radius:13px;background:var(--dv-well);border:1px solid #d8d6e8;color:var(--dv-navy);box-shadow:0 1px 0 #fff inset}
+.app #screen-home .mobile-shortcuts strong{color:var(--dv-navy)}
+.app #screen-home .mobile-shortcuts small{color:var(--dv-muted)}
+
+/* your leader: a dark card */
+.app #screen-home #home-leader-chip{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:var(--dv-lift-dark)}
+.app #screen-home #home-leader-chip-av{border:2px solid #d6bc7c;box-shadow:0 0 0 3px #d6bc7c33}
+.app #screen-home #home-leader-chip .home-leader-chip-label{color:#e3cf97}
+.app #screen-home #home-leader-chip .home-leader-chip-name{font:700 17px/1.25 var(--fh-display);letter-spacing:-.2px;color:#fff}
+.app #screen-home #home-leader-chip .home-leader-chip-sub{color:#c9cbe6}
+.app #screen-home #home-leader-chip .home-leader-chip-cta{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 8px 16px #0d0f3059}
+
+/* the My story line */
+.app #screen-home .fw-story-nudge-go{color:var(--dv-navy)}
+.app #screen-home .fw-story-nudge-go small,
+.app #screen-home .fw-story-nudge-close{color:var(--dv-gold-ink)}
+
+/* IMPACT: a light card with a warm footer and one navy action */
+.app #screen-home .mobile-impact-summary > header > small{background:none;border:1px solid var(--dv-gold);color:var(--dv-gold-ink)}
+.app #screen-home .mobile-impact-card > img{background:var(--dv-well);border-radius:14px;margin:12px 0 12px 12px;padding:10px;width:calc(100% - 12px);border:1px solid #d8d6e8}
+.app #screen-home .mobile-impact-card strong{color:var(--dv-navy)}
+.app #screen-home .mobile-impact-card button{color:var(--dv-gold-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:#b8a35a99}
+.app #screen-home .mobile-impact-story{background:linear-gradient(180deg,#fbfaf3 0%,#f4f1e2 100%);border:1px solid var(--dv-gold-line);border-top-color:#e6e2c0;box-shadow:var(--dv-lift)}
+.app #screen-home .mobile-impact-story button{min-height:44px;margin-top:8px;padding:0 18px;border-radius:22px;background:var(--dv-navy-fill);color:#fff;text-decoration:none;box-shadow:0 8px 18px #292a6940}
+
+/* community: chips for the ways in, a dark panel for the scripture */
+.app #screen-home .mobile-community-summary{row-gap:10px;column-gap:8px}
+.app #screen-home .mobile-community-summary > button{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--dv-gold-line);background:linear-gradient(180deg,#fdfcf6,#f6f4e6);color:var(--dv-navy)}
+.app #screen-home .mobile-community-summary .cn-post-name{color:var(--dv-navy)}
+.app #screen-home .mobile-community-summary .cn-post-badge{background:none;border:1px solid var(--dv-gold);color:var(--dv-gold-ink);border-radius:12px}
+.app #screen-home .mobile-community-summary .cn-post-quote{background:var(--dv-dark);border:0;border-left:3px solid var(--dv-gold);border-radius:6px 16px 16px 6px;color:#fff;font-style:italic;box-shadow:var(--dv-lift-dark)}
+.app #screen-home .mobile-community-summary .cn-post-verse{color:var(--dv-gold-ink)}
+.app #screen-home .mobile-community-summary .cn-post-body{color:var(--dv-ink)}
+.app #screen-home .mobile-community-summary .cn-post-actions{border-top-color:#e6e2c0}
+.app #screen-home .mobile-community-summary .cn-pact{border:1px solid var(--dv-gold-line);background:linear-gradient(180deg,#fff,#f8f7fc);color:var(--dv-navy)}
+
+/* the closing invitation: dark, with the screen's second gold action */
+.app #screen-home .fm-survey-invite{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:var(--dv-lift-dark)}
+.app #screen-home .fm-survey-invite h2{color:#fff}
+.app #screen-home .fm-survey-invite p{color:#d3d5ec;opacity:1}
+.app #screen-home .fm-survey-invite button{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}
+
+
+/* ── footer: on the grid, and every link wide enough to hit ─────────────── */
+.app #screen-home > .scroll > .fd-footer{margin:28px var(--fh-gutter) 0;padding:16px 0}
+.app #screen-home .fd-footer button{min-width:44px}
+
+/* ── tab bar: six tabs is a squeeze, so every one fills its cell ────────── */
+.app .tabbar .tab{height:100%;min-height:44px;font-size:12px}
+.app .impact-float-close{width:44px;height:44px;margin:-8px -8px -8px 0}
+
+@media(prefers-reduced-motion:reduce){
+  .app #screen-home .mobile-shortcuts button{transition:none}
+}

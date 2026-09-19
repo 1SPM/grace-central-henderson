@@ -1,30 +1,67 @@
-.app .app-drawer{width:85%;max-width:360px;background:linear-gradient(180deg,#091c30 0%,#102941f5 65%,#102941c9 100%),url('../../assets/faithful-dawn.jpg') center bottom/cover;color:#f5f8fc}
-.app .drawer-head{position:relative;padding:22px 20px 18px;gap:14px;align-items:flex-start}
-.app .drawer-head-title{font:500 32px/1.2 Georgia,serif;letter-spacing:0}
-.app .drawer-logo.drawer-wordmark{height:42px;max-width:calc(100% - 48px)}
-.app .fmn-close{position:absolute;right:10px;top:12px;width:44px;height:44px;border:0;background:none;color:white;font-size:28px;border-radius:8px;cursor:pointer}
-.app .drawer-scroll{padding:12px 14px 32px}
-.app .drawer-grace{background:transparent;border:0;padding:14px 8px 22px;box-shadow:none;gap:14px}
-.app .drawer-grace-title{font:500 23px Georgia,serif;letter-spacing:0}
-.app .drawer-grace-tag{display:none}
-.app .drawer-grace-sub{font-size:13px;line-height:1.5;color:#c2d4e6}
-.app .drawer-grace .grace-orb{width:48px;height:48px}
-.app .drawer-item{min-height:58px;padding:14px 12px;border-radius:10px;gap:14px;font:500 20px/1.3 Georgia,serif;color:#f0f5fc;text-align:left}
-.app .drawer-item.active{background:#244d72;box-shadow:inset 3px 0 #8dccf3}
-.app .drawer-item-icon{width:26px;height:26px;color:#e5f1ff}
-.app .drawer-item:after{content:'›';margin-left:auto;font:24px Georgia,serif;color:#b9d0e7}
-.app .drawer-link{min-height:48px;font-size:14px;line-height:1.4;color:#e1ebf6}
-.app .drawer-section-label{font-size:11px;color:#a9c1d8;letter-spacing:.8px;margin-top:22px;padding-top:18px;border-top:1px solid #ffffff25}
-.app .tabbar-zone{padding-left:0;padding-right:0;background:#fff;border-top:1px solid #d8e4ef}
+.app .app-drawer{width:85%;max-width:360px;background:linear-gradient(180deg,#17193f 0%,#17193ff5 65%,#17193fc9 100%),url('../../assets/faithful-dawn.jpg') center bottom/cover;color:#f5f5fc}
+/* The head is the church's mark and the close button, nothing else. It used
+   to carry a 32px "Menu" title; a panel that slides out from the menu button
+   does not need a caption (faithful-mobile-navigation.js removes it). */
+.app .drawer-head{position:relative;min-height:68px;padding:12px 60px 12px 20px;gap:0;align-items:flex-start;justify-content:center;border-bottom:1px solid #ffffff1f}
+.app .drawer-logo.drawer-wordmark{height:40px;max-width:100%}
+.app .fmn-close{position:absolute;right:10px;top:12px;line-height:1;width:44px;height:44px;border:0;background:none;color:white;font-size:28px;border-radius:8px;cursor:pointer}
+.app .drawer-scroll{padding:12px 12px 24px}
+/* Rows are in the UI face at 17px, the same step the rest of the app uses for
+   row and card titles. They were 20px Georgia -- a third typeface, found
+   nowhere else on the phone. No chevrons: every row here navigates, so a "›"
+   on each one distinguishes nothing; the filled row says where you are. */
+.app .drawer-nav{gap:2px}
+.app .drawer-item{min-height:50px;padding:0 14px;border-radius:14px;gap:14px;font:600 17px/1.3 var(--font-ui,Inter),sans-serif;letter-spacing:0;color:#f1f1fb;text-align:left}
+.app .drawer-item.active{background:#ffffff1f;box-shadow:none;color:#fff}
+.app .drawer-item:active{background:#ffffff14}
+.app .drawer-item-icon{width:24px;height:24px;color:#d3d4f3}
+.app .drawer-item.active .drawer-item-icon{color:#9b9ee5}
+.app .drawer-link{min-height:48px;padding-left:14px;padding-right:14px;gap:14px;font:400 15px/1.4 var(--font-ui,Inter),sans-serif;color:#e1e2f6}
+.app .drawer-section-label{font:600 12px/1.4 var(--font-ui,Inter),sans-serif;color:#a9abd8;letter-spacing:.06em;margin-top:16px;padding-top:16px;border-top:1px solid #ffffff1f}
+.app .drawer-divider{background:#ffffff1f;margin:10px 2px}
+/* A label that opens the list is heading the only list there is: the phone
+   drops "Get Connected" and "Quick Links", which left "MAIN" over everything. */
+.app .drawer-scroll > .drawer-section-label:first-child{display:none}
+/* The drawer is a grid so its last row can hold two siblings side by side:
+   Settings (appended by faithful-destinations.js) and Sign Out (moved here by
+   faithful-mobile-navigation.js). Head and list span both columns. */
+.app #app-drawer{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto}
+.app #app-drawer > .drawer-head,
+.app #app-drawer > .drawer-scroll{grid-column:1/-1}
+.app #app-drawer > .fd-settings-cog{grid-column:1;grid-row:3}
+.app #app-drawer > .drawer-signout{grid-column:2;grid-row:3;width:auto;min-height:48px;margin:0;padding:12px 22px max(14px,env(safe-area-inset-bottom)) 18px;gap:10px;border-radius:0;border:solid #ffffff38;border-width:1px 0 0 1px;background:#1d1f4f;font:600 15px/1.4 var(--font-ui,Inter),sans-serif;color:#e1e2f6}
+.app #app-drawer > .drawer-signout:active{background:#292b6e}
+/* The crisis card is the one thing here that is not navigation, so it keeps its
+   own surface -- on the same type scale as everything else. */
+.app .app-drawer .drawer-crisis{border-radius:16px;padding:16px}
+.app .app-drawer .drawer-crisis-title{font:600 15px/1.3 var(--font-ui,Inter),sans-serif}
+.app .app-drawer .drawer-crisis-sub{font-size:13px;line-height:1.5}
+/* The body line ("Access free, confidential resources and helplines.") says
+   what the subline, the button and the footer already say between them. In the
+   drawer it is the difference between the whole card fitting and its last line
+   being cut off, so it is dropped here; the full wording stays on Leaders. */
+.app .app-drawer .drawer-crisis-body{display:none}
+.app .app-drawer .drawer-crisis-head{margin-bottom:12px}
+.app .app-drawer .drawer-crisis-btn{min-height:48px;border-radius:24px;font:600 15px/1.2 var(--font-ui,Inter),sans-serif}
+.app .app-drawer .drawer-crisis-foot{font-size:12px;line-height:1.5}
+.app #app-drawer > .fd-settings-cog{font:600 15px/1.4 var(--font-ui,Inter),sans-serif;padding-left:26px;gap:14px}
+.app #app-drawer > .fd-settings-cog > span:first-child{font-size:22px;width:24px;text-align:center}
+/* faithful-destinations.js appends its screens (Settings, My story, Privacy...)
+   to .app AFTER the tab bar, and .app is a flex column -- so on every one of
+   those screens the tab bar was drawn at the TOP. order puts it back under
+   whichever screen is showing; the overlays are absolutely positioned and do
+   not take part. */
+.app > .tabbar-zone{order:1}
+.app .tabbar-zone{padding-left:0;padding-right:0;background:#fff;border-top:1px solid #d8d9ef}
 .app .tabbar{border-radius:0;background:#fff;box-shadow:none;border:0;padding:4px 8px;backdrop-filter:none}
-.app .tab{position:relative;min-height:52px;font-size:11px;color:#344d69;gap:3px}
-.app .tab-icon{width:44px;height:30px;border-radius:18px;color:#284666}
+.app .tab{position:relative;min-height:52px;font-size:12px;color:#343669;gap:3px}
+.app .tab-icon{width:44px;height:30px;border-radius:18px;color:#282a66}
 .app .tab-icon svg{color:inherit!important;opacity:1}
-.app .tab.active{color:#123858}
-.app .tab.active .tab-icon{background:#deefff;color:#0863b2;box-shadow:none}
-.app .tab-badge{background:#1265ad;color:white;border:2px solid white;right:calc(50% - 24px);top:0;font-size:10px;min-width:17px;height:17px}
+.app .tab.active{color:#1d1e4d}
+.app .tab.active .tab-icon{background:#e5e6f8;color:#323588;box-shadow:none}
+.app .tab-badge{background:#34368b;color:white;border:2px solid white;right:calc(50% - 24px);top:0;font-size:10px;min-width:17px;height:17px}
 .app.menu-open .tabbar-zone{pointer-events:none;filter:brightness(.65)}
 .app.menu-open .toast,.app.menu-open .watch-donate-toast{visibility:hidden}
-.app .toast{background:#edf7ff;color:#173b5c;border:1px solid #d1e4f4;box-shadow:0 5px 18px #102d4b22;bottom:calc(var(--ios-tab-chrome-h) + 16px);border-radius:14px;font-size:13px}
-.app .drawer-item:focus-visible,.app .drawer-link:focus-visible,.app .tab:focus-visible,.app .fmn-close:focus-visible,.app .drawer-grace:focus-visible{outline:3px solid #79c5ff;outline-offset:2px}
+.app .toast{background:#f1f1fb;color:#1f2154;border:1px solid #d2d3f3;box-shadow:0 5px 18px #191a4222;bottom:calc(var(--ios-tab-chrome-h) + 16px);border-radius:14px;font-size:13px}
+.app .drawer-item:focus-visible,.app .drawer-link:focus-visible,.app .tab:focus-visible,.app .fmn-close:focus-visible{outline:3px solid #9598e3;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.app .app-drawer,.app .app-drawer-backdrop{transition:none}}

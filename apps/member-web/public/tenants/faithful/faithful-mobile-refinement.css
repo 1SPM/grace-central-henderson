@@ -1,73 +1,73 @@
 /* Faithful mobile: same visual assets, existing mobile navigation and state. */
 #gv-panel-assets>#res-hero,#gv-panel-impact>.gv-impact-head{display:none}
 #screen-give .gv-alloc-wrap{display:flex;flex-direction:column;align-items:center;gap:18px}#screen-give .gv-donut{width:150px;height:150px}#screen-give #gv-alloc-donut{width:150px;height:150px}
-#screen-give .scroll{background:#f3f9fd}
-.fm-wallet-heading{padding:18px 2px 20px}.fm-wallet-heading h1{font:700 30px/1.15 Georgia,serif;color:#153454;margin:0 0 10px}.fm-wallet-heading p{font-size:14px;color:#4d6882;line-height:1.5}.fm-wallet-heading small{display:inline-block;padding:5px 9px;background:#e3f1ff;color:#235981;border-radius:8px;margin-top:12px;font-size:11px}
+#screen-give .scroll{background:#f4f4fc}
+.fm-wallet-heading{padding:18px 2px 20px}.fm-wallet-heading h1{font:700 28px/1.15 var(--font-display,'Playfair Display'),Georgia,serif;color:#1c1e4d;margin:0 0 10px}.fm-wallet-heading p{font-size:15px;color:#4d4f82;line-height:1.5}.fm-wallet-heading small{display:inline-block;padding:5px 9px;background:#e9e9f9;color:#2c2f78;border-radius:8px;margin-top:12px;font-size:12px}
 #gv-panel-assets>.gv-hero,#gv-panel-assets>.gv-engage-strip,#gv-panel-impact>.gv-stats{display:none}
-#screen-give #gv-grace-card-block{padding:14px;background:white;border:1px solid #d6e5f1;border-radius:12px}
+#screen-give #gv-grace-card-block{padding:14px;background:white;border:1px solid #d6d7f1;border-radius:12px}
 #gv-grace-card-block .mc-front>.members-card-shell{visibility:hidden}#gv-grace-card-block .mc-front{position:absolute}#gv-grace-card-block .fm-card-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:14px}
-#screen-give #gv-balance-display{display:block!important;font:700 38px Georgia,serif;color:#153454;margin:6px 0 16px}
+#screen-give #gv-balance-display{display:block!important;font:700 28px var(--font-display,'Playfair Display'),Georgia,serif;color:#1c1e4d;margin:6px 0 16px}
 .fm-balance-label{color:#536a7f;font-size:13px;margin:12px 0 0}
 #gv-grace-card-block .gv-balance-meta,#gv-grace-card-block .gv-balance-sub,#gv-grace-card-block .gv-card-teaser-actions,#gv-grace-card-block .gv-wallet-more-btn{display:none}
-.fm-wallet-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.fm-wallet-actions button{border:1px solid #c9dfef;background:#edf7ff;color:#164b78;border-radius:8px;min-height:52px;font-size:13px;font-weight:600}
-.fm-impact-bridge{display:flex;gap:12px;padding:12px;margin:16px 0;border:1px solid #d6e5f1;background:white;border-radius:10px}.fm-impact-bridge img{width:90px;object-fit:cover;border-radius:6px}.fm-impact-bridge h2{font:700 17px/1.25 Georgia,serif;color:#153454}.fm-impact-bridge strong{display:block;font:700 25px Georgia,serif;margin:7px 0;color:#153454}.fm-impact-bridge button{min-height:36px;border:0;background:none;color:#175b9b;text-align:left;padding:0}
-.fm-section-title{font:700 25px Georgia,serif;color:#153454;padding:12px}.fm-giving-images{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 14px}.fm-giving-images img{width:100%;height:90px;object-fit:cover;border-radius:7px}.fm-giving-images strong{display:block;font-size:12px;color:#153454;margin:5px 0}
-.fm-impact-story{position:relative;margin:0 0 16px;border-radius:12px;overflow:hidden}.fm-impact-story img{width:100%;height:180px;object-fit:cover}.fm-impact-story h2{position:absolute;bottom:0;left:0;right:0;padding:28px 14px 14px;margin:0;background:linear-gradient(transparent,#082740d9);color:white;font:700 25px/1.1 Georgia,serif}
-#screen-give #gv-alloc-card{display:block;background:white;border:1px solid #cbdff0;border-radius:12px}#screen-give .gv-alloc-layout{flex-direction:column}#screen-give .gv-alloc-list{width:100%}#screen-give .impact-row{padding:12px 0;gap:9px}#screen-give .impact-bar{height:8px;background:#e6edf4}#screen-give .impact-fill{height:8px}#screen-give .gv-card-head strong{font:700 21px Georgia,serif;color:#153454}
-.fm-allocation-note{padding:12px;font-size:12px;color:#536b80;line-height:1.5}#screen-give .gv-goal-strip{margin:16px 0;background:#fff;border:1px solid #d6e5f1;border-radius:12px}#screen-give .gv-goal-bar{height:10px}.fm-wallet-footer{margin-top:22px;padding:30px 12px;background:linear-gradient(#eef8ffad,#eef8ffdb),url('../../assets/faithful-dawn.jpg') center/cover;text-align:center;color:#153454}.fm-wallet-footer h2{font:700 23px/1.2 Georgia,serif}.fm-wallet-footer p{font-size:12px;margin-top:10px}
+.fm-wallet-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.fm-wallet-actions button{border:1px solid #c9caef;background:#f1f1fb;color:#262968;border-radius:8px;min-height:52px;font-size:13px;font-weight:600}
+.fm-impact-bridge{display:flex;gap:12px;padding:12px;margin:16px 0;border:1px solid #d6d7f1;background:white;border-radius:10px}.fm-impact-bridge img{width:90px;object-fit:cover;border-radius:6px}.fm-impact-bridge h2{font:700 17px/1.25 var(--font-display,'Playfair Display'),Georgia,serif;color:#1c1e4d}.fm-impact-bridge strong{display:block;font:700 22px var(--font-display,'Playfair Display'),Georgia,serif;margin:7px 0;color:#1c1e4d}.fm-impact-bridge button{min-height:36px;border:0;background:none;color:#303382;text-align:left;padding:0}
+.fm-section-title{font:700 22px var(--font-display,'Playfair Display'),Georgia,serif;color:#1c1e4d;padding:12px}.fm-giving-images{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 14px}.fm-giving-images img{width:100%;height:90px;object-fit:cover;border-radius:7px}.fm-giving-images strong{display:block;font-size:12px;color:#1c1e4d;margin:5px 0}
+.fm-impact-story{position:relative;margin:0 0 16px;border-radius:12px;overflow:hidden}.fm-impact-story img{width:100%;height:180px;object-fit:cover}.fm-impact-story h2{position:absolute;bottom:0;left:0;right:0;padding:28px 14px 14px;margin:0;background:linear-gradient(transparent,#17193fd9);color:white;font:700 22px/1.1 var(--font-display,'Playfair Display'),Georgia,serif}
+#screen-give #gv-alloc-card{display:block;background:white;border:1px solid #cbccf0;border-radius:12px}#screen-give .gv-alloc-layout{flex-direction:column}#screen-give .gv-alloc-list{width:100%}#screen-give .impact-row{padding:12px 0;gap:9px}#screen-give .impact-bar{height:8px;background:#e6e6f4}#screen-give .impact-fill{height:8px}#screen-give .gv-card-head strong{font:700 22px var(--font-display,'Playfair Display'),Georgia,serif;color:#1c1e4d}
+.fm-allocation-note{padding:12px;font-size:12px;color:#536b80;line-height:1.5}#screen-give .gv-goal-strip{margin:16px 0;background:#fff;border:1px solid #d6d7f1;border-radius:12px}#screen-give .gv-goal-bar{height:10px}.fm-wallet-footer{margin-top:22px;padding:30px 12px;background:linear-gradient(#f2f2fbad,#f2f2fbdb),url('../../assets/faithful-dawn.jpg') center/cover;text-align:center;color:#1c1e4d}.fm-wallet-footer h2{font:700 22px/1.2 var(--font-display,'Playfair Display'),Georgia,serif}.fm-wallet-footer p{font-size:12px;margin-top:10px}
 #screen-home .pilot-next-card,#screen-home .card--teaser,#screen-home #home-giving-impact{display:none}
 #screen-home .home-hero{margin:0 12px;border-radius:12px;min-height:235px}
-#screen-home .home-hero-name{font-size:29px}
-#screen-home>.scroll>.home-hero-leader{margin:10px 12px;background:#edf4fa;color:#173754;border:1px solid #dce8f2;display:flex;flex-wrap:wrap}
-#screen-home .home-leader-chip-sub{color:#526d85}
-.mobile-human-care{border:0;border-top:1px solid #d4e2ef;padding:10px 0 0;background:none;color:#174e7d;width:100%;text-align:left}
+#screen-home .home-hero-name{font-size:28px}
+#screen-home>.scroll>.home-hero-leader{margin:10px 12px;background:#ededfa;color:#1d1f4e;border:1px solid #dcddf2;display:flex;flex-wrap:wrap}
+#screen-home .home-leader-chip-sub{color:#525485}
+.mobile-human-care{border:0;border-top:1px solid #d4d5ef;padding:10px 0 0;background:none;color:#282a6c;width:100%;text-align:left}
 .mobile-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 12px}
-.mobile-shortcuts button{display:flex;align-items:center;gap:8px;text-align:left;padding:12px 9px;border:1px solid #e1e9f2;background:#fff;border-radius:10px;color:#173754;min-height:65px}
-.mobile-shortcuts button>span:nth-child(2){flex:1}.mobile-shortcuts strong{display:block;font-size:12px}.mobile-shortcuts small{display:block;font-size:10px;margin-top:4px;color:#526d85}
-.mobile-shortcut-icon{width:30px;height:30px;border-radius:50%;background:#eaf2fa;display:grid;place-items:center;flex-shrink:0}
+.mobile-shortcuts button{display:flex;align-items:center;gap:8px;text-align:left;padding:12px 9px;border:1px solid #e1e2f2;background:#fff;border-radius:10px;color:#1d1f4e;min-height:65px}
+.mobile-shortcuts button>span:nth-child(2){flex:1}.mobile-shortcuts strong{display:block;font-size:12px}.mobile-shortcuts small{display:block;font-size:12px;margin-top:4px;color:#525485}
+.mobile-shortcut-icon{width:30px;height:30px;border-radius:50%;background:#eaebfa;display:grid;place-items:center;flex-shrink:0}
 #screen-home .dash-pillar{min-height:145px;padding:54px 12px 12px;background:#f1ece5}
 #screen-home .dash-pillar::before{height:100%;clip-path:none;opacity:.6}
 #screen-home .dash-pillar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#f6eee7ef,transparent);pointer-events:none}
 #screen-home .dash-pillar>*{position:relative;z-index:1}
 #screen-home .dash-pillar-top{position:absolute;top:10px;left:12px}
-#screen-home .dash-pillar-name{margin:0;font-size:16px}
-#screen-home .dash-pillar-sub{max-width:105px;margin-top:5px;font-size:11px;color:#243c50}
+#screen-home .dash-pillar-name{margin:0;font-size:15px}
+#screen-home .dash-pillar-sub{max-width:105px;margin-top:5px;font-size:12px;color:#242550}
 #screen-home .dash-pillar:last-child{grid-column:1/-1;min-height:95px;padding:22px 60px}
 #screen-home .dash-pillar:last-child .dash-pillar-sub{max-width:210px}
-#screen-home #home-grace-card{margin:20px 12px;padding:20px;background:linear-gradient(135deg,#10273f,#244669);color:#fff}
-#screen-home .home-grace-title{font-family:Georgia,serif;font-size:26px;color:white}
-#screen-home .home-grace-note,#screen-home .home-grace-status{color:#d1dfed}
+#screen-home #home-grace-card{margin:20px 12px;padding:20px;background:linear-gradient(135deg,#17193f,#262867);color:#fff}
+#screen-home .home-grace-title{font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-size:28px;color:white}
+#screen-home .home-grace-note,#screen-home .home-grace-status{color:#d1d2ed}
 #screen-home .grace-acronym-tag{display:none}
-.home-grace-foot button{padding:8px 18px;background:#ffffff18;color:white;border:1px solid #8ba6c1;border-radius:20px}
+.home-grace-foot button{padding:8px 18px;background:#ffffff18;color:white;border:1px solid #8b8dc1;border-radius:20px}
 .mobile-impact-summary,.mobile-community-summary{margin:26px 12px}
-.mobile-impact-summary h2,.mobile-community-summary h2{font-family:Georgia,serif;font-size:26px;color:#123457;margin-bottom:8px}
-.mobile-impact-summary header>small{font-size:10px;color:#55728d}
-.mobile-impact-summary>p{font-size:12px;color:#55728d;margin:10px 0}
-.mobile-impact-card,.mobile-impact-story{display:grid;grid-template-columns:1fr 1fr;background:#fff;border:1px solid #e0e8f1;border-radius:10px;overflow:hidden;margin-top:12px}
+.mobile-impact-summary h2,.mobile-community-summary h2{font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-size:28px;color:#1c1e4d;margin-bottom:8px}
+.mobile-impact-summary header>small{font-size:12px;color:#55578d}
+.mobile-impact-summary>p{font-size:12px;color:#55578d;margin:10px 0}
+.mobile-impact-card,.mobile-impact-story{display:grid;grid-template-columns:1fr 1fr;background:#fff;border:1px solid #e0e1f1;border-radius:10px;overflow:hidden;margin-top:12px}
 .mobile-impact-card>img,.mobile-impact-story>img{width:100%;height:100%;object-fit:cover;min-height:140px}
-.mobile-impact-card>img{object-fit:contain;background:#eaf3fa}
+.mobile-impact-card>img{object-fit:contain;background:#eaebfa}
 .mobile-impact-card>div,.mobile-impact-story>div{padding:14px}
-.mobile-impact-card strong{display:block;font-family:Georgia,serif;font-size:24px;margin:12px 0 3px}
-.mobile-impact-card small{display:block;font-size:10px;color:#55728d}
-.mobile-impact-story h3{font-family:Georgia,serif;font-size:17px;color:#123457}
-.mobile-impact-story p{font-size:12px;line-height:1.5;color:#55728d;margin:8px 0}
-.mobile-impact-summary button,.mobile-community-summary>button{border:0;background:transparent;color:#0753ad;padding:10px 0;font-size:12px;cursor:pointer}
+.mobile-impact-card strong{display:block;font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-size:22px;margin:12px 0 3px}
+.mobile-impact-card small{display:block;font-size:12px;color:#55578d}
+.mobile-impact-story h3{font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-size:17px;color:#1c1e4d}
+.mobile-impact-story p{font-size:12px;line-height:1.5;color:#55578d;margin:8px 0}
+.mobile-impact-summary button,.mobile-community-summary>button{border:0;background:transparent;color:#313383;padding:10px 0;font-size:12px;cursor:pointer}
 .mobile-community-summary .cn-post{margin-top:12px}
 .device{overflow:clip}
 .device>.app{position:absolute;top:var(--ios-safe-top);bottom:0;left:0;right:0;height:auto;overflow:hidden}
 #screen-home .scroll{min-height:0;padding:0 0 calc(24px + var(--ios-safe-bot))}
-#screen-home{background:#f7faff}
-#screen-home .scroll{background-image:radial-gradient(#b0c6dc20 .5px,transparent .8px);background-size:5px 5px}
-#screen-home .home-hero{margin:12px;border-radius:14px;padding:24px 18px;background:linear-gradient(90deg,#061e39eb,#061e3960),url('../../assets/faithful-worship-hero.jpg') 65% center/cover;color:white}
-#screen-home .home-hero-name{font-family:var(--font-brand),Georgia,serif;font-size:32px;line-height:1.15;color:white}
-#screen-home .home-hero-tagline{color:#e1eaf6;font-size:13px;line-height:1.5;margin-top:10px}
+#screen-home{background:#f9f9fd}
+#screen-home .scroll{background-image:radial-gradient(#b0b1dc20 .5px,transparent .8px);background-size:5px 5px}
+#screen-home .home-hero{margin:12px;border-radius:14px;padding:24px 18px;background:linear-gradient(90deg,#17193feb,#17193f60),url('../../assets/faithful-worship-hero.jpg') 65% center/cover;color:white}
+#screen-home .home-hero-name{font-family:var(--font-brand),Georgia,serif;font-size:28px;line-height:1.15;color:white}
+#screen-home .home-hero-tagline{color:#e1e2f6;font-size:13px;line-height:1.5;margin-top:10px}
 #screen-home .home-hero-top{display:block}
 #screen-home .home-hero-top-right{margin-top:18px;align-items:flex-start}
-#screen-home .home-live-pill{background:#14558e;color:white;border:1px solid #aacbe6;padding:12px 18px;min-height:44px}
-#screen-home .home-hero-leader{margin-top:16px;background:#102b45cc;border:1px solid #ffffff30}
+#screen-home .home-live-pill{background:#2c2e76;color:white;border:1px solid #aaace6;padding:12px 18px;min-height:44px}
+#screen-home .home-hero-leader{margin-top:16px;background:#17193fcc;border:1px solid #ffffff30}
 #screen-home .home-hero-metrics{display:none}
 #screen-home .dash-mod{margin:24px 12px;border:0;background:transparent;box-shadow:none}
-#screen-home .dash-mod-title{font-family:var(--font-brand),Georgia,serif;font-size:27px;color:#123457}
+#screen-home .dash-mod-title{font-family:var(--font-brand),Georgia,serif;font-size:28px;color:#1c1e4d}
 #screen-home .dash-mod-sub{font-size:12px;line-height:1.5;color:#5b7089}
 #screen-home .dash-pillars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
 #screen-home .dash-pillar{position:relative;min-height:206px;padding:101px 12px 16px;overflow:hidden;border:1px solid #e4e5e6;border-radius:9px;background:linear-gradient(135deg,#fff,#f2e9df)}
@@ -78,87 +78,87 @@
 #screen-home .dash-pillar--community::before{background-image:url('../../assets/faithful-community.jpg')}
 #screen-home .dash-pillar--engagement::before{background-image:url('../../assets/faithful-food-pantry.jpg')}
 #screen-home .dash-pillar-top{position:absolute;top:85px;left:12px}
-#screen-home .dash-pillar-step{font-family:Georgia,serif;font-size:36px;color:#79533f}
-#screen-home .dash-pillar-name{font-family:var(--font-brand),Georgia,serif;margin-left:32px;font-size:16px;color:#18334c}
+#screen-home .dash-pillar-step{font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-size:28px;color:#79533f}
+#screen-home .dash-pillar-name{font-family:var(--font-brand),Georgia,serif;margin-left:32px;font-size:15px;color:#1b1d49}
 #screen-home .dash-pillar-sub{margin-top:14px;font-size:12px;line-height:1.5;color:#4e6479}
 #screen-home .dash-pillar-badge{display:none}
-#screen-home .home-grace-card{background:linear-gradient(135deg,#10273f,#244669);color:white;border-radius:14px}
-#screen-home button:focus-visible,#screen-home [role=button]:focus-visible{outline:3px solid #458dcc;outline-offset:2px}
+#screen-home .home-grace-card{background:linear-gradient(135deg,#17193f,#262867);color:white;border-radius:14px}
+#screen-home button:focus-visible,#screen-home [role=button]:focus-visible{outline:3px solid #5256bf;outline-offset:2px}
 #screen-home .home-wallet-card{display:none}
 #screen-home .dash-pillars .dash-pillar{min-height:145px;padding:54px 12px 12px;background:#f1ece5}
 #screen-home .dash-pillars .dash-pillar::before{height:100%;clip-path:none;opacity:.6}
 #screen-home .dash-pillars .dash-pillar-top{position:absolute;top:10px;left:12px}
-#screen-home .dash-pillars .dash-pillar-name{margin:0;font-size:16px}
-#screen-home .dash-pillars .dash-pillar-sub{max-width:105px;margin-top:5px;font-size:11px;color:#243c50}
+#screen-home .dash-pillars .dash-pillar-name{margin:0;font-size:15px}
+#screen-home .dash-pillars .dash-pillar-sub{max-width:105px;margin-top:5px;font-size:12px;color:#242550}
 #screen-home .dash-pillars .dash-pillar:last-child{grid-column:1/-1;min-height:95px;padding:22px 60px}
-#screen-home .home-leader-chip-name,#screen-home .home-leader-chip-label{color:#183b5c}
-#screen-home .mobile-shortcut-icon{background:#13477a;color:#fff}
+#screen-home .home-leader-chip-name,#screen-home .home-leader-chip-label{color:#1f2155}
+#screen-home .mobile-shortcut-icon{background:#262867;color:#fff}
 #screen-home .mobile-shortcut-icon svg [stroke]{stroke:currentColor}
 #screen-home .mobile-shortcuts button:last-child .mobile-shortcut-icon{background:#35765a}
-#screen-home .home-live-pill{background:#14558e!important}
+#screen-home .home-live-pill{background:#2c2e76!important}
 .tabbar-zone .tabbar{border-radius:0;box-shadow:none;background:#ffffffef}
 
 /* Mobile type scale: shared local Playfair display / Inter interface families. */
 .device{font-family:var(--font-ui),'Inter',sans-serif;font-size:13px;line-height:1.5}
 .device button,.device input,.device select,.device textarea{font-family:var(--font-ui),'Inter',sans-serif}
-#screen-home .home-hero-name{font-family:var(--font-display),Georgia,serif;font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.6px}
-#screen-home .dash-mod-title,#screen-home .home-grace-title,#screen-home .mobile-impact-summary h2,#screen-home .mobile-community-summary h2{font-family:var(--font-display),Georgia,serif;font-size:25px;line-height:1.2;font-weight:700;letter-spacing:-.4px;margin:0 0 8px}
+#screen-home .home-hero-name{font-family:var(--font-display),Georgia,serif;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.6px}
+#screen-home .dash-mod-title,#screen-home .home-grace-title,#screen-home .mobile-impact-summary h2,#screen-home .mobile-community-summary h2{font-family:var(--font-display),Georgia,serif;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.4px;margin:0 0 8px}
 #screen-home .dash-pillars .dash-pillar-name,#screen-home .mobile-impact-story h3,#screen-home .section-head h3{font-family:var(--font-display),Georgia,serif;font-size:17px;line-height:1.25;font-weight:700;letter-spacing:-.2px}
 #screen-home .dash-pillar-step{font-family:var(--font-display),Georgia,serif;font-weight:700;line-height:1}
-#screen-home .mobile-impact-card strong{font-family:var(--font-display),Georgia,serif;font-size:24px;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums}
+#screen-home .mobile-impact-card strong{font-family:var(--font-display),Georgia,serif;font-size:22px;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums}
 #screen-home .home-hero-tagline,#screen-home .dash-mod-sub,#screen-home .home-grace-note,#screen-home .mobile-impact-summary p,#screen-home .cn-post-body{font-family:var(--font-ui),sans-serif;font-size:13px;line-height:1.5}
 #screen-home .mobile-shortcuts strong,#screen-home .home-leader-chip-name{font-family:var(--font-ui),sans-serif;font-size:13px;font-weight:600;line-height:1.35}
-#screen-home .mobile-shortcuts small,#screen-home .home-leader-chip-sub,#screen-home .mobile-impact-card small{font-size:11px;line-height:1.4}
+#screen-home .mobile-shortcuts small,#screen-home .home-leader-chip-sub,#screen-home .mobile-impact-card small{font-size:12px;line-height:1.4}
 #screen-home .mobile-impact-summary button,#screen-home .mobile-community-summary>button,.mobile-human-care{font-size:12px;font-weight:600;line-height:1.4}
 /* Faithful mobile Leadership: church-native portrait, care, then directory. */
-#screen-leaders .scroll{background:#f3f8fc;padding:16px 16px 100px}
-.mobile-leadership-heading{margin:0 0 18px}.mobile-leadership-heading button{border:0;background:none;color:#175b9b;padding:8px 0;min-height:44px}
-.mobile-leadership-heading h1{font:700 29px/1.16 Georgia,serif;color:#173755;margin:6px 0 10px;letter-spacing:-.5px}
-.mobile-leadership-heading p,.mobile-leadership-care>p{font-size:14px;line-height:1.5;color:#607991;margin:8px 0 18px}
-#screen-leaders .ld-hero-centered{background:linear-gradient(180deg,#edf7ff80,#f4f9fff2),url('../../assets/faithful-dawn.jpg') center/cover;border:1px solid #dce8f1;border-radius:16px;padding:24px 14px 16px;box-shadow:none}
+#screen-leaders .scroll{background:#f3f3fc;padding:16px 16px 100px}
+.mobile-leadership-heading{margin:0 0 18px}.mobile-leadership-heading button{border:0;background:none;color:#303382;padding:8px 0;min-height:44px}
+.mobile-leadership-heading h1{font:700 28px/1.16 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f;margin:6px 0 10px;letter-spacing:-.5px}
+.mobile-leadership-heading p,.mobile-leadership-care>p{font-size:15px;line-height:1.5;color:#607991;margin:8px 0 18px}
+#screen-leaders .ld-hero-centered{background:linear-gradient(180deg,#f1f1fb80,#f6f7fdf2),url('../../assets/faithful-dawn.jpg') center/cover;border:1px solid #dcddf1;border-radius:16px;padding:24px 14px 16px;box-shadow:none}
 #screen-leaders .ld-hero-profile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}
-#screen-leaders .ld-av-lg{width:144px;height:144px;border-radius:50%;flex:none;overflow:hidden;border:4px solid white;box-shadow:0 4px 22px #15385718}
+#screen-leaders .ld-av-lg{width:144px;height:144px;border-radius:50%;flex:none;overflow:hidden;border:4px solid white;box-shadow:0 4px 22px #1d1f4f18}
 #screen-leaders #ld-leader-img{width:100%;height:100%;object-fit:cover;object-position:center 52%;border-radius:50%}
-#screen-leaders .ld-leader-name{font:700 27px/1.15 Georgia,serif;color:#173755}
-#screen-leaders .ld-leader-role{color:#58718a;font-size:12px;line-height:1.5;margin-top:8px}
+#screen-leaders .ld-leader-name{font:700 28px/1.15 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f}
+#screen-leaders .ld-leader-role{color:#585a8a;font-size:12px;line-height:1.5;margin-top:8px}
 #screen-leaders .ld-hero-top,#screen-leaders .ld-kpi-strip,#screen-leaders .ld-hero-status,#screen-leaders .home-ai-pulse,#screen-leaders .home-ai-pulse2,#screen-leaders .home-ai-live,#screen-leaders .home-ai-greeting,#screen-leaders .ld-hero-dm,#screen-leaders #ld-quick-cmds{display:none}
 #screen-leaders .ld-hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
-#screen-leaders .ld-hero-actions button{min-height:44px;border:1px solid #22619c;border-radius:8px;font-size:13px;padding:10px;background:#17558b;color:white}
-#screen-leaders .ld-hero-actions .ld-switch-ghost{background:#f5faff;color:#17558b}
-.mobile-avatar-disclosure{text-align:center;font-size:12px;color:#526d86;margin:12px 0 0}
-#screen-leaders .ld-hero-disclaimer{font-size:11px;line-height:1.5;color:#61778b}
-#screen-leaders .ld-chat{border:1px solid #dce8f1;border-radius:14px;background:#fff;overflow:hidden;margin:20px 0}
-.mobile-chat-heading{font:700 18px/1.35 Georgia,serif;color:#173755;padding:16px;margin:0;border-bottom:1px solid #e4edf4}
+#screen-leaders .ld-hero-actions button{min-height:44px;border:1px solid #33368b;border-radius:8px;font-size:13px;padding:10px;background:#2c2e76;color:white}
+#screen-leaders .ld-hero-actions .ld-switch-ghost{background:#f7f7fd;color:#2c2e76}
+.mobile-avatar-disclosure{text-align:center;font-size:12px;color:#525486;margin:12px 0 0}
+#screen-leaders .ld-hero-disclaimer{font-size:12px;line-height:1.5;color:#61778b}
+#screen-leaders .ld-chat{border:1px solid #dcddf1;border-radius:14px;background:#fff;overflow:hidden;margin:20px 0}
+.mobile-chat-heading{font:700 17px/1.35 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f;padding:16px;margin:0;border-bottom:1px solid #e4e5f4}
 #screen-leaders .ld-chat-messages{min-height:100px;max-height:240px;overflow:auto}
-#screen-leaders .ld-input{font-size:16px}#screen-leaders .ld-send{min-width:44px;min-height:44px}
-.mobile-leadership-care h2{font:700 28px/1.2 Georgia,serif;color:#173755;margin:24px 0 8px}
+#screen-leaders .ld-input{font-size:15px}#screen-leaders .ld-send{min-width:44px;min-height:44px}
+.mobile-leadership-care h2{font:700 28px/1.2 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f;margin:24px 0 8px}
 .mobile-care-topics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mobile-care-topics button{padding:0;overflow:hidden;text-align:left;border:1px solid #dce8f1;border-radius:10px;background:white;color:#173755;display:flex;flex-direction:column;font:inherit}
+.mobile-care-topics button{padding:0;overflow:hidden;text-align:left;border:1px solid #dcddf1;border-radius:10px;background:white;color:#1d1f4f;display:flex;flex-direction:column;font:inherit}
 .mobile-care-topics img{width:100%;height:82px;object-fit:cover}.mobile-care-topics span{padding:10px;display:block}
-.mobile-care-topics strong{font:700 16px/1.25 Georgia,serif;display:block}.mobile-care-topics small{display:block;font-size:12px;line-height:1.4;color:#617b94;margin-top:5px}
+.mobile-care-topics strong{font:700 17px/1.25 var(--font-display,'Playfair Display'),Georgia,serif;display:block}.mobile-care-topics small{display:block;font-size:12px;line-height:1.4;color:#617b94;margin-top:5px}
 #screen-leaders .ld-crisis{margin:22px 0;padding:18px;background:#fff4f3;border:1px solid #e6c4bf;border-radius:12px;color:#492823;box-shadow:none}
 #screen-leaders .ld-crisis .drawer-crisis-head{align-items:center;gap:12px;margin-bottom:12px}
-#screen-leaders .ld-crisis .drawer-crisis-ico{background:#f5dfdb;color:#922e28;flex:0 0 40px;width:40px;height:40px;font-size:20px}
-#screen-leaders .ld-crisis .drawer-crisis-title{font:700 21px/1.25 Georgia,serif;color:#492823}
+#screen-leaders .ld-crisis .drawer-crisis-ico{background:#f5dfdb;color:#922e28;flex:0 0 40px;width:40px;height:40px;font-size:22px}
+#screen-leaders .ld-crisis .drawer-crisis-title{font:700 22px/1.25 var(--font-display,'Playfair Display'),Georgia,serif;color:#492823}
 #screen-leaders .ld-crisis .drawer-crisis-sub{font-size:13px;line-height:1.5;color:#66433e;margin-top:5px}
-#screen-leaders .ld-crisis .drawer-crisis-body{font-size:14px;line-height:1.55;color:#66433e;margin:0 0 16px}
+#screen-leaders .ld-crisis .drawer-crisis-body{font-size:15px;line-height:1.55;color:#66433e;margin:0 0 16px}
 #screen-leaders .ld-crisis .drawer-crisis-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;background:#a3312a;color:#fff;border:1px solid #a3312a;border-radius:8px;font-size:15px;font-weight:700;padding:12px;box-shadow:none}
 #screen-leaders .ld-crisis .drawer-crisis-btn:hover{background:#852720}
 #screen-leaders .ld-crisis .drawer-crisis-foot{font-size:12px;line-height:1.5;color:#66433e;text-align:left;margin-top:12px;opacity:1}
-#screen-leaders .mobile-care-topics small,#screen-leaders .ld-leader-role,#screen-leaders .ld-hero-disclaimer,#screen-leaders .ld-disclaimer{color:#475f75}
+#screen-leaders .mobile-care-topics small,#screen-leaders .ld-leader-role,#screen-leaders .ld-hero-disclaimer,#screen-leaders .ld-disclaimer{color:#474975}
 #screen-leaders .ld-input::placeholder{color:#52677c;opacity:1}
 #screen-leaders .bible-card{display:none}
-#screen-leaders .ld-gallery{margin-top:24px;border:1px solid #dce8f1;border-radius:12px;overflow:hidden}
-#screen-leaders .ld-gallery-head{font:700 23px/1.25 Georgia,serif;color:#173755}
+#screen-leaders .ld-gallery{margin-top:24px;border:1px solid #dcddf1;border-radius:12px;overflow:hidden}
+#screen-leaders .ld-gallery-head{font:700 22px/1.25 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f}
 #screen-leaders .lg-item{padding:14px;gap:10px}#screen-leaders .lg-av{border-radius:50%;object-fit:cover}
-#screen-leaders button:focus-visible{outline:2px solid #175b9b;outline-offset:3px}
+#screen-leaders button:focus-visible{outline:2px solid #303382;outline-offset:3px}
 #screen-leaders .ld-hero-body{gap:6px}
 #screen-leaders .ld-hero-actions{margin-top:12px}
-#screen-leaders .ld-hero-actions button{box-shadow:none;background:#17558b}
-#screen-leaders .ld-hero-actions .ld-switch-ghost{background:#f6faff}
-#screen-leaders .ld-hero-identity [class*="badge"]{background:#e3edf6;color:#234e72;border:1px solid #c3d6e6;font-size:11px}
-#screen-leaders .ld-hero-disclaimer{padding-top:10px;margin-top:10px;border-top:1px solid #d5e3ed;text-align:left;line-height:1.55}
-#screen-leaders .ld-gallery-head-actions{font:12px/1.5 Arial,sans-serif;margin-top:8px}
-#screen-leaders .lg-name{font:700 17px/1.3 Georgia,serif}
+#screen-leaders .ld-hero-actions button{box-shadow:none;background:#2c2e76}
+#screen-leaders .ld-hero-actions .ld-switch-ghost{background:#f8f8fd}
+#screen-leaders .ld-hero-identity [class*="badge"]{background:#e3e4f6;color:#282b6d;border:1px solid #c3c4e6;font-size:12px}
+#screen-leaders .ld-hero-disclaimer{padding-top:10px;margin-top:10px;border-top:1px solid #d5d6ed;text-align:left;line-height:1.55}
+#screen-leaders .ld-gallery-head-actions{font:12px/1.5 var(--font-ui,'Inter'),system-ui,sans-serif;margin-top:8px}
+#screen-leaders .lg-name{font:700 17px/1.3 var(--font-display,'Playfair Display'),Georgia,serif}
 #screen-leaders .lg-switch,#screen-leaders .lg-profile-btn{min-height:40px}
-@media(max-width:350px){.mobile-care-topics{grid-template-columns:1fr}.mobile-care-topics button{flex-direction:row;align-items:center}.mobile-care-topics img{width:82px;height:94px}.mobile-leadership-heading h1{font-size:27px}}
+@media(max-width:350px){.mobile-care-topics{grid-template-columns:1fr}.mobile-care-topics button{flex-direction:row;align-items:center}.mobile-care-topics img{width:82px;height:94px}.mobile-leadership-heading h1{font-size:28px}}

@@ -30,7 +30,7 @@
     if(active===maya){
       const history=document.createElement('section');history.className='member-sample-history';
       const heading=document.createElement('h2');heading.textContent='How Maya’s story grew';
-      const intro=document.createElement('p');intro.textContent='Illustrative history — these are staged examples, not recorded activity.';
+      const intro=document.createElement('p');intro.textContent='Illustrative history: these are staged examples, not recorded activity.';
       const timeline=document.createElement('ol');
       for(const [when,detail]of [
         ['When she joined the platform','Shared her preferred name and existing connection to Faithful Church.'],

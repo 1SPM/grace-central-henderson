@@ -2,7 +2,7 @@
  const root=document.getElementById('jy-scroll'); if(!root)return;
  const q=s=>root.querySelector(s), el=(tag,cls,text)=>{const n=document.createElement(tag);n.className=cls;n.textContent=text||'';return n;};
  const btn=(text,fn,cls='fmj-row')=>{const b=el('button',cls,text);b.type='button';b.onclick=fn;return b;};
- q('.jy-title').textContent='Reflect';q('.jy-tagline').textContent='Reflect. Explore. Choose your next step.';
+ q('.jy-title').textContent='Reflect';q('.jy-tagline').textContent='Read this week’s message and write down what stays with you.';
  const keys=['journal','growth','study','activity','goals'];
  const titles=['A little space for your soul','Growth happens in small steps','Let Scripture meet your everyday life','Moments along your journey','Small steps, chosen by you'];
  const photos=['reflection','growth','reflection','dawn','growth'];

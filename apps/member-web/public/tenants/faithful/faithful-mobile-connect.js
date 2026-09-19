@@ -2,7 +2,7 @@
 (() => {
  const root=document.getElementById('screen-community');
  const make=(tag,cls,html)=>{const e=document.createElement(tag);e.className=cls;e.innerHTML=html;return e;};
- root.querySelector('#cn-tabs').before(make('header','fmc-heading','<h1>Connect</h1><p>Real people. Genuine care. Your church family.</p><small>Demo content</small>'));
+ root.querySelector('#cn-tabs').before(make('header','fmc-heading','<h1>Connect</h1><p>The people and the care of your church family.</p><small>Demo content</small>'));
  const community=document.getElementById('cn-panel-community');community.prepend(make('section','fmc-hero','<h2>Life together<br>at Faithful.</h2>'));
  const care=make('section','fmc-care','<h2>Need prayer or care?</h2><p>Find support from your church. Response times vary.</p><button type="button">Request pastoral care</button>');care.querySelector('button').onclick=()=>showScreen('care');community.append(care);
  const photoAction=community.querySelector('.cn-composer-actions button:last-child');photoAction.onclick=openFaithMomentCreate;

@@ -4,22 +4,22 @@
 .mc-back-wordmark{height:26px!important;width:auto!important;max-width:150px;object-fit:contain;align-self:flex-start;flex-shrink:0}
 .mc-back-inner{min-height:0;padding:12px 16px}
 .mc-stripe{height:30px;flex-shrink:0}.mc-sig{height:26px;flex-shrink:0;margin-top:6px}.mc-back-info{padding-top:6px}
-.mc-flip:focus-visible{outline:2px solid #287fac;outline-offset:4px;border-radius:18px}
-.fm-care button,.fm-prayer button{font:inherit;color:#175a77;background:none;border:0;cursor:pointer;min-height:44px}
-.fm-care{background:#edf3f6;border:1px solid #dce6ef;border-radius:18px 18px 28px 18px;padding:20px;margin:16px 0;background-image:repeating-linear-gradient(0deg,#17375504 0,#17375504 1px,transparent 1px,transparent 4px)}
-.fm-care h2,.fm-prayer h2{font-family:Georgia,serif;color:#173755;font-size:22px;margin:0 0 8px}.fm-care p,.fm-prayer p{color:#526985;font-size:13px;line-height:1.5}
-.fm-care button{display:block;text-align:left;width:100%;border-bottom:1px solid #17375518;padding:12px 0;font-size:14px;font-weight:600}
-.fm-care small{display:block;color:#526985;font-size:11px;line-height:1.5;margin-top:12px}
+.mc-flip:focus-visible{outline:2px solid #393c9b;outline-offset:4px;border-radius:18px}
+.fm-care button,.fm-prayer button{font:inherit;color:#262968;background:none;border:0;cursor:pointer;min-height:44px}
+.fm-care{background:#ededf6;border:1px solid #dcddef;border-radius:18px 18px 28px 18px;padding:20px;margin:16px 0;background-image:repeating-linear-gradient(0deg,#1d1f4f04 0,#1d1f4f04 1px,transparent 1px,transparent 4px)}
+.fm-care h2,.fm-prayer h2{font-family:var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1f4f;font-size:22px;margin:0 0 8px}.fm-care p,.fm-prayer p{color:#525485;font-size:13px;line-height:1.5}
+.fm-care button{display:block;text-align:left;width:100%;border-bottom:1px solid #1d1f4f18;padding:12px 0;font-size:15px;font-weight:600}
+.fm-care small{display:block;color:#525485;font-size:12px;line-height:1.5;margin-top:12px}
 .fm-prayer{overflow:hidden;border-radius:16px;background:#f3f0e8;background-image:repeating-linear-gradient(90deg,#77674d08 0,#77674d08 1px,transparent 1px,transparent 5px);margin:16px 0}
 .fm-prayer>img{display:block;width:100%;height:100px;object-fit:cover}.fm-prayer>div{padding:18px}
-.fm-care button:focus-visible,.fm-prayer button:focus-visible{outline:2px solid #347890;outline-offset:2px}
+.fm-care button:focus-visible,.fm-prayer button:focus-visible{outline:2px solid #35388f;outline-offset:2px}
 .pillar-card{border-radius:16px 16px 24px 16px}
 @media(prefers-reduced-motion:reduce){.mc-flip-inner{transition:none}}
 
 /* The closing invitation at the end of the home scroll. It replaces the survey
    that used to be mounted here: same place in the journey, a fraction of the
    height, and it points at the tab instead of burying fifteen questions. */
-.fm-survey-invite{margin:18px 16px 8px;padding:20px 18px;border-radius:16px;background:rgba(23,95,165,.07);border:1px solid rgba(23,95,165,.16);text-align:center}
-.fm-survey-invite h2{margin:0 0 6px;font-size:1.05rem;font-weight:700}
-.fm-survey-invite p{margin:0 0 14px;font-size:.85rem;line-height:1.55;opacity:.8}
-.fm-survey-invite button{-webkit-appearance:none;appearance:none;width:100%;min-height:44px;padding:.7rem 1rem;border:0;border-radius:999px;background:#175fa5;color:#fff;font-size:.92rem;font-weight:600;font-family:inherit;cursor:pointer}
+.fm-survey-invite{margin:18px 16px 8px;padding:20px 18px;border-radius:16px;background:rgba(51,54,137,.07);border:1px solid rgba(51,54,137,.16);text-align:center}
+.fm-survey-invite h2{margin:0 0 6px;font-size:17px;font-weight:700}
+.fm-survey-invite p{margin:0 0 14px;font-size:13px;line-height:1.55;opacity:.8}
+.fm-survey-invite button{-webkit-appearance:none;appearance:none;width:100%;min-height:44px;padding:.7rem 1rem;border:0;border-radius:999px;background:#333689;color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}

@@ -57,6 +57,13 @@ assert(/--ios-safe-top:\s*0px/.test(phone),
 assert(/--ios-safe-bot:\s*env\(safe-area-inset-bottom/.test(phone),
   'the bottom inset comes from env(), so the tab bar clears the home indicator on ' +
   'devices that have one and wastes no space on devices that do not');
+// --ios-tab-chrome-h is a calc() over --ios-safe-bot, declared on :root. A
+// custom property's var() is resolved where it is DECLARED, so overriding the
+// inset on .device alone left the tab zone sized for the 34px guess: on any
+// phone whose real inset is 0 that was a blank 34px band above the tab bar.
+// The dependent value has to be restated next to the override.
+assert(/--ios-tab-chrome-h:\s*calc\([^;]*var\(--ios-safe-bot\)/.test(phone),
+  'the tab zone height is recomputed from the real inset, or it keeps the desktop 34px');
 assert(/\.device \.app\{padding-top:env\(safe-area-inset-top/.test(phone),
   'the app clears the real status bar / notch');
 // Qualified with .device on purpose: the base .status and .app rules come LATER
@@ -107,33 +114,162 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
 
   assert.deepEqual(order, [
     '.home-hero',
-    '.home-hero-leader',
-    '.fp-preferences',
-    '.mobile-impact-summary',
     '.mobile-shortcuts',
-    '.dash-mod',
-    '.home-grace-wrap',
+    '.home-hero-leader',
+    '.mobile-impact-summary',
     '.mobile-community-summary',
-    '.cn-widget',
-    '.fm-care',
-    '.fm-prayer',
     '.fm-survey-invite',
-  ], 'the phone home order must match the portal: hero, leader, the onboarding dropdown, ' +
-     'IMPACT, this week, pathways, community, prayer, care, prayer invite, survey invite');
+  ], 'the phone home order: hero, this week, leader, IMPACT, community, survey invite');
 
-  // The two that were actually wrong, stated as relationships so the intent
-  // survives a future insertion into the list.
-  assert(order.indexOf('.fp-preferences') < order.indexOf('.mobile-shortcuts'),
-    'the onboarding dropdown comes before the shortcuts row, as it does on the portal');
-  assert(order.indexOf('.mobile-impact-summary') < order.indexOf('.dash-mod'),
-    'IMPACT comes before the pathways, as it does on the portal');
+  // "Your church, at a glance" held a tour, an explanation and a form -- all
+  // needed once, shown forever. On the phone they are a first-visit tour and a
+  // My story screen (test-faithful-mobile-welcome.mjs), so it is not a section.
+  assert(!order.includes('.fp-preferences'), 'the onboarding row is not a section of the phone\'s Home');
+
+  // GRACE has no portal equivalent, so it was never part of the parity; it is
+  // docked above the tab bar instead of taking a slot in the scroll. It must
+  // be the SAME card moved -- same input, same send -- not a second launcher
+  // that could drift from what GRACE actually does with a message.
+  assert(!order.includes('.home-grace-wrap'), 'GRACE is docked, not a section in the scroll');
+  assert(/getElementById\('home-grace-wrap'\)/.test(finish) && /classList\.add\('fm-grace-dock'\)/.test(finish) &&
+         /home\.closest\('\.app'\)\.append\(grace\)/.test(finish),
+    'the existing GRACE card is moved out of the scroll and tagged as the dock');
+  assert(/id="home-grace-input"[^>]*sendGraceHome\(\)/.test(html) && /class="home-grace-send" onclick="sendGraceHome\(\)"/.test(html),
+    'the dock still sends through sendGraceHome()');
+
+  // Same order as the portal, but the phone stops early. The prayer wall,
+  // "People to turn to" and "Pray with your church" are the tail of the
+  // portal's My Church; on a phone they made Home six screens long, so they
+  // live one tap away instead. Relocated, not deleted -- each must still be
+  // built and placed somewhere, and Home must keep a way to reach prayer.
+  for (const sel of ['.cn-widget', '.fm-care', '.fm-prayer']) {
+    assert(!order.includes(sel), `${sel} is no longer a Home section; it was moved to keep Home short`);
+  }
+  assert(/#screen-care > \.scroll/.test(finish) && /insertBefore\(care,/.test(finish),
+    '"People to turn to" is placed on the Care screen');
+  assert(/getElementById\('cn-panel-community'\)/.test(finish) && /\[prayer, wall\]/.test(finish),
+    '"Pray with your church" and the prayer wall are placed on Connect, together and in that order');
+  assert(/fm-prayer-link/.test(finish) && /openCnReelsFull\(\)/.test(finish),
+    'Home keeps a link to the prayer wall');
+  // The wall is moved rather than copied, so the opener has to follow it.
+  assert(/function openCnReelsFull\(\) \{[\s\S]{0,200}wall\.closest\('\.screen'\)/.test(html),
+    'openCnReelsFull() opens whichever screen holds the wall, not a hardcoded Home');
+
+  // Relationships, so the intent survives a future insertion into the list.
+  //
+  // This block used to require the dropdown BEFORE the shortcuts, to match the
+  // portal. That was reversed on purpose once the page was seen on a phone:
+  // there the four tiles are the navigation, and under IMPACT they sat a screen
+  // and a half down. What is still the portal's order is everything else.
+  assert(order.indexOf('.home-hero') === 0 && order.indexOf('.mobile-shortcuts') === 1,
+    'the shortcuts row sits directly under the hero on the phone');
+  assert(order.indexOf('.home-hero-leader') < order.indexOf('.mobile-impact-summary') &&
+         order.indexOf('.mobile-impact-summary') < order.indexOf('.mobile-community-summary'),
+    'leader, IMPACT, community -- still in the portal\'s order');
+  // The pathways are hidden on the phone's Home, not deleted: updateDashboard()
+  // writes the tiles' badges by ID, so the markup has to stay.
+  assert(!order.includes('.dash-mod'), 'the G-R-A-C-E pathways are not a section of the phone\'s Home');
+  assert(/id="dash-journey-badge"/.test(html), 'the pathway markup stays in the page; scripts write to it by ID');
   assert(order.indexOf('.fm-survey-invite') === order.length - 1,
     'the survey invitation closes the walkthrough');
 
   // Ordering runs before the footer is reclaimed, or the footer lands mid-page.
-  assert(finish.indexOf(']).forEach') < finish.indexOf("':scope > .fd-footer'") ||
-         finish.indexOf('].forEach') < finish.indexOf("':scope > .fd-footer'"),
+  // Home's footer specifically -- the Care screen's footer is also looked up,
+  // earlier, to place a section above it.
+  assert(finish.indexOf('].forEach') < finish.indexOf("home.querySelector(':scope > .fd-footer')"),
     'the footer is moved last, after the sections are ordered');
+}
+
+// ── Home is styled by one layer, loaded after the modules it unifies ───────
+{
+  const css = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-home.css', 'utf8');
+  assert(html.indexOf('faithful-mobile-finish.css') < html.indexOf('faithful-mobile-home.css'),
+    'the home layer loads after the finish layer, or equal-specificity rules there win');
+  // :is() takes the specificity of its most specific argument and lends it to
+  // the whole list. That happened here twice: an #id, then a ".a .b", in the
+  // shared "card" rule outranked every per-module adjustment after it, and the
+  // page still looked almost right. So: no IDs in any :is(), and the card rule
+  // that sets border-radius for everything is a plain list with no :is() at all.
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of bare.matchAll(/:is\(([^)]*)\)/g)) {
+    assert(!m[1].includes('#'), `no IDs inside :is() in the home layer -- found ":is(${m[1]})"`);
+  }
+  // A dismissed card must still dock: the old "dismiss" wrote to localStorage,
+  // and .is-dismissed hides .home-grace-card. The dock rule carries two IDs to
+  // outrank it, and the scroll leaves room so the footer clears the bar.
+  // The bar lives at the app level now, over every tab, so its rules are in the
+  // app-wide theme rather than Home's layer.
+  const theme = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-theme.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert(!/fm-grace-dock/.test(bare), 'Home\'s layer no longer owns the GRACE bar');
+  assert(/\.app > \.fm-grace-dock #home-grace-card\{display:flex/.test(theme), 'the dock shows even for someone who dismissed the old card');
+  assert(/\.app > \.fm-grace-dock\{position:absolute;[^}]*bottom:calc\(var\(--ios-tab-chrome-h\) \+ 10px\)/.test(theme), 'it sits above the tab bar, whichever tab is showing');
+  assert(/\.screen:not\(#_\):not\(#screen-survey\) > \.scroll:not\(\.fd-page\)\{padding-bottom:96px\}/.test(theme), 'every list that scrolls under it ends clear of it');
+  assert(/\.app:has\(> :is\(#screen-survey,\.fd-destination\)\.active\) > \.fm-grace-dock/.test(theme), 'it stays off the survey and the form and information screens');
+  // The landing screen is drawn OVER the app, at a lower z-index than the bar.
+  // Moving the bar up to the app level put it on the sign-in page, and it was
+  // missed because every check was made after entering.
+  assert(/\.device\.landing-active \.app > \.fm-grace-dock[^{]*\{display:none\}/.test(theme) ||
+         /\.device\.landing-active \.app > \.fm-grace-dock,[\s\S]{0,260}\{display:none\}/.test(theme),
+    'the GRACE bar is not shown on the landing screen');
+  // A bar over every tab has to be able to get out of the way.
+  const finishJs = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
+  assert(/\.fm-grace-dock\.is-collapsed \.home-grace-inputrow\{display:none\}/.test(theme) && /fm-grace-fold/.test(finishJs) &&
+         /stopImmediatePropagation\(\)/.test(finishJs), 'it folds to the orb, and a folded orb opens the bar instead of a conversation');
+  // The field is the one off-scale size on Home: under 16px iOS zooms on focus.
+  assert(/\.home-grace-input\{[^}]*font-size:16px/.test(theme), 'the GRACE field is 16px so iOS does not zoom the page on focus');
+
+  assert(/#screen-home > \.scroll > \.dash-mod\{display:none\}/.test(bare), 'the pathways are hidden by one rule in the home layer');
+
+  // The "Someone just gave" toasts sat in the hero's flow and made it ~34px
+  // taller for a few seconds at a time, so everything under it jumped on a
+  // timer. They are taken out of the flow; the hero's height cannot depend on
+  // whether one is showing.
+  assert(/\.home-donate-stack\{position:absolute/.test(bare), 'giving toasts do not resize the hero');
+  assert(/\.home-donate-stack > :not\(:last-child\)\{display:none\}/.test(bare), 'and only the newest one shows on Home');
+
+  const cardRule = /([^{}]+)\{[^}]*border-radius:var\(--fh-radius\);box-shadow/.exec(bare);
+  assert(cardRule && !cardRule[1].includes(':is('), 'the shared card rule is a plain selector list');
+  // Every selector starts with .app, so the layer cannot reach another page.
+  // Commas inside :is(...) are not selector separators, hence the paren strip.
+  const rules = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{/g, '');
+  for (const m of rules.matchAll(/([^{}]+)\{/g)) {
+    for (const sel of m[1].replace(/\([^()]*\)/g, '').split(',')) {
+      assert(sel.trim().startsWith('.app'), `home layer selector is not scoped under .app: "${sel.trim()}"`);
+    }
+  }
+}
+
+// ── the side menu is for going somewhere ───────────────────────────────────
+//
+// It opened with a 32px "Menu" title and an "Ask GRACE" block: 220px before
+// the first destination, in a panel that is obviously the menu. GRACE lives in
+// the dock on Home now. Rows were 20px Georgia -- a third typeface used nowhere
+// else on the phone.
+{
+  const nav = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-navigation.js', 'utf8');
+  const css = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-navigation.css', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  assert(/'\.drawer-head-title'\)\?\.remove\(\)/.test(nav), 'the "Menu" title is removed');
+  assert(/'#drawer-grace'\)\?\.remove\(\)/.test(nav),
+    'the GRACE block is removed, not hidden -- a hidden orb would still be bound by the companion');
+  // This line used to read .drawer-grace-title unguarded. With the block gone
+  // that is a null dereference, and everything after it in the module -- the
+  // close button, the focus trap, inert handling -- silently never runs.
+  assert(!/querySelector\('\.drawer-grace-(title|sub)'\)\./.test(nav),
+    'nothing dereferences the removed GRACE block');
+  assert(/drawer\.append\(signOut\)/.test(nav), 'Sign Out is pinned beside Settings, out of the scroll');
+  assert(/#app-drawer\{display:grid/.test(css) && /> \.drawer-signout\{grid-column:2;grid-row:3/.test(css) &&
+         /> \.fd-settings-cog\{grid-column:1;grid-row:3/.test(css),
+    'Settings and Sign Out share the drawer\'s last row');
+  assert(/\.drawer-scroll > \.drawer-section-label:first-child\{display:none\}/.test(css),
+    'a label heading the only list is not shown');
+  assert(!/Georgia/.test(css.split('.app .tabbar-zone')[0]), 'the drawer uses the UI face; no Georgia');
+  // faithful-destinations.js appends its screens after the tab bar in a flex
+  // column, which drew the tab bar at the TOP of Settings, Privacy and every
+  // other extra screen. That was live. One declaration puts it back.
+  assert(/\.app > \.tabbar-zone\{order:1\}/.test(css), 'the tab bar stays under whichever screen is showing');
+  assert(!/\.drawer-item:after/.test(css), 'no chevron on every row: they all navigate, so it distinguishes nothing');
 }
 
 console.log('PASS: on a phone the simulated chrome is hidden, the real insets are used and the home order matches the portal; on a desktop the mockup is intact. Rendering on real hardware not verified.');
