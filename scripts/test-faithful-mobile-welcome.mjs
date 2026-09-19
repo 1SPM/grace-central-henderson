@@ -139,7 +139,7 @@ assert.equal(give.querySelector(':scope > .fw-tip'), null, 'and never again');
 
 // ── the way back in ────────────────────────────────────────────────────────
 const chips = [...d.querySelectorAll('#app-drawer .fw-drawer-chip')].map(b => b.textContent);
-assert.deepEqual(chips, ['Take the tour', 'My story']);
+assert.deepEqual(chips, ['Take the tour', 'My story', 'Feedback']);
 
 // ── wiring ─────────────────────────────────────────────────────────────────
 const html = read('grace_faithful_church_members_card_ios_app.html');

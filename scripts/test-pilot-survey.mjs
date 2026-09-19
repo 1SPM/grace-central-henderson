@@ -324,8 +324,14 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
 // the walkthrough ends -- but that scroll is about twelve phone screens, so
 // fifteen questions sat below a wall of content almost nobody would reach. A
 // completion rate near zero would have read as disinterest rather than as a
-// navigation problem. It has its own tab now, and the end of the home scroll
-// invites people to it.
+// navigation problem. It got its own screen, and for a while its own tab.
+//
+// The tab has gone again, on purpose. Home is about two and a half screens now,
+// so the invitation at the end of it is reachable; a temporary research
+// instrument beside Home, Give and Connect read as a member feature; and the
+// bar had grown to six. What must NOT regress is reachability, so the ways in
+// are pinned instead: the invitation, the side menu, a one-time prompt once
+// someone has looked around, and a direct link facilitators can hand out.
 {
   const ios = 'apps/member-web/public/tenants/faithful/grace_faithful_church_members_card_ios_app.html';
   const page = fs.readFileSync(ios, 'utf8');
@@ -335,12 +341,27 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
   assert.equal((page.match(/<link[^>]*shared\/grace-pilot-survey\.css/g) || []).length, 1,
     'the phone loads the stylesheet once');
 
-  // Its own screen, reachable from the tab bar.
+  // Its own screen, and four ways to reach it, none of them a tab.
   assert(/<section class="screen" id="screen-survey">/.test(page), 'the survey has its own screen');
-  assert(/data-tab="survey" onclick="showScreen\('survey'\)"/.test(page),
-    'and a tab that opens it — the whole point is that it is reachable without scrolling');
-  assert(/grid-template-columns:repeat\(6,1fr\)/.test(page),
-    'the tab bar is widened to six columns, or the new tab overflows the others');
+  assert(!/data-tab="survey"/.test(page), 'the survey is not a tab: it is a pilot instrument, not a member destination');
+  assert(/grid-template-columns:repeat\(5,1fr\)/.test(page), 'the tab bar is five columns again, so five tabs fill it');
+  assert(/<div class="nav-title">Pilot feedback<\/div>/.test(page), 'the screen says what it is');
+  {
+    const dir = 'apps/member-web/public/tenants/faithful/';
+    const finishJs = fs.readFileSync(dir + 'faithful-mobile-finish.js', 'utf8');
+    const welcomeJs = fs.readFileSync(dir + 'faithful-mobile-welcome.js', 'utf8');
+    const tourJs = fs.readFileSync(dir + 'faithful-mobile-tour.js', 'utf8');
+    assert(/'Give pilot feedback'/.test(finishJs) && /'Pilot program'/.test(finishJs), '1. the invitation on Home, labelled for what it is and who is asking');
+    assert(/button\('fw-drawer-chip', 'Feedback'\)/.test(welcomeJs), '2. the side menu');
+    assert(/function offerFeedback\(/.test(welcomeJs) && /visited\.size < 3/.test(welcomeJs) && /seen\.feedbackPrompt/.test(welcomeJs),
+      '3. one prompt, once, after three tabs have been opened');
+    assert(/'profile','survey'\]/.test(tourJs), '4. a direct link: ?tour=1#survey');
+    // It stops asking once feedback was really sent. The signal is the shared
+    // module revealing [data-done], which it does only when the server accepted
+    // a completed response -- never a guess, never a click.
+    assert(/\[data-done\]/.test(finishJs) && /FAITHFUL_PILOT_FEEDBACK/.test(finishJs) && /sent\(\)\) return false/.test(welcomeJs),
+      'the invitation and the prompt both stand down once the survey has been sent');
+  }
 
   // The mount is static now: it sits in a screen nothing appends to, so the
   // shared module finds it at parse time and no explicit mount() is needed.

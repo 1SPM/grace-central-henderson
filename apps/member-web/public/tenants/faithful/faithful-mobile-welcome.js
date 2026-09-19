@@ -267,19 +267,19 @@
   // The words are the tab's own row title and subline, read at the moment of
   // showing, so they cannot drift from what the row says.
   const TABS = { leaders: 'screen-leaders', give: 'screen-give', community: 'screen-community', profile: 'screen-profile' };
-  let tip = null;
-  function dismissTip() { tip?.remove(); tip = null; }
+  let tip = null, tipKey = null;
+  function dismissTip() { tip?.remove(); tip = null; tipKey = null; }
   function offerTip(name) {
     dismissTip();
-    if (seen['tip.' + name] || embedded || !tour.hidden) return;
+    if (seen['tip.' + name] || embedded || !tour.hidden) return false;
     const screen = document.getElementById(TABS[name]);
     const row = screen?.querySelector('.scroll > .fp-connection, .scroll .fp-connection');
     const summary = row?.querySelector(':scope > summary');
-    if (!summary) return;
+    if (!summary) return false;
     const subline = summary.querySelector('.fh-guide-subline')?.textContent.trim();
     const heading = [...summary.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(' ').trim();
-    if (!heading || !subline) return;
-    tip = make('aside', 'fw-tip');
+    if (!heading || !subline) return false;
+    tip = make('aside', 'fw-tip'); tipKey = 'tip.' + name;
     tip.setAttribute('aria-label', 'About this page');
     const more = button('fw-tip-more', 'Tell me more');
     const ok = button('fw-tip-ok', 'Got it');
@@ -289,15 +289,41 @@
     ok.onclick = () => { mark('tip.' + name); dismissTip(); };
     more.onclick = () => { mark('tip.' + name); dismissTip(); row.open = true; row.scrollIntoView({ block: 'start', behavior: 'smooth' }); summary.focus({ preventScroll: true }); };
     screen.append(tip);
+    return true;
+  }
+
+  // Pilot feedback is asked for ONCE, after someone has actually looked around:
+  // three tabs opened, and no tip due on the screen they have just arrived at.
+  // That is when an opinion exists. A Survey tab asked before there was one.
+  const visited = new Set();
+  function offerFeedback(screen) {
+    if (tip || seen.feedbackPrompt || embedded || !tour.hidden || visited.size < 3) return false;
+    if (window.FAITHFUL_PILOT_FEEDBACK?.sent()) return false;
+    tip = make('aside', 'fw-tip fw-feedback'); tipKey = 'feedbackPrompt';
+    tip.setAttribute('aria-label', 'Pilot feedback');
+    const later = button('fw-tip-more', 'Not now');
+    const give = button('fw-tip-ok', 'Give feedback');
+    const actions = make('div', 'fw-tip-actions');
+    actions.append(later, give);
+    tip.append(make('h2', '', 'Two minutes of feedback?'),
+      make('p', '', 'You have had a look around. Faithful Church is piloting this app and would like to know what you think. Every question is optional.'), actions);
+    later.onclick = () => { mark('feedbackPrompt'); dismissTip(); };
+    give.onclick = () => { mark('feedbackPrompt'); dismissTip(); window.FAITHFUL_PILOT_FEEDBACK?.open(); };
+    screen.append(tip);
+    return true;
   }
   Object.entries(TABS).forEach(([name, id]) => {
     const screen = document.getElementById(id);
     if (!screen) return;
     new MutationObserver(() => {
-      if (screen.classList.contains('active')) setTimeout(() => offerTip(name), 350);
-      else if (tip?.parentElement === screen) { mark('tip.' + name); dismissTip(); }
+      if (screen.classList.contains('active')) { visited.add(name); setTimeout(() => { if (screen.classList.contains('active')) offerTip(name) || offerFeedback(screen); }, 350); }
+      else if (tip?.parentElement === screen) { mark(tipKey); dismissTip(); }
     }).observe(screen, { attributes: true, attributeFilter: ['class'] });
   });
+  new MutationObserver(() => {
+    if (homeScreen.classList.contains('active')) setTimeout(() => { if (homeScreen.classList.contains('active')) offerFeedback(homeScreen); }, 350);
+    else if (tip?.parentElement === homeScreen) { mark(tipKey); dismissTip(); }
+  }).observe(homeScreen, { attributes: true, attributeFilter: ['class'] });
 
   // ── the way back in: the side menu ────────────────────────────────────────
   const drawerNav = document.querySelector('#app-drawer .drawer-nav');
@@ -307,7 +333,11 @@
     again.onclick = () => { window.closeAppMenu?.(); setTimeout(() => open(0), 320); };
     const story = button('fw-drawer-chip', 'My story');
     story.dataset.fdAction = 'my-story';   // routed by faithful-destinations.js
-    row.append(again, story);
+    // The survey's way in from anywhere, now that it is not a tab.
+    const feedback = button('fw-drawer-chip', 'Feedback');
+    feedback.setAttribute('aria-label', 'Give pilot feedback');
+    feedback.onclick = () => { window.closeAppMenu?.(); window.FAITHFUL_PILOT_FEEDBACK?.open(); };
+    row.append(again, story, feedback);
     drawerNav.after(row);
   }
 
