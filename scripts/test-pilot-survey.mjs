@@ -279,6 +279,39 @@ for (const tenant of ['faithful', 'central-henderson']) {
   assert(secEnd - mount < 320, `${tenant}: the survey is the last block of the Mobile section`);
 }
 
+// ── the phone carries it too ────────────────────────────────────────────────
+//
+// The pilot ends on the phone: the QR in the desktop Mobile section sends
+// people to the iOS page. The survey lived only on the desktop portal, so the
+// device the walkthrough actually finishes on had no survey at all.
+{
+  const ios = 'apps/member-web/public/tenants/faithful/grace_faithful_church_members_card_ios_app.html';
+  const page = fs.readFileSync(ios, 'utf8');
+  const scripts = [...page.matchAll(/<script src="[^"]*shared\/(grace-pilot-survey[^"]*\.js)"/g)].map(m => m[1]);
+  assert.deepEqual(scripts, ['grace-pilot-survey-questions.js', 'grace-pilot-survey.js'],
+    'the phone loads the questions, then the module');
+  assert.equal((page.match(/<link[^>]*shared\/grace-pilot-survey\.css/g) || []).length, 1,
+    'the phone loads the stylesheet once');
+
+  // Load order is load-bearing here, not cosmetic: faithful-mobile-finish.js is
+  // what appends the mount and then calls mount(), so the module must already
+  // exist by the time it runs.
+  assert(page.indexOf('shared/grace-pilot-survey.js') < page.indexOf('faithful-mobile-finish.js'),
+    'the survey module must load before faithful-mobile-finish.js, which mounts it');
+
+  const finish = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
+  assert(/data-grace-pilot-survey/.test(finish), 'mobile-finish creates the mount point');
+  assert(/GRACE_PILOT_SURVEY\?\.mount\(\)/.test(finish),
+    'and mounts it explicitly — the module\'s own auto-mount has already run and found nothing');
+  // It must be appended AFTER the sections this module adds, or the survey
+  // renders above them instead of at the end of the walkthrough.
+  assert(finish.indexOf('home.append(prayer)') < finish.indexOf('data-grace-pilot-survey'),
+    'the mount is appended after the care and prayer sections, so it lands last');
+  // A static <div> in the HTML would sit above those runtime sections.
+  assert(!/data-grace-pilot-survey/.test(page),
+    'the phone must NOT carry a static mount — it would render above the appended sections');
+}
+
 // ── the migration keeps the survey unlinkable to a person ───────────────────
 const migration = fs.readFileSync('supabase/migrations/083_pilot_survey_responses.sql', 'utf8');
 // Strip -- comments AND quoted strings: the `comment on` text discusses the
@@ -299,4 +332,4 @@ assert(!/\banon\b/.test(sql), 'no anon policy: responses are read by staff, not 
   assert(!/drop table|delete from/i.test(m84), '084 is a widening only');
 }
 
-console.log(`PASS: no drift (Central ${MEMBER_SURVEY.length}, Faithful ${FAITHFUL_MEMBER_SURVEY.length}), separate tracks, skippable, truthful failure states, anonymous payload, server validation, both tenants wired. Visual layout and a real phone submission not verified.`);
+console.log(`PASS: no drift (Central ${MEMBER_SURVEY.length}, Faithful ${FAITHFUL_MEMBER_SURVEY.length}), separate tracks, skippable, truthful failure states, anonymous payload, server validation, both tenants wired, phone carries it too. Visual layout and a real phone submission not verified.`);
