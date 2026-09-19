@@ -355,10 +355,16 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
   assert(/showScreen\('survey'\)/.test(finish), 'and the invitation opens the survey screen');
   assert(!/data-grace-pilot-survey/.test(finish),
     'the survey is no longer mounted into the home scroll — two mounts would mean two rows per person');
-  // Still after the sections this module appends, so it closes the walkthrough.
-  assert(finish.indexOf('home.append(prayer)') < finish.indexOf('fm-survey-invite'),
-    'the invitation comes after the care and prayer sections');
-  assert(finish.indexOf('fm-survey-invite') < finish.indexOf("':scope > .fd-footer'"),
+  // Still after the sections this module builds, so it closes the walkthrough.
+  // (Care and prayer are built here but now live on the Care and Connect
+  // screens; the invitation is still built after them, and is still the last
+  // thing in Home's order.)
+  assert(finish.indexOf("make('section', 'fm-prayer')") < finish.indexOf("make('section', 'fm-survey-invite')"),
+    'the invitation is built after the care and prayer sections');
+  // HOME's footer specifically: the module also looks up the Care screen's
+  // footer, earlier, to place a section above it. Matching the bare selector
+  // found that one first and failed this check for the wrong reason.
+  assert(finish.indexOf("make('section', 'fm-survey-invite')") < finish.indexOf("home.querySelector(':scope > .fd-footer')"),
     'and before the footer is reclaimed, so the footer still ends the page');
 }
 
