@@ -73,8 +73,33 @@ export default defineConfig(({ mode }) => {
           // index.html as no-cache, so letting navigations hit the network
           // is correct and cheap.
           globPatterns: ['**/*.{js,css,svg,png,ico,woff,woff2}'],
-          // Preserve the full-resolution film artwork without precaching it.
-          globIgnores: ['assets/members-portal-video-thumbnail.png'],
+          globIgnores: [
+            // Preserve the full-resolution film artwork without precaching it.
+            'assets/members-portal-video-thumbnail.png',
+            // The static tenant portals' own scripts and styles.
+            //
+            // Precaching these bought nothing and cost a great deal. Their HTML
+            // is not precached (see above), so those pages already require the
+            // network to load at all -- there was never an offline story for
+            // them. What the precache did do was serve their JS and CSS with no
+            // network request whatsoever, which silently overrides the
+            // "public, max-age=0, must-revalidate" the server sends. A browser
+            // that had visited once could keep running old code indefinitely.
+            //
+            // That is not theoretical. It produced four false readings in one
+            // day of testing, and the worst failure mode is severe rather than
+            // cosmetic: faithful-preferences.js builds every page-guide
+            // dropdown and every "Let us know" bar at runtime, so one stale
+            // copy of it removes the entire onboarding layer from the page and
+            // looks like a design regression rather than a cache.
+            //
+            // The app's own bundle stays precached: it lives under assets/ with
+            // a content hash in the filename, so it cannot go stale this way.
+            'tenants/**/*.js',
+            'tenants/**/*.css',
+            'shared/**/*.js',
+            'shared/**/*.css',
+          ],
           navigateFallback: null,
           cleanupOutdatedCaches: true,
           skipWaiting: true,
