@@ -82,7 +82,11 @@ for (const [name, raw] of phoneCss) {
 
 // ── copy ───────────────────────────────────────────────────────────────────
 {
-  const protect = s => s.replace(/<style[\s\S]*?<\/style>|<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|(?<![:"'\\])\/\/[^\n]*/g, '');
+  // Strips what nobody reads (styles, comments) so only copy is searched. Run
+  // to a fixed point: one pass over "<sty<style>…</style>le>" would leave a
+  // "<style" behind. Nothing here is rendered, but a stripper should strip.
+  const NOT_COPY = /<style[\s\S]*?<\/style>|<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|(?<![:"'\\])\/\/[^\n]*/g;
+  const protect = s => { let prev; do { prev = s; s = s.replace(NOT_COPY, ''); } while (s !== prev); return s; };
   const files = [PAGE, ...fs.readdirSync(DIR).filter(f => /^faithful-.*\.js$/.test(f) && html.includes('src="' + f))];
   for (const f of files) {
     const hit = /[^\n]{0,40}\S \u2014 \S[^\n]{0,30}/.exec(protect(read(f)));

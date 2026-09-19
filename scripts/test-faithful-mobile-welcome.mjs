@@ -80,7 +80,7 @@ assert.equal(nudge.hidden, true, 'the invitation can be dismissed');
 const tour = d.querySelector('.app > .fw-tour');
 assert(tour && tour.hidden, 'the tour exists and starts hidden');
 assert.equal(tour.getAttribute('role'), 'dialog');
-const next = tour.querySelector('.fw-tour-next'), skip = tour.querySelector('.fw-tour-skip');
+const next = tour.querySelector('.fw-tour-next');
 const title = tour.querySelector('.fw-tour-title');
 
 window.FAITHFUL_MOBILE_WELCOME.startTour();
@@ -104,7 +104,7 @@ assert.equal(tour.hidden, true, 'Escape leaves the tour');
 // Every step has to point at something the phone's Home really has. The old
 // in-row tour had two steps out of four that highlighted nothing.
 const sources = ['grace_faithful_church_members_card_ios_app.html', 'faithful-mobile-refinement.js', 'faithful-mobile-finish.js'].map(read).join('\n');
-for (const [, selector] of welcome.matchAll(/\n    \['([^']+)', '[^']+', '/g)) {
+for (const [, selector] of welcome.matchAll(/\n {4}\['([^']+)', '[^']+', '/g)) {
   const name = selector.split(/[ >]/).at(-1).replace(/^[.#]/, '');
   assert(sources.includes(name), `tour step points at "${selector}", and "${name}" is not built anywhere on the phone`);
 }
