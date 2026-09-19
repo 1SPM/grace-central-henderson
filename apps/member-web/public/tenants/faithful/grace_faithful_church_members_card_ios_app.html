@@ -3067,14 +3067,14 @@ html.embed-preview .watch-donate-toast{display:none!important}
             </div>
             <div class="impact-notify-list" id="impact-notify-list"></div>
             <div class="gv-live-static">
-              <div class="gv-feed-item"><div class="gv-feed-ico">◈</div><div><strong>Sarah</strong> generated <strong>$4.20</strong> for Youth Ministry</div></div>
-              <div class="gv-feed-item"><div class="gv-feed-ico">🌿</div><div><strong>David</strong> updated their giving goal</div></div>
+              <div class="gv-feed-item"><div class="gv-feed-ico">◈</div><div>A member's card supported <strong>Youth Ministry</strong></div></div>
+              <div class="gv-feed-item"><div class="gv-feed-ico">🌿</div><div>A member set a new giving goal</div></div>
               <div class="gv-feed-item"><div class="gv-feed-ico">🍽</div><div>Food Pantry at <strong>85%</strong> · <strong>127 meals</strong> this week</div></div>
-              <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>GRACE Impact Card (Walmart) → <strong>+$2.40</strong> Food Pantry</div></div>
+              <div class="gv-feed-item"><div class="gv-feed-ico">🛒</div><div>Your card supported <strong>Food Pantry</strong></div></div>
             </div>
             <div class="impact-notify-total">
-              This month from everyday spending:
-              <strong id="impact-notify-month">$18.42</strong> to Faithful Church causes
+              This month, everyday spending supported Faithful Church causes
+              <strong id="impact-notify-count">6</strong> times
             </div>
           </div>
 
@@ -4668,7 +4668,7 @@ html.embed-preview .watch-donate-toast{display:none!important}
 
     <div class="impact-float" id="impact-float" onclick="openImpactNotifications()">
       <div class="impact-float-card" aria-hidden="true">💳</div>
-      <div class="impact-float-text" id="impact-float-text">McDonald's: +$0.26 to Youth</div>
+      <div class="impact-float-text" id="impact-float-text">Your card just supported Youth</div>
       <button type="button" class="impact-float-close" onclick="event.stopPropagation();dismissImpactFloat()" aria-label="Dismiss">×</button>
     </div>
   </div>
@@ -5586,12 +5586,20 @@ var watchChatPool = [
   { name: 'Dorothy M.', av: 'https://randomuser.me/api/portraits/women/63.jpg', text: 'Glory to God 🙏🙏' },
   { name: 'Kevin N.', av: 'https://randomuser.me/api/portraits/men/86.jpg', text: 'Stream looks great on mobile today.' }
 ];
+// NOTIFICATION PRIVACY. Anything that appears unprompted -- a toast, a float, a
+// row in the live feed -- is read by whoever can see the screen: the person in
+// the next seat, the room when a phone is mirrored, a lock-screen preview. So a
+// notification may say THAT something happened and which ministry it helped,
+// and nothing else: no amount, no merchant, no other person's name. What
+// someone gives, and where they shop, is theirs. Amounts live where the member
+// goes to look for them -- the wallet balance and the Activity list.
+// The pool holds funds only so a name or amount cannot leak back into a toast.
 var watchDonationPool = [
-  { name: 'Sarah J.', amount: 25, fund: 'Tithe' },
-  { name: 'Michael T.', amount: 50, fund: 'Missions' },
-  { name: 'Anonymous', amount: 100, fund: 'Building' },
-  { name: 'Lisa W.', amount: 15, fund: 'Food Pantry' },
-  { name: 'David P.', amount: 40, fund: 'Youth' }
+  { fund: 'Tithe' },
+  { fund: 'Missions' },
+  { fund: 'Building' },
+  { fund: 'Food Pantry' },
+  { fund: 'Youth' }
 ];
 var watchChatIdx = 0;
 var watchDonateIdx = 0;
@@ -5626,7 +5634,11 @@ function showDonationToast(stackId, item) {
   if (!stack) return;
   var el = document.createElement('div');
   el.className = 'watch-donate-toast';
-  el.innerHTML = '<strong>' + item.name + '</strong> gave <em>$' + item.amount + '</em> · ' + item.fund;
+  // No giver, no amount -- see NOTIFICATION PRIVACY above.
+  el.textContent = 'Someone just gave · ';
+  var fund = document.createElement('strong');
+  fund.textContent = item.fund;
+  el.appendChild(fund);
   stack.appendChild(el);
   while (stack.children.length > 3) stack.removeChild(stack.firstChild);
   setTimeout(function() { if (el.parentNode) el.remove(); }, 4500);
@@ -5739,11 +5751,13 @@ function showToast(message) {
 
 function renderImpactNotification(item, isNew) {
   return '<div class="impact-notify-item' + (isNew ? ' is-new' : '') + '">' +
-    '<div class="impact-notify-icon" style="background:' + item.bg + '" data-grace-icon="' + item.icon + '" data-grace-size="18"></div>' +
+    // One neutral icon: the per-merchant ones (dining, fuel...) say where the
+    // member shops. The full line -- merchant, spend, amount routed -- is in
+    // Activity below, where they went looking for it. See NOTIFICATION PRIVACY.
+    '<div class="impact-notify-icon" style="background:#e8f4fa" data-grace-icon="heart" data-grace-size="18"></div>' +
     '<div class="impact-notify-body">' +
-      '<strong>' + item.merchant + '</strong>' +
-      '<span class="impact-notify-meta">' + item.date + ' · GRACE Impact Card · −' + formatMoney(item.spend) + '</span>' +
-      '<div class="impact-notify-route">+' + formatMoney(item.impact) + ' routed to ' + item.cause + '</div>' +
+      '<strong>Your card supported ' + item.cause + '</strong>' +
+      '<span class="impact-notify-meta">' + item.date + ' · GRACE Impact Card</span>' +
     '</div>' +
     '<div class="impact-notify-time">' + item.time + '</div>' +
   '</div>';
@@ -5753,16 +5767,19 @@ function renderImpactNotifications() {
   const list = document.getElementById('impact-notify-list');
   if (!list) return;
   list.innerHTML = purchaseImpactFeed.map(item => renderImpactNotification(item, false)).join('');
+  const countEl = document.getElementById('impact-notify-count');
+  if (countEl) countEl.textContent = String(purchaseImpactFeed.length);
   if (typeof hydrateGraceIcons === 'function') hydrateGraceIcons(list);
   if (typeof initGraceAllIcons === 'function') initGraceAllIcons(list);
 }
 
 function updateImpactTotals() {
-  const monthEl = document.getElementById('impact-notify-month');
+  const countEl = document.getElementById('impact-notify-count');
   const heroEl = document.getElementById('hero-impact');
   const dailyEl = document.getElementById('daily-impact-status');
   const formatted = formatMoney(monthImpactTotal);
-  if (monthEl) monthEl.textContent = formatted;
+  // A count, not the total: the total is on the Impact tab. See NOTIFICATION PRIVACY.
+  if (countEl) countEl.textContent = String(document.querySelectorAll('#impact-notify-list .impact-notify-item').length);
   if (heroEl) heroEl.textContent = formatted;
   if (dailyEl) dailyEl.textContent = '+' + formatted + ' routed this month';
 }
@@ -5780,7 +5797,8 @@ function showImpactFloat(item) {
   const text = document.getElementById('impact-float-text');
   if (!float || !text || document.querySelector('.device')?.classList.contains('landing-active')) return;
   if (!document.getElementById('screen-home')?.classList.contains('active')) return;
-  text.textContent = item.merchant + ': +' + formatMoney(item.impact) + ' to ' + item.cause;
+  // Not the merchant and not the amount -- see NOTIFICATION PRIVACY.
+  text.textContent = 'Your card just supported ' + item.cause;
   float.classList.add('show');
   // Auto-dismiss so the pill never sits over content indefinitely (UX review 2026-07-06).
   clearTimeout(showImpactFloat.timer);
@@ -6755,8 +6773,6 @@ function hydrateMetrics() {
   setMetric('hero-impact', formatMoney(monthImpactTotal));
   const dailyEl = document.getElementById('daily-impact-status');
   if (dailyEl) dailyEl.textContent = '+' + formatMoney(monthImpactTotal) + ' this month';
-  const notifyMonth = document.getElementById('impact-notify-month');
-  if (notifyMonth) notifyMonth.textContent = formatMoney(monthImpactTotal);
   setMetric('hero-commitment', m.commitment.level);
   setMetric('pulse-page-score', String(m.pulse.score));
   setMetric('jy-pulse-val', String(m.pulse.score));
