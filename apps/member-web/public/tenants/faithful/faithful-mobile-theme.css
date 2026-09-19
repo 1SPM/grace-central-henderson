@@ -195,6 +195,11 @@
 /* Where the bar stays out of the way: the survey (it is feedback ABOUT GRACE,
    and a prompt to ask GRACE sits oddly under it), the form and information
    screens, and full-screen video. The side menu and sheets simply cover it. */
+/* And never on the landing screen. The landing sits over the app at z-index
+   30 and the bar is 40, so once the bar moved from Home's screen up to the
+   app it showed through the sign-in page. Nobody has entered yet; there is
+   nothing to ask GRACE about. */
+.device.landing-active .app > .fm-grace-dock,
 .app:has(> :is(#screen-survey,.fd-destination).active) > .fm-grace-dock,
 .app:is(.watch-open,.divinity-open) > .fm-grace-dock{display:none}
 /* Every list that scrolls under the bar ends 96px early (the bar is 56, its
@@ -259,3 +264,6 @@
 /* The last screenful of My story: the footer follows the form at the same
    distance as everything else. */
 .app .screen:not(#_) > .fd-page > .fd-footer{margin-top:0}
+/* The same goes for the app's toasts: one fired on the way out ("Returned to
+   app") was drawn over the landing screen it had just returned to. */
+.device.landing-active .app :is(.toast,.watch-donate-toast){visibility:hidden}

@@ -205,6 +205,12 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   assert(/\.app > \.fm-grace-dock\{position:absolute;[^}]*bottom:calc\(var\(--ios-tab-chrome-h\) \+ 10px\)/.test(theme), 'it sits above the tab bar, whichever tab is showing');
   assert(/\.screen:not\(#_\):not\(#screen-survey\) > \.scroll:not\(\.fd-page\)\{padding-bottom:96px\}/.test(theme), 'every list that scrolls under it ends clear of it');
   assert(/\.app:has\(> :is\(#screen-survey,\.fd-destination\)\.active\) > \.fm-grace-dock/.test(theme), 'it stays off the survey and the form and information screens');
+  // The landing screen is drawn OVER the app, at a lower z-index than the bar.
+  // Moving the bar up to the app level put it on the sign-in page, and it was
+  // missed because every check was made after entering.
+  assert(/\.device\.landing-active \.app > \.fm-grace-dock[^{]*\{display:none\}/.test(theme) ||
+         /\.device\.landing-active \.app > \.fm-grace-dock,[\s\S]{0,260}\{display:none\}/.test(theme),
+    'the GRACE bar is not shown on the landing screen');
   // A bar over every tab has to be able to get out of the way.
   const finishJs = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
   assert(/\.fm-grace-dock\.is-collapsed \.home-grace-inputrow\{display:none\}/.test(theme) && /fm-grace-fold/.test(finishJs) &&
