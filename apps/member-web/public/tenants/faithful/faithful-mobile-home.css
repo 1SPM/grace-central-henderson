@@ -34,9 +34,7 @@
 }
 
 /* ── one gutter, one rhythm ─────────────────────────────────────────────── */
-/* 96px = the GRACE dock (56) + its 10px offset + breathing room, so the footer
-   can scroll clear of it. */
-.app #screen-home > .scroll{padding:4px 0 96px}
+.app #screen-home > .scroll{padding-top:4px;padding-left:0;padding-right:0}
 .app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.mobile-impact-summary,.mobile-shortcuts,.mobile-community-summary,.fm-survey-invite){
   margin:16px var(--fh-gutter) 0;width:auto;box-sizing:border-box
 }
@@ -133,28 +131,6 @@
    badges by ID. Delete this one rule to bring the section back -- and add
    '.dash-mod' to the order list in faithful-mobile-finish.js. */
 .app #screen-home > .scroll > .dash-mod{display:none}
-
-/* ── GRACE: docked above the tab bar ─────────────────────────────────────
-   faithful-mobile-finish.js moves #home-grace-wrap out of the scroll and tags
-   it .fm-grace-dock. It is the same card with the same input and send button;
-   this only shows the orb and the input row, as one pill. Two IDs in these
-   selectors on purpose: they have to outrank ".is-dismissed .home-grace-card
-   {display:none}" for anyone who dismissed the old card. */
-.app #screen-home{position:relative}
-.app #screen-home > .fm-grace-dock{position:absolute;left:var(--fh-gutter);right:var(--fh-gutter);bottom:10px;margin:0;z-index:5;display:block}
-.app #screen-home .fm-grace-dock #home-grace-card{display:flex;align-items:center;gap:10px;height:56px;margin:0;padding:0 6px;border:0;border-radius:28px;background:#10273ff0;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 10px 30px #10273f59}
-.app #screen-home .fm-grace-dock :is(.home-grace-dismiss,.home-grace-body,.home-grace-foot,.home-grace-reopen){display:none}
-.app #screen-home .fm-grace-dock .home-grace-row{flex:none;display:flex;align-items:center}
-/* 44px, not the mockup's 36: the companion binds the orb as a button too. */
-.app #screen-home .fm-grace-dock .grace-orb{width:44px;height:44px;min-width:44px;margin:0}
-.app #screen-home .fm-grace-dock .home-grace-inputrow{flex:1;min-width:0;display:flex;align-items:center;gap:6px;margin:0;padding:0;min-height:0;border:0;border-radius:0;background:none}
-/* 16px, not 15: below 16 iOS zooms the page when the field takes focus. It is
-   the one off-scale size on Home, and it is a platform rule, not a choice. */
-.app #screen-home .fm-grace-dock .home-grace-input{flex:1;min-width:0;min-height:44px;font-size:16px;color:#fff}
-.app #screen-home .fm-grace-dock .home-grace-input::placeholder{color:#ffffffc7}
-.app #screen-home .fm-grace-dock .home-grace-send{flex:none;width:44px;height:44px;border-radius:50%;font-size:17px}
-/* The round-up toast used to rise from where the dock now sits. */
-.app .impact-float{bottom:calc(var(--ios-tab-chrome-h) + 76px)}
 
 /* ── community: title, two ways in, one post ────────────────────────────── */
 .app #screen-home .mobile-community-summary{display:flex;flex-wrap:wrap;align-items:center;column-gap:20px}
@@ -280,9 +256,6 @@
 .app #screen-home .fm-survey-invite p{color:#d3d5ec;opacity:1}
 .app #screen-home .fm-survey-invite button{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}
 
-/* GRACE: the same dark surface, gold rule, gold send */
-.app #screen-home .fm-grace-dock #home-grace-card{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:0 1px 0 #ffffff24 inset,0 14px 34px #12143466}
-.app #screen-home .fm-grace-dock .home-grace-send{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset}
 
 /* ── footer: on the grid, and every link wide enough to hit ─────────────── */
 .app #screen-home > .scroll > .fd-footer{margin:28px var(--fh-gutter) 0;padding:16px 0}

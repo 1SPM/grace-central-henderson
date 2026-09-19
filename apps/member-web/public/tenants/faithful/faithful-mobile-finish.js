@@ -86,14 +86,51 @@
   // GRACE does with a message it does from here too. Everything else in the
   // card (title, note, dismiss, "Got it", the reopen button) is hidden by
   // faithful-mobile-home.css: a bar that is always one thumb away has nothing
-  // to dismiss. It sits in the screen, not the scroll, so it does not move.
+  // to dismiss. It sits in the app, above the tab bar, not in Home's scroll --
+  // so it stays put, and it is there on every tab. The side menu used to be
+  // the way to GRACE from the other tabs; once GRACE left the menu, a bar on
+  // Home alone made it reachable from one place.
   const grace = document.getElementById('home-grace-wrap');
   if (grace) {
     grace.classList.add('fm-grace-dock');
     grace.querySelector('.grace-orb')?.classList.replace('grace-orb--md', 'grace-orb--sm');
     const ask = document.getElementById('home-grace-input');
     if (ask) ask.placeholder = 'Ask GRACE anything…';
-    home.parentElement.append(grace);
+    home.closest('.app').append(grace);
+
+    // A bar over every tab has to be able to get out of the way. It folds down
+    // to the orb and opens again from it, and remembers which the person chose.
+    // Only that choice is stored.
+    const DOCK_KEY = 'grace.faithful.mobile.dock';
+    const orb = grace.querySelector('.grace-orb');
+    const fold = make('button', 'fm-grace-fold'); fold.type = 'button';
+    fold.setAttribute('aria-label', 'Minimise the GRACE bar');
+    fold.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+    grace.querySelector('.home-grace-inputrow')?.prepend(fold);
+    const setFolded = (folded, remember) => {
+      grace.classList.toggle('is-collapsed', folded);
+      orb?.setAttribute('aria-label', folded ? 'Open the GRACE bar' : 'Talk with GRACE');
+      orb?.setAttribute('aria-expanded', String(!folded));
+      if (remember) { try { localStorage.setItem(DOCK_KEY, folded ? 'closed' : 'open'); } catch (_) {} }
+    };
+    fold.onclick = () => { setFolded(true, true); orb?.focus({ preventScroll: true }); };
+    // Folded, the orb opens the bar. Open, it does what it always did: the
+    // companion binds it to start a conversation. Capture phase, so this runs
+    // before that binding and can stand in for it.
+    orb?.addEventListener('click', event => {
+      if (!grace.classList.contains('is-collapsed')) return;
+      event.stopImmediatePropagation(); event.preventDefault();
+      setFolded(false, true);
+    }, true);
+    orb?.addEventListener('keydown', event => {
+      if (!grace.classList.contains('is-collapsed') || (event.key !== 'Enter' && event.key !== ' ')) return;
+      event.stopImmediatePropagation(); event.preventDefault();
+      setFolded(false, true);
+    }, true);
+    let folded = false;
+    try { folded = localStorage.getItem(DOCK_KEY) === 'closed'; } catch (_) {}
+    setFolded(folded, false);
+    window.FAITHFUL_GRACE_DOCK = { open: () => setFolded(false, false) };
   }
 
   // One row has room for the leader's whole name or for "Open avatar →", not

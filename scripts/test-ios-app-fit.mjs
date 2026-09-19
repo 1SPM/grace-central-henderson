@@ -132,7 +132,7 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   // that could drift from what GRACE actually does with a message.
   assert(!order.includes('.home-grace-wrap'), 'GRACE is docked, not a section in the scroll');
   assert(/getElementById\('home-grace-wrap'\)/.test(finish) && /classList\.add\('fm-grace-dock'\)/.test(finish) &&
-         /home\.parentElement\.append\(grace\)/.test(finish),
+         /home\.closest\('\.app'\)\.append\(grace\)/.test(finish),
     'the existing GRACE card is moved out of the scroll and tagged as the dock');
   assert(/id="home-grace-input"[^>]*sendGraceHome\(\)/.test(html) && /class="home-grace-send" onclick="sendGraceHome\(\)"/.test(html),
     'the dock still sends through sendGraceHome()');
@@ -197,10 +197,20 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   // A dismissed card must still dock: the old "dismiss" wrote to localStorage,
   // and .is-dismissed hides .home-grace-card. The dock rule carries two IDs to
   // outrank it, and the scroll leaves room so the footer clears the bar.
-  assert(/\.fm-grace-dock #home-grace-card\{display:flex/.test(bare), 'the dock shows even for someone who dismissed the old card');
-  assert(/#screen-home > \.scroll\{padding:4px 0 96px\}/.test(bare), 'the scroll ends clear of the dock');
+  // The bar lives at the app level now, over every tab, so its rules are in the
+  // app-wide theme rather than Home's layer.
+  const theme = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-theme.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert(!/fm-grace-dock/.test(bare), 'Home\'s layer no longer owns the GRACE bar');
+  assert(/\.app > \.fm-grace-dock #home-grace-card\{display:flex/.test(theme), 'the dock shows even for someone who dismissed the old card');
+  assert(/\.app > \.fm-grace-dock\{position:absolute;[^}]*bottom:calc\(var\(--ios-tab-chrome-h\) \+ 10px\)/.test(theme), 'it sits above the tab bar, whichever tab is showing');
+  assert(/\.screen:not\(#_\):not\(#screen-survey\) > \.scroll:not\(\.fd-page\)\{padding-bottom:96px\}/.test(theme), 'every list that scrolls under it ends clear of it');
+  assert(/\.app:has\(> :is\(#screen-survey,\.fd-destination\)\.active\) > \.fm-grace-dock/.test(theme), 'it stays off the survey and the form and information screens');
+  // A bar over every tab has to be able to get out of the way.
+  const finishJs = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
+  assert(/\.fm-grace-dock\.is-collapsed \.home-grace-inputrow\{display:none\}/.test(theme) && /fm-grace-fold/.test(finishJs) &&
+         /stopImmediatePropagation\(\)/.test(finishJs), 'it folds to the orb, and a folded orb opens the bar instead of a conversation');
   // The field is the one off-scale size on Home: under 16px iOS zooms on focus.
-  assert(/\.home-grace-input\{[^}]*font-size:16px/.test(bare), 'the GRACE field is 16px so iOS does not zoom the page on focus');
+  assert(/\.home-grace-input\{[^}]*font-size:16px/.test(theme), 'the GRACE field is 16px so iOS does not zoom the page on focus');
 
   assert(/#screen-home > \.scroll > \.dash-mod\{display:none\}/.test(bare), 'the pathways are hidden by one rule in the home layer');
 

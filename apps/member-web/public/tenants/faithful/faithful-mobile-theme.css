@@ -124,8 +124,6 @@
 
 /* ── fields ─────────────────────────────────────────────────────────────── */
 .app .screen:not(#_) :is(input:not([type=checkbox],[type=radio],[type=range],[type=file]),textarea,select){border:1px solid var(--dv-lav-line);border-radius:12px;background:#fbfbfe;color:var(--dv-ink)}
-/* ...except a field that sits on a dark surface and brings its own look. */
-.app .screen:not(#_) .fm-grace-dock .home-grace-input{border:0;border-radius:0;background:none;color:#fff}
 .app .screen:not(#_) :is(input,textarea,select):focus-visible{outline:3px solid #6b74c9;outline-offset:1px}
 .app :is(input[type=checkbox],input[type=radio]){accent-color:#2a2c6c}
 .app :is(button,a,[role=button],summary):focus-visible{outline:3px solid #6b74c9;outline-offset:2px}
@@ -168,3 +166,52 @@
 .app .screen:not(#_) .settings-tabs button{min-width:0;padding:0 6px;white-space:normal;line-height:1.2}
 .app .screen:not(#_) :is(.ld-msg-nav,.fm-impact-bridge button){min-height:44px}
 .app .screen:not(#_) .cn-event-date span{font-size:12px;font-weight:600}
+
+/* ── GRACE: docked above the tab bar, on every tab ───────────────────────
+   faithful-mobile-finish.js moves #home-grace-wrap out of Home's scroll to the
+   app itself and tags it .fm-grace-dock. It is the same card with the same
+   input and send button; this only shows the orb and the input row, as one
+   pill. It began on Home alone, which made GRACE reachable from one tab once
+   it had left the side menu. The ID in these selectors is on purpose: it has
+   to outrank ".is-dismissed .home-grace-card{display:none}" for anyone who
+   dismissed the old card. */
+.app > .fm-grace-dock{position:absolute;left:16px;right:16px;bottom:calc(var(--ios-tab-chrome-h) + 10px);margin:0;z-index:40;display:block}
+.app > .fm-grace-dock #home-grace-card{display:flex;align-items:center;gap:10px;height:56px;margin:0;padding:0 6px;border:0;border-radius:28px;background:#10273ff0;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 10px 30px #10273f59}
+.app > .fm-grace-dock :is(.home-grace-dismiss,.home-grace-body,.home-grace-foot,.home-grace-reopen){display:none}
+.app > .fm-grace-dock .home-grace-row{flex:none;display:flex;align-items:center}
+/* 44px, not the mockup's 36: the companion binds the orb as a button too. */
+.app > .fm-grace-dock .grace-orb{width:44px;height:44px;min-width:44px;margin:0}
+.app > .fm-grace-dock .home-grace-inputrow{flex:1;min-width:0;display:flex;align-items:center;gap:6px;margin:0;padding:0;min-height:0;border:0;border-radius:0;background:none}
+/* 16px, not 15: below 16 iOS zooms the page when the field takes focus. It is
+   the one off-scale size on Home, and it is a platform rule, not a choice. */
+.app > .fm-grace-dock .home-grace-input{flex:1;min-width:0;min-height:44px;font-size:16px;color:#fff}
+.app > .fm-grace-dock .home-grace-input::placeholder{color:#ffffffc7}
+.app > .fm-grace-dock .home-grace-send{flex:none;width:44px;height:44px;border-radius:50%;font-size:17px}
+/* The round-up toast used to rise from where the dock now sits. */
+.app .impact-float{bottom:calc(var(--ios-tab-chrome-h) + 76px)}
+/* the same dark surface as the other dark cards, with the gold send */
+.app > .fm-grace-dock #home-grace-card{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:0 1px 0 #ffffff24 inset,0 14px 34px #12143466}
+.app > .fm-grace-dock .home-grace-send{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset}
+.app > .fm-grace-dock .home-grace-input{border:0;border-radius:0;background:none}
+/* Where the bar stays out of the way: the survey (it is feedback ABOUT GRACE,
+   and a prompt to ask GRACE sits oddly under it), the form and information
+   screens, and full-screen video. The side menu and sheets simply cover it. */
+.app:has(> :is(#screen-survey,.fd-destination).active) > .fm-grace-dock,
+.app:is(.watch-open,.divinity-open) > .fm-grace-dock{display:none}
+/* Every list that scrolls under the bar ends 96px early (the bar is 56, its
+   offset 10, the rest is air), so the last thing on a page can be reached. */
+.app .screen:not(#_):not(#screen-survey) > .scroll:not(.fd-page){padding-bottom:96px}
+/* Folded, the bar is the orb alone, at the thumb side. Same element, so the
+   orb does not jump: the pill shrinks round it. */
+.app > .fm-grace-dock{transition:left .24s ease}
+.app > .fm-grace-dock.is-collapsed{left:calc(100% - 16px - 60px)}
+.app > .fm-grace-dock.is-collapsed #home-grace-card{width:60px;height:60px;padding:0;justify-content:center;border-radius:50%}
+.app > .fm-grace-dock.is-collapsed .home-grace-inputrow{display:none}
+.app > .fm-grace-dock .fm-grace-fold{flex:none;order:2;width:44px;height:44px;border:0;border-radius:50%;background:none;color:#c9cbe6;display:grid;place-items:center;cursor:pointer}
+.app > .fm-grace-dock .fm-grace-fold:active{background:#ffffff1a}
+.app > .fm-grace-dock .home-grace-input{order:1}
+.app > .fm-grace-dock .home-grace-send{order:3}
+.app > .fm-grace-dock :is(.fm-grace-fold,.grace-orb):focus-visible{outline:3px solid #e3cf97;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.app > .fm-grace-dock{transition:none}}
+/* Toasts rose from where the bar now sits on every tab. */
+.app .toast{bottom:calc(var(--ios-tab-chrome-h) + 76px)}

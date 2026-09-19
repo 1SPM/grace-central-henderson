@@ -100,7 +100,7 @@
     ['#screen-home .home-hero', 'Follow the message', 'Start with the service at the top of My Church. When you want more time with a passage, Reflect gives you a place to read and write.'],
     ['#screen-home .mobile-shortcuts', 'Find your people', 'Sunday, groups, care and your impact are one tap from here. You can look around without joining anything or sending a request.'],
     ['#home-leader-chip', 'Meet your leader', 'Your pastor’s AI avatar can help you explore your faith. It is always labelled as an avatar, and you can ask for a person under Care.'],
-    ['#screen-home .fm-grace-dock', 'Ask GRACE', 'GRACE helps you find your way around church life. Ask about services, groups, events or giving.'],
+    ['.app > .fm-grace-dock', 'Ask GRACE', 'GRACE helps you find your way around church life. Ask about services, groups, events or giving. The bar is here on every tab.'],
     [null, 'Begin your story', 'A little about your connection gives this experience context. Add what feels useful, in your own words. It stays in this browser.']
   ];
   const tour = make('div', 'fw-tour');
@@ -172,6 +172,8 @@
     skip.textContent = welcome ? 'Not now' : last ? 'Finish' : 'Skip';
     next.textContent = welcome ? 'Show me around' : last ? 'Add my story' : 'Next';
     listen.hidden = welcome || typeof window.GRACE_COMPANION?.narratePage !== 'function';
+    // The tour points at the whole bar, so it opens it if it was folded away.
+    if (selector === '.app > .fm-grace-dock') window.FAITHFUL_GRACE_DOCK?.open();
     const target = selector && document.querySelector(selector);
     // Centre the target by setting the scroll position outright. The list
     // scrolls smoothly by stylesheet, and scrollIntoView left it still moving
