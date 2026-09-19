@@ -252,6 +252,10 @@
 
 /* the closing invitation: dark, with the screen's second gold action */
 .app #screen-home .fm-survey-invite{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:var(--dv-lift-dark)}
+/* The eyebrow says who is asking; the title and button say what for. */
+.app #screen-home .fm-survey-invite .fm-survey-eyebrow{display:block;margin:0 0 6px;font:600 12px/1.4 var(--font-ui,'Inter'),system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#e3cf97}
+/* Sent: nothing left to press, so the card is a quiet thank-you. */
+.app #screen-home .fm-survey-invite.is-sent p{margin-bottom:0}
 .app #screen-home .fm-survey-invite h2{color:#fff}
 .app #screen-home .fm-survey-invite p{color:#d3d5ec;opacity:1}
 .app #screen-home .fm-survey-invite button{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}

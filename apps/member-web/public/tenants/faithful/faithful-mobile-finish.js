@@ -67,17 +67,50 @@
   // after everything else -- but this scroll is about twelve phone screens, so
   // it was in practice unreachable, and a completion rate near zero would have
   // read as disinterest rather than as nobody ever finding it. It lives on its
-  // own tab now; what stays here is the invitation.
+  // own screen now; what stays here is the invitation.
+  //
+  // It had its own TAB for a while, for that same reason. Home is about two and
+  // a half screens now, not twelve, so the reason has gone -- and a temporary
+  // research instrument sitting beside Home, Give and Connect read as a member
+  // feature, in a bar that had grown to six. The survey is reached from here,
+  // from the side menu, from a one-time prompt once someone has looked around
+  // (faithful-mobile-welcome.js), and from a direct link (?tour=1#survey).
+  //
+  // The card used to say "One last thing ... about what you just saw", which
+  // assumes a walkthrough the reader may not have had and does not say who is
+  // asking. It says both now. Once the survey has been sent it stops asking.
   const invite = make('section', 'fm-survey-invite');
-  invite.append(
-    make('h2', '', 'One last thing'),
-    make('p', '', 'A few questions about what you just saw. It takes about two minutes, every question is optional, and nothing is linked to your name.'),
-  );
-  const go = make('button', '', 'Answer the questions');
+  const inviteTitle = make('h2', '', 'Help us decide');
+  const inviteText = make('p', '', 'Faithful Church is piloting this app. Two minutes, every question optional, and nothing is linked to your name.');
+  const go = make('button', '', 'Give pilot feedback');
   go.type = 'button';
   go.onclick = () => { showScreen('survey'); };
-  invite.append(go);
+  invite.append(make('small', 'fm-survey-eyebrow', 'Pilot program'), inviteTitle, inviteText, go);
   home.append(invite);
+
+  // The shared survey module reveals its [data-done] block when a COMPLETED
+  // response has been accepted by the server, and only then. That is the one
+  // honest signal that feedback was sent, so that is what is watched; nothing
+  // in the shared module is changed. The flag is a UI flag, not an answer.
+  const FEEDBACK_KEY = 'grace.faithful.mobile.feedback-sent';
+  // Watches the survey's SCREEN, not its mount: this module must never look
+  // like it mounts the survey (two mounts would mean two rows per person).
+  const surveyMount = document.querySelector('#screen-survey > .scroll');
+  const surveyDone = () => { const done = surveyMount?.querySelector('[data-done]'); return !!done && !done.hidden; };
+  let feedbackSent = false;
+  try { feedbackSent = localStorage.getItem(FEEDBACK_KEY) === '1'; } catch (_) {}
+  const thank = () => {
+    feedbackSent = true;
+    try { localStorage.setItem(FEEDBACK_KEY, '1'); } catch (_) {}
+    invite.classList.add('is-sent');
+    inviteTitle.textContent = 'Thank you';
+    inviteText.textContent = 'Your pilot feedback has been sent to the church.';
+    go.hidden = true;
+  };
+  if (feedbackSent) thank();
+  if (surveyMount) new MutationObserver(() => { if (!feedbackSent && surveyDone()) thank(); })
+    .observe(surveyMount, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+  window.FAITHFUL_PILOT_FEEDBACK = { sent: () => feedbackSent, open: () => showScreen('survey') };
 
   // GRACE docks above the tab bar instead of sitting two screens down the page.
   //
@@ -194,7 +227,7 @@
     '.home-hero-leader',       // Your leader
     '.mobile-impact-summary',  // Your IMPACT card
     '.mobile-community-summary', // Life in your church / Community wall (+ the prayer wall link)
-    '.fm-survey-invite',       // One last thing -> the survey tab
+    '.fm-survey-invite',       // Pilot program -> the survey screen
   ].forEach(sel => {
     const el = home.querySelector(':scope > ' + sel);
     if (el) home.append(el);   // append() moves an existing node
