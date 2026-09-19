@@ -222,9 +222,28 @@ for (const f of FAITHFUL_MEMBER_SURVEY) {
 // The onboarding is what Faithful actually walks people through, so it is
 // covered directly and named in the comprehension and usability questions.
 const fKeys = FAITHFUL_MEMBER_SURVEY.map(q => q.key);
-for (const k of ['onboarding_ease', 'onboarding_purpose_clear']) {
+for (const k of ['onboarding_ease', 'onboarding_purpose_clear', 'signup_intent']) {
   assert(fKeys.includes(k), `Faithful asks '${k}' directly`);
   assert(!MEMBER_SURVEY.some(q => q.key === k), `${k} is Faithful-only`);
+}
+
+// The demo stops short of account creation on purpose: making someone sign up
+// before the payoff is friction, and it would have answered this by coercion
+// instead of asking. So the question has to exist, or dropping the sign-up step
+// silently costs the pilot the very signal it was meant to produce.
+{
+  const q = FAITHFUL_MEMBER_SURVEY.find(x => x.key === 'signup_intent');
+  assert(/create an account/i.test(q.text), 'signup_intent asks about creating an account');
+  assert.notEqual(q.measures, FAITHFUL_MEMBER_SURVEY.find(x => x.key === 'adoption_signal').measures,
+    'signup intent and ongoing-use intent are different measures — collapsing them loses one');
+}
+
+// Nothing in Faithful's set may assume something the demo does not do. There is
+// no sign-in, so GRACE knows nothing about the person answering and the figures
+// on screen belong to a fabricated persona.
+for (const q of FAITHFUL_MEMBER_SURVEY) {
+  assert(!/know about you|your (giving|balance|account) (history|data)/i.test(q.text),
+    `'${q.key}' asks about personal data the demo never had: ${q.text}`);
 }
 for (const k of ['comprehension', 'usability_navigate']) {
   const q = FAITHFUL_MEMBER_SURVEY.find(x => x.key === k);
