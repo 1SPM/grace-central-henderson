@@ -108,6 +108,7 @@
   tour.setAttribute('role', 'dialog');
   tour.setAttribute('aria-modal', 'true');
   tour.setAttribute('aria-labelledby', 'fw-tour-title');
+  const dim = make('div', 'fw-tour-dim');
   const hole = make('div', 'fw-tour-hole');
   const card = make('div', 'fw-tour-card');
   const position = make('p', 'fw-tour-position');
@@ -120,10 +121,10 @@
   const actions = make('div', 'fw-tour-actions');
   actions.append(skip, listen, next);
   card.append(position, title, caption, actions, status);
-  tour.append(hole, card);
+  tour.append(dim, hole, card);
   app.append(tour);
 
-  let index = -1, hiddenFromReaders = [], returnFocus = null, narration = 0;
+  let index = -1, hiddenFromReaders = [], returnFocus = null, narration = 0, follow = 0;
   function stopAudio() { narration++; window.GRACE_COMPANION?.stopNarration?.(); listen.disabled = false; status.textContent = ''; }
 
   function place(target) {
@@ -132,17 +133,26 @@
     // positions inside .app are not.
     const scale = (frame.width / app.offsetWidth) || 1;
     card.style.top = card.style.bottom = '';
+    // The dimming is one filled layer with the spotlight cut out of it
+    // (clip-path, even-odd: the outer rectangle minus a rounded one). It was a
+    // 2000px box-shadow round the hole; that repainted unreliably as the hole
+    // moved -- some steps came out pale instead of dark. A fill always paints.
+    const W = app.offsetWidth, H = app.offsetHeight, outer = 'M0 0H' + W + 'V' + H + 'H0Z';
+    hole.hidden = !target;
     if (!target) {
-      Object.assign(hole.style, { left: '50%', top: '42%', width: '0px', height: '0px' });
+      dim.style.clipPath = 'path(evenodd,"' + outer + '")';
       card.style.bottom = '20px';
       return;
     }
     const r = target.getBoundingClientRect(), pad = 6;
-    const top = (r.top - frame.top) / scale - pad, height = r.height / scale + pad * 2;
-    Object.assign(hole.style, {
-      left: ((r.left - frame.left) / scale - pad) + 'px', top: top + 'px',
-      width: (r.width / scale + pad * 2) + 'px', height: height + 'px'
-    });
+    const left = Math.round((r.left - frame.left) / scale - pad), top = Math.round((r.top - frame.top) / scale - pad);
+    const width = Math.round(r.width / scale + pad * 2), height = Math.round(r.height / scale + pad * 2);
+    const c = Math.min(26, width / 2, height / 2);
+    const rounded = 'M' + (left + c) + ' ' + top + 'h' + (width - 2 * c) + 'a' + c + ' ' + c + ' 0 0 1 ' + c + ' ' + c +
+      'v' + (height - 2 * c) + 'a' + c + ' ' + c + ' 0 0 1 -' + c + ' ' + c + 'h-' + (width - 2 * c) +
+      'a' + c + ' ' + c + ' 0 0 1 -' + c + ' -' + c + 'v-' + (height - 2 * c) + 'a' + c + ' ' + c + ' 0 0 1 ' + c + ' -' + c + 'z';
+    dim.style.clipPath = 'path(evenodd,"' + outer + rounded + '")';
+    Object.assign(hole.style, { left: left + 'px', top: top + 'px', width: width + 'px', height: height + 'px', borderRadius: c + 'px' });
     // The caption goes on whichever side of the target has the room.
     const appHeight = app.offsetHeight;
     if (top + height / 2 < appHeight / 2) card.style.top = Math.min(top + height + 12, appHeight - 260) + 'px';
@@ -163,8 +173,16 @@
     next.textContent = welcome ? 'Show me around' : last ? 'Add my story' : 'Next';
     listen.hidden = welcome || typeof window.GRACE_COMPANION?.narratePage !== 'function';
     const target = selector && document.querySelector(selector);
-    if (target && home.contains(target)) target.scrollIntoView({ block: 'center', behavior: 'instant' });
-    // Measure after the scroll has landed.
+    // Centre the target by setting the scroll position outright. The list
+    // scrolls smoothly by stylesheet, and scrollIntoView left it still moving
+    // when the target was measured -- the spotlight landed on whatever had
+    // been there a moment earlier.
+    if (target && home.contains(target)) {
+      home.style.scrollBehavior = 'auto';
+      const offset = target.getBoundingClientRect().top - home.getBoundingClientRect().top + home.scrollTop;
+      home.scrollTop = Math.max(0, offset - (home.clientHeight - target.offsetHeight) / 2);
+    }
+    // Measure once that has been laid out.
     requestAnimationFrame(() => requestAnimationFrame(() => { place(target); title.focus({ preventScroll: true }); }));
   }
 
@@ -185,14 +203,19 @@
     tour.hidden = false;
     index = from;
     show();
+    // The page can still move under a step (an image finishing, a late module),
+    // so the spotlight is re-measured while the tour is open rather than once.
+    follow = setInterval(() => { const sel = index >= 0 && STEPS[index][0]; place(sel ? document.querySelector(sel) : null); }, 300);
   }
   function close(outcome) {
+    clearInterval(follow);
     stopAudio();
     tour.hidden = true;
     hiddenFromReaders.forEach(el => el.removeAttribute('aria-hidden'));
     hiddenFromReaders = [];
     app.classList.remove('fw-touring');
-    home.scrollTo({ top: 0, behavior: 'instant' });
+    home.scrollTop = 0;
+    home.style.scrollBehavior = '';
     mark('tour', outcome);
     if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
   }

@@ -108,8 +108,19 @@ for (const [, selector] of welcome.matchAll(/\n    \['([^']+)', '[^']+', '/g)) {
   const name = selector.split(/[ >]/).at(-1).replace(/^[.#]/, '');
   assert(sources.includes(name), `tour step points at "${selector}", and "${name}" is not built anywhere on the phone`);
 }
-// Not `inert`: some engines paint inert content washed-out, which turned the
-// dimming pale. Taps, the Tab trap and aria-hidden do the same job.
+// The spotlight has to land on its target, and that failed twice for reasons a
+// reader of the code would not guess:
+//  - the list scrolls smoothly by stylesheet, so after scrollIntoView the target
+//    was measured while still moving. The scroll position is set outright now;
+//  - the page can move under a step (it did: a toast made the hero taller), so
+//    the spotlight is re-measured while the tour is open, and the timer stops.
+assert(!/scrollIntoView\(\{ block: 'center'/.test(welcome), 'tour steps do not rely on scrollIntoView to centre the target');
+assert(/home\.scrollTop = Math\.max\(0,/.test(welcome), 'the scroll position is set directly');
+assert(/follow = setInterval\(/.test(welcome) && /clearInterval\(follow\)/.test(welcome), 'the spotlight follows its target, and stops following on close');
+// The dimming is a filled layer with the spotlight cut out -- not a 2000px
+// box-shadow, which repainted unreliably as the hole moved.
+assert(/dim\.style\.clipPath = 'path\(evenodd,/.test(welcome), 'the dimming is a clip-path cut-out');
+// Not `inert` either: taps, the Tab trap and aria-hidden do the same job.
 assert(!/\.inert\s*=/.test(welcome), 'the tour does not use inert to block the page');
 assert(!/localStorage\.setItem\(KEY, JSON\.stringify\((?!seen)/.test(welcome), 'only the "seen" flags are stored');
 

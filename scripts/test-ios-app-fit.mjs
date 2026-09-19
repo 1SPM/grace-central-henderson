@@ -204,6 +204,13 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
 
   assert(/#screen-home > \.scroll > \.dash-mod\{display:none\}/.test(bare), 'the pathways are hidden by one rule in the home layer');
 
+  // The "Someone just gave" toasts sat in the hero's flow and made it ~34px
+  // taller for a few seconds at a time, so everything under it jumped on a
+  // timer. They are taken out of the flow; the hero's height cannot depend on
+  // whether one is showing.
+  assert(/\.home-donate-stack\{position:absolute/.test(bare), 'giving toasts do not resize the hero');
+  assert(/\.home-donate-stack > :not\(:last-child\)\{display:none\}/.test(bare), 'and only the newest one shows on Home');
+
   const cardRule = /([^{}]+)\{[^}]*border-radius:var\(--fh-radius\);box-shadow/.exec(bare);
   assert(cardRule && !cardRule[1].includes(':is('), 'the shared card rule is a plain selector list');
   // Every selector starts with .app, so the layer cannot reach another page.

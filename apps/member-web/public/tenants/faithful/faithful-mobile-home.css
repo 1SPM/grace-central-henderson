@@ -73,6 +73,18 @@
 .app #screen-home .home-live-pill{min-height:44px;padding:0 18px;border-radius:22px;font-size:13px;font-weight:600;background:#fff!important;color:var(--fh-title);border-color:#fff}
 .app #screen-home .home-live-pill i{background:var(--fh-control)}
 
+/* The "Someone just gave" toasts were in the hero's flow, so each one made the
+   hero ~34px taller for a few seconds and everything under it jumped -- on a
+   timer, for as long as Home was open. The compact hero has no free corner,
+   so the newest one sits as a badge across the hero's bottom edge, in the gap
+   above the tiles: it covers nothing, and the page holds still. */
+.app #screen-home .home-hero{position:relative;overflow:visible}
+/* The badge is positioned against the hero, not the button row it sits in. */
+.app #screen-home :is(.home-hero-top,.home-hero-left,.home-hero-top-right){position:static}
+.app #screen-home .home-donate-stack{position:absolute;right:16px;bottom:-14px;max-width:72%;margin:0;pointer-events:none;z-index:2}
+.app #screen-home .home-donate-stack > :not(:last-child){display:none}
+.app #screen-home .home-donate-stack .watch-donate-toast{margin:0;padding:6px 10px;border-radius:14px;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(180deg,#2a3163,#1a2048);border:1px solid #b8a35a;color:#fff;box-shadow:0 6px 14px #12143459}
+
 /* ── leader: one row. Who, what it is, one way in ───────────────────────── */
 .app #screen-home #home-leader-chip{grid-template-columns:48px minmax(0,1fr) auto;column-gap:12px;padding:12px 12px 12px 14px}
 .app #screen-home #home-leader-chip-av{width:48px;height:48px}
@@ -171,56 +183,115 @@
 .app #screen-home .mobile-community-summary .cn-post-quote{font-size:15px;line-height:1.5}
 .app #screen-home .fm-survey-invite button{font-size:15px;font-weight:600}
 
-/* ── colour says what a card is for ───────────────────────────────────────
-   Everything on Home was a white card on a near-white page: one gutter and one
-   radius made it calm, and also made a leader, a wallet and a post look like
-   the same thing. Two changes. The page is a step darker, so white reads as a
-   surface. And each FUNCTION has one colour, used the same way everywhere it
-   appears -- a tinted tile, a well, or a rule down a card's leading edge:
+/* ── one look: indigo, gold, and depth ────────────────────────────────────
+   Home briefly gave each function its own colour (blue, violet, rose, green,
+   gold). Five colours on one screen separated the cards and also made the page
+   busy. This is the uniform look Divinity uses instead, and it separates cards
+   by SURFACE rather than hue:
 
-     worship    blue     the service, watching, the community's posts
-     people     violet   groups and the people you meet
-     care       rose     asking for support (not the crisis red, which stays
-                         reserved for the crisis card)
-     giving     green    the IMPACT card and the causes it supports
-     your story gold     your leader, your own story
+     light card   white-to-lavender gradient, a thin gold rule round it, a soft
+                  two-layer shadow -- for things you read or browse
+     dark card    a deep indigo gradient with a sheen at the top and a gold
+                  rule -- for the people and the invitations: your leader, the
+                  scripture, the closing invitation, GRACE
+     gold         the one primary action on the screen
+     navy pill    every other action
+     icon well    a rounded square, lavender, navy glyph -- always the same
 
-   Tints are backgrounds only; text on them stays the navy ink, so contrast
-   does not depend on the colour. */
+   Texture comes from gradients, never from a flat fill: the page itself runs
+   lavender to grey-violet under a fine dot grain. Two colours, so nothing on
+   the page competes with the photograph in the hero. */
 .app #screen-home{
-  --fn-worship:#175fa5;--fn-worship-tint:#e2eefb;
-  --fn-people:#5b4bb3;--fn-people-tint:#ebe8fb;
-  --fn-care:#b04a63;--fn-care-tint:#fbe8ec;
-  --fn-giving:#2f7d5b;--fn-giving-tint:#e1f3ea;
-  --fn-story:#8a6420;--fn-story-tint:#fbf3e1;
-  --fh-line:#d3deeb;
-  --fh-shadow:0 1px 2px #1234570f,0 10px 28px #12345714;
-  background:#e9eef6;
+  --dv-navy:#23255c;--dv-navy-2:#36408c;--dv-ink:#1d1f4a;--dv-muted:#5d6085;
+  --dv-gold:#b8a35a;--dv-gold-ink:#8d7d33;--dv-gold-line:#d6d2a4;
+  --dv-well:linear-gradient(180deg,#f4f3fa 0%,#e5e3f1 100%);
+  --dv-light:linear-gradient(180deg,#ffffff 0%,#f8f7fc 100%);
+  --dv-dark:radial-gradient(130% 70% at 50% 0%,#414b86 0%,#414b8600 62%),linear-gradient(180deg,#1a2048 0%,#2a3163 52%,#1c2250 100%);
+  --dv-gold-fill:linear-gradient(135deg,#d6bc7c 0%,#b89c5c 52%,#a3884b 100%);
+  --dv-navy-fill:linear-gradient(135deg,#292a69 0%,#38428f 100%);
+  --dv-lift:0 1px 0 #ffffff inset,0 2px 4px #23255c12,0 14px 30px #23255c1c;
+  --dv-lift-dark:0 1px 0 #ffffff24 inset,0 3px 6px #12143433,0 18px 36px #1214344d;
+  /* the tokens the rest of this file already uses, re-pointed */
+  --fh-ink:var(--dv-ink);--fh-title:var(--dv-navy);--fh-muted:var(--dv-muted);
+  --fh-line:var(--dv-gold-line);--fh-soft:#ecebf5;--fh-control:var(--dv-navy);
+  --fh-shadow:var(--dv-lift);
+  background:#efeef6;
 }
-.app #screen-home > .scroll{background-color:#e9eef6}
+.app #screen-home > .scroll{
+  background:
+    radial-gradient(#23255c14 .6px,transparent .9px) 0 0/6px 6px,
+    radial-gradient(90% 40% at 50% 0%,#ffffff 0%,#ffffff00 70%),
+    linear-gradient(180deg,#f6f5fb 0%,#ebe9f4 55%,#e6e4f0 100%);
+}
 
-/* this week: a tile per function, each its own colour */
-.app #screen-home .mobile-shortcuts button{border-color:transparent;box-shadow:none;background:var(--fn-worship-tint)}
-.app #screen-home .mobile-shortcuts button .mobile-shortcut-icon{background:#fff;color:var(--fn-worship)}
-.app #screen-home .mobile-shortcuts button:nth-child(2){background:var(--fn-people-tint)}
-.app #screen-home .mobile-shortcuts button:nth-child(2) .mobile-shortcut-icon{color:var(--fn-people)}
-.app #screen-home .mobile-shortcuts button:nth-child(3){background:var(--fn-care-tint)}
-.app #screen-home .mobile-shortcuts button:nth-child(3) .mobile-shortcut-icon{color:var(--fn-care)}
-.app #screen-home .mobile-shortcuts button:nth-child(4){background:var(--fn-giving-tint)}
-.app #screen-home .mobile-shortcuts button:nth-child(4) .mobile-shortcut-icon{background:#fff;color:var(--fn-giving)}
-.app #screen-home .mobile-shortcuts small{color:#3f5670}
+/* light cards */
+.app #screen-home .mobile-shortcuts button,
+.app #screen-home .mobile-impact-card,
+.app #screen-home .cn-post,
+.app #screen-home > .scroll > .fw-story-nudge{background:var(--dv-light);border:1px solid var(--dv-gold-line);box-shadow:var(--dv-lift)}
+.app #screen-home .mobile-impact-card{box-shadow:none}
+.app #screen-home .mobile-impact-summary > header + p + .mobile-impact-card,
+.app #screen-home .mobile-impact-card{border-bottom:0}
 
-/* your leader, your story: gold */
-.app #screen-home #home-leader-chip{border-left:4px solid var(--fn-story)}
-.app #screen-home #home-leader-chip .home-leader-chip-cta{background:var(--fn-story-tint);color:#6d4e14}
+/* hero: the photograph under indigo, a gold hairline, one gold action */
+.app #screen-home .home-hero{
+  background:
+    linear-gradient(180deg,#1a1c4d59 0%,#1a1c4d8c 45%,#151740f0 100%),
+    linear-gradient(90deg,#151740d9 0%,#15174033 70%),
+    url('../../assets/faithful-worship-hero.jpg') 65% center/cover;
+  border:1px solid #d6bc7c8c;box-shadow:0 1px 0 #ffffff33 inset,0 18px 40px #15174059;
+}
+.app #screen-home .home-hero-date{color:#e3cf97}
+.app #screen-home .home-live-pill{background:var(--dv-gold-fill)!important;color:#1b1d3f;border:0;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}
+.app #screen-home .home-live-pill i{background:#1b1d3f}
 
-/* giving: green */
-.app #screen-home .mobile-impact-card{border-left:4px solid var(--fn-giving)}
-.app #screen-home .mobile-impact-story{border-left:4px solid var(--fn-giving);background:#f1f9f4}
-.app #screen-home .mobile-impact-summary button{color:#23694b}
+/* this week: four identical tiles; the glyph says which is which */
+.app #screen-home .mobile-shortcuts button .mobile-shortcut-icon,
+.app #screen-home .mobile-shortcuts button:last-child .mobile-shortcut-icon{width:44px;height:44px;border-radius:13px;background:var(--dv-well);border:1px solid #d8d6e8;color:var(--dv-navy);box-shadow:0 1px 0 #fff inset}
+.app #screen-home .mobile-shortcuts strong{color:var(--dv-navy)}
+.app #screen-home .mobile-shortcuts small{color:var(--dv-muted)}
 
-/* the community's posts: blue */
-.app #screen-home .mobile-community-summary .cn-post{border-left:4px solid var(--fn-worship)}
+/* your leader: a dark card */
+.app #screen-home #home-leader-chip{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:var(--dv-lift-dark)}
+.app #screen-home #home-leader-chip-av{border:2px solid #d6bc7c;box-shadow:0 0 0 3px #d6bc7c33}
+.app #screen-home #home-leader-chip .home-leader-chip-label{color:#e3cf97}
+.app #screen-home #home-leader-chip .home-leader-chip-name{font:700 17px/1.25 var(--fh-display);letter-spacing:-.2px;color:#fff}
+.app #screen-home #home-leader-chip .home-leader-chip-sub{color:#c9cbe6}
+.app #screen-home #home-leader-chip .home-leader-chip-cta{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 8px 16px #0d0f3059}
+
+/* the My story line */
+.app #screen-home .fw-story-nudge-go{color:var(--dv-navy)}
+.app #screen-home .fw-story-nudge-go small,
+.app #screen-home .fw-story-nudge-close{color:var(--dv-gold-ink)}
+
+/* IMPACT: a light card with a warm footer and one navy action */
+.app #screen-home .mobile-impact-summary > header > small{background:none;border:1px solid var(--dv-gold);color:var(--dv-gold-ink)}
+.app #screen-home .mobile-impact-card > img{background:var(--dv-well);border-radius:14px;margin:12px 0 12px 12px;padding:10px;width:calc(100% - 12px);border:1px solid #d8d6e8}
+.app #screen-home .mobile-impact-card strong{color:var(--dv-navy)}
+.app #screen-home .mobile-impact-card button{color:var(--dv-gold-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:#b8a35a99}
+.app #screen-home .mobile-impact-story{background:linear-gradient(180deg,#fbfaf3 0%,#f4f1e2 100%);border:1px solid var(--dv-gold-line);border-top-color:#e6e2c0;box-shadow:var(--dv-lift)}
+.app #screen-home .mobile-impact-story button{min-height:44px;margin-top:8px;padding:0 18px;border-radius:22px;background:var(--dv-navy-fill);color:#fff;text-decoration:none;box-shadow:0 8px 18px #292a6940}
+
+/* community: chips for the ways in, a dark panel for the scripture */
+.app #screen-home .mobile-community-summary{row-gap:10px;column-gap:8px}
+.app #screen-home .mobile-community-summary > button{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--dv-gold-line);background:linear-gradient(180deg,#fdfcf6,#f6f4e6);color:var(--dv-navy)}
+.app #screen-home .mobile-community-summary .cn-post-name{color:var(--dv-navy)}
+.app #screen-home .mobile-community-summary .cn-post-badge{background:none;border:1px solid var(--dv-gold);color:var(--dv-gold-ink);border-radius:12px}
+.app #screen-home .mobile-community-summary .cn-post-quote{background:var(--dv-dark);border:0;border-left:3px solid var(--dv-gold);border-radius:6px 16px 16px 6px;color:#fff;font-style:italic;box-shadow:var(--dv-lift-dark)}
+.app #screen-home .mobile-community-summary .cn-post-verse{color:var(--dv-gold-ink)}
+.app #screen-home .mobile-community-summary .cn-post-body{color:var(--dv-ink)}
+.app #screen-home .mobile-community-summary .cn-post-actions{border-top-color:#e6e2c0}
+.app #screen-home .mobile-community-summary .cn-pact{border:1px solid var(--dv-gold-line);background:linear-gradient(180deg,#fff,#f8f7fc);color:var(--dv-navy)}
+
+/* the closing invitation: dark, with the screen's second gold action */
+.app #screen-home .fm-survey-invite{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:var(--dv-lift-dark)}
+.app #screen-home .fm-survey-invite h2{color:#fff}
+.app #screen-home .fm-survey-invite p{color:#d3d5ec;opacity:1}
+.app #screen-home .fm-survey-invite button{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #0d0f3059}
+
+/* GRACE: the same dark surface, gold rule, gold send */
+.app #screen-home .fm-grace-dock #home-grace-card{background:var(--dv-dark);border:1.5px solid var(--dv-gold);box-shadow:0 1px 0 #ffffff24 inset,0 14px 34px #12143466}
+.app #screen-home .fm-grace-dock .home-grace-send{background:var(--dv-gold-fill);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset}
 
 /* ── footer: on the grid, and every link wide enough to hit ─────────────── */
 .app #screen-home > .scroll > .fd-footer{margin:28px var(--fh-gutter) 0;padding:16px 0}
