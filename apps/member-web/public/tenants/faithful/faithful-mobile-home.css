@@ -171,6 +171,57 @@
 .app #screen-home .mobile-community-summary .cn-post-quote{font-size:15px;line-height:1.5}
 .app #screen-home .fm-survey-invite button{font-size:15px;font-weight:600}
 
+/* ── colour says what a card is for ───────────────────────────────────────
+   Everything on Home was a white card on a near-white page: one gutter and one
+   radius made it calm, and also made a leader, a wallet and a post look like
+   the same thing. Two changes. The page is a step darker, so white reads as a
+   surface. And each FUNCTION has one colour, used the same way everywhere it
+   appears -- a tinted tile, a well, or a rule down a card's leading edge:
+
+     worship    blue     the service, watching, the community's posts
+     people     violet   groups and the people you meet
+     care       rose     asking for support (not the crisis red, which stays
+                         reserved for the crisis card)
+     giving     green    the IMPACT card and the causes it supports
+     your story gold     your leader, your own story
+
+   Tints are backgrounds only; text on them stays the navy ink, so contrast
+   does not depend on the colour. */
+.app #screen-home{
+  --fn-worship:#175fa5;--fn-worship-tint:#e2eefb;
+  --fn-people:#5b4bb3;--fn-people-tint:#ebe8fb;
+  --fn-care:#b04a63;--fn-care-tint:#fbe8ec;
+  --fn-giving:#2f7d5b;--fn-giving-tint:#e1f3ea;
+  --fn-story:#8a6420;--fn-story-tint:#fbf3e1;
+  --fh-line:#d3deeb;
+  --fh-shadow:0 1px 2px #1234570f,0 10px 28px #12345714;
+  background:#e9eef6;
+}
+.app #screen-home > .scroll{background-color:#e9eef6}
+
+/* this week: a tile per function, each its own colour */
+.app #screen-home .mobile-shortcuts button{border-color:transparent;box-shadow:none;background:var(--fn-worship-tint)}
+.app #screen-home .mobile-shortcuts button .mobile-shortcut-icon{background:#fff;color:var(--fn-worship)}
+.app #screen-home .mobile-shortcuts button:nth-child(2){background:var(--fn-people-tint)}
+.app #screen-home .mobile-shortcuts button:nth-child(2) .mobile-shortcut-icon{color:var(--fn-people)}
+.app #screen-home .mobile-shortcuts button:nth-child(3){background:var(--fn-care-tint)}
+.app #screen-home .mobile-shortcuts button:nth-child(3) .mobile-shortcut-icon{color:var(--fn-care)}
+.app #screen-home .mobile-shortcuts button:nth-child(4){background:var(--fn-giving-tint)}
+.app #screen-home .mobile-shortcuts button:nth-child(4) .mobile-shortcut-icon{background:#fff;color:var(--fn-giving)}
+.app #screen-home .mobile-shortcuts small{color:#3f5670}
+
+/* your leader, your story: gold */
+.app #screen-home #home-leader-chip{border-left:4px solid var(--fn-story)}
+.app #screen-home #home-leader-chip .home-leader-chip-cta{background:var(--fn-story-tint);color:#6d4e14}
+
+/* giving: green */
+.app #screen-home .mobile-impact-card{border-left:4px solid var(--fn-giving)}
+.app #screen-home .mobile-impact-story{border-left:4px solid var(--fn-giving);background:#f1f9f4}
+.app #screen-home .mobile-impact-summary button{color:#23694b}
+
+/* the community's posts: blue */
+.app #screen-home .mobile-community-summary .cn-post{border-left:4px solid var(--fn-worship)}
+
 /* ── footer: on the grid, and every link wide enough to hit ─────────────── */
 .app #screen-home > .scroll > .fd-footer{margin:28px var(--fh-gutter) 0;padding:16px 0}
 .app #screen-home .fd-footer button{min-width:44px}
