@@ -37,4 +37,16 @@
   const copy = make('div', ''); copy.append(make('h2', '', 'Pray with your church'), make('p', '', 'Share a prayer request or pray for others.'));
   const link = make('button', '', 'Go to prayer wall'); link.type = 'button'; link.onclick = () => document.getElementById('home-prayer-wall')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   copy.append(link); prayer.append(photo, copy); home.append(prayer);
+
+  // The pilot survey goes last on the phone, because the phone is where the
+  // walkthrough ends -- the QR at the end of the desktop Mobile section sends
+  // people here. It is appended rather than written into the HTML so it lands
+  // after the sections this module adds above; a static <div> would sit above
+  // them. The shared module builds its own DOM and reads the tenant from the
+  // path, so nothing here is survey-specific beyond the mount point.
+  const survey = document.createElement('div');
+  survey.setAttribute('data-grace-pilot-survey', '');
+  home.append(survey);
+  // Its own auto-mount already ran and found nothing, so ask it explicitly.
+  window.GRACE_PILOT_SURVEY?.mount();
 })();
