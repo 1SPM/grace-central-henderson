@@ -79,6 +79,41 @@
   invite.append(go);
   home.append(invite);
 
+  // GRACE docks above the tab bar instead of sitting two screens down the page.
+  //
+  // It is the same card, moved -- not a second launcher. The input is still
+  // #home-grace-input and the arrow still calls sendGraceHome(), so whatever
+  // GRACE does with a message it does from here too. Everything else in the
+  // card (title, note, dismiss, "Got it", the reopen button) is hidden by
+  // faithful-mobile-home.css: a bar that is always one thumb away has nothing
+  // to dismiss. It sits in the screen, not the scroll, so it does not move.
+  const grace = document.getElementById('home-grace-wrap');
+  if (grace) {
+    grace.classList.add('fm-grace-dock');
+    grace.querySelector('.grace-orb')?.classList.replace('grace-orb--md', 'grace-orb--sm');
+    const ask = document.getElementById('home-grace-input');
+    if (ask) ask.placeholder = 'Ask GRACE anything…';
+    home.parentElement.append(grace);
+  }
+
+  // One row has room for the leader's whole name or for "Open avatar →", not
+  // both -- the name was wrapping. The line under the name already says this
+  // is an AI avatar, and the card keeps its "Open your leader avatar" label
+  // for screen readers, so the visible word can be short.
+  const talk = home.querySelector('#home-leader-chip .home-leader-chip-cta');
+  if (talk) talk.textContent = 'Talk';
+
+  // The hero's date line ended "· Faithful Church", which the bar above it
+  // already says. That slot now answers the question people open a church app
+  // with. 9:45 is the same service the Sunday shortcut and the live pill use;
+  // "today" only until that service's window closes at 12:30.
+  const heroDate = document.getElementById('home-hero-date');
+  if (heroDate) {
+    const now = new Date(), day = now.getDay();
+    const when = day === 0 && now.getHours() * 60 + now.getMinutes() <= 750 ? 'today' : day === 6 ? 'tomorrow' : 'Sunday';
+    heroDate.textContent = heroDate.textContent.split(' · ')[0] + ' · Worship ' + when + ' 9:45 AM';
+  }
+
   // faithful-destinations.js appends the page footer, and it runs before this
   // module -- so everything added above lands BELOW it. That left three
   // sections and the survey sitting under a footer, which reads as if the page
@@ -101,7 +136,8 @@
   // The portal's My Church goes on to the prayer wall, people to turn to and
   // pray with your church. The phone keeps the portal's order but stops early:
   // those three live on Connect and Care, one tap away, so Home is about three
-  // screens instead of six. Same sequence, shorter page.
+  // screens instead of six. Same sequence, shorter page. GRACE is not in the
+  // list at all: it has no portal equivalent, and it is docked above the tabs.
   [
     '.home-hero',              // Good morning, Maya
     '.home-hero-leader',       // Your leader
@@ -109,7 +145,6 @@
     '.mobile-impact-summary',  // Your IMPACT card
     '.mobile-shortcuts',       // This week: service, groups, care
     '.dash-mod',               // Grow with Faithful Church
-    '.home-grace-wrap',        // Find your way  (no portal equivalent; kept here)
     '.mobile-community-summary', // Life in your church / Community wall (+ the prayer wall link)
     '.fm-survey-invite',       // One last thing -> the survey tab
   ].forEach(sel => {

@@ -119,11 +119,21 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
     '.mobile-impact-summary',
     '.mobile-shortcuts',
     '.dash-mod',
-    '.home-grace-wrap',
     '.mobile-community-summary',
     '.fm-survey-invite',
   ], 'the phone home order must match the portal: hero, leader, the onboarding dropdown, ' +
-     'IMPACT, this week, pathways, find your way, community, survey invite');
+     'IMPACT, this week, pathways, community, survey invite');
+
+  // GRACE has no portal equivalent, so it was never part of the parity; it is
+  // docked above the tab bar instead of taking a slot in the scroll. It must
+  // be the SAME card moved -- same input, same send -- not a second launcher
+  // that could drift from what GRACE actually does with a message.
+  assert(!order.includes('.home-grace-wrap'), 'GRACE is docked, not a section in the scroll');
+  assert(/getElementById\('home-grace-wrap'\)/.test(finish) && /classList\.add\('fm-grace-dock'\)/.test(finish) &&
+         /home\.parentElement\.append\(grace\)/.test(finish),
+    'the existing GRACE card is moved out of the scroll and tagged as the dock');
+  assert(/id="home-grace-input"[^>]*sendGraceHome\(\)/.test(html) && /class="home-grace-send" onclick="sendGraceHome\(\)"/.test(html),
+    'the dock still sends through sendGraceHome()');
 
   // Same order as the portal, but the phone stops early. The prayer wall,
   // "People to turn to" and "Pray with your church" are the tail of the
@@ -173,6 +183,14 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   for (const m of bare.matchAll(/:is\(([^)]*)\)/g)) {
     assert(!m[1].includes('#'), `no IDs inside :is() in the home layer -- found ":is(${m[1]})"`);
   }
+  // A dismissed card must still dock: the old "dismiss" wrote to localStorage,
+  // and .is-dismissed hides .home-grace-card. The dock rule carries two IDs to
+  // outrank it, and the scroll leaves room so the footer clears the bar.
+  assert(/\.fm-grace-dock #home-grace-card\{display:flex/.test(bare), 'the dock shows even for someone who dismissed the old card');
+  assert(/#screen-home > \.scroll\{padding:4px 0 96px\}/.test(bare), 'the scroll ends clear of the dock');
+  // The field is the one off-scale size on Home: under 16px iOS zooms on focus.
+  assert(/\.home-grace-input\{[^}]*font-size:16px/.test(bare), 'the GRACE field is 16px so iOS does not zoom the page on focus');
+
   const cardRule = /([^{}]+)\{[^}]*border-radius:var\(--fh-radius\);box-shadow/.exec(bare);
   assert(cardRule && !cardRule[1].includes(':is('), 'the shared card rule is a plain selector list');
   // Every selector starts with .app, so the layer cannot reach another page.
