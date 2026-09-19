@@ -251,32 +251,43 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
   cdom.window.close();
 }
 
-// ── both tenants are wired identically ──────────────────────────────────────
-for (const tenant of ['faithful', 'central-henderson']) {
-  const page = fs.readFileSync(`apps/member-web/public/tenants/${tenant}/member-portal.html`, 'utf8');
-  assert.equal((page.match(/data-grace-pilot-survey/g) || []).length, 1, `${tenant}: exactly one mount point`);
-  // Count tags, not mentions — the mount comment names the module too.
-  const scripts = [...page.matchAll(/<script src="[^"]*shared\/(grace-pilot-survey[^"]*\.js)"/g)].map(m => m[1]);
-  assert.deepEqual(scripts, ['grace-pilot-survey-questions.js', 'grace-pilot-survey.js'],
-    `${tenant}: loads the questions once, then the module that reads them`);
-  assert.equal((page.match(/<link[^>]*shared\/grace-pilot-survey\.css/g) || []).length, 1,
-    `${tenant}: loads the stylesheet once`);
+// ── where each tenant's survey lives ───────────────────────────────────────
+//
+// Faithful ends on the phone: the QR in the desktop Mobile section sends people
+// to the iOS page, and that is where they answer. The desktop mount was removed
+// once the phone had one, because a respondent key lives in sessionStorage and
+// is therefore per-tab — the same person answering on both would have written
+// two rows under two keys and inflated the count.
+//
+// Central has no survey on its phone page, so its desktop mount is the only
+// place its members can answer and must stay. The two tenants are deliberately
+// NOT symmetrical here; asserting they were is what would break first.
+{
+  const faithfulPortal = fs.readFileSync('apps/member-web/public/tenants/faithful/member-portal.html', 'utf8');
+  assert(!/data-grace-pilot-survey/.test(faithfulPortal),
+    'Faithful answers on the phone, so its desktop portal must not also mount the survey');
+  assert(!/shared\/grace-pilot-survey/.test(faithfulPortal),
+    'and should not carry the module or stylesheet it no longer uses');
 
-  // Placement is part of "identical in function": the survey is the last block
-  // of the Mobile section on both tenants, so it reads after the walkthrough and
-  // the QR handoff rather than interrupting them.
-  const secStart = page.indexOf('<div class="sec" id="sec-mobile">');
-  assert(secStart > 0, `${tenant}: has a Mobile section`);
-  let depth = 0, secEnd = -1;
-  for (const m of page.slice(secStart).matchAll(/<div\b|<\/div>/g)) {
-    depth += m[0].startsWith('<div') ? 1 : -1;
-    if (depth === 0) { secEnd = secStart + m.index; break; }
+  const centralPortal = fs.readFileSync('apps/member-web/public/tenants/central-henderson/member-portal.html', 'utf8');
+  assert.equal((centralPortal.match(/data-grace-pilot-survey/g) || []).length, 1,
+    'Central has no survey on its phone page, so the desktop mount is its only one');
+  const centralScripts = [...centralPortal.matchAll(/<script src="[^"]*shared\/(grace-pilot-survey[^"]*\.js)"/g)].map(m => m[1]);
+  assert.deepEqual(centralScripts, ['grace-pilot-survey-questions.js', 'grace-pilot-survey.js'],
+    'Central loads the questions, then the module');
+  assert.equal((centralPortal.match(/<link[^>]*shared\/grace-pilot-survey\.css/g) || []).length, 1,
+    'Central loads the stylesheet once');
+
+  // Exactly one mount per tenant, across both of its pages.
+  for (const tenant of ['faithful', 'central-henderson']) {
+    const pages = fs.readdirSync(`apps/member-web/public/tenants/${tenant}`)
+      .filter(f => f.endsWith('.html'))
+      .map(f => fs.readFileSync(`apps/member-web/public/tenants/${tenant}/${f}`, 'utf8'));
+    const statik = pages.reduce((n, p) => n + (p.match(/data-grace-pilot-survey/g) || []).length, 0);
+    const appended = tenant === 'faithful' ? 1 : 0;   // faithful-mobile-finish.js appends the phone one
+    assert.equal(statik + appended, 1,
+      `${tenant}: exactly one mount across all its pages — two would mean two rows per person`);
   }
-  const mount = page.indexOf('<div data-grace-pilot-survey>');
-  assert(mount > secStart && mount < secEnd, `${tenant}: the survey mounts inside the Mobile section`);
-  assert(mount > page.indexOf('<div class="mobile-share-panel">', secStart),
-    `${tenant}: the survey must come after the QR handoff, not before it`);
-  assert(secEnd - mount < 320, `${tenant}: the survey is the last block of the Mobile section`);
 }
 
 // ── the phone carries it too ────────────────────────────────────────────────
@@ -332,4 +343,4 @@ assert(!/\banon\b/.test(sql), 'no anon policy: responses are read by staff, not 
   assert(!/drop table|delete from/i.test(m84), '084 is a widening only');
 }
 
-console.log(`PASS: no drift (Central ${MEMBER_SURVEY.length}, Faithful ${FAITHFUL_MEMBER_SURVEY.length}), separate tracks, skippable, truthful failure states, anonymous payload, server validation, both tenants wired, phone carries it too. Visual layout and a real phone submission not verified.`);
+console.log(`PASS: no drift (Central ${MEMBER_SURVEY.length}, Faithful ${FAITHFUL_MEMBER_SURVEY.length}), separate tracks, skippable, truthful failure states, anonymous payload, server validation, one mount per tenant (Faithful on the phone, Central on desktop). Visual layout and a real phone submission not verified.`);
