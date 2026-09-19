@@ -74,8 +74,8 @@
   function mountNudge() {
     if (nudge) return;
     nudge = make('div', 'fw-story-nudge');
-    const go = button('fw-story-nudge-go', 'Tell us a little about you');
-    go.append(make('small', '', 'Optional · about 2 minutes'));
+    const go = button('fw-story-nudge-go', 'Get connected with Faithful');
+    go.append(make('small', '', 'Tell the church about you · about 2 minutes'));
     go.onclick = openStory;
     const close = button('fw-story-nudge-close', '×');
     close.setAttribute('aria-label', 'Dismiss');
@@ -101,7 +101,7 @@
     ['#screen-home .mobile-shortcuts', 'Find your people', 'Sunday, groups, care and your impact are one tap from here. You can look around without joining anything or sending a request.'],
     ['#home-leader-chip', 'Meet your leader', 'Your pastor’s AI avatar can help you explore your faith. It is always labelled as an avatar, and you can ask for a person under Care.'],
     ['.app > .fm-grace-dock', 'Ask GRACE', 'GRACE helps you find your way around church life. Ask about services, groups, events or giving. The bar is here on every tab.'],
-    [null, 'Begin your story', 'A little about your connection gives this experience context. Add what feels useful, in your own words. It stays in this browser.']
+    [null, 'Get connected', 'This is how Faithful gets to know the people who join. Tell the church a little about you, then create your account. Nothing is sent until you say so.']
   ];
   const tour = make('div', 'fw-tour');
   tour.hidden = true;
@@ -170,7 +170,7 @@
     title.textContent = heading;
     caption.textContent = text;
     skip.textContent = welcome ? 'Not now' : last ? 'Finish' : 'Skip';
-    next.textContent = welcome ? 'Show me around' : last ? 'Add my story' : 'Next';
+    next.textContent = welcome ? 'Show me around' : last ? 'Get connected' : 'Next';
     listen.hidden = welcome || typeof window.GRACE_COMPANION?.narratePage !== 'function';
     // The tour points at the whole bar, so it opens it if it was folded away.
     if (selector === '.app > .fm-grace-dock') window.FAITHFUL_GRACE_DOCK?.open();
@@ -329,9 +329,10 @@
   const drawerNav = document.querySelector('#app-drawer .drawer-nav');
   if (drawerNav) {
     const row = make('div', 'fw-drawer-row');
-    const again = button('fw-drawer-chip', 'Take the tour');
+    const again = button('fw-drawer-chip', 'Tour');
+    again.setAttribute('aria-label', 'Take the tour');
     again.onclick = () => { window.closeAppMenu?.(); setTimeout(() => open(0), 320); };
-    const story = button('fw-drawer-chip', 'My story');
+    const story = button('fw-drawer-chip', 'Get connected');
     story.dataset.fdAction = 'my-story';   // routed by faithful-destinations.js
     // The survey's way in from anywhere, now that it is not a tab.
     const feedback = button('fw-drawer-chip', 'Feedback');
