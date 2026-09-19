@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="GRACE Faithful Church">
+<!-- Without these, Add to Home Screen shows a screenshot of the page instead of
+     an icon, and Safari's chrome does not pick up the app's own colour. The
+     status-bar style stays "default": the app background is light (#f3f4f6), and
+     black-translucent would put white status text on it. -->
+<link rel="apple-touch-icon" href="../../assets/faithful-church-logo.png">
+<meta name="theme-color" content="#f3f4f6">
 <title>GRACE Faithful Church Members Card</title>
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="../../shared/grace-typography.css">
@@ -50,6 +56,31 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
 @media (max-width:500px){
   .device{width:100vw;height:100dvh;border-radius:0;box-shadow:none}
   .island{display:none}
+
+  /* ── on a real phone, stop drawing a second phone ──
+     This page simulates an iPhone for the desktop mockup: a frame, a Dynamic
+     Island, and a status bar reading 9:41 / 5G. The frame and island were
+     already dropped here; the status bar was not, so a member opening this from
+     the QR saw a fake clock and battery sitting directly under their real one.
+     Nothing else announces "this is a picture of an app" more loudly.
+
+     --ios-safe-top / --ios-safe-bot are hardcoded stand-ins for an iPhone's
+     insets (47px / 34px). iOS supplies the real ones, which differ by device
+     and are 0 on older phones and in landscape, so defer to env() instead of
+     guessing. Scoped to .device so .app and .tabbar-zone inherit them.
+
+     Selectors are qualified with .device deliberately: the base .status and
+     .app rules are declared LATER in this file, so at equal specificity they
+     win and an unqualified override does nothing. That is not hypothetical --
+     it is what happened on the first attempt, and an emulator hid it, because
+     env() resolves to 0 there regardless. */
+  .device .status{display:none}
+  .device{
+    --ios-safe-top:0px;
+    --ios-safe-bot:env(safe-area-inset-bottom,0px);
+    overscroll-behavior:none;
+  }
+  .device .app{padding-top:env(safe-area-inset-top,0px)}
 }
 .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:15}
 .status{
