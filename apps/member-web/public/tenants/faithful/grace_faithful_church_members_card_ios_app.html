@@ -5751,10 +5751,11 @@ function showToast(message) {
 
 function renderImpactNotification(item, isNew) {
   return '<div class="impact-notify-item' + (isNew ? ' is-new' : '') + '">' +
-    // One neutral icon: the per-merchant ones (dining, fuel...) say where the
+    // One neutral icon (navy well: this icon set draws in #e8f4fa, which vanishes
+    // on a pale one): the per-merchant ones (dining, fuel...) say where the
     // member shops. The full line -- merchant, spend, amount routed -- is in
     // Activity below, where they went looking for it. See NOTIFICATION PRIVACY.
-    '<div class="impact-notify-icon" style="background:#e8f4fa" data-grace-icon="heart" data-grace-size="18"></div>' +
+    '<div class="impact-notify-icon" style="background:#13477a" data-grace-icon="heart" data-grace-size="18"></div>' +
     '<div class="impact-notify-body">' +
       '<strong>Your card supported ' + item.cause + '</strong>' +
       '<span class="impact-notify-meta">' + item.date + ' · GRACE Impact Card</span>' +
