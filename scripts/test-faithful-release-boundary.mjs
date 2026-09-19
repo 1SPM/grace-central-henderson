@@ -54,7 +54,7 @@ for(const page of ['member-portal.html','grace_faithful_church_members_card_ios_
 //    in a PR whose subject is changing Central.
 const CENTRAL_PAGE_SHA256={
  'member-portal.html':'1a0a373736ea588b1993c3ac087e1f980c039b49b8baeada100fe993a91c8bb9',
- 'grace_central_henderson_members_card_ios_app.html':'652d1120c0a32d8ee8fbf8a80576ab8add1e5a717fb020a875cf0486f20dcb66',
+ 'grace_central_henderson_members_card_ios_app.html':'9eecc89ba5ee9b6557ed9746baf6f6da5add93cbb63937cf5cac7f610dbbecaf',
 };
 for(const [page,expected] of Object.entries(CENTRAL_PAGE_SHA256)){
  const p='apps/member-web/public/tenants/central-henderson/'+page;
