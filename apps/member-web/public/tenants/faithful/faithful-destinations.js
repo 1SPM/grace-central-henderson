@@ -38,11 +38,14 @@
   // how it saves changes. The desktop portal keeps it on Home, so this page and
   // the Settings wording that points at it exist on mobile only.
   if (mobile) {
-    pages['my-story'] = ['My story', 'A little about you, in your own words.', ''];
-    content['my-story'] = '<p class="fd-notice">Optional. What you write stays in this browser. It isn’t shared with GRACE or the church team.</p><div data-member-story></div>';
+    // The key stays 'my-story'; the screen is the church's onboarding now, and
+    // says so. It can reach the church (faithful-mobile-get-connected.js), so
+    // the notice no longer promises that it cannot.
+    pages['my-story'] = ['Get connected', 'How Faithful Church gets to know the people who join.', ''];
+    content['my-story'] = '<p class="fd-notice">Nothing is sent until you press Continue at the end. Until then, what you write stays on this phone.</p><div data-member-story></div>';
     content.settings = content.settings.replace(
       card('Personalize your experience', '<p>Review your guidance preferences in the “Make this useful for you” section on Home.</p>' + button('Open Home preferences', 'home') + '<p>These preview preferences are stored in this browser, not synced across devices.</p>'),
-      card('My story', '<p>Your connection to the church, how you take part, and what you hope to find.</p>' + button('Open My story', 'my-story') + '<p>Stored in this browser, not synced across devices.</p>'));
+      card('Get connected', '<p>Tell the church about you: your connection, how you take part, and what you hope to find.</p>' + button('Open Get connected', 'my-story') + '<p>Sent only when you choose to. Until then it stays on this phone.</p>'));
   }
   const parent = document.getElementById(mobile ? 'screen-home' : 'sec-home').parentElement;
   content['my-profile']='<div data-member-profile></div>';

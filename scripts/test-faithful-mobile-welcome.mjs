@@ -89,8 +89,8 @@ assert.equal(d.getElementById('screen-home').getAttribute('aria-hidden'), 'true'
 assert(d.querySelector('.app').classList.contains('fw-touring'));
 const titles = [title.textContent];
 for (let i = 1; i < window.FAITHFUL_MOBILE_WELCOME.steps; i++) { next.click(); titles.push(title.textContent); }
-assert.deepEqual(titles, ['Follow the message', 'Find your people', 'Meet your leader', 'Ask GRACE', 'Begin your story']);
-assert.equal(next.textContent, 'Add my story');
+assert.deepEqual(titles, ['Follow the message', 'Find your people', 'Meet your leader', 'Ask GRACE', 'Get connected']);
+assert.equal(next.textContent, 'Get connected');
 next.click();
 assert.equal(tour.hidden, true);
 assert.equal(shown.at(-1), 'destination:my-story', 'the last step hands off to My story');
@@ -139,14 +139,14 @@ assert.equal(give.querySelector(':scope > .fw-tip'), null, 'and never again');
 
 // ── the way back in ────────────────────────────────────────────────────────
 const chips = [...d.querySelectorAll('#app-drawer .fw-drawer-chip')].map(b => b.textContent);
-assert.deepEqual(chips, ['Take the tour', 'My story', 'Feedback']);
+assert.deepEqual(chips, ['Tour', 'Get connected', 'Feedback']);
 
 // ── wiring ─────────────────────────────────────────────────────────────────
 const html = read('grace_faithful_church_members_card_ios_app.html');
 assert(html.indexOf('faithful-preferences.js') < html.indexOf('faithful-mobile-welcome.js'), 'loads after the script whose form it moves');
 assert(html.indexOf('faithful-destinations.js') < html.indexOf('faithful-mobile-welcome.js'), 'and after the one that builds the My story screen');
 const destinations = read('faithful-destinations.js');
-assert(/if \(mobile\) \{\s*pages\['my-story'\]/.test(destinations), 'My story is a mobile-only screen; the desktop portal keeps the form on Home');
+assert(/if \(mobile\) \{(?:\s*\/\/[^\n]*)*\s*pages\['my-story'\]/.test(destinations), 'My story is a mobile-only screen; the desktop portal keeps the form on Home');
 assert(!/rel="stylesheet" href="faithful-mobile-welcome\.css"/.test(read('member-portal.html')), 'the desktop portal does not load this layer');
 const css = read('faithful-mobile-welcome.css').replace(/\/\*[\s\S]*?\*\//g, '').replace(/@(media|keyframes)[^{]*\{/g, '');
 for (const m of css.matchAll(/([^{}]+)\{/g)) {
