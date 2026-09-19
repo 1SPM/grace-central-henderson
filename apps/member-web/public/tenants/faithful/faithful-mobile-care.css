@@ -8,7 +8,7 @@
 #screen-care .cr-hero-leader strong{color:white;font:600 17px var(--font-display,'Playfair Display'),Georgia,serif}
 #screen-care .cr-hero-live{font-size:12px;letter-spacing:0;color:#d8d9f5}
 #screen-care .cr-hero-live i,#screen-care .cr-hero-face-live,#screen-care #cr-hero-leader-status{display:none}
-#screen-care .card,#screen-care .cr-blessing{border:1px solid #d6d7f1;border-radius:12px;background:#ffffffee;box-shadow:0 3px 12px #20225810;margin-bottom:18px!important}
+#screen-care .card,#screen-care .cr-blessing{border:1px solid #d6d7f1;border-radius:12px;background:#ffffffee;box-shadow:0 3px 12px #20225810;margin-bottom:16px}
 #screen-care h3{font:600 22px/1.25 var(--font-display,'Playfair Display'),Georgia,serif;color:#1d1e4d}
 #screen-care .section-head{padding:20px 18px 12px!important;gap:12px;flex-wrap:wrap}
 #screen-care .care-option{padding:17px 16px;gap:12px;min-height:78px;border-bottom:1px solid #e6e7f5;box-sizing:border-box}

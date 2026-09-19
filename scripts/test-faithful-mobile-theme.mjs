@@ -80,6 +80,23 @@ for (const [name, raw] of phoneCss) {
   }
 }
 
+// ── spacing ────────────────────────────────────────────────────────────────
+// One gutter and one rhythm on every screen but Home (which has its own
+// layer): 16px at the sides and top, 16px between blocks. Measured during the
+// change: Care ran a 14px gutter, tops ran 12 to 32px, and several blocks
+// touched. The rhythm rule is the file's only use of !important, because a
+// number of blocks carry their margin as an inline style attribute.
+{
+  const theme = read('faithful-mobile-theme.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert(/:not\(#screen-home\) > \.scroll:not\(\.fd-page\)\{padding-top:16px;padding-left:16px;padding-right:16px\}/.test(theme), 'every screen has the 16px gutter and top');
+  assert(/margin-top:0!important;margin-bottom:16px!important/.test(theme), 'blocks are 16px apart, even where the markup sets an inline margin');
+  const important = theme.match(/[^{}]+\{[^{}]*!important[^{}]*\}/g) || [];
+  assert(important.every(r => /margin-(top|bottom):[^;]*!important/.test(r) || /background:var\(--dv-(well|navy-fill)\)!important/.test(r)),
+    '!important is used for the spacing rhythm and the icon wells (both fight inline styles), and nowhere else');
+  // A card holds rows. Care's options were cards inside a padding-less card.
+  assert(/\.card > \.care-option\{[^}]*border:0;border-top:1px solid/.test(theme), 'care options are rows inside their card, not cards of their own');
+}
+
 // ── copy ───────────────────────────────────────────────────────────────────
 {
   // Strips what nobody reads (styles, comments) so only copy is searched. Run

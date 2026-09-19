@@ -87,11 +87,10 @@
 .app .screen:not(#_) :is(.home-hero,.cn-hero,.cr-hero,.fmc-hero,.cn-ge-hero,.fmj-hero,.cn-fm-hero,.fm-impact-story,.fm-giving-images,.ld-hero,.fm-survey-invite,.fw-tip,.fp-profile,.dv-dark) :is(h1,h2,h3){color:#fff}
 
 /* ── light cards ────────────────────────────────────────────────────────── */
-.app .screen:not(#_) :is(.card,.faq-card,.ld-chat,.ld-gallery,.gv-cause-card,.gv-card-block,.fm-impact-bridge,.give-history-card,.fm-care,.cn-post,.cn-widget,.cn-composer,.cn-event-card,.cn-group-row,.cn-person-row,.wj-lesson,.wj-panel-journal,.jy-card,.fd-card,.fp-preferences,.fp-page-guide > section,.care-option,.mobile-leadership-care,.gps-question,.member-sample-history){
+.app .screen:not(#_) :is(.card,.faq-card,.ld-chat,.ld-gallery,.gv-cause-card,.gv-card-block,.fm-impact-bridge,.give-history-card,.fm-care,.cn-post,.cn-widget,.cn-composer,.cn-event-card,.cn-group-row,.cn-person-row,.wj-lesson,.wj-panel-journal,.jy-card,.fd-card,.fp-preferences,.fp-page-guide > section,.mobile-leadership-care,.gps-question,.member-sample-history){
   background:var(--dv-light);border:1px solid var(--dv-gold-line);border-radius:20px;box-shadow:var(--dv-lift)
 }
 .app .screen:not(#_) .fp-page-guide > section{border-radius:16px;box-shadow:none}
-.app .screen:not(#_) .care-option{border-radius:16px;margin-bottom:8px;padding:12px 14px}
 .app .screen:not(#_) .faq-card.open{border-color:var(--dv-gold)}
 /* icon wells */
 .app .screen:not(#_) :is(.fg-icon,.co-ico,.cr-req-ico,.give-history-icon,.ic-tile,.gv-feed-ico,.impact-notify-icon,.mobile-shortcut-icon,.cn-post-av-icon){border-radius:13px;background:var(--dv-well)!important;border:1px solid var(--dv-lav-line);color:var(--dv-navy);box-shadow:0 1px 0 #fff inset}
@@ -215,3 +214,48 @@
 @media(prefers-reduced-motion:reduce){.app > .fm-grace-dock{transition:none}}
 /* Toasts rose from where the bar now sits on every tab. */
 .app .toast{bottom:calc(var(--ios-tab-chrome-h) + 76px)}
+
+/* ── spacing: one gutter, one rhythm, and no cards inside cards ───────────
+   Every screen but Home sets its gutter with the scroll's own padding; they
+   ran 14 or 16px at the sides and 12 to 32px at the top. Blocks were spaced
+   by whatever margin their own module chose, so some touched (the emergency
+   button against the hero under it, a heading against its tabs) and some
+   stood 40px apart. Now: 16px at the sides and the top, 16px between blocks.
+   Home keeps its own layer, which already does this. */
+.app .screen:not(#_):not(#screen-home) > .scroll:not(.fd-page){padding-top:16px;padding-left:16px;padding-right:16px}
+.app .screen:not(#_) > .fd-page{padding:16px 16px 32px}
+/* ":not(#_)" on the child as well: a few modules space their blocks with a
+   rule that carries their screen's ID, and the rhythm has to outrank those. */
+.app .screen:not(#_):not(#screen-home) > .scroll > :not(#_),
+.app .screen:not(#_) > .scroll > :is(.gv-panel,.cn-panel,.wj,[role=tabpanel]) > :not(#_),
+/* !important, and only here: a number of these blocks carry their margin as an
+   inline style attribute in the page markup, which no selector outranks. */
+.app .screen:not(#_) > .fd-page > .fd-grid > :not(#_){margin-top:0!important;margin-bottom:16px!important}
+.app .screen:not(#_) > .scroll > :is(.gv-panel,.cn-panel,.wj,[role=tabpanel]):not(#_){margin-bottom:0!important;padding:0}
+.app .screen:not(#_) > .scroll > :last-child:not(#_){margin-bottom:0!important}
+.app .screen:not(#_) > .fd-page > .fd-grid{gap:0}
+
+/* A card holds ROWS. The care options, the dispatch grid, history and feed
+   lists were each given a border of their own, so inside a padding-less card
+   they read as cards spilling to its edge. Rows get the card's inset and a
+   hairline between them; the card is the only thing with a border. */
+.app .screen:not(#_) .card > .care-option{margin:0;padding:14px 18px;border:0;border-top:1px solid var(--dv-lav-line);border-radius:0;background:none;box-shadow:none}
+.app .screen:not(#_) .card > .care-option--crisis{background:#fff4f1}
+.app .screen:not(#_) .card > .care-option:last-child{border-radius:0 0 19px 19px}
+.app .screen:not(#_) .card > .cr-dispatch-grid{padding:0 18px 18px}
+.app .screen:not(#_) .card{overflow:hidden}
+.app .screen:not(#_) :is(.give-history-list,.impact-notify-list,.impact-notify-total,.gv-history-foot){border-left:0;border-right:0;border-radius:0}
+.app .screen:not(#_) .gv-card-block > .gv-activity-tabs{margin:12px 14px}
+.app .screen:not(#_) .mobile-leadership-care{padding:18px}
+.app .screen:not(#_) .mobile-leadership-care .mobile-care-topics button{border-radius:14px}
+.app .screen:not(#_) .wj-legacy{margin-left:0;margin-right:0}
+/* Inside a card the inset is 16px, once. Give's cards padded 10 to 14px and
+   then their titles and notes padded another 12, so a heading sat further in
+   than the content under it. */
+.app .screen:not(#_) :is(.gv-card-block,.gv-goal-strip){padding:16px}
+.app .screen:not(#_) :is(.gv-card-block,.gv-goal-strip) > :is(.fm-section-title,.fm-allocation-note){padding:0}
+.app .screen:not(#_) :is(.gv-card-block,.gv-goal-strip) > .fm-section-title{margin:0 0 12px}
+.app .screen:not(#_) :is(.gv-card-block,.gv-goal-strip) > .fm-allocation-note{margin:12px 0 0}
+/* The last screenful of My story: the footer follows the form at the same
+   distance as everything else. */
+.app .screen:not(#_) > .fd-page > .fd-footer{margin-top:0}
