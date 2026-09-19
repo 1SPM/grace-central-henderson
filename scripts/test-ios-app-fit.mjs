@@ -116,12 +116,15 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
     '.home-hero',
     '.mobile-shortcuts',
     '.home-hero-leader',
-    '.fp-preferences',
     '.mobile-impact-summary',
     '.mobile-community-summary',
     '.fm-survey-invite',
-  ], 'the phone home order: hero, this week, leader, the onboarding dropdown, IMPACT, ' +
-     'community, survey invite');
+  ], 'the phone home order: hero, this week, leader, IMPACT, community, survey invite');
+
+  // "Your church, at a glance" held a tour, an explanation and a form -- all
+  // needed once, shown forever. On the phone they are a first-visit tour and a
+  // My story screen (test-faithful-mobile-welcome.mjs), so it is not a section.
+  assert(!order.includes('.fp-preferences'), 'the onboarding row is not a section of the phone\'s Home');
 
   // GRACE has no portal equivalent, so it was never part of the parity; it is
   // docked above the tab bar instead of taking a slot in the scroll. It must
@@ -160,10 +163,9 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   // and a half down. What is still the portal's order is everything else.
   assert(order.indexOf('.home-hero') === 0 && order.indexOf('.mobile-shortcuts') === 1,
     'the shortcuts row sits directly under the hero on the phone');
-  assert(order.indexOf('.home-hero-leader') < order.indexOf('.fp-preferences') &&
-         order.indexOf('.fp-preferences') < order.indexOf('.mobile-impact-summary') &&
+  assert(order.indexOf('.home-hero-leader') < order.indexOf('.mobile-impact-summary') &&
          order.indexOf('.mobile-impact-summary') < order.indexOf('.mobile-community-summary'),
-    'leader, the onboarding dropdown, IMPACT, community -- still in the portal\'s order');
+    'leader, IMPACT, community -- still in the portal\'s order');
   // The pathways are hidden on the phone's Home, not deleted: updateDashboard()
   // writes the tiles' badges by ID, so the markup has to stay.
   assert(!order.includes('.dash-mod'), 'the G-R-A-C-E pathways are not a section of the phone\'s Home');
@@ -240,6 +242,10 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   assert(/\.drawer-scroll > \.drawer-section-label:first-child\{display:none\}/.test(css),
     'a label heading the only list is not shown');
   assert(!/Georgia/.test(css.split('.app .tabbar-zone')[0]), 'the drawer uses the UI face; no Georgia');
+  // faithful-destinations.js appends its screens after the tab bar in a flex
+  // column, which drew the tab bar at the TOP of Settings, Privacy and every
+  // other extra screen. That was live. One declaration puts it back.
+  assert(/\.app > \.tabbar-zone\{order:1\}/.test(css), 'the tab bar stays under whichever screen is showing');
   assert(!/\.drawer-item:after/.test(css), 'no chevron on every row: they all navigate, so it distinguishes nothing');
 }
 

@@ -37,7 +37,7 @@
 /* 96px = the GRACE dock (56) + its 10px offset + breathing room, so the footer
    can scroll clear of it. */
 .app #screen-home > .scroll{padding:4px 0 96px}
-.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.fp-preferences,.mobile-impact-summary,.mobile-shortcuts,.mobile-community-summary,.fm-survey-invite){
+.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.mobile-impact-summary,.mobile-shortcuts,.mobile-community-summary,.fm-survey-invite){
   margin:16px var(--fh-gutter) 0;width:auto;box-sizing:border-box
 }
 .app #screen-home > .scroll > :is(.mobile-impact-summary,.mobile-community-summary){margin-top:32px}
@@ -49,7 +49,6 @@
    "#id" or ".a .b" in there outranks the per-module rules below -- the card
    and its story could not be joined until this was a plain list. */
 .app #screen-home .home-hero-leader,
-.app #screen-home .fp-preferences,
 .app #screen-home .mobile-shortcuts button,
 .app #screen-home .mobile-impact-card,
 .app #screen-home .mobile-impact-story,
@@ -85,9 +84,6 @@
    two rows down does. One of them on Home is enough; the tile is the bigger
    target. The link is hidden here, not removed: it is still in the DOM. */
 .app #screen-home #home-leader-chip > .mobile-human-care{display:none}
-
-/* ── the onboarding dropdown joins the grid instead of bleeding past it ─── */
-.app #screen-home .fp-preferences{overflow:hidden}
 
 /* ── IMPACT: one module. The card art stays; the cause becomes its footer ── */
 .app #screen-home .mobile-impact-summary > header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
@@ -171,15 +167,6 @@
 .app #screen-home .fm-survey-invite p{font-size:13px}
 
 /* ── the scale, enforced where modules brought their own sizes ──────────── */
-/* "Your church, at a glance" arrived with 25, 23, 20, 14 and 13.33px. */
-.app #screen-home .fp-preferences :is(h2,h3){font:700 17px/1.25 var(--fh-display);letter-spacing:-.2px;color:var(--fh-title)}
-.app #screen-home .fp-preferences :is(p,em,li,label,small){font-size:13px;line-height:1.5}
-/* The closed row is the card's title, so it is set like the other card titles. */
-.app #screen-home .fp-preferences > summary{font:700 17px/1.25 var(--fh-display);letter-spacing:-.2px;color:var(--fh-title)}
-/* The subline is a <small> inside the summary; without this it inherits the
-   title's serif bold. */
-.app #screen-home .fp-preferences > summary small{font:400 13px/1.5 var(--font-ui,Inter),sans-serif;letter-spacing:0;color:var(--fh-muted)}
-.app #screen-home .fp-preferences button{font-family:inherit;font-size:13px;font-weight:600}
 .app #screen-home .mobile-impact-card strong{font-size:22px}
 .app #screen-home .mobile-community-summary .cn-post-quote{font-size:15px;line-height:1.5}
 .app #screen-home .fm-survey-invite button{font-size:15px;font-weight:600}

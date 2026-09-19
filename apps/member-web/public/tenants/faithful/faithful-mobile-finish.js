@@ -146,11 +146,15 @@
   // not shown on the phone's Home (hidden in faithful-mobile-home.css, still
   // in the DOM because updateDashboard() writes its badges by ID): all five
   // destinations are already a tab or a tile -- Journey, Give, Care, Connect.
+  //
+  // "Your church, at a glance" is not in the list either. It held a tour, an
+  // explanation and a form, all needed once and shown forever; on the phone
+  // those are now a first-visit tour and a My story screen
+  // (faithful-mobile-welcome.js), which removes the row from Home.
   [
     '.home-hero',              // Good morning, Maya
     '.mobile-shortcuts',       // This week: service, groups, care, impact
     '.home-hero-leader',       // Your leader
-    '.fp-preferences',         // Your church, at a glance  (the onboarding)
     '.mobile-impact-summary',  // Your IMPACT card
     '.mobile-community-summary', // Life in your church / Community wall (+ the prayer wall link)
     '.fm-survey-invite',       // One last thing -> the survey tab

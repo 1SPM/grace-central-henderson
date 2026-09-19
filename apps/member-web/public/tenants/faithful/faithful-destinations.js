@@ -31,6 +31,19 @@
     privacy: draft + card('Your information', '<p>This page will explain what information is collected, why it is used, who can access it, and how to ask questions.</p>' + detail('Profile visibility', 'Visibility controls are not connected on this page yet. Do not assume information is private without checking the current sharing context.') + detail('Notification preferences', 'Notification settings will be linked here when available.') + detail('Access, correction & deletion', 'The approved request process and contact details must be supplied before publication.')) + card('Privacy policy', '<p>Collection, sharing, retention, and contact details require review. No new privacy guarantees are introduced by this preview.</p>'),
     terms: draft + card('Using the portal', detail('Member accounts', 'Account eligibility and responsibilities require approved terms.') + detail('Community participation', 'Participation rules and moderation processes require church approval.') + detail('AI-assisted features', 'AI interactions must be identified. A leader’s AI avatar is not a live conversation with that person.') + detail('Giving & payments', 'The current preview uses demo financial flows. Final payment terms must reflect the actual service before launch.') + detail('Contact & questions', 'Approved support and legal contact details will be added before publication.'))
   };
+  // On the phone "My story" is a screen of its own. It was a form inside a
+  // dropdown on Home -- 14 fields, 2,600px tall when open -- which is a lot to
+  // ask of a home page and easy to never find. faithful-mobile-welcome.js moves
+  // the form faithful-preferences.js builds into the host below; nothing about
+  // how it saves changes. The desktop portal keeps it on Home, so this page and
+  // the Settings wording that points at it exist on mobile only.
+  if (mobile) {
+    pages['my-story'] = ['My story', 'A little about you, in your own words.', ''];
+    content['my-story'] = '<p class="fd-notice">Optional. What you write stays in this browser. It isn’t shared with GRACE or the church team.</p><div data-member-story></div>';
+    content.settings = content.settings.replace(
+      card('Personalize your experience', '<p>Review your guidance preferences in the “Make this useful for you” section on Home.</p>' + button('Open Home preferences', 'home') + '<p>These preview preferences are stored in this browser, not synced across devices.</p>'),
+      card('My story', '<p>Your connection to the church, how you take part, and what you hope to find.</p>' + button('Open My story', 'my-story') + '<p>Stored in this browser, not synced across devices.</p>'));
+  }
   const parent = document.getElementById(mobile ? 'screen-home' : 'sec-home').parentElement;
   content['my-profile']='<div data-member-profile></div>';
   content.settings=card('My profile','<p>Your details, connections, and interests.</p>'+button('Open my profile','my-profile'))+content.settings;

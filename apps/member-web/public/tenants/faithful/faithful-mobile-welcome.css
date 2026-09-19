@@ -1,0 +1,87 @@
+/* Faithful mobile · the first visit. See faithful-mobile-welcome.js.
+ * Same scale as Home: 22 · 17 · 15 · 13 · 12, two families, three weights.
+ * Every selector is under .app, so nothing here reaches another page. */
+
+/* ── the tour ───────────────────────────────────────────────────────────── */
+/* The layer takes every tap, so the page underneath cannot be used by accident
+   mid-step. The hole is only a picture of one: a clear box whose enormous
+   shadow is the dimming. Moving the box moves the spotlight. */
+.app .fw-tour{position:absolute;inset:0;z-index:70;overflow:hidden}
+.app .fw-tour[hidden]{display:none}
+/* Demo toasts keep firing on a timer; under a tour they are just noise. */
+.app.fw-touring :is(.impact-float,.toast,.watch-donate-toast){visibility:hidden}
+.app .fw-tour-hole{position:absolute;border-radius:26px;box-shadow:0 0 0 2000px #071526b8,0 0 0 2px #ffffffd9 inset;transition:left .28s ease,top .28s ease,width .28s ease,height .28s ease;pointer-events:none}
+.app .fw-tour-card{position:absolute;left:16px;right:16px;padding:18px 18px 14px;border-radius:20px;background:#fff;color:#173755;box-shadow:0 18px 48px #07152666}
+.app .fw-tour-position{margin:0 0 4px;font:600 12px/1.4 var(--font-ui,Inter),sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#8a6420}
+.app .fw-tour-title{margin:0;font:700 22px/1.2 var(--font-display,Georgia),Georgia,serif;letter-spacing:-.3px;color:#123457;outline:none}
+.app .fw-tour-caption{margin:8px 0 0;font:400 15px/1.5 var(--font-ui,Inter),sans-serif;color:#36506b}
+.app .fw-tour-actions{display:flex;align-items:center;gap:8px;margin-top:16px}
+.app .fw-tour-actions button{min-height:44px;padding:0 16px;border-radius:22px;border:0;font:600 15px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
+.app .fw-tour-skip,.app .fw-tour-listen{background:none;color:#175fa5}
+.app .fw-tour-skip{padding-left:4px!important}
+.app .fw-tour-next{margin-left:auto;background:#175fa5;color:#fff}
+.app .fw-tour-next:active{background:#124c85}
+.app .fw-tour-listen:disabled{opacity:.5;cursor:default}
+.app .fw-tour-status{min-height:0;margin:0;font:400 12px/1.5 var(--font-ui,Inter),sans-serif;color:#536d85}
+.app .fw-tour-status:not(:empty){margin-top:8px}
+.app .fw-tour button:focus-visible{outline:3px solid #3285bf;outline-offset:2px}
+
+/* ── one tip per tab, above the tab bar, never over the top of the page ─── */
+.app .screen > .fw-tip{position:absolute;left:12px;right:12px;bottom:12px;z-index:6;padding:16px 16px 10px;border-radius:20px;background:#10273ff5;color:#fff;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 36px #10273f59;animation:fw-rise .28s ease both}
+.app .screen{position:relative}
+.app .fw-tip h2{margin:0;font:700 17px/1.25 var(--font-display,Georgia),Georgia,serif;color:#fff}
+.app .fw-tip p{margin:4px 0 0;font:400 13px/1.5 var(--font-ui,Inter),sans-serif;color:#d5e3f1}
+.app .fw-tip-actions{display:flex;justify-content:flex-end;gap:4px;margin-top:6px}
+.app .fw-tip button{min-height:44px;padding:0 14px;border:0;border-radius:22px;background:none;color:#a9d4f7;font:600 15px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
+.app .fw-tip .fw-tip-ok{color:#fff}
+.app .fw-tip button:focus-visible{outline:3px solid #79c5ff;outline-offset:-2px}
+@keyframes fw-rise{from{opacity:0;transform:translateY(12px)}}
+
+/* The tip says what the row's subline said, once. After that a closed row is
+   its title: one line instead of three. Open, it is unchanged. */
+.app .screen .fp-connection:not([open]) > summary .fh-guide-subline{display:none}
+.app .screen .fp-connection:not([open]) > summary{min-height:52px;padding-top:12px;padding-bottom:12px;display:flex;align-items:center;gap:12px;font-size:15px;line-height:1.3}
+
+/* ── Home: one slim line until the story is filled in or dismissed ──────── */
+.app #screen-home > .scroll > .fw-story-nudge{display:flex;align-items:center;margin:16px 16px 0;padding:0 4px 0 16px;min-height:56px;border-radius:18px;background:#fbf5e6;border:1px solid #efe3c4}
+.app #screen-home > .scroll > .fw-story-nudge[hidden]{display:none}
+.app .fw-story-nudge-go{flex:1;min-width:0;min-height:56px;padding:0;border:0;background:none;text-align:left;font:600 15px/1.3 var(--font-ui,Inter),sans-serif;color:#173755;cursor:pointer}
+.app .fw-story-nudge-go small{display:block;font:400 12px/1.4 var(--font-ui,Inter),sans-serif;color:#7a6a45}
+.app .fw-story-nudge-close{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:none;font:400 22px/1 var(--font-ui,Inter),sans-serif;color:#7a6a45;cursor:pointer}
+.app .fw-story-nudge button:focus-visible{outline:3px solid #3285bf;outline-offset:-2px}
+
+/* ── My story, as a page ────────────────────────────────────────────────── */
+.app #screen-destination-my-story [data-member-story] > form{display:block;margin:0;padding:0;border:0;background:none}
+.app #screen-destination-my-story .fp-connection-layout{display:block}
+.app #screen-destination-my-story :is(.fp-question,.fp-story-note,.fp-consent){margin:0 0 16px;padding:16px;border:1px solid #dfe8f1;border-radius:20px;background:#fff}
+.app #screen-destination-my-story :is(legend,.fp-story-note > label){padding:0;font:700 17px/1.25 var(--font-display,Georgia),Georgia,serif;color:#123457}
+.app #screen-destination-my-story :is(p,label,dd,dt,select,textarea){font-size:15px;line-height:1.5}
+.app #screen-destination-my-story :is(textarea,select){width:100%;margin-top:10px;padding:12px;border:1px solid #cfdcea;border-radius:12px;font-size:16px;background:#f9fbfe;color:#173755}
+/* The "taking shape" preview is the page's gold card: your own words, read
+   back. Its list was a two-column grid sized for the desktop sidebar. */
+.app #screen-destination-my-story .fp-profile{margin:0 0 16px;padding:16px;border-radius:20px;border:1px solid #efe3c4;border-left:4px solid #8a6420;background:#fbf5e6}
+.app #screen-destination-my-story .fp-profile h3{margin:0;font:700 17px/1.25 var(--font-display,Georgia),Georgia,serif;color:#123457}
+.app #screen-destination-my-story .fp-profile h3:not(:first-child){margin-top:16px}
+.app #screen-destination-my-story .fp-profile p{margin:4px 0 0;font-size:13px;line-height:1.5;color:#5a4a26}
+.app #screen-destination-my-story .fp-profile .fp-preview-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8a6420}
+.app #screen-destination-my-story .fp-profile dl{display:block;margin:8px 0 0}
+.app #screen-destination-my-story .fp-profile dt{margin-top:10px;font-size:12px;font-weight:600;color:#8a6420}
+.app #screen-destination-my-story .fp-profile dd{margin:2px 0 0;font-size:15px;color:#173755}
+.app #screen-destination-my-story .fp-consent label{display:flex;align-items:flex-start;gap:12px;min-height:44px}
+.app #screen-destination-my-story .fp-consent input{flex:none;width:22px;height:22px;margin:2px 0 0}
+.app #screen-destination-my-story .fp-choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.app #screen-destination-my-story .fp-choices label{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #cfdcea;border-radius:22px;font-size:13px;background:#fff}
+.app #screen-destination-my-story .fp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.app #screen-destination-my-story .fp-actions button{flex:1 1 auto;min-height:48px;padding:0 18px;border-radius:24px;border:1px solid #175fa5;background:#fff;color:#175fa5;font:600 15px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
+.app #screen-destination-my-story .fp-actions button[type=submit]{flex-basis:100%;background:#175fa5;color:#fff}
+
+/* ── side menu: the two ways back in, as one row ────────────────────────── */
+.app .fw-drawer-row{display:flex;gap:8px;margin:12px 2px 2px}
+.app .fw-drawer-chip{flex:1;min-height:44px;padding:0 10px;border-radius:22px;border:1px solid #ffffff38;background:#ffffff12;color:#f0f5fc;font:600 13px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
+.app .fw-drawer-chip:active{background:#ffffff24}
+.app .fw-drawer-chip:focus-visible{outline:3px solid #79c5ff;outline-offset:2px}
+
+@media(prefers-reduced-motion:reduce){
+  .app .fw-tour-hole{transition:none}
+  .app .screen > .fw-tip{animation:none}
+}
