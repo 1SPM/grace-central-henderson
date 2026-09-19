@@ -57,6 +57,13 @@ assert(/--ios-safe-top:\s*0px/.test(phone),
 assert(/--ios-safe-bot:\s*env\(safe-area-inset-bottom/.test(phone),
   'the bottom inset comes from env(), so the tab bar clears the home indicator on ' +
   'devices that have one and wastes no space on devices that do not');
+// --ios-tab-chrome-h is a calc() over --ios-safe-bot, declared on :root. A
+// custom property's var() is resolved where it is DECLARED, so overriding the
+// inset on .device alone left the tab zone sized for the 34px guess: on any
+// phone whose real inset is 0 that was a blank 34px band above the tab bar.
+// The dependent value has to be restated next to the override.
+assert(/--ios-tab-chrome-h:\s*calc\([^;]*var\(--ios-safe-bot\)/.test(phone),
+  'the tab zone height is recomputed from the real inset, or it keeps the desktop 34px');
 assert(/\.device \.app\{padding-top:env\(safe-area-inset-top/.test(phone),
   'the app clears the real status bar / notch');
 // Qualified with .device on purpose: the base .status and .app rules come LATER
@@ -114,12 +121,27 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
     '.dash-mod',
     '.home-grace-wrap',
     '.mobile-community-summary',
-    '.cn-widget',
-    '.fm-care',
-    '.fm-prayer',
     '.fm-survey-invite',
   ], 'the phone home order must match the portal: hero, leader, the onboarding dropdown, ' +
-     'IMPACT, this week, pathways, community, prayer, care, prayer invite, survey invite');
+     'IMPACT, this week, pathways, find your way, community, survey invite');
+
+  // Same order as the portal, but the phone stops early. The prayer wall,
+  // "People to turn to" and "Pray with your church" are the tail of the
+  // portal's My Church; on a phone they made Home six screens long, so they
+  // live one tap away instead. Relocated, not deleted -- each must still be
+  // built and placed somewhere, and Home must keep a way to reach prayer.
+  for (const sel of ['.cn-widget', '.fm-care', '.fm-prayer']) {
+    assert(!order.includes(sel), `${sel} is no longer a Home section; it was moved to keep Home short`);
+  }
+  assert(/#screen-care > \.scroll/.test(finish) && /insertBefore\(care,/.test(finish),
+    '"People to turn to" is placed on the Care screen');
+  assert(/getElementById\('cn-panel-community'\)/.test(finish) && /\[prayer, wall\]/.test(finish),
+    '"Pray with your church" and the prayer wall are placed on Connect, together and in that order');
+  assert(/fm-prayer-link/.test(finish) && /openCnReelsFull\(\)/.test(finish),
+    'Home keeps a link to the prayer wall');
+  // The wall is moved rather than copied, so the opener has to follow it.
+  assert(/function openCnReelsFull\(\) \{[\s\S]{0,200}wall\.closest\('\.screen'\)/.test(html),
+    'openCnReelsFull() opens whichever screen holds the wall, not a hardcoded Home');
 
   // The two that were actually wrong, stated as relationships so the intent
   // survives a future insertion into the list.
@@ -131,9 +153,36 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
     'the survey invitation closes the walkthrough');
 
   // Ordering runs before the footer is reclaimed, or the footer lands mid-page.
-  assert(finish.indexOf(']).forEach') < finish.indexOf("':scope > .fd-footer'") ||
-         finish.indexOf('].forEach') < finish.indexOf("':scope > .fd-footer'"),
+  // Home's footer specifically -- the Care screen's footer is also looked up,
+  // earlier, to place a section above it.
+  assert(finish.indexOf('].forEach') < finish.indexOf("home.querySelector(':scope > .fd-footer')"),
     'the footer is moved last, after the sections are ordered');
+}
+
+// ── Home is styled by one layer, loaded after the modules it unifies ───────
+{
+  const css = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-home.css', 'utf8');
+  assert(html.indexOf('faithful-mobile-finish.css') < html.indexOf('faithful-mobile-home.css'),
+    'the home layer loads after the finish layer, or equal-specificity rules there win');
+  // :is() takes the specificity of its most specific argument and lends it to
+  // the whole list. That happened here twice: an #id, then a ".a .b", in the
+  // shared "card" rule outranked every per-module adjustment after it, and the
+  // page still looked almost right. So: no IDs in any :is(), and the card rule
+  // that sets border-radius for everything is a plain list with no :is() at all.
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of bare.matchAll(/:is\(([^)]*)\)/g)) {
+    assert(!m[1].includes('#'), `no IDs inside :is() in the home layer -- found ":is(${m[1]})"`);
+  }
+  const cardRule = /([^{}]+)\{[^}]*border-radius:var\(--fh-radius\);box-shadow/.exec(bare);
+  assert(cardRule && !cardRule[1].includes(':is('), 'the shared card rule is a plain selector list');
+  // Every selector starts with .app, so the layer cannot reach another page.
+  // Commas inside :is(...) are not selector separators, hence the paren strip.
+  const rules = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{/g, '');
+  for (const m of rules.matchAll(/([^{}]+)\{/g)) {
+    for (const sel of m[1].replace(/\([^()]*\)/g, '').split(',')) {
+      assert(sel.trim().startsWith('.app'), `home layer selector is not scoped under .app: "${sel.trim()}"`);
+    }
+  }
 }
 
 console.log('PASS: on a phone the simulated chrome is hidden, the real insets are used and the home order matches the portal; on a desktop the mockup is intact. Rendering on real hardware not verified.');

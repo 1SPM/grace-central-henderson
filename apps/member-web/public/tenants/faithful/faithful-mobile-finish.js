@@ -31,12 +31,35 @@
   });
   const leaders = make('button', '', 'Meet your leaders'); leaders.type = 'button'; leaders.onclick = () => showScreen('leaders');
   care.append(leaders, make('small', '', 'Explore the options. No care request is sent here.'));
-  home.append(care);
+  // Home is the short answer to "what is next for me"; this list is the long
+  // answer to "who can help", so it lives on Care, where the Care shortcut and
+  // the leader card's "Request pastoral care" already send people.
+  // Above that screen's footer: faithful-destinations.js has already appended
+  // one, and a section under a footer reads as if the page had ended.
+  const careScroll = document.querySelector('#screen-care > .scroll') || home;
+  careScroll.insertBefore(care, careScroll.querySelector(':scope > .fd-footer'));
   const prayer = make('section', 'fm-prayer');
   const photo = make('img', ''); photo.src = '../../assets/watch/schedule-prayer.jpg'; photo.alt = ''; photo.loading = 'lazy';
   const copy = make('div', ''); copy.append(make('h2', '', 'Pray with your church'), make('p', '', 'Share a prayer request or pray for others.'));
   const link = make('button', '', 'Go to prayer wall'); link.type = 'button'; link.onclick = () => document.getElementById('home-prayer-wall')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  copy.append(link); prayer.append(photo, copy); home.append(prayer);
+  copy.append(link); prayer.append(photo, copy);
+  // Prayer moves to Connect as a pair: the invitation, then the wall it points
+  // at. The wall is moved, not copied, so #home-prayer-wall and #cn-reels-wall
+  // stay unique and openCnReelsFull() finds them wherever they are.
+  const wall = document.getElementById('home-prayer-wall');
+  const connect = document.getElementById('cn-panel-community');
+  if (connect) {
+    const before = connect.querySelector(':scope > .fmc-care');
+    [prayer, wall].forEach(el => { if (el) connect.insertBefore(el, before); });
+  } else home.append(prayer);
+
+  // What Home keeps of both is one line under the community post.
+  const summary = home.querySelector(':scope > .mobile-community-summary');
+  if (summary && connect && wall) {
+    const toWall = make('button', 'fm-prayer-link', 'Prayer wall →'); toWall.type = 'button';
+    toWall.onclick = () => openCnReelsFull();
+    summary.querySelector(':scope > button')?.after(toWall);
+  }
 
   // The walkthrough ends here, so this is where it points at the survey.
   //
@@ -74,6 +97,11 @@
   // wherever its own module happened to append it. Anything not listed keeps
   // its position, and a missing section is skipped rather than throwing --
   // several of these are built by other modules that may not have run.
+  //
+  // The portal's My Church goes on to the prayer wall, people to turn to and
+  // pray with your church. The phone keeps the portal's order but stops early:
+  // those three live on Connect and Care, one tap away, so Home is about three
+  // screens instead of six. Same sequence, shorter page.
   [
     '.home-hero',              // Good morning, Maya
     '.home-hero-leader',       // Your leader
@@ -82,10 +110,7 @@
     '.mobile-shortcuts',       // This week: service, groups, care
     '.dash-mod',               // Grow with Faithful Church
     '.home-grace-wrap',        // Find your way  (no portal equivalent; kept here)
-    '.mobile-community-summary', // Life in your church / Community wall
-    '.cn-widget',              // Prayer wall
-    '.fm-care',                // People to turn to
-    '.fm-prayer',              // Pray with your church
+    '.mobile-community-summary', // Life in your church / Community wall (+ the prayer wall link)
     '.fm-survey-invite',       // One last thing -> the survey tab
   ].forEach(sel => {
     const el = home.querySelector(':scope > ' + sel);

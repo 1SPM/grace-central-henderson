@@ -1,0 +1,170 @@
+/* Faithful mobile · My Church, one system.
+ *
+ * Home was assembled by a dozen modules, each with its own gutter (0, 12 or
+ * 16px), radius (9 to 28px), border colour and type size (9 to 32px). Nothing
+ * was wrong with any one piece; together they read as a stack of different
+ * apps. This layer does not add or reorder anything. It makes the pieces share
+ * one gutter, one card, one type scale and one minimum tap size.
+ *
+ * Kept on purpose, because they are what people like about this page: the
+ * worship-photo hero with its "You belong here." line and replay pill, the real
+ * IMPACT card art, and the G-R-A-C-E pathway tiles with washed photographs and
+ * brown serif initials.
+ *
+ * Faithful only. Every selector is under .app #screen-home (or names a
+ * Faithful-mobile class), and the file lives in tenants/faithful, so nothing
+ * here can reach another tenant's portal.
+ */
+.app #screen-home{
+  --fh-gutter:16px;
+  --fh-radius:20px;
+  --fh-ink:#173755;
+  --fh-title:#123457;
+  --fh-muted:#536d85;
+  --fh-line:#dfe8f1;
+  --fh-soft:#eaf3fc;
+  --fh-control:#175fa5;
+  --fh-shadow:0 1px 2px #12345708,0 8px 24px #1234570d;
+  --fh-display:var(--font-display,Georgia),Georgia,serif;
+}
+
+/* ── one gutter, one rhythm ─────────────────────────────────────────────── */
+.app #screen-home > .scroll{padding:4px 0 calc(28px + var(--ios-safe-bot))}
+.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.fp-preferences,.mobile-impact-summary,.mobile-shortcuts,.dash-mod,.mobile-community-summary,.fm-survey-invite){
+  margin:16px var(--fh-gutter) 0;width:auto;box-sizing:border-box
+}
+.app #screen-home > .scroll > :is(.mobile-impact-summary,.dash-mod,.mobile-community-summary){margin-top:32px}
+.app #screen-home > .scroll > .home-grace-wrap{margin:28px 0 0}
+.app #screen-home #home-grace-card,
+.app #screen-home .home-grace-reopen{margin:0 var(--fh-gutter)}
+.app #screen-home > .scroll > .fm-survey-invite{margin-top:32px}
+
+/* ── one card ───────────────────────────────────────────────────────────── */
+/* Written out rather than grouped in :is(). :is() takes the specificity of its
+   MOST specific argument and lends it to every selector in the list, so one
+   "#id" or ".a .b" in there outranks the per-module rules below -- the card
+   and its story could not be joined until this was a plain list. */
+.app #screen-home .home-hero-leader,
+.app #screen-home .fp-preferences,
+.app #screen-home .mobile-shortcuts button,
+.app #screen-home .mobile-impact-card,
+.app #screen-home .mobile-impact-story,
+.app #screen-home .cn-post{
+  background:#fff;border:1px solid var(--fh-line);border-radius:var(--fh-radius);box-shadow:var(--fh-shadow)
+}
+
+/* ── one type scale: 28 · 22 · 17 · 15 · 13 · 12 ────────────────────────── */
+.app #screen-home :is(.dash-mod-title,.mobile-impact-summary h2,.mobile-community-summary h2){
+  font:700 22px/1.2 var(--fh-display);letter-spacing:-.3px;color:var(--fh-title);margin:0
+}
+.app #screen-home :is(.dash-mod-sub,.mobile-impact-summary > p){font-size:13px;line-height:1.5;color:var(--fh-muted);margin:4px 0 0}
+
+/* ── hero: same picture, same words, the page's radius and gutter ───────── */
+.app #screen-home .home-hero{min-height:208px;padding:22px 18px;border-radius:24px;display:flex;flex-direction:column;justify-content:flex-end}
+.app #screen-home .home-hero-date{font-size:12px;letter-spacing:.02em}
+.app #screen-home .home-hero-name{font-size:28px;line-height:1.12;margin-top:4px}
+.app #screen-home .home-hero-tagline{font-size:15px;margin-top:6px}
+.app #screen-home .home-hero-top-right{margin-top:16px}
+.app #screen-home .home-live-pill{min-height:44px;padding:0 18px;border-radius:22px;font-size:13px}
+
+/* ── leader: the whole name, and a care link you can actually hit ───────── */
+.app #screen-home #home-leader-chip{grid-template-columns:56px minmax(0,1fr) auto;padding:14px 14px 0}
+.app #screen-home #home-leader-chip-av{width:56px;height:56px}
+.app #screen-home #home-leader-chip .home-leader-chip-label{font-size:12px;letter-spacing:.06em}
+.app #screen-home #home-leader-chip .home-leader-chip-name{white-space:normal;overflow:visible;text-overflow:clip;font-size:15px;line-height:1.3}
+.app #screen-home #home-leader-chip .home-leader-chip-sub{font-size:13px}
+/* Both actions share the bottom row, so the name gets the full width above. */
+/* No column gap, or the rule above the two actions would break between them. */
+.app #screen-home #home-leader-chip{row-gap:10px;column-gap:0}
+.app #screen-home #home-leader-chip .home-leader-chip-copy{grid-column:2/-1;padding-left:12px}
+.app #screen-home #home-leader-chip :is(.home-leader-chip-cta,.mobile-human-care){grid-row:2;min-height:44px;display:flex;align-items:center;padding:0;font-size:13px;font-weight:600;color:var(--fh-control);border-top:1px solid var(--fh-line)}
+.app #screen-home #home-leader-chip > .mobile-human-care{grid-column:1/3}
+.app #screen-home #home-leader-chip .home-leader-chip-cta{grid-column:3;justify-content:flex-end}
+
+/* ── the onboarding dropdown joins the grid instead of bleeding past it ─── */
+.app #screen-home .fp-preferences{overflow:hidden}
+
+/* ── IMPACT: one module. The card art stays; the cause becomes its footer ── */
+.app #screen-home .mobile-impact-summary > header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.app #screen-home .mobile-impact-summary > header > small{flex-shrink:0;font-size:12px;font-weight:600;color:#7a5a1e;background:#fbf3e1;padding:3px 9px;border-radius:10px}
+.app #screen-home .mobile-impact-card{margin-top:14px;border-radius:var(--fh-radius) var(--fh-radius) 0 0;border-bottom:0;box-shadow:none;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center}
+.app #screen-home .mobile-impact-card > img{min-height:0;height:auto;padding:16px 4px 16px 16px;background:transparent;box-sizing:border-box;filter:drop-shadow(0 6px 12px #12345726)}
+.app #screen-home .mobile-impact-card > div{padding:14px 14px 10px}
+.app #screen-home .mobile-impact-card span{font-size:13px;color:var(--fh-muted)}
+.app #screen-home .mobile-impact-card strong{font-size:26px;margin:4px 0 0;color:var(--fh-title)}
+.app #screen-home .mobile-impact-card small{font-size:12px}
+.app #screen-home .mobile-impact-story{margin-top:0;border-top:1px solid var(--fh-line);border-radius:0 0 var(--fh-radius) var(--fh-radius);grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:14px;background:#f8fbfe}
+.app #screen-home .mobile-impact-story > img{width:64px;height:64px;min-height:0;border-radius:14px}
+.app #screen-home .mobile-impact-story > div{padding:0}
+.app #screen-home .mobile-impact-story h3{font-size:17px;margin:0;color:var(--fh-title)}
+.app #screen-home .mobile-impact-story p{font-size:13px;margin:2px 0 0}
+.app #screen-home .mobile-impact-summary button{min-height:44px;padding:0;font-size:13px;font-weight:600;color:var(--fh-control)}
+.app #screen-home .mobile-impact-story{padding-bottom:4px}
+
+/* ── this week: four across, so it costs one row instead of two ─────────── */
+.app #screen-home .mobile-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.app #screen-home .mobile-shortcuts button{flex-direction:column;justify-content:flex-start;gap:8px;min-height:100px;padding:12px 4px 10px;text-align:center;border-radius:18px;transition:transform .12s ease}
+.app #screen-home .mobile-shortcuts button:active{transform:scale(.96)}
+.app #screen-home .mobile-shortcuts button > span:last-child{display:none}
+.app #screen-home .mobile-shortcut-icon{width:40px;height:40px}
+.app #screen-home .mobile-shortcuts strong{font-size:13px;line-height:1.2}
+.app #screen-home .mobile-shortcuts small{font-size:12px;line-height:1.25;margin-top:2px;color:var(--fh-muted)}
+
+/* ── pathways: the tiles as they are, on the page's radius; the wide tile
+      keeps its wash under the words so the label never sits on a face ───── */
+.app #screen-home .dash-mod{padding:0}
+.app #screen-home .dash-mod-head{padding:0;margin:0}
+.app #screen-home .dash-pillars{gap:10px;margin-top:14px;padding:0}
+.app #screen-home .dash-pillars .dash-pillar{border-radius:18px;border-color:#e6e1d9;transition:transform .12s ease}
+.app #screen-home .dash-pillars .dash-pillar:active{transform:scale(.97)}
+.app #screen-home .dash-pillars .dash-pillar-sub{font-size:12px;line-height:1.4;max-width:118px}
+.app #screen-home .dash-pillars .dash-pillar:last-child{padding:20px 16px 20px 64px}
+.app #screen-home .dash-pillars .dash-pillar:last-child::after{background:linear-gradient(90deg,#f6eee7f7 0%,#f6eee7e6 52%,#f6eee700 88%)}
+.app #screen-home .dash-pillars .dash-pillar:last-child .dash-pillar-top{top:50%;left:16px;transform:translateY(-50%)}
+.app #screen-home .dash-pillars .dash-pillar:last-child .dash-pillar-sub{max-width:190px}
+
+/* ── find your way: same card, controls you can hit ─────────────────────── */
+.app #screen-home #home-grace-card{border-radius:24px;padding:20px 18px 16px}
+.app #screen-home .home-grace-title{font:700 22px/1.2 var(--fh-display);padding-right:36px}
+.app #screen-home .home-grace-status{font-size:13px}
+.app #screen-home .home-grace-dismiss{width:44px;height:44px;top:6px;right:6px;display:grid;place-items:center;font-size:22px}
+.app #screen-home .home-grace-inputrow{min-height:52px;border-radius:16px;padding:4px 4px 4px 14px;align-items:center}
+.app #screen-home .home-grace-input{min-height:44px}
+.app #screen-home .home-grace-send{width:44px;height:44px;border-radius:12px;flex-shrink:0;font-size:18px}
+.app #screen-home .home-grace-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+.app #screen-home .home-grace-dismiss-note{font-size:12px;text-align:left}
+.app #screen-home .home-grace-foot button{min-height:44px;padding:0 20px;border-radius:22px;font-size:13px;font-weight:600;flex-shrink:0}
+
+/* ── community: title, two ways in, one post ────────────────────────────── */
+.app #screen-home .mobile-community-summary{display:flex;flex-wrap:wrap;align-items:center;column-gap:20px}
+.app #screen-home .mobile-community-summary h2{flex:1 0 100%}
+.app #screen-home .mobile-community-summary > button{min-height:44px;padding:0;font-size:13px;font-weight:600;color:var(--fh-control);border:0;background:none;cursor:pointer;font-family:inherit}
+.app #screen-home .mobile-community-summary .cn-post{flex:1 0 100%;margin:6px 0 0;padding:16px;box-sizing:border-box}
+.app #screen-home .mobile-community-summary .cn-post-name{font-size:15px}
+.app #screen-home .mobile-community-summary .cn-post-role,
+.app #screen-home .mobile-community-summary .cn-post-time{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-badge{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-quote{font:600 16px/1.45 var(--fh-display);border-radius:4px 14px 14px 4px}
+.app #screen-home .mobile-community-summary .cn-post-verse{font-size:12px}
+.app #screen-home .mobile-community-summary .cn-post-body{font-size:15px;line-height:1.5}
+.app #screen-home .mobile-community-summary .cn-post-actions{gap:8px}
+.app #screen-home .mobile-community-summary .cn-pact{min-height:44px;border-radius:14px;font-size:13px;white-space:nowrap;padding:0 2px}
+/* Home shows the post, not the thread; the thread is one tap away on Connect. */
+.app #screen-home .mobile-community-summary .cn-comment-area{display:none}
+
+/* ── the closing invitation ─────────────────────────────────────────────── */
+.app #screen-home .fm-survey-invite{border-radius:var(--fh-radius)}
+.app #screen-home .fm-survey-invite h2{font:700 17px/1.25 var(--fh-display);color:var(--fh-title)}
+.app #screen-home .fm-survey-invite p{font-size:13px}
+
+/* ── footer: on the grid, and every link wide enough to hit ─────────────── */
+.app #screen-home > .scroll > .fd-footer{margin:28px var(--fh-gutter) 0;padding:16px 0}
+.app #screen-home .fd-footer button{min-width:44px}
+
+/* ── tab bar: six tabs is a squeeze, so every one fills its cell ────────── */
+.app .tabbar .tab{height:100%;min-height:44px;font-size:11px}
+.app .impact-float-close{width:44px;height:44px;margin:-8px -8px -8px 0}
+
+@media(prefers-reduced-motion:reduce){
+  .app #screen-home :is(.mobile-shortcuts button,.dash-pillar){transition:none}
+}

@@ -48,7 +48,7 @@
   const care = document.createElement('button'); care.type='button'; care.className='mobile-human-care';
   care.textContent='Request pastoral care'; care.onclick=e=>{e.stopPropagation();showScreen('care');}; leader.append(care);
   const shortcuts=document.createElement('div'); shortcuts.className='mobile-shortcuts';
-  [['calendar','Sunday','9:45 AM',()=>openPush('watch')],['people','Groups','Find your people',()=>showScreen('community')],['heart','Care','Support is here',()=>showScreen('care')],['give','Impact','Your shared impact',()=>{showScreen('give');walletTabGive('impact');}]].forEach(([icon,title,sub,action])=>{
+  [['calendar','Sunday','9:45 AM',()=>openPush('watch')],['people','Groups','Find people',()=>showScreen('community')],['heart','Care','Get support',()=>showScreen('care')],['give','Impact','See yours',()=>{showScreen('give');walletTabGive('impact');}]].forEach(([icon,title,sub,action])=>{
     const button=document.createElement('button');button.type='button';button.onclick=action;
     button.innerHTML='<span class="mobile-shortcut-icon" data-grace-icon="'+icon+'"></span><span><strong>'+title+'</strong><small>'+sub+'</small></span><span>›</span>';shortcuts.append(button);
   });leader.after(shortcuts);

@@ -78,6 +78,8 @@ body{font-family:var(--font-body),Arial,sans-serif;display:grid;place-items:cent
   .device{
     --ios-safe-top:0px;
     --ios-safe-bot:env(safe-area-inset-bottom,0px);
+    --ios-tab-chrome-h:calc(var(--ios-tab-pill-h) + var(--ios-tab-float-pad) + var(--ios-safe-bot));
+    --ios-tab-h:var(--ios-tab-chrome-h);
     overscroll-behavior:none;
   }
   .device .app{padding-top:env(safe-area-inset-top,0px)}
@@ -6100,9 +6102,10 @@ function playCnReel(el, label) {
 }
 
 function openCnReelsFull() {
-  showScreen('home');
   var wall = document.getElementById('cn-reels-wall');
-  var scroller = document.querySelector('#screen-home .scroll');
+  var screen = wall && wall.closest('.screen');
+  showScreen(screen ? screen.id.replace('screen-', '') : 'home');
+  var scroller = screen && screen.querySelector('.scroll');
   if (wall && scroller) {
     var top = wall.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
     scroller.scrollTo({ top: Math.max(0, top - 8), behavior: 'smooth' });
@@ -7390,6 +7393,7 @@ function openGraceFromDrawer() {
 <script src="faithful-settings-tabs.js"></script>
 <link rel="stylesheet" href="faithful-member-profile.css">
 <link rel="stylesheet" href="faithful-mobile-finish.css">
+<link rel="stylesheet" href="faithful-mobile-home.css">
 <link rel="stylesheet" href="../../shared/grace-pilot-survey.css">
 <script src="../../shared/grace-pilot-survey-questions.js"></script>
 <script src="../../shared/grace-pilot-survey.js"></script>
