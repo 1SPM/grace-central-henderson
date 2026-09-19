@@ -214,4 +214,33 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   }
 }
 
+// ── the side menu is for going somewhere ───────────────────────────────────
+//
+// It opened with a 32px "Menu" title and an "Ask GRACE" block: 220px before
+// the first destination, in a panel that is obviously the menu. GRACE lives in
+// the dock on Home now. Rows were 20px Georgia -- a third typeface used nowhere
+// else on the phone.
+{
+  const nav = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-navigation.js', 'utf8');
+  const css = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-navigation.css', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  assert(/'\.drawer-head-title'\)\?\.remove\(\)/.test(nav), 'the "Menu" title is removed');
+  assert(/'#drawer-grace'\)\?\.remove\(\)/.test(nav),
+    'the GRACE block is removed, not hidden -- a hidden orb would still be bound by the companion');
+  // This line used to read .drawer-grace-title unguarded. With the block gone
+  // that is a null dereference, and everything after it in the module -- the
+  // close button, the focus trap, inert handling -- silently never runs.
+  assert(!/querySelector\('\.drawer-grace-(title|sub)'\)\./.test(nav),
+    'nothing dereferences the removed GRACE block');
+  assert(/drawer\.append\(signOut\)/.test(nav), 'Sign Out is pinned beside Settings, out of the scroll');
+  assert(/#app-drawer\{display:grid/.test(css) && /> \.drawer-signout\{grid-column:2;grid-row:3/.test(css) &&
+         /> \.fd-settings-cog\{grid-column:1;grid-row:3/.test(css),
+    'Settings and Sign Out share the drawer\'s last row');
+  assert(/\.drawer-scroll > \.drawer-section-label:first-child\{display:none\}/.test(css),
+    'a label heading the only list is not shown');
+  assert(!/Georgia/.test(css.split('.app .tabbar-zone')[0]), 'the drawer uses the UI face; no Georgia');
+  assert(!/\.drawer-item:after/.test(css), 'no chevron on every row: they all navigate, so it distinguishes nothing');
+}
+
 console.log('PASS: on a phone the simulated chrome is hidden, the real insets are used and the home order matches the portal; on a desktop the mockup is intact. Rendering on real hardware not verified.');
