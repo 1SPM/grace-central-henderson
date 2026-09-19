@@ -15,3 +15,11 @@
 .fm-care button:focus-visible,.fm-prayer button:focus-visible{outline:2px solid #347890;outline-offset:2px}
 .pillar-card{border-radius:16px 16px 24px 16px}
 @media(prefers-reduced-motion:reduce){.mc-flip-inner{transition:none}}
+
+/* The closing invitation at the end of the home scroll. It replaces the survey
+   that used to be mounted here: same place in the journey, a fraction of the
+   height, and it points at the tab instead of burying fifteen questions. */
+.fm-survey-invite{margin:18px 16px 8px;padding:20px 18px;border-radius:16px;background:rgba(23,95,165,.07);border:1px solid rgba(23,95,165,.16);text-align:center}
+.fm-survey-invite h2{margin:0 0 6px;font-size:1.05rem;font-weight:700}
+.fm-survey-invite p{margin:0 0 14px;font-size:.85rem;line-height:1.55;opacity:.8}
+.fm-survey-invite button{-webkit-appearance:none;appearance:none;width:100%;min-height:44px;padding:.7rem 1rem;border:0;border-radius:999px;background:#175fa5;color:#fff;font-size:.92rem;font-weight:600;font-family:inherit;cursor:pointer}

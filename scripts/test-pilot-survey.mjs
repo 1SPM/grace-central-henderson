@@ -303,17 +303,29 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
       .filter(f => f.endsWith('.html'))
       .map(f => fs.readFileSync(`apps/member-web/public/tenants/${tenant}/${f}`, 'utf8'));
     const statik = pages.reduce((n, p) => n + (p.match(/data-grace-pilot-survey/g) || []).length, 0);
-    const appended = tenant === 'faithful' ? 1 : 0;   // faithful-mobile-finish.js appends the phone one
+    // Count any mount a script appends too, rather than assuming. This was a
+    // hardcoded 1 for Faithful while mobile-finish.js appended one; when the
+    // survey moved to its own screen the constant went stale and claimed a
+    // second mount that no longer existed.
+    const scripts = fs.readdirSync(`apps/member-web/public/tenants/${tenant}`)
+      .filter(f => f.endsWith('.js'))
+      .map(f => fs.readFileSync(`apps/member-web/public/tenants/${tenant}/${f}`, 'utf8'));
+    const appended = scripts.filter(js => /setAttribute\('data-grace-pilot-survey'/.test(js)).length;
     assert.equal(statik + appended, 1,
-      `${tenant}: exactly one mount across all its pages — two would mean two rows per person`);
+      `${tenant}: exactly one mount across all its pages (${statik} static + ${appended} appended) — ` +
+      'two would mean two rows per person');
   }
 }
 
-// ── the phone carries it too ────────────────────────────────────────────────
+// ── the phone carries it, on its own screen ────────────────────────────────
 //
-// The pilot ends on the phone: the QR in the desktop Mobile section sends
-// people to the iOS page. The survey lived only on the desktop portal, so the
-// device the walkthrough actually finishes on had no survey at all.
+// The pilot ends on the phone: the QR in the desktop Mobile section sends people
+// to the iOS page. It first lived at the end of the home scroll, which is where
+// the walkthrough ends -- but that scroll is about twelve phone screens, so
+// fifteen questions sat below a wall of content almost nobody would reach. A
+// completion rate near zero would have read as disinterest rather than as a
+// navigation problem. It has its own tab now, and the end of the home scroll
+// invites people to it.
 {
   const ios = 'apps/member-web/public/tenants/faithful/grace_faithful_church_members_card_ios_app.html';
   const page = fs.readFileSync(ios, 'utf8');
@@ -323,33 +335,31 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
   assert.equal((page.match(/<link[^>]*shared\/grace-pilot-survey\.css/g) || []).length, 1,
     'the phone loads the stylesheet once');
 
-  // Load order is load-bearing here, not cosmetic: faithful-mobile-finish.js is
-  // what appends the mount and then calls mount(), so the module must already
-  // exist by the time it runs.
-  assert(page.indexOf('shared/grace-pilot-survey.js') < page.indexOf('faithful-mobile-finish.js'),
-    'the survey module must load before faithful-mobile-finish.js, which mounts it');
+  // Its own screen, reachable from the tab bar.
+  assert(/<section class="screen" id="screen-survey">/.test(page), 'the survey has its own screen');
+  assert(/data-tab="survey" onclick="showScreen\('survey'\)"/.test(page),
+    'and a tab that opens it — the whole point is that it is reachable without scrolling');
+  assert(/grid-template-columns:repeat\(6,1fr\)/.test(page),
+    'the tab bar is widened to six columns, or the new tab overflows the others');
 
+  // The mount is static now: it sits in a screen nothing appends to, so the
+  // shared module finds it at parse time and no explicit mount() is needed.
+  const mounts = [...page.matchAll(/data-grace-pilot-survey/g)].length;
+  assert.equal(mounts, 1, 'exactly one mount, inside the survey screen');
+  const screenBlock = page.slice(page.indexOf('id="screen-survey"'), page.indexOf('id="screen-give"'));
+  assert(/data-grace-pilot-survey/.test(screenBlock), 'the mount is inside the survey screen');
+
+  // The end of the walkthrough points at it.
   const finish = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
-  assert(/data-grace-pilot-survey/.test(finish), 'mobile-finish creates the mount point');
-  assert(/GRACE_PILOT_SURVEY\?\.mount\(\)/.test(finish),
-    'and mounts it explicitly — the module\'s own auto-mount has already run and found nothing');
-  // It must be appended AFTER the sections this module adds, or the survey
-  // renders above them instead of at the end of the walkthrough.
-  assert(finish.indexOf('home.append(prayer)') < finish.indexOf('data-grace-pilot-survey'),
-    'the mount is appended after the care and prayer sections');
-
-  // The page footer is appended by faithful-destinations.js, which runs FIRST,
-  // so everything this module adds lands below it. Left alone, three sections
-  // and the survey sat underneath a footer — the page appeared to end and then
-  // carry on. The footer is moved back to last, after the survey, so the survey
-  // is the final thing a member reads before the page ends.
-  assert(/home\.querySelector\(':scope > \.fd-footer'\)/.test(finish),
-    'mobile-finish reclaims the footer');
-  assert(finish.indexOf('data-grace-pilot-survey') < finish.indexOf("':scope > .fd-footer'"),
-    'the footer is moved AFTER the survey is mounted, or it would not end up last');
-  // A static <div> in the HTML would sit above those runtime sections.
-  assert(!/data-grace-pilot-survey/.test(page),
-    'the phone must NOT carry a static mount — it would render above the appended sections');
+  assert(/fm-survey-invite/.test(finish), 'the home scroll ends with an invitation');
+  assert(/showScreen\('survey'\)/.test(finish), 'and the invitation opens the survey screen');
+  assert(!/data-grace-pilot-survey/.test(finish),
+    'the survey is no longer mounted into the home scroll — two mounts would mean two rows per person');
+  // Still after the sections this module appends, so it closes the walkthrough.
+  assert(finish.indexOf('home.append(prayer)') < finish.indexOf('fm-survey-invite'),
+    'the invitation comes after the care and prayer sections');
+  assert(finish.indexOf('fm-survey-invite') < finish.indexOf("':scope > .fd-footer'"),
+    'and before the footer is reclaimed, so the footer still ends the page');
 }
 
 // ── the migration keeps the survey unlinkable to a person ───────────────────
