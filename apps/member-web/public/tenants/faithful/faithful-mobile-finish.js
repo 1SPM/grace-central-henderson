@@ -38,17 +38,23 @@
   const link = make('button', '', 'Go to prayer wall'); link.type = 'button'; link.onclick = () => document.getElementById('home-prayer-wall')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   copy.append(link); prayer.append(photo, copy); home.append(prayer);
 
-  // The pilot survey goes last on the phone, because the phone is where the
-  // walkthrough ends -- the QR at the end of the desktop Mobile section sends
-  // people here. It is appended rather than written into the HTML so it lands
-  // after the sections this module adds above; a static <div> would sit above
-  // them. The shared module builds its own DOM and reads the tenant from the
-  // path, so nothing here is survey-specific beyond the mount point.
-  const survey = document.createElement('div');
-  survey.setAttribute('data-grace-pilot-survey', '');
-  home.append(survey);
-  // Its own auto-mount already ran and found nothing, so ask it explicitly.
-  window.GRACE_PILOT_SURVEY?.mount();
+  // The walkthrough ends here, so this is where it points at the survey.
+  //
+  // The survey used to be mounted at this spot. Structurally that was right --
+  // after everything else -- but this scroll is about twelve phone screens, so
+  // it was in practice unreachable, and a completion rate near zero would have
+  // read as disinterest rather than as nobody ever finding it. It lives on its
+  // own tab now; what stays here is the invitation.
+  const invite = make('section', 'fm-survey-invite');
+  invite.append(
+    make('h2', '', 'One last thing'),
+    make('p', '', 'A few questions about what you just saw. It takes about two minutes, every question is optional, and nothing is linked to your name.'),
+  );
+  const go = make('button', '', 'Answer the questions');
+  go.type = 'button';
+  go.onclick = () => { showScreen('survey'); };
+  invite.append(go);
+  home.append(invite);
 
   // faithful-destinations.js appends the page footer, and it runs before this
   // module -- so everything added above lands BELOW it. That left three
