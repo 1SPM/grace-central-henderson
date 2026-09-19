@@ -49,4 +49,12 @@
   home.append(survey);
   // Its own auto-mount already ran and found nothing, so ask it explicitly.
   window.GRACE_PILOT_SURVEY?.mount();
+
+  // faithful-destinations.js appends the page footer, and it runs before this
+  // module -- so everything added above lands BELOW it. That left three
+  // sections and the survey sitting under a footer, which reads as if the page
+  // had already ended. On desktop the footer is last, as a footer should be.
+  // append() moves an existing node rather than copying it.
+  const footer = home.querySelector(':scope > .fd-footer');
+  if (footer) home.append(footer);
 })();
