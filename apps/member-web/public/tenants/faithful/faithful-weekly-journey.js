@@ -4,14 +4,14 @@
   const host = document.querySelector('#jy-scroll') || document.querySelector('#sec-profile');
   if (!host) return;
   const lessons = [
-    {id:'watch-sermons-0', index:0, status:'demo', title:'Part 3 — The Power of Forgiveness', date:'May 18', speaker:'Pastor James Wilson', ref:'Ephesians 4:32', chapter:'Ephesians 4', url:'https://ebible.org/engwebp/EPH04.htm',
+    {id:'watch-sermons-0', index:0, status:'demo', title:'Part 3: The Power of Forgiveness', date:'May 18', speaker:'Pastor James Wilson', ref:'Ephesians 4:32', chapter:'Ephesians 4', url:'https://ebible.org/engwebp/EPH04.htm',
       verse:'And be kind to one another, tender hearted, forgiving each other, just as God also in Christ forgave you.',
       context:'29 Let no corrupt speech proceed out of your mouth, but only what is good for building others up as the need may be, that it may give grace to those who hear. 30 Don’t grieve the Holy Spirit of God, in whom you were sealed for the day of redemption. 31 Let all bitterness, wrath, anger, outcry, and slander be put away from you, with all malice.',
       summary:'An invitation to consider kindness and forgiveness in everyday relationships. Forgiveness does not require abandoning boundaries or returning to an unsafe situation.',
       prompts:['What stayed with you from this passage or message?','Where might kindness change your next conversation?','What question would you like to carry into the week?'],
       questions:['What does Paul connect with forgiveness in verses 29–32?','How might words build someone up without avoiding a difficult truth?'],
       actions:['Offer one specific word of encouragement','Reflect on a boundary that supports a healthy relationship']},
-    {id:'watch-sermons-1', index:1, status:'demo', title:'Part 2 — Serving One Another', date:'May 11', speaker:'Pastor James Wilson', ref:'Galatians 5:13', chapter:'Galatians 5', url:'https://ebible.org/engwebp/GAL05.htm',
+    {id:'watch-sermons-1', index:1, status:'demo', title:'Part 2: Serving One Another', date:'May 11', speaker:'Pastor James Wilson', ref:'Galatians 5:13', chapter:'Galatians 5', url:'https://ebible.org/engwebp/GAL05.htm',
       verse:'For you, brothers, were called for freedom. Only don’t use your freedom as an opportunity for the flesh, but through love be servants to one another.',
       context:'14 For the whole law is fulfilled in one word, in this: “You shall love your neighbor as yourself.” 15 But if you bite and devour one another, be careful that you don’t consume one another.',
       summary:'Consider what serving through love could look like in the ordinary places you already spend time. Choose something realistic for your capacity this week.',
@@ -54,7 +54,7 @@
     // Preserve the live guide and its draft when rebuilding lesson content.
     const pageGuide=host.querySelector('[data-reflect-guide]');
     if(pageGuide)pageGuide.remove();
-    root.innerHTML=`<header class="wj-heading"><h1>Reflect</h1><p>Reflect. Explore. Choose your next step.</p></header>
+    root.innerHTML=`<header class="wj-heading"><h1>Reflect</h1><p>Read this week’s message and write down what stays with you.</p></header>
       <p class="wj-notice">Demo: entries clear when this page reloads. Do not enter sensitive information.</p>
       <div class="wj-week-picker"><label for="wj-week">Your weekly message</label><select id="wj-week">${lessons.filter(x=>x.status==='demo').map(x=>`<option value="${x.id}" ${x.id===l.id?'selected':''}>${esc(x.date)} · ${esc(x.title)}</option>`).join('')}</select></div>
       <section class="wj-lesson"><figure class="wj-sermon-image"><img src="../../assets/watch/ondemand-${l.index===0?'forgiveness':'serving'}.jpg" alt="${esc(l.title)} sermon artwork"><figcaption>${esc(l.date)} · ${esc(l.ref)}</figcaption></figure><div class="wj-lesson-copy">
@@ -133,7 +133,7 @@
     // ask() returns false when GRACE is unmounted or still answering. Keep the
     // draft and the panel until it confirms acceptance: never report a send
     // that did not happen.
-    if(a==='share-confirm'){if(!shareText)return;if(!window.GRACE_COMPANION?.ask)return status('GRACE is unavailable. Your text has not been sent.');const text=shareText;window.GRACE_COMPANION.open();if(!window.GRACE_COMPANION.ask('Please help me reflect on this text I chose to share:\n'+text))return status('GRACE is still answering. Your text has not been sent — try again in a moment.');shareText='';q('#wj-share').hidden=true;status('Selected text sent to GRACE.');}
+    if(a==='share-confirm'){if(!shareText)return;if(!window.GRACE_COMPANION?.ask)return status('GRACE is unavailable. Your text has not been sent.');const text=shareText;window.GRACE_COMPANION.open();if(!window.GRACE_COMPANION.ask('Please help me reflect on this text I chose to share:\n'+text))return status('GRACE is still answering. Your text has not been sent. Try again in a moment.');shareText='';q('#wj-share').hidden=true;status('Selected text sent to GRACE.');}
     if(a==='dictate'){
       q('#wj-voice').hidden=false;
       const supported=window.SpeechRecognition||window.webkitSpeechRecognition;

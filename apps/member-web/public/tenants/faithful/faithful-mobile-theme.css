@@ -1,0 +1,170 @@
+/* Faithful mobile · one look for the whole app.
+ *
+ * Home was restyled first (faithful-mobile-home.css). This carries the same
+ * system to every other screen, so moving between tabs does not feel like
+ * moving between products:
+ *
+ *   light card   white-to-lavender gradient, thin gold rule, two-layer shadow
+ *   dark card    deep indigo gradient, sheen at the top, gold rule
+ *   gold         the one primary action on a screen
+ *   navy pill    every other filled action
+ *   light pill   secondary actions
+ *   chip         filters and small choices: gold rule, cream fill, navy when on
+ *   segmented    a gold-ruled tray; the selected segment is a navy pill
+ *   icon well    a lavender rounded square with a navy glyph
+ *
+ * Type is 28 22 17 15 13 12, fields 16 (iOS zooms below that), weights
+ * 400 600 700, two families: the display serif for headings, figures and
+ * scripture, the UI sans for everything else. A one-off script put the
+ * phone-only files on that scale and palette directly;
+ * faithful-mobile-theme.generated.css restates it for files the desktop portal
+ * shares. This file is the part that needed decisions rather than arithmetic.
+ *
+ * SPECIFICITY. The older layers scope by screen ID ("#screen-give .gv-tab"),
+ * which no number of classes outranks. Rules here that must win use
+ * ".screen:not(#_)": :not() takes the specificity of its argument, no element
+ * has the id "_", so it matches every screen and counts as an ID.
+ *
+ * Every selector starts with .app or .device, which exist only on the phone
+ * page, so nothing here can reach the desktop portal or another tenant.
+ */
+.device,.app{
+  --dv-navy:#23255c;--dv-navy-2:#36408c;--dv-ink:#1d1f4a;--dv-muted:#5d6085;
+  --dv-gold:#b8a35a;--dv-gold-ink:#8d7d33;--dv-gold-line:#d6d2a4;--dv-lav-line:#d8d6e8;
+  --dv-well:linear-gradient(180deg,#f4f3fa 0%,#e5e3f1 100%);
+  --dv-light:linear-gradient(180deg,#ffffff 0%,#f8f7fc 100%);
+  --dv-cream:linear-gradient(180deg,#fdfcf6 0%,#f6f4e6 100%);
+  --dv-dark:radial-gradient(130% 70% at 50% 0%,#414b86 0%,#414b8600 62%),linear-gradient(180deg,#1a2048 0%,#2a3163 52%,#1c2250 100%);
+  --dv-gold-fill:linear-gradient(135deg,#d6bc7c 0%,#b89c5c 52%,#a3884b 100%);
+  --dv-navy-fill:linear-gradient(135deg,#292a69 0%,#38428f 100%);
+  --dv-page:radial-gradient(#23255c14 .6px,transparent .9px) 0 0/6px 6px,radial-gradient(90% 40% at 50% 0%,#ffffff 0%,#ffffff00 70%),linear-gradient(180deg,#f6f5fb 0%,#ebe9f4 55%,#e6e4f0 100%);
+  --dv-lift:0 1px 0 #ffffff inset,0 2px 4px #23255c12,0 14px 30px #23255c1c;
+  --dv-lift-dark:0 1px 0 #ffffff24 inset,0 3px 6px #12143433,0 18px 36px #1214344d;
+  /* The tenant theme's tokens are declared on :root with var() references, and
+     a custom property resolves where it is DECLARED -- so re-pointing only the
+     base colours here would leave every token derived from them blue. Each
+     one the phone uses is restated. */
+  --grace-navy-950:#1d1f4a;--grace-navy-800:#2a2c6c;--grace-sky-500:#4b53a8;
+  --central-red:#4b53a8;--central-red-hover:#3d4595;--central-black:#1d1f4a;--central-ink-soft:#2a2c6c;
+  --central-red-soft:#ecebf5;--central-line:#d8d6e8;--central-grey:#5d6085;--central-canvas:#f6f5fb;
+  --accent:#4b53a8;--text:#1d1f4a;--bg-dark:#1d1f4a;--accent-soft:#ecebf5;--border:#d8d6e8;
+  --brand-accent:#4b53a8;--brand-dark:#1d1f4a;--brand-soft:#ecebf5;
+  --shadow-card:0 14px 30px #23255c1c;
+  --ios-bg:#efeef6;--ios-text:#1d1f4a;--ios-line:#d8d6e8;--ios-muted:#5d6085;
+  --fm-control:#23255c;--fm-ink:#1d1f4a;--fm-muted:#5d6085;--fm-line:#d8d6e8;--fm-soft:#ecebf5;
+}
+.app{color:var(--dv-ink);font-family:var(--font-ui,'Inter'),system-ui,sans-serif}
+/* :where() has no specificity, so any rule that names a size still wins. This
+   only catches controls nobody styled, which otherwise get the browser's
+   13.33px system font. */
+.app :where(button,input,select,textarea){font-family:inherit}
+.app :where(button){font-size:13px}
+.app :where(input:not([type=checkbox],[type=radio],[type=range]),textarea,select){font-size:16px}
+
+/* ── the page, the top bar, the tab bar ─────────────────────────────────── */
+.app .screen:not(#_) > :is(.scroll,.fd-page){background:var(--dv-page)}
+.app .screen:not(#_){background:#efeef6}
+.app .screen:not(#_) > :is(.home-nav,.nav),
+.app .screen:not(#_) > .fd-top{background:linear-gradient(180deg,#ffffff 0%,#f6f5fb 100%);border-bottom:1px solid var(--dv-gold-line);box-shadow:0 6px 18px #23255c0f}
+.app .screen:not(#_) > :is(.home-nav,.nav) :is(.home-nav-title,.nav-title),
+.app .screen:not(#_) > .fd-top > span{font:600 17px/1.3 var(--font-ui,'Inter'),system-ui,sans-serif;color:var(--dv-navy)}
+.app .screen:not(#_) :is(.menu-btn,.fd-back,.fd-menu){width:44px;height:44px;border-radius:13px;background:var(--dv-well);border:1px solid var(--dv-lav-line);color:var(--dv-navy);box-shadow:0 1px 0 #fff inset}
+.app .screen:not(#_) > :is(.home-nav,.nav) .nav-btn{color:var(--dv-navy)}
+.app .nav-badge,.app .tab-badge{background:var(--dv-gold-fill);color:#1b1d3f;border-color:#fff}
+.app > .tabbar-zone{background:linear-gradient(180deg,#ffffff 0%,#f4f3fa 100%);border-top:1px solid var(--dv-gold-line)}
+.app .tabbar-zone .tabbar{background:none}
+.app .tabbar .tab{color:#5d6085}
+.app .tabbar .tab .tab-icon{color:#4a4d75}
+.app .tabbar .tab.active{color:var(--dv-navy);font-weight:700}
+.app .tabbar .tab.active .tab-icon{background:var(--dv-well);color:var(--dv-navy);box-shadow:0 0 0 1px var(--dv-lav-line),0 1px 0 #fff inset}
+
+/* ── headings ───────────────────────────────────────────────────────────── */
+.app .screen:not(#_) :is(h1,h2,h3,legend,.cn-widget-head strong,.jy-card-head,.gv-card-head strong,.dash-mod-title){font-family:var(--font-display,'Playfair Display'),Georgia,serif;font-weight:700;letter-spacing:-.2px;color:var(--dv-navy)}
+.app .screen:not(#_) h1{font-size:28px;line-height:1.14}
+.app .screen:not(#_) h2{font-size:22px;line-height:1.2}
+.app .screen:not(#_) :is(h3,legend){font-size:17px;line-height:1.25}
+/* headings that sit on a photograph or a dark card stay white */
+.app .screen:not(#_) :is(.home-hero,.cn-hero,.cr-hero,.fmc-hero,.cn-ge-hero,.fmj-hero,.cn-fm-hero,.fm-impact-story,.fm-giving-images,.ld-hero,.fm-survey-invite,.fw-tip,.fp-profile,.dv-dark) :is(h1,h2,h3){color:#fff}
+
+/* ── light cards ────────────────────────────────────────────────────────── */
+.app .screen:not(#_) :is(.card,.faq-card,.ld-chat,.ld-gallery,.gv-cause-card,.gv-card-block,.fm-impact-bridge,.give-history-card,.fm-care,.cn-post,.cn-widget,.cn-composer,.cn-event-card,.cn-group-row,.cn-person-row,.wj-lesson,.wj-panel-journal,.jy-card,.fd-card,.fp-preferences,.fp-page-guide > section,.care-option,.mobile-leadership-care,.gps-question,.member-sample-history){
+  background:var(--dv-light);border:1px solid var(--dv-gold-line);border-radius:20px;box-shadow:var(--dv-lift)
+}
+.app .screen:not(#_) .fp-page-guide > section{border-radius:16px;box-shadow:none}
+.app .screen:not(#_) .care-option{border-radius:16px;margin-bottom:8px;padding:12px 14px}
+.app .screen:not(#_) .faq-card.open{border-color:var(--dv-gold)}
+/* icon wells */
+.app .screen:not(#_) :is(.fg-icon,.co-ico,.cr-req-ico,.give-history-icon,.ic-tile,.gv-feed-ico,.impact-notify-icon,.mobile-shortcut-icon,.cn-post-av-icon){border-radius:13px;background:var(--dv-well)!important;border:1px solid var(--dv-lav-line);color:var(--dv-navy);box-shadow:0 1px 0 #fff inset}
+.app .screen:not(#_) .ic-tile.ic-tile--active{background:var(--dv-navy-fill)!important;color:#fff;border-color:transparent}
+
+/* ── dark cards: one or two a screen, for the people and the invitations ── */
+.app .screen:not(#_) :is(.fmc-care,.fm-wallet-footer,.cr-blessing,.fm-prayer,.dv-dark){background:var(--dv-dark);border:1.5px solid var(--dv-gold);border-radius:20px;box-shadow:var(--dv-lift-dark);color:#fff}
+.app .screen:not(#_) :is(.fmc-care,.fm-wallet-footer,.cr-blessing,.fm-prayer) :is(h2,h3,strong){color:#fff}
+.app .screen:not(#_) :is(.fmc-care,.fm-wallet-footer,.cr-blessing,.fm-prayer) :is(p,small,span,div){color:#d3d5ec}
+.app .screen:not(#_) :is(.fmc-care,.fm-prayer) button{min-height:44px;padding:0 18px;border:0;border-radius:22px;background:var(--dv-gold-fill);color:#1b1d3f;font-weight:600;box-shadow:0 1px 0 #ffffff80 inset,0 8px 16px #0d0f3059}
+
+/* ── actions ────────────────────────────────────────────────────────────── */
+.app .screen:not(#_) :is(.btn.dark,.btn.primary,.ld-begin,.cr-ba-primary,.cn-req-accept,.fd-button,.gps-submit,.lg-switch.active,button[type=submit]){min-height:44px;border:0;border-radius:22px;background:var(--dv-navy-fill);color:#fff;font-weight:600;box-shadow:0 8px 18px #292a6940}
+.app .screen:not(#_) :is(.btn.soft,.fd-secondary,.ld-switch-ghost,.cr-ba-btn:not(.cr-ba-primary),.cn-req-decline,.lg-profile-btn,.lg-switch:not(.active)){min-height:44px;border:1px solid var(--dv-gold-line);border-radius:22px;background:var(--dv-light);color:var(--dv-navy);font-weight:600;box-shadow:none}
+.app .screen:not(#_) :is(.btn,.fd-button,.ld-begin,.cr-ba-btn):active{filter:brightness(.94)}
+/* links that were text-only stay text, in the gold ink, underlined like Divinity's */
+.app .screen:not(#_) :is(.lg-learn-link,.cn-widget-head span[onclick]){color:var(--dv-gold-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:#b8a35a99;font-size:13px}
+
+/* ── chips ──────────────────────────────────────────────────────────────── */
+.app .screen:not(#_) :is(.gv-fund,.gv-cause-ftab,.cn-feed-filter,.cn-ev-filter,.cn-wall-filter,.cn-filter,.cn-filter-chip,.jy-mood-chip,.cn-comp-act,.cn-pact,.gv-amount,.gps-choice){min-height:44px;border:1px solid var(--dv-gold-line);border-radius:22px;background:var(--dv-cream);color:var(--dv-navy);box-shadow:none}
+.app .screen:not(#_) :is(.gv-fund,.gv-cause-ftab,.cn-feed-filter,.cn-ev-filter,.cn-wall-filter,.cn-filter,.cn-filter-chip,.jy-mood-chip,.gv-amount).active,
+.app .screen:not(#_) .gps-choice:has(input:checked){background:var(--dv-navy-fill);border-color:transparent;color:#fff;box-shadow:0 6px 14px #292a6933}
+.app .screen:not(#_) :is(.cn-post-badge,.cn-reel-badge,.gv-cause-badge,.cr-dispatch-badge,.fd-tag){font-size:12px;font-weight:600;border-radius:12px;padding:3px 9px;border:1px solid var(--dv-gold);background:none;color:var(--dv-gold-ink)}
+
+/* ── segmented tabs: a tray, and the selected segment is a pill in it ───── */
+.app .screen:not(#_) :is(.gv-tabs,.cn-tabs,.cn-people-tabs,.gv-activity-tabs,.wj-tabs,.jy-jtabs,.settings-tabs){display:flex;gap:4px;padding:4px;border:1px solid var(--dv-gold-line);border-radius:18px;background:var(--dv-light);box-shadow:var(--dv-lift);overflow:visible}
+.app .screen:not(#_) :is(.gv-tab,.cn-tab,.cn-people-tab,.gv-activity-tab,.jy-jtab,.wj-tabs button,.settings-tabs button){flex:1;min-height:44px;border:0;border-radius:14px;background:none;color:var(--dv-muted);font-size:13px;font-weight:600;box-shadow:none}
+.app .screen:not(#_) :is(.gv-tab,.cn-tab,.cn-people-tab,.gv-activity-tab,.jy-jtab).active,
+.app .screen:not(#_) :is(.wj-tabs,.settings-tabs) button[aria-selected=true]{background:var(--dv-navy-fill);color:#fff;box-shadow:0 8px 16px #292a6940}
+
+/* ── fields ─────────────────────────────────────────────────────────────── */
+.app .screen:not(#_) :is(input:not([type=checkbox],[type=radio],[type=range],[type=file]),textarea,select){border:1px solid var(--dv-lav-line);border-radius:12px;background:#fbfbfe;color:var(--dv-ink)}
+/* ...except a field that sits on a dark surface and brings its own look. */
+.app .screen:not(#_) .fm-grace-dock .home-grace-input{border:0;border-radius:0;background:none;color:#fff}
+.app .screen:not(#_) :is(input,textarea,select):focus-visible{outline:3px solid #6b74c9;outline-offset:1px}
+.app :is(input[type=checkbox],input[type=radio]){accent-color:#2a2c6c}
+.app :is(button,a,[role=button],summary):focus-visible{outline:3px solid #6b74c9;outline-offset:2px}
+
+/* ── the landing screen, so the first thing seen matches what follows ───── */
+.device .landing-title{font-family:var(--font-display,'Playfair Display'),Georgia,serif}
+.device #landing-screen .landing-cta,.device #landing-screen button{border-radius:24px}
+
+/* ── the long tail: things every screen has, and a few that were simply small ── */
+/* Footer links are on every screen; "Safety" and "Terms" are 38px wide as set. */
+.app .fd-footer button{min-width:44px;min-height:44px}
+/* Filled and outlined actions that stopped at 32-42px. */
+.app .screen:not(#_) :is(.gv-give-btn,.gv-browse-causes,.gv-commit-banner-btn,.gv-merchant-manage,.cn-wall-create,.fund,.cn-req-decline,.cn-req-accept,.jy-nav-btn,.fm-wallet-actions button,.linkish,.lg-learn-link){min-height:44px;min-width:44px}
+.app .screen:not(#_) :is(.linkish,.lg-learn-link){display:inline-flex;align-items:center}
+.app .screen:not(#_) :is(.gv-give-btn,.gv-browse-causes,.gv-merchant-manage,.cn-wall-create){border-radius:22px}
+.app .screen:not(#_) .gv-give-btn{border:0;background:var(--dv-gold-fill);color:#1b1d3f;font-weight:600;box-shadow:0 1px 0 #ffffff80 inset,0 10px 22px #23255c33}
+.app .screen:not(#_) :is(.gv-browse-causes,.gv-merchant-manage,.cn-wall-create,.gv-commit-banner-btn){border:1px solid var(--dv-gold-line);background:var(--dv-light);color:var(--dv-navy);font-weight:600}
+.app .screen:not(#_) summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+/* Micro-labels that are reading text, not counts: 7 and 8px is not a size. */
+.app .screen:not(#_) :is(.lg-human-live,.cn-wall-filter-badge,.cn-group-meta span,.cn-ev-meta span){font-size:12px;font-weight:600}
+.app .screen:not(#_) :is(#gv-donut-val strong,#gv-tx-impact-total strong,strong){font-weight:700}
+/* Fields are 16px everywhere. Below that iOS zooms the page on focus. */
+.app .screen:not(#_) :is(input:not([type=checkbox],[type=radio],[type=range],[type=file]),textarea,select){font-size:16px;line-height:1.5}
+/* A long unbroken value must wrap, not push the page sideways. */
+.app .screen:not(#_) > :is(.scroll,.fd-page){overflow-x:hidden}
+.app .screen:not(#_) :is(.fd-card,.fd-grid,[data-member-profile],[role=tabpanel]){min-width:0;max-width:100%}
+/* The shared icon set draws every glyph in fixed hex (a sky blue, or a pale
+   blue meant for dark wells). Letting them take the colour of their context is
+   what makes one icon work in a lavender well, on a dark card and in the tab
+   bar. The duotone fills keep their own opacity, so they stay a tint. */
+.app svg.grace-ic [stroke]{stroke:currentColor}
+.app svg.grace-ic [fill]:not([fill="none"]){fill:currentColor}
+/* Black was the old "primary". Nothing in this system is black. */
+.app .screen:not(#_) :is(.ld-send,.cn-comment-send,.gv-amount.active){background:var(--dv-navy-fill);color:#fff;border:0}
+/* The survey's questions are cards like everything else you answer. */
+.app #screen-survey fieldset{margin:0 0 16px;padding:16px;border:1px solid var(--dv-gold-line);border-radius:20px;background:var(--dv-light);box-shadow:var(--dv-lift)}
+/* Settings has four tabs; at equal width with 13px labels they ran 26px past
+   the screen. They share the row and may wrap their label instead. */
+.app .screen:not(#_) .settings-tabs{flex-wrap:nowrap;max-width:100%;box-sizing:border-box}
+.app .screen:not(#_) .settings-tabs button{min-width:0;padding:0 6px;white-space:normal;line-height:1.2}
+.app .screen:not(#_) :is(.ld-msg-nav,.fm-impact-bridge button){min-height:44px}
+.app .screen:not(#_) .cn-event-date span{font-size:12px;font-weight:600}

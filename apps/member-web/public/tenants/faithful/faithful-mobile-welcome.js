@@ -97,7 +97,7 @@
   // Each step names something that is really on the phone's Home. The captions
   // are the explainer cards' words, shortened to a sentence or two.
   const STEPS = [
-    ['#screen-home .home-hero', 'Follow the message', 'Start with the service at the top of My Church. When you want more time with a passage, Journey gives you a place to read and write.'],
+    ['#screen-home .home-hero', 'Follow the message', 'Start with the service at the top of My Church. When you want more time with a passage, Reflect gives you a place to read and write.'],
     ['#screen-home .mobile-shortcuts', 'Find your people', 'Sunday, groups, care and your impact are one tap from here. You can look around without joining anything or sending a request.'],
     ['#home-leader-chip', 'Meet your leader', 'Your pastor’s AI avatar can help you explore your faith. It is always labelled as an avatar, and you can ask for a person under Care.'],
     ['#screen-home .fm-grace-dock', 'Ask GRACE', 'GRACE helps you find your way around church life. Ask about services, groups, events or giving.'],

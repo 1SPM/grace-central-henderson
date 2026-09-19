@@ -32,7 +32,7 @@
    if(before?.classList.contains('drawer-divider'))before.remove();
    drawer.append(signOut);
  }
- const labels={home:'My Church',leaders:'My Leadership',give:'GRACE Impact Card'};
+ const labels={home:'My Church',leaders:'My Leadership',give:'Give'};
  Object.entries(labels).forEach(([key,label])=>{drawer.querySelector(`[data-drawer-tab="${key}"]`).lastElementChild.textContent=label;});
  const nav=drawer.querySelector('.drawer-nav');['home','leaders','care','give','community','profile'].forEach(key=>nav.append(drawer.querySelector(`[data-drawer-tab="${key}"]`)));
  const bar=document.querySelector('.tabbar');bar.setAttribute('role','navigation');bar.setAttribute('aria-label','Primary navigation');

@@ -5,7 +5,7 @@
   const make = (tag, cls, text) => { const el = document.createElement(tag); el.className = cls; if (text) el.textContent = text; return el; };
   document.querySelectorAll('.mc-front').forEach(front => {
     const image = make('img', 'fm-card-image');
-    image.src = '../../assets/faithful-church-card.png'; image.alt = 'Faithful Church IMPACT card — demo';
+    image.src = '../../assets/faithful-church-card.png'; image.alt = 'Faithful Church IMPACT card, demo';
     front.replaceChildren(image);
   });
   document.querySelectorAll('.mc-flip').forEach(card => {

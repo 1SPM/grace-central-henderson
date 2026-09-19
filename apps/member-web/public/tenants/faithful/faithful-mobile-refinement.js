@@ -1,7 +1,7 @@
 (() => {
   const assets=document.getElementById('gv-panel-assets'), impactPanel=document.getElementById('gv-panel-impact');
   const node=(tag,cls,html)=>{const e=document.createElement(tag);e.className=cls;e.innerHTML=html;return e;};
-  const walletHeading=node('header','fm-wallet-heading','<h1>Your everyday, with purpose.</h1><p>Your card and church connection.</p><small>Demo preview — illustrative data</small>');assets.prepend(walletHeading);
+  const walletHeading=node('header','fm-wallet-heading','<h1>Your wallet</h1><p>Your card and church connection.</p><small>Demo preview: illustrative data</small>');assets.prepend(walletHeading);
   const card=document.getElementById('gv-grace-card-block');walletHeading.after(card);
   const front=card.querySelector('.mc-front');front.append(node('img','fm-card-art',''));front.querySelector('.fm-card-art').src='../../assets/faithful-church-card.png';front.querySelector('.fm-card-art').alt='Faithful Church GRACE Impact Card';
   const balance=document.getElementById('gv-balance-display');balance.removeAttribute('aria-hidden');balance.before(node('p','fm-balance-label','Available balance · Demo'));
@@ -9,17 +9,17 @@
   const bridge=node('section','fm-impact-bridge','<img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative ministry volunteers"><div><h2>Your card impact this month</h2><strong></strong><button type="button">View impact →</button></div>');bridge.querySelector('button').onclick=()=>walletTabGive('impact');card.after(bridge);
   const form=document.getElementById('gv-give-form');bridge.after(form);form.prepend(node('h2','fm-section-title','Give directly'));
   const photoGrid=node('div','fm-giving-images','');[['General giving','worship-hero'],['Missions','community'],['Youth','community'],['Food Pantry','food-pantry']].forEach(([label,asset])=>photoGrid.append(node('div','','<img src="../../assets/faithful-'+asset+'.jpg" alt=""><strong>'+label+'</strong>')));form.querySelector('h2').after(photoGrid);
-  const impactHeading=node('header','fm-wallet-heading','<h1>Your impact,<br>in motion.</h1><p>Everyday generosity. Shared purpose.</p><small>Demo preview — illustrative data</small>');impactPanel.prepend(impactHeading);
-  const story=node('section','fm-impact-story','<img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative food pantry volunteers"><h2>Small acts.<br>Meaningful support.</h2>');impactHeading.after(story);
+  const impactHeading=node('header','fm-wallet-heading','<h1>Your impact</h1><p>What your everyday spending supports.</p><small>Demo preview: illustrative data</small>');impactPanel.prepend(impactHeading);
+  const story=node('section','fm-impact-story','<img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative food pantry volunteers"><h2>Small purchases add up.</h2>');impactHeading.after(story);
   const allocation=document.getElementById('gv-alloc-card');story.after(allocation);allocation.append(node('p','fm-allocation-note','Allocation shares are not fundraising progress.'));
   const goal=assets.querySelector('.gv-goal-strip');allocation.after(goal);goal.prepend(node('h2','fm-section-title','Your giving goal'));goal.append(node('p','fm-allocation-note','A goal you choose, at your own pace.'));
   const tx=document.getElementById('gv-tx-card');goal.after(tx);
-  [assets,impactPanel].forEach(p=>p.append(node('footer','fm-wallet-footer','<h2>A brighter tomorrow, together.</h2><p>Faithful Church</p>')));
+  [assets,impactPanel].forEach(p=>p.append(node('footer','fm-wallet-footer','<h2>Thank you for giving.</h2><p>Faithful Church</p>')));
   const syncImpact=()=>{bridge.querySelector('strong').textContent=document.getElementById('gv-stat-impact').textContent;};syncImpact();new MutationObserver(syncImpact).observe(document.getElementById('gv-stat-impact'),{childList:true,subtree:true,characterData:true});
   const leaders=document.getElementById('screen-leaders');
   const leadershipScroll=leaders.querySelector('.scroll');
   const heading=document.createElement('header');heading.className='mobile-leadership-heading';
-  heading.innerHTML='<button type="button">‹ My Church</button><h1>People to walk with you</h1><p>Meet your leaders. Find guidance. Ask for support.</p>';
+  heading.innerHTML='<button type="button">‹ My Church</button><h1>People to walk with you</h1><p>Meet your leaders and ask for guidance or support.</p>';
   heading.querySelector('button').onclick=()=>showScreen('home');leadershipScroll.prepend(heading);
   leaders.querySelector('.ld-begin').textContent='Open AI avatar';
   const profile=leaders.querySelector('.ld-switch-ghost');profile.textContent='View profile';profile.onclick=()=>openLeaderProfile(currentLeader);
@@ -36,7 +36,7 @@
   leaders.querySelector('.drawer-crisis-sub').textContent='You do not have to navigate this alone.';
   leaders.querySelector('.drawer-crisis-body').textContent='Find crisis helplines and support options for your location.';
   leaders.querySelector('.drawer-crisis-btn').textContent='Find urgent support';
-  leaders.querySelector('.drawer-crisis-foot').textContent='Opens support resources — not an AI conversation.';
+  leaders.querySelector('.drawer-crisis-foot').textContent='Opens support resources. This is not an AI conversation.';
   const home = document.getElementById('screen-home');
   const scroll = home.querySelector('.scroll');
   const hero = home.querySelector('.home-hero');
@@ -58,7 +58,7 @@
   guide.querySelector('.home-grace-title').firstChild.textContent='Find your way. ';
   const got=document.createElement('button');got.type='button';got.textContent='Got it';got.onclick=dismissHomeGraceCard;guide.querySelector('.home-grace-foot').append(got);
   const section=document.createElement('section');section.className='mobile-impact-summary';
-  section.innerHTML='<header><h2>Your impact, in motion</h2><small>Demo preview</small></header><p>Everyday generosity supporting your church.</p><div class="mobile-impact-card"><img src="../../assets/faithful-church-card.png" alt="Faithful Church Impact Card"><div><span>Impact Card</span><strong id="mobile-summary-balance"></strong><small>Available balance</small><button type="button">Manage card</button></div></div><div class="mobile-impact-story"><img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative food pantry volunteers"><div><h3>Hope on the table</h3><p>Support food and care for our neighbors.</p><button type="button">Give directly →</button></div></div>';
+  section.innerHTML='<header><h2>Your impact</h2><small>Demo preview</small></header><p>Everyday generosity supporting your church.</p><div class="mobile-impact-card"><img src="../../assets/faithful-church-card.png" alt="Faithful Church Impact Card"><div><span>Impact Card</span><strong id="mobile-summary-balance"></strong><small>Available balance</small><button type="button">Manage card</button></div></div><div class="mobile-impact-story"><img src="../../assets/faithful-food-pantry.jpg" alt="Illustrative food pantry volunteers"><div><h3>Hope on the table</h3><p>Support food and care for our neighbors.</p><button type="button">Give directly →</button></div></div>';
   const syncBalance=()=>{section.querySelector('#mobile-summary-balance').textContent=home.querySelector('.home-wallet-bal').textContent;};
   syncBalance(); new MutationObserver(syncBalance).observe(document.getElementById('home-wallet-available'),{childList:true,characterData:true,subtree:true});
   section.querySelectorAll('button').forEach(b=>b.onclick=()=>showScreen('give'));

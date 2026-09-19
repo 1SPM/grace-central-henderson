@@ -1,15 +1,15 @@
 /* Faithful welcome cover. Existing demo entry handlers are unchanged. */
-#landing-screen{background:linear-gradient(180deg,#061c352b 0%,#061c3510 28%,#061c35a8 53%,#061c35f5 73%,#061c35 100%),url('../../assets/faithful-worship-hero.jpg') 60% center/cover no-repeat;overflow-y:auto}
+#landing-screen{background:linear-gradient(180deg,#17193f2b 0%,#17193f10 28%,#17193fa8 53%,#17193ff5 73%,#17193f 100%),url('../../assets/faithful-worship-hero.jpg') 60% center/cover no-repeat;overflow-y:auto}
 #landing-screen .landing-inner{width:100%;box-sizing:border-box;min-height:100%;flex:none;padding:calc(var(--ios-safe-top) + 28px) 24px calc(var(--ios-safe-bot) + 20px);justify-content:flex-start}
-#landing-screen .landing-mark{height:110px;max-width:190px;width:auto;filter:drop-shadow(0 2px 12px #061c3540)}
+#landing-screen .landing-mark{height:110px;max-width:190px;width:auto;filter:drop-shadow(0 2px 12px #17193f40)}
 #landing-screen .landing-copy{flex:1;justify-content:flex-end;padding:150px 0 22px;gap:13px;width:100%}
-#landing-screen .landing-title{font:500 clamp(32px,8vw,42px)/1.12 Georgia,serif;text-transform:none;letter-spacing:-.025em;color:white;margin:0}
-#landing-screen .landing-sub{font-size:16px;line-height:1.55;max-width:310px;color:#f1f6ff}
-#landing-screen .landing-caption{font-size:13px;color:#bccde0;margin:3px 0 0;line-height:1.5}
+#landing-screen .landing-title{font:700 clamp(32px,8vw,42px)/1.12 Georgia,serif;text-transform:none;letter-spacing:-.025em;color:white;margin:0}
+#landing-screen .landing-sub{font-size:15px;line-height:1.55;max-width:310px;color:#f4f4fc}
+#landing-screen .landing-caption{font-size:13px;color:#bcbde0;margin:3px 0 0;line-height:1.5}
 #landing-screen .landing-actions{width:100%;display:grid;grid-template-columns:1fr;gap:12px}
-#landing-screen .landing-action{min-height:50px;border:1px solid #dbe9f9;border-radius:13px;padding:13px 18px;text-transform:none;letter-spacing:0;font-size:16px;font-weight:600;background:transparent;color:#fff}
-#landing-screen .landing-action:first-child{background:#d4e7ff;color:#123759;border-color:#d4e7ff}
+#landing-screen .landing-action{min-height:50px;border:1px solid #dedff6;border-radius:13px;padding:13px 18px;text-transform:none;letter-spacing:0;font-size:17px;font-weight:600;background:transparent;color:#fff}
+#landing-screen .landing-action:first-child{background:#dddef6;color:#1d1f4e;border-color:#dddef6}
 #landing-screen .landing-action:focus-visible{outline:3px solid #fff;outline-offset:4px}
-#landing-screen .landing-demo{font-size:11px;line-height:1.5;color:#bacde1;margin:18px 0 0;max-width:270px}
+#landing-screen .landing-demo{font-size:12px;line-height:1.5;color:#babbe1;margin:18px 0 0;max-width:270px}
 @media(max-height:700px){#landing-screen .landing-mark{height:80px}#landing-screen .landing-copy{padding-top:70px}#landing-screen .landing-inner{padding-top:calc(var(--ios-safe-top) + 16px)}}
 @media(prefers-reduced-motion:reduce){#landing-screen{transition:none}}

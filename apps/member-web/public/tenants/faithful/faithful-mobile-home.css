@@ -104,7 +104,7 @@
 .app #screen-home .mobile-impact-card > img{min-height:0;height:auto;padding:16px 4px 16px 16px;background:transparent;box-sizing:border-box;filter:drop-shadow(0 6px 12px #12345726)}
 .app #screen-home .mobile-impact-card > div{padding:14px 14px 10px}
 .app #screen-home .mobile-impact-card span{font-size:13px;color:var(--fh-muted)}
-.app #screen-home .mobile-impact-card strong{font-size:26px;margin:4px 0 0;color:var(--fh-title)}
+.app #screen-home .mobile-impact-card strong{font-size:22px;margin:4px 0 0;color:var(--fh-title)}
 .app #screen-home .mobile-impact-card small{font-size:12px}
 .app #screen-home .mobile-impact-story{margin-top:0;border-top:1px solid var(--fh-line);border-radius:0 0 var(--fh-radius) var(--fh-radius);grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:14px;background:#f8fbfe}
 .app #screen-home .mobile-impact-story > img{width:64px;height:64px;min-height:0;border-radius:14px}
@@ -165,7 +165,7 @@
 .app #screen-home .mobile-community-summary .cn-post-role,
 .app #screen-home .mobile-community-summary .cn-post-time{font-size:12px}
 .app #screen-home .mobile-community-summary .cn-post-badge{font-size:12px}
-.app #screen-home .mobile-community-summary .cn-post-quote{font:600 16px/1.45 var(--fh-display);border-radius:4px 14px 14px 4px}
+.app #screen-home .mobile-community-summary .cn-post-quote{font:700 15px/1.5 var(--fh-display);border-radius:4px 14px 14px 4px}
 .app #screen-home .mobile-community-summary .cn-post-verse{font-size:12px}
 .app #screen-home .mobile-community-summary .cn-post-body{font-size:15px;line-height:1.5}
 .app #screen-home .mobile-community-summary .cn-post-actions{gap:8px}
@@ -202,15 +202,6 @@
    lavender to grey-violet under a fine dot grain. Two colours, so nothing on
    the page competes with the photograph in the hero. */
 .app #screen-home{
-  --dv-navy:#23255c;--dv-navy-2:#36408c;--dv-ink:#1d1f4a;--dv-muted:#5d6085;
-  --dv-gold:#b8a35a;--dv-gold-ink:#8d7d33;--dv-gold-line:#d6d2a4;
-  --dv-well:linear-gradient(180deg,#f4f3fa 0%,#e5e3f1 100%);
-  --dv-light:linear-gradient(180deg,#ffffff 0%,#f8f7fc 100%);
-  --dv-dark:radial-gradient(130% 70% at 50% 0%,#414b86 0%,#414b8600 62%),linear-gradient(180deg,#1a2048 0%,#2a3163 52%,#1c2250 100%);
-  --dv-gold-fill:linear-gradient(135deg,#d6bc7c 0%,#b89c5c 52%,#a3884b 100%);
-  --dv-navy-fill:linear-gradient(135deg,#292a69 0%,#38428f 100%);
-  --dv-lift:0 1px 0 #ffffff inset,0 2px 4px #23255c12,0 14px 30px #23255c1c;
-  --dv-lift-dark:0 1px 0 #ffffff24 inset,0 3px 6px #12143433,0 18px 36px #1214344d;
   /* the tokens the rest of this file already uses, re-pointed */
   --fh-ink:var(--dv-ink);--fh-title:var(--dv-navy);--fh-muted:var(--dv-muted);
   --fh-line:var(--dv-gold-line);--fh-soft:#ecebf5;--fh-control:var(--dv-navy);

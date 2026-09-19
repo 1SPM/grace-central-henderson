@@ -37,11 +37,11 @@
 /* ── one tip per tab, above the tab bar, never over the top of the page ─── */
 .app .screen > .fw-tip{position:absolute;left:12px;right:12px;bottom:12px;z-index:6;padding:16px 16px 10px;border-radius:20px;background:radial-gradient(130% 70% at 50% 0%,#414b86 0%,#414b8600 62%),linear-gradient(180deg,#1a2048 0%,#2a3163 52%,#1c2250 100%);border:1.5px solid #b8a35a;color:#fff;box-shadow:0 1px 0 #ffffff24 inset,0 14px 34px #12143466;animation:fw-rise .28s ease both}
 .app .screen{position:relative}
-.app .fw-tip h2{margin:0;font:700 17px/1.25 var(--font-display,Georgia),Georgia,serif;color:#fff}
-.app .fw-tip p{margin:4px 0 0;font:400 13px/1.5 var(--font-ui,Inter),sans-serif;color:#d3d5ec}
+.app .screen:not(#_) > .fw-tip h2{margin:0;font:700 17px/1.25 var(--font-display,Georgia),Georgia,serif;color:#fff}
+.app .screen:not(#_) > .fw-tip p{margin:4px 0 0;font:400 13px/1.5 var(--font-ui,Inter),sans-serif;color:#d3d5ec}
 .app .fw-tip-actions{display:flex;justify-content:flex-end;gap:4px;margin-top:6px}
-.app .fw-tip button{min-height:44px;padding:0 14px;border:0;border-radius:22px;background:none;color:#e3cf97;font:600 15px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
-.app .fw-tip .fw-tip-ok{background:linear-gradient(135deg,#d6bc7c 0%,#b89c5c 52%,#a3884b 100%);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset}
+.app .screen:not(#_) > .fw-tip button{min-height:44px;padding:0 14px;border:0;border-radius:22px;background:none;color:#e3cf97;font:600 15px/1 var(--font-ui,Inter),sans-serif;cursor:pointer}
+.app .screen:not(#_) > .fw-tip .fw-tip-ok{background:linear-gradient(135deg,#d6bc7c 0%,#b89c5c 52%,#a3884b 100%);color:#1b1d3f;box-shadow:0 1px 0 #ffffff80 inset}
 .app .fw-tip button:focus-visible{outline:3px solid #79c5ff;outline-offset:-2px}
 @keyframes fw-rise{from{opacity:0;transform:translateY(12px)}}
 
