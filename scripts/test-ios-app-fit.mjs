@@ -114,15 +114,14 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
 
   assert.deepEqual(order, [
     '.home-hero',
+    '.mobile-shortcuts',
     '.home-hero-leader',
     '.fp-preferences',
     '.mobile-impact-summary',
-    '.mobile-shortcuts',
-    '.dash-mod',
     '.mobile-community-summary',
     '.fm-survey-invite',
-  ], 'the phone home order must match the portal: hero, leader, the onboarding dropdown, ' +
-     'IMPACT, this week, pathways, community, survey invite');
+  ], 'the phone home order: hero, this week, leader, the onboarding dropdown, IMPACT, ' +
+     'community, survey invite');
 
   // GRACE has no portal equivalent, so it was never part of the parity; it is
   // docked above the tab bar instead of taking a slot in the scroll. It must
@@ -153,12 +152,22 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   assert(/function openCnReelsFull\(\) \{[\s\S]{0,200}wall\.closest\('\.screen'\)/.test(html),
     'openCnReelsFull() opens whichever screen holds the wall, not a hardcoded Home');
 
-  // The two that were actually wrong, stated as relationships so the intent
-  // survives a future insertion into the list.
-  assert(order.indexOf('.fp-preferences') < order.indexOf('.mobile-shortcuts'),
-    'the onboarding dropdown comes before the shortcuts row, as it does on the portal');
-  assert(order.indexOf('.mobile-impact-summary') < order.indexOf('.dash-mod'),
-    'IMPACT comes before the pathways, as it does on the portal');
+  // Relationships, so the intent survives a future insertion into the list.
+  //
+  // This block used to require the dropdown BEFORE the shortcuts, to match the
+  // portal. That was reversed on purpose once the page was seen on a phone:
+  // there the four tiles are the navigation, and under IMPACT they sat a screen
+  // and a half down. What is still the portal's order is everything else.
+  assert(order.indexOf('.home-hero') === 0 && order.indexOf('.mobile-shortcuts') === 1,
+    'the shortcuts row sits directly under the hero on the phone');
+  assert(order.indexOf('.home-hero-leader') < order.indexOf('.fp-preferences') &&
+         order.indexOf('.fp-preferences') < order.indexOf('.mobile-impact-summary') &&
+         order.indexOf('.mobile-impact-summary') < order.indexOf('.mobile-community-summary'),
+    'leader, the onboarding dropdown, IMPACT, community -- still in the portal\'s order');
+  // The pathways are hidden on the phone's Home, not deleted: updateDashboard()
+  // writes the tiles' badges by ID, so the markup has to stay.
+  assert(!order.includes('.dash-mod'), 'the G-R-A-C-E pathways are not a section of the phone\'s Home');
+  assert(/id="dash-journey-badge"/.test(html), 'the pathway markup stays in the page; scripts write to it by ID');
   assert(order.indexOf('.fm-survey-invite') === order.length - 1,
     'the survey invitation closes the walkthrough');
 
@@ -190,6 +199,8 @@ assert(/class="island"/.test(html), 'the Dynamic Island still exists for the des
   assert(/#screen-home > \.scroll\{padding:4px 0 96px\}/.test(bare), 'the scroll ends clear of the dock');
   // The field is the one off-scale size on Home: under 16px iOS zooms on focus.
   assert(/\.home-grace-input\{[^}]*font-size:16px/.test(bare), 'the GRACE field is 16px so iOS does not zoom the page on focus');
+
+  assert(/#screen-home > \.scroll > \.dash-mod\{display:none\}/.test(bare), 'the pathways are hidden by one rule in the home layer');
 
   const cardRule = /([^{}]+)\{[^}]*border-radius:var\(--fh-radius\);box-shadow/.exec(bare);
   assert(cardRule && !cardRule[1].includes(':is('), 'the shared card rule is a plain selector list');

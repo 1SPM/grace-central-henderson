@@ -138,13 +138,20 @@
   // those three live on Connect and Care, one tap away, so Home is about three
   // screens instead of six. Same sequence, shorter page. GRACE is not in the
   // list at all: it has no portal equivalent, and it is docked above the tabs.
+  //
+  // Two deliberate departures from the portal's order, both the owner's call
+  // after seeing the page on a phone. The shortcuts row sits directly under the
+  // hero: on a phone those four tiles ARE the navigation, and below the IMPACT
+  // module they were a screen and a half away. And the G-R-A-C-E pathways are
+  // not shown on the phone's Home (hidden in faithful-mobile-home.css, still
+  // in the DOM because updateDashboard() writes its badges by ID): all five
+  // destinations are already a tab or a tile -- Journey, Give, Care, Connect.
   [
     '.home-hero',              // Good morning, Maya
+    '.mobile-shortcuts',       // This week: service, groups, care, impact
     '.home-hero-leader',       // Your leader
     '.fp-preferences',         // Your church, at a glance  (the onboarding)
     '.mobile-impact-summary',  // Your IMPACT card
-    '.mobile-shortcuts',       // This week: service, groups, care
-    '.dash-mod',               // Grow with Faithful Church
     '.mobile-community-summary', // Life in your church / Community wall (+ the prayer wall link)
     '.fm-survey-invite',       // One last thing -> the survey tab
   ].forEach(sel => {

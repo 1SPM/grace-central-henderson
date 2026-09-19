@@ -13,9 +13,8 @@
  * seventh size. Shared chrome is exempt: the screen title, the numeric badges.
  *
  * Kept on purpose, because they are what people like about this page: the
- * worship-photo hero with its "You belong here." line and replay pill, the real
- * IMPACT card art, and the G-R-A-C-E pathway tiles with washed photographs and
- * brown serif initials.
+ * worship-photo hero with its "You belong here." line and replay pill, and the
+ * real IMPACT card art.
  *
  * Faithful only. Every selector is under .app #screen-home (or names a
  * Faithful-mobile class), and the file lives in tenants/faithful, so nothing
@@ -38,10 +37,10 @@
 /* 96px = the GRACE dock (56) + its 10px offset + breathing room, so the footer
    can scroll clear of it. */
 .app #screen-home > .scroll{padding:4px 0 96px}
-.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.fp-preferences,.mobile-impact-summary,.mobile-shortcuts,.dash-mod,.mobile-community-summary,.fm-survey-invite){
+.app #screen-home > .scroll > :is(.home-hero,.home-hero-leader,.fp-preferences,.mobile-impact-summary,.mobile-shortcuts,.mobile-community-summary,.fm-survey-invite){
   margin:16px var(--fh-gutter) 0;width:auto;box-sizing:border-box
 }
-.app #screen-home > .scroll > :is(.mobile-impact-summary,.dash-mod,.mobile-community-summary){margin-top:32px}
+.app #screen-home > .scroll > :is(.mobile-impact-summary,.mobile-community-summary){margin-top:32px}
 .app #screen-home > .scroll > .fm-survey-invite{margin-top:32px}
 
 /* ── one card ───────────────────────────────────────────────────────────── */
@@ -59,10 +58,10 @@
 }
 
 /* ── one type scale: 28 · 22 · 17 · 15 · 13 · 12 ────────────────────────── */
-.app #screen-home :is(.dash-mod-title,.mobile-impact-summary h2,.mobile-community-summary h2){
+.app #screen-home :is(.mobile-impact-summary h2,.mobile-community-summary h2){
   font:700 22px/1.2 var(--fh-display);letter-spacing:-.3px;color:var(--fh-title);margin:0
 }
-.app #screen-home :is(.dash-mod-sub,.mobile-impact-summary > p){font-size:13px;line-height:1.5;color:var(--fh-muted);margin:4px 0 0}
+.app #screen-home .mobile-impact-summary > p{font-size:13px;line-height:1.5;color:var(--fh-muted);margin:4px 0 0}
 
 /* ── hero: same photograph and words, a third shorter. The date line carries
       the next service (faithful-mobile-finish.js), so there is one action ── */
@@ -119,18 +118,13 @@
 .app #screen-home .mobile-shortcuts strong{font-size:13px;font-weight:600;line-height:1.2}
 .app #screen-home .mobile-shortcuts small{font-size:12px;line-height:1.25;margin-top:2px;color:var(--fh-muted)}
 
-/* ── pathways: the tiles as they are, on the page's radius; the wide tile
-      keeps its wash under the words so the label never sits on a face ───── */
-.app #screen-home .dash-mod{padding:0}
-.app #screen-home .dash-mod-head{padding:0;margin:0}
-.app #screen-home .dash-pillars{gap:10px;margin-top:14px;padding:0}
-.app #screen-home .dash-pillars .dash-pillar{border-radius:18px;border-color:#e6e1d9;transition:transform .12s ease}
-.app #screen-home .dash-pillars .dash-pillar:active{transform:scale(.97)}
-.app #screen-home .dash-pillars .dash-pillar-sub{font-size:12px;line-height:1.4;max-width:118px}
-.app #screen-home .dash-pillars .dash-pillar:last-child{padding:20px 16px 20px 64px}
-.app #screen-home .dash-pillars .dash-pillar:last-child::after{background:linear-gradient(90deg,#f6eee7f7 0%,#f6eee7e6 52%,#f6eee700 88%)}
-.app #screen-home .dash-pillars .dash-pillar:last-child .dash-pillar-top{top:50%;left:16px;transform:translateY(-50%)}
-.app #screen-home .dash-pillars .dash-pillar:last-child .dash-pillar-sub{max-width:190px}
+/* ── pathways: not on the phone's Home ───────────────────────────────────
+   Growth, Resource, Assistance, Community and Engagement each open a screen
+   that is already a tab or a tile here, so on a phone the grid was 470px of
+   second navigation. Hidden, not removed: updateDashboard() sets the tiles'
+   badges by ID. Delete this one rule to bring the section back -- and add
+   '.dash-mod' to the order list in faithful-mobile-finish.js. */
+.app #screen-home > .scroll > .dash-mod{display:none}
 
 /* ── GRACE: docked above the tab bar ─────────────────────────────────────
    faithful-mobile-finish.js moves #home-grace-wrap out of the scroll and tags
@@ -187,7 +181,6 @@
 .app #screen-home .fp-preferences > summary small{font:400 13px/1.5 var(--font-ui,Inter),sans-serif;letter-spacing:0;color:var(--fh-muted)}
 .app #screen-home .fp-preferences button{font-family:inherit;font-size:13px;font-weight:600}
 .app #screen-home .mobile-impact-card strong{font-size:22px}
-.app #screen-home .dash-pillars .dash-pillar-step{font-size:28px}
 .app #screen-home .mobile-community-summary .cn-post-quote{font-size:15px;line-height:1.5}
 .app #screen-home .fm-survey-invite button{font-size:15px;font-weight:600}
 
@@ -200,5 +193,5 @@
 .app .impact-float-close{width:44px;height:44px;margin:-8px -8px -8px 0}
 
 @media(prefers-reduced-motion:reduce){
-  .app #screen-home :is(.mobile-shortcuts button,.dash-pillar){transition:none}
+  .app #screen-home .mobile-shortcuts button{transition:none}
 }
