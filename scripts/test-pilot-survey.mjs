@@ -336,7 +336,17 @@ assert(Object.keys(SURVEY_TRACKS).includes(TENANT_SURVEY_TRACKS.faithful));
   // It must be appended AFTER the sections this module adds, or the survey
   // renders above them instead of at the end of the walkthrough.
   assert(finish.indexOf('home.append(prayer)') < finish.indexOf('data-grace-pilot-survey'),
-    'the mount is appended after the care and prayer sections, so it lands last');
+    'the mount is appended after the care and prayer sections');
+
+  // The page footer is appended by faithful-destinations.js, which runs FIRST,
+  // so everything this module adds lands below it. Left alone, three sections
+  // and the survey sat underneath a footer — the page appeared to end and then
+  // carry on. The footer is moved back to last, after the survey, so the survey
+  // is the final thing a member reads before the page ends.
+  assert(/home\.querySelector\(':scope > \.fd-footer'\)/.test(finish),
+    'mobile-finish reclaims the footer');
+  assert(finish.indexOf('data-grace-pilot-survey') < finish.indexOf("':scope > .fd-footer'"),
+    'the footer is moved AFTER the survey is mounted, or it would not end up last');
   // A static <div> in the HTML would sit above those runtime sections.
   assert(!/data-grace-pilot-survey/.test(page),
     'the phone must NOT carry a static mount — it would render above the appended sections');
