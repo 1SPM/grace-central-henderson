@@ -103,7 +103,10 @@ export const MEMBER_SURVEY: readonly SurveyQuestion[] = [
  */
 export const FAITHFUL_MEMBER_SURVEY: readonly SurveyQuestion[] = [
   { key: 'baseline_current_channels',
-    text: 'Before the walkthrough, how easy is it to do the task we discussed using your church’s current channels?',
+    // "the task we discussed" relied on a facilitator being in earshot. It is
+    // answered on the phone now, often after the room has moved on, so it names
+    // what it is asking about instead.
+    text: 'Thinking about what you came here to try: how easy is that to do today, using your church’s current channels?',
     type: 'likert5', low: 'Very difficult', high: 'Very easy', measures: 'Current baseline' },
   { key: 'onboarding_ease',
     text: 'How easy were the “Let us know” steps to work through as you went?',
@@ -121,7 +124,12 @@ export const FAITHFUL_MEMBER_SURVEY: readonly SurveyQuestion[] = [
     text: 'Did GRACE give you useful information or a useful next step?',
     type: 'likert5', low: 'Not useful', high: 'Extremely useful', measures: 'Practical value' },
   { key: 'privacy_comfort',
-    text: 'How comfortable were you with what GRACE appeared to know about you?',
+    // The demo has no sign-in: GRACE knows nothing about the person answering,
+    // and the figures on screen belong to a fabricated persona. Asking what it
+    // "appeared to know about you" invited them to rate something that never
+    // happened. What they did experience is being ASKED for things, so that is
+    // what this measures. Still Privacy, still comparable with Central's.
+    text: 'How comfortable were you with the information GRACE asked you for?',
     type: 'likert5', low: 'Very uncomfortable', high: 'Very comfortable', measures: 'Privacy' },
   { key: 'ai_disclosure',
     text: 'How clear was it that you were interacting with AI rather than a pastor or staff member?',
@@ -147,6 +155,13 @@ export const FAITHFUL_MEMBER_SURVEY: readonly SurveyQuestion[] = [
   { key: 'adoption_signal',
     text: 'How likely would you be to use GRACE at least monthly if your church continued with it?',
     type: 'choice', measures: 'Adoption signal', options: LIKELIHOOD },
+  { key: 'signup_intent',
+    // The demo deliberately stops short of account creation -- making people
+    // sign up before the payoff is friction, and it would also have answered
+    // this question by coercion rather than by asking. So it is asked here.
+    // Faithful only: Central's set is the pilot document's, unchanged.
+    text: 'If your church offered this for real, how likely would you be to create an account?',
+    type: 'choice', measures: 'Signup intent', options: LIKELIHOOD },
 ] as const;
 
 export const SURVEY_TRACKS = {

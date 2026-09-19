@@ -18,20 +18,21 @@ window.GRACE_PILOT_SURVEY_TRACKS = {
     {key:"adoption_signal",text:"How likely would you be to use GRACE at least monthly if Central continued with it?",type:"choice",options:["Very unlikely","Unlikely","Neutral","Likely","Very likely"]}
   ],
   "members_faithful": [
-    {key:"baseline_current_channels",text:"Before the walkthrough, how easy is it to do the task we discussed using your church’s current channels?",type:"likert5",low:"Very difficult",high:"Very easy"},
+    {key:"baseline_current_channels",text:"Thinking about what you came here to try: how easy is that to do today, using your church’s current channels?",type:"likert5",low:"Very difficult",high:"Very easy"},
     {key:"onboarding_ease",text:"How easy were the “Let us know” steps to work through as you went?",type:"likert5",low:"Very difficult",high:"Very easy"},
     {key:"onboarding_purpose_clear",text:"How clear was it why each “Let us know” step was asking for that information?",type:"likert5",low:"Not clear",high:"Very clear"},
     {key:"comprehension",text:"After the walkthrough and the “Let us know” steps, how clearly do you understand what GRACE is?",type:"likert5",low:"Not clear",high:"Very clear"},
     {key:"usability_navigate",text:"How easy was the GRACE Members experience, including the onboarding steps, to navigate?",type:"likert5",low:"Very difficult",high:"Very easy"},
     {key:"practical_value",text:"Did GRACE give you useful information or a useful next step?",type:"likert5",low:"Not useful",high:"Extremely useful"},
-    {key:"privacy_comfort",text:"How comfortable were you with what GRACE appeared to know about you?",type:"likert5",low:"Very uncomfortable",high:"Very comfortable"},
+    {key:"privacy_comfort",text:"How comfortable were you with the information GRACE asked you for?",type:"likert5",low:"Very uncomfortable",high:"Very comfortable"},
     {key:"ai_disclosure",text:"How clear was it that you were interacting with AI rather than a pastor or staff member?",type:"likert5",low:"Not clear",high:"Very clear"},
     {key:"human_escalation",text:"How clear was it when a human would become involved?",type:"likert5",low:"Not clear",high:"Very clear"},
     {key:"control_never_use",text:"What information should GRACE never use without asking you first?",type:"text",maxLength:1000},
     {key:"most_valuable_reason",text:"What is the most valuable reason you would use GRACE?",type:"choice",options:["Information","Groups and events","Communication","Next steps","Pastoral support","Giving","IMPACT","Other"]},
     {key:"barrier",text:"What would make you not use GRACE?",type:"text",maxLength:1000},
     {key:"channel_duplication",text:"Compared with the tools your church already uses, would GRACE feel easier, about the same, or like another place to check?",type:"choice",options:["Easier","About the same","Another place to check","Not sure"]},
-    {key:"adoption_signal",text:"How likely would you be to use GRACE at least monthly if your church continued with it?",type:"choice",options:["Very unlikely","Unlikely","Neutral","Likely","Very likely"]}
+    {key:"adoption_signal",text:"How likely would you be to use GRACE at least monthly if your church continued with it?",type:"choice",options:["Very unlikely","Unlikely","Neutral","Likely","Very likely"]},
+    {key:"signup_intent",text:"If your church offered this for real, how likely would you be to create an account?",type:"choice",options:["Very unlikely","Unlikely","Neutral","Likely","Very likely"]}
   ]
 };
 /* Which group each tenant's portal shows. Faithful has its own so its form
