@@ -61,6 +61,37 @@
   // sections and the survey sitting under a footer, which reads as if the page
   // had already ended. On desktop the footer is last, as a footer should be.
   // append() moves an existing node rather than copying it.
+  // ── the reading order, matched to the portal's My Church ──
+  //
+  // The phone had grown its own order: the shortcuts row above the dropdown,
+  // and the IMPACT summary three sections below where the portal puts the card.
+  // Someone shown the portal and then handed the phone was reading two
+  // different pages, which is the opposite of what a demo of one product
+  // should do.
+  //
+  // Ordered explicitly rather than by moving individual pieces, so the sequence
+  // is readable here and a section added later lands deliberately instead of
+  // wherever its own module happened to append it. Anything not listed keeps
+  // its position, and a missing section is skipped rather than throwing --
+  // several of these are built by other modules that may not have run.
+  [
+    '.home-hero',              // Good morning, Maya
+    '.home-hero-leader',       // Your leader
+    '.fp-preferences',         // Your church, at a glance  (the onboarding)
+    '.mobile-impact-summary',  // Your IMPACT card
+    '.mobile-shortcuts',       // This week: service, groups, care
+    '.dash-mod',               // Grow with Faithful Church
+    '.home-grace-wrap',        // Find your way  (no portal equivalent; kept here)
+    '.mobile-community-summary', // Life in your church / Community wall
+    '.cn-widget',              // Prayer wall
+    '.fm-care',                // People to turn to
+    '.fm-prayer',              // Pray with your church
+    '.fm-survey-invite',       // One last thing -> the survey tab
+  ].forEach(sel => {
+    const el = home.querySelector(':scope > ' + sel);
+    if (el) home.append(el);   // append() moves an existing node
+  });
+
   const footer = home.querySelector(':scope > .fd-footer');
   if (footer) home.append(footer);
 })();

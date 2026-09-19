@@ -92,4 +92,48 @@ if (bar[1] === 'black-translucent') {
 assert(/<div class="status">[\s\S]*?9:41/.test(html), 'the simulated status bar still exists for the desktop mockup');
 assert(/class="island"/.test(html), 'the Dynamic Island still exists for the desktop mockup');
 
-console.log('PASS: on a phone the simulated chrome is hidden and the real insets are used; on a desktop the mockup is intact. Rendering on real hardware not verified.');
+// ── the home screen reads in the same order as the portal ──────────────────
+//
+// The phone had grown its own order: the shortcuts row above the "Your church,
+// at a glance" dropdown, and the IMPACT summary three sections below where the
+// portal puts the card. Someone shown the portal and then handed the phone was
+// reading two different pages -- the opposite of what a demo of one product
+// should do.
+{
+  const finish = fs.readFileSync('apps/member-web/public/tenants/faithful/faithful-mobile-finish.js', 'utf8');
+  const block = /\[\s*\n([\s\S]*?)\]\.forEach\(sel =>/.exec(finish);
+  assert(block, 'the home order is still declared as one explicit list');
+  const order = [...block[1].matchAll(/'(\.[a-z-]+)'/g)].map(m => m[1]);
+
+  assert.deepEqual(order, [
+    '.home-hero',
+    '.home-hero-leader',
+    '.fp-preferences',
+    '.mobile-impact-summary',
+    '.mobile-shortcuts',
+    '.dash-mod',
+    '.home-grace-wrap',
+    '.mobile-community-summary',
+    '.cn-widget',
+    '.fm-care',
+    '.fm-prayer',
+    '.fm-survey-invite',
+  ], 'the phone home order must match the portal: hero, leader, the onboarding dropdown, ' +
+     'IMPACT, this week, pathways, community, prayer, care, prayer invite, survey invite');
+
+  // The two that were actually wrong, stated as relationships so the intent
+  // survives a future insertion into the list.
+  assert(order.indexOf('.fp-preferences') < order.indexOf('.mobile-shortcuts'),
+    'the onboarding dropdown comes before the shortcuts row, as it does on the portal');
+  assert(order.indexOf('.mobile-impact-summary') < order.indexOf('.dash-mod'),
+    'IMPACT comes before the pathways, as it does on the portal');
+  assert(order.indexOf('.fm-survey-invite') === order.length - 1,
+    'the survey invitation closes the walkthrough');
+
+  // Ordering runs before the footer is reclaimed, or the footer lands mid-page.
+  assert(finish.indexOf(']).forEach') < finish.indexOf("':scope > .fd-footer'") ||
+         finish.indexOf('].forEach') < finish.indexOf("':scope > .fd-footer'"),
+    'the footer is moved last, after the sections are ordered');
+}
+
+console.log('PASS: on a phone the simulated chrome is hidden, the real insets are used and the home order matches the portal; on a desktop the mockup is intact. Rendering on real hardware not verified.');
