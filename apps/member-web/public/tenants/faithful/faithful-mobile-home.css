@@ -182,7 +182,9 @@
 .app #screen-home .fp-preferences :is(p,em,li,label,small){font-size:13px;line-height:1.5}
 /* The closed row is the card's title, so it is set like the other card titles. */
 .app #screen-home .fp-preferences > summary{font:700 17px/1.25 var(--fh-display);letter-spacing:-.2px;color:var(--fh-title)}
-.app #screen-home .fp-preferences > summary span{font:400 13px/1.5 var(--font-ui,Inter),sans-serif;letter-spacing:0}
+/* The subline is a <small> inside the summary; without this it inherits the
+   title's serif bold. */
+.app #screen-home .fp-preferences > summary small{font:400 13px/1.5 var(--font-ui,Inter),sans-serif;letter-spacing:0;color:var(--fh-muted)}
 .app #screen-home .fp-preferences button{font-family:inherit;font-size:13px;font-weight:600}
 .app #screen-home .mobile-impact-card strong{font-size:22px}
 .app #screen-home .dash-pillars .dash-pillar-step{font-size:28px}
